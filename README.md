@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/images/banner.jpg" alt="SoloStone logo and mascot: a friendly blue stone with a flame on its head, in a tavern at night" width="100%"></p>
+
 # SoloStone
 
 > [!WARNING]
