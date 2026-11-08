@@ -1,8 +1,13 @@
 # Installing SoloStone (Windows)
 
+> [!WARNING]
+> **Alpha 0.1.0.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
+> if anything goes wrong, tell us on [Discord](https://discord.gg/e45QgKHmC2) or open an
+> [issue](https://github.com/KeyStarr/SoloStone/issues).
+
 SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
 
-This is a beta. It has been tested on few machines. Read "Known issues" at the end before you start.
+It has been tested on few machines. Read "Known issues" near the end before you start.
 
 ## What SoloStone does to your PC
 
@@ -26,37 +31,17 @@ Blizzard service and never logs in anywhere.
    SoloStone refuses to install, update or run while they are open. Do the same every time before you play. If it
    still says Battle.net is running, wait a minute, or end "Agent" in Task Manager.
 
-## Download and check
+## Download
 
-From the [Releases page](https://github.com/KeyStarr/SoloStone/releases) take:
-
-- `SoloStone-Setup-<version>.exe`
-- `SHA256SUMS`
-- `SHA256SUMS.minisig`
-
-Checking is optional but takes a minute. In PowerShell, in the folder you downloaded to:
-
-```powershell
-Get-FileHash .\SoloStone-Setup-<version>.exe -Algorithm SHA256
-```
-
-The hash printed must match the line for that file in `SHA256SUMS` (upper or lower case does not matter). A matching hash only proves anything if
-`SHA256SUMS` itself is genuine, so also check its signature with [minisign](https://jedisct1.github.io/minisign/):
-
-```text
-minisign -Vm SHA256SUMS -P RWSsM35KycCUtK/VB0YlewJOA99zkss4+lMLTL7yVzm56kxILzP7W4PN
-```
-
-It must say the signature is valid. If the hash or the signature does not match, do not run the file, and tell us
-(see [SECURITY.md](../.github/SECURITY.md)).
+From the [Releases page](https://github.com/KeyStarr/SoloStone/releases), download `SoloStone-Setup-<version>.exe`.
 
 ## Run the setup
 
 1. Double-click `SoloStone-Setup-<version>.exe`.
 2. **Windows will probably show a blue "Windows protected your PC" (SmartScreen) page.** The installer is not signed
-   with a paid Windows code-signing certificate, so Windows does not know who made it. If you checked the hash and
-   signature above, choose **More info**, then **Run anyway**. This is expected. Do not turn off your antivirus or
-   SmartScreen to get past it.
+   with a paid Windows code-signing certificate, so Windows does not know who made it. Choose **More info**, then
+   **Run anyway**. This is expected. Do not turn off your antivirus or SmartScreen to get past it. To check the file
+   first, see "Optional: check your download" at the end.
 3. The setup needs no administrator rights. It installs only for your account, into `%LOCALAPPDATA%\SoloStone\app`.
    It also works if your account runs everything as administrator (for example with UAC turned off).
 4. SoloStone's own setup window opens with five steps:
@@ -175,9 +160,31 @@ markers, which include your Windows user name). Delete that folder by hand if yo
 - **Not tested yet:** a brand-new Windows account, third-party firewalls (SoloStone can only read Windows
   Firewall), and clients newer than the one it was tested with.
 - **Antivirus:** a loader file in the copy (`winhttp.dll`) can trigger false alarms in some antivirus programs.
-  Do not switch your antivirus off. If it flags the file, check the installer against `SHA256SUMS` as above and
+  Do not switch your antivirus off. If it flags the file, check the installer as in "Optional: check your download" and
   report it to your antivirus vendor as a false positive. If you are not comfortable, do not install.
 - Windows only. English only. Steam Deck and Linux are not supported yet.
 
 Problems or questions: see [CONTRIBUTING.md](../.github/CONTRIBUTING.md). Logs in `%LOCALAPPDATA%\SoloStone\reports` can include
 your Windows user name and folder paths; remove those before you post a log.
+
+## Optional: check your download
+
+For people who want proof the file is genuine. Most players can skip this.
+
+Also download `SHA256SUMS` and `SHA256SUMS.minisig` from the same release.
+
+In PowerShell, in the folder you downloaded to:
+
+```powershell
+Get-FileHash .\SoloStone-Setup-<version>.exe -Algorithm SHA256
+```
+
+The hash printed must match the line for that file in `SHA256SUMS` (upper or lower case does not matter). A matching hash only proves anything if
+`SHA256SUMS` itself is genuine, so also check its signature with [minisign](https://jedisct1.github.io/minisign/):
+
+```text
+minisign -Vm SHA256SUMS -P RWSsM35KycCUtK/VB0YlewJOA99zkss4+lMLTL7yVzm56kxILzP7W4PN
+```
+
+It must say the signature is valid. If the hash or the signature does not match, do not run the file, and tell us
+(see [SECURITY.md](../.github/SECURITY.md)).

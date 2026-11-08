@@ -1,11 +1,29 @@
 # SoloStone
 
+> [!WARNING]
+> **Alpha 0.1.0.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
+> if anything goes wrong, tell us on [Discord](https://discord.gg/e45QgKHmC2) or open an
+> [issue](https://github.com/KeyStarr/SoloStone/issues).
+
 SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
 
 **Play Hearthstone offline, on your own PC, against computer opponents.** You get the game's own screens, ranked and
 casual matches, deck building, packs and progress, all kept on your machine.
 
-[Install](docs/INSTALL.md) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md)
+[Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md)
+
+## Just want to play?
+
+You need Windows 10 or 11 (64-bit), Hearthstone installed through Battle.net, and about 12.5 GB free.
+
+1. **Quit Battle.net**: right-click its icon in the tray, choose **Quit**. Do this every time before you play.
+2. Download **`SoloStone-Setup-0.1.0.exe`** from the [latest release](https://github.com/KeyStarr/SoloStone/releases/latest).
+3. Run it. Windows shows a blue **"Windows protected your PC"** page, because the installer has no paid code-signing
+   certificate. Click **More info**, then **Run anyway**.
+4. Follow the five setup steps. When Windows asks for permission (for the firewall rules), click **Yes**.
+5. Start **SoloStone** from the desktop or Start menu shortcut and press **Play**.
+
+Something went wrong? Tell us on [Discord](https://discord.gg/e45QgKHmC2). The full guide is in [INSTALL.md](docs/INSTALL.md).
 
 ## What it is
 
@@ -70,23 +88,10 @@ flowchart LR
 or if your game version is one it can't handle. Your own Hearthstone, your Battle.net
 app and your account are never touched.
 
-## Install
-
-Download `SoloStone-Setup-<version>.exe` from the [Releases page](https://github.com/KeyStarr/SoloStone/releases), **quit Battle.net first**,
-run the setup and follow its five steps. Windows will warn about an unknown publisher, because the installer is not
-signed with a paid certificate.
-
-| You need | |
-|---|---|
-| Windows 10 or 11, 64-bit | Steam Deck and Linux are not supported yet |
-| Hearthstone from Battle.net | Tested with client 37.0.0.254477; the setup shows the version of yours |
-| About 12.5 GB free | For the copy |
-
-The full steps, including how to check your download, are in [INSTALL.md](docs/INSTALL.md).
-
 ## What to expect
 
-- **This is a beta.** It has rough edges and has been tested on few machines.
+- **This is an alpha.** It has rough edges and has been tested on few machines.
+- **Windows only for now**, tested with Hearthstone client 37.0.0.254477. Steam Deck and Linux are not supported yet.
 - **Windows asks for permission once**, to add the firewall rules.
 - **Hearthstone updates:**
 
@@ -100,10 +105,15 @@ The full steps, including how to check your download, are in [INSTALL.md](docs/I
   signature. You can turn them off. [INSTALL.md](docs/INSTALL.md) lists exactly what connects.
 - **Card text** comes from SoloStone's own file, in English, so it can differ from your updated client or the live game.
 
+## A note from the author
+
+SoloStone is a one-person hobby project, and the code and docs are in rough shape: so far it was built to work, not to
+be pretty. If people really want to play it, I'll invest more effort in cleaning it up. I also have a full-time job and
+a family, so I'm often exhausted and may reply with delays for now. Thanks for your patience.
+
 ## Contributing
 
-SoloStone is a small project, so for now it takes **issues, not pull requests**
-([CONTRIBUTING.md](.github/CONTRIBUTING.md)). The most useful help:
+SoloStone is a small project, so for now the most useful help is **issues** ([CONTRIBUTING.md](.github/CONTRIBUTING.md)):
 
 | You can | How |
 |---|---|
@@ -118,6 +128,14 @@ your Windows user name: check them first.
 
 Chat: [Discord](https://discord.gg/e45QgKHmC2)
 
+### Not there yet
+
+- **The test suite is not published yet.** The card, rules and match tests stay private for now, so a change you
+  make here is not checked by them.
+- **There is no convenient mod or developer mode yet.** If there is demand, we will design proper mod support. Until
+  then, a mod is a set of patches on top of ours: fork the repository and change what you need. Patches and pull
+  requests on top of ours are welcome; we look at them when time allows.
+
 ### Repository layout
 
 | Folder | What is in it |
@@ -128,10 +146,12 @@ Chat: [Discord](https://discord.gg/e45QgKHmC2)
 | `facts/` | The card data for the fixed card set, one file per meta |
 | `data/` | Opponent decks and personalities, card pools, shop, packs and progression data |
 
+Branch and commit naming: [GIT.md](docs/GIT.md).
+
 ## Source and licence
 
 The source for every download is in this repository, at that release's tag. [BUILDING.md](docs/BUILDING.md) says how to
-build it. The card and rules test suites are not published yet.
+build it.
 
 SoloStone's own code is licensed under the GNU AGPL version 3 or later ([LICENSE](LICENSE)), with an additional
 permission for its own files ([LICENSE-ADDITIONAL-PERMISSION.md](LICENSE-ADDITIONAL-PERMISSION.md)). The rules engine
