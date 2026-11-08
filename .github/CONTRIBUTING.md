@@ -1,9 +1,9 @@
-# Contributing
+# Issues only, for now
 
-SoloStone takes **bug reports and questions as issues**, and that is the most useful help right now.
-**Patches and pull requests are welcome too**, especially mods built on top of ours, but the project is small: they
-are looked at when time allows, and may wait. There is no contributor agreement, no CI, no public test suite and no
-mod or developer mode yet ([README](../README.md#not-there-yet)). This file will change when they come.
+SoloStone takes **bug reports and questions as issues**. **Pull requests are not encouraged yet**: it is a one-person
+project, and there is no contributor agreement, no CI, no public test suite and no mod API yet
+([README](../README.md#not-there-yet)). If there is real demand, proper contribution rules, CI and a mod API come next,
+and this file will change. Until then, mods live as patches in your own fork.
 
 When you open an issue, please include:
 

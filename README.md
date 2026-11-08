@@ -5,6 +5,12 @@
 > if anything goes wrong, tell us on [Discord](https://discord.gg/e45QgKHmC2) or open an
 > [issue](https://github.com/KeyStarr/SoloStone/issues).
 
+> [!NOTE]
+> **From the author.** SoloStone is a one-person hobby project, and the code and docs are in rough shape: so far it
+> was built to work, not to be pretty. If people really want to play it, I'll invest more effort in cleaning it up.
+> I also have a full-time job and a family, so I'm often exhausted and may reply with delays for now. Thanks for your
+> patience.
+
 SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
 
 **Play Hearthstone offline, on your own PC, against computer opponents.** You get the game's own screens, ranked and
@@ -105,15 +111,10 @@ app and your account are never touched.
   signature. You can turn them off. [INSTALL.md](docs/INSTALL.md) lists exactly what connects.
 - **Card text** comes from SoloStone's own file, in English, so it can differ from your updated client or the live game.
 
-## A note from the author
-
-SoloStone is a one-person hobby project, and the code and docs are in rough shape: so far it was built to work, not to
-be pretty. If people really want to play it, I'll invest more effort in cleaning it up. I also have a full-time job and
-a family, so I'm often exhausted and may reply with delays for now. Thanks for your patience.
-
 ## Contributing
 
-SoloStone is a small project, so for now the most useful help is **issues** ([CONTRIBUTING.md](.github/CONTRIBUTING.md)):
+**For now SoloStone takes issues, not pull requests** ([CONTRIBUTING.md](.github/CONTRIBUTING.md)). If there is real
+demand, proper contribution rules, CI and a mod API come next. Until then, the most useful help is:
 
 | You can | How |
 |---|---|
@@ -132,9 +133,8 @@ Chat: [Discord](https://discord.gg/e45QgKHmC2)
 
 - **The test suite is not published yet.** The card, rules and match tests stay private for now, so a change you
   make here is not checked by them.
-- **There is no convenient mod or developer mode yet.** If there is demand, we will design proper mod support. Until
-  then, a mod is a set of patches on top of ours: fork the repository and change what you need. Patches and pull
-  requests on top of ours are welcome; we look at them when time allows.
+- **There is no mod API or developer mode yet.** If there is demand, it gets designed properly. Until then, a mod is
+  a set of patches on top of ours in your own fork. Pull requests are not encouraged yet; open an issue instead.
 
 ### Repository layout
 
