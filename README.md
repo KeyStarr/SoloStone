@@ -52,6 +52,9 @@ Something went wrong? Tell us on [Discord](https://discord.gg/e45QgKHmC2). The f
 The card data file does contain card names and English card text taken from the game, which belong to Blizzard.
 [NOTICE](NOTICE) says what is where.
 
+**Rights holders:** if you represent Blizzard Entertainment or another rights holder and are not OK with this project,
+or with any part of it, please write to KirillLoves@proton.me. I'll reply promptly and we can talk it through.
+
 ## How it works
 
 ```mermaid
