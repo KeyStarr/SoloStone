@@ -1,0 +1,27 @@
+{
+  "schema": 1,
+  "seq": 1,
+  "latest": {
+    "version": "0.1.0",
+    "saveSchema": 15,
+    "asset": {
+      "name": "SoloStone-0.1.0.zip",
+      "size": 12484625,
+      "sha256": "8eb86310fecad4234aff8902bd2d77b6408b5630a7cdbf45c7ab7f2768bd5c6b"
+    }
+  },
+  "testedClients": [
+    {
+      "schema": 1,
+      "version": "37.0.0",
+      "build": "254477",
+      "files": {
+        "Hearthstone.exe": "CC18F8D294B836C9A8F3381A7763049A4BA90879DB98887849EB697D47DE5D70",
+        "UnityPlayer.dll": "A2022611884470DDAB23927A3EB7BBAEF3924C18972D30BA7B5330A8FD25BCC4",
+        "Hearthstone_Data/Managed/Assembly-CSharp.dll": "786376BDDAD544709639D4B3AB60CE8799D4B1C6C7D7FC4C225CE79FE07228C6",
+        "Hearthstone_Data/Managed/blizzard.bgsclient.dll": "457BA351F6373C9B9E2F14ACCDD87360832AD82A1278A9914025AB9AC7AFC67D"
+      }
+    }
+  ],
+  "knownBad": []
+}
