@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net48</TargetFramework><EnableDefaultCompileItems>false</EnableDefaultCompileItems><AutomaticallyUseReferenceAssemblyPackages>false</AutomaticallyUseReferenceAssemblyPackages></PropertyGroup>
+  <ItemGroup><PackageReference Include="Tools.InnoSetup" Version="6.4.3" GeneratePathProperty="true" /></ItemGroup>
+</Project>

@@ -1,0 +1,1020 @@
+{
+ "version": 1,
+ "_doc": "Personality archetypes (WP3): HOW an NPC plays and behaves, never how well (skills-v1). pro/veteran/gambler are the golden personalities, 1:1 with NpcCatalog.cs. Warm archetypes may not mock (load fails). Mock rules only on HumanMisplay/HumanBigTurn (public-only detection), capped at PersonalityCatalog.MaxMocksPerMatch per match by NpcPresentation. Bot emotes: Greetings, WellPlayed, Thanks, Wow, Oops, Threaten (Sorry has no qualified native transport). bandWeights = [bronze, silver, gold, platinum, diamond, legend] generation weights; tasteAffinity multiplies them per DeckTaste.",
+ "archetypes": [
+  {
+   "id": "pro",
+   "label": "Confident pro",
+   "blurb": "Quick and decisive. Greets, respects a big turn, concedes cleanly when the board proves it is dead.",
+   "pacing": {
+    "preTurnMin": 0.15,
+    "preTurnMax": 0.45,
+    "actionMin": 0.1,
+    "actionMax": 0.3
+   },
+   "replyBlendBeta": 0.35,
+   "concessionWillingness": 1,
+   "concedeFromTurn": 8,
+   "riskBias": 0,
+   "aggressionBias": 0,
+   "warm": false,
+   "bandWeights": [
+    0.3,
+    0.5,
+    0.8,
+    1.2,
+    1.6,
+    2.0
+   ],
+   "tasteAffinity": {
+    "tryhard": 1.6,
+    "netdecker": 1.3,
+    "memeLord": 0.3
+   },
+   "emotes": {
+    "budget": 3,
+    "gapSeconds": 30,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 0.9,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Wow",
+      "chance": 0.35,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "veteran",
+   "label": "Patient veteran",
+   "blurb": "Slow, kind and unhurried. Thanks you for everything and plays every game to the end.",
+   "pacing": {
+    "preTurnMin": 0.8,
+    "preTurnMax": 1.4,
+    "actionMin": 0.3,
+    "actionMax": 0.5
+   },
+   "replyBlendBeta": 0.55,
+   "concessionWillingness": 0.25,
+   "concedeFromTurn": 10,
+   "riskBias": -0.3,
+   "aggressionBias": -0.2,
+   "warm": true,
+   "bandWeights": [
+    1.0,
+    1.1,
+    1.1,
+    1.0,
+    0.9,
+    0.7
+   ],
+   "tasteAffinity": {
+    "classLoyalist": 2.5,
+    "brewer": 1.2,
+    "tryhard": 0.6
+   },
+   "emotes": {
+    "budget": 4,
+    "gapSeconds": 25,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "WellPlayed",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Wow",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "WellPlayed",
+      "chance": 0.5,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Oops",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Sorry",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "gambler",
+   "label": "Cocky gambler",
+   "blurb": "Fast, greedy, loud. Threatens early, crows over big turns and will poke fun at a clear misplay.",
+   "pacing": {
+    "preTurnMin": 0.1,
+    "preTurnMax": 0.3,
+    "actionMin": 0.08,
+    "actionMax": 0.2
+   },
+   "replyBlendBeta": 0.15,
+   "concessionWillingness": 0.25,
+   "concedeFromTurn": 12,
+   "riskBias": 0.6,
+   "aggressionBias": 0.5,
+   "warm": false,
+   "bandWeights": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "tasteAffinity": {
+    "netdecker": 1.2,
+    "memeLord": 1.2
+   },
+   "emotes": {
+    "budget": 6,
+    "gapSeconds": 15,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Threaten",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Wow",
+      "chance": 0.7,
+      "maxUses": 2,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Threaten",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotLethalFound",
+      "emote": "Threaten",
+      "chance": 0.8,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Wow",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Oops",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": true
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Oops",
+      "chance": 0.6,
+      "maxUses": 2,
+      "mock": true
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Wow",
+      "chance": 0.75,
+      "maxUses": 2,
+      "mock": true
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Threaten",
+      "chance": 0.5,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Threaten",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 0.6,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "grinder",
+   "label": "Salty grinder",
+   "blurb": "Never concedes, rarely says well played, never cheats. Fires a Threaten back if you start it.",
+   "pacing": {
+    "preTurnMin": 0.9,
+    "preTurnMax": 1.6,
+    "actionMin": 0.35,
+    "actionMax": 0.6
+   },
+   "replyBlendBeta": 0.7,
+   "concessionWillingness": 0.05,
+   "concedeFromTurn": 14,
+   "riskBias": -0.3,
+   "aggressionBias": -0.2,
+   "warm": false,
+   "bandWeights": [
+    0.6,
+    0.8,
+    1.0,
+    1.2,
+    1.4,
+    1.4
+   ],
+   "tasteAffinity": {
+    "tryhard": 1.8,
+    "netdecker": 1.3,
+    "classLoyalist": 1.2,
+    "memeLord": 0.3
+   },
+   "emotes": {
+    "budget": 3,
+    "gapSeconds": 40,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Oops",
+      "chance": 0.3,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.35,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Threaten",
+      "chance": 0.6,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 0.4,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.5,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "showboat",
+   "label": "Showboat",
+   "blurb": "Every big turn is a highlight reel. Threatens on lethal and may mock one clear misplay; respects a comeback.",
+   "pacing": {
+    "preTurnMin": 0.1,
+    "preTurnMax": 0.35,
+    "actionMin": 0.08,
+    "actionMax": 0.25
+   },
+   "replyBlendBeta": 0.25,
+   "concessionWillingness": 0.15,
+   "concedeFromTurn": 12,
+   "riskBias": 0.4,
+   "aggressionBias": 0.4,
+   "warm": false,
+   "bandWeights": [
+    1.0,
+    1.0,
+    1.0,
+    0.9,
+    0.8,
+    0.7
+   ],
+   "tasteAffinity": {
+    "netdecker": 1.3,
+    "memeLord": 1.4,
+    "brewer": 0.6
+   },
+   "emotes": {
+    "budget": 5,
+    "gapSeconds": 15,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Threaten",
+      "chance": 0.7,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Wow",
+      "chance": 0.6,
+      "maxUses": 2,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Threaten",
+      "chance": 0.4,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotLethalFound",
+      "emote": "Threaten",
+      "chance": 0.9,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Oops",
+      "chance": 0.7,
+      "maxUses": 1,
+      "mock": true
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Wow",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": true
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Wow",
+      "chance": 0.3,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.4,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.4,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Threaten",
+      "chance": 0.7,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Threaten",
+      "chance": 0.4,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 0.7,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "silent",
+   "label": "Silent tryhard",
+   "blurb": "Netdecks, plays fast and says nothing. One Well Played when beaten, then gone.",
+   "pacing": {
+    "preTurnMin": 0.2,
+    "preTurnMax": 0.5,
+    "actionMin": 0.12,
+    "actionMax": 0.3
+   },
+   "replyBlendBeta": 0.5,
+   "concessionWillingness": 0.6,
+   "concedeFromTurn": 8,
+   "riskBias": 0.0,
+   "aggressionBias": 0.0,
+   "warm": false,
+   "bandWeights": [
+    0.4,
+    0.6,
+    0.9,
+    1.2,
+    1.6,
+    1.8
+   ],
+   "tasteAffinity": {
+    "tryhard": 1.8,
+    "netdecker": 1.6,
+    "memeLord": 0.2,
+    "brewer": 0.5
+   },
+   "emotes": {
+    "budget": 1,
+    "gapSeconds": 60,
+    "rules": [
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.7,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "friendly",
+   "label": "Friendly newbie",
+   "blurb": "Still reading the cards. Says hello, gasps at your big turns, cheers its own, thanks you for the game.",
+   "pacing": {
+    "preTurnMin": 0.6,
+    "preTurnMax": 1.2,
+    "actionMin": 0.3,
+    "actionMax": 0.55
+   },
+   "replyBlendBeta": 0.4,
+   "concessionWillingness": 0.15,
+   "concedeFromTurn": 12,
+   "riskBias": 0.1,
+   "aggressionBias": 0.3,
+   "warm": true,
+   "bandWeights": [
+    1.8,
+    1.5,
+    1.1,
+    0.8,
+    0.5,
+    0.3
+   ],
+   "tasteAffinity": {
+    "netdecker": 1.2,
+    "memeLord": 1.2,
+    "tryhard": 0.4
+   },
+   "emotes": {
+    "budget": 5,
+    "gapSeconds": 20,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Wow",
+      "chance": 0.7,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Wow",
+      "chance": 0.25,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Wow",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Oops",
+      "chance": 0.5,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "professor",
+   "label": "Thoughtful brewer",
+   "blurb": "Thinks long, experiments often and applauds a clever line, even against itself.",
+   "pacing": {
+    "preTurnMin": 1.0,
+    "preTurnMax": 1.8,
+    "actionMin": 0.4,
+    "actionMax": 0.7
+   },
+   "replyBlendBeta": 0.65,
+   "concessionWillingness": 0.4,
+   "concedeFromTurn": 10,
+   "riskBias": 0.2,
+   "aggressionBias": -0.1,
+   "warm": true,
+   "bandWeights": [
+    0.8,
+    0.9,
+    1.0,
+    1.1,
+    1.1,
+    1.0
+   ],
+   "tasteAffinity": {
+    "brewer": 2.5,
+    "classLoyalist": 1.3,
+    "netdecker": 0.6
+   },
+   "emotes": {
+    "budget": 3,
+    "gapSeconds": 35,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "WellPlayed",
+      "chance": 0.7,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 1,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Thanks",
+      "chance": 1,
+      "maxUses": 1,
+      "humanEmote": "WellPlayed",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "speedster",
+   "label": "Speedrunner",
+   "blurb": "Plays like the rope is always lit. A quick hello, a quick gg, straight into the next queue.",
+   "pacing": {
+    "preTurnMin": 0.05,
+    "preTurnMax": 0.2,
+    "actionMin": 0.05,
+    "actionMax": 0.15
+   },
+   "replyBlendBeta": 0.2,
+   "concessionWillingness": 0.7,
+   "concedeFromTurn": 8,
+   "riskBias": 0.2,
+   "aggressionBias": 0.3,
+   "warm": false,
+   "bandWeights": [
+    0.9,
+    0.9,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+   ],
+   "tasteAffinity": {
+    "netdecker": 1.4,
+    "tryhard": 1.2,
+    "brewer": 0.6
+   },
+   "emotes": {
+    "budget": 2,
+    "gapSeconds": 20,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotLethalFound",
+      "emote": "WellPlayed",
+      "chance": 0.4,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.8,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.8,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.5,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     }
+    ]
+   }
+  },
+  {
+   "id": "chaotic",
+   "label": "Chaotic meme lord",
+   "blurb": "Here for the bit. Random Wows, ironic Oops, echoes your emotes and plays the meme to the last card.",
+   "pacing": {
+    "preTurnMin": 0.2,
+    "preTurnMax": 1.2,
+    "actionMin": 0.1,
+    "actionMax": 0.5
+   },
+   "replyBlendBeta": 0.1,
+   "concessionWillingness": 0.05,
+   "concedeFromTurn": 16,
+   "riskBias": 0.6,
+   "aggressionBias": 0.2,
+   "warm": false,
+   "bandWeights": [
+    1.8,
+    1.5,
+    1.1,
+    0.8,
+    0.5,
+    0.4
+   ],
+   "tasteAffinity": {
+    "memeLord": 3.0,
+    "brewer": 1.5,
+    "tryhard": 0.3
+   },
+   "emotes": {
+    "budget": 6,
+    "gapSeconds": 15,
+    "rules": [
+     {
+      "trigger": "MatchStart",
+      "emote": "Wow",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "MatchStart",
+      "emote": "Greetings",
+      "chance": 0.8,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Wow",
+      "chance": 0.6,
+      "maxUses": 2,
+      "mock": false
+     },
+     {
+      "trigger": "OwnBigTurn",
+      "emote": "Oops",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanBigTurn",
+      "emote": "Wow",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Wow",
+      "chance": 0.5,
+      "maxUses": 1,
+      "mock": true
+     },
+     {
+      "trigger": "HumanMisplay",
+      "emote": "Oops",
+      "chance": 0.4,
+      "maxUses": 1,
+      "mock": true
+     },
+     {
+      "trigger": "BotLethalFound",
+      "emote": "Wow",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "Oops",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "BotDoomed",
+      "emote": "WellPlayed",
+      "chance": 0.8,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "Concession",
+      "emote": "WellPlayed",
+      "chance": 0.6,
+      "maxUses": 1,
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Oops",
+      "chance": 0.6,
+      "maxUses": 1,
+      "humanEmote": "Threaten",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Wow",
+      "chance": 0.4,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Greetings",
+      "chance": 0.8,
+      "maxUses": 1,
+      "humanEmote": "Greetings",
+      "mock": false
+     },
+     {
+      "trigger": "ReplyToHumanEmote",
+      "emote": "Oops",
+      "chance": 0.7,
+      "maxUses": 1,
+      "humanEmote": "Oops",
+      "mock": false
+     }
+    ]
+   }
+  }
+ ]
+}

@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType><TargetFramework>net48</TargetFramework>
+    <AssemblyName>SoloStone</AssemblyName><LangVersion>latest</LangVersion>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo><Deterministic>true</Deterministic>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>../assets/launcher.ico</ApplicationIcon>
+  </PropertyGroup>
+  <Import Project="../BuildInputs.targets" />
+  <PropertyGroup><AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects><GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType></PropertyGroup>
+  <!-- Live-test builds only. A release build never passes TestHooks. -->
+  <PropertyGroup Condition="'$(TestHooks)' == 'true'"><DefineConstants>$(DefineConstants);SOLOSTONE_TEST_HOOKS</DefineConstants></PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+    <PackageReference Include="BouncyCastle.Cryptography" Version="[2.6.2]" />
+    <PackageReference Include="System.Reflection.Metadata" Version="[8.0.1]" />
+    <Reference Include="System.Windows.Forms" /><Reference Include="System.Drawing" />
+    <Reference Include="System.Runtime.Serialization" /><Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.IO.Compression" />
+    <EmbeddedResource Include="$(TestedClientFile)" LogicalName="tested-client.json" />
+  </ItemGroup>
+</Project>

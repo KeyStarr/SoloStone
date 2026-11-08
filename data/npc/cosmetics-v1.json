@@ -1,0 +1,368 @@
+{
+ "version": 1,
+ "_doc": "Cosmetics NPCs may wear (WP3). Source: owner-approved curation on feat/shop-products, commit 44fcbf96 'data(shop): admit natively checked cosmetics' (data/shop/catalog-v1.json, verify=false items only: 55 hero skins, 5 per class, and 37 card backs), plus the skins golden NPCs already wear (HERO_02c). heroPower only where the golden profiles override it; otherwise the base hero power is kept. Card back 0 = default back. name is documentation only.",
+ "heroSkins": [
+  {
+   "hero": "HERO_01",
+   "skin": "HERO_01a",
+   "name": "Magni Bronzebeard"
+  },
+  {
+   "hero": "HERO_01",
+   "skin": "HERO_01aa",
+   "name": "Varian Wrynn"
+  },
+  {
+   "hero": "HERO_01",
+   "skin": "HERO_01bb",
+   "name": "Ragnaros the Firelord"
+  },
+  {
+   "hero": "HERO_01",
+   "skin": "HERO_01bd",
+   "name": "Wrathion"
+  },
+  {
+   "hero": "HERO_01",
+   "skin": "HERO_01c",
+   "heroPower": "CS2_102_H3",
+   "name": "Deathwing"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02a",
+   "name": "Morgl the Oracle"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02am",
+   "name": "Thorim"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02b",
+   "name": "King Rastakhan"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02c",
+   "heroPower": "CS2_049_H3",
+   "name": "golden ZeeCashh skin"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02e",
+   "name": "Lady Vashj"
+  },
+  {
+   "hero": "HERO_02",
+   "skin": "HERO_02m",
+   "name": "Ragnaros"
+  },
+  {
+   "hero": "HERO_03",
+   "skin": "HERO_03a",
+   "name": "Maiev Shadowsong"
+  },
+  {
+   "hero": "HERO_03",
+   "skin": "HERO_03ak_Patches",
+   "name": "Patches the Pirate"
+  },
+  {
+   "hero": "HERO_03",
+   "skin": "HERO_03ay",
+   "name": "Vanessa VanCleef"
+  },
+  {
+   "hero": "HERO_03",
+   "skin": "HERO_03m",
+   "name": "Edwin VanCleef"
+  },
+  {
+   "hero": "HERO_03",
+   "skin": "HERO_03s",
+   "name": "Garona Halforcen"
+  },
+  {
+   "hero": "HERO_04",
+   "skin": "HERO_04a",
+   "name": "Lady Liadrin"
+  },
+  {
+   "hero": "HERO_04",
+   "skin": "HERO_04ay",
+   "heroPower": "HERO_04ayhp",
+   "name": "Tirion Fordring"
+  },
+  {
+   "hero": "HERO_04",
+   "skin": "HERO_04b",
+   "name": "Prince Arthas"
+  },
+  {
+   "hero": "HERO_04",
+   "skin": "HERO_04bk",
+   "name": "Turalyon"
+  },
+  {
+   "hero": "HERO_04",
+   "skin": "HERO_04u",
+   "name": "Leeroy Jenkins"
+  },
+  {
+   "hero": "HERO_05",
+   "skin": "HERO_05a",
+   "name": "Alleria Windrunner"
+  },
+  {
+   "hero": "HERO_05",
+   "skin": "HERO_05am_KingKrush_h",
+   "name": "King Krush"
+  },
+  {
+   "hero": "HERO_05",
+   "skin": "HERO_05as",
+   "name": "Nathanos Blightcaller"
+  },
+  {
+   "hero": "HERO_05",
+   "skin": "HERO_05c",
+   "name": "Sylvanas Windrunner"
+  },
+  {
+   "hero": "HERO_05",
+   "skin": "HERO_05y",
+   "name": "Lor'themar"
+  },
+  {
+   "hero": "HERO_06",
+   "skin": "HERO_06a",
+   "name": "Lunara"
+  },
+  {
+   "hero": "HERO_06",
+   "skin": "HERO_06ah",
+   "name": "C'Thun"
+  },
+  {
+   "hero": "HERO_06",
+   "skin": "HERO_06aw",
+   "name": "Ysera"
+  },
+  {
+   "hero": "HERO_06",
+   "skin": "HERO_06b",
+   "name": "Elise Starseeker"
+  },
+  {
+   "hero": "HERO_06",
+   "skin": "HERO_06f",
+   "name": "Hamuul Runetotem"
+  },
+  {
+   "hero": "HERO_07",
+   "skin": "HERO_07a",
+   "name": "Nemsy Necrofizzle"
+  },
+  {
+   "hero": "HERO_07",
+   "skin": "HERO_07ae",
+   "name": "Rafaam"
+  },
+  {
+   "hero": "HERO_07",
+   "skin": "HERO_07ag",
+   "name": "Sargeras"
+  },
+  {
+   "hero": "HERO_07",
+   "skin": "HERO_07b",
+   "name": "Mecha-Jaraxxus"
+  },
+  {
+   "hero": "HERO_07",
+   "skin": "HERO_07d",
+   "name": "N'Zoth"
+  },
+  {
+   "hero": "HERO_08",
+   "skin": "HERO_08a",
+   "name": "Medivh"
+  },
+  {
+   "hero": "HERO_08",
+   "skin": "HERO_08aa",
+   "name": "Kael'thas Sunstrider"
+  },
+  {
+   "hero": "HERO_08",
+   "skin": "HERO_08b",
+   "name": "Khadgar"
+  },
+  {
+   "hero": "HERO_08",
+   "skin": "HERO_08e",
+   "name": "Kel'Thuzad"
+  },
+  {
+   "hero": "HERO_08",
+   "skin": "HERO_08x",
+   "name": "Queen Azshara"
+  },
+  {
+   "hero": "HERO_09",
+   "skin": "HERO_09a",
+   "name": "Tyrande Whisperwind"
+  },
+  {
+   "hero": "HERO_09",
+   "skin": "HERO_09ar",
+   "name": "Talanji"
+  },
+  {
+   "hero": "HERO_09",
+   "skin": "HERO_09at",
+   "name": "Prophet Velen"
+  },
+  {
+   "hero": "HERO_09",
+   "skin": "HERO_09b",
+   "name": "Madame Lazul"
+  },
+  {
+   "hero": "HERO_09",
+   "skin": "HERO_09bd",
+   "name": "Xal'atath"
+  },
+  {
+   "hero": "HERO_10",
+   "skin": "HERO_10am",
+   "name": "Metamorphosis Illidan"
+  },
+  {
+   "hero": "HERO_10",
+   "skin": "HERO_10b",
+   "name": "Aranna Starseeker"
+  },
+  {
+   "hero": "HERO_10",
+   "skin": "HERO_10bc",
+   "name": "Broxigar"
+  },
+  {
+   "hero": "HERO_10",
+   "skin": "HERO_10bk",
+   "name": "Kayn Sunfury"
+  },
+  {
+   "hero": "HERO_10",
+   "skin": "HERO_10z",
+   "name": "Halveria Darkraven"
+  },
+  {
+   "hero": "HERO_11",
+   "skin": "HERO_11ag",
+   "name": "The Jailer"
+  },
+  {
+   "hero": "HERO_11",
+   "skin": "HERO_11b",
+   "name": "Arthas Menethil"
+  },
+  {
+   "hero": "HERO_11",
+   "skin": "HERO_11c",
+   "name": "Darion Mograine"
+  },
+  {
+   "hero": "HERO_11",
+   "skin": "HERO_11l",
+   "name": "Blood-Queen Lana'thel"
+  },
+  {
+   "hero": "HERO_11",
+   "skin": "HERO_11z",
+   "name": "Bolvar Fordragon"
+  }
+ ],
+ "cardBacks": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  6,
+  8,
+  9,
+  11,
+  15,
+  18,
+  19,
+  21,
+  23,
+  31,
+  36,
+  45,
+  46,
+  56,
+  61,
+  67,
+  70,
+  99,
+  122,
+  143,
+  162,
+  177,
+  190,
+  207,
+  226,
+  239,
+  325,
+  351,
+  373,
+  427,
+  482,
+  503,
+  513
+ ],
+ "cardBackNames": {
+  "1": "Pandaria",
+  "2": "Black Temple",
+  "3": "Rainbow!",
+  "4": "Fireside",
+  "6": "Naxxramas",
+  "8": "Icecrown",
+  "9": "Pirates!",
+  "11": "Goblins",
+  "15": "Gnomes",
+  "18": "Molten Core",
+  "19": "Ragnaros",
+  "21": "Nefarian",
+  "23": "Ninjas!",
+  "31": "The Grand Tournament",
+  "36": "Explorer's Map",
+  "45": "Eyes of C'Thun",
+  "46": "Hogger",
+  "56": "Karazhan Nights",
+  "61": "Legion",
+  "67": "Grimy Goons",
+  "70": "Fossil",
+  "99": "Frostmourne",
+  "122": "Catacomber",
+  "143": "Boomsday!",
+  "162": "Kul Tiras",
+  "177": "Darkmoon Faire",
+  "190": "Book of E.V.I.L.",
+  "207": "Scholomance",
+  "226": "The Barrens",
+  "239": "Stormwind",
+  "325": "Violet Hold",
+  "351": "The Lich King",
+  "373": "Emerald Dream",
+  "427": "Whizbang",
+  "482": "The Lost City",
+  "503": "Time War",
+  "513": "Cataclysm"
+ }
+}

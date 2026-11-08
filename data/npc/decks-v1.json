@@ -1,0 +1,7244 @@
+{
+ "schema": 1,
+ "libraryVersion": 1,
+ "activeMeta": "violet-hold",
+ "_doc": "NPC World v1 deck library (spec 2026-10-25-npc-world-v1-design.md). WP1 appends admitted decks from data/npc/admission-report-v1.json + candidate files; cards use the recipes-v1 {id,count} shape.",
+ "_generated": "tools/agents/npc_deck_import.py; measured by auto-golden gauntlet runs: wp1-r1, wp1-r1-zee, wp1-r2-warlock, wp1-r3-legacy; skipped lists are in _skipped",
+ "decks": [
+  {
+   "id": "npc-pure-paladin",
+   "version": 1,
+   "name": "Pure Aura Paladin",
+   "class": "PALADIN",
+   "hero": "HERO_04",
+   "origin": "golden",
+   "admission": "admitted",
+   "planId": "pure-paladin.v1",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "hearthstone-decks.net",
+    "url": "https://hearthstone-decks.net/pure-paladin-243-legend-unknown-score-14-5/",
+    "accessed": "2026-10-11",
+    "deckCode": null,
+    "changes": "golden showcase list (LocalDecks.NpcDecks)"
+   },
+   "cards": [
+    {
+     "id": "CORE_ICC_038",
+     "count": 2
+    },
+    {
+     "id": "END_011",
+     "count": 2
+    },
+    {
+     "id": "CATA_472",
+     "count": 2
+    },
+    {
+     "id": "MEND_802",
+     "count": 2
+    },
+    {
+     "id": "JAIL_035",
+     "count": 2
+    },
+    {
+     "id": "JAIL_327",
+     "count": 2
+    },
+    {
+     "id": "TIME_019",
+     "count": 2
+    },
+    {
+     "id": "CATA_474",
+     "count": 2
+    },
+    {
+     "id": "CATA_479",
+     "count": 2
+    },
+    {
+     "id": "TIME_700",
+     "count": 2
+    },
+    {
+     "id": "JAIL_516",
+     "count": 2
+    },
+    {
+     "id": "CATA_475",
+     "count": 2
+    },
+    {
+     "id": "TIME_009t1",
+     "count": 1
+    },
+    {
+     "id": "EDR_258",
+     "count": 1
+    },
+    {
+     "id": "TIME_009t2",
+     "count": 1
+    },
+    {
+     "id": "CATA_473",
+     "count": 1
+    },
+    {
+     "id": "JAIL_397",
+     "count": 1
+    },
+    {
+     "id": "TIME_009",
+     "count": 1
+    }
+   ],
+   "sideboards": [
+    {
+     "owner": "JAIL_397",
+     "cards": [
+      {
+       "id": "JAIL_328",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "npc-zee-shaman",
+   "version": 1,
+   "name": "Zee Shaman",
+   "class": "SHAMAN",
+   "hero": "HERO_02",
+   "origin": "golden",
+   "admission": "admitted",
+   "planId": "zee-shaman.v1",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "hearthstone-decks.net",
+    "url": "https://hearthstone-decks.net/zee-shaman-37-legend-unknown-score-10-6/",
+    "accessed": "2026-10-09",
+    "deckCode": null,
+    "changes": "golden showcase list (LocalDecks.NpcDecks)"
+   },
+   "cards": [
+    {
+     "id": "CORE_GIL_531",
+     "count": 2
+    },
+    {
+     "id": "CORE_ULD_191",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_809",
+     "count": 2
+    },
+    {
+     "id": "CORE_WC_042",
+     "count": 2
+    },
+    {
+     "id": "CATA_556",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "CATA_565",
+     "count": 2
+    },
+    {
+     "id": "JAIL_802",
+     "count": 2
+    },
+    {
+     "id": "JAIL_457",
+     "count": 2
+    },
+    {
+     "id": "TLC_482",
+     "count": 2
+    },
+    {
+     "id": "CATA_722",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 1
+    },
+    {
+     "id": "JAIL_850",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "JAIL_458",
+     "count": 1
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "JAIL_800",
+     "count": 1
+    },
+    {
+     "id": "CATA_153",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": []
+  },
+  {
+   "id": "npc-dragon-warrior",
+   "version": 1,
+   "name": "Dragon Warrior",
+   "class": "WARRIOR",
+   "hero": "HERO_01",
+   "origin": "golden",
+   "admission": "admitted",
+   "planId": "dragon-warrior.v1",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "hearthstone-decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-10-20",
+    "deckCode": "AAECAQcC69YHstgHDqr8Bqv8BveDB6WFB+iHB9KXB7etB+yyB7XAB5XCB5vCB5zCB6ngB/vgBwAA",
+    "changes": "golden showcase list (LocalDecks.NpcDecks)"
+   },
+   "cards": [
+    {
+     "id": "EDR_456",
+     "count": 2
+    },
+    {
+     "id": "CATA_556",
+     "count": 2
+    },
+    {
+     "id": "CATA_585",
+     "count": 2
+    },
+    {
+     "id": "CAP_107",
+     "count": 2
+    },
+    {
+     "id": "EDR_457",
+     "count": 2
+    },
+    {
+     "id": "EDR_889",
+     "count": 2
+    },
+    {
+     "id": "FIR_939",
+     "count": 2
+    },
+    {
+     "id": "CATA_582",
+     "count": 2
+    },
+    {
+     "id": "CAP_105",
+     "count": 2
+    },
+    {
+     "id": "CATA_584",
+     "count": 2
+    },
+    {
+     "id": "EDR_492",
+     "count": 2
+    },
+    {
+     "id": "TIME_034",
+     "count": 2
+    },
+    {
+     "id": "END_033",
+     "count": 2
+    },
+    {
+     "id": "TLC_600",
+     "count": 2
+    },
+    {
+     "id": "JAIL_421",
+     "count": 1
+    },
+    {
+     "id": "JAIL_384",
+     "count": 1
+    }
+   ],
+   "sideboards": []
+  },
+  {
+   "id": "npc-recipe-egg-death-knight",
+   "version": 2,
+   "name": "Egg Death Knight",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "recipe:egg-death-knight",
+   "admission": "rejected",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 5,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/uub-egg-death-knight-187-legend-unknown-score-21-8/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAfHhBAb1mAfXnQfSrged2we/3we9jAgModQEl4IHvJQHupUH7JsH4J0Hn54HkqQH4rEHrtoHtNoHptwHAAA=",
+    "changes": "",
+    "restored": "2026-10-29: published list restored; the swapped-out event cards are in the Violet Hold pool and every player owns them from the welcome gift. Was: 1x Staff of the Endbringer (TLC_EVENT_402) replaced by 1x Defias Smuggler (JAIL_998): EVENT weapon unsupported; Smuggler gives an Egg attack and Rush for trading; 1x Arrival of the Old Gods (BE_EVENT_100) replaced by 1x Emergency Surgery (JAIL_454): BE EVENT forbidden; add a second Emergency Surgery for recovery"
+   },
+   "cards": [
+    {
+     "id": "DINO_417",
+     "count": 2
+    },
+    {
+     "id": "EDR_813",
+     "count": 2
+    },
+    {
+     "id": "CORE_EDR_002",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_020",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "JAIL_441",
+     "count": 2
+    },
+    {
+     "id": "JAIL_450",
+     "count": 2
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "TIME_003",
+     "count": 2
+    },
+    {
+     "id": "TLC_252",
+     "count": 2
+    },
+    {
+     "id": "JAIL_446",
+     "count": 1
+    },
+    {
+     "id": "JAIL_444",
+     "count": 2
+    },
+    {
+     "id": "JAIL_454",
+     "count": 1
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "END_004",
+     "count": 2
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "TLC_EVENT_402",
+     "count": 1
+    },
+    {
+     "id": "BE_EVENT_100",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: win rate 9.5% (unplayable by the strong pilot)",
+   "admissionStats": {
+    "harnessId": "cand-recipe-egg-death-knight",
+    "rating": 896.2,
+    "winRateVsField": 13.3,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 38,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ],
+   "pending": {
+    "needs": [
+     "BE_EVENT_100"
+    ],
+    "branch": "claude/feat-admit-mother-be036-76c0e0",
+    "fallback": {
+     "changes": "1x Arrival of the Old Gods (BE_EVENT_100) replaced by a second Emergency Surgery (JAIL_454) until catalog admission; Staff of the Endbringer remains admitted.",
+     "cards": [
+      {
+       "id": "DINO_417",
+       "count": 2
+      },
+      {
+       "id": "EDR_813",
+       "count": 2
+      },
+      {
+       "id": "CORE_EDR_002",
+       "count": 2
+      },
+      {
+       "id": "CORE_NEW1_020",
+       "count": 2
+      },
+      {
+       "id": "DINO_411",
+       "count": 2
+      },
+      {
+       "id": "JAIL_441",
+       "count": 2
+      },
+      {
+       "id": "JAIL_450",
+       "count": 2
+      },
+      {
+       "id": "DINO_410",
+       "count": 1
+      },
+      {
+       "id": "TIME_003",
+       "count": 2
+      },
+      {
+       "id": "TLC_252",
+       "count": 2
+      },
+      {
+       "id": "JAIL_446",
+       "count": 1
+      },
+      {
+       "id": "JAIL_444",
+       "count": 2
+      },
+      {
+       "id": "JAIL_454",
+       "count": 2
+      },
+      {
+       "id": "TLC_436",
+       "count": 2
+      },
+      {
+       "id": "END_004",
+       "count": 2
+      },
+      {
+       "id": "TLC_106",
+       "count": 1
+      },
+      {
+       "id": "TLC_EVENT_402",
+       "count": 1
+      }
+     ],
+     "sideboards": []
+    }
+   }
+  },
+  {
+   "id": "npc-recipe-herald-death-knight",
+   "version": 1,
+   "name": "Herald Death Knight",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "recipe:herald-death-knight",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/bbu-herald-death-knight-258-legend-unknown-score-10-8/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAfHhBAjDgwf3qgf7qgf8qgeosQfQvwfqyQeb1AcLh/YE2OUGgf0GupUHn54HkasHj74HmsUH0MUHyccHv98HAAA="
+   },
+   "cards": [
+    {
+     "id": "DINO_417",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_066",
+     "count": 2
+    },
+    {
+     "id": "EDR_814",
+     "count": 2
+    },
+    {
+     "id": "MEND_100",
+     "count": 2
+    },
+    {
+     "id": "RLK_708",
+     "count": 2
+    },
+    {
+     "id": "TIME_619t2",
+     "count": 1
+    },
+    {
+     "id": "CATA_780",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "TIME_616",
+     "count": 2
+    },
+    {
+     "id": "TIME_618",
+     "count": 1
+    },
+    {
+     "id": "TIME_619",
+     "count": 1
+    },
+    {
+     "id": "CATA_722",
+     "count": 2
+    },
+    {
+     "id": "JAIL_454",
+     "count": 2
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "CATA_156",
+     "count": 2
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "TIME_619t",
+     "count": 1
+    },
+    {
+     "id": "CATA_155",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 2.3%, pilot headroom +325 Elo; wp1-r1 game 33 FAIRNESS came from the opponent showcase-death-knight-dark-gift (Stickybomb Saboteur CATA_186te twin leak, engine/harness), live-t5 seat; not this list",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-herald-death-knight",
+    "rating": 1401.2,
+    "winRateVsField": 70.0,
+    "games": 42,
+    "fallbackRate": 0.0227
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 26,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-deathrattle-herald-demon-hunter",
+   "version": 1,
+   "name": "Deathrattle Herald Demon Hunter",
+   "class": "DEMONHUNTER",
+   "hero": "HERO_10",
+   "origin": "recipe:deathrattle-herald-demon-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 4,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "HearthPwn",
+    "url": "https://www.hearthpwn.com/decks/1462831-deathrattle-herald-demon-hunter",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAea5AwzsoATDgwf+gweviAeCmAe1mAeBqAePvgeSvwfQvwfUyQeb1AcJtKAEwf4Gwv4GxIEHtpcHkqQHjb8Hlb8H4L8HAAA="
+   },
+   "cards": [
+    {
+     "id": "CATA_528",
+     "count": 2
+    },
+    {
+     "id": "CATA_526",
+     "count": 1
+    },
+    {
+     "id": "CATA_530",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_491",
+     "count": 2
+    },
+    {
+     "id": "TLC_902",
+     "count": 2
+    },
+    {
+     "id": "CATA_525",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_801",
+     "count": 1
+    },
+    {
+     "id": "EDR_820",
+     "count": 1
+    },
+    {
+     "id": "TIME_003",
+     "count": 2
+    },
+    {
+     "id": "TLC_833",
+     "count": 1
+    },
+    {
+     "id": "EDR_260",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "FIR_958",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "CATA_722",
+     "count": 1
+    },
+    {
+     "id": "EDR_891",
+     "count": 2
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "EDR_892",
+     "count": 2
+    },
+    {
+     "id": "CATA_151",
+     "count": 1
+    },
+    {
+     "id": "TLC_480",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +132 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-deathrattle-herald-demon-hunter",
+    "rating": 1105.5,
+    "winRateVsField": 33.3,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 3,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 113,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-void-demon-hunter",
+   "version": 1,
+   "name": "Void Demon Hunter",
+   "class": "DEMONHUNTER",
+   "hero": "HERO_10",
+   "origin": "recipe:void-demon-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/void-demon-hunter-475-legend-unknown-score-7-5/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAea5AwaongaKqgeSqgeTqgeUvweD2gcM7KAE4fgF3v8GtJcHtpcHwLEHkr8Hlb8HxN0Hxt0HteEHt+EHAAA="
+   },
+   "cards": [
+    {
+     "id": "TIME_020t2",
+     "count": 1
+    },
+    {
+     "id": "CATA_528",
+     "count": 2
+    },
+    {
+     "id": "CORE_YOP_001",
+     "count": 2
+    },
+    {
+     "id": "JAIL_732",
+     "count": 2
+    },
+    {
+     "id": "TLC_900",
+     "count": 2
+    },
+    {
+     "id": "CATA_526",
+     "count": 2
+    },
+    {
+     "id": "EDR_840",
+     "count": 2
+    },
+    {
+     "id": "JAIL_891",
+     "count": 2
+    },
+    {
+     "id": "JAIL_892",
+     "count": 2
+    },
+    {
+     "id": "TIME_020",
+     "count": 1
+    },
+    {
+     "id": "TLC_902",
+     "count": 2
+    },
+    {
+     "id": "CATA_527",
+     "count": 1
+    },
+    {
+     "id": "CORE_BT_801",
+     "count": 2
+    },
+    {
+     "id": "TIME_020t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_449",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_187",
+     "count": 1
+    },
+    {
+     "id": "JAIL_719",
+     "count": 1
+    },
+    {
+     "id": "JAIL_730",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +568 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-void-demon-hunter",
+    "rating": 1298.9,
+    "winRateVsField": 56.7,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 29,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-attack-druid",
+   "version": 1,
+   "name": "Attack Druid",
+   "class": "DRUID",
+   "hero": "HERO_06",
+   "origin": "recipe:attack-druid",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/attack-druid-106-legend-unknown-score-15-5/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAZICDM2eBqn1BqGBB5KDB6+HB6yIB4KYB+ixB+DAB+LAB+XEB6PaBwmunwSqrwesrwe+sgfXwAeR2gfH5ge85wfK5wcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_169",
+     "count": 2
+    },
+    {
+     "id": "JAIL_201",
+     "count": 2
+    },
+    {
+     "id": "JAIL_202",
+     "count": 2
+    },
+    {
+     "id": "TIME_701",
+     "count": 2
+    },
+    {
+     "id": "END_011",
+     "count": 2
+    },
+    {
+     "id": "TIME_702",
+     "count": 2
+    },
+    {
+     "id": "CATA_131",
+     "count": 2
+    },
+    {
+     "id": "END_007",
+     "count": 1
+    },
+    {
+     "id": "JAIL_872",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_072",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "JAIL_875",
+     "count": 1
+    },
+    {
+     "id": "FIR_907",
+     "count": 1
+    },
+    {
+     "id": "JAIL_200",
+     "count": 2
+    },
+    {
+     "id": "CATA_139",
+     "count": 1
+    },
+    {
+     "id": "MEND_046",
+     "count": 1
+    },
+    {
+     "id": "EDR_844",
+     "count": 1
+    },
+    {
+     "id": "CATA_140",
+     "count": 1
+    },
+    {
+     "id": "EDR_846",
+     "count": 1
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    },
+    {
+     "id": "FIR_959",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 4.6%, pilot headroom +93 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-attack-druid",
+    "rating": 1103.4,
+    "winRateVsField": 26.7,
+    "games": 42,
+    "fallbackRate": 0.046
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 20,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-merithra-druid",
+   "version": 1,
+   "name": "Merithra Druid",
+   "class": "DRUID",
+   "hero": "HERO_06",
+   "origin": "recipe:merithra-druid",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 5,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/merithra-druid-33-legend-unknown-score-17-4/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAZICDKn1BqGBB5KDB8ODB6+HB6yIB4KYB+DAB+LAB+XEB+TZB6PaBwmunwSIgweqrwesrwfosQe+sgfXwAe85wfK5wcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_169",
+     "count": 2
+    },
+    {
+     "id": "JAIL_201",
+     "count": 2
+    },
+    {
+     "id": "JAIL_202",
+     "count": 2
+    },
+    {
+     "id": "TIME_701",
+     "count": 2
+    },
+    {
+     "id": "END_011",
+     "count": 2
+    },
+    {
+     "id": "TIME_702",
+     "count": 2
+    },
+    {
+     "id": "CATA_131",
+     "count": 2
+    },
+    {
+     "id": "EDR_270",
+     "count": 2
+    },
+    {
+     "id": "END_007",
+     "count": 2
+    },
+    {
+     "id": "JAIL_436",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "JAIL_875",
+     "count": 1
+    },
+    {
+     "id": "FIR_907",
+     "count": 1
+    },
+    {
+     "id": "CATA_139",
+     "count": 1
+    },
+    {
+     "id": "MEND_046",
+     "count": 1
+    },
+    {
+     "id": "EDR_844",
+     "count": 1
+    },
+    {
+     "id": "CATA_140",
+     "count": 1
+    },
+    {
+     "id": "EDR_846",
+     "count": 1
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    },
+    {
+     "id": "FIR_959",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.4%, pilot headroom +205 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-merithra-druid",
+    "rating": 1085.3,
+    "winRateVsField": 23.3,
+    "games": 42,
+    "fallbackRate": 0.0042
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 46,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-dragon-hunter",
+   "version": 1,
+   "name": "Dragon Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "recipe:dragon-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54201/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAR8E94MHmacHmqcHm6cHDamfBK+SB+yyB4S9B/O/B/W/B4PAB7XAB/nDB6zYB9faB9PbB9fbBwAA"
+   },
+   "cards": [
+    {
+     "id": "CATA_554",
+     "count": 2
+    },
+    {
+     "id": "CATA_556",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_801",
+     "count": 2
+    },
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "JAIL_380",
+     "count": 2
+    },
+    {
+     "id": "CATA_614",
+     "count": 2
+    },
+    {
+     "id": "EDR_889",
+     "count": 1
+    },
+    {
+     "id": "JAIL_877",
+     "count": 2
+    },
+    {
+     "id": "CATA_111",
+     "count": 2
+    },
+    {
+     "id": "CATA_551",
+     "count": 2
+    },
+    {
+     "id": "JAIL_881",
+     "count": 2
+    },
+    {
+     "id": "TIME_609",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t2",
+     "count": 1
+    },
+    {
+     "id": "JAIL_879",
+     "count": 2
+    },
+    {
+     "id": "CATA_552",
+     "count": 2
+    },
+    {
+     "id": "END_033",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +368 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-dragon-hunter",
+    "rating": 1378.5,
+    "winRateVsField": 63.3,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 40,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-tripwire-hunter",
+   "version": 1,
+   "name": "Tripwire Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "recipe:tripwire-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54080/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAR8Ezp4GmacHmqcHm6cHDamfBM6bB5CnB5inB5uwB8ayB7TAB4zGB97XB6zYB9faB9PbB9fbBwAA"
+   },
+   "cards": [
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "JAIL_380",
+     "count": 2
+    },
+    {
+     "id": "TIME_606",
+     "count": 2
+    },
+    {
+     "id": "TLC_249",
+     "count": 2
+    },
+    {
+     "id": "CATA_557",
+     "count": 2
+    },
+    {
+     "id": "JAIL_877",
+     "count": 2
+    },
+    {
+     "id": "TIME_600",
+     "count": 2
+    },
+    {
+     "id": "CATA_897",
+     "count": 2
+    },
+    {
+     "id": "JAIL_881",
+     "count": 2
+    },
+    {
+     "id": "TIME_609",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t2",
+     "count": 1
+    },
+    {
+     "id": "CORE_SW_066",
+     "count": 1
+    },
+    {
+     "id": "END_016",
+     "count": 2
+    },
+    {
+     "id": "JAIL_879",
+     "count": 2
+    },
+    {
+     "id": "TIME_047",
+     "count": 2
+    },
+    {
+     "id": "JAIL_398",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +288 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-tripwire-hunter",
+    "rating": 1168.5,
+    "winRateVsField": 30.0,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 52,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-burn-mage",
+   "version": 1,
+   "name": "Burn Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "recipe:burn-mage",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/burn-mage-39-legend-unknown-score-9-5/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAf0EBsODB/WlB9GmB4i+B5HGB6TZBwyzhwf5mwfopQeLsQfWsgeGxAeSxAesxged2QeT2get2gf53gcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CATA_484",
+     "count": 2
+    },
+    {
+     "id": "CATA_485",
+     "count": 2
+    },
+    {
+     "id": "CORE_DRG_107",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_108",
+     "count": 2
+    },
+    {
+     "id": "END_022",
+     "count": 2
+    },
+    {
+     "id": "JAIL_319",
+     "count": 1
+    },
+    {
+     "id": "TIME_006",
+     "count": 1
+    },
+    {
+     "id": "FIR_911",
+     "count": 2
+    },
+    {
+     "id": "JAIL_312",
+     "count": 2
+    },
+    {
+     "id": "TLC_364",
+     "count": 2
+    },
+    {
+     "id": "TIME_855",
+     "count": 2
+    },
+    {
+     "id": "CATA_458",
+     "count": 1
+    },
+    {
+     "id": "CATA_489",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "TIME_857",
+     "count": 1
+    },
+    {
+     "id": "JAIL_321",
+     "count": 2
+    },
+    {
+     "id": "CATA_488",
+     "count": 1
+    },
+    {
+     "id": "JAIL_735",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report fix (fallback rate 9.1%) resolved: own-Secret tolerance, auto-golden 0 fallbacks in 55 decisions",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-burn-mage",
+    "rating": 1267.6,
+    "winRateVsField": 53.3,
+    "games": 42,
+    "fallbackRate": 0.0908
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 55,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-manastorm-mage",
+   "version": 2,
+   "name": "Manastorm Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "recipe:manastorm-mage",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 4,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAf0EBMODB6TZB5HbB4DgBw3x0wTYngeSpAf1pQfYsgfksgeGxAeSxAeT2get2geU2weG4Ae/jAgAAA==",
+    "changes": "",
+    "restored": "2026-10-29: published list restored; the swapped-out event cards are in the Violet Hold pool and every player owns them from the welcome gift. Was: 2x Arrival of the Titans (BE_EVENT_101) replaced by 2x Arcane Intellect (CORE_CS2_023): BE EVENT forbidden; Arcane Intellect keeps two-card draw but cannot refresh Mana"
+   },
+   "cards": [
+    {
+     "id": "CATA_484",
+     "count": 2
+    },
+    {
+     "id": "CATA_485",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_108",
+     "count": 2
+    },
+    {
+     "id": "JAIL_125",
+     "count": 2
+    },
+    {
+     "id": "JAIL_319",
+     "count": 1
+    },
+    {
+     "id": "TIME_006",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_541",
+     "count": 2
+    },
+    {
+     "id": "END_025",
+     "count": 2
+    },
+    {
+     "id": "TIME_003",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "END_023",
+     "count": 2
+    },
+    {
+     "id": "JAIL_122",
+     "count": 1
+    },
+    {
+     "id": "JAIL_321",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_028",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_072",
+     "count": 1
+    },
+    {
+     "id": "TLC_334",
+     "count": 2
+    },
+    {
+     "id": "BE_EVENT_101",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 5.0%, pilot headroom +300 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-manastorm-mage",
+    "rating": 1230.7,
+    "winRateVsField": 46.7,
+    "games": 42,
+    "fallbackRate": 0.0496
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 18,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ],
+   "pending": {
+    "needs": [
+     "BE_EVENT_101"
+    ],
+    "branch": "claude/feat-admit-mother-be036-76c0e0",
+    "fallback": {
+     "changes": "2x Arrival of the Titans (BE_EVENT_101) replaced by 2x Arcane Intellect (CORE_CS2_023) until catalog admission; this preserves draw but cannot refresh Mana.",
+     "cards": [
+      {
+       "id": "CATA_484",
+       "count": 2
+      },
+      {
+       "id": "CATA_485",
+       "count": 2
+      },
+      {
+       "id": "CORE_SW_108",
+       "count": 2
+      },
+      {
+       "id": "JAIL_125",
+       "count": 2
+      },
+      {
+       "id": "JAIL_319",
+       "count": 1
+      },
+      {
+       "id": "TIME_006",
+       "count": 2
+      },
+      {
+       "id": "CORE_BAR_541",
+       "count": 2
+      },
+      {
+       "id": "END_025",
+       "count": 2
+      },
+      {
+       "id": "TIME_003",
+       "count": 2
+      },
+      {
+       "id": "EDR_856",
+       "count": 1
+      },
+      {
+       "id": "END_023",
+       "count": 2
+      },
+      {
+       "id": "JAIL_122",
+       "count": 1
+      },
+      {
+       "id": "JAIL_321",
+       "count": 2
+      },
+      {
+       "id": "CORE_CS2_028",
+       "count": 2
+      },
+      {
+       "id": "CORE_BT_072",
+       "count": 1
+      },
+      {
+       "id": "TLC_334",
+       "count": 2
+      },
+      {
+       "id": "CORE_CS2_023",
+       "count": 2
+      }
+     ],
+     "sideboards": []
+    }
+   }
+  },
+  {
+   "id": "npc-recipe-infinity-paladin",
+   "version": 1,
+   "name": "Infinity Paladin",
+   "class": "PALADIN",
+   "hero": "HERO_04",
+   "origin": "recipe:infinity-paladin",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 5,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54246/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAZ8FAonmBtedBw6cnwTunwStoASS1ASd1ASh1AS1ngbTngaGowbgnQftrAe/sgeY3Qe83QcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_292",
+     "count": 2
+    },
+    {
+     "id": "CORE_DMF_067",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_619",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_018",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_020",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_021",
+     "count": 2
+    },
+    {
+     "id": "CORE_TRL_307",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "JAIL_377",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_093",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_094",
+     "count": 2
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "END_012",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_952",
+     "count": 1
+    },
+    {
+     "id": "JAIL_326",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.5%, pilot headroom +258 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-infinity-paladin",
+    "rating": 1075.4,
+    "winRateVsField": 23.3,
+    "games": 42,
+    "fallbackRate": 0.005
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 23,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-equilibrium-quest-priest",
+   "version": 1,
+   "name": "Equilibrium Quest Priest",
+   "class": "PRIEST",
+   "hero": "HERO_09",
+   "origin": "recipe:equilibrium-quest-priest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 4,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/quest-priest-10-legend-unknown-score-6-4/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAa0GBMODB6iWB9edB9zgBw2FnwSG/QbFlAfkngfSrwebvweyxQevyQeT3wew3wfV4AfZ4Af04AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CATA_302",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS1_130",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_004",
+     "count": 2
+    },
+    {
+     "id": "JAIL_940",
+     "count": 2
+    },
+    {
+     "id": "TLC_817",
+     "count": 1
+    },
+    {
+     "id": "DINO_426",
+     "count": 2
+    },
+    {
+     "id": "EDR_463",
+     "count": 2
+    },
+    {
+     "id": "JAIL_941",
+     "count": 2
+    },
+    {
+     "id": "CAP_801",
+     "count": 2
+    },
+    {
+     "id": "CAP_804",
+     "count": 2
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "CAP_805",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "TLC_816",
+     "count": 2
+    },
+    {
+     "id": "CATA_308",
+     "count": 2
+    },
+    {
+     "id": "CAP_806",
+     "count": 1
+    },
+    {
+     "id": "JAIL_912",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +139 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-equilibrium-quest-priest",
+    "rating": 1150.0,
+    "winRateVsField": 36.7,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 38,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-medivh-imbue-priest",
+   "version": 1,
+   "name": "Medivh Imbue Priest",
+   "class": "PRIEST",
+   "hero": "HERO_09",
+   "origin": "recipe:medivh-imbue-priest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 1,
+    "pilotDifficulty": 4,
+    "annoyance": 2,
+    "fun": 4,
+    "bands": [
+     "platinum",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/control-priest-59-legend-unknown-score-6-4/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAa0GCqn1BsP/BsCPB6iWB/ypB4CqB4SqB5GuB4O/B5b8BwrwnwSg+wb3gQeFhgedrQfksgeixAeyxQevyQf04AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "TLC_817",
+     "count": 1
+    },
+    {
+     "id": "EDR_852",
+     "count": 2
+    },
+    {
+     "id": "EDR_449",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_311",
+     "count": 1
+    },
+    {
+     "id": "END_025",
+     "count": 2
+    },
+    {
+     "id": "EDR_571",
+     "count": 1
+    },
+    {
+     "id": "TIME_432",
+     "count": 2
+    },
+    {
+     "id": "EDR_970",
+     "count": 2
+    },
+    {
+     "id": "CATA_216",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_197",
+     "count": 2
+    },
+    {
+     "id": "CAP_805",
+     "count": 2
+    },
+    {
+     "id": "CATA_308",
+     "count": 2
+    },
+    {
+     "id": "EDR_476",
+     "count": 1
+    },
+    {
+     "id": "JAIL_912",
+     "count": 2
+    },
+    {
+     "id": "CATA_300",
+     "count": 1
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    },
+    {
+     "id": "TIME_890t",
+     "count": 1
+    },
+    {
+     "id": "TIME_890t2",
+     "count": 1
+    },
+    {
+     "id": "TIME_890",
+     "count": 1
+    },
+    {
+     "id": "TLC_835",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.5%, pilot headroom +442 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-medivh-imbue-priest",
+    "rating": 1453.0,
+    "winRateVsField": 83.3,
+    "games": 42,
+    "fallbackRate": 0.0053
+   },
+   "measured": {
+    "games": 3,
+    "autoWins": 1,
+    "liveWins": 2,
+    "fallbacks": 0,
+    "decisions": 145,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-aya-coin-rogue",
+   "version": 2,
+   "name": "Aya Coin Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "recipe:aya-coin-rogue",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 5,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/aya-rogue-64-legend-unknown-score-23-10/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAaIHCN/+BsODB4aoB4eoB4ioB+WvB6XYB4jZBwuRnwT3nwTZogaQgwfBlwe0wQfFwQfVxQek2AeR2QeN2gcAAA==",
+    "changes": "",
+    "restored": "2026-10-29: published list restored; the swapped-out event cards are in the Violet Hold pool and every player owns them from the welcome gift. Was: 2x Deadly Bribe (CATA_EVENT_402) replaced by 2x Assassinate (CORE_CS2_076): EVENT unsupported; Assassinate keeps unconditional minion removal but does not give a Coin"
+   },
+   "cards": [
+    {
+     "id": "CORE_CS2_072",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_145",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "CATA_200",
+     "count": 2
+    },
+    {
+     "id": "EDR_528",
+     "count": 2
+    },
+    {
+     "id": "CATA_203",
+     "count": 2
+    },
+    {
+     "id": "CATA_785",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_129",
+     "count": 2
+    },
+    {
+     "id": "JAIL_720",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t1",
+     "count": 1
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "JAIL_503",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "TIME_875",
+     "count": 1
+    },
+    {
+     "id": "TIME_713",
+     "count": 1
+    },
+    {
+     "id": "JAIL_504",
+     "count": 1
+    },
+    {
+     "id": "EDR_527",
+     "count": 1
+    },
+    {
+     "id": "CATA_EVENT_402",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +211 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-aya-coin-rogue",
+    "rating": 1028.1,
+    "winRateVsField": 20.0,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 44,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-sneaky-herald-rogue",
+   "version": 1,
+   "name": "Sneaky Herald Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "recipe:sneaky-herald-rogue",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/sneaky-herald-rogue-55-legend-unknown-score-8-5/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAaIHDKGBB5KDB4KYB+ylB4aoB4eoB4ioB9C/B4rUB5vUB4jZB9DgBwn3nwTBlwe0wQfAwQedxQfVxQej4AfO4AfD8gcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_145",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "CATA_200",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_701",
+     "count": 2
+    },
+    {
+     "id": "CAP_003",
+     "count": 2
+    },
+    {
+     "id": "CATA_785",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t1",
+     "count": 1
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "CAP_000",
+     "count": 2
+    },
+    {
+     "id": "CATA_158",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t",
+     "count": 1
+    },
+    {
+     "id": "CAP_005",
+     "count": 1
+    },
+    {
+     "id": "TIME_875",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "CATA_154",
+     "count": 1
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "TLC_522",
+     "count": 1
+    },
+    {
+     "id": "EDR_844",
+     "count": 1
+    },
+    {
+     "id": "EDR_846",
+     "count": 1
+    },
+    {
+     "id": "CATA_201",
+     "count": 2
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.2%, pilot headroom +409 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-sneaky-herald-rogue",
+    "rating": 1339.0,
+    "winRateVsField": 56.7,
+    "games": 42,
+    "fallbackRate": 0.0019
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 35,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-mug-shaman",
+   "version": 2,
+   "name": "Mug Shaman",
+   "class": "SHAMAN",
+   "hero": "HERO_02",
+   "origin": "recipe:mug-shaman",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/mug-shaman-3-legend-unknown-score-12-5/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAaoIAtDbB9/lBw6vnwTRmwfQnQfwqgf8rQe8sQfLtgfDwAfTwAfH2wfK2wfN2wfa3wfg9gcAAA==",
+    "changes": "",
+    "restored": "2026-10-29: published list restored; the swapped-out event cards are in the Violet Hold pool and every player owns them from the welcome gift. Was: 2x Sands of Time (TIME_EVENT_999) replaced by 2x Far Sight (CORE_CS2_053): EVENT unsupported; Far Sight supplies discounted resources but not Rewind or Discover"
+   },
+   "cards": [
+    {
+     "id": "TIME_218",
+     "count": 2
+    },
+    {
+     "id": "CORE_GIL_836",
+     "count": 2
+    },
+    {
+     "id": "JAIL_987",
+     "count": 2
+    },
+    {
+     "id": "TLC_464",
+     "count": 2
+    },
+    {
+     "id": "CAP_407",
+     "count": 2
+    },
+    {
+     "id": "CATA_561",
+     "count": 2
+    },
+    {
+     "id": "TIME_215",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_246",
+     "count": 2
+    },
+    {
+     "id": "DINO_406",
+     "count": 2
+    },
+    {
+     "id": "JAIL_801",
+     "count": 2
+    },
+    {
+     "id": "CATA_567",
+     "count": 2
+    },
+    {
+     "id": "JAIL_458",
+     "count": 1
+    },
+    {
+     "id": "JAIL_803",
+     "count": 2
+    },
+    {
+     "id": "JAIL_800",
+     "count": 1
+    },
+    {
+     "id": "JAIL_805",
+     "count": 2
+    },
+    {
+     "id": "TIME_EVENT_999",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 2.7%, pilot headroom +412 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-mug-shaman",
+    "rating": 1292.3,
+    "winRateVsField": 53.3,
+    "games": 42,
+    "fallbackRate": 0.0273
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 28,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-zee-herald-shaman",
+   "version": 1,
+   "name": "Zee Herald Shaman",
+   "class": "SHAMAN",
+   "hero": "HERO_02",
+   "origin": "recipe:zee-herald-shaman",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/zee-shaman-19-legend-unknown-score-18-9/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAaoICs6eBsODB9C/B/nDB4LUB5vUB8/bB9DbB4jdB9/lBwqe1ATt5gbgnQexsAePvge1wAfJwAfJ2wfI5Qfm/QcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CORE_GIL_531",
+     "count": 2
+    },
+    {
+     "id": "CORE_ULD_191",
+     "count": 2
+    },
+    {
+     "id": "CATA_556",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_809",
+     "count": 2
+    },
+    {
+     "id": "CORE_WC_042",
+     "count": 2
+    },
+    {
+     "id": "JAIL_802",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "CATA_614",
+     "count": 1
+    },
+    {
+     "id": "CATA_565",
+     "count": 2
+    },
+    {
+     "id": "JAIL_850",
+     "count": 1
+    },
+    {
+     "id": "JAIL_457",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "CORE_SW_066",
+     "count": 1
+    },
+    {
+     "id": "JAIL_458",
+     "count": 1
+    },
+    {
+     "id": "CATA_722",
+     "count": 2
+    },
+    {
+     "id": "JAIL_806",
+     "count": 1
+    },
+    {
+     "id": "JAIL_800",
+     "count": 1
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "CATA_153",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.1%, pilot headroom +131 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-zee-herald-shaman",
+    "rating": 1438.7,
+    "winRateVsField": 80.0,
+    "games": 42,
+    "fallbackRate": 0.0013
+   },
+   "measured": {
+    "games": 2,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 67,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-egg-warlock",
+   "version": 1,
+   "name": "Egg Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "recipe:egg-warlock",
+   "admission": "rejected",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 5,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54283/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAf0GAvWYB9edBw6PnwTnoATrhAepiAeEmQfenQfgnQfhnQeTvgfXvgfYvgfgvgfa1we06AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "TLC_451",
+     "count": 2
+    },
+    {
+     "id": "FIR_954",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "CATA_725",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "EDR_491",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "JAIL_461",
+     "count": 2
+    },
+    {
+     "id": "JAIL_998",
+     "count": 2
+    },
+    {
+     "id": "CATA_492",
+     "count": 2
+    },
+    {
+     "id": "DINO_131",
+     "count": 2
+    },
+    {
+     "id": "CATA_491",
+     "count": 2
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "DINO_132",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: win rate 9.5% (unplayable by the strong pilot)",
+   "admissionStats": {
+    "harnessId": "cand-recipe-egg-warlock",
+    "rating": 886.4,
+    "winRateVsField": 13.3,
+    "games": 42,
+    "fallbackRate": 0.0149
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 44,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-herald-warlock",
+   "version": 1,
+   "name": "Herald Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "recipe:herald-warlock",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/herald-warlock-12-legend-unknown-score-10-3/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAf0GBoSZB9C/B5vUB63ZB47cB9vgBwyPnwTnoATRngbTngaTvgfYvgfgvgfd1wew2Qex2Qe32QeN3AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "TLC_451",
+     "count": 1
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "CATA_725",
+     "count": 2
+    },
+    {
+     "id": "CORE_CFM_790",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "JAIL_515",
+     "count": 1
+    },
+    {
+     "id": "CAP_405",
+     "count": 1
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "JAIL_399",
+     "count": 2
+    },
+    {
+     "id": "JAIL_513",
+     "count": 2
+    },
+    {
+     "id": "CATA_492",
+     "count": 2
+    },
+    {
+     "id": "JAIL_509",
+     "count": 1
+    },
+    {
+     "id": "JAIL_511",
+     "count": 2
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "JAIL_510",
+     "count": 2
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    },
+    {
+     "id": "JAIL_514",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report fix (1 engine exception(s) in 72 games (System.ArgumentException:) resolved by fix/cursed-catacombs@894e6984; wp1 re-measured clean (6 games)",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-herald-warlock",
+    "rating": 1213.6,
+    "winRateVsField": 43.3,
+    "games": 42,
+    "fallbackRate": 0.0029
+   },
+   "measured": {
+    "games": 3,
+    "autoWins": 2,
+    "liveWins": 2,
+    "fallbacks": 0,
+    "decisions": 101,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-rafaam-warlock",
+   "version": 1,
+   "name": "Timethief Rafaam",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "recipe:rafaam-warlock",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "outof.games",
+    "url": "https://outof.games/realms/hearthstone/decks/53736/",
+    "accessed": "2026-10-28",
+    "deckCode": "AAECAf0GEIOgBIKYB4ilB4mlB4qlB5GlB5OlB5SlB5WlB5alB5elB5qlB6qtB5vUB63ZB9vgBwyPnwTnoATTngaEmQeTvgfYvgfgvgfd1wew2Qex2Qe32QeN3AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "CAP_405",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    },
+    {
+     "id": "CATA_492",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "CATA_725",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_312",
+     "count": 1
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "JAIL_399",
+     "count": 2
+    },
+    {
+     "id": "JAIL_509",
+     "count": 1
+    },
+    {
+     "id": "JAIL_510",
+     "count": 2
+    },
+    {
+     "id": "JAIL_511",
+     "count": 2
+    },
+    {
+     "id": "JAIL_513",
+     "count": 2
+    },
+    {
+     "id": "JAIL_514",
+     "count": 2
+    },
+    {
+     "id": "TIME_005",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t2",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t3",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t4",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t5",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t6",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t7",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t8",
+     "count": 1
+    },
+    {
+     "id": "TIME_005t9",
+     "count": 1
+    },
+    {
+     "id": "TIME_031",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "TLC_451",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (30 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 15,
+    "autoWins": 10,
+    "liveWins": 5,
+    "fallbacks": 0,
+    "decisions": 681,
+    "unfinished": 0,
+    "verified": true
+   }
+  },
+  {
+   "id": "npc-recipe-cannon-pirate-warrior",
+   "version": 1,
+   "name": "Cannon Pirate Warrior",
+   "class": "WARRIOR",
+   "hero": "HERO_01",
+   "origin": "recipe:cannon-pirate-warrior",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 1,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "platinum",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/pirate-warrior-243-legend-unknown-score-16-6/",
+    "accessed": "2026-10-24",
+    "deckCode": "AAECAQcE0LIH69YHstgHq+AHDaWFB8eHB+iHB5XCB5vCB5zCB6XgB6bgB6fgB6jgB6ngB/DgB/vgBwAA"
+   },
+   "cards": [
+    {
+     "id": "CAP_107",
+     "count": 2
+    },
+    {
+     "id": "END_020",
+     "count": 1
+    },
+    {
+     "id": "CAP_101",
+     "count": 2
+    },
+    {
+     "id": "CORE_DRG_024",
+     "count": 2
+    },
+    {
+     "id": "CATA_585",
+     "count": 2
+    },
+    {
+     "id": "CAP_104",
+     "count": 2
+    },
+    {
+     "id": "CAP_105",
+     "count": 2
+    },
+    {
+     "id": "FIR_929",
+     "count": 2
+    },
+    {
+     "id": "CATA_582",
+     "count": 2
+    },
+    {
+     "id": "FIR_939",
+     "count": 2
+    },
+    {
+     "id": "CATA_584",
+     "count": 2
+    },
+    {
+     "id": "CAP_103",
+     "count": 2
+    },
+    {
+     "id": "CAP_102",
+     "count": 2
+    },
+    {
+     "id": "EDR_492",
+     "count": 2
+    },
+    {
+     "id": "JAIL_421",
+     "count": 1
+    },
+    {
+     "id": "CAP_106",
+     "count": 1
+    },
+    {
+     "id": "JAIL_384",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +385 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-recipe-cannon-pirate-warrior",
+    "rating": 1517.5,
+    "winRateVsField": 80.0,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 33,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-recipe-drake-warlock",
+   "version": 1,
+   "name": "Drake Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "recipe:drake-warlock",
+   "admission": "pending",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net / Firestone",
+    "url": "https://hearthstone-decks.net/drake-warlock-90-legend-unknown-score-14-4/",
+    "accessed": "2026-10-29",
+    "deckCode": "AAECAf0GBoadB5mxB63ZB9vgB7roB4TpBwyPnwTnoATTngaEmQeqrQfQsgeTvgfgvgex2Qe32QeN3AeO3AcAAA=="
+   },
+   "cards": [
+    {
+     "id": "DINO_402",
+     "count": 1
+    },
+    {
+     "id": "TIME_064",
+     "count": 1
+    },
+    {
+     "id": "JAIL_509",
+     "count": 1
+    },
+    {
+     "id": "CAP_405",
+     "count": 1
+    },
+    {
+     "id": "CATA_999",
+     "count": 1
+    },
+    {
+     "id": "BE_036",
+     "count": 1
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "TLC_451",
+     "count": 2
+    },
+    {
+     "id": "TIME_031",
+     "count": 2
+    },
+    {
+     "id": "END_020",
+     "count": 2
+    },
+    {
+     "id": "CATA_725",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "JAIL_511",
+     "count": 2
+    },
+    {
+     "id": "JAIL_513",
+     "count": 2
+    },
+    {
+     "id": "JAIL_514",
+     "count": 2
+    },
+    {
+     "id": "JAIL_515",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "ready candidate, not in this batch: passes admission checks; elite win rate 36 [31, 41] against the average of 36 tested decks (fails the Legend filter). Kept in the file because the Legend filter field uses it.",
+   "pilot": "auto"
+  },
+  {
+   "id": "npc-unholy-death-knight",
+   "version": 1,
+   "name": "Unholy Death Knight",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "candidate:cand-doc-unholy-death-knight",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 5,
+    "pilotDifficulty": 2,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/unholy-death-knight-6-legend-unknown-score-15-7/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A1"
+   },
+   "cards": [
+    {
+     "id": "CORE_UNG_205",
+     "count": 1
+    },
+    {
+     "id": "CORE_ULD_723",
+     "count": 2
+    },
+    {
+     "id": "DINO_417",
+     "count": 2
+    },
+    {
+     "id": "CATA_210",
+     "count": 2
+    },
+    {
+     "id": "TLC_245",
+     "count": 2
+    },
+    {
+     "id": "CATA_467",
+     "count": 1
+    },
+    {
+     "id": "JAIL_450",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 1
+    },
+    {
+     "id": "JAIL_850",
+     "count": 1
+    },
+    {
+     "id": "RLK_708",
+     "count": 2
+    },
+    {
+     "id": "TLC_443",
+     "count": 2
+    },
+    {
+     "id": "RLK_707",
+     "count": 2
+    },
+    {
+     "id": "JAIL_440",
+     "count": 2
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "JAIL_444",
+     "count": 2
+    },
+    {
+     "id": "CATA_471",
+     "count": 2
+    },
+    {
+     "id": "END_004",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +45 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-unholy-death-knight",
+    "rating": 925.2,
+    "winRateVsField": 13.3,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 47,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-void-soul-demon-hunter",
+   "version": 1,
+   "name": "Void Soul Demon Hunter",
+   "class": "DEMONHUNTER",
+   "hero": "HERO_10",
+   "origin": "candidate:cand-doc-void-soul-demon-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 1,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "platinum",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/void-soul-demon-hunter-5-legend-unknown-score-8-4/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A2"
+   },
+   "cards": [
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CORE_YOP_001",
+     "count": 2
+    },
+    {
+     "id": "CATA_528",
+     "count": 2
+    },
+    {
+     "id": "TLC_249",
+     "count": 2
+    },
+    {
+     "id": "TIME_444",
+     "count": 1
+    },
+    {
+     "id": "JAIL_732",
+     "count": 2
+    },
+    {
+     "id": "JAIL_892",
+     "count": 2
+    },
+    {
+     "id": "CORE_SCH_713",
+     "count": 2
+    },
+    {
+     "id": "EDR_840",
+     "count": 2
+    },
+    {
+     "id": "TLC_902",
+     "count": 2
+    },
+    {
+     "id": "JAIL_891",
+     "count": 2
+    },
+    {
+     "id": "JAIL_733",
+     "count": 2
+    },
+    {
+     "id": "EDR_820",
+     "count": 1
+    },
+    {
+     "id": "DINO_136",
+     "count": 2
+    },
+    {
+     "id": "JAIL_719",
+     "count": 1
+    },
+    {
+     "id": "CORE_BT_187",
+     "count": 1
+    },
+    {
+     "id": "JAIL_730",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +477 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-void-soul-demon-hunter",
+    "rating": 1488.0,
+    "winRateVsField": 86.7,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 44,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-chef-druid",
+   "version": 1,
+   "name": "Chef Druid",
+   "class": "DRUID",
+   "hero": "HERO_06",
+   "origin": "candidate:cand-doc-chef-druid",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/chef-druid-355-legend-unknown-score-15-10/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A9"
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_169",
+     "count": 2
+    },
+    {
+     "id": "CATA_136",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "Core_LOE_115",
+     "count": 1
+    },
+    {
+     "id": "JAIL_202",
+     "count": 2
+    },
+    {
+     "id": "TIME_701",
+     "count": 2
+    },
+    {
+     "id": "CORE_SCH_713",
+     "count": 2
+    },
+    {
+     "id": "TIME_702",
+     "count": 2
+    },
+    {
+     "id": "EDR_270",
+     "count": 2
+    },
+    {
+     "id": "CATA_135",
+     "count": 2
+    },
+    {
+     "id": "END_007",
+     "count": 2
+    },
+    {
+     "id": "JAIL_872",
+     "count": 2
+    },
+    {
+     "id": "CAP_407",
+     "count": 2
+    },
+    {
+     "id": "JAIL_860",
+     "count": 1
+    },
+    {
+     "id": "JAIL_866",
+     "count": 2
+    },
+    {
+     "id": "JAIL_507",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.9%, pilot headroom +190 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-chef-druid",
+    "rating": 1294.6,
+    "winRateVsField": 53.3,
+    "games": 42,
+    "fallbackRate": 0.0086
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 47,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-token-druid",
+   "version": 1,
+   "name": "Token Druid",
+   "class": "DRUID",
+   "hero": "HERO_06",
+   "origin": "candidate:cand-doc-token-druid",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 4,
+    "pilotDifficulty": 2,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/token-druid-4-legend-unknown-score-21-12/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A3"
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_169",
+     "count": 2
+    },
+    {
+     "id": "CORE_AT_037",
+     "count": 2
+    },
+    {
+     "id": "TLC_603",
+     "count": 2
+    },
+    {
+     "id": "CATA_210",
+     "count": 2
+    },
+    {
+     "id": "TIME_701",
+     "count": 2
+    },
+    {
+     "id": "END_011",
+     "count": 1
+    },
+    {
+     "id": "CATA_131",
+     "count": 2
+    },
+    {
+     "id": "EDR_270",
+     "count": 2
+    },
+    {
+     "id": "DINO_130",
+     "count": 1
+    },
+    {
+     "id": "TLC_232",
+     "count": 2
+    },
+    {
+     "id": "CATA_138",
+     "count": 2
+    },
+    {
+     "id": "TLC_233",
+     "count": 2
+    },
+    {
+     "id": "FIR_906",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "DINO_432",
+     "count": 1
+    },
+    {
+     "id": "FIR_907",
+     "count": 1
+    },
+    {
+     "id": "CATA_139",
+     "count": 1
+    },
+    {
+     "id": "MEND_046",
+     "count": 1
+    },
+    {
+     "id": "JAIL_407",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.0%, pilot headroom +251 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-token-druid",
+    "rating": 1181.2,
+    "winRateVsField": 36.7,
+    "games": 42,
+    "fallbackRate": 0.0
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 49,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-companion-hunter",
+   "version": 1,
+   "name": "Companion Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "candidate:cand-doc-companion-hunter",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/companion-hunter-280-legend-unknown-score-10-7/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A4"
+   },
+   "cards": [
+    {
+     "id": "CATA_554",
+     "count": 2
+    },
+    {
+     "id": "MEND_300",
+     "count": 2
+    },
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_801",
+     "count": 2
+    },
+    {
+     "id": "JAIL_030",
+     "count": 2
+    },
+    {
+     "id": "MEND_303",
+     "count": 2
+    },
+    {
+     "id": "CATA_557",
+     "count": 2
+    },
+    {
+     "id": "JAIL_877",
+     "count": 2
+    },
+    {
+     "id": "TIME_609t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_609",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t2",
+     "count": 1
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "MEND_301",
+     "count": 2
+    },
+    {
+     "id": "MEND_304",
+     "count": 1
+    },
+    {
+     "id": "JAIL_831",
+     "count": 1
+    },
+    {
+     "id": "MEND_307",
+     "count": 2
+    },
+    {
+     "id": "CORE_OG_211",
+     "count": 2
+    },
+    {
+     "id": "EDR_480",
+     "count": 1
+    },
+    {
+     "id": "EDR_453",
+     "count": 1
+    }
+   ],
+   "sideboards": [
+    {
+     "owner": "JAIL_831",
+     "cards": [
+      {
+       "id": "EDR_259",
+       "count": 1
+      },
+      {
+       "id": "EDR_489",
+       "count": 1
+      },
+      {
+       "id": "EDR_471",
+       "count": 1
+      }
+     ]
+    }
+   ],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.4%, pilot headroom +221 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-companion-hunter",
+    "rating": 1296.8,
+    "winRateVsField": 53.3,
+    "games": 42,
+    "fallbackRate": 0.0039
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 34,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-elemental-mage",
+   "version": 1,
+   "name": "Elemental Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "candidate:cand-doc-elemental-mage",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://www.hearthpwn.com/decks/1465436-elemental-mage",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A5"
+   },
+   "cards": [
+    {
+     "id": "TLC_249",
+     "count": 2
+    },
+    {
+     "id": "CORE_DRG_107",
+     "count": 2
+    },
+    {
+     "id": "JAIL_312",
+     "count": 2
+    },
+    {
+     "id": "FIR_929",
+     "count": 2
+    },
+    {
+     "id": "CATA_487",
+     "count": 2
+    },
+    {
+     "id": "FIR_911",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_023",
+     "count": 2
+    },
+    {
+     "id": "TLC_226",
+     "count": 2
+    },
+    {
+     "id": "END_025",
+     "count": 2
+    },
+    {
+     "id": "FIR_913",
+     "count": 2
+    },
+    {
+     "id": "DINO_429",
+     "count": 2
+    },
+    {
+     "id": "CATA_483",
+     "count": 2
+    },
+    {
+     "id": "TLC_220",
+     "count": 2
+    },
+    {
+     "id": "TLC_110",
+     "count": 1
+    },
+    {
+     "id": "TIME_858",
+     "count": 2
+    },
+    {
+     "id": "CATA_488",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 1.9%, pilot headroom +501 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-elemental-mage",
+    "rating": 1318.5,
+    "winRateVsField": 60.0,
+    "games": 42,
+    "fallbackRate": 0.0194
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 17,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-two-bit-rogue",
+   "version": 1,
+   "name": "Two-Bit Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "candidate:cand-doc-two-bit-rogue",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 3,
+    "bands": [
+     "silver",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "candidate",
+    "url": "https://hearthstone-decks.net/two-bit-rogue-470-legend-unknown-score-10-7/",
+    "accessed": "2026-10-24",
+    "changes": "docs/decks/npc-candidates-batch-2-2026-10-24.md#A7"
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_145",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "JAIL_501",
+     "count": 1
+    },
+    {
+     "id": "EDR_852",
+     "count": 2
+    },
+    {
+     "id": "CORE_SCH_713",
+     "count": 1
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_021",
+     "count": 1
+    },
+    {
+     "id": "JAIL_030",
+     "count": 2
+    },
+    {
+     "id": "END_000",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_129",
+     "count": 2
+    },
+    {
+     "id": "TIME_711",
+     "count": 1
+    },
+    {
+     "id": "JAIL_720",
+     "count": 2
+    },
+    {
+     "id": "CATA_785",
+     "count": 2
+    },
+    {
+     "id": "CATA_614",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_875t",
+     "count": 1
+    },
+    {
+     "id": "JAIL_470",
+     "count": 2
+    },
+    {
+     "id": "TIME_875",
+     "count": 1
+    },
+    {
+     "id": "JAIL_474",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "admission-report: clean: 0 engine errors, stalls 0, fallbacks 0.3%, pilot headroom +206 Elo",
+   "pilot": "auto",
+   "admissionStats": {
+    "harnessId": "cand-doc-two-bit-rogue",
+    "rating": 1310.6,
+    "winRateVsField": 56.7,
+    "games": 42,
+    "fallbackRate": 0.003
+   },
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 52,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "fun",
+    "annoyance"
+   ]
+  },
+  {
+   "id": "npc-death-knight-aggro",
+   "version": 1,
+   "name": "Raptor Corpse Aggro",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "batch-3:npc-death-knight-aggro",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 3,
+    "pilotDifficulty": 2,
+    "annoyance": 1,
+    "fun": 2,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53603",
+    "accessed": "2026-09-11",
+    "deckCode": "AAECAfHhBAAPkeQEh/YEsvcE1J4GyIwHr5UHupUHopcH0JsH0q0HubEHiL8H/78HrNoHptwHAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "RLK_503",
+     "count": 2
+    },
+    {
+     "id": "EDR_816",
+     "count": 2
+    },
+    {
+     "id": "CORE_ULD_723",
+     "count": 2
+    },
+    {
+     "id": "TLC_245",
+     "count": 2
+    },
+    {
+     "id": "RLK_061",
+     "count": 2
+    },
+    {
+     "id": "JAIL_450",
+     "count": 2
+    },
+    {
+     "id": "RLK_708",
+     "count": 2
+    },
+    {
+     "id": "TLC_443",
+     "count": 2
+    },
+    {
+     "id": "TIME_617",
+     "count": 2
+    },
+    {
+     "id": "TLC_432",
+     "count": 2
+    },
+    {
+     "id": "JAIL_440",
+     "count": 2
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "CATA_471",
+     "count": 2
+    },
+    {
+     "id": "TIME_610",
+     "count": 2
+    },
+    {
+     "id": "CATA_465",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 29,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-death-knight-bwonsamdi",
+   "version": 1,
+   "name": "Bwonsamdi Deathrattle DK",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "batch-3:npc-death-knight-bwonsamdi",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 5,
+    "bands": [
+     "silver",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53022",
+    "accessed": "2026-08-25",
+    "deckCode": "AAECAfHhBAjDgweyigftnwf3qgf7qgf8qges2ged2wcLodQEh/YEzp4Ggf0Gl4IHvJQHupUHkasH0q0H+cMHptwHAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "EDR_813",
+     "count": 2
+    },
+    {
+     "id": "JAIL_450",
+     "count": 2
+    },
+    {
+     "id": "EDR_814",
+     "count": 2
+    },
+    {
+     "id": "CORE_EDR_002",
+     "count": 2
+    },
+    {
+     "id": "CATA_614",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_020",
+     "count": 2
+    },
+    {
+     "id": "RLK_708",
+     "count": 2
+    },
+    {
+     "id": "CORE_EDR_003",
+     "count": 1
+    },
+    {
+     "id": "TIME_619t2",
+     "count": 1
+    },
+    {
+     "id": "JAIL_446",
+     "count": 1
+    },
+    {
+     "id": "TIME_616",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "CORE_SW_066",
+     "count": 2
+    },
+    {
+     "id": "TIME_619",
+     "count": 1
+    },
+    {
+     "id": "JAIL_440",
+     "count": 1
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "TIME_619t",
+     "count": 1
+    },
+    {
+     "id": "TIME_610",
+     "count": 2
+    },
+    {
+     "id": "EDR_819",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 61,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-death-knight-thalena",
+   "version": 1,
+   "name": "Thal'ena Corpse Value DK",
+   "class": "DEATHKNIGHT",
+   "hero": "HERO_11",
+   "origin": "batch-3:npc-death-knight-thalena",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53620",
+    "accessed": "2026-09-12",
+    "deckCode": "AAECAfHhBALtnwed2wcO1+UG94EHl4IHwIcHupUHn54H4rEHt7MH/78HrNoHrtoHtNoHptwHv98HAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "EDR_813",
+     "count": 2
+    },
+    {
+     "id": "DINO_417",
+     "count": 2
+    },
+    {
+     "id": "EDR_852",
+     "count": 2
+    },
+    {
+     "id": "JAIL_450",
+     "count": 2
+    },
+    {
+     "id": "JAIL_441",
+     "count": 2
+    },
+    {
+     "id": "CORE_EDR_003",
+     "count": 1
+    },
+    {
+     "id": "END_003",
+     "count": 2
+    },
+    {
+     "id": "FIR_921",
+     "count": 2
+    },
+    {
+     "id": "JAIL_446",
+     "count": 1
+    },
+    {
+     "id": "CORE_RLK_062",
+     "count": 2
+    },
+    {
+     "id": "JAIL_440",
+     "count": 2
+    },
+    {
+     "id": "JAIL_454",
+     "count": 2
+    },
+    {
+     "id": "TLC_436",
+     "count": 2
+    },
+    {
+     "id": "JAIL_444",
+     "count": 2
+    },
+    {
+     "id": "CATA_471",
+     "count": 2
+    },
+    {
+     "id": "END_004",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 57,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-demon-hunter-quest",
+   "version": 1,
+   "name": "Colossus Quest Demon Hunter",
+   "class": "DEMONHUNTER",
+   "hero": "HERO_10",
+   "origin": "batch-3:npc-demon-hunter-quest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "silver",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/52867",
+    "accessed": "2026-08-20",
+    "deckCode": "AAECAea5AwbvmAeKqgeSqgeTqgeUvweD2gcM7KAE4fgF3v8G/oMHrIcHtpcHtZgH7ZgH550Hkr8Hlb8Ht+EHAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TIME_020t2",
+     "count": 1
+    },
+    {
+     "id": "CORE_YOP_001",
+     "count": 2
+    },
+    {
+     "id": "CATA_528",
+     "count": 2
+    },
+    {
+     "id": "TLC_631",
+     "count": 1
+    },
+    {
+     "id": "TIME_020",
+     "count": 1
+    },
+    {
+     "id": "CATA_526",
+     "count": 2
+    },
+    {
+     "id": "JAIL_892",
+     "count": 2
+    },
+    {
+     "id": "FIR_904",
+     "count": 2
+    },
+    {
+     "id": "EDR_840",
+     "count": 2
+    },
+    {
+     "id": "TLC_902",
+     "count": 2
+    },
+    {
+     "id": "TIME_020t1",
+     "count": 1
+    },
+    {
+     "id": "CORE_BT_801",
+     "count": 2
+    },
+    {
+     "id": "TLC_833",
+     "count": 2
+    },
+    {
+     "id": "CATA_527",
+     "count": 1
+    },
+    {
+     "id": "EDR_820",
+     "count": 2
+    },
+    {
+     "id": "DINO_136",
+     "count": 2
+    },
+    {
+     "id": "JAIL_719",
+     "count": 1
+    },
+    {
+     "id": "TLC_630",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 126,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-demon-hunter-raza",
+   "version": 1,
+   "name": "Broxigar Raza Demon Hunter",
+   "class": "DEMONHUNTER",
+   "hero": "HERO_10",
+   "origin": "batch-3:npc-demon-hunter-raza",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 2,
+    "fun": 2,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-09-28",
+    "deckCode": "AAECAea5AwSKqgeSqgeTqgfosQcN4fgFzZ4Gzp4G054G3v8GtpcH4rEHkrIHkr8Hlb8H5eQHk+gHpvgHAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TIME_020t2",
+     "count": 1
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CORE_YOP_001",
+     "count": 2
+    },
+    {
+     "id": "CATA_528",
+     "count": 2
+    },
+    {
+     "id": "TIME_020",
+     "count": 1
+    },
+    {
+     "id": "CATA_526",
+     "count": 2
+    },
+    {
+     "id": "JAIL_206",
+     "count": 2
+    },
+    {
+     "id": "EDR_840",
+     "count": 2
+    },
+    {
+     "id": "TLC_902",
+     "count": 2
+    },
+    {
+     "id": "END_007",
+     "count": 1
+    },
+    {
+     "id": "JAIL_EVENT_101",
+     "count": 2
+    },
+    {
+     "id": "TIME_020t1",
+     "count": 1
+    },
+    {
+     "id": "END_008",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_072",
+     "count": 2
+    },
+    {
+     "id": "CORE_TTN_843",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_066",
+     "count": 2
+    },
+    {
+     "id": "END_004",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 72,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-druid-azshara",
+   "version": 1,
+   "name": "Azshara Ramp Druid",
+   "class": "DRUID",
+   "hero": "HERO_06",
+   "origin": "batch-3:npc-druid-azshara",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54100",
+    "accessed": "2026-10-04",
+    "deckCode": "AAECAZICDKn1BqX8BpKDB8ODB6+HB4KYB/ioB/moB/qoB+DAB+XEB6PaBwmunwShiQeqrwesrwfosQe4sge+sgfXwAeT8QcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_169",
+     "count": 2
+    },
+    {
+     "id": "TIME_701",
+     "count": 2
+    },
+    {
+     "id": "END_011",
+     "count": 2
+    },
+    {
+     "id": "TIME_702",
+     "count": 2
+    },
+    {
+     "id": "CATA_131",
+     "count": 2
+    },
+    {
+     "id": "END_007",
+     "count": 2
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "JAIL_875",
+     "count": 1
+    },
+    {
+     "id": "TIME_211t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_211t2",
+     "count": 1
+    },
+    {
+     "id": "FIR_907",
+     "count": 1
+    },
+    {
+     "id": "TIME_211",
+     "count": 1
+    },
+    {
+     "id": "EDR_272",
+     "count": 2
+    },
+    {
+     "id": "END_010",
+     "count": 2
+    },
+    {
+     "id": "CATA_139",
+     "count": 1
+    },
+    {
+     "id": "MEND_046",
+     "count": 1
+    },
+    {
+     "id": "CORE_RLK_657",
+     "count": 2
+    },
+    {
+     "id": "EDR_846",
+     "count": 1
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    },
+    {
+     "id": "EDR_453",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 22,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-hunter-face",
+   "version": 1,
+   "name": "Tripwire Face Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "batch-3:npc-hunter-face",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 4,
+    "pilotDifficulty": 2,
+    "annoyance": 1,
+    "fun": 2,
+    "bands": [
+     "bronze",
+     "silver"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-09-06",
+    "deckCode": "AAECAR8E054GmacHmqcHm6cHDamfBK+SB86bB5CnB5inB9SvB4PAB7TAB7nAB6zYB9faB9PbB9fbBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CATA_554",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 1
+    },
+    {
+     "id": "TIME_606",
+     "count": 2
+    },
+    {
+     "id": "CATA_558",
+     "count": 2
+    },
+    {
+     "id": "TLC_249",
+     "count": 2
+    },
+    {
+     "id": "JAIL_380",
+     "count": 2
+    },
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_801",
+     "count": 2
+    },
+    {
+     "id": "TIME_601",
+     "count": 2
+    },
+    {
+     "id": "TIME_600",
+     "count": 2
+    },
+    {
+     "id": "CATA_557",
+     "count": 2
+    },
+    {
+     "id": "JAIL_877",
+     "count": 2
+    },
+    {
+     "id": "JAIL_881",
+     "count": 2
+    },
+    {
+     "id": "TIME_609t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_609",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t2",
+     "count": 1
+    },
+    {
+     "id": "JAIL_879",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 26,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-hunter-magmaw",
+   "version": 1,
+   "name": "Colossal Magmaw Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "batch-3:npc-hunter-magmaw",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 5,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53912",
+    "accessed": "2026-09-25",
+    "deckCode": "AAECAR8GzpsHmacHmqcHm6cH8b8H2dsHDKmfBM6eBuyCB9eXB9CbB+6fB7TAB6zYB9baB9faB9vaB9PbBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TLC_603",
+     "count": 2
+    },
+    {
+     "id": "DINO_434",
+     "count": 2
+    },
+    {
+     "id": "TLC_249",
+     "count": 1
+    },
+    {
+     "id": "JAIL_380",
+     "count": 2
+    },
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "TLC_245",
+     "count": 2
+    },
+    {
+     "id": "JAIL_878",
+     "count": 2
+    },
+    {
+     "id": "CATA_557",
+     "count": 2
+    },
+    {
+     "id": "JAIL_877",
+     "count": 2
+    },
+    {
+     "id": "EDR_261",
+     "count": 2
+    },
+    {
+     "id": "JAIL_882",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_609",
+     "count": 1
+    },
+    {
+     "id": "TIME_609t2",
+     "count": 1
+    },
+    {
+     "id": "JAIL_879",
+     "count": 2
+    },
+    {
+     "id": "JAIL_876",
+     "count": 2
+    },
+    {
+     "id": "CORE_SW_066",
+     "count": 2
+    },
+    {
+     "id": "CATA_550",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 24,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-hunter-quest",
+   "version": 1,
+   "name": "Food Chain Quest Hunter",
+   "class": "HUNTER",
+   "hero": "HERO_05",
+   "origin": "batch-3:npc-hunter-quest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53839",
+    "accessed": "2026-09-22",
+    "deckCode": "AAEBAR8ImKAEpfwGrIgHqJcHhLEHwbIHg8AHp/cHC6mfBOD4Ba+SB8yWB96WB9+WB9eXB/2bB8iuB/qwB9vaBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CATA_554",
+     "count": 1
+    },
+    {
+     "id": "CORE_UNG_912",
+     "count": 2
+    },
+    {
+     "id": "TIME_058",
+     "count": 1
+    },
+    {
+     "id": "TLC_603",
+     "count": 2
+    },
+    {
+     "id": "TLC_EVENT_400",
+     "count": 2
+    },
+    {
+     "id": "TLC_830",
+     "count": 1
+    },
+    {
+     "id": "CORE_DS1_184",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_801",
+     "count": 2
+    },
+    {
+     "id": "TLC_823",
+     "count": 2
+    },
+    {
+     "id": "JAIL_878",
+     "count": 2
+    },
+    {
+     "id": "TLC_826",
+     "count": 2
+    },
+    {
+     "id": "JAIL_EVENT_100",
+     "count": 1
+    },
+    {
+     "id": "END_013",
+     "count": 1
+    },
+    {
+     "id": "CORE_EX1_014",
+     "count": 1
+    },
+    {
+     "id": "TIME_053",
+     "count": 2
+    },
+    {
+     "id": "TLC_825",
+     "count": 2
+    },
+    {
+     "id": "TLC_366",
+     "count": 2
+    },
+    {
+     "id": "EDR_453",
+     "count": 1
+    },
+    {
+     "id": "FIR_959",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 38,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-mage-imbue",
+   "version": 1,
+   "name": "Titanographer Imbue Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "batch-3:npc-mage-imbue",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 5,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/52932",
+    "accessed": "2026-08-22",
+    "deckCode": "AAECAf0EBqT4BsODB8CHB8SZB5HbB4DgBwzx0wTTngac+wb0/Ab3gQfujQe8pweLsQfYsgeGxAfJxweT2wcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CORE_DRG_107",
+     "count": 2
+    },
+    {
+     "id": "CATA_484",
+     "count": 2
+    },
+    {
+     "id": "EDR_852",
+     "count": 2
+    },
+    {
+     "id": "TIME_860",
+     "count": 2
+    },
+    {
+     "id": "EDR_871",
+     "count": 2
+    },
+    {
+     "id": "MEND_100",
+     "count": 2
+    },
+    {
+     "id": "FIR_921",
+     "count": 1
+    },
+    {
+     "id": "JAIL_379",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "EDR_860",
+     "count": 2
+    },
+    {
+     "id": "END_023",
+     "count": 2
+    },
+    {
+     "id": "JAIL_122",
+     "count": 1
+    },
+    {
+     "id": "EDR_519",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_028",
+     "count": 2
+    },
+    {
+     "id": "TLC_452",
+     "count": 1
+    },
+    {
+     "id": "CORE_BT_072",
+     "count": 1
+    },
+    {
+     "id": "EDR_430",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 42,
+    "unfinished": 0,
+    "verified": false
+   },
+   "secrets": true,
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-mage-leyline",
+   "version": 1,
+   "name": "Leyline Spell Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "batch-3:npc-mage-leyline",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "tempo",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53599",
+    "accessed": "2026-09-11",
+    "deckCode": "AAEBAf0ECMODB+SyB8u2B/rEB5HGB6TZB5PaB4bgBwv6mwfopQeGxAeSxAfnxAfoxAfwxAfzxAf0xAf7xAet2gcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_SW_108",
+     "count": 1
+    },
+    {
+     "id": "TIME_EVENT_999",
+     "count": 1
+    },
+    {
+     "id": "CATA_485",
+     "count": 2
+    },
+    {
+     "id": "JAIL_319",
+     "count": 1
+    },
+    {
+     "id": "CATA_484",
+     "count": 2
+    },
+    {
+     "id": "MEND_504",
+     "count": 2
+    },
+    {
+     "id": "MEND_506",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_541",
+     "count": 1
+    },
+    {
+     "id": "TIME_855",
+     "count": 2
+    },
+    {
+     "id": "END_025",
+     "count": 1
+    },
+    {
+     "id": "MEND_501",
+     "count": 2
+    },
+    {
+     "id": "TLC_365",
+     "count": 2
+    },
+    {
+     "id": "MEND_500",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "MEND_503",
+     "count": 2
+    },
+    {
+     "id": "MEND_502",
+     "count": 2
+    },
+    {
+     "id": "JAIL_321",
+     "count": 2
+    },
+    {
+     "id": "MEND_505",
+     "count": 1
+    },
+    {
+     "id": "CATA_488",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 34,
+    "unfinished": 0,
+    "verified": false
+   },
+   "secrets": true,
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-mage-quest",
+   "version": 1,
+   "name": "Forbidden Sequence Quest Mage",
+   "class": "MAGE",
+   "hero": "HERO_08",
+   "origin": "batch-3:npc-mage-quest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "silver",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/quest-mage-3-legend-unknown-score-41-32/",
+    "accessed": "2026-09-05",
+    "deckCode": "AAECAf0EBu/8BqebB/mbB/KyB6TZB6f3Bwyb8gbxkQewmwf6mwfRpgfLtgf5wweGxAeSxAeG4Afg9gecgggAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TIME_EVENT_999",
+     "count": 2
+    },
+    {
+     "id": "TLC_461",
+     "count": 2
+    },
+    {
+     "id": "CATA_485",
+     "count": 2
+    },
+    {
+     "id": "EDR_872",
+     "count": 2
+    },
+    {
+     "id": "TLC_460",
+     "count": 1
+    },
+    {
+     "id": "JAIL_319",
+     "count": 1
+    },
+    {
+     "id": "CATA_484",
+     "count": 2
+    },
+    {
+     "id": "CORE_BAR_541",
+     "count": 2
+    },
+    {
+     "id": "CATA_614",
+     "count": 2
+    },
+    {
+     "id": "TLC_364",
+     "count": 1
+    },
+    {
+     "id": "CAP_407",
+     "count": 2
+    },
+    {
+     "id": "JAIL_EVENT_100",
+     "count": 1
+    },
+    {
+     "id": "EDR_517",
+     "count": 1
+    },
+    {
+     "id": "CORE_EDR_004_2026",
+     "count": 2
+    },
+    {
+     "id": "Core_UNG_072",
+     "count": 2
+    },
+    {
+     "id": "TLC_365",
+     "count": 2
+    },
+    {
+     "id": "TIME_857",
+     "count": 2
+    },
+    {
+     "id": "END_036",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 41,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-paladin-egg",
+   "version": 1,
+   "name": "Khelos Egg Paladin",
+   "class": "PALADIN",
+   "hero": "HERO_04",
+   "origin": "batch-3:npc-paladin-egg",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "silver",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53386",
+    "accessed": "2026-09-02",
+    "deckCode": "AAEBAZ8FBoX+BcODB8CPB9edB+CdB5KkBwycnwTunwStoASS1AS1ngaGowbP/gbDjwe/sgfLtgeY3Qe83QcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "EDR_251",
+     "count": 2
+    },
+    {
+     "id": "TIME_EVENT_999",
+     "count": 2
+    },
+    {
+     "id": "EDR_264",
+     "count": 2
+    },
+    {
+     "id": "CORE_NEW1_018",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_619",
+     "count": 2
+    },
+    {
+     "id": "CORE_TRL_307",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_292",
+     "count": 2
+    },
+    {
+     "id": "JAIL_377",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 1
+    },
+    {
+     "id": "TTN_851",
+     "count": 1
+    },
+    {
+     "id": "CORE_CS2_093",
+     "count": 2
+    },
+    {
+     "id": "EDR_571",
+     "count": 1
+    },
+    {
+     "id": "CORE_CS2_094",
+     "count": 2
+    },
+    {
+     "id": "END_012",
+     "count": 2
+    },
+    {
+     "id": "TIME_003",
+     "count": 1
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "JAIL_326",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 39,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-priest-egg",
+   "version": 1,
+   "name": "Khelos Egg Priest",
+   "class": "PRIEST",
+   "hero": "HERO_09",
+   "origin": "batch-3:npc-priest-egg",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/egg-priest-128-legend-unknown-score-7-4/",
+    "accessed": "2026-08-27",
+    "deckCode": "AAECAa0GBvCfBPWYB9edB5KkB+SyB6/JBwyFnwSG/QbgnQedrQfnsgfLtgeWvweyxQewyQfV4AfZ4Af04AcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_CS1_130",
+     "count": 2
+    },
+    {
+     "id": "TIME_EVENT_999",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "CATA_303",
+     "count": 2
+    },
+    {
+     "id": "EDR_463",
+     "count": 2
+    },
+    {
+     "id": "END_025",
+     "count": 1
+    },
+    {
+     "id": "CAP_801",
+     "count": 2
+    },
+    {
+     "id": "TIME_432",
+     "count": 2
+    },
+    {
+     "id": "TIME_003",
+     "count": 1
+    },
+    {
+     "id": "CAP_804",
+     "count": 2
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "END_028",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_197",
+     "count": 1
+    },
+    {
+     "id": "CAP_805",
+     "count": 2
+    },
+    {
+     "id": "JAIL_913",
+     "count": 2
+    },
+    {
+     "id": "CATA_308",
+     "count": 2
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "JAIL_912",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 37,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-priest-reborn",
+   "version": 1,
+   "name": "Raith Reborn Priest",
+   "class": "PRIEST",
+   "hero": "HERO_09",
+   "origin": "batch-3:npc-priest-reborn",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 2,
+    "pilotDifficulty": 5,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-08-28",
+    "deckCode": "AAECAcz8BQap9QbDgweolgf1mAeZsQfc4AcM8J8EhYYHna0HrK0H0q8HssUHr8kHsMkHk98HsN8H1eAH9OAHAAA=",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_CS2_004",
+     "count": 2
+    },
+    {
+     "id": "TLC_817",
+     "count": 1
+    },
+    {
+     "id": "JAIL_940",
+     "count": 2
+    },
+    {
+     "id": "JAIL_941",
+     "count": 2
+    },
+    {
+     "id": "TIME_433",
+     "count": 2
+    },
+    {
+     "id": "CAP_801",
+     "count": 2
+    },
+    {
+     "id": "TIME_432",
+     "count": 2
+    },
+    {
+     "id": "EDR_970",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "CORE_EX1_197",
+     "count": 2
+    },
+    {
+     "id": "CAP_805",
+     "count": 2
+    },
+    {
+     "id": "JAIL_913",
+     "count": 2
+    },
+    {
+     "id": "CATA_308",
+     "count": 2
+    },
+    {
+     "id": "TIME_064",
+     "count": 1
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "CAP_806",
+     "count": 1
+    },
+    {
+     "id": "JAIL_912",
+     "count": 2
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (6 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 3,
+    "autoWins": 2,
+    "liveWins": 2,
+    "fallbacks": 0,
+    "decisions": 152,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-priest-thief",
+   "version": 1,
+   "name": "Azalina Thief Priest",
+   "class": "PRIEST",
+   "hero": "HERO_09",
+   "origin": "batch-3:npc-priest-thief",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 2,
+    "pilotDifficulty": 5,
+    "annoyance": 3,
+    "fun": 3,
+    "bands": [
+     "diamond",
+     "legend"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-09-28",
+    "deckCode": "AAECAa0GAsP/BufYBwnwnwTRngag+wb3gQeFhgedrQevyQeq2Qes2QcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "EDR_852",
+     "count": 2
+    },
+    {
+     "id": "CORE_CFM_790",
+     "count": 2
+    },
+    {
+     "id": "EDR_449",
+     "count": 2
+    },
+    {
+     "id": "JAIL_432",
+     "count": 2
+    },
+    {
+     "id": "TIME_432",
+     "count": 2
+    },
+    {
+     "id": "EDR_970",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_197",
+     "count": 2
+    },
+    {
+     "id": "JAIL_433",
+     "count": 2
+    },
+    {
+     "id": "EDR_476",
+     "count": 1
+    },
+    {
+     "id": "JAIL_430",
+     "count": 1
+    },
+    {
+     "id": "JAIL_912",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "legality clean; 64 elite round-robin games 2026-11-05: 0 errors, 0 unfinished, 0 fallbacks; passed the Legend pilot filter (35.9% [23.4, 50.0])",
+   "ownerReview": [
+    "powerTier"
+   ],
+   "pilot": "auto"
+  },
+  {
+   "id": "npc-rogue-burn",
+   "version": 1,
+   "name": "Fan of Knives Burn Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "batch-3:npc-rogue-burn",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "aggro",
+    "powerTier": 2,
+    "pilotDifficulty": 3,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/burn-rogue-278-legend-unknown-score-34-21/",
+    "accessed": "2026-09-12",
+    "deckCode": "AAECAaIHCJegBOylB4aoB4eoB4ioB/KyB4jZB9DgBwv3nwSWoATZogbBlwfmowfqsgfVxQej4Ae04AfO4AfD8gcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_EX1_145",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "CORE_BT_701",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_010",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_012",
+     "count": 1
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_129",
+     "count": 2
+    },
+    {
+     "id": "CATA_785",
+     "count": 2
+    },
+    {
+     "id": "CAP_003",
+     "count": 2
+    },
+    {
+     "id": "CAP_001",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t1",
+     "count": 1
+    },
+    {
+     "id": "TIME_001",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t",
+     "count": 1
+    },
+    {
+     "id": "CAP_000",
+     "count": 2
+    },
+    {
+     "id": "END_031",
+     "count": 2
+    },
+    {
+     "id": "TIME_875",
+     "count": 1
+    },
+    {
+     "id": "CAP_005",
+     "count": 1
+    },
+    {
+     "id": "END_036",
+     "count": 1
+    },
+    {
+     "id": "TLC_522",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 27,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-rogue-mill",
+   "version": 1,
+   "name": "Ysera Fatigue Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "batch-3:npc-rogue-mill",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 3,
+    "pilotDifficulty": 5,
+    "annoyance": 3,
+    "fun": 2,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54174",
+    "accessed": "2026-10-09",
+    "deckCode": "AAEBAaIHEKPUBKn1BqGBB8ODB7aUB/WYB4aoB4eoB4ioB/SqB+2sB5mxB6XYB4jZB43aB4rdBwfTngbBlwe0wQfAwQek2AeR2QfP4AcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "CATA_200",
+     "count": 2
+    },
+    {
+     "id": "CAP_004",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "JAIL_720",
+     "count": 1
+    },
+    {
+     "id": "CORE_LOOT_413",
+     "count": 1
+    },
+    {
+     "id": "CORE_DMF_067",
+     "count": 1
+    },
+    {
+     "id": "TIME_875t1",
+     "count": 1
+    },
+    {
+     "id": "JAIL_503",
+     "count": 2
+    },
+    {
+     "id": "CATA_EVENT_402",
+     "count": 2
+    },
+    {
+     "id": "TIME_875t",
+     "count": 1
+    },
+    {
+     "id": "TIME_875",
+     "count": 1
+    },
+    {
+     "id": "JAIL_851",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "EDR_979",
+     "count": 1
+    },
+    {
+     "id": "CORE_KAR_061",
+     "count": 1
+    },
+    {
+     "id": "JAIL_504",
+     "count": 1
+    },
+    {
+     "id": "TIME_064",
+     "count": 1
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "EDR_844",
+     "count": 1
+    },
+    {
+     "id": "CATA_201",
+     "count": 2
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 27,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-rogue-quest",
+   "version": 1,
+   "name": "Lie in Wait Quest Rogue",
+   "class": "ROGUE",
+   "hero": "HERO_03",
+   "origin": "batch-3:npc-rogue-quest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 0,
+    "fun": 4,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53324",
+    "accessed": "2026-09-01",
+    "deckCode": "AAECAaIHBuaTB/WYB6GbB5mxB4jZB9DgBwyRnwT3nwTZogbEgQfBlwfDlwfElwfUnQeNvgeD1QfO4AfP4AcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "CORE_CS2_072",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_145",
+     "count": 2
+    },
+    {
+     "id": "CORE_RLK_567",
+     "count": 1
+    },
+    {
+     "id": "CAP_004",
+     "count": 2
+    },
+    {
+     "id": "TLC_517",
+     "count": 2
+    },
+    {
+     "id": "TLC_513",
+     "count": 1
+    },
+    {
+     "id": "DINO_408",
+     "count": 2
+    },
+    {
+     "id": "TLC_515",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_129",
+     "count": 2
+    },
+    {
+     "id": "TLC_518",
+     "count": 2
+    },
+    {
+     "id": "JAIL_225",
+     "count": 2
+    },
+    {
+     "id": "TLC_987",
+     "count": 1
+    },
+    {
+     "id": "CAP_003",
+     "count": 2
+    },
+    {
+     "id": "CATA_721",
+     "count": 2
+    },
+    {
+     "id": "EDR_260",
+     "count": 2
+    },
+    {
+     "id": "CAP_005",
+     "count": 1
+    },
+    {
+     "id": "TIME_064",
+     "count": 1
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (6 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 3,
+    "autoWins": 0,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 68,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-shaman-herald",
+   "version": 1,
+   "name": "Muradin Herald Shaman",
+   "class": "SHAMAN",
+   "hero": "HERO_02",
+   "origin": "batch-3:npc-shaman-herald",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 3,
+    "bands": [
+     "gold",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/52937",
+    "accessed": "2026-08-22",
+    "deckCode": "AAECAaoICsODB+aWB4KYB9umB9+mB+WmB4++B9C/B4LUB5vUBwqvnwT9nwSxsAe8sQfDwAfJwAf3wAf2wQfJ2wfm/QcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TIME_218",
+     "count": 2
+    },
+    {
+     "id": "CORE_GIL_531",
+     "count": 2
+    },
+    {
+     "id": "CATA_210",
+     "count": 2
+    },
+    {
+     "id": "CORE_WC_042",
+     "count": 2
+    },
+    {
+     "id": "JAIL_802",
+     "count": 2
+    },
+    {
+     "id": "CATA_561",
+     "count": 2
+    },
+    {
+     "id": "CATA_565",
+     "count": 2
+    },
+    {
+     "id": "TIME_209t2",
+     "count": 1
+    },
+    {
+     "id": "TLC_222",
+     "count": 1
+    },
+    {
+     "id": "CORE_EX1_246",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_259",
+     "count": 2
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "CATA_722",
+     "count": 1
+    },
+    {
+     "id": "TIME_209",
+     "count": 1
+    },
+    {
+     "id": "TIME_209t",
+     "count": 1
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "CATA_153",
+     "count": 1
+    },
+    {
+     "id": "CATA_568",
+     "count": 2
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 84,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-shaman-masochist",
+   "version": 1,
+   "name": "Muradin Masochist Shaman",
+   "class": "SHAMAN",
+   "hero": "HERO_02",
+   "origin": "batch-3:npc-shaman-masochist",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 5,
+    "bands": [
+     "silver",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54106",
+    "accessed": "2026-10-04",
+    "deckCode": "AAECAaoICNumB9+mB+WmB4anB9C/B4LUB5vUB6PdBwuvnwTTvgbtqgfvqgfwqgf1rAe8sQfDwAfJwAf3wAfm/QcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TIME_218",
+     "count": 2
+    },
+    {
+     "id": "CORE_GIL_531",
+     "count": 2
+    },
+    {
+     "id": "JAIL_452",
+     "count": 1
+    },
+    {
+     "id": "TIME_212",
+     "count": 2
+    },
+    {
+     "id": "CORE_BOT_451",
+     "count": 2
+    },
+    {
+     "id": "TIME_214",
+     "count": 2
+    },
+    {
+     "id": "TIME_213",
+     "count": 2
+    },
+    {
+     "id": "CATA_561",
+     "count": 2
+    },
+    {
+     "id": "CATA_565",
+     "count": 2
+    },
+    {
+     "id": "TIME_215",
+     "count": 2
+    },
+    {
+     "id": "TIME_209t2",
+     "count": 1
+    },
+    {
+     "id": "CORE_EX1_246",
+     "count": 2
+    },
+    {
+     "id": "TIME_013",
+     "count": 1
+    },
+    {
+     "id": "TIME_209",
+     "count": 1
+    },
+    {
+     "id": "TIME_209t",
+     "count": 1
+    },
+    {
+     "id": "CATA_497",
+     "count": 1
+    },
+    {
+     "id": "CATA_153",
+     "count": 1
+    },
+    {
+     "id": "CATA_568",
+     "count": 2
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 37,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warlock-godfrey",
+   "version": 1,
+   "name": "Godfrey Overdraw Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "batch-3:npc-warlock-godfrey",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 2,
+    "fun": 4,
+    "bands": [
+     "silver",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/godfrey-warlock-16-legend-unknown-score-9-5/",
+    "accessed": "2026-08-03",
+    "deckCode": "AAECAf0GBNGCB8ayB9CyB63ZBw2PnwTnoATQngapiAeEmQftrAelrQfgvgfb1wfe1wex2Qe32QeN3AcAAA==",
+    "changes": "balance-checked: contains no card changed by a later patch"
+   },
+   "cards": [
+    {
+     "id": "TLC_451",
+     "count": 2
+    },
+    {
+     "id": "FIR_954",
+     "count": 2
+    },
+    {
+     "id": "END_020",
+     "count": 1
+    },
+    {
+     "id": "CORE_SCH_713",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "JAIL_997",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "CORE_DMF_067",
+     "count": 2
+    },
+    {
+     "id": "EDR_482",
+     "count": 1
+    },
+    {
+     "id": "TIME_027",
+     "count": 2
+    },
+    {
+     "id": "JAIL_513",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "END_016",
+     "count": 1
+    },
+    {
+     "id": "JAIL_509",
+     "count": 1
+    },
+    {
+     "id": "JAIL_511",
+     "count": 2
+    },
+    {
+     "id": "JAIL_398",
+     "count": 2
+    },
+    {
+     "id": "JAIL_514",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (6 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 3,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 84,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warlock-pig",
+   "version": 1,
+   "name": "Agamaggan Pig Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "batch-3:npc-warlock-pig",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 2,
+    "pilotDifficulty": 4,
+    "annoyance": 2,
+    "fun": 4,
+    "bands": [
+     "platinum",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Hearthstone-Decks.net",
+    "url": "https://hearthstone-decks.net/",
+    "accessed": "2026-10-01",
+    "deckCode": "AAECAf0GBt+CB5KDB4OEB8auB9i+B5vUBwyPnwSxnwSCoATnoATTngbiiQeEmQeprQfQsgfLtgeTvgfgvgcAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TLC_451",
+     "count": 2
+    },
+    {
+     "id": "EDR_971",
+     "count": 2
+    },
+    {
+     "id": "END_020",
+     "count": 2
+    },
+    {
+     "id": "CORE_UNG_205",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_302",
+     "count": 2
+    },
+    {
+     "id": "EDR_485",
+     "count": 1
+    },
+    {
+     "id": "TIME_EVENT_999",
+     "count": 2
+    },
+    {
+     "id": "CATA_496",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "CATA_725",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "CATA_492",
+     "count": 1
+    },
+    {
+     "id": "CORE_EX1_309",
+     "count": 2
+    },
+    {
+     "id": "TIME_030",
+     "count": 2
+    },
+    {
+     "id": "TIME_038",
+     "count": 1
+    },
+    {
+     "id": "EDR_846",
+     "count": 1
+    },
+    {
+     "id": "EDR_489",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (6 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 3,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 113,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warlock-wallow",
+   "version": 1,
+   "name": "Wallow Dark Gift Warlock",
+   "class": "WARLOCK",
+   "hero": "HERO_07",
+   "origin": "batch-3:npc-warlock-wallow",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 4,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 5,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53316",
+    "accessed": "2026-08-31",
+    "deckCode": "AAECAf0GBt+CB+SCB8ODB+qbB63ZB9vgBwyPnwTnoASe+Qa1+gbDhweEmQfd1wew2Qex2Qe32QeN3AecgggAAA==",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TLC_451",
+     "count": 2
+    },
+    {
+     "id": "EDR_485",
+     "count": 1
+    },
+    {
+     "id": "EDR_105",
+     "count": 2
+    },
+    {
+     "id": "CORE_ICC_055",
+     "count": 2
+    },
+    {
+     "id": "JAIL_513",
+     "count": 2
+    },
+    {
+     "id": "CAP_405",
+     "count": 1
+    },
+    {
+     "id": "CORE_CS2_062",
+     "count": 2
+    },
+    {
+     "id": "JAIL_399",
+     "count": 2
+    },
+    {
+     "id": "CORE_EDR_004_2026",
+     "count": 2
+    },
+    {
+     "id": "JAIL_509",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "EDR_654",
+     "count": 1
+    },
+    {
+     "id": "FIR_924",
+     "count": 2
+    },
+    {
+     "id": "EDR_102",
+     "count": 2
+    },
+    {
+     "id": "JAIL_511",
+     "count": 2
+    },
+    {
+     "id": "EDR_487",
+     "count": 1
+    },
+    {
+     "id": "JAIL_510",
+     "count": 2
+    },
+    {
+     "id": "JAIL_514",
+     "count": 2
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (6 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 3,
+    "autoWins": 1,
+    "liveWins": 1,
+    "fallbacks": 0,
+    "decisions": 108,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warrior-egg",
+   "version": 1,
+   "name": "Khelos Egg Warrior",
+   "class": "WARRIOR",
+   "hero": "HERO_01",
+   "origin": "batch-3:npc-warrior-egg",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "combo",
+    "powerTier": 3,
+    "pilotDifficulty": 3,
+    "annoyance": 1,
+    "fun": 4,
+    "bands": [
+     "silver",
+     "platinum"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53789",
+    "accessed": "2026-09-19",
+    "deckCode": "AAECAQcE9ZgH7JsH150HstgHDYagBI7UBJzUBOPmBsyPB9OXB+CdB9WmB+qnB/yvB9CyB7DBB5zCBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "END_020",
+     "count": 2
+    },
+    {
+     "id": "CORE_REV_990",
+     "count": 2
+    },
+    {
+     "id": "EDR_531",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_391",
+     "count": 2
+    },
+    {
+     "id": "CATA_585",
+     "count": 2
+    },
+    {
+     "id": "DINO_411",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_606",
+     "count": 2
+    },
+    {
+     "id": "TIME_873",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_007",
+     "count": 2
+    },
+    {
+     "id": "TLC_478",
+     "count": 2
+    },
+    {
+     "id": "TLC_252",
+     "count": 1
+    },
+    {
+     "id": "DINO_410",
+     "count": 1
+    },
+    {
+     "id": "TLC_601",
+     "count": 2
+    },
+    {
+     "id": "TIME_715",
+     "count": 2
+    },
+    {
+     "id": "CATA_581",
+     "count": 2
+    },
+    {
+     "id": "TLC_106",
+     "count": 1
+    },
+    {
+     "id": "JAIL_384",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 1,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 54,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warrior-logosh",
+   "version": 1,
+   "name": "Blood Fighter Lo'Gosh Warrior",
+   "class": "WARRIOR",
+   "hero": "HERO_01",
+   "origin": "batch-3:npc-warrior-logosh",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "midrange",
+    "powerTier": 3,
+    "pilotDifficulty": 4,
+    "annoyance": 1,
+    "fun": 4,
+    "bands": [
+     "gold",
+     "diamond"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/53095",
+    "accessed": "2026-08-26",
+    "deckCode": "AAECAQcIn58EhqAEw4MHm6UHnaUHnqUH69YHstgHC47UBJzUBOPmBqWFB+iHB9WmB4+xB9CyB5XCB5vCB5zCBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "END_020",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_108",
+     "count": 1
+    },
+    {
+     "id": "CORE_REV_990",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_391",
+     "count": 1
+    },
+    {
+     "id": "CATA_585",
+     "count": 2
+    },
+    {
+     "id": "TIME_750",
+     "count": 2
+    },
+    {
+     "id": "CATA_582",
+     "count": 2
+    },
+    {
+     "id": "FIR_939",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_606",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_007",
+     "count": 2
+    },
+    {
+     "id": "TLC_478",
+     "count": 2
+    },
+    {
+     "id": "CATA_584",
+     "count": 2
+    },
+    {
+     "id": "EDR_492",
+     "count": 2
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "JAIL_421",
+     "count": 1
+    },
+    {
+     "id": "TIME_850t",
+     "count": 1
+    },
+    {
+     "id": "TIME_850",
+     "count": 1
+    },
+    {
+     "id": "TIME_850t1",
+     "count": 1
+    },
+    {
+     "id": "JAIL_384",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 25,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  },
+  {
+   "id": "npc-warrior-quest",
+   "version": 1,
+   "name": "Survive Quest Warrior",
+   "class": "WARRIOR",
+   "hero": "HERO_01",
+   "origin": "batch-3:npc-warrior-quest",
+   "admission": "admitted",
+   "tags": {
+    "archetype": "control",
+    "powerTier": 4,
+    "pilotDifficulty": 3,
+    "annoyance": 1,
+    "fun": 5,
+    "bands": [
+     "bronze",
+     "gold"
+    ]
+   },
+   "source": {
+    "site": "Out of Games",
+    "url": "https://outof.games/realms/hearthstone/decks/54231",
+    "accessed": "2026-10-12",
+    "deckCode": "AAECAQcKqfUGw4MH7o8HtpQH1JcHgpgHhJ0H2LIHm9QHuNkHCp+fBI7UBOiHB9WmB/yvB9CyB7DBB5vCB5zCB8XXBwAA",
+    "changes": "after 36.2.2 (2026-08-18) and 36.4.2 balance; pre-BE (client 37.0 data)"
+   },
+   "cards": [
+    {
+     "id": "TLC_602",
+     "count": 1
+    },
+    {
+     "id": "END_020",
+     "count": 2
+    },
+    {
+     "id": "CORE_CS2_108",
+     "count": 2
+    },
+    {
+     "id": "JAIL_386",
+     "count": 2
+    },
+    {
+     "id": "CATA_585",
+     "count": 2
+    },
+    {
+     "id": "FIR_939",
+     "count": 2
+    },
+    {
+     "id": "CORE_EX1_606",
+     "count": 2
+    },
+    {
+     "id": "TLC_478",
+     "count": 2
+    },
+    {
+     "id": "CORE_BT_781",
+     "count": 1
+    },
+    {
+     "id": "CATA_584",
+     "count": 2
+    },
+    {
+     "id": "TLC_100",
+     "count": 1
+    },
+    {
+     "id": "EDR_856",
+     "count": 1
+    },
+    {
+     "id": "EDR_979",
+     "count": 1
+    },
+    {
+     "id": "END_023",
+     "count": 1
+    },
+    {
+     "id": "TIME_715",
+     "count": 2
+    },
+    {
+     "id": "CATA_581",
+     "count": 2
+    },
+    {
+     "id": "JAIL_435",
+     "count": 1
+    },
+    {
+     "id": "DINO_401",
+     "count": 1
+    },
+    {
+     "id": "EDR_000",
+     "count": 1
+    },
+    {
+     "id": "CATA_190h",
+     "count": 1
+    }
+   ],
+   "sideboards": [],
+   "admissionNote": "wp1-gauntlet stability (2 games)",
+   "pilot": "auto",
+   "measured": {
+    "games": 1,
+    "autoWins": 0,
+    "liveWins": 0,
+    "fallbacks": 0,
+    "decisions": 40,
+    "unfinished": 0,
+    "verified": false
+   },
+   "ownerReview": [
+    "powerTier"
+   ]
+  }
+ ],
+ "_skipped": [
+  {
+   "id": "npc-pure-paladin",
+   "origin": "recipe:pure-paladin",
+   "reason": "duplicate of npc-pure-paladin"
+  },
+  {
+   "id": "npc-dragon-warrior",
+   "origin": "recipe:dragon-warrior",
+   "reason": "duplicate of npc-dragon-warrior"
+  },
+  {
+   "id": "npc-quest-priest",
+   "origin": "candidate:cand-doc-quest-priest",
+   "reason": "duplicate of npc-recipe-equilibrium-quest-priest"
+  },
+  {
+   "id": "npc-herald-warlock",
+   "origin": "candidate:cand-doc-herald-warlock",
+   "reason": "duplicate of npc-recipe-herald-warlock"
+  }
+ ]
+}

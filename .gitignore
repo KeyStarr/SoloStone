@@ -1,0 +1,20 @@
+# Build output and local inputs. Nothing from a Hearthstone client belongs in this repository:
+# the reference libraries you collect to build the plugin stay in references/ and are never committed.
+bin/
+obj/
+out/
+packages/
+references/
+__pycache__/
+*.pyc
+.DS_Store
+*.dll
+*.exe
+*.pdb
+*.nupkg
+*.zip
+# Key material of any kind. A release is signed offline; no private key belongs in this tree.
+*.key
+*.pem
+*.pfx
+*.p12

@@ -1,0 +1,948 @@
+{
+  "schema": 1,
+  "libraryVersion": 1,
+  "activeMeta": "violet-hold",
+  "_doc": "SoloStone Standard Casual NPC decks (backlog #37): fun-first lists for the unranked Casual queue only. Kept out of decks-v1.json so ranked NPC deck pools never change. Same entry shape as decks-v1.json plus an optional 'host' (suggested notables-v1 id) and an optional 'family' (variants of one archetype count as one deck for variety). Measured by tools in docs/decks/casual-decks-2026-10-28.md.",
+  "decks": [
+    {
+      "id": "npc-casual-beast-stampede",
+      "version": 1,
+      "name": "Beast Stampede",
+      "class": "HUNTER",
+      "hero": "HERO_05",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "midrange",
+        "powerTier": 4,
+        "pilotDifficulty": 2,
+        "annoyance": 0,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "solostone",
+        "url": null,
+        "accessed": "2026-10-28",
+        "deckCode": null,
+        "changes": "curated Beast/Kindred Hunter with Magmaw and Goldrinn"
+      },
+      "cards": [
+        {
+          "id": "CORE_UNG_912",
+          "count": 2
+        },
+        {
+          "id": "TIME_601",
+          "count": 2
+        },
+        {
+          "id": "JAIL_878",
+          "count": 2
+        },
+        {
+          "id": "TLC_823",
+          "count": 2
+        },
+        {
+          "id": "EDR_226",
+          "count": 2
+        },
+        {
+          "id": "CORE_NEW1_031",
+          "count": 2
+        },
+        {
+          "id": "TLC_825",
+          "count": 2
+        },
+        {
+          "id": "EDR_227",
+          "count": 2
+        },
+        {
+          "id": "END_015",
+          "count": 2
+        },
+        {
+          "id": "TIME_605",
+          "count": 2
+        },
+        {
+          "id": "TLC_366",
+          "count": 2
+        },
+        {
+          "id": "CATA_550",
+          "count": 1
+        },
+        {
+          "id": "CORE_AV_337",
+          "count": 1
+        },
+        {
+          "id": "CORE_OG_211",
+          "count": 1
+        },
+        {
+          "id": "EDR_480",
+          "count": 1
+        },
+        {
+          "id": "CORE_BRM_013",
+          "count": 2
+        },
+        {
+          "id": "CORE_TRL_900",
+          "count": 1
+        },
+        {
+          "id": "TLC_828",
+          "count": 1
+        }
+      ],
+      "sideboards": [],
+      "host": "npc.n.patchwork-pam"
+    },
+    {
+      "id": "npc-casual-giants-garden",
+      "version": 1,
+      "name": "Giant's Garden",
+      "class": "WARRIOR",
+      "hero": "HERO_01",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "control",
+        "powerTier": 4,
+        "pilotDifficulty": 2,
+        "annoyance": 0,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "solostone",
+        "url": null,
+        "accessed": "2026-10-28",
+        "deckCode": null,
+        "changes": "curated armor Warrior into 9-11 mana giants"
+      },
+      "cards": [
+        {
+          "id": "CORE_EX1_391",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_108",
+          "count": 2
+        },
+        {
+          "id": "CORE_AT_064",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_606",
+          "count": 2
+        },
+        {
+          "id": "TLC_620",
+          "count": 2
+        },
+        {
+          "id": "CORE_OG_149",
+          "count": 1
+        },
+        {
+          "id": "CORE_OG_218",
+          "count": 2
+        },
+        {
+          "id": "JAIL_311",
+          "count": 2
+        },
+        {
+          "id": "CORE_WON_337",
+          "count": 2
+        },
+        {
+          "id": "JAIL_307",
+          "count": 1
+        },
+        {
+          "id": "END_019",
+          "count": 2
+        },
+        {
+          "id": "TIME_715",
+          "count": 1
+        },
+        {
+          "id": "DINO_433",
+          "count": 1
+        },
+        {
+          "id": "TLC_600",
+          "count": 2
+        },
+        {
+          "id": "CATA_616",
+          "count": 2
+        },
+        {
+          "id": "TLC_480",
+          "count": 1
+        },
+        {
+          "id": "EDR_453",
+          "count": 1
+        },
+        {
+          "id": "EDR_471",
+          "count": 1
+        },
+        {
+          "id": "TLC_248",
+          "count": 1
+        }
+      ],
+      "sideboards": [],
+      "host": "npc.n.when-pigs-fly"
+    },
+    {
+      "id": "npc-casual-undead-horde",
+      "version": 1,
+      "name": "Undead Horde",
+      "class": "DEATHKNIGHT",
+      "hero": "HERO_11",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "aggro",
+        "powerTier": 4,
+        "pilotDifficulty": 2,
+        "annoyance": 0,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "solostone",
+        "url": null,
+        "accessed": "2026-10-28",
+        "deckCode": null,
+        "changes": "curated Unholy Undead swarm Death Knight (2 Unholy runes)"
+      },
+      "cards": [
+        {
+          "id": "RLK_503",
+          "count": 2
+        },
+        {
+          "id": "RLK_958",
+          "count": 2
+        },
+        {
+          "id": "CORE_ULD_723",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_012",
+          "count": 1
+        },
+        {
+          "id": "RLK_061",
+          "count": 2
+        },
+        {
+          "id": "CORE_RLK_116",
+          "count": 2
+        },
+        {
+          "id": "RLK_708",
+          "count": 2
+        },
+        {
+          "id": "CORE_RLK_121",
+          "count": 2
+        },
+        {
+          "id": "CORE_RLK_062",
+          "count": 2
+        },
+        {
+          "id": "TIME_040",
+          "count": 2
+        },
+        {
+          "id": "RLK_060",
+          "count": 2
+        },
+        {
+          "id": "TLC_436",
+          "count": 1
+        },
+        {
+          "id": "DINO_416",
+          "count": 1
+        },
+        {
+          "id": "RLK_720",
+          "count": 1
+        },
+        {
+          "id": "EDR_818",
+          "count": 1
+        },
+        {
+          "id": "CATA_465",
+          "count": 1
+        },
+        {
+          "id": "CORE_RLK_118",
+          "count": 2
+        },
+        {
+          "id": "END_002",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "host": "npc.n.goblin-grin"
+    },
+    {
+      "id": "npc-casual-multiverse-shaman",
+      "version": 1,
+      "name": "Multiverse Shaman",
+      "class": "SHAMAN",
+      "hero": "HERO_02",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "midrange",
+        "powerTier": 4,
+        "pilotDifficulty": 2,
+        "annoyance": 0,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "solostone",
+        "url": null,
+        "accessed": "2026-10-28",
+        "deckCode": null,
+        "changes": "curated random-summon Overload Shaman Owner 2026-10-28: shipped at a 25% bar (pooled 64 games)."
+      },
+      "cards": [
+        {
+          "id": "CORE_GIL_531",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_238",
+          "count": 2
+        },
+        {
+          "id": "DINO_412",
+          "count": 2
+        },
+        {
+          "id": "CORE_AT_052",
+          "count": 2
+        },
+        {
+          "id": "FIR_923",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_259",
+          "count": 2
+        },
+        {
+          "id": "TLC_227",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_246",
+          "count": 1
+        },
+        {
+          "id": "CATA_569",
+          "count": 2
+        },
+        {
+          "id": "CATA_724",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_250",
+          "count": 2
+        },
+        {
+          "id": "TIME_014",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_042",
+          "count": 2
+        },
+        {
+          "id": "END_030",
+          "count": 2
+        },
+        {
+          "id": "EDR_233",
+          "count": 1
+        },
+        {
+          "id": "FIR_778",
+          "count": 1
+        },
+        {
+          "id": "CATA_153",
+          "count": 1
+        }
+      ],
+      "sideboards": [],
+      "host": "npc.n.miss-play"
+    },
+    {
+      "id": "npc-casual-dragon-hoard",
+      "version": 1,
+      "name": "Dragon Hoard",
+      "class": "PRIEST",
+      "hero": "HERO_09",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "control",
+        "powerTier": 5,
+        "pilotDifficulty": 3,
+        "annoyance": 0,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "solostone",
+        "url": null,
+        "accessed": "2026-10-28",
+        "deckCode": null,
+        "changes": "curated big-Dragon heal Priest Owner 2026-10-28: shipped at a 25% bar (pooled 64 games)."
+      },
+      "cards": [
+        {
+          "id": "CORE_CS1_130",
+          "count": 2
+        },
+        {
+          "id": "CORE_AT_055",
+          "count": 1
+        },
+        {
+          "id": "CORE_CS2_004",
+          "count": 2
+        },
+        {
+          "id": "CATA_303",
+          "count": 2
+        },
+        {
+          "id": "TIME_431",
+          "count": 2
+        },
+        {
+          "id": "EDR_463",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS1_112",
+          "count": 2
+        },
+        {
+          "id": "CATA_304",
+          "count": 2
+        },
+        {
+          "id": "EDR_462",
+          "count": 2
+        },
+        {
+          "id": "CATA_305",
+          "count": 2
+        },
+        {
+          "id": "CORE_SW_442",
+          "count": 1
+        },
+        {
+          "id": "TIME_720",
+          "count": 2
+        },
+        {
+          "id": "CORE_BAR_310",
+          "count": 1
+        },
+        {
+          "id": "CATA_307",
+          "count": 1
+        },
+        {
+          "id": "TIME_052",
+          "count": 2
+        },
+        {
+          "id": "CORE_LOOT_137",
+          "count": 1
+        },
+        {
+          "id": "END_037",
+          "count": 1
+        },
+        {
+          "id": "TLC_243",
+          "count": 1
+        },
+        {
+          "id": "EDR_486",
+          "count": 1
+        }
+      ],
+      "sideboards": [],
+      "host": "npc.n.paper-crown"
+    },
+    {
+      "id": "npc-casual-rafaam-fordaking",
+      "version": 1,
+      "name": "Timethief Rafaam",
+      "class": "WARLOCK",
+      "hero": "HERO_07",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "combo",
+        "powerTier": 4,
+        "pilotDifficulty": 4,
+        "annoyance": 1,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "outof.games",
+        "url": "https://outof.games/realms/hearthstone/decks/53736/",
+        "accessed": "2026-10-28",
+        "deckCode": "AAECAf0GEIOgBIKYB4ilB4mlB4qlB5GlB5OlB5SlB5WlB5alB5elB5qlB6qtB5vUB63ZB9vgBwyPnwTnoATTngaEmQeTvgfYvgfgvgfd1wew2Qex2Qe32QeN3AcAAA==",
+        "changes": "unchanged public list: outof.games 53736 (ForDaKingHS 57-35, 2026-09-17)"
+      },
+      "cards": [
+        {
+          "id": "CAP_405",
+          "count": 1
+        },
+        {
+          "id": "CATA_190h",
+          "count": 1
+        },
+        {
+          "id": "CATA_492",
+          "count": 2
+        },
+        {
+          "id": "CATA_496",
+          "count": 2
+        },
+        {
+          "id": "CATA_725",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_062",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_312",
+          "count": 1
+        },
+        {
+          "id": "CORE_ICC_055",
+          "count": 2
+        },
+        {
+          "id": "CORE_UNG_205",
+          "count": 2
+        },
+        {
+          "id": "JAIL_399",
+          "count": 2
+        },
+        {
+          "id": "JAIL_509",
+          "count": 1
+        },
+        {
+          "id": "JAIL_510",
+          "count": 2
+        },
+        {
+          "id": "JAIL_511",
+          "count": 2
+        },
+        {
+          "id": "JAIL_513",
+          "count": 2
+        },
+        {
+          "id": "JAIL_514",
+          "count": 2
+        },
+        {
+          "id": "TIME_005",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t1",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t2",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t3",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t4",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t5",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t6",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t7",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t8",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t9",
+          "count": 1
+        },
+        {
+          "id": "TIME_031",
+          "count": 1
+        },
+        {
+          "id": "TLC_100",
+          "count": 1
+        },
+        {
+          "id": "TLC_451",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "family": "rafaam"
+    },
+    {
+      "id": "npc-casual-rafaam-ysera",
+      "version": 1,
+      "name": "Ysera Rafaam",
+      "class": "WARLOCK",
+      "hero": "HERO_07",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "combo",
+        "powerTier": 4,
+        "pilotDifficulty": 4,
+        "annoyance": 1,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "outof.games",
+        "url": "https://outof.games/realms/hearthstone/decks/52792/",
+        "accessed": "2026-10-28",
+        "deckCode": "AAECAf0GDqn1BraUB4ilB4mlB4qlB5GlB5OlB5SlB5WlB5alB5elB5qlB9vXB63ZBw3noASc1ATTngbiiQeEmQfQsgfa1wfd1wew2Qex2Qe32QeN3AeO3AcAAA==",
+        "changes": "unchanged public list: outof.games 52792 (2026-08-18)"
+      },
+      "cards": [
+        {
+          "id": "CORE_EX1_007",
+          "count": 2
+        },
+        {
+          "id": "CORE_ICC_055",
+          "count": 2
+        },
+        {
+          "id": "CORE_UNG_205",
+          "count": 2
+        },
+        {
+          "id": "EDR_000",
+          "count": 1
+        },
+        {
+          "id": "EDR_971",
+          "count": 2
+        },
+        {
+          "id": "EDR_979",
+          "count": 1
+        },
+        {
+          "id": "END_020",
+          "count": 2
+        },
+        {
+          "id": "JAIL_399",
+          "count": 2
+        },
+        {
+          "id": "JAIL_509",
+          "count": 1
+        },
+        {
+          "id": "JAIL_510",
+          "count": 2
+        },
+        {
+          "id": "JAIL_511",
+          "count": 2
+        },
+        {
+          "id": "JAIL_513",
+          "count": 2
+        },
+        {
+          "id": "JAIL_514",
+          "count": 2
+        },
+        {
+          "id": "JAIL_515",
+          "count": 2
+        },
+        {
+          "id": "JAIL_997",
+          "count": 1
+        },
+        {
+          "id": "JAIL_998",
+          "count": 2
+        },
+        {
+          "id": "TIME_005",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t1",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t2",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t3",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t4",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t5",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t6",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t7",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t8",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t9",
+          "count": 1
+        },
+        {
+          "id": "TLC_451",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "family": "rafaam"
+    },
+    {
+      "id": "npc-casual-rafaam-last-stand",
+      "version": 1,
+      "name": "Rafaams' Last Stand",
+      "class": "WARLOCK",
+      "hero": "HERO_07",
+      "origin": "casual-curated",
+      "admission": "casual",
+      "tags": {
+        "archetype": "combo",
+        "powerTier": 4,
+        "pilotDifficulty": 4,
+        "annoyance": 1,
+        "fun": 5,
+        "bands": [
+          "bronze",
+          "legend"
+        ]
+      },
+      "source": {
+        "site": "outof.games",
+        "url": "https://outof.games/realms/hearthstone/decks/53679/",
+        "accessed": "2026-10-28",
+        "deckCode": "AAECAf0GDo+fBMODB4ilB4mlB4qlB5GlB5OlB5SlB5WlB5alB5elB5qlB63ZB9vgBw2xnwTnoATTngaEmQfQsgfgvgfNvwfd1wew2QeN3AfR4AfS4AcAAA==",
+        "changes": "unchanged public list: outof.games 53679 (brigitteous 6-5, 2026-09-15)"
+      },
+      "cards": [
+        {
+          "id": "CAP_403",
+          "count": 2
+        },
+        {
+          "id": "CAP_404",
+          "count": 2
+        },
+        {
+          "id": "CAP_405",
+          "count": 1
+        },
+        {
+          "id": "CATA_496",
+          "count": 2
+        },
+        {
+          "id": "CATA_498",
+          "count": 2
+        },
+        {
+          "id": "CATA_725",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_062",
+          "count": 1
+        },
+        {
+          "id": "CORE_EX1_302",
+          "count": 2
+        },
+        {
+          "id": "CORE_ICC_055",
+          "count": 2
+        },
+        {
+          "id": "CORE_UNG_205",
+          "count": 2
+        },
+        {
+          "id": "EDR_856",
+          "count": 1
+        },
+        {
+          "id": "END_020",
+          "count": 2
+        },
+        {
+          "id": "JAIL_399",
+          "count": 2
+        },
+        {
+          "id": "JAIL_509",
+          "count": 1
+        },
+        {
+          "id": "JAIL_510",
+          "count": 2
+        },
+        {
+          "id": "JAIL_514",
+          "count": 2
+        },
+        {
+          "id": "TIME_005",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t1",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t2",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t3",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t4",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t5",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t6",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t7",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t8",
+          "count": 1
+        },
+        {
+          "id": "TIME_005t9",
+          "count": 1
+        },
+        {
+          "id": "TLC_451",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "family": "rafaam"
+    }
+  ]
+}

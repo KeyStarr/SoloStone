@@ -1,0 +1,372 @@
+{
+ "version": 1,
+ "_doc": "Skill tiers (WP2, spec 2026-10-25-npc-world-v1-design.md). Same engine and golden node budget at every tier; low tiers add bounded, believable human mistakes (SkilledPilot), never shallow search: wrong trade target (enemy minions only), going face over a better trade, holding a card for later, planning a turn without the opponent's reply (ignoreAoeRisk, per turn), a greedy mulligan (per match) and missing a long lethal (lethalMiss, once per turn, lethals of >= minLethalActions). Typed-mistake chances are per eligible decision; maxValueLoss / softmaxMaxValueLoss in DeckPlanEvaluator units (a 3/3 minion is ~12). Every in-turn proposal is validated by paired same-root continuation searches; maxValueLoss 0 permits only equal-or-better outcomes, including ignoreAoeRisk and lethalMiss. Greedy mulligan remains a separate pregame policy. misorder is not used until the search exposes its plan line. expert and master keep the golden budget (master spans Diamond 5 to early Legend, and the matchmaker is not recalibrated for a ~+100 Elo shift); elite runs the elite+ budget (2026-10-25 research, docs/roadmap/2026-10-25-npc-elite-research.md): about 10x the golden plan search (own beam 25, 9 reply finalists x 14 samples, lethal 4000), ~4.5x the nodes per decision, and a live search budget of up to 45 s per turn (turnSearchSeconds) that stops new search 55 s into the 75 s retail turn (turnWallSeconds, also clamped to a finite turn deadline such as Nozdormu's 15 s). Owner 2026-11-01 (quality over speed within a retail turn): every tier uses the same 45 s / 55 s live guards, so slow devices never truncate a tier's node budget; tiers differ by node budget and mistakes, not by clock. replyBlendScale 1 at expert/master/elite. rating bands are nominal; data/npc/calibration-v1.json is a provisional diagnostic (tiers not separable at <=20 games per edge, see the design spec).",
+ "tiers": [
+  {
+   "id": "novice",
+   "tier": 1,
+   "rating": [
+    900,
+    1080
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 1.5,
+   "topN": 3,
+   "replyBlendScale": 0.3,
+   "softmaxMaxValueLoss": 6,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.3,
+     "maxValueLoss": 10,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "faceBias",
+     "chance": 0.2,
+     "maxValueLoss": 8,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "holdTooLong",
+     "chance": 0.15,
+     "maxValueLoss": 8,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "ignoreAoeRisk",
+     "chance": 0.3,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "greedyMulligan",
+     "chance": 0.4,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.6,
+     "maxValueLoss": 0,
+     "minLethalActions": 3
+    }
+   ]
+  },
+  {
+   "id": "casual",
+   "tier": 2,
+   "rating": [
+    1080,
+    1200
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 1.2,
+   "topN": 3,
+   "replyBlendScale": 0.5,
+   "softmaxMaxValueLoss": 5,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.22,
+     "maxValueLoss": 8.5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "faceBias",
+     "chance": 0.15,
+     "maxValueLoss": 7.5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "holdTooLong",
+     "chance": 0.11,
+     "maxValueLoss": 7.5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "ignoreAoeRisk",
+     "chance": 0.22,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "greedyMulligan",
+     "chance": 0.3,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.45,
+     "maxValueLoss": 0,
+     "minLethalActions": 3
+    }
+   ]
+  },
+  {
+   "id": "regular",
+   "tier": 3,
+   "rating": [
+    1200,
+    1320
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 1.0,
+   "topN": 3,
+   "replyBlendScale": 0.7,
+   "softmaxMaxValueLoss": 4,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.15,
+     "maxValueLoss": 7,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "faceBias",
+     "chance": 0.1,
+     "maxValueLoss": 7,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "holdTooLong",
+     "chance": 0.075,
+     "maxValueLoss": 7,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "ignoreAoeRisk",
+     "chance": 0.15,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "greedyMulligan",
+     "chance": 0.2,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.3,
+     "maxValueLoss": 0,
+     "minLethalActions": 4
+    }
+   ]
+  },
+  {
+   "id": "skilled",
+   "tier": 4,
+   "rating": [
+    1320,
+    1440
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 0.8,
+   "topN": 2,
+   "replyBlendScale": 0.85,
+   "softmaxMaxValueLoss": 3,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.1,
+     "maxValueLoss": 5.5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "faceBias",
+     "chance": 0.065,
+     "maxValueLoss": 5.5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "holdTooLong",
+     "chance": 0.05,
+     "maxValueLoss": 5,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "ignoreAoeRisk",
+     "chance": 0.1,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "greedyMulligan",
+     "chance": 0.13,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.2,
+     "maxValueLoss": 0,
+     "minLethalActions": 4
+    }
+   ]
+  },
+  {
+   "id": "expert",
+   "tier": 5,
+   "rating": [
+    1440,
+    1540
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 0.6,
+   "topN": 2,
+   "replyBlendScale": 1,
+   "softmaxMaxValueLoss": 2,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.06,
+     "maxValueLoss": 4,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "faceBias",
+     "chance": 0.04,
+     "maxValueLoss": 4,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "holdTooLong",
+     "chance": 0.03,
+     "maxValueLoss": 4,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "ignoreAoeRisk",
+     "chance": 0.06,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "greedyMulligan",
+     "chance": 0.08,
+     "maxValueLoss": 0,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.12,
+     "maxValueLoss": 0,
+     "minLethalActions": 5
+    }
+   ]
+  },
+  {
+   "id": "master",
+   "tier": 6,
+   "rating": [
+    1540,
+    1640
+   ],
+   "budget": {
+    "turnNodes": 28000,
+    "planNodes": 7000,
+    "lethalNodes": 500,
+    "replyK": 8,
+    "replyL": 3,
+    "replyR": 160,
+    "ownBeamWidth": 16,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 0,
+   "topN": 1,
+   "replyBlendScale": 1,
+   "softmaxMaxValueLoss": 0,
+   "mistakes": [
+    {
+     "kind": "tradeTarget",
+     "chance": 0.04,
+     "maxValueLoss": 4,
+     "minLethalActions": 0
+    },
+    {
+     "kind": "lethalMiss",
+     "chance": 0.05,
+     "maxValueLoss": 0,
+     "minLethalActions": 5
+    }
+   ]
+  },
+  {
+   "id": "elite",
+   "tier": 7,
+   "rating": [
+    1640,
+    2000
+   ],
+   "budget": {
+    "turnNodes": 280000,
+    "planNodes": 70000,
+    "lethalNodes": 4000,
+    "replyK": 14,
+    "replyL": 9,
+    "replyR": 160,
+    "ownBeamWidth": 25,
+    "turnSearchSeconds": 45,
+    "turnWallSeconds": 55
+   },
+   "temperature": 0,
+   "topN": 1,
+   "replyBlendScale": 1,
+   "softmaxMaxValueLoss": 0,
+   "mistakes": []
+  }
+ ]
+}

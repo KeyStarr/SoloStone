@@ -1,0 +1,5237 @@
+{
+  "ruleVersion": 1,
+  "clientBuild": "37.0.0.254477",
+  "quality": "NORMAL",
+  "inputs": {
+    "data/carddb/37.0.0.254477/cards.json.gz": "754a2f91f01122226cf7ab90c1fe7cd7bb4ce029cad4eab61b4e7b9262c5e7e6",
+    "data/carddb/37.0.0.254477/set-overrides.json": "ef6ba80c21e11dc820978c61650a3edb27d201240d0d7df3243ac1cacd16d60c",
+    "data/packs/policy-v1.json": "310d19d360b346dd2ec3e18d51f46a6e502e667679fc300f9ae1fd88edf94757"
+  },
+  "knownSets": [
+    "EMERALD_DREAM",
+    "THE_LOST_CITY",
+    "TIME_TRAVEL",
+    "CATACLYSM",
+    "ESCAPEFROM_VIOLET_HOLD",
+    "BE"
+  ],
+  "boosterSource": {
+    "path": "references/game/Assembly-CSharp.dll",
+    "sha256": "786376bddad544709639d4b3ab60ce8799d4b1c6c7d7fc4c225ce79fe07228c6",
+    "type": "BoosterDbId",
+    "method": "BOOSTER asset table is not present in the card export or references. Values decompiled from the pinned client enum using ilspycmd -t BoosterDbId references/game/Assembly-CSharp.dll; STANDARD maps to STANDARD_PACK; BE maps to BLACK_EMPIRE=1057; LEGACY uses CLASSIC=1."
+  },
+  "boosters": {
+    "STANDARD": 713,
+    "EMERALD_DREAM": 975,
+    "THE_LOST_CITY": 982,
+    "TIME_TRAVEL": 989,
+    "CATACLYSM": 1030,
+    "ESCAPEFROM_VIOLET_HOLD": 1047,
+    "BE": 1057
+  },
+  "excluded": [
+    {
+      "id": "BE_036",
+      "dbfId": 128132,
+      "rarity": "LEGENDARY",
+      "set": "BE",
+      "name": "M.O.T.H.E.R.",
+      "reason": "M.O.T.H.E.R. login/first-pack Normal Legendary grant, not a pack slot.",
+      "source": "https://hearthstone.blizzard.com/en-gb/news/24294373"
+    },
+    {
+      "id": "BE_055",
+      "dbfId": 129245,
+      "rarity": "LEGENDARY",
+      "set": "BE",
+      "name": "Archaedas",
+      "reason": "Archaedas uncraftable Normal rewards-track Legendary.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24309582/reign-of-the-black-empire-rewards-track-refresh"
+    },
+    {
+      "id": "CATA_615",
+      "dbfId": 123396,
+      "rarity": "LEGENDARY",
+      "set": "CATACLYSM",
+      "name": "Genn, Cursed King",
+      "reason": "Uncraftable Normal rewards-track Legendary.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24265937"
+    },
+    {
+      "id": "CATA_720",
+      "dbfId": 122635,
+      "rarity": "LEGENDARY",
+      "set": "CATACLYSM",
+      "name": "Warmaster Blackhorn",
+      "reason": "Login/first-pack Normal Legendary grant.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24242740"
+    },
+    {
+      "id": "EDR_000",
+      "dbfId": 113321,
+      "rarity": "LEGENDARY",
+      "set": "EMERALD_DREAM",
+      "name": "Ysera, Emerald Aspect",
+      "reason": "Login/first-pack Normal Legendary grant, not a pack slot.",
+      "source": "https://hearthstone.blizzard.com/en-gb/news/24179332"
+    },
+    {
+      "id": "EDR_105",
+      "dbfId": 113973,
+      "rarity": "COMMON",
+      "set": "EMERALD_DREAM",
+      "name": "Creature of Madness",
+      "reason": "Normal Creature of Madness promotional playset grant; later first-pack unlock.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24204092"
+    },
+    {
+      "id": "EDR_844",
+      "dbfId": 114849,
+      "rarity": "LEGENDARY",
+      "set": "EMERALD_DREAM",
+      "name": "Naralex, Herald of the Flights",
+      "reason": "Uncraftable Normal rewards-track Legendary.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24187142"
+    },
+    {
+      "id": "JAIL_407",
+      "dbfId": 124150,
+      "rarity": "LEGENDARY",
+      "set": "ESCAPEFROM_VIOLET_HOLD",
+      "name": "Vanessa the Ringleader",
+      "reason": "Login/first-pack Normal Legendary grant.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24280282"
+    },
+    {
+      "id": "JAIL_850",
+      "dbfId": 126600,
+      "rarity": "LEGENDARY",
+      "set": "ESCAPEFROM_VIOLET_HOLD",
+      "name": "Warden Maiev",
+      "reason": "Uncraftable Normal rewards-track Legendary.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24286285"
+    },
+    {
+      "id": "TIME_000",
+      "dbfId": 118636,
+      "rarity": "RARE",
+      "set": "TIME_TRAVEL",
+      "name": "Semi-Stable Portal",
+      "reason": "Normal promotional/event playset grants; Portal Vanguard explicitly excluded from packs.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24232759"
+    },
+    {
+      "id": "TIME_003",
+      "dbfId": 119314,
+      "rarity": "RARE",
+      "set": "TIME_TRAVEL",
+      "name": "Portal Vanguard",
+      "reason": "Normal promotional/event playset grants; Portal Vanguard explicitly excluded from packs.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24232759"
+    },
+    {
+      "id": "TIME_038",
+      "dbfId": 120646,
+      "rarity": "LEGENDARY",
+      "set": "TIME_TRAVEL",
+      "name": "Mister Clocksworth",
+      "reason": "Login/first-pack Normal Legendary grant.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24232759"
+    },
+    {
+      "id": "TIME_064",
+      "dbfId": 120985,
+      "rarity": "LEGENDARY",
+      "set": "TIME_TRAVEL",
+      "name": "Chrono-Lord Deios",
+      "reason": "Uncraftable Normal rewards-track Legendary.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24241547"
+    },
+    {
+      "id": "TLC_106",
+      "dbfId": 117877,
+      "rarity": "LEGENDARY",
+      "set": "THE_LOST_CITY",
+      "name": "Endbringer Umbra",
+      "reason": "Login/first-pack Normal Legendary grant.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24205006"
+    },
+    {
+      "id": "TLC_110",
+      "dbfId": 121026,
+      "rarity": "LEGENDARY",
+      "set": "THE_LOST_CITY",
+      "name": "City Chief Esho",
+      "reason": "Uncraftable Normal rewards-track Legendary (client name City Chief Esho).",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24215170"
+    },
+    {
+      "id": "TLC_252",
+      "dbfId": 118252,
+      "rarity": "RARE",
+      "set": "THE_LOST_CITY",
+      "name": "Dissolving Ooze",
+      "reason": "Normal shop/event playset grants; first-pack unlock after 33.2.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24205006"
+    },
+    {
+      "id": "TLC_468",
+      "dbfId": 118279,
+      "rarity": "COMMON",
+      "set": "THE_LOST_CITY",
+      "name": "Blob of Tar",
+      "reason": "Normal shop/event playset grants; first-pack unlock after 33.2.",
+      "source": "https://hearthstone.blizzard.com/en-us/news/24205006"
+    }
+  ],
+  "sets": {
+    "EMERALD_DREAM": {
+      "setId": 1946,
+      "count": 180,
+      "byRarity": {
+        "COMMON": 68,
+        "EPIC": 29,
+        "LEGENDARY": 29,
+        "RARE": 54
+      },
+      "cards": [
+        {
+          "id": "EDR_001",
+          "dbfId": 113328,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_014",
+          "dbfId": 113371,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_031",
+          "dbfId": 113434,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_060",
+          "dbfId": 110889,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_102",
+          "dbfId": 113822,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_110",
+          "dbfId": 115652,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_209",
+          "dbfId": 113588,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_226",
+          "dbfId": 114018,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_227",
+          "dbfId": 114020,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_230",
+          "dbfId": 114280,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_231",
+          "dbfId": 114367,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_232",
+          "dbfId": 114357,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_233",
+          "dbfId": 114369,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_234",
+          "dbfId": 114281,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_238",
+          "dbfId": 114284,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_251",
+          "dbfId": 114511,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_252",
+          "dbfId": 114630,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_253",
+          "dbfId": 114632,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_254",
+          "dbfId": 114533,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_255",
+          "dbfId": 114543,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_256",
+          "dbfId": 116674,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_257",
+          "dbfId": 116667,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_258",
+          "dbfId": 114544,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_259",
+          "dbfId": 114868,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_260",
+          "dbfId": 114884,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_261",
+          "dbfId": 115052,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_262",
+          "dbfId": 115055,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_263",
+          "dbfId": 115058,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_264",
+          "dbfId": 116675,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_270",
+          "dbfId": 115080,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_271",
+          "dbfId": 115809,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_272",
+          "dbfId": 115873,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_273",
+          "dbfId": 115876,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_416",
+          "dbfId": 113568,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_421",
+          "dbfId": 113606,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_430",
+          "dbfId": 113700,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_449",
+          "dbfId": 114080,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_451",
+          "dbfId": 114081,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_453",
+          "dbfId": 114213,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_454",
+          "dbfId": 114215,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_455",
+          "dbfId": 114217,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_456",
+          "dbfId": 114218,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_457",
+          "dbfId": 114219,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_459",
+          "dbfId": 114243,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_460",
+          "dbfId": 114299,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_461",
+          "dbfId": 114300,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_462",
+          "dbfId": 114308,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_463",
+          "dbfId": 114310,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_464",
+          "dbfId": 114326,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_465",
+          "dbfId": 114340,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_468",
+          "dbfId": 116293,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_469",
+          "dbfId": 114344,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_470",
+          "dbfId": 114346,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_471",
+          "dbfId": 114353,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_472",
+          "dbfId": 114373,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_476",
+          "dbfId": 114627,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_477",
+          "dbfId": 114920,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_480",
+          "dbfId": 114254,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_481",
+          "dbfId": 114298,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_482",
+          "dbfId": 115025,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_483",
+          "dbfId": 115033,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_484",
+          "dbfId": 115037,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_485",
+          "dbfId": 115039,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_486",
+          "dbfId": 115041,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_487",
+          "dbfId": 115044,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_488",
+          "dbfId": 115086,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_489",
+          "dbfId": 115203,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_490",
+          "dbfId": 115215,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_491",
+          "dbfId": 115307,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_492",
+          "dbfId": 115365,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_493",
+          "dbfId": 115928,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_494",
+          "dbfId": 117498,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_495",
+          "dbfId": 115027,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_517",
+          "dbfId": 114287,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_518",
+          "dbfId": 114289,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_519",
+          "dbfId": 114292,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_520",
+          "dbfId": 114293,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_521",
+          "dbfId": 114505,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_522",
+          "dbfId": 114508,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_523",
+          "dbfId": 114510,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_524",
+          "dbfId": 114514,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_525",
+          "dbfId": 114517,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_526",
+          "dbfId": 114518,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_527",
+          "dbfId": 114527,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_528",
+          "dbfId": 115088,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_529",
+          "dbfId": 115295,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_530",
+          "dbfId": 115364,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_531",
+          "dbfId": 116684,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_540",
+          "dbfId": 115612,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_570",
+          "dbfId": 116660,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_571",
+          "dbfId": 116672,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_572",
+          "dbfId": 116673,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_598",
+          "dbfId": 117420,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_654",
+          "dbfId": 118250,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_780",
+          "dbfId": 115174,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_781",
+          "dbfId": 115176,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_800",
+          "dbfId": 114006,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_804",
+          "dbfId": 114012,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_810",
+          "dbfId": 114301,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_811",
+          "dbfId": 114303,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_812",
+          "dbfId": 114304,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_813",
+          "dbfId": 114967,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_814",
+          "dbfId": 114305,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_815",
+          "dbfId": 114306,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_816",
+          "dbfId": 116296,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_817",
+          "dbfId": 114966,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_818",
+          "dbfId": 114307,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_819",
+          "dbfId": 116018,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_820",
+          "dbfId": 115198,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_840",
+          "dbfId": 114654,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_841",
+          "dbfId": 114663,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_842",
+          "dbfId": 114844,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_843",
+          "dbfId": 114848,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_845",
+          "dbfId": 114858,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_846",
+          "dbfId": 115090,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_847",
+          "dbfId": 114912,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_848",
+          "dbfId": 114914,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_849",
+          "dbfId": 114933,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_852",
+          "dbfId": 114935,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_853",
+          "dbfId": 114857,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_856",
+          "dbfId": 115139,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_860",
+          "dbfId": 114076,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_861",
+          "dbfId": 116292,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_871",
+          "dbfId": 116462,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_872",
+          "dbfId": 116977,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_873",
+          "dbfId": 116495,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_874",
+          "dbfId": 116980,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_882",
+          "dbfId": 114337,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_888",
+          "dbfId": 115186,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_889",
+          "dbfId": 115191,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_890",
+          "dbfId": 114496,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_891",
+          "dbfId": 114497,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_892",
+          "dbfId": 114498,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_895",
+          "dbfId": 115264,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "EDR_940",
+          "dbfId": 115805,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_941",
+          "dbfId": 115866,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_942",
+          "dbfId": 115867,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_970",
+          "dbfId": 115461,
+          "rarity": "RARE"
+        },
+        {
+          "id": "EDR_971",
+          "dbfId": 115938,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_978",
+          "dbfId": 117511,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "EDR_979",
+          "dbfId": 117302,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "EDR_999",
+          "dbfId": 116256,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_777",
+          "dbfId": 117292,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_778",
+          "dbfId": 117294,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_900",
+          "dbfId": 115624,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_901",
+          "dbfId": 115625,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_902",
+          "dbfId": 115626,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "FIR_904",
+          "dbfId": 115628,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_906",
+          "dbfId": 115630,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_907",
+          "dbfId": 115631,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "FIR_908",
+          "dbfId": 115632,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_909",
+          "dbfId": 115633,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_910",
+          "dbfId": 115634,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_911",
+          "dbfId": 115635,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_913",
+          "dbfId": 115637,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_914",
+          "dbfId": 115638,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_916",
+          "dbfId": 115640,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_918",
+          "dbfId": 115642,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_919",
+          "dbfId": 115646,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_920",
+          "dbfId": 115647,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_921",
+          "dbfId": 115648,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_922",
+          "dbfId": 115649,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_923",
+          "dbfId": 115650,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_924",
+          "dbfId": 115651,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_927",
+          "dbfId": 115656,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_928",
+          "dbfId": 115653,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_929",
+          "dbfId": 115655,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_939",
+          "dbfId": 115688,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_940",
+          "dbfId": 115654,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "FIR_941",
+          "dbfId": 115776,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_951",
+          "dbfId": 115748,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "FIR_952",
+          "dbfId": 115749,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_953",
+          "dbfId": 115751,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_954",
+          "dbfId": 115753,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_955",
+          "dbfId": 115754,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_956",
+          "dbfId": 115755,
+          "rarity": "RARE"
+        },
+        {
+          "id": "FIR_958",
+          "dbfId": 115759,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "FIR_959",
+          "dbfId": 115756,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "FIR_960",
+          "dbfId": 115960,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "FIR_961",
+          "dbfId": 115972,
+          "rarity": "RARE"
+        }
+      ]
+    },
+    "THE_LOST_CITY": {
+      "setId": 1952,
+      "count": 179,
+      "byRarity": {
+        "COMMON": 68,
+        "EPIC": 28,
+        "LEGENDARY": 29,
+        "RARE": 54
+      },
+      "cards": [
+        {
+          "id": "DINO_130",
+          "dbfId": 118490,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_131",
+          "dbfId": 118494,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_132",
+          "dbfId": 118497,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_136",
+          "dbfId": 118503,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_137",
+          "dbfId": 118505,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_138",
+          "dbfId": 118507,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_400",
+          "dbfId": 118403,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_401",
+          "dbfId": 118404,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "DINO_402",
+          "dbfId": 118406,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_403",
+          "dbfId": 118408,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_404",
+          "dbfId": 118410,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_405",
+          "dbfId": 118413,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_406",
+          "dbfId": 118480,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_407",
+          "dbfId": 118481,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "DINO_408",
+          "dbfId": 118484,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_409",
+          "dbfId": 118485,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_410",
+          "dbfId": 118487,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "DINO_411",
+          "dbfId": 118496,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_412",
+          "dbfId": 118500,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_413",
+          "dbfId": 118501,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_414",
+          "dbfId": 118554,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_415",
+          "dbfId": 118555,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_416",
+          "dbfId": 118558,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_417",
+          "dbfId": 118559,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_419",
+          "dbfId": 118563,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_421",
+          "dbfId": 118617,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_422",
+          "dbfId": 118620,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_424",
+          "dbfId": 118625,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_426",
+          "dbfId": 118628,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_427",
+          "dbfId": 118632,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_428",
+          "dbfId": 118649,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_429",
+          "dbfId": 118651,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_430",
+          "dbfId": 118653,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "DINO_431",
+          "dbfId": 118656,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_432",
+          "dbfId": 118712,
+          "rarity": "RARE"
+        },
+        {
+          "id": "DINO_433",
+          "dbfId": 118730,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_434",
+          "dbfId": 118766,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "DINO_435",
+          "dbfId": 119695,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_100",
+          "dbfId": 117762,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_101",
+          "dbfId": 119781,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_102",
+          "dbfId": 117848,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_107",
+          "dbfId": 117885,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_109",
+          "dbfId": 117889,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_220",
+          "dbfId": 117531,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_221",
+          "dbfId": 117532,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_222",
+          "dbfId": 117606,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_223",
+          "dbfId": 117533,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_224",
+          "dbfId": 117534,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_225",
+          "dbfId": 117612,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_226",
+          "dbfId": 117535,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_227",
+          "dbfId": 117536,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_228",
+          "dbfId": 117617,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_229",
+          "dbfId": 117538,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_230",
+          "dbfId": 117646,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_231",
+          "dbfId": 117648,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_232",
+          "dbfId": 117650,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_233",
+          "dbfId": 117652,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_234",
+          "dbfId": 117653,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_235",
+          "dbfId": 117655,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_236",
+          "dbfId": 117656,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_237",
+          "dbfId": 117657,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_239",
+          "dbfId": 117661,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_240",
+          "dbfId": 117949,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_241",
+          "dbfId": 117951,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_242",
+          "dbfId": 118220,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_243",
+          "dbfId": 118221,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_244",
+          "dbfId": 118223,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_245",
+          "dbfId": 118224,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_246",
+          "dbfId": 118232,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_247",
+          "dbfId": 118235,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_248",
+          "dbfId": 118238,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_249",
+          "dbfId": 118222,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_250",
+          "dbfId": 118247,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_251",
+          "dbfId": 118251,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_253",
+          "dbfId": 118254,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_254",
+          "dbfId": 118257,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_255",
+          "dbfId": 118259,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_256",
+          "dbfId": 118260,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_257",
+          "dbfId": 118575,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_334",
+          "dbfId": 118616,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_364",
+          "dbfId": 118265,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_365",
+          "dbfId": 118266,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_366",
+          "dbfId": 118269,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_401",
+          "dbfId": 116376,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_426",
+          "dbfId": 117341,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_427",
+          "dbfId": 117381,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_428",
+          "dbfId": 117382,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_429",
+          "dbfId": 117383,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_430",
+          "dbfId": 117384,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_432",
+          "dbfId": 117423,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_433",
+          "dbfId": 117427,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_434",
+          "dbfId": 117430,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_435",
+          "dbfId": 117431,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_436",
+          "dbfId": 117434,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_438",
+          "dbfId": 117562,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_439",
+          "dbfId": 117604,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_440",
+          "dbfId": 117622,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_441",
+          "dbfId": 117664,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_442",
+          "dbfId": 117665,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_443",
+          "dbfId": 117666,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_444",
+          "dbfId": 117679,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_446",
+          "dbfId": 117827,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_447",
+          "dbfId": 117830,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_449",
+          "dbfId": 117837,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_450",
+          "dbfId": 117890,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_451",
+          "dbfId": 117892,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_452",
+          "dbfId": 117956,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_454",
+          "dbfId": 118182,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_460",
+          "dbfId": 118183,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_461",
+          "dbfId": 118192,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_462",
+          "dbfId": 118199,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_463",
+          "dbfId": 118210,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_464",
+          "dbfId": 118225,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_465",
+          "dbfId": 118241,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_466",
+          "dbfId": 118243,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_467",
+          "dbfId": 118277,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_469",
+          "dbfId": 118282,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_477",
+          "dbfId": 119587,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_478",
+          "dbfId": 119637,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_479",
+          "dbfId": 119789,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_480",
+          "dbfId": 119809,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_482",
+          "dbfId": 120344,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_483",
+          "dbfId": 120582,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_513",
+          "dbfId": 117222,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_514",
+          "dbfId": 117691,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_515",
+          "dbfId": 117697,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_516",
+          "dbfId": 117698,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_517",
+          "dbfId": 117699,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_518",
+          "dbfId": 117700,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_519",
+          "dbfId": 118580,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_520",
+          "dbfId": 117702,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_521",
+          "dbfId": 117703,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_522",
+          "dbfId": 119532,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_600",
+          "dbfId": 117714,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_601",
+          "dbfId": 117715,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_602",
+          "dbfId": 117716,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_603",
+          "dbfId": 117719,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_605",
+          "dbfId": 117733,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_606",
+          "dbfId": 117771,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_620",
+          "dbfId": 117835,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_621",
+          "dbfId": 117916,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_622",
+          "dbfId": 117917,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_623",
+          "dbfId": 117918,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_624",
+          "dbfId": 117919,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_630",
+          "dbfId": 117869,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_631",
+          "dbfId": 117871,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_632",
+          "dbfId": 117874,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_633",
+          "dbfId": 117950,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_810",
+          "dbfId": 117231,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_811",
+          "dbfId": 117232,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_814",
+          "dbfId": 117312,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_815",
+          "dbfId": 117316,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_816",
+          "dbfId": 117317,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_817",
+          "dbfId": 117544,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_818",
+          "dbfId": 117557,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_819",
+          "dbfId": 117563,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_820",
+          "dbfId": 117565,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_821",
+          "dbfId": 117566,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_822",
+          "dbfId": 117574,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_823",
+          "dbfId": 117580,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_824",
+          "dbfId": 117596,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_825",
+          "dbfId": 117598,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_826",
+          "dbfId": 117599,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_827",
+          "dbfId": 117600,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_828",
+          "dbfId": 117602,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_829",
+          "dbfId": 117610,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_830",
+          "dbfId": 117672,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_831",
+          "dbfId": 117674,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_833",
+          "dbfId": 117813,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_835",
+          "dbfId": 120593,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_836",
+          "dbfId": 121029,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_840",
+          "dbfId": 119754,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_841",
+          "dbfId": 119755,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TLC_888",
+          "dbfId": 122318,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_900",
+          "dbfId": 117684,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_901",
+          "dbfId": 117685,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TLC_902",
+          "dbfId": 117686,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TLC_903",
+          "dbfId": 117687,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TLC_987",
+          "dbfId": 118177,
+          "rarity": "COMMON"
+        }
+      ]
+    },
+    "TIME_TRAVEL": {
+      "setId": 1957,
+      "count": 179,
+      "byRarity": {
+        "COMMON": 69,
+        "EPIC": 28,
+        "LEGENDARY": 29,
+        "RARE": 53
+      },
+      "cards": [
+        {
+          "id": "END_000",
+          "dbfId": 121242,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_001",
+          "dbfId": 121274,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_002",
+          "dbfId": 121057,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_003",
+          "dbfId": 121271,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_004",
+          "dbfId": 121058,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_005",
+          "dbfId": 121060,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_006",
+          "dbfId": 121063,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "END_007",
+          "dbfId": 121064,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_008",
+          "dbfId": 121106,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_009",
+          "dbfId": 121107,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_010",
+          "dbfId": 121144,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_011",
+          "dbfId": 121150,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_012",
+          "dbfId": 121151,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_013",
+          "dbfId": 121153,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_014",
+          "dbfId": 121154,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_015",
+          "dbfId": 121157,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_016",
+          "dbfId": 121158,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_017",
+          "dbfId": 121159,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "END_018",
+          "dbfId": 121162,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_019",
+          "dbfId": 121166,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_020",
+          "dbfId": 121168,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_021",
+          "dbfId": 121171,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_022",
+          "dbfId": 121174,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_023",
+          "dbfId": 121176,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_024",
+          "dbfId": 121187,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_025",
+          "dbfId": 121188,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_026",
+          "dbfId": 121189,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_027",
+          "dbfId": 121190,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_028",
+          "dbfId": 121191,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_029",
+          "dbfId": 121192,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_030",
+          "dbfId": 121193,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_031",
+          "dbfId": 121194,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_032",
+          "dbfId": 121195,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_033",
+          "dbfId": 121196,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "END_034",
+          "dbfId": 121197,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "END_035",
+          "dbfId": 121199,
+          "rarity": "RARE"
+        },
+        {
+          "id": "END_036",
+          "dbfId": 121202,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "END_037",
+          "dbfId": 121203,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_001",
+          "dbfId": 119270,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_002",
+          "dbfId": 119312,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_004",
+          "dbfId": 119317,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_005",
+          "dbfId": 119432,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_006",
+          "dbfId": 119541,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_008",
+          "dbfId": 119545,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_009",
+          "dbfId": 119918,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_013",
+          "dbfId": 119686,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_014",
+          "dbfId": 119688,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_015",
+          "dbfId": 119963,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_016",
+          "dbfId": 119964,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_017",
+          "dbfId": 119965,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_018",
+          "dbfId": 119977,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_019",
+          "dbfId": 120011,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_020",
+          "dbfId": 120074,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_021",
+          "dbfId": 120179,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_022",
+          "dbfId": 120181,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_023",
+          "dbfId": 120208,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_024",
+          "dbfId": 120266,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_025",
+          "dbfId": 120482,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_026",
+          "dbfId": 120484,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_027",
+          "dbfId": 120485,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_028",
+          "dbfId": 120487,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_029",
+          "dbfId": 120488,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_030",
+          "dbfId": 120489,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_031",
+          "dbfId": 120490,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_032",
+          "dbfId": 120491,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_033",
+          "dbfId": 120499,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_034",
+          "dbfId": 120503,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_035",
+          "dbfId": 120506,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_036",
+          "dbfId": 120534,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_037",
+          "dbfId": 120547,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_039",
+          "dbfId": 120647,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_040",
+          "dbfId": 120782,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_041",
+          "dbfId": 120784,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_042",
+          "dbfId": 120795,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_043",
+          "dbfId": 120818,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_044",
+          "dbfId": 120821,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_045",
+          "dbfId": 120856,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_046",
+          "dbfId": 120857,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_047",
+          "dbfId": 120859,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_048",
+          "dbfId": 120860,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_049",
+          "dbfId": 120944,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_050",
+          "dbfId": 120947,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_051",
+          "dbfId": 120949,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_052",
+          "dbfId": 120951,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_053",
+          "dbfId": 120954,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_054",
+          "dbfId": 120955,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_055",
+          "dbfId": 120958,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_056",
+          "dbfId": 120961,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_057",
+          "dbfId": 120962,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_058",
+          "dbfId": 120964,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_059",
+          "dbfId": 120966,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_060",
+          "dbfId": 120976,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_061",
+          "dbfId": 120977,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_062",
+          "dbfId": 120979,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_063",
+          "dbfId": 120981,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_100",
+          "dbfId": 121051,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_101",
+          "dbfId": 121670,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_102",
+          "dbfId": 121671,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_103",
+          "dbfId": 121672,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_209",
+          "dbfId": 119643,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_211",
+          "dbfId": 119928,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_212",
+          "dbfId": 120173,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_213",
+          "dbfId": 120437,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_214",
+          "dbfId": 120175,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_215",
+          "dbfId": 120176,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_216",
+          "dbfId": 120448,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_217",
+          "dbfId": 120177,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_218",
+          "dbfId": 121020,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_427",
+          "dbfId": 120450,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_428",
+          "dbfId": 120452,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_429",
+          "dbfId": 120471,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_431",
+          "dbfId": 120475,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_432",
+          "dbfId": 120477,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_433",
+          "dbfId": 120492,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_434",
+          "dbfId": 120527,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_435",
+          "dbfId": 120543,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_436",
+          "dbfId": 120544,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_441",
+          "dbfId": 120922,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_442",
+          "dbfId": 120988,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_443",
+          "dbfId": 120990,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_444",
+          "dbfId": 120993,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_446",
+          "dbfId": 120999,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_447",
+          "dbfId": 121005,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_448",
+          "dbfId": 121023,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_449",
+          "dbfId": 121024,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_600",
+          "dbfId": 119696,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_601",
+          "dbfId": 120788,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_602",
+          "dbfId": 120501,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_603",
+          "dbfId": 119702,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_605",
+          "dbfId": 119703,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_606",
+          "dbfId": 119704,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_609",
+          "dbfId": 119707,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_610",
+          "dbfId": 120530,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_611",
+          "dbfId": 120389,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_612",
+          "dbfId": 121011,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_613",
+          "dbfId": 120481,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_614",
+          "dbfId": 121015,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_615",
+          "dbfId": 121014,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_616",
+          "dbfId": 120209,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_617",
+          "dbfId": 121017,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_618",
+          "dbfId": 121000,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_619",
+          "dbfId": 120183,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_620",
+          "dbfId": 121210,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_700",
+          "dbfId": 120644,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_701",
+          "dbfId": 120746,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_702",
+          "dbfId": 120748,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_703",
+          "dbfId": 120749,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_704",
+          "dbfId": 120761,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_705",
+          "dbfId": 120762,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_706",
+          "dbfId": 120774,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_707",
+          "dbfId": 122833,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_710",
+          "dbfId": 120790,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_711",
+          "dbfId": 120793,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_712",
+          "dbfId": 120797,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_713",
+          "dbfId": 120805,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_714",
+          "dbfId": 120817,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_715",
+          "dbfId": 120828,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_716",
+          "dbfId": 120829,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_720",
+          "dbfId": 120847,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_730",
+          "dbfId": 121460,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_750",
+          "dbfId": 120975,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_770",
+          "dbfId": 121142,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_810",
+          "dbfId": 119166,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_850",
+          "dbfId": 119451,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_852",
+          "dbfId": 119524,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_855",
+          "dbfId": 119528,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_856",
+          "dbfId": 119632,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_857",
+          "dbfId": 119633,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_858",
+          "dbfId": 119649,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_859",
+          "dbfId": 119691,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_860",
+          "dbfId": 119740,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_861",
+          "dbfId": 119741,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_870",
+          "dbfId": 119778,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_871",
+          "dbfId": 119780,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_872",
+          "dbfId": 119783,
+          "rarity": "RARE"
+        },
+        {
+          "id": "TIME_873",
+          "dbfId": 119786,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "TIME_875",
+          "dbfId": 119814,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "TIME_876",
+          "dbfId": 119841,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "TIME_890",
+          "dbfId": 120060,
+          "rarity": "LEGENDARY"
+        }
+      ]
+    },
+    "CATACLYSM": {
+      "setId": 1980,
+      "count": 162,
+      "byRarity": {
+        "COMMON": 51,
+        "EPIC": 36,
+        "LEGENDARY": 29,
+        "RARE": 46
+      },
+      "cards": [
+        {
+          "id": "CATA_111",
+          "dbfId": 122500,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_130",
+          "dbfId": 122966,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_131",
+          "dbfId": 122967,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_132",
+          "dbfId": 122968,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_133",
+          "dbfId": 122970,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_134",
+          "dbfId": 122971,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_135",
+          "dbfId": 123023,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_136",
+          "dbfId": 122975,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_138",
+          "dbfId": 122988,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_139",
+          "dbfId": 122976,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_140",
+          "dbfId": 122978,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_150",
+          "dbfId": 124110,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_151",
+          "dbfId": 124116,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_153",
+          "dbfId": 125442,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_154",
+          "dbfId": 125450,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_155",
+          "dbfId": 124138,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_156",
+          "dbfId": 123546,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_158",
+          "dbfId": 123549,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_160",
+          "dbfId": 123552,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_161",
+          "dbfId": 123547,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_180",
+          "dbfId": 123675,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_185",
+          "dbfId": 123779,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_186",
+          "dbfId": 123783,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_190h",
+          "dbfId": 125467,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_200",
+          "dbfId": 123060,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_201",
+          "dbfId": 123072,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_202",
+          "dbfId": 123074,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_203",
+          "dbfId": 123077,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_206",
+          "dbfId": 123119,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_208",
+          "dbfId": 123122,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_209",
+          "dbfId": 123124,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_210",
+          "dbfId": 123126,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_213",
+          "dbfId": 123151,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_215",
+          "dbfId": 123315,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_216",
+          "dbfId": 123426,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_300",
+          "dbfId": 122755,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_301",
+          "dbfId": 122757,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_302",
+          "dbfId": 122779,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_303",
+          "dbfId": 122774,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_304",
+          "dbfId": 122881,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_305",
+          "dbfId": 122878,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_306",
+          "dbfId": 122874,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_307",
+          "dbfId": 123146,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_308",
+          "dbfId": 123570,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_432",
+          "dbfId": 122401,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_452",
+          "dbfId": 122454,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_458",
+          "dbfId": 122632,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_464",
+          "dbfId": 122759,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_465",
+          "dbfId": 122760,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_467",
+          "dbfId": 122766,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_469",
+          "dbfId": 122771,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_470",
+          "dbfId": 122778,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_471",
+          "dbfId": 122879,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_472",
+          "dbfId": 123106,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_473",
+          "dbfId": 123109,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_474",
+          "dbfId": 123112,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_475",
+          "dbfId": 123114,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_476",
+          "dbfId": 123115,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_477",
+          "dbfId": 123117,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_478",
+          "dbfId": 123123,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_479",
+          "dbfId": 123139,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_480",
+          "dbfId": 123691,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_481",
+          "dbfId": 123332,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_483",
+          "dbfId": 123351,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_484",
+          "dbfId": 123398,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_485",
+          "dbfId": 123410,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_487",
+          "dbfId": 123419,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_488",
+          "dbfId": 123665,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_489",
+          "dbfId": 123692,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_490",
+          "dbfId": 122710,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_491",
+          "dbfId": 122711,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_492",
+          "dbfId": 122712,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_493",
+          "dbfId": 122713,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_494",
+          "dbfId": 122714,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_496",
+          "dbfId": 122720,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_497",
+          "dbfId": 122832,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_498",
+          "dbfId": 122829,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_499",
+          "dbfId": 122831,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_525",
+          "dbfId": 122765,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_526",
+          "dbfId": 122770,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_527",
+          "dbfId": 122772,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_528",
+          "dbfId": 122773,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_529",
+          "dbfId": 122775,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_530",
+          "dbfId": 122848,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_533",
+          "dbfId": 122995,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_550",
+          "dbfId": 122865,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_551",
+          "dbfId": 122867,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_552",
+          "dbfId": 122869,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_553",
+          "dbfId": 122871,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_554",
+          "dbfId": 122883,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_556",
+          "dbfId": 122933,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_557",
+          "dbfId": 122932,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_558",
+          "dbfId": 122937,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_560",
+          "dbfId": 122939,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_561",
+          "dbfId": 122947,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_563",
+          "dbfId": 122950,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_564",
+          "dbfId": 122952,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_565",
+          "dbfId": 122953,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_566",
+          "dbfId": 122961,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_567",
+          "dbfId": 122963,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_568",
+          "dbfId": 122999,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_569",
+          "dbfId": 123001,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_570",
+          "dbfId": 123006,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_580",
+          "dbfId": 123055,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_581",
+          "dbfId": 123056,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_582",
+          "dbfId": 123157,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_584",
+          "dbfId": 123163,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_585",
+          "dbfId": 123164,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_586",
+          "dbfId": 123166,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_591",
+          "dbfId": 123321,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_610",
+          "dbfId": 123382,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_612",
+          "dbfId": 123383,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_613",
+          "dbfId": 123384,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_614",
+          "dbfId": 123385,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_616",
+          "dbfId": 123440,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_621",
+          "dbfId": 123403,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_697",
+          "dbfId": 123604,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_699",
+          "dbfId": 123539,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_721",
+          "dbfId": 122637,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_722",
+          "dbfId": 122639,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_723",
+          "dbfId": 122641,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_724",
+          "dbfId": 122642,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_725",
+          "dbfId": 122643,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_726",
+          "dbfId": 125432,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CATA_780",
+          "dbfId": 123600,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_785",
+          "dbfId": 123605,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_786",
+          "dbfId": 123606,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_820",
+          "dbfId": 121757,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_897",
+          "dbfId": 123660,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_898",
+          "dbfId": 123655,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CATA_978",
+          "dbfId": 123847,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CATA_979",
+          "dbfId": 123848,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CATA_999",
+          "dbfId": 128058,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_040",
+          "dbfId": 123472,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_041",
+          "dbfId": 123478,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_042",
+          "dbfId": 123485,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_043",
+          "dbfId": 123481,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_044",
+          "dbfId": 123483,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_045",
+          "dbfId": 123482,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_046",
+          "dbfId": 123493,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "MEND_100",
+          "dbfId": 123849,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_300",
+          "dbfId": 123486,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_301",
+          "dbfId": 123488,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_302",
+          "dbfId": 123490,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_303",
+          "dbfId": 123491,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_304",
+          "dbfId": 123492,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "MEND_305",
+          "dbfId": 123510,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_307",
+          "dbfId": 123513,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_500",
+          "dbfId": 123495,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_501",
+          "dbfId": 123496,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_502",
+          "dbfId": 123504,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_503",
+          "dbfId": 123507,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_504",
+          "dbfId": 123508,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_505",
+          "dbfId": 123514,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "MEND_506",
+          "dbfId": 123515,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_800",
+          "dbfId": 123620,
+          "rarity": "RARE"
+        },
+        {
+          "id": "MEND_801",
+          "dbfId": 123621,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_802",
+          "dbfId": 123622,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_803",
+          "dbfId": 123623,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "MEND_804",
+          "dbfId": 123624,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "MEND_805",
+          "dbfId": 123625,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "MEND_900",
+          "dbfId": 127427,
+          "rarity": "RARE"
+        }
+      ]
+    },
+    "ESCAPEFROM_VIOLET_HOLD": {
+      "setId": 1988,
+      "count": 162,
+      "byRarity": {
+        "COMMON": 51,
+        "EPIC": 36,
+        "LEGENDARY": 29,
+        "RARE": 46
+      },
+      "cards": [
+        {
+          "id": "CAP_000",
+          "dbfId": 127011,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_001",
+          "dbfId": 127028,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_002",
+          "dbfId": 127041,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_003",
+          "dbfId": 127054,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_004",
+          "dbfId": 127055,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_005",
+          "dbfId": 127056,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CAP_006",
+          "dbfId": 127073,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_101",
+          "dbfId": 127013,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_102",
+          "dbfId": 127014,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_103",
+          "dbfId": 127015,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_104",
+          "dbfId": 127016,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_105",
+          "dbfId": 127017,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_106",
+          "dbfId": 127019,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CAP_107",
+          "dbfId": 127099,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_400",
+          "dbfId": 127033,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_401",
+          "dbfId": 127037,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_402",
+          "dbfId": 127051,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_403",
+          "dbfId": 127057,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_404",
+          "dbfId": 127058,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_405",
+          "dbfId": 127067,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "CAP_406",
+          "dbfId": 127090,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_407",
+          "dbfId": 129888,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_800",
+          "dbfId": 127060,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_801",
+          "dbfId": 127061,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_802",
+          "dbfId": 127062,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_803",
+          "dbfId": 127064,
+          "rarity": "RARE"
+        },
+        {
+          "id": "CAP_804",
+          "dbfId": 127065,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "CAP_805",
+          "dbfId": 127092,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "CAP_806",
+          "dbfId": 127068,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_007",
+          "dbfId": 123995,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_029",
+          "dbfId": 126094,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_030",
+          "dbfId": 125643,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_035",
+          "dbfId": 125660,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_101",
+          "dbfId": 124003,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_118",
+          "dbfId": 125462,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_122",
+          "dbfId": 126353,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_123",
+          "dbfId": 126354,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_125",
+          "dbfId": 126356,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_200",
+          "dbfId": 127815,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_201",
+          "dbfId": 127932,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_202",
+          "dbfId": 127946,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_204",
+          "dbfId": 127994,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_205",
+          "dbfId": 131316,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_206",
+          "dbfId": 128019,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_225",
+          "dbfId": 125571,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_303",
+          "dbfId": 125878,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_307",
+          "dbfId": 126100,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_311",
+          "dbfId": 126104,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_312",
+          "dbfId": 126109,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_313",
+          "dbfId": 126111,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_315",
+          "dbfId": 126113,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_319",
+          "dbfId": 126116,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_321",
+          "dbfId": 126253,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_326",
+          "dbfId": 126616,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_327",
+          "dbfId": 126617,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_328",
+          "dbfId": 126618,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_329",
+          "dbfId": 126619,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_330",
+          "dbfId": 126620,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_376",
+          "dbfId": 126597,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_377",
+          "dbfId": 126652,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_379",
+          "dbfId": 126355,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_380",
+          "dbfId": 125996,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_384",
+          "dbfId": 126002,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_386",
+          "dbfId": 125893,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_387",
+          "dbfId": 126598,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_395",
+          "dbfId": 125934,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_397",
+          "dbfId": 126621,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_398",
+          "dbfId": 125918,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_399",
+          "dbfId": 125917,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_421",
+          "dbfId": 125803,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_430",
+          "dbfId": 126055,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_432",
+          "dbfId": 126122,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_433",
+          "dbfId": 126124,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_434",
+          "dbfId": 126127,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_435",
+          "dbfId": 126136,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_436",
+          "dbfId": 126180,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_440",
+          "dbfId": 126252,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_441",
+          "dbfId": 126254,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_442",
+          "dbfId": 126255,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_443",
+          "dbfId": 126259,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_444",
+          "dbfId": 126260,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_445",
+          "dbfId": 126261,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_446",
+          "dbfId": 126365,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_447",
+          "dbfId": 126479,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_448",
+          "dbfId": 126482,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_450",
+          "dbfId": 126502,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_451",
+          "dbfId": 126503,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_452",
+          "dbfId": 126627,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_453",
+          "dbfId": 126666,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_454",
+          "dbfId": 126911,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_455",
+          "dbfId": 127260,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_456",
+          "dbfId": 127322,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_457",
+          "dbfId": 127688,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_458",
+          "dbfId": 127711,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_459",
+          "dbfId": 127996,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_460",
+          "dbfId": 128004,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_461",
+          "dbfId": 128052,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_462",
+          "dbfId": 128053,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_470",
+          "dbfId": 129983,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_474",
+          "dbfId": 130021,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_500",
+          "dbfId": 125983,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_501",
+          "dbfId": 125985,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_502",
+          "dbfId": 125986,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_503",
+          "dbfId": 125988,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_504",
+          "dbfId": 125989,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_507",
+          "dbfId": 125993,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_509",
+          "dbfId": 126125,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_510",
+          "dbfId": 126128,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_511",
+          "dbfId": 126129,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_513",
+          "dbfId": 126135,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_514",
+          "dbfId": 126477,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_515",
+          "dbfId": 126478,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_516",
+          "dbfId": 127319,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_703",
+          "dbfId": 126092,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_706",
+          "dbfId": 126098,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_718",
+          "dbfId": 126210,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_719",
+          "dbfId": 126211,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_720",
+          "dbfId": 126221,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_721",
+          "dbfId": 126222,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_730",
+          "dbfId": 126660,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_732",
+          "dbfId": 126662,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_733",
+          "dbfId": 126663,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_734",
+          "dbfId": 126664,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_735",
+          "dbfId": 126841,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_800",
+          "dbfId": 126416,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_801",
+          "dbfId": 126407,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_802",
+          "dbfId": 126409,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_803",
+          "dbfId": 126410,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_805",
+          "dbfId": 126413,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_806",
+          "dbfId": 126415,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_831",
+          "dbfId": 125998,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_851",
+          "dbfId": 126602,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_852",
+          "dbfId": 126604,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_860",
+          "dbfId": 126045,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_861",
+          "dbfId": 126054,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_866",
+          "dbfId": 126205,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_872",
+          "dbfId": 126225,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_875",
+          "dbfId": 126243,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_876",
+          "dbfId": 126294,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_877",
+          "dbfId": 126295,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_878",
+          "dbfId": 126299,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_879",
+          "dbfId": 126419,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_880",
+          "dbfId": 126422,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_881",
+          "dbfId": 126423,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_882",
+          "dbfId": 126425,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_883",
+          "dbfId": 126472,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_887",
+          "dbfId": 126497,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_890",
+          "dbfId": 127155,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_891",
+          "dbfId": 127157,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_892",
+          "dbfId": 127159,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_906",
+          "dbfId": 124073,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "JAIL_909",
+          "dbfId": 124075,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_912",
+          "dbfId": 124079,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_913",
+          "dbfId": 124080,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_940",
+          "dbfId": 126867,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_941",
+          "dbfId": 126896,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_942",
+          "dbfId": 126898,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_974",
+          "dbfId": 126874,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_986",
+          "dbfId": 126937,
+          "rarity": "RARE"
+        },
+        {
+          "id": "JAIL_987",
+          "dbfId": 126938,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "JAIL_997",
+          "dbfId": 125915,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "JAIL_998",
+          "dbfId": 125914,
+          "rarity": "COMMON"
+        }
+      ]
+    },
+    "BE": {
+      "setId": 1994,
+      "count": 133,
+      "byRarity": {
+        "COMMON": 43,
+        "EPIC": 27,
+        "LEGENDARY": 25,
+        "RARE": 38
+      },
+      "cards": [
+        {
+          "id": "BE_000",
+          "dbfId": 128090,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_004",
+          "dbfId": 132353,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_005",
+          "dbfId": 132346,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_008",
+          "dbfId": 132535,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_009",
+          "dbfId": 132547,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_012",
+          "dbfId": 132348,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_013",
+          "dbfId": 132339,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_014",
+          "dbfId": 132347,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_017",
+          "dbfId": 128389,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_042",
+          "dbfId": 128696,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_044",
+          "dbfId": 128892,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_045",
+          "dbfId": 129089,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_071",
+          "dbfId": 129340,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_085",
+          "dbfId": 129793,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_086",
+          "dbfId": 129802,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_087",
+          "dbfId": 129804,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_090",
+          "dbfId": 129824,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_093",
+          "dbfId": 129808,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_094",
+          "dbfId": 129805,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_114",
+          "dbfId": 131061,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_142",
+          "dbfId": 130326,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_143",
+          "dbfId": 130327,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_146",
+          "dbfId": 130673,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_150",
+          "dbfId": 130441,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_151",
+          "dbfId": 129093,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_152",
+          "dbfId": 129131,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_153",
+          "dbfId": 129137,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_154",
+          "dbfId": 131122,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_169",
+          "dbfId": 130634,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_171",
+          "dbfId": 131056,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_183",
+          "dbfId": 129839,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_193",
+          "dbfId": 130089,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_196",
+          "dbfId": 130092,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_201",
+          "dbfId": 131200,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_204",
+          "dbfId": 128215,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_207",
+          "dbfId": 131236,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_208",
+          "dbfId": 131232,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_209",
+          "dbfId": 131240,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_220",
+          "dbfId": 129256,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_221",
+          "dbfId": 130401,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_222",
+          "dbfId": 130403,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_223",
+          "dbfId": 130404,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_227",
+          "dbfId": 130402,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_228",
+          "dbfId": 130524,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_229",
+          "dbfId": 131294,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_230",
+          "dbfId": 130651,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_250",
+          "dbfId": 129112,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_251",
+          "dbfId": 129787,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_252",
+          "dbfId": 129788,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_255",
+          "dbfId": 129797,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_256",
+          "dbfId": 129798,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_257",
+          "dbfId": 129801,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_258",
+          "dbfId": 129811,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_259",
+          "dbfId": 129851,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_262",
+          "dbfId": 129359,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_264",
+          "dbfId": 130785,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_265",
+          "dbfId": 130520,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_270",
+          "dbfId": 129889,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_283",
+          "dbfId": 130395,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_284",
+          "dbfId": 130314,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_285",
+          "dbfId": 130315,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_287",
+          "dbfId": 130341,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_298",
+          "dbfId": 130555,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_302",
+          "dbfId": 130974,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_303",
+          "dbfId": 131007,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_325",
+          "dbfId": 129224,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_327",
+          "dbfId": 129235,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_337",
+          "dbfId": 131010,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_349",
+          "dbfId": 130871,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_541",
+          "dbfId": 130761,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_550",
+          "dbfId": 129792,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_552",
+          "dbfId": 129820,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_553",
+          "dbfId": 129821,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_554",
+          "dbfId": 129822,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_555",
+          "dbfId": 129823,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_557",
+          "dbfId": 129935,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_558",
+          "dbfId": 129938,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_559",
+          "dbfId": 129942,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_560",
+          "dbfId": 129946,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_561",
+          "dbfId": 129947,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_564",
+          "dbfId": 130114,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_565",
+          "dbfId": 130117,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_566",
+          "dbfId": 130346,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_571",
+          "dbfId": 130565,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_572",
+          "dbfId": 130567,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_588",
+          "dbfId": 132009,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_600",
+          "dbfId": 130279,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_701",
+          "dbfId": 129943,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_702",
+          "dbfId": 129944,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_703",
+          "dbfId": 129945,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_720",
+          "dbfId": 130112,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_721",
+          "dbfId": 130115,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_722",
+          "dbfId": 130118,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_723",
+          "dbfId": 130113,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_724",
+          "dbfId": 130119,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_725",
+          "dbfId": 130122,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_726",
+          "dbfId": 130281,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_728",
+          "dbfId": 130285,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_729",
+          "dbfId": 130283,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_730",
+          "dbfId": 130763,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_731",
+          "dbfId": 130764,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_732",
+          "dbfId": 130765,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_733",
+          "dbfId": 130769,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_734",
+          "dbfId": 130815,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_740",
+          "dbfId": 130973,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_749",
+          "dbfId": 131157,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_771",
+          "dbfId": 131262,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_778",
+          "dbfId": 131357,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_780",
+          "dbfId": 131126,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_781",
+          "dbfId": 131127,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_784",
+          "dbfId": 131851,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_790",
+          "dbfId": 130000,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_801",
+          "dbfId": 131177,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_802",
+          "dbfId": 131180,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_842",
+          "dbfId": 131059,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_850t",
+          "dbfId": 129814,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_851",
+          "dbfId": 129837,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_852",
+          "dbfId": 129842,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_854",
+          "dbfId": 129892,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_855",
+          "dbfId": 129893,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_856",
+          "dbfId": 129937,
+          "rarity": "LEGENDARY"
+        },
+        {
+          "id": "BE_859",
+          "dbfId": 134936,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_861",
+          "dbfId": 133415,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_870",
+          "dbfId": 131008,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_873",
+          "dbfId": 130680,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_877",
+          "dbfId": 130729,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_900",
+          "dbfId": 132177,
+          "rarity": "COMMON"
+        },
+        {
+          "id": "BE_993",
+          "dbfId": 131456,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_994",
+          "dbfId": 131454,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_996",
+          "dbfId": 131432,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_997",
+          "dbfId": 132135,
+          "rarity": "EPIC"
+        },
+        {
+          "id": "BE_998",
+          "dbfId": 131433,
+          "rarity": "RARE"
+        },
+        {
+          "id": "BE_999",
+          "dbfId": 131418,
+          "rarity": "COMMON"
+        }
+      ]
+    }
+  }
+}

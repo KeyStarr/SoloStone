@@ -1,0 +1,1583 @@
+{
+ "version": 1,
+ "_doc": "Hand-written notables, the named cast (WP3, backlog #66): 8 each in Bronze through Diamond, 20 in Legend, each with 2-5 decks that fit the character and at least 2 allowed at home rank. The matchmaker draws them near the player's rank (QueueRules.RegularShare). Ids are stable forever (match records reference them); golden ids npc.golden.N kept for playtest records. All characters are original: no real players, streamers or public figures. decks: NpcDeckLibrary ids, signature first. Until WP1's decks-v1 lands, non-golden decks use recipe-derived ids npc-recipe-<data/shop/recipes-v1 id> (the dragon-warrior and pure-paladin recipes map to the golden npc-dragon-warrior / npc-pure-paladin); NpcWorld.Generate drops ids the library lacks and falls back to an admitted deck of the notable's class. heroSkins/cardBack come from cosmetics-v1.json; no heroSkins entry = base hero.",
+ "notables": [
+  {
+   "id": "npc.golden.1",
+   "version": 1,
+   "name": "Dragonyyyy",
+   "bio": "Top-500 regular who has played Dragon Warrior every season since the dragons came back.",
+   "homeRating": 1680,
+   "personality": "pro",
+   "taste": "tryhard",
+   "classes": [
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-dragon-warrior",
+    "npc-recipe-cannon-pirate-warrior",
+    "npc-warrior-logosh"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01c",
+     "heroPower": "CS2_102_H3"
+    }
+   ],
+   "cardBack": 0,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.golden.2",
+   "version": 1,
+   "name": "FatherUther",
+   "bio": "Retired teacher. Plays slowly, says thanks, and never forgives a missed lethal (his own).",
+   "homeRating": 1500,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "PALADIN",
+    "PRIEST"
+   ],
+   "decks": [
+    "npc-pure-paladin",
+    "npc-recipe-medivh-imbue-priest",
+    "npc-paladin-egg"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04ay",
+     "heroPower": "HERO_04ayhp"
+    },
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09a"
+    }
+   ],
+   "cardBack": 0,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.golden.3",
+   "version": 1,
+   "name": "ZeeCashh",
+   "bio": "Plays fast, talks big and lives for the five-minion turn. Will tell you about it.",
+   "homeRating": 1600,
+   "personality": "gambler",
+   "taste": "netdecker",
+   "classes": [
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-zee-shaman",
+    "npc-recipe-zee-herald-shaman",
+    "npc-recipe-mug-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02c",
+     "heroPower": "CS2_049_H3"
+    }
+   ],
+   "cardBack": 0,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.oblivia",
+   "version": 1,
+   "name": "Oblivia",
+   "bio": "The name at the top of the board most nights. Counts your outs before you do, then greets you anyway.",
+   "homeRating": 1885,
+   "personality": "pro",
+   "taste": "tryhard",
+   "classes": [
+    "MAGE",
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-burn-mage",
+    "npc-recipe-zee-herald-shaman",
+    "npc-mage-leyline"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08x"
+    },
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02b"
+    }
+   ],
+   "cardBack": 61,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.quiet-storm",
+   "version": 1,
+   "name": "QuietStorm",
+   "bio": "Has never typed a word. Has also never missed a lethal anyone can remember.",
+   "homeRating": 1862,
+   "personality": "silent",
+   "taste": "tryhard",
+   "classes": [
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-mug-shaman",
+    "npc-zee-shaman",
+    "npc-recipe-zee-herald-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02am"
+    }
+   ],
+   "cardBack": 513,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.tempo-teddy",
+   "version": 1,
+   "name": "TempoTeddy",
+   "bio": "Plays like the rope owes him money. Ends turns before you finish reading them, and is usually right.",
+   "homeRating": 1840,
+   "personality": "speedster",
+   "taste": "netdecker",
+   "classes": [
+    "DEMONHUNTER",
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-void-soul-demon-hunter",
+    "npc-recipe-void-demon-hunter",
+    "npc-recipe-sneaky-herald-rogue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_10",
+     "skin": "HERO_10am"
+    },
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03ak_Patches"
+    }
+   ],
+   "cardBack": 2,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.marrow-mind",
+   "version": 2,
+   "name": "MarrowMind",
+   "bio": "Took Thal'ena Corpse DK to the top fifty while everyone called it a meme. Applauds clever lines, even yours.",
+   "homeRating": 1825,
+   "personality": "professor",
+   "taste": "brewer",
+   "classes": [
+    "DEATHKNIGHT",
+    "WARLOCK"
+   ],
+   "decks": [
+    "npc-recipe-herald-death-knight",
+    "npc-unholy-death-knight",
+    "npc-death-knight-thalena",
+    "npc-recipe-herald-warlock"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_11",
+     "skin": "HERO_11c"
+    },
+    {
+     "hero": "HERO_07",
+     "skin": "HERO_07ag"
+    }
+   ],
+   "cardBack": 351,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.coin-flip-carl",
+   "version": 1,
+   "name": "CoinFlipCarl",
+   "bio": "Every win was skill, every loss was the coin. Annoyingly good at Rogue either way.",
+   "homeRating": 1790,
+   "personality": "gambler",
+   "taste": "netdecker",
+   "classes": [
+    "ROGUE",
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-sneaky-herald-rogue",
+    "npc-recipe-aya-coin-rogue",
+    "npc-rogue-burn",
+    "npc-recipe-zee-herald-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03ak_Patches"
+    },
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02am"
+    }
+   ],
+   "cardBack": 9,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.iron-vesper",
+   "version": 1,
+   "name": "IronVesper",
+   "bio": "Plays every game to the last card. Never concedes, rarely says well played, never takes a shortcut.",
+   "homeRating": 1775,
+   "personality": "grinder",
+   "taste": "tryhard",
+   "classes": [
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-dragon-warrior",
+    "npc-recipe-cannon-pirate-warrior",
+    "npc-warrior-logosh"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01aa"
+    }
+   ],
+   "cardBack": 239,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.lunar-lark",
+   "version": 1,
+   "name": "LunarLark",
+   "bio": "Druid since the first beta, Hunter on weekends. Thanks you for every game and wins most of them.",
+   "homeRating": 1760,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "DRUID",
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-chef-druid",
+    "npc-recipe-attack-druid",
+    "npc-recipe-merithra-druid",
+    "npc-recipe-dragon-hunter",
+    "npc-druid-azshara"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_06",
+     "skin": "HERO_06a"
+    },
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05am_KingKrush_h"
+    }
+   ],
+   "cardBack": 373,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.fel-flexx",
+   "version": 2,
+   "name": "FelFlexx",
+   "bio": "Treats every big turn like a highlight reel and emotes like one. Respects a comeback, grudgingly.",
+   "homeRating": 1745,
+   "personality": "showboat",
+   "taste": "netdecker",
+   "classes": [
+    "WARLOCK",
+    "DEMONHUNTER"
+   ],
+   "decks": [
+    "npc-recipe-herald-warlock",
+    "npc-warlock-pig",
+    "npc-void-soul-demon-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_07",
+     "skin": "HERO_07b"
+    },
+    {
+     "hero": "HERO_10",
+     "skin": "HERO_10bc"
+    }
+   ],
+   "cardBack": 61,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.patchwork-pam",
+   "version": 1,
+   "name": "PatchworkPam",
+   "bio": "Hit Legend with a deck named after her cat. Emotes like a slot machine, plays like a calculator.",
+   "homeRating": 1730,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "ROGUE",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-cannon-pirate-warrior",
+    "npc-dragon-warrior",
+    "npc-recipe-sneaky-herald-rogue",
+    "npc-warrior-egg"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03s"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01a"
+    }
+   ],
+   "cardBack": 3,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.sir-lumen",
+   "version": 1,
+   "name": "SirLumen",
+   "bio": "Old tournament hand who still bows after every match. Knows the Paladin mirror better than the Paladins do.",
+   "homeRating": 1715,
+   "personality": "pro",
+   "taste": "netdecker",
+   "classes": [
+    "PALADIN",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-pure-paladin",
+    "npc-dragon-warrior",
+    "npc-recipe-infinity-paladin"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04bk"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01a"
+    }
+   ],
+   "cardBack": 31,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.vexmoth",
+   "version": 1,
+   "name": "Vexmoth",
+   "bio": "Night queue specialist. One emote per match, at the very end, if you earned it.",
+   "homeRating": 1700,
+   "personality": "silent",
+   "taste": "tryhard",
+   "classes": [
+    "DEMONHUNTER",
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-void-soul-demon-hunter",
+    "npc-recipe-void-demon-hunter",
+    "npc-recipe-deathrattle-herald-demon-hunter",
+    "npc-zee-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_10",
+     "skin": "HERO_10bk"
+    },
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02a"
+    }
+   ],
+   "cardBack": 2,
+   "skill": "elite"
+  },
+  {
+   "id": "npc.n.cartograph",
+   "version": 1,
+   "name": "Cartograph",
+   "bio": "Writes long deck guides nobody asked for. They are usually correct, which is worse.",
+   "homeRating": 1670,
+   "personality": "professor",
+   "taste": "brewer",
+   "classes": [
+    "HUNTER",
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-dragon-hunter",
+    "npc-recipe-zee-herald-shaman",
+    "npc-recipe-tripwire-hunter",
+    "npc-companion-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05y"
+    },
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02b"
+    }
+   ],
+   "cardBack": 36,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.frost-byte",
+   "version": 1,
+   "name": "FrostByte",
+   "bio": "Counts damage in his head faster than the animations play. Says gg and is already in the next queue.",
+   "homeRating": 1655,
+   "personality": "speedster",
+   "taste": "netdecker",
+   "classes": [
+    "MAGE",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-burn-mage",
+    "npc-recipe-cannon-pirate-warrior",
+    "npc-elemental-mage"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08e"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01bd"
+    }
+   ],
+   "cardBack": 8,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.night-owl-nia",
+   "version": 1,
+   "name": "NightOwlNia",
+   "bio": "Queues at three in the morning, every morning, until the number goes up. Will not be rushed.",
+   "homeRating": 1640,
+   "personality": "grinder",
+   "taste": "tryhard",
+   "classes": [
+    "PRIEST",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-medivh-imbue-priest",
+    "npc-priest-thief",
+    "npc-recipe-equilibrium-quest-priest",
+    "npc-priest-reborn",
+    "npc-dragon-warrior"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09at"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01bd"
+    }
+   ],
+   "cardBack": 56,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.when-pigs-fly",
+   "version": 2,
+   "name": "WhenPigsFly",
+   "bio": "Believes every deck is one lucky draw from tier one. Sometimes proves it, loudly.",
+   "homeRating": 1630,
+   "personality": "gambler",
+   "taste": "memeLord",
+   "classes": [
+    "WARLOCK",
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-recipe-herald-warlock",
+    "npc-warlock-pig",
+    "npc-recipe-rafaam-warlock",
+    "npc-recipe-sneaky-herald-rogue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_07",
+     "skin": "HERO_07ae"
+    },
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03a"
+    }
+   ],
+   "cardBack": 11,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.old-mossy",
+   "version": 1,
+   "name": "OldMossy",
+   "bio": "Plays one pace and one way: slowly, kindly, and well.",
+   "homeRating": 1620,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "DRUID",
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-chef-druid",
+    "npc-recipe-merithra-druid",
+    "npc-recipe-attack-druid",
+    "npc-druid-azshara",
+    "npc-recipe-dragon-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_06",
+     "skin": "HERO_06f"
+    },
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05a"
+    }
+   ],
+   "cardBack": 70,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.glimmerjack",
+   "version": 1,
+   "name": "Glimmerjack",
+   "bio": "Nicest player in Legend. Says hello, gasps at your best turns, thanks you on the way out.",
+   "homeRating": 1612,
+   "personality": "friendly",
+   "taste": "netdecker",
+   "classes": [
+    "PALADIN",
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-pure-paladin",
+    "npc-recipe-infinity-paladin",
+    "npc-recipe-dragon-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04a"
+    },
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05a"
+    }
+   ],
+   "cardBack": 4,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.razorquill",
+   "version": 1,
+   "name": "Razorquill",
+   "bio": "Plays face, talks face. If you misplay, you will hear about it once.",
+   "homeRating": 1605,
+   "personality": "showboat",
+   "taste": "tryhard",
+   "classes": [
+    "HUNTER",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-dragon-hunter",
+    "npc-recipe-tripwire-hunter",
+    "npc-dragon-warrior"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05c"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01bb"
+    }
+   ],
+   "cardBack": 99,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.brew-dad",
+   "version": 1,
+   "name": "BrewDad",
+   "bio": "Two kids, one hour a night and a new homebrew every Sunday. Half of them are great.",
+   "homeRating": 1585,
+   "personality": "professor",
+   "taste": "brewer",
+   "classes": [
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-zee-herald-shaman",
+    "npc-recipe-mug-shaman",
+    "npc-shaman-masochist"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02m"
+    }
+   ],
+   "cardBack": 4,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.tilt-proof",
+   "version": 1,
+   "name": "TiltProof",
+   "bio": "The name is aspirational. Plays every game out and fires back if you Threaten first.",
+   "homeRating": 1570,
+   "personality": "grinder",
+   "taste": "tryhard",
+   "classes": [
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-dragon-warrior",
+    "npc-warrior-logosh",
+    "npc-recipe-cannon-pirate-warrior"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01bb"
+    }
+   ],
+   "cardBack": 18,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.salt-mine",
+   "version": 1,
+   "name": "SaltMine",
+   "bio": "Every loss is a lesson he resents learning. Fair to the bone, salty to the core.",
+   "homeRating": 1555,
+   "personality": "grinder",
+   "taste": "netdecker",
+   "classes": [
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-rogue-mill",
+    "npc-two-bit-rogue",
+    "npc-recipe-sneaky-herald-rogue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03m"
+    }
+   ],
+   "cardBack": 67,
+   "skill": "master"
+  },
+  {
+   "id": "npc.n.miss-play",
+   "version": 1,
+   "name": "MissPlay",
+   "bio": "Insists the misplays are part of the plan. Occasionally they are.",
+   "homeRating": 1535,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "MAGE"
+   ],
+   "decks": [
+    "npc-mage-quest",
+    "npc-elemental-mage",
+    "npc-recipe-manastorm-mage"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08b"
+    }
+   ],
+   "cardBack": 177,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.hollowcrest",
+   "version": 2,
+   "name": "Hollowcrest",
+   "bio": "Cold, quick and wordless. Concedes the moment the board says so.",
+   "homeRating": 1525,
+   "personality": "silent",
+   "taste": "netdecker",
+   "classes": [
+    "DEATHKNIGHT"
+   ],
+   "decks": [
+    "npc-death-knight-aggro",
+    "npc-recipe-herald-death-knight",
+    "npc-death-knight-thalena"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_11",
+     "skin": "HERO_11z"
+    }
+   ],
+   "cardBack": 99,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.pocket-aces",
+   "version": 1,
+   "name": "PocketAces",
+   "bio": "Plays the odds, quotes the odds, ignores the odds. Threatens on lethal, every time.",
+   "homeRating": 1510,
+   "personality": "gambler",
+   "taste": "netdecker",
+   "classes": [
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-recipe-dragon-hunter",
+    "npc-companion-hunter",
+    "npc-recipe-tripwire-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05am_KingKrush_h"
+    }
+   ],
+   "cardBack": 46,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.quillfeather",
+   "version": 1,
+   "name": "Quillfeather",
+   "bio": "Librarian by day. Greets everyone, means it, and quietly out-values you.",
+   "homeRating": 1490,
+   "personality": "friendly",
+   "taste": "brewer",
+   "classes": [
+    "PRIEST",
+    "DRUID"
+   ],
+   "decks": [
+    "npc-priest-reborn",
+    "npc-druid-azshara",
+    "npc-priest-egg"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09a"
+    },
+    {
+     "hero": "HERO_06",
+     "skin": "HERO_06ah"
+    }
+   ],
+   "cardBack": 207,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.snack-time",
+   "version": 1,
+   "name": "SnackTime",
+   "bio": "Plays on lunch breaks. Every turn takes eight seconds or less.",
+   "homeRating": 1470,
+   "personality": "speedster",
+   "taste": "netdecker",
+   "classes": [
+    "DEMONHUNTER"
+   ],
+   "decks": [
+    "npc-recipe-void-demon-hunter",
+    "npc-demon-hunter-quest",
+    "npc-void-soul-demon-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_10",
+     "skin": "HERO_10b"
+    }
+   ],
+   "cardBack": 23,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.captain-brine",
+   "version": 1,
+   "name": "CaptainBrine",
+   "bio": "Talks like a pirate, plays like a pirate and emotes like the whole crew.",
+   "homeRating": 1455,
+   "personality": "showboat",
+   "taste": "memeLord",
+   "classes": [
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-cannon-pirate-warrior",
+    "npc-warrior-egg",
+    "npc-warrior-logosh"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01a"
+    }
+   ],
+   "cardBack": 162,
+   "skill": "expert"
+  },
+  {
+   "id": "npc.n.ledgerline",
+   "version": 1,
+   "name": "Ledgerline",
+   "bio": "Accountant. Tracks every card you have played and is very polite about it.",
+   "homeRating": 1430,
+   "personality": "professor",
+   "taste": "tryhard",
+   "classes": [
+    "PRIEST"
+   ],
+   "decks": [
+    "npc-recipe-equilibrium-quest-priest",
+    "npc-priest-egg",
+    "npc-priest-reborn",
+    "npc-recipe-medivh-imbue-priest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09ar"
+    }
+   ],
+   "cardBack": 190,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.bramblewick",
+   "version": 1,
+   "name": "Bramblewick",
+   "bio": "Retired gardener who treats every board like a hedge: patiently, and with shears.",
+   "homeRating": 1415,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "DRUID"
+   ],
+   "decks": [
+    "npc-chef-druid",
+    "npc-druid-azshara",
+    "npc-token-druid",
+    "npc-recipe-attack-druid"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_06",
+     "skin": "HERO_06b"
+    }
+   ],
+   "cardBack": 373,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.goblin-grin",
+   "version": 2,
+   "name": "GoblinGrin",
+   "bio": "Laughs at his own bad luck and at your big turns. Mostly at the bad luck.",
+   "homeRating": 1400,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "WARLOCK"
+   ],
+   "decks": [
+    "npc-warlock-godfrey",
+    "npc-recipe-rafaam-warlock",
+    "npc-warlock-pig"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_07",
+     "skin": "HERO_07a"
+    }
+   ],
+   "cardBack": 143,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.stoneward",
+   "version": 1,
+   "name": "Stoneward",
+   "bio": "Paladin or nothing. Fights for every point of health and never hands you the win.",
+   "homeRating": 1385,
+   "personality": "grinder",
+   "taste": "classLoyalist",
+   "classes": [
+    "PALADIN"
+   ],
+   "decks": [
+    "npc-pure-paladin",
+    "npc-paladin-egg"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04b"
+    }
+   ],
+   "cardBack": 239,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.kettlebell",
+   "version": 1,
+   "name": "Kettlebell",
+   "bio": "Gym coach energy. Cheers your good plays, cheers her own louder.",
+   "homeRating": 1370,
+   "personality": "friendly",
+   "taste": "netdecker",
+   "classes": [
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-mug-shaman",
+    "npc-shaman-herald",
+    "npc-recipe-zee-herald-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02e"
+    }
+   ],
+   "cardBack": 482,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.nova-noodle",
+   "version": 1,
+   "name": "NovaNoodle",
+   "bio": "Will cast the funny spell over the right spell. Will also emote about it.",
+   "homeRating": 1350,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "MAGE"
+   ],
+   "decks": [
+    "npc-recipe-manastorm-mage",
+    "npc-mage-imbue",
+    "npc-mage-quest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08a"
+    }
+   ],
+   "cardBack": 3,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.turtlefort",
+   "version": 1,
+   "name": "Turtlefort",
+   "bio": "Builds walls, outlasts everyone and grumbles the whole way.",
+   "homeRating": 1330,
+   "personality": "grinder",
+   "taste": "classLoyalist",
+   "classes": [
+    "DEATHKNIGHT"
+   ],
+   "decks": [
+    "npc-recipe-herald-death-knight",
+    "npc-death-knight-thalena",
+    "npc-death-knight-bwonsamdi"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_11",
+     "skin": "HERO_11b"
+    }
+   ],
+   "cardBack": 8,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.sunny-side-up",
+   "version": 1,
+   "name": "SunnySideUp",
+   "bio": "Morning person. Opens with Greetings, closes with Thanks and means both.",
+   "homeRating": 1310,
+   "personality": "friendly",
+   "taste": "brewer",
+   "classes": [
+    "PALADIN"
+   ],
+   "decks": [
+    "npc-recipe-infinity-paladin",
+    "npc-paladin-egg"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04u"
+    }
+   ],
+   "cardBack": 177,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.deck-doctor",
+   "version": 1,
+   "name": "DeckDoctor",
+   "bio": "Diagnoses your deck from one turn. Prescribes card draw.",
+   "homeRating": 1290,
+   "personality": "professor",
+   "taste": "brewer",
+   "classes": [
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-recipe-sneaky-herald-rogue",
+    "npc-rogue-quest",
+    "npc-two-bit-rogue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03a"
+    }
+   ],
+   "cardBack": 207,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.last-pick",
+   "version": 1,
+   "name": "LastPick",
+   "bio": "Copies the top deck, plays it straight and says nothing. Respectable.",
+   "homeRating": 1270,
+   "personality": "silent",
+   "taste": "netdecker",
+   "classes": [
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-recipe-tripwire-hunter",
+    "npc-companion-hunter",
+    "npc-hunter-quest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_05",
+     "skin": "HERO_05as"
+    }
+   ],
+   "cardBack": 226,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.rocket-rhoda",
+   "version": 1,
+   "name": "RocketRhoda",
+   "bio": "Gold league's loudest Demon Hunter. Threatens on turn one, celebrates on turn five.",
+   "homeRating": 1250,
+   "personality": "showboat",
+   "taste": "netdecker",
+   "classes": [
+    "DEMONHUNTER"
+   ],
+   "decks": [
+    "npc-recipe-deathrattle-herald-demon-hunter",
+    "npc-demon-hunter-quest",
+    "npc-recipe-void-demon-hunter"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_10",
+     "skin": "HERO_10z"
+    }
+   ],
+   "cardBack": 143,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.murloc-mum",
+   "version": 1,
+   "name": "MurlocMum",
+   "bio": "Learned the game to beat her kids at it. Now they ask her for deck advice.",
+   "homeRating": 1230,
+   "personality": "friendly",
+   "taste": "memeLord",
+   "classes": [
+    "SHAMAN"
+   ],
+   "decks": [
+    "npc-recipe-mug-shaman",
+    "npc-shaman-masochist",
+    "npc-recipe-zee-herald-shaman"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_02",
+     "skin": "HERO_02a"
+    }
+   ],
+   "cardBack": 15,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.topdeck-tom",
+   "version": 1,
+   "name": "TopdeckTom",
+   "bio": "Lives for the last-card miracle and tells you when it lands.",
+   "homeRating": 1205,
+   "personality": "gambler",
+   "taste": "netdecker",
+   "classes": [
+    "WARLOCK"
+   ],
+   "decks": [
+    "npc-recipe-herald-warlock",
+    "npc-recipe-rafaam-warlock"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_07",
+     "skin": "HERO_07d"
+    }
+   ],
+   "cardBack": 11,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.sproutling",
+   "version": 1,
+   "name": "Sproutling",
+   "bio": "Picked Druid because of the trees. Stayed for the trees.",
+   "homeRating": 1185,
+   "personality": "friendly",
+   "taste": "classLoyalist",
+   "classes": [
+    "DRUID"
+   ],
+   "decks": [
+    "npc-recipe-merithra-druid",
+    "npc-chef-druid",
+    "npc-token-druid"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_06",
+     "skin": "HERO_06aw"
+    }
+   ],
+   "cardBack": 373,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.grumpy-gnoll",
+   "version": 1,
+   "name": "GrumpyGnoll",
+   "bio": "Complains about every topdeck, including his own. Never quits a game early.",
+   "homeRating": 1160,
+   "personality": "grinder",
+   "taste": "netdecker",
+   "classes": [
+    "PRIEST",
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-recipe-equilibrium-quest-priest",
+    "npc-warrior-quest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09b"
+    },
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01bd"
+    }
+   ],
+   "cardBack": 46,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.spark-plug",
+   "version": 1,
+   "name": "SparkPlug",
+   "bio": "Burn, burn, end turn. Thinks the rope is a suggestion for other people.",
+   "homeRating": 1140,
+   "personality": "speedster",
+   "taste": "memeLord",
+   "classes": [
+    "MAGE"
+   ],
+   "decks": [
+    "npc-recipe-burn-mage",
+    "npc-mage-imbue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08aa"
+    }
+   ],
+   "cardBack": 18,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.first-timer",
+   "version": 1,
+   "name": "FirstTimer",
+   "bio": "Copied the top deck from a website yesterday. Still reading what the cards do.",
+   "homeRating": 1095,
+   "personality": "friendly",
+   "taste": "netdecker",
+   "classes": [
+    "WARRIOR",
+    "MAGE"
+   ],
+   "decks": [
+    "npc-warrior-quest",
+    "npc-recipe-burn-mage",
+    "npc-dragon-warrior"
+   ],
+   "heroSkins": [],
+   "cardBack": 0,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.chaos-goblin",
+   "version": 1,
+   "name": "ChaosGoblin",
+   "bio": "Pure vibes. Has never once played around anything and is having the time of their life.",
+   "homeRating": 1060,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-rogue-quest",
+    "npc-recipe-aya-coin-rogue",
+    "npc-recipe-sneaky-herald-rogue"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03s"
+    }
+   ],
+   "cardBack": 11,
+   "skill": "novice"
+  },
+  {
+   "id": "npc.n.paper-crown",
+   "version": 1,
+   "name": "PaperCrown",
+   "bio": "Calls himself the king of Bronze. Technically, on a good night, correct.",
+   "homeRating": 1030,
+   "personality": "showboat",
+   "taste": "memeLord",
+   "classes": [
+    "PALADIN",
+    "MAGE"
+   ],
+   "decks": [
+    "npc-recipe-infinity-paladin",
+    "npc-recipe-manastorm-mage"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04u"
+    },
+    {
+     "hero": "HERO_08",
+     "skin": "HERO_08a"
+    }
+   ],
+   "cardBack": 31,
+   "skill": "novice"
+  },
+  {
+   "id": "npc.n.dust-bunny",
+   "version": 1,
+   "name": "DustBunny",
+   "bio": "Crafts whatever has the cutest art. Has strong opinions about dragons.",
+   "homeRating": 990,
+   "personality": "friendly",
+   "taste": "brewer",
+   "classes": [
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-hunter-magmaw",
+    "npc-hunter-quest",
+    "npc-recipe-dragon-hunter"
+   ],
+   "heroSkins": [],
+   "cardBack": 0,
+   "skill": "novice"
+  },
+  {
+   "id": "npc.n.late-bloomer",
+   "version": 1,
+   "name": "LateBloomer",
+   "bio": "Picked up the game at seventy-one. Patient, polite and better every week.",
+   "homeRating": 960,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "PRIEST",
+    "PALADIN"
+   ],
+   "decks": [
+    "npc-recipe-equilibrium-quest-priest",
+    "npc-recipe-infinity-paladin"
+   ],
+   "heroSkins": [],
+   "cardBack": 4,
+   "skill": "novice"
+  },
+  {
+   "id": "npc.n.wobbly-wren",
+   "version": 1,
+   "name": "WobblyWren",
+   "bio": "Builds decks by colour. So far that colour is green, and it is going surprisingly well.",
+   "homeRating": 1010,
+   "personality": "friendly",
+   "taste": "brewer",
+   "classes": [
+    "DRUID"
+   ],
+   "decks": [
+    "npc-token-druid",
+    "npc-recipe-merithra-druid"
+   ],
+   "heroSkins": [],
+   "cardBack": 21,
+   "skill": "novice"
+  },
+  {
+   "id": "npc.n.punch-card",
+   "version": 1,
+   "name": "PunchCard",
+   "bio": "Clocks in, plays face, clocks out. Has never seen a late game and sees no reason to.",
+   "homeRating": 1075,
+   "personality": "speedster",
+   "taste": "netdecker",
+   "classes": [
+    "HUNTER"
+   ],
+   "decks": [
+    "npc-hunter-face",
+    "npc-recipe-tripwire-hunter"
+   ],
+   "heroSkins": [],
+   "cardBack": 6,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.grave-muffin",
+   "version": 1,
+   "name": "GraveMuffin",
+   "bio": "Bakes, apparently. Nobody has asked what goes in them, and nobody plans to.",
+   "homeRating": 1110,
+   "personality": "chaotic",
+   "taste": "memeLord",
+   "classes": [
+    "DEATHKNIGHT",
+    "WARLOCK"
+   ],
+   "decks": [
+    "npc-unholy-death-knight",
+    "npc-warlock-wallow"
+   ],
+   "heroSkins": [],
+   "cardBack": 19,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.back-alley-bea",
+   "version": 1,
+   "name": "BackAlleyBea",
+   "bio": "Plays on the bus. Two stops a game, three if you stall, and she will notice if you stall.",
+   "homeRating": 1125,
+   "personality": "speedster",
+   "taste": "netdecker",
+   "classes": [
+    "ROGUE"
+   ],
+   "decks": [
+    "npc-two-bit-rogue",
+    "npc-rogue-quest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_03",
+     "skin": "HERO_03ay"
+    }
+   ],
+   "cardBack": 1,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.bone-appetit",
+   "version": 1,
+   "name": "BoneAppetit",
+   "bio": "Names every skeleton and announces them on arrival. Takes the deaths personally.",
+   "homeRating": 1175,
+   "personality": "showboat",
+   "taste": "memeLord",
+   "classes": [
+    "DEATHKNIGHT"
+   ],
+   "decks": [
+    "npc-death-knight-bwonsamdi",
+    "npc-unholy-death-knight"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_11",
+     "skin": "HERO_11ag"
+    }
+   ],
+   "cardBack": 45,
+   "skill": "casual"
+  },
+  {
+   "id": "npc.n.sir-snoozalot",
+   "version": 1,
+   "name": "SirSnoozalot",
+   "bio": "Naps between turns. Somehow still remembers every card you have played.",
+   "homeRating": 1215,
+   "personality": "veteran",
+   "taste": "classLoyalist",
+   "classes": [
+    "PALADIN"
+   ],
+   "decks": [
+    "npc-paladin-egg",
+    "npc-pure-paladin",
+    "npc-recipe-infinity-paladin"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_04",
+     "skin": "HERO_04a"
+    }
+   ],
+   "cardBack": 122,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.one-more-game",
+   "version": 1,
+   "name": "OneMoreGame",
+   "bio": "Says it after every match. Has been saying it for eleven years. Means it every time.",
+   "homeRating": 1265,
+   "personality": "grinder",
+   "taste": "tryhard",
+   "classes": [
+    "WARRIOR"
+   ],
+   "decks": [
+    "npc-warrior-quest",
+    "npc-warrior-logosh",
+    "npc-dragon-warrior"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_01",
+     "skin": "HERO_01aa"
+    }
+   ],
+   "cardBack": 325,
+   "skill": "regular"
+  },
+  {
+   "id": "npc.n.tea-and-toast",
+   "version": 1,
+   "name": "TeaAndToast",
+   "bio": "Brews a pot before each match and wishes you could have some. Heals everything, slowly.",
+   "homeRating": 1340,
+   "personality": "friendly",
+   "taste": "classLoyalist",
+   "classes": [
+    "PRIEST"
+   ],
+   "decks": [
+    "npc-priest-egg",
+    "npc-recipe-equilibrium-quest-priest"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_09",
+     "skin": "HERO_09bd"
+    }
+   ],
+   "cardBack": 427,
+   "skill": "skilled"
+  },
+  {
+   "id": "npc.n.grave-shift",
+   "version": 1,
+   "name": "GraveShift",
+   "bio": "Works nights at a cemetery. Says it is mostly paperwork. Plays like it is mostly paperwork.",
+   "homeRating": 1445,
+   "personality": "grinder",
+   "taste": "classLoyalist",
+   "classes": [
+    "DEATHKNIGHT"
+   ],
+   "decks": [
+    "npc-death-knight-bwonsamdi",
+    "npc-death-knight-thalena",
+    "npc-recipe-herald-death-knight"
+   ],
+   "heroSkins": [
+    {
+     "hero": "HERO_11",
+     "skin": "HERO_11l"
+    }
+   ],
+   "cardBack": 503,
+   "skill": "skilled"
+  }
+ ]
+}

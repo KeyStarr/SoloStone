@@ -1,0 +1,63 @@
+SoloStone third-party notices
+
+SoloStone's launcher (SoloStone.exe) uses the following libraries, shipped beside it.
+Each is used under its own licence, and each licence text is available from the project named.
+
+BouncyCastle.Cryptography 2.6.2
+  Ed25519 signature checks and BLAKE2b hashing for signed update files.
+  Copyright (c) 2000 - 2025 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
+  Licence: MIT.  https://github.com/bcgit/bc-csharp
+
+System.Reflection.Metadata 8.0.1
+  Reads the Hearthstone version from its program files without running them.
+  Licence: MIT.  Copyright (c) .NET Foundation and Contributors.  https://github.com/dotnet/runtime
+
+Its dependencies, from the same .NET libraries and under the same MIT licence:
+  System.Collections.Immutable
+  System.Memory
+  System.Buffers
+  System.Numerics.Vectors
+  System.Runtime.CompilerServices.Unsafe
+
+Offline files added to your copy of Hearthstone (the payload folder). Each comes from the release archive named here,
+checked by SHA-256 when SoloStone is built (installer\loader-inputs.json lists every file and its hash).
+
+Unity Doorstop 4.5.0  (winhttp.dll)
+  Starts the mod loader inside the game.
+  Licence: LGPL-2.1.  https://github.com/NeighTools/UnityDoorstop/blob/v4.5.0/LICENSE
+  Release: https://github.com/NeighTools/UnityDoorstop/releases/tag/v4.5.0
+
+BepInEx 5.4.23.5  (BepInEx\core)
+  The mod loader, from BepInEx_win_x64_5.4.23.5.zip.
+  Licence: LGPL-2.1.  https://github.com/BepInEx/BepInEx/blob/v5.4.23.5/LICENSE
+  Release: https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5
+  Shipped in that archive, each under its own licence:
+    HarmonyX 2.9.0 (0Harmony.dll)                    MIT.  https://github.com/BepInEx/HarmonyX/blob/v2.9.0/LICENSE
+    BepInEx.Harmony 2.0.0 (BepInEx.Harmony.dll, 0Harmony20.dll, HarmonyXInterop.dll)
+                                                     MIT.  https://github.com/BepInEx/BepInEx.Harmony/blob/d4cdcb4cdeac14a0b77012165f5f5a9f5032a9fa/LICENSE
+    Mono.Cecil 0.10.4                                MIT.  https://github.com/jbevain/cecil/blob/0.10.4/LICENSE.txt
+    MonoMod 22.1.29.1 (Utils and RuntimeDetour)      MIT.  https://github.com/MonoMod/MonoMod/blob/v22.01.29.01/LICENSE
+
+Unity Mono class libraries (Windows set) 6000.3.11f1  (BepInEx\unstripped_corlib)
+  Full copies of the Mono class libraries (mscorlib, System, System.Core, System.Xml and others) for the same Unity
+  version as the game, because the game's own copies are stripped and BepInEx's preloader needs the full ones.
+  Taken, file by file and hash-checked, from the HsMod repository at commit 551d4423 ("6000.3.11f1"), folder
+  HsMod/UnstrippedCorlib: https://github.com/Pik-4/HsMod/tree/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib
+  Those files are not HsMod's own work and HsMod's AGPL-3.0 licence does not apply to them; they are Unity's builds of the
+  Mono class libraries. Licence: MIT, with some third-party parts under BSD-3-Clause and a Microsoft patent grant
+  (PATENTS.TXT); see https://github.com/Unity-Technologies/mono/blob/6000.3.1f1/LICENSE
+  Mono's licence file lists a few parts under other licences (SharpZipLib, RabbitMQ.Client, and one Android-only file in
+  System.Core); the first two are not in this set.
+  Open: nothing ties these binaries to one commit of that source, and the terms of the Unity Editor they were taken
+  from have not been checked.
+
+Also added to your copy: the SabberStone rules engine and the SoloStone plugin. SoloStone's own files are licensed under
+the GNU Affero General Public License, version 3 or later, with an additional permission for the plugin and launcher.
+The rules engine is based on SabberStone (AGPL-3.0), with its own inherited notices. The full notice, the licence texts
+and the source are in the SoloStone repository, in NOTICE, LICENSE and LICENSES/.
+
+SoloStone's installer ships no Hearthstone program files, art or sound. Its card data file holds card names and English
+card text taken from the game; they belong to Blizzard Entertainment, and SoloStone claims no rights in them.
+Your copy of Hearthstone comes from your own installation.
+Hearthstone is a trademark of Blizzard Entertainment, Inc. SoloStone is an unofficial mod and is not affiliated with,
+endorsed by, or sponsored by Blizzard.

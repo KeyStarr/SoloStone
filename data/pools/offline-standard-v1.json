@@ -1,0 +1,116 @@
+{
+  "policyVersion": "offline-standard/2",
+  "clientBuild": "37.0.0.254477",
+  "activeMeta": "violet-hold",
+  "metas": [
+    {
+      "id": "violet-hold",
+      "label": "Escape from Violet Hold",
+      "sets": [
+        "EMERALD_DREAM",
+        "THE_LOST_CITY",
+        "TIME_TRAVEL",
+        "CATACLYSM",
+        "ESCAPEFROM_VIOLET_HOLD",
+        "CORE"
+      ],
+      "newestSet": "ESCAPEFROM_VIOLET_HOLD",
+      "extraCards": [
+        "CATA_EVENT_000",
+        "CATA_EVENT_001",
+        "CATA_EVENT_002",
+        "CATA_EVENT_110",
+        "CATA_EVENT_400",
+        "CATA_EVENT_401",
+        "CATA_EVENT_402",
+        "EDR_950",
+        "JAIL_EVENT_100",
+        "JAIL_EVENT_101",
+        "JAIL_EVENT_102",
+        "TIME_EVENT_300",
+        "TIME_EVENT_301",
+        "TIME_EVENT_997",
+        "TIME_EVENT_998",
+        "TIME_EVENT_999",
+        "TLC_EVENT_400",
+        "TLC_EVENT_402",
+        "BE_036",
+        "BE_EVENT_100",
+        "BE_EVENT_101",
+        "BE_EVENT_102"
+      ],
+      "window": {
+        "from": "2026-07-07",
+        "to": "2026-10-19"
+      },
+      "windowAdmissions": [
+        {
+          "cardId": "BE_036",
+          "name": "M.O.T.H.E.R.",
+          "legalFrom": "2026-09-15",
+          "reason": "Free login grant from patch 36.6; playable before Black Empire launch.",
+          "source": "https://hearthstone.blizzard.com/en-us/news/24294373"
+        },
+        {
+          "cardId": "BE_EVENT_100",
+          "name": "Arrival of the Old Gods",
+          "legalFrom": "2026-10-06",
+          "reason": "The War of Old & New event reward; early deck use allowed before Black Empire launch.",
+          "source": "https://hearthstone.blizzard.com/en-us/news/24294373"
+        },
+        {
+          "cardId": "BE_EVENT_101",
+          "name": "Arrival of the Titans",
+          "legalFrom": "2026-10-06",
+          "reason": "The War of Old & New event reward; early deck use allowed before Black Empire launch.",
+          "source": "https://hearthstone.blizzard.com/en-us/news/24294373"
+        },
+        {
+          "cardId": "BE_EVENT_102",
+          "name": "Dark Terraforming",
+          "legalFrom": "2026-10-06",
+          "reason": "The War of Old & New event reward; early deck use allowed before Black Empire launch.",
+          "source": "https://hearthstone.blizzard.com/en-us/news/24294373"
+        }
+      ]
+    },
+    {
+      "id": "black-empire",
+      "label": "Reign of the Black Empire",
+      "sets": [
+        "EMERALD_DREAM",
+        "THE_LOST_CITY",
+        "TIME_TRAVEL",
+        "CATACLYSM",
+        "ESCAPEFROM_VIOLET_HOLD",
+        "BE",
+        "CORE"
+      ],
+      "newestSet": "BE",
+      "extraCards": [
+        "CATA_EVENT_000",
+        "CATA_EVENT_001",
+        "CATA_EVENT_002",
+        "CATA_EVENT_110",
+        "CATA_EVENT_400",
+        "CATA_EVENT_401",
+        "CATA_EVENT_402",
+        "EDR_950",
+        "JAIL_EVENT_100",
+        "JAIL_EVENT_101",
+        "JAIL_EVENT_102",
+        "TIME_EVENT_300",
+        "TIME_EVENT_301",
+        "TIME_EVENT_997",
+        "TIME_EVENT_998",
+        "TIME_EVENT_999",
+        "TLC_EVENT_400",
+        "TLC_EVENT_402",
+        "BE_EVENT_100",
+        "BE_EVENT_101",
+        "BE_EVENT_102",
+        "BE_EVENT_103"
+      ]
+    }
+  ]
+}

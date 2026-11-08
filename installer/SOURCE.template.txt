@@ -1,0 +1,14 @@
+SoloStone @VERSION@: where to get the source
+
+SoloStone is free software. Its own files are under the GNU Affero General Public License, version 3 or later, with an
+additional permission for the plugin and the launcher (LICENSE and LICENSE-ADDITIONAL-PERMISSION.md, next to this
+file). The rules engine is based on SabberStone, which is under the same licence. Other parts keep their own licences:
+see NOTICE and the texts in the LICENSES folder.
+
+The complete source code of this build, and the steps to build it, are here:
+
+  Source:  @SOURCE_LINE@
+  Commit:  @REVISION@
+  Build:   docs/BUILDING.md in that repository
+
+If you cannot reach that address, ask the person who gave you this download to get the source for you.

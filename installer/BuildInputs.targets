@@ -1,0 +1,21 @@
+<Project>
+  <!-- Release inputs. Keys are public keys; empty means "updates not configured" and everything else still works. No private key ever enters a build. -->
+  <PropertyGroup>
+    <SoloStoneRootKey Condition="'$(SoloStoneRootKey)' == ''"></SoloStoneRootKey>
+    <SoloStoneSigningKey Condition="'$(SoloStoneSigningKey)' == ''"></SoloStoneSigningKey>
+    <SoloStoneRepo Condition="'$(SoloStoneRepo)' == ''"></SoloStoneRepo>
+    <SoloStoneSeqFloor Condition="'$(SoloStoneSeqFloor)' == ''">0</SoloStoneSeqFloor>
+    <!-- A test build may compile different tested values to exercise the Warning path. -->
+    <TestedClientFile Condition="'$(TestedClientFile)' == ''">$(MSBuildThisFileDirectory)tested-client.json</TestedClientFile>
+  </PropertyGroup>
+  <Target Name="GenerateSoloStoneBuildInputs" BeforeTargets="BeforeCompile;CoreCompile">
+    <PropertyGroup><SoloStoneBuildInputsFile>$(IntermediateOutputPath)SoloStoneBuildInputs.g.cs</SoloStoneBuildInputsFile></PropertyGroup>
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(SoloStoneRootKey)','^(RW[A-Za-z0-9+/=]{54})?$'))" Text="SoloStoneRootKey must be a minisign public key." />
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(SoloStoneSigningKey)','^(RW[A-Za-z0-9+/=]{54})?$'))" Text="SoloStoneSigningKey must be a minisign public key." />
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(SoloStoneRepo)','^([A-Za-z0-9][A-Za-z0-9._-]*/[A-Za-z0-9][A-Za-z0-9._-]*)?$'))" Text="SoloStoneRepo must be owner/name." />
+    <Error Condition="!$([System.Text.RegularExpressions.Regex]::IsMatch('$(SoloStoneSeqFloor)','^[0-9]{1,18}$'))" Text="SoloStoneSeqFloor must be a number." />
+    <WriteLinesToFile File="$(SoloStoneBuildInputsFile)" Overwrite="true" WriteOnlyWhenDifferent="true"
+      Lines="namespace SoloStone { internal static class BuildInputs { internal const string RootPublicKey=&quot;$(SoloStoneRootKey)&quot;%3B internal const string SigningPublicKey=&quot;$(SoloStoneSigningKey)&quot;%3B internal const string Repo=&quot;$(SoloStoneRepo)&quot;%3B internal const long SeqFloor=$(SoloStoneSeqFloor)%3B } }" />
+    <ItemGroup><Compile Include="$(SoloStoneBuildInputsFile)" /><FileWrites Include="$(SoloStoneBuildInputsFile)" /></ItemGroup>
+  </Target>
+</Project>

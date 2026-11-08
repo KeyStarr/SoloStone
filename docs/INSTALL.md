@@ -1,0 +1,183 @@
+# Installing SoloStone (Windows)
+
+SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
+
+This is a beta. It has been tested on few machines. Read "Known issues" at the end before you start.
+
+## What SoloStone does to your PC
+
+SoloStone makes a separate copy of the Hearthstone you already have, adds its own files to the copy, and blocks the
+copy from the internet with Windows Firewall. Your own Hearthstone folder is only read. SoloStone never talks to a
+Blizzard service and never logs in anywhere.
+
+## Fair play and safety
+
+- SoloStone runs a separate offline copy of the game. It never connects to Blizzard's servers: Windows Firewall blocks the copy, and SoloStone refuses to start if it detects a connection.
+- It doesn't change your own Hearthstone, your Battle.net app or your account, and it never logs in.
+- It has no online features, so it can't affect anyone else's games.
+- SoloStone is an unofficial fan project, not affiliated with or endorsed by Blizzard Entertainment. Use it at your own risk; it comes with no warranty (see [LICENSE](../LICENSE)).
+
+## Before you start
+
+1. Windows 10 or 11, 64-bit.
+2. Hearthstone installed through Battle.net.
+3. About 12.5 GB free for the copy.
+4. **Quit Battle.net and its update agent first.** Right-click the Battle.net icon in the tray and choose Quit.
+   SoloStone refuses to install, update or run while they are open. Do the same every time before you play. If it
+   still says Battle.net is running, wait a minute, or end "Agent" in Task Manager.
+
+## Download and check
+
+From the [Releases page](https://github.com/KeyStarr/SoloStone/releases) take:
+
+- `SoloStone-Setup-<version>.exe`
+- `SHA256SUMS`
+- `SHA256SUMS.minisig`
+
+Checking is optional but takes a minute. In PowerShell, in the folder you downloaded to:
+
+```powershell
+Get-FileHash .\SoloStone-Setup-<version>.exe -Algorithm SHA256
+```
+
+The hash printed must match the line for that file in `SHA256SUMS` (upper or lower case does not matter). A matching hash only proves anything if
+`SHA256SUMS` itself is genuine, so also check its signature with [minisign](https://jedisct1.github.io/minisign/):
+
+```text
+minisign -Vm SHA256SUMS -P RWSsM35KycCUtK/VB0YlewJOA99zkss4+lMLTL7yVzm56kxILzP7W4PN
+```
+
+It must say the signature is valid. If the hash or the signature does not match, do not run the file, and tell us
+(see [SECURITY.md](../.github/SECURITY.md)).
+
+## Run the setup
+
+1. Double-click `SoloStone-Setup-<version>.exe`.
+2. **Windows will probably show a blue "Windows protected your PC" (SmartScreen) page.** The installer is not signed
+   with a paid Windows code-signing certificate, so Windows does not know who made it. If you checked the hash and
+   signature above, choose **More info**, then **Run anyway**. This is expected. Do not turn off your antivirus or
+   SmartScreen to get past it.
+3. The setup needs no administrator rights. It installs only for your account, into `%LOCALAPPDATA%\SoloStone\app`.
+   It also works if your account runs everything as administrator (for example with UAC turned off).
+4. SoloStone's own setup window opens with five steps:
+
+| Step | What you see | Does it write anything? |
+|---|---|---|
+| 1. How it works | A short explanation | No |
+| 2. Your Hearthstone folder | Found for you, or choose it with Browse. It shows the client version SoloStone was last tested with and the version of yours | No |
+| 3. Copy to | Default `%LOCALAPPDATA%\SoloStone\client`, with free space and path checks | No |
+| 4. What will happen | The plain list of what the next step does, and the "Check for updates" box | No |
+| 5. Do it | Progress for each step, and a Cancel button | Only here |
+
+Closing the window or clicking Cancel in steps 1 to 4 leaves no copy of Hearthstone behind. SoloStone itself stays
+installed, and its shortcut opens setup again until a copy exists.
+
+5. In step 5, **Windows asks for permission** (a UAC prompt for Windows' own `cmd.exe` and `netsh.exe`). Say
+   Yes. It adds one outbound block rule per program in the copy. If you say No, the copy is kept and SoloStone
+   cannot start; the window offers "Ask again". Windows asks again if you later remove or re-apply the rules,
+   and at uninstall.
+
+If setup stops half-way, step 5 offers **Try again**, **Remove partial copy** and **Open log**
+(`%LOCALAPPDATA%\SoloStone\reports\installer.log`).
+
+## Your Hearthstone version
+
+| Your client | What happens |
+|---|---|
+| The version SoloStone was tested with | Works |
+| Same major and minor version, newer or older patch | Works, no warning |
+| Same major version, different minor version | A **warning**. Tick "I understand" once to continue. Card text and rules can differ from the game |
+| A different major version, or a version SoloStone cannot read, or a client on the known-problem list | **Blocked**. The window says why |
+| The check finds that something SoloStone needs from your client is missing | **Blocked**, even for a patch-only difference |
+
+If your Hearthstone gets a new major version, SoloStone is blocked until a SoloStone release is tested with it.
+Copies that are already installed keep working. The first time you accept a warning, your saves are backed up
+first.
+
+## What connects to GitHub
+
+Only the launcher, only when it starts, and only if "Check for updates" is on:
+
+1. It fetches a small release list, a signing-key file and their signatures from `raw.githubusercontent.com`.
+2. Only if a newer version exists, it downloads the update from `github.com` (GitHub hands the file over from
+   `objects.githubusercontent.com` or `release-assets.githubusercontent.com`).
+
+The launcher connects to nothing else. Every request is HTTPS to those four GitHub hosts, with no cookies, no login and no tracking,
+and a redirect to any other host is refused. **GitHub sees what any web visitor shows: your internet address, and
+that you fetched those files.** The signature is checked before the file is read, and an update that is not newer
+than yours is ignored.
+
+All requests finish before the game starts. The game itself makes no web requests of its own and stays behind its
+firewall rules. At every start the mod does try two test connections (to 1.1.1.1 and to a typical home-router address on the private network, port 443) to
+prove the firewall blocks them; if either one gets through, the game quits. If GitHub cannot be reached, you keep
+your current version and can still play.
+
+A few buttons in the game (help and bug reporting) open a web page in your normal browser. That happens only when
+you click one.
+
+**The off switch:** untick "Check for updates" in setup step 4 or in the launcher window, or run
+
+```text
+SoloStone.exe settings --updates off
+```
+
+With it off, SoloStone makes **no request at all**.
+
+## Playing and updating
+
+The desktop and Start menu shortcut opens the launcher. It shows the client version SoloStone was tested with,
+yours, the SoloStone version, update status, **Play**, **Roll back**, the update switch and **Uninstall**.
+
+- On start it checks for an update (you can **Skip update**) and installs it. After the swap it restarts itself.
+- A new release is installed and then checked: the next start must see the mod load. If it does not, the previous
+  version is restored and the window says so.
+- A release that would give a warning for your client asks first. A release for a different major version never
+  installs by itself; the update is held and your current version keeps working.
+- **Roll back** returns to the previous version, only if that version can read your current saves. Otherwise the
+  window says progress since the update would be lost and offers the backup taken before the update. Your
+  current saves are moved aside first, never deleted.
+- Backups are in `%LOCALAPPDATA%\SoloStone\backups`. The newest three stay.
+
+## What SoloStone leaves alone
+
+- Your Hearthstone folder. It is only read.
+- Battle.net, its settings and your Blizzard account.
+- Windows Firewall, apart from rules named `SoloStone-<install id>-...`, one per program in the copy.
+- Your saves, in `%LOCALAPPDATA%\SoloStone\saves`. Update, rollback and uninstall keep them. The launcher's Uninstall button deletes
+  them only if you tick "Also delete my saves" and confirm; uninstalling from Apps & features always keeps them.
+- The registry, except the standard "Apps & features" entry and what the copy writes itself. The copy has its own
+  company name (`SoloStone Offline Mods`), so the game writes `HKCU\Software\SoloStone Offline Mods\Hearthstone`
+  and not the key your own Hearthstone uses. The copy keeps its options in
+  `%LOCALAPPDATA%\Blizzard\Hearthstone\SoloStone`, beside your own Hearthstone's data but separate from it, and may
+  write to `%USERPROFILE%\AppData\LocalLow\SoloStone Offline Mods\Hearthstone`.
+- Your administrator rights. SoloStone doesn't need them and doesn't ask for them, though it also runs if your account
+  is always elevated (UAC turned off). Only Windows' own `cmd.exe` and `netsh.exe` are started with your permission, for
+  the firewall rules.
+
+## Uninstall
+
+Use the launcher's **Uninstall** button or Windows' Apps & features. Both check that the folders and firewall rules
+are SoloStone's own, then remove the rules and the offline copy, and then the app folder. **The copy folder is
+deleted whole, including anything you put there.** Your saves stay unless you use the launcher's Uninstall button
+and tick "Also delete my saves", which also deletes your save backups.
+
+Otherwise left behind in `%LOCALAPPDATA%\SoloStone`: `backups\` (your save backups) and `reports\` (logs and launch
+markers, which include your Windows user name). Delete that folder by hand if you do not want them.
+
+## Known issues
+
+- **Card text follows SoloStone's own file.** For the cards in the fixed set, SoloStone shows the English text from
+  its own card file on any client and in any client language. After Hearthstone balance patches, that text can
+  differ from your client's or the live game's. Cards outside the set show your client's own text.
+- **Hearthstone updates:** see "Your Hearthstone version". A new major version blocks SoloStone until a new release.
+- **Quit Battle.net first.** Do not run your normal Hearthstone at the same time as SoloStone. Running both together
+  has not been tested.
+- **Not tested yet:** a brand-new Windows account, third-party firewalls (SoloStone can only read Windows
+  Firewall), and clients newer than the one it was tested with.
+- **Antivirus:** a loader file in the copy (`winhttp.dll`) can trigger false alarms in some antivirus programs.
+  Do not switch your antivirus off. If it flags the file, check the installer against `SHA256SUMS` as above and
+  report it to your antivirus vendor as a false positive. If you are not comfortable, do not install.
+- Windows only. English only. Steam Deck and Linux are not supported yet.
+
+Problems or questions: see [CONTRIBUTING.md](../.github/CONTRIBUTING.md). Logs in `%LOCALAPPDATA%\SoloStone\reports` can include
+your Windows user name and folder paths; remove those before you post a log.

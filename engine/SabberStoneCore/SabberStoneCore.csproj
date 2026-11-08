@@ -1,0 +1,174 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.1;net10.0</TargetFrameworks>
+    <Deterministic>true</Deterministic>
+    <!-- Content-reproducible engine bytes: exact-DLL pins (AI corpus) must not change with each Git commit. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <EnableSourceControlManagerQueries>false</EnableSourceControlManagerQueries>
+    <Version>2.1.0</Version>
+    <RepositoryUrl>https://github.com/HearthSim/Sabberstone</RepositoryUrl>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <Authors>SabberStone Team, darkfriend77 and rnilva</Authors>
+    <Description>Hearthstone Simulator</Description>
+    <Copyright>GNU AGPL v3</Copyright>
+    <PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
+    <Configurations>Debug;Release;NoSpan</Configurations>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NoWarn>NU1605</NoWarn>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <LangVersion>latest</LangVersion>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;NETSTANDARD2_0</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='NoSpan|AnyCPU'">
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <LangVersion>latest</LangVersion>
+    <Optimize>false</Optimize>
+    <DefineConstants>NETSTANDARD2_0, NOSPAN</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+    <TreatSpecificWarningsAsErrors />
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DefineConstants />
+    <NoWarn>1701;1702;0008;0049;</NoWarn>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="resources\Data\OfflinePoolCatalog.xml" LogicalName="SabberStoneCore.Resources.OfflinePoolCatalog.xml" />
+    <EmbeddedResource Include="resources\Data\LegacyGenerationV1.xml" LogicalName="SabberStoneCore.Resources.LegacyGenerationV1.xml" />
+    <!-- CardDefs.xml and ClientOverlay.xml stay private inputs of tools/gen_card_facts.py; never embed them. -->
+    <EmbeddedResource Include="..\..\facts\violet-hold-2026-09.json" LogicalName="SabberStoneCore.Resources.Facts.violet-hold-2026-09.json" />
+    <InternalsVisibleTo Include="EngineProof" />
+    <InternalsVisibleTo Include="HsSim" />
+    <InternalsVisibleTo Include="AiHarness" />
+    <InternalsVisibleTo Include="TransportInvariants" />
+    <EmbeddedResource Include="resources\Data\PlayErrors.xml">
+      <LogicalName>SabberStoneCore.Resources.PlayErrors.xml</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+
+  </ItemGroup>
+  <!-- Build-time helpers as MSBuild inline tasks, so a build needs only the .NET SDK (no python3 on PATH, which Windows does not have). -->
+  <UsingTask TaskName="EngineBuildPathMap" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ProjectDirectory ParameterType="System.String" Required="true" />
+      <IntermediateDirectory ParameterType="System.String" Required="true" />
+      <Result ParameterType="System.String" Output="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.Collections.Generic" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Reflection" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        // Each directory is mapped under its path as given and under its resolved path (links followed), like pathlib's resolve().
+        Func<string, string> trim = path => path.Length > 1 ? path.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) : path;
+        Func<string, string> resolve = path =>
+        {
+            PropertyInfo linkTarget = typeof(FileSystemInfo).GetProperty("LinkTarget");   // .NET 6 and later; older hosts keep the given path
+            if (linkTarget == null) return path;
+            string rootName = Path.GetPathRoot(path);
+            var pending = new List<string>(path.Substring(rootName.Length).Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries));
+            string current = rootName;
+            int hops = 0;
+            while (pending.Count > 0)
+            {
+                string next = Path.Combine(current, pending[0]);
+                pending.RemoveAt(0);
+                string target = null;
+                if (Directory.Exists(next) || File.Exists(next))
+                {
+                    var info = Directory.Exists(next) ? (FileSystemInfo)new DirectoryInfo(next) : new FileInfo(next);
+                    target = (string)linkTarget.GetValue(info);
+                }
+                if (target == null) { current = next; continue; }
+                if (++hops > 40) return path;
+                string full = Path.GetFullPath(Path.Combine(current, target));
+                rootName = Path.GetPathRoot(full);
+                pending.InsertRange(0, full.Substring(rootName.Length).Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries));
+                current = rootName;
+            }
+            return trim(current);
+        };
+        string root = trim(Path.GetFullPath(ProjectDirectory));
+        string intermediate = trim(Path.GetFullPath(Path.Combine(root, IntermediateDirectory)));
+        var pairs = new List<string>();
+        foreach (var entry in new[] { new[] { intermediate, "/_/SabberStoneCore/obj" }, new[] { root, "/_/SabberStoneCore" } })
+        {
+            var seen = new HashSet<string>();
+            foreach (string source in new[] { resolve(entry[0]), entry[0] })
+                if (seen.Add(source)) pairs.Add(source + "=" + entry[1]);
+        }
+        Result = string.Join(",", pairs);
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <UsingTask TaskName="EngineSourceStamp" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+    <ParameterGroup>
+      <ProjectDirectory ParameterType="System.String" Required="true" />
+      <FactsFile ParameterType="System.String" Required="true" />
+      <OutputFile ParameterType="System.String" Required="true" />
+    </ParameterGroup>
+    <Task>
+      <Using Namespace="System" />
+      <Using Namespace="System.Collections.Generic" />
+      <Using Namespace="System.IO" />
+      <Using Namespace="System.Security.Cryptography" />
+      <Using Namespace="System.Text" />
+      <Code Type="Fragment" Language="cs"><![CDATA[
+        string root = Path.GetFullPath(ProjectDirectory).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+        var extensions = new HashSet<string> { ".cs", ".csproj", ".xml", ".resx" };
+        var skippedNames = new HashSet<string> { "CardDefs.xml", "ClientOverlay.xml" };
+        var found = new List<KeyValuePair<string, string>>();   // posix relative path, full path
+        foreach (string file in Directory.EnumerateFiles(root, "*", SearchOption.AllDirectories))
+        {
+            string relative = file.Substring(root.Length + 1).Replace('\\', '/');
+            string[] parts = relative.Split('/');
+            if (!extensions.Contains(Path.GetExtension(file)) || skippedNames.Contains(parts[parts.Length - 1])) continue;
+            if (Array.IndexOf(parts, "bin") >= 0 || Array.IndexOf(parts, "obj") >= 0) continue;
+            found.Add(new KeyValuePair<string, string>(relative, file));
+        }
+        found.Sort((a, b) => string.CompareOrdinal(a.Key, b.Key));
+        // The facts file comes last, named relative to the project folder.
+        found.Add(new KeyValuePair<string, string>("../../facts/violet-hold-2026-09.json", FactsFile));
+        var text = new StringBuilder();
+        using (SHA256 sha = SHA256.Create())
+        {
+            foreach (var item in found)
+                text.Append(BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(item.Value))).Replace("-", "").ToLowerInvariant()).Append("  ./").Append(item.Key).Append('\n');
+            string stamp;
+            using (SHA256 outer = SHA256.Create()) stamp = BitConverter.ToString(outer.ComputeHash(Encoding.UTF8.GetBytes(text.ToString()))).Replace("-", "").ToLowerInvariant();
+            string content = "[assembly: System.Reflection.AssemblyMetadata(\"EngineSourceIdentity\", \"" + stamp + "\")]";
+            if (!File.Exists(OutputFile) || File.ReadAllText(OutputFile) != content)
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(OutputFile)));
+                File.WriteAllText(OutputFile, content);
+            }
+        }
+      ]]></Code>
+    </Task>
+  </UsingTask>
+  <!-- Normalize source/generated-source/PDB paths for exact-DLL pins; preserve explicit caller PathMap. -->
+  <Target Name="MapEngineBuildPaths" BeforeTargets="CoreCompile" Condition="'$(PathMap)' == ''">
+    <EngineBuildPathMap ProjectDirectory="$(MSBuildProjectDirectory)" IntermediateDirectory="$(IntermediateOutputPath)">
+      <Output TaskParameter="Result" PropertyName="PathMap" />
+    </EngineBuildPathMap>
+  </Target>
+  <Target Name="GenerateEngineSourceStamp" BeforeTargets="CoreCompile">
+    <!-- Hashes what the build compiles and embeds: the card file counts, the private XMLs do not, so an export without them gets the same stamp. -->
+    <EngineSourceStamp ProjectDirectory="$(MSBuildProjectDirectory)" FactsFile="$(MSBuildProjectDirectory)/../../facts/violet-hold-2026-09.json" OutputFile="$(IntermediateOutputPath)EngineSourceStamp.g.cs" />
+    <ItemGroup><Compile Include="$(IntermediateOutputPath)EngineSourceStamp.g.cs" /></ItemGroup>
+  </Target>
+</Project>

@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup>
+    <EmbeddedResource Include="$(MSBuildThisFileDirectory)eligibility-v1.json" LogicalName="FairPackEligibilityV1.json" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,238 @@
+{
+ "schema": 1,
+ "doorstopVersion": "4.5.0",
+ "bepInExVersion": "5.4.23.5",
+ "unityVersion": "6000.3.11",
+ "sources": {
+  "doorstop": {
+   "url": "https://github.com/NeighTools/UnityDoorstop/releases/download/v4.5.0/doorstop_win_release_4.5.0.zip",
+   "archiveSha256": "7bb953e8d883c8bde76ced96f6d0e45660ad6e0151880d8ab5856bf4f532b147",
+   "components": [
+    {
+     "name": "Unity Doorstop",
+     "version": "4.5.0",
+     "licence": "LGPL-2.1",
+     "licenceUrl": "https://github.com/NeighTools/UnityDoorstop/blob/v4.5.0/LICENSE"
+    }
+   ]
+  },
+  "bepinex": {
+   "url": "https://github.com/BepInEx/BepInEx/releases/download/v5.4.23.5/BepInEx_win_x64_5.4.23.5.zip",
+   "archiveSha256": "82f9878551030f54657792c0740d9d51a09500eeae1fba21106b0c441e6732c4",
+   "components": [
+    {
+     "name": "BepInEx",
+     "version": "5.4.23.5",
+     "licence": "LGPL-2.1",
+     "licenceUrl": "https://github.com/BepInEx/BepInEx/blob/v5.4.23.5/LICENSE"
+    },
+    {
+     "name": "HarmonyX",
+     "version": "2.9.0",
+     "licence": "MIT",
+     "licenceUrl": "https://github.com/BepInEx/HarmonyX/blob/v2.9.0/LICENSE"
+    },
+    {
+     "name": "BepInEx.Harmony",
+     "version": "2.0.0",
+     "licence": "MIT",
+     "licenceUrl": "https://github.com/BepInEx/BepInEx.Harmony/blob/d4cdcb4cdeac14a0b77012165f5f5a9f5032a9fa/LICENSE"
+    },
+    {
+     "name": "Mono.Cecil",
+     "version": "0.10.4",
+     "licence": "MIT",
+     "licenceUrl": "https://github.com/jbevain/cecil/blob/0.10.4/LICENSE.txt"
+    },
+    {
+     "name": "MonoMod",
+     "version": "22.1.29.1",
+     "licence": "MIT",
+     "licenceUrl": "https://github.com/MonoMod/MonoMod/blob/v22.01.29.01/LICENSE"
+    }
+   ]
+  },
+  "hsmod-windows-corlibs": {
+   "raw": true,
+   "components": [
+    {
+     "name": "Unity Mono class libraries (Windows set)",
+     "version": "6000.3.11f1",
+     "licence": "MIT, with some third-party parts under BSD-3-Clause, and a Microsoft patent grant (PATENTS.TXT)",
+     "licenceUrl": "https://github.com/Unity-Technologies/mono/blob/6000.3.1f1/LICENSE"
+    }
+   ]
+  }
+ },
+ "files": [
+  {
+   "path": "winhttp.dll",
+   "source": "doorstop",
+   "member": "x64/winhttp.dll",
+   "sha256": "8c6cdbc38836dee87e3368f5de1994d7c0ccebf29e4ce7aba3c0981f9375412c"
+  },
+  {
+   "path": "BepInEx/core/0Harmony.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/0Harmony.dll",
+   "sha256": "1a21cc03424fc82c3dd1346905d16494536b9595ae4162228d99fb7c285c1031"
+  },
+  {
+   "path": "BepInEx/core/0Harmony20.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/0Harmony20.dll",
+   "sha256": "c755a5ab2712915a32f9a850d580a8c1b70ff1653bc76600f2767aa8ffccc663"
+  },
+  {
+   "path": "BepInEx/core/BepInEx.Harmony.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/BepInEx.Harmony.dll",
+   "sha256": "00c8f2ac48593e4d45ce4eb26ce4e68b18113c5c489b38b8bf0850f65830d601"
+  },
+  {
+   "path": "BepInEx/core/BepInEx.Preloader.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/BepInEx.Preloader.dll",
+   "sha256": "55d3895351a9d16b63b6f35f1c01b44ac650979e853d0bd3a442b92a082af64f"
+  },
+  {
+   "path": "BepInEx/core/BepInEx.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/BepInEx.dll",
+   "sha256": "8255b28902886085c578b9e427d3073c97002db85176d2090cdeda90ef14ce70"
+  },
+  {
+   "path": "BepInEx/core/HarmonyXInterop.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/HarmonyXInterop.dll",
+   "sha256": "7ce1342d3afa0334b59a3e38c0aed15e162b9abe9d46f95f34be44af47f3b493"
+  },
+  {
+   "path": "BepInEx/core/Mono.Cecil.Mdb.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/Mono.Cecil.Mdb.dll",
+   "sha256": "5896d1898f616701fff18f3b2c71e6b844d2390ef9f41e1c5fccce8cb27c698e"
+  },
+  {
+   "path": "BepInEx/core/Mono.Cecil.Pdb.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/Mono.Cecil.Pdb.dll",
+   "sha256": "174db44a067f58561510af746f3caeb032037762c57a31c8d9ee32db25174984"
+  },
+  {
+   "path": "BepInEx/core/Mono.Cecil.Rocks.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/Mono.Cecil.Rocks.dll",
+   "sha256": "54ac539fb5ddc8b44c0e9acd0fcb7324f89d1a072edf8ebc1b06dd691e3d3927"
+  },
+  {
+   "path": "BepInEx/core/Mono.Cecil.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/Mono.Cecil.dll",
+   "sha256": "7ae470288fff4a402899c254d0a76cefef55877f5c54f96e83c797cc5bb6e2f6"
+  },
+  {
+   "path": "BepInEx/core/MonoMod.RuntimeDetour.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/MonoMod.RuntimeDetour.dll",
+   "sha256": "40e49bb314391cd7bddc2644f8553eeba92c194b940836b103df16955c464e0c"
+  },
+  {
+   "path": "BepInEx/core/MonoMod.Utils.dll",
+   "source": "bepinex",
+   "member": "BepInEx/core/MonoMod.Utils.dll",
+   "sha256": "9d1495f147ac93c4f81f84538c1a326e8f8a6aefc78d6289d798f3ce1162c5e9"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/Microsoft.CSharp.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/Microsoft.CSharp.dll",
+   "sha256": "144a06f84d540075afffb3d5206864e2031531a787be5f3b2a3c36f237acb894"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/Mono.Posix.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/Mono.Posix.dll",
+   "sha256": "4c7c07bb0cae627b0d19c430c5c9dbf22bbbfa8910d6d5e5996a4d43a56d4511"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/Mono.Security.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/Mono.Security.dll",
+   "sha256": "618009319dbf3ae374f9b5dc0d0522e1e1bdd172200c120a5471747b7991a584"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Configuration.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Configuration.dll",
+   "sha256": "04907729e87a101e62d3a5c93cfa16688bee745d05440d6daa0c541964be27ab"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Core.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Core.dll",
+   "sha256": "a5e7d47313da0eca0b92a901a30498f5e970916faf63b70b74dd62b09760ed72"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Data.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Data.dll",
+   "sha256": "427478545ce66b632414ca838088ea073f250ed16b21c70005f48cb571350e47"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Net.Http.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Net.Http.dll",
+   "sha256": "3cd3ac19050d5031c13644cd87958ad8029b79ce16c7747faf3d0542e7fb45a3"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Numerics.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Numerics.dll",
+   "sha256": "ac9224b32355a09f09b706cab568384f64cf8116825c5911cef1e13221c61c38"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Runtime.Serialization.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Runtime.Serialization.dll",
+   "sha256": "1152ef687dbe39e0ccb6b9a68f6501004415a729072df29abab3bc7c66840217"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Security.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Security.dll",
+   "sha256": "2101a4dd4475285f96b1ac3ba1715a52aa8067690709e675cc49a9eb8ed901a4"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Xml.Linq.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Xml.Linq.dll",
+   "sha256": "4f5d6bf313cbf091e7bff83d07dd03ed93d0ecb3ddb025ae786aadd6b5f477fb"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.Xml.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.Xml.dll",
+   "sha256": "79194220adfcf027a334c87b1adcc6d07b9660a4061e04b3d9500c10d30f7d49"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/System.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/System.dll",
+   "sha256": "7019d6b6dbfa07cf30f62e7d3ccb969f70cbf001fd72112938ffb535c7f75d81"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/mscorlib.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/mscorlib.dll",
+   "sha256": "6c76e06e6d44cf0f39bf59e6a90770968b70093ad4c1572dfbc5e46e431c5fbf"
+  },
+  {
+   "path": "BepInEx/unstripped_corlib/netstandard.dll",
+   "source": "hsmod-windows-corlibs",
+   "url": "https://raw.githubusercontent.com/Pik-4/HsMod/551d4423d789c7316303376b616688dafbf05c6c/HsMod/UnstrippedCorlib/netstandard.dll",
+   "sha256": "6ae62e082dc494a2433984177f60ca4db5fae69b1f360a8b33754172b310b8c5"
+  }
+ ],
+ "note": "Mono libraries: byte-identical to the set the lab client ran on before P1 (all 18 lab files matched HsMod Windows; Newtonsoft.Json and UniTask dropped, nothing of ours uses them). Candidate alternative: loader-inputs-mirror-candidate.json."
+}

@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><LangVersion>latest</LangVersion><DefineConstants>$(DefineConstants);SOLOSTONE_TEST_HOOKS</DefineConstants></PropertyGroup>
+  <PropertyGroup Condition="'$(Installer)' != 'false'"><DefineConstants>$(DefineConstants);SOLOSTONE_INSTALLER</DefineConstants></PropertyGroup>
+  <Import Project="../BuildInputs.targets" />
+  <ItemGroup>
+    <PackageReference Include="BouncyCastle.Cryptography" Version="[2.6.2]" />
+    <Content Include="../SoloStone.Launcher/*.cs" Link="launcher-source/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../SoloStone.Launcher/Gui/*.cs" Link="launcher-source/Gui/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../SoloStone.Launcher/SoloStone.Launcher.csproj" Link="launcher-source/SoloStone.Launcher.csproj" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../SoloStone.iss" Link="launcher-source/SoloStone.iss" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../build.ps1" Link="launcher-source/build.ps1" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/InstallerRuntime.cs" Link="launcher-source/InstallerRuntime.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/OfflineProbe.csproj" Link="launcher-source/OfflineProbe.csproj" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="fixtures/**" Link="fixtures/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <EmbeddedResource Include="$(TestedClientFile)" LogicalName="tested-client.json" />
+    <Content Include="../../plugin/OfflineProbe.cs" Link="plugin-source/OfflineProbe.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/OfflineGuard.cs" Link="plugin-source/OfflineGuard.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/ClientChecks.cs" Link="plugin-source/ClientChecks.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/NativeResultsUI.cs" Link="plugin-source/NativeResultsUI.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/client-bindings.txt" Link="plugin-source/client-bindings.txt" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/ClientBridge.cs" Link="plugin-source/ClientBridge.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/SelectedProfile.cs" Link="plugin-source/SelectedProfile.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/LocalProfile.cs" Link="plugin-source/LocalProfile.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/NativeGuideCards.cs" Link="plugin-source/NativeGuideCards.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/NativePlaytest.cs" Link="plugin-source/NativePlaytest.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/NativeTestControl.cs" Link="plugin-source/NativeTestControl.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="../../plugin/TestControlProtocol.cs" Link="plugin-source/TestControlProtocol.cs" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../SoloStone.Launcher/Core.cs" Link="Core.cs" />
+    <Compile Include="../SoloStone.Launcher/Options.cs" Link="Options.cs" />
+    <Compile Include="../SoloStone.Launcher/LabGuard.cs" Link="LabGuard.cs" />
+    <Compile Include="../SoloStone.Launcher/CoreLauncher.cs" Link="CoreLauncher.cs" />
+    <Compile Include="../SoloStone.Launcher/WindowsFirewall.cs" Link="WindowsFirewall.cs" />
+    <Compile Include="../SoloStone.Launcher/RuntimeProtection.cs" Link="RuntimeProtection.cs" />
+    <Compile Include="../SoloStone.Launcher/Fs.cs" Link="Fs.cs" />
+    <Compile Include="../SoloStone.Launcher/Install.cs" Link="Install.cs" />
+    <Compile Include="../SoloStone.Launcher/ClientPolicy.cs" Link="ClientPolicy.cs" />
+    <Compile Include="../SoloStone.Launcher/Minisign.cs" Link="Minisign.cs" />
+    <Compile Include="../SoloStone.Launcher/ReleaseManifest.cs" Link="ReleaseManifest.cs" />
+    <Compile Include="../SoloStone.Launcher/UpdateClient.cs" Link="UpdateClient.cs" />
+    <Compile Include="../SoloStone.Launcher/UpdateEngine.cs" Link="UpdateEngine.cs" />
+    <Compile Include="../SoloStone.Launcher/LaunchGate.cs" Link="LaunchGate.cs" />
+    <Compile Include="../SoloStone.Launcher/ClientIdentity.cs" Link="ClientIdentity.cs" />
+    <!-- Window logic without any WinForms: wording, wizard and launcher models, and the pure part of the live-test hooks. -->
+    <Compile Include="../SoloStone.Launcher/Gui/Texts.cs" Link="Gui/Texts.cs" />
+    <Compile Include="../SoloStone.Launcher/Gui/Messages.cs" Link="Gui/Messages.cs" />
+    <Compile Include="../SoloStone.Launcher/Gui/WizardModel.cs" Link="Gui/WizardModel.cs" />
+    <Compile Include="../SoloStone.Launcher/Gui/LauncherModel.cs" Link="Gui/LauncherModel.cs" />
+    <Compile Include="../SoloStone.Launcher/Gui/TestHooksCore.cs" Link="Gui/TestHooksCore.cs" />
+    <Compile Include="../../plugin/InstallerRuntime.cs" Link="InstallerRuntime.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" Link="OfflineGuard.cs" />
+    <Compile Include="../../plugin/ClientBindings.cs" Link="ClientBindings.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" Link="ProfileCatalog.cs" />
+    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+  </ItemGroup>
+</Project>
