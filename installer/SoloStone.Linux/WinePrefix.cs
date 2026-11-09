@@ -101,6 +101,15 @@ namespace SoloStone
             if(dxvkLog!=null) start.Environment["DXVK_LOG_PATH"]=dxvkLog;
             return start;
         }
+        // Appends the program's console output to log. The shell opens the file and execs, so the program keeps its process id,
+        // and its output still has a place to go if the launcher closes first.
+        internal static ProcessStartInfo OutputTo(ProcessStartInfo start,string log) {
+            var wrapped=new ProcessStartInfo("/bin/sh") { UseShellExecute=false, WorkingDirectory=start.WorkingDirectory };
+            foreach(string part in new[]{"-c","exec \"$@\" >>\"$0\" 2>&1",log,start.FileName}.Concat(start.ArgumentList)) wrapped.ArgumentList.Add(part);
+            wrapped.Environment.Clear();
+            foreach(var row in start.Environment) wrapped.Environment[row.Key]=row.Value;
+            return wrapped;
+        }
         // A new prefix is made inside the namespace too, so no wineserver for it ever had network.
         internal void Create(Action<string> progress) {
             if(ServerRunning()) throw new InvalidOperationException(ServerRunningMessage);

@@ -83,7 +83,8 @@ applications menu. The copy takes a few minutes. To run the game with a Wine oth
 ## Play
 
 Start **SoloStone** from your applications menu, or run `solostone play`. A terminal window opens. The launcher
-writes its checks there and stays open while you play. Quit from the game's menu to close it.
+writes its checks there and stays open while you play. Quit from the game's menu to close it. The game's own console
+output goes to `wine.log` (see "Where things are"), not to this window.
 
 | Command | What it does |
 |---|---|
@@ -105,6 +106,7 @@ writes its checks there and stays open while you play. Quit from the game's menu
 | Your saves | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/saves` |
 | The game log | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/reports/Unity.log` |
 | DXVK's logs | `Hearthstone_d3d11.log` and `Hearthstone_dxgi.log` in the same `reports` folder |
+| What Wine, the game and DXVK print to the console | `wine.log` in the same `reports` folder, emptied at each start |
 | The mod log | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/client/BepInEx/LogOutput.log` |
 | Launcher settings | `~/.config/solostone/linux.json` |
 

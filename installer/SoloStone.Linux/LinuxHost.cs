@@ -93,6 +93,8 @@ namespace SoloStone
             RequireIdle(prefix); Safety.Destinations(record,Registered);
             engine.RequireReadableJournal();
             string reports=Path.Combine(record.Root,"reports"); Safety.NoLinks(reports); Directory.CreateDirectory(reports);
+            // Wine, Unity and DXVK write hundreds of lines to the console; the terminal keeps the launcher's own messages.
+            string output=Path.Combine(reports,"wine.log"); Safety.NoLinks(output); File.WriteAllText(output,"");
             string previous=null,token=null,target=null;
             var used=new HashSet<string>();
             for(;;) {
@@ -118,7 +120,7 @@ namespace SoloStone
                 if(previous!=null) arguments.AddRange(new[]{"-hs-profile-previous-run",previous,"-hs-profile-relaunch-token",token});
                 arguments.AddRange(new[]{"-logFile",prefix.ToWine(Path.Combine(reports,"Unity.log"))});
                 // DXVK writes its log where the game starts unless told otherwise: the reports folder, not the verified copy.
-                var start=prefix.Start(record.Client,true,prefix.InstallDxvk(bundle)?prefix.ToWine(reports):null,arguments.ToArray());
+                var start=WinePrefix.OutputTo(prefix.Start(record.Client,true,prefix.InstallDxvk(bundle)?prefix.ToWine(reports):null,arguments.ToArray()),output);
                 DateTime started=DateTime.UtcNow; progress("Starting SoloStone…");
                 using(var client=Process.Start(start)) {
                     try {

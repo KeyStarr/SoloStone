@@ -63,6 +63,20 @@ static partial class Program
         Check(dxvkHost.InstallDxvk(dxvkBundle) && WinePrefix.DxvkFiles.All(name=>File.ReadAllText(Path.Combine(dxvkPrefix,"drive_c","windows","system32",name))=="dxvk "+name),"DXVK replaces Wine's DLLs in the prefix");
         Check(dxvkHost.InstallDxvk(dxvkBundle),"installing again is a no-op that still says DXVK is on");
 
+        // The game's console output goes to a log, not the launcher's terminal; arguments, environment and exit code pass through.
+        if(File.Exists("/bin/sh")) {
+            string log=Path.Combine(temp,"wine output.log"); File.WriteAllText(log,"earlier\n");
+            var inner=new System.Diagnostics.ProcessStartInfo("/bin/sh") { UseShellExecute=false, WorkingDirectory=temp };
+            foreach(string part in new[]{"-c","echo \"$1|$2|$SOLO_TEST|$(pwd)\"; echo err >&2; exit 46","sh","a b","$HOME \"q\""}) inner.ArgumentList.Add(part);
+            inner.Environment["SOLO_TEST"]="set";
+            var wrapped=WinePrefix.OutputTo(inner,log); wrapped.RedirectStandardOutput=true; wrapped.RedirectStandardError=true;
+            using(var run=System.Diagnostics.Process.Start(wrapped)) {
+                string shown=run.StandardOutput.ReadToEnd()+run.StandardError.ReadToEnd(); run.WaitForExit();
+                Check(run.ExitCode==46 && shown=="","exit code passes through; nothing reaches the terminal");
+            }
+            Check(File.ReadAllText(log)=="earlier\na b|$HOME \"q\"|set|"+temp+"\nerr\n","output and errors are appended to the log, arguments and environment intact");
+        }
+
         // The applications-menu entry starts this launcher wherever the player unpacked it, quoted as the Desktop Entry spec asks.
         Check(DesktopEntry.Quote("/home/a b/SoloStone/solostone")=="\"/home/a b/SoloStone/solostone\"","a path with a space is quoted");
         Check(DesktopEntry.Quote("/x/$HOME`\"\\y")=="\"/x/\\$HOME\\`\\\"\\\\y\"","$ ` \" and \\ are escaped");
