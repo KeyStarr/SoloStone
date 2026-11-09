@@ -57,5 +57,6 @@
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
     <Content Include="../../plugin/**/*.cs" Link="plugin-all/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../plugin/DeckStats.cs" Link="DeckStats.cs" />
+    <Compile Include="../../plugin/DeckTrackerRows.cs" Link="DeckTrackerRows.cs" />
   </ItemGroup>
 </Project>
