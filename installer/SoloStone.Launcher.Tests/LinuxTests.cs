@@ -62,6 +62,13 @@ static partial class Program
         File.WriteAllText(Path.Combine(dxvkPrefix,"drive_c","windows","system32","dxgi.dll"),"wine's own");
         Check(dxvkHost.InstallDxvk(dxvkBundle) && WinePrefix.DxvkFiles.All(name=>File.ReadAllText(Path.Combine(dxvkPrefix,"drive_c","windows","system32",name))=="dxvk "+name),"DXVK replaces Wine's DLLs in the prefix");
         Check(dxvkHost.InstallDxvk(dxvkBundle),"installing again is a no-op that still says DXVK is on");
+        // The IMGUI font goes into the prefix's Fonts folder, which a new prefix may not have yet.
+        string prefixFont=Path.Combine(dxvkPrefix,"drive_c","windows","Fonts",WinePrefix.ImguiFont);
+        Check(!dxvkHost.InstallImguiFont(dxvkBundle) && !File.Exists(prefixFont),"no font in the download: nothing installed");
+        Directory.CreateDirectory(Path.Combine(dxvkBundle,"fonts")); File.WriteAllText(Path.Combine(dxvkBundle,"fonts",WinePrefix.ImguiFont),"font v1");
+        Check(dxvkHost.InstallImguiFont(dxvkBundle) && File.ReadAllText(prefixFont)=="font v1","the font goes into the prefix's Fonts folder");
+        File.WriteAllText(Path.Combine(dxvkBundle,"fonts",WinePrefix.ImguiFont),"font v2");
+        Check(dxvkHost.InstallImguiFont(dxvkBundle) && File.ReadAllText(prefixFont)=="font v2","a newer download replaces it");
 
         // The game's console output goes to a log, not the launcher's terminal; arguments, environment and exit code pass through.
         if(File.Exists("/bin/sh")) {

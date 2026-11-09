@@ -5,7 +5,8 @@ The Linux launcher is a native program; the game is still the Windows client, wh
 namespace. This builds that launcher and puts beside it the same payload that build.ps1 puts beside the Windows one:
 the loader files listed in loader-inputs.json (hash-checked again), the plugin and engine, client.config,
 doorstop_config.ini and payload.json. It adds DXVK, which runs the game's Direct3D 11 on Vulkan, from the release
-pinned in linux-inputs.json. Then the licence texts and SOURCE.txt, and a tarball of the whole folder.
+pinned in linux-inputs.json, and fonts/LegacyRuntime.ttf, Liberation Sans renamed so that the mod's labels have text under Wine (rename_font).
+Then the licence texts and SOURCE.txt, and a tarball of the whole folder.
 
     python3 installer/stage.py --out <stage folder> --version <version>
     python3 installer/package_linux.py --staged <stage folder> --version <version> --out <folder> [--dotnet <dotnet>] [--cache <folder>]
@@ -91,12 +92,15 @@ def payload(staged, app, revision):
     (app / 'payload.json').write_text(json.dumps(record, indent=1) + '\n', encoding='ascii')
 
 
-def dxvk(app, cache):
-    """DXVK's 64-bit d3d11.dll and dxgi.dll, from the archive pinned in linux-inputs.json."""
-    pinned = json.loads((INSTALLER / 'linux-inputs.json').read_text(encoding='utf-8'))
-    if pinned.get('schema') != 1:
+def pinned(key):
+    inputs = json.loads((INSTALLER / 'linux-inputs.json').read_text(encoding='utf-8'))
+    if inputs.get('schema') != 1:
         fail('linux-inputs.json has an unknown schema')
-    source = pinned['dxvk']
+    return inputs[key]
+
+
+def download(source, cache):
+    """The archive at source['url'], checked against source['archiveSha256']; kept in cache when one is given."""
     name = source['url'].rsplit('/', 1)[-1]
     cached = Path(cache) / (source['archiveSha256'] + '-' + name) if cache else None
     if cached and cached.is_file():
@@ -112,6 +116,13 @@ def dxvk(app, cache):
     if cached and not cached.is_file():
         cached.parent.mkdir(parents=True, exist_ok=True)
         cached.write_bytes(data)
+    return data
+
+
+def dxvk(app, cache):
+    """DXVK's 64-bit d3d11.dll and dxgi.dll, from the archive pinned in linux-inputs.json."""
+    source = pinned('dxvk')
+    data = download(source, cache)
     target = app / 'dxvk'
     target.mkdir()
     with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as archive:
@@ -121,6 +132,85 @@ def dxvk(app, cache):
             if not member.isfile():
                 fail('DXVK archive entry is not a file: ' + path)
             (target / path.rsplit('/', 1)[-1]).write_bytes(archive.extractfile(member).read())
+
+
+# Unity's built-in IMGUI font is found by family name, LegacyRuntime or else Arial, in the Windows Fonts folder; a Wine prefix has neither.
+# Liberation Sans, renamed LegacyRuntime, fills the gap. Its licence (SIL OFL 1.1) reserves the names Liberation, Arimo, Tinos and Cousine for
+# the original, so every name record that names the font is replaced, and the trademark record, which names Liberation, is dropped.
+FONT_FAMILY = 'LegacyRuntime'
+FONT_NAMES = {1: FONT_FAMILY, 3: 'SoloStone: ' + FONT_FAMILY + ' 2.1.5', 4: FONT_FAMILY, 6: FONT_FAMILY + '-Regular'}
+FONT_DROPPED = {7, 16, 17, 18, 21, 22}
+
+
+def rename_font(data, names, dropped):
+    """The TrueType font data with its name table rebuilt: the records in names replaced, those in dropped removed, the rest kept.
+    Table checksums and head.checkSumAdjustment are recomputed; every other table keeps its bytes."""
+    def checksum(block):
+        block += b'\0' * (-len(block) % 4)
+        return sum(struct.unpack('>%dI' % (len(block) // 4), block)) & 0xFFFFFFFF
+    version, count = struct.unpack_from('>IH', data, 0)
+    if version not in (0x00010000, 0x74727565):
+        fail('the pinned font is not TrueType')
+    tables = {}
+    order = []
+    for index in range(count):
+        tag, _, offset, length = struct.unpack_from('>4sIII', data, 12 + 16 * index)
+        tables[tag] = bytearray(data[offset:offset + length])
+        order.append(tag)
+    if b'name' not in tables or b'head' not in tables:
+        fail('the pinned font has no name or head table')
+    table = bytes(tables[b'name'])
+    form, records, storage = struct.unpack_from('>HHH', table, 0)
+    if form != 0:
+        fail('the pinned font has a name table this build does not read')
+    kept = []
+    for index in range(records):
+        platform, encoding, language, name_id, length, offset = struct.unpack_from('>HHHHHH', table, 6 + 12 * index)
+        if name_id in dropped:
+            continue
+        text = table[storage + offset:storage + offset + length]
+        if name_id in names:
+            if platform == 3 or platform == 0:
+                text = names[name_id].encode('utf-16-be')
+            elif platform == 1 and encoding == 0:
+                text = names[name_id].encode('mac_roman')
+            else:
+                fail('the pinned font has a name record this build cannot rewrite (platform %d)' % platform)
+        kept.append((platform, encoding, language, name_id, text))
+    kept.sort(key=lambda record: record[:4])
+    header = struct.pack('>HHH', 0, len(kept), 6 + 12 * len(kept))
+    strings = b''
+    for platform, encoding, language, name_id, text in kept:
+        header += struct.pack('>HHHHHH', platform, encoding, language, name_id, len(text), len(strings))
+        strings += text
+    tables[b'name'] = bytearray(header + strings)
+    tables[b'head'][8:12] = b'\0\0\0\0'
+    directory = data[:12]
+    offset = 12 + 16 * count
+    body = b''
+    head = 0
+    for tag in sorted(order):
+        block = bytes(tables[tag])
+        if tag == b'head':
+            head = offset + len(body)
+        directory += struct.pack('>4sIII', tag, checksum(block), offset + len(body), len(block))
+        body += block + b'\0' * (-len(block) % 4)
+    font = bytearray(directory + body)
+    struct.pack_into('>I', font, head + 8, (0xB1B0AFBA - checksum(bytes(font))) & 0xFFFFFFFF)
+    return bytes(font)
+
+
+def imgui_font(app, cache):
+    """fonts/LegacyRuntime.ttf: Liberation Sans Regular from the archive pinned in linux-inputs.json, renamed."""
+    source = pinned('font')
+    with tarfile.open(fileobj=io.BytesIO(download(source, cache)), mode='r:gz') as archive:
+        member = archive.getmember(source['file'])
+        if not member.isfile():
+            fail('font archive entry is not a file: ' + source['file'])
+        data = archive.extractfile(member).read()
+    target = app / 'fonts'
+    target.mkdir()
+    (target / (FONT_FAMILY + '.ttf')).write_bytes(rename_font(data, FONT_NAMES, FONT_DROPPED))
 
 
 def icon(app):
@@ -174,6 +264,7 @@ def main():
     build_launcher(args.dotnet, app)
     payload(staged, app, release['sourceRevision'])
     dxvk(app, args.cache or None)
+    imgui_font(app, args.cache or None)
     icon(app)
     shutil.copyfile(staged / 'release.json', app / 'release.json')
     shutil.copyfile(staged / 'NOTICE.txt', app / 'NOTICE.txt')

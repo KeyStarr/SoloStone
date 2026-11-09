@@ -72,13 +72,27 @@ namespace SoloStone
             string from=System.IO.Path.Combine(bundle,"dxvk");
             if(!DxvkWanted || !DxvkFiles.All(name=>File.Exists(System.IO.Path.Combine(from,name)))) return false;
             string system32=System.IO.Path.Combine(DriveC,"windows","system32");
-            foreach(string name in DxvkFiles) {
-                string source=System.IO.Path.Combine(from,name), target=System.IO.Path.Combine(system32,name);
-                Safety.NoLinks(target);
-                if(File.Exists(target) && Hashes.FileHash(target)==Hashes.FileHash(source)) continue;
-                File.Copy(source,target+".solostone-tmp",true); File.Move(target+".solostone-tmp",target,true);
-            }
+            foreach(string name in DxvkFiles) Place(System.IO.Path.Combine(from,name),System.IO.Path.Combine(system32,name));
             return true;
+        }
+        // The mod's labels (brand label, FPS counter, ladder) use Unity's built-in font, which Unity loads by family name,
+        // LegacyRuntime or else Arial, from C:\windows\Fonts. Windows has Arial; a Wine prefix has neither, so the labels draw their boxes but no
+        // text. The Linux download ships Liberation Sans renamed LegacyRuntime (fonts/, made by package_linux.py) and it goes into this prefix's
+        // Fonts folder. The game copy is never touched.
+        internal const string ImguiFont="LegacyRuntime.ttf";
+        internal bool InstallImguiFont(string bundle) {
+            string source=System.IO.Path.Combine(bundle,"fonts",ImguiFont);
+            if(!File.Exists(source)) return false;
+            string fonts=System.IO.Path.Combine(DriveC,"windows","Fonts");
+            Directory.CreateDirectory(fonts);
+            Place(source,System.IO.Path.Combine(fonts,ImguiFont));
+            return true;
+        }
+        // Copies a file into the prefix unless the same bytes are there already; the old file is replaced in one step.
+        static void Place(string source,string target) {
+            Safety.NoLinks(target);
+            if(File.Exists(target) && Hashes.FileHash(target)==Hashes.FileHash(source)) return;
+            File.Copy(source,target+".solostone-tmp",true); File.Move(target+".solostone-tmp",target,true);
         }
         internal Dictionary<string,string> Variables(bool game,bool dxvk=false) {
             var env=new Dictionary<string,string> {

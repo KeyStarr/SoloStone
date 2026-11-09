@@ -22,6 +22,9 @@ issues" before you start.
   namespace, so nothing the game does can reach the network.
 - It installs DXVK in that prefix. DXVK runs the game's Direct3D 11 graphics on Vulkan in place of Wine's own
   translation, which is slower. The Linux download ships it, so setup needs no internet.
+- It adds one font, `LegacyRuntime.ttf`, to that prefix's Fonts folder. SoloStone's own on-screen text, such as the
+  SoloStone label, the FPS counter and the ladder screen, uses Unity's built-in font, and Unity looks for it in that
+  folder. A new Wine prefix has none, so without it that text is blank. The font is Liberation Sans under another name.
 - It adds SoloStone to your applications menu.
 
 SoloStone never talks to a Blizzard service and never logs in anywhere.

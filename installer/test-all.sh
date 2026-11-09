@@ -13,3 +13,4 @@ fi
 SOLOSTONE_REQUIRE_ALL=1 "$DOTNET" installer/out/gate/bin/SoloStone.Launcher.Tests/release/SoloStone.Launcher.Tests.dll
 /usr/bin/python3 -I installer/test_loader_inputs.py
 /usr/bin/python3 -I installer/test_stage.py
+/usr/bin/python3 -I installer/test_package_linux.py

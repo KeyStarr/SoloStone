@@ -131,8 +131,10 @@ The Linux launcher (`installer/SoloStone.Linux`) is a native .NET program; the g
 Windows launcher's install, update and save code and adds its own host: the Wine prefix, the network namespace and
 the command line. On Linux, `package_linux.py` builds it from the stage folder of step 4 and puts beside it the same
 payload as `build.ps1`. It checks the loader files against `installer/loader-inputs.json` again, and it downloads
-DXVK, which runs the game's Direct3D 11 on Vulkan, and checks it against `installer/linux-inputs.json`. Pass
-`--cache <folder>` to keep the download.
+DXVK, which runs the game's Direct3D 11 on Vulkan, and checks it against `installer/linux-inputs.json`. It downloads
+Liberation Sans the same way and renames it LegacyRuntime, the family name Unity looks for when it loads its built-in
+font; the font's licence doesn't let a modified copy keep the Liberation name. Pass `--cache <folder>` to keep the
+downloads.
 
 ```text
 python3 installer/package_linux.py --staged <stage folder> --version <version> --out <output folder>

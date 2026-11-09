@@ -128,6 +128,7 @@ namespace SoloStone
                     "-hs-native-ui-run",run,"-hs-installer-root",prefix.ToWine(record.Root)};
                 if(previous!=null) arguments.AddRange(new[]{"-hs-profile-previous-run",previous,"-hs-profile-relaunch-token",token});
                 arguments.AddRange(new[]{"-logFile",prefix.ToWine(Path.Combine(reports,"Unity.log"))});
+                prefix.InstallImguiFont(bundle);
                 // DXVK writes its log where the game starts unless told otherwise: the reports folder, not the verified copy.
                 var start=WinePrefix.OutputTo(prefix.Start(record.Client,true,prefix.InstallDxvk(bundle)?prefix.ToWine(reports):null,arguments.ToArray()),output);
                 DateTime started=DateTime.UtcNow; progress("Starting SoloStone…");

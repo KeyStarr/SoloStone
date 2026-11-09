@@ -113,6 +113,7 @@ Options:
                         AcceptedWarning=acceptWarning, Progress=step=>{ if(step.Message!=last) progress(last=step.Message); } });
                     config.Save();
                     if(prefix.InstallDxvk(bundle)) progress("Installed DXVK in SoloStone's Wine prefix.");
+                    prefix.InstallImguiFont(bundle);
                     try { DesktopEntry.Write(Environment.ProcessPath,Icon); progress("Added SoloStone to your applications menu."); }
                     catch(Exception e) when(e is IOException || e is UnauthorizedAccessException) { progress("SoloStone could not add itself to your applications menu: "+e.Message); }
                     progress("Setup complete. Start SoloStone from your applications menu, or with: solostone play");
