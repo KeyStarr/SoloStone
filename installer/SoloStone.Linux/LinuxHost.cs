@@ -25,21 +25,25 @@ namespace SoloStone
         // A command name is looked up on PATH now, so a later PATH change can't swap the Wine that runs the game.
         internal static string FindWine(string wine) {
             if(wine.Contains('/')) { string full=Path.GetFullPath(wine); if(File.Exists(full)) return full; }
-            else foreach(string dir in (Environment.GetEnvironmentVariable("PATH")??"").Split(':').Where(d=>d.StartsWith("/"))) {
-                string candidate=Path.Combine(dir,wine); if(File.Exists(candidate)) return candidate;
-            }
+            else if(OnPath(wine) is string found) return found;
             throw new InvalidOperationException("Wine was not found ("+wine+"). Install Wine, or pass --wine <path to the wine program>.");
+        }
+        internal static string OnPath(string name) {
+            foreach(string dir in (Environment.GetEnvironmentVariable("PATH")??"").Split(':').Where(d=>d.StartsWith("/"))) {
+                string candidate=Path.Combine(dir,name); if(File.Exists(candidate)) return candidate;
+            }
+            return null;
         }
     }
 
-    // The applications-menu entry, written by setup and removed by uninstall. It opens a terminal: the launcher reports there and stays while the game runs.
+    // The applications-menu entry, written by setup and removed by uninstall. It starts the game with no terminal (see Desktop).
     internal static class DesktopEntry
     {
         internal static string FilePath => Path.Combine(LinuxConfig.DataHome,"applications","solostone.desktop");
         // Desktop Entry Exec quoting: a quoted argument escapes " ` $ and \ with a backslash.
         internal static string Quote(string arg) => "\""+string.Concat(arg.Select(c=>"\"`$\\".IndexOf(c)>=0?"\\"+c:c.ToString()))+"\"";
         internal static string Text(string exe,string icon) => "[Desktop Entry]\nType=Application\nName=SoloStone\nComment=Play Hearthstone offline against computer opponents\n"
-            +"Exec="+Quote(exe)+" play\n"+(icon!=null?"Icon="+icon+"\n":"")+"Terminal=true\nCategories=Game;CardGame;\n";
+            +"Exec="+Quote(exe)+" play --desktop\n"+(icon!=null?"Icon="+icon+"\n":"")+"Terminal=false\nCategories=Game;CardGame;\n";
         internal static void Write(string exe,string icon) {
             Directory.CreateDirectory(Path.GetDirectoryName(FilePath));
             File.WriteAllText(FilePath,Text(exe,icon!=null && File.Exists(icon)?icon:null));
@@ -89,7 +93,8 @@ namespace SoloStone
         }
 
         // No network from here on: the game runs in the namespace, and the plugin refuses to start if it can see any interface but loopback.
-        internal static int Launch(WinePrefix prefix,InstallRecord record,string bundle,UpdateEngine engine,bool acceptWarning,Action<string> progress) {
+        // confirm: asks the player about a client warning (the menu entry's dialog); null leaves it to --accept-warning.
+        internal static int Launch(WinePrefix prefix,InstallRecord record,string bundle,UpdateEngine engine,bool acceptWarning,Action<string> progress,Func<string,bool> confirm=null) {
             RequireIdle(prefix); Safety.Destinations(record,Registered);
             engine.RequireReadableJournal();
             string reports=Path.Combine(record.Root,"reports"); Safety.NoLinks(reports); Directory.CreateDirectory(reports);
@@ -102,6 +107,10 @@ namespace SoloStone
                 var facts=ClientFacts.Read(record.Client);
                 var verdict=ClientGate.Evaluate(facts,TestedClient.Compiled(),new ManifestStore(record.Root,UpdateConfig.Compiled()).Current(),new NoBindingManifest(),IdleFailures(prefix));
                 var current=record;
+                if(verdict.Kind==VerdictKind.Warning && !acceptWarning && confirm!=null) {
+                    if(!confirm(verdict.Message)) { progress("Not started: the client warning was not confirmed."); return 0; }
+                    acceptWarning=true;
+                }
                 string grant=LaunchGate.Admit(record.Root,verdict,facts,record.ReleaseVersion,acceptWarning,()=>engine.BackupNow(current));
                 if(verdict.Kind==VerdictKind.Warning) progress(verdict.Message);
                 Hashes.Verify(record.Client,record.Files);

@@ -82,9 +82,13 @@ applications menu. The copy takes a few minutes. To run the game with a Wine oth
 
 ## Play
 
-Start **SoloStone** from your applications menu, or run `solostone play`. A terminal window opens. The launcher
-writes its checks there and stays open while you play. Quit from the game's menu to close it. The game's own console
-output goes to `wine.log` (see "Where things are"), not to this window.
+Start **SoloStone** from your applications menu. No terminal opens. A notification says the game is starting, and
+the game window follows after a few seconds. If something stops the game, a dialog says why. If your client needs a
+warning confirmed, a dialog asks first. The dialogs use `kdialog` on KDE and `zenity` elsewhere. The launcher's
+messages also go to `launcher.log` (see "Where things are").
+
+You can also run `solostone play` in a terminal. The launcher then writes its checks there and waits until you quit
+the game. Add `--accept-warning` to confirm a client warning.
 
 | Command | What it does |
 |---|---|
@@ -109,6 +113,7 @@ output goes to `wine.log` (see "Where things are"), not to this window.
 | What Wine, the game and DXVK print to the console | `wine.log` in the same `reports` folder, emptied at each start |
 | The mod log | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/client/BepInEx/LogOutput.log` |
 | Launcher settings | `~/.config/solostone/linux.json` |
+| The launcher's messages, when started from the menu | `~/.local/state/solostone/launcher.log` |
 
 The saves live inside the prefix. Deleting the prefix deletes them, so copy the `saves` folder out first.
 
@@ -131,7 +136,9 @@ To remove everything, uninstall, then delete `~/.local/share/SoloStone` and `~/.
 
 - Linux support is new. We tested it on one machine, CachyOS with Wine 11.21 and an NVIDIA graphics card. We have
   not tested Steam Deck or Proton.
-- The launcher has no window. Setup runs in a terminal, and the menu entry opens one.
+- The launcher has no window of its own. Setup and the other commands run in a terminal. Without `kdialog` or
+  `zenity`, errors from the menu entry appear only as a notification, and a client warning can't be confirmed there:
+  run `solostone play --accept-warning` in a terminal instead.
 - The launcher does not update itself yet. "Updating" above has the steps.
 - If the game is slow, check that `vulkaninfo --summary` lists your graphics card, and that DXVK's log in the
   `reports` folder names that card. After a graphics driver update, restart the computer before you play: until

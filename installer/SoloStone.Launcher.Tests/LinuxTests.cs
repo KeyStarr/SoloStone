@@ -81,7 +81,28 @@ static partial class Program
         Check(DesktopEntry.Quote("/home/a b/SoloStone/solostone")=="\"/home/a b/SoloStone/solostone\"","a path with a space is quoted");
         Check(DesktopEntry.Quote("/x/$HOME`\"\\y")=="\"/x/\\$HOME\\`\\\"\\\\y\"","$ ` \" and \\ are escaped");
         string entry=DesktopEntry.Text("/opt/solo stone/solostone","/opt/solo stone/solostone.png");
-        Check(entry.StartsWith("[Desktop Entry]\n") && entry.Contains("\nExec=\"/opt/solo stone/solostone\" play\n") && entry.Contains("\nIcon=/opt/solo stone/solostone.png\n") && entry.Contains("\nTerminal=true\n"),"desktop entry runs play in a terminal");
+        Check(entry.StartsWith("[Desktop Entry]\n") && entry.Contains("\nExec=\"/opt/solo stone/solostone\" play --desktop\n") && entry.Contains("\nIcon=/opt/solo stone/solostone.png\n") && entry.Contains("\nTerminal=false\n"),"desktop entry runs play --desktop with no terminal");
+
+        // Without a terminal, errors and client warnings go to kdialog on KDE and zenity elsewhere, with the message as one argument.
+        string tricky="Path <C:\\a & b> \"q\" $HOME";
+        var kde=Desktop.Dialogs("error",tricky,true); var gnome=Desktop.Dialogs("confirm",tricky,false);
+        Check(kde[0][0]=="kdialog" && kde[1][0]=="zenity" && gnome[0][0]=="zenity" && gnome[1][0]=="kdialog","the desktop's own dialog program first, the other as fallback");
+        Check(kde[0].SequenceEqual(new[]{"kdialog","--title","SoloStone","--error",tricky}) && gnome[1].Contains("--warningcontinuecancel"),"kdialog error and continue/cancel dialogs");
+        Check(kde[1].Contains("--no-markup") && kde[1].Contains("--text="+tricky) && gnome[0].Contains("--question") && gnome[0].Contains("--no-markup"),"zenity shows < and & as text, not markup");
+        string oldState=Environment.GetEnvironmentVariable("XDG_STATE_HOME");
+        try {
+            Environment.SetEnvironmentVariable("XDG_STATE_HOME",Path.Combine(temp,"state"));
+            Check(Desktop.LogPath==Path.Combine(temp,"state","solostone","launcher.log"),"the launcher log follows XDG_STATE_HOME");
+            Directory.CreateDirectory(Path.GetDirectoryName(Desktop.LogPath)); File.WriteAllText(Desktop.LogPath,"last start\n");
+            var log=Desktop.OpenLog(); log("Starting SoloStone…");
+            string logged=File.ReadAllText(Desktop.LogPath);
+            Check(logged.StartsWith("last start\n") && logged.EndsWith(" Starting SoloStone…\n"),"a second start appends, so it can't wipe the running game's log; lines are time-stamped");
+            File.WriteAllText(Desktop.LogPath,new string('x',(int)Desktop.LogLimit+1));
+            Desktop.OpenLog()("fresh");
+            Check(new FileInfo(Desktop.LogPath+".old").Length==Desktop.LogLimit+1 && File.ReadAllText(Desktop.LogPath).EndsWith(" fresh\n") && new FileInfo(Desktop.LogPath).Length<100,"past the limit the log moves to launcher.log.old");
+            Environment.SetEnvironmentVariable("XDG_STATE_HOME","relative/state");
+            Check(Desktop.LogPath.EndsWith("/.local/state/solostone/launcher.log"),"a relative XDG_STATE_HOME is ignored, as the spec says");
+        } finally { Environment.SetEnvironmentVariable("XDG_STATE_HOME",oldState); }
         Check(!DesktopEntry.Text("/x/solostone",null).Contains("Icon="),"no icon line without an icon");
         Check(InstallRecord.FromBytes(Encoding.UTF8.GetBytes("{\"schema\":2,\"root\":\"/r\",\"clientPath\":\"/r/client\"}")).Root=="/r","unmapped by default");
     }

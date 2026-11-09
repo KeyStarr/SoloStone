@@ -25,10 +25,13 @@ Options:
   --prefix <folder>  The Wine prefix (setup only; default ~/.local/share/SoloStone/prefix).
   --wine <program>   The wine program that runs the game (setup only; default: wine on PATH).
   --accept-warning   Continue past a client warning (setup, play).
-  --json             Machine-readable output (status, check-client).";
+  --json             Machine-readable output (status, check-client).
+  --desktop          No terminal (play only; the applications-menu entry uses it): a notification when the game
+                     starts, dialogs for errors and client warnings, and the messages in ~/.local/state/solostone/launcher.log.";
 
         static int Main(string[] args) {
-            string command="play", source=null, prefixPath=null, wine=null, backupId=null; bool json=false, acceptWarning=false, deleteSaves=false;
+            string command="play", source=null, prefixPath=null, wine=null, backupId=null; bool json=false, acceptWarning=false, deleteSaves=false, desktop=false;
+            Action<string> progress=Console.WriteLine;
             try {
                 int i=0;
                 Func<string,string> value=name=>{ if(++i>=args.Length) throw new InvalidOperationException(name+" needs a value."); return args[i]; };
@@ -41,6 +44,7 @@ Options:
                     case "--json": json=true; break;
                     case "--accept-warning": acceptWarning=true; break;
                     case "--delete-saves": deleteSaves=true; break;
+                    case "--desktop": desktop=true; break;
                     case "-h": case "--help": Console.WriteLine(Usage); return 0;
                     default: throw new InvalidOperationException("Unknown option: "+args[i]+"\n\n"+Usage);
                 }
@@ -49,16 +53,21 @@ Options:
                 if((prefixPath!=null || wine!=null) && command!="setup") throw new InvalidOperationException("--prefix and --wine are only valid with setup.");
                 if(source!=null && command!="setup" && command!="check-client") throw new InvalidOperationException("--source is only valid with setup or check-client.");
                 if(command=="restore-backup" && backupId==null) throw new InvalidOperationException("Use restore-backup --id <backup id>.");
-                return Run(command,source,prefixPath,wine,backupId,json,acceptWarning,deleteSaves);
+                if(desktop && command!="play") throw new InvalidOperationException("--desktop is only valid with play.");
+                if(desktop) progress=Desktop.OpenLog();
+                return Run(command,source,prefixPath,wine,backupId,json,acceptWarning,deleteSaves,progress,desktop);
             } catch(Exception e) {
-                Console.Error.WriteLine(Messages.Friendly(e));
+                string message=Messages.Friendly(e);
+                if(desktop) { progress(message); Desktop.Error(message,Icon); }
+                else Console.Error.WriteLine(message);
                 return e is IOException || e is UnauthorizedAccessException ? 5 : 1;
             }
         }
 
-        static int Run(string command,string source,string prefixPath,string wine,string backupId,bool json,bool acceptWarning,bool deleteSaves) {
-            Action<string> progress=Console.WriteLine;
-            if(command=="desktop-entry") { DesktopEntry.Write(Environment.ProcessPath,Path.Combine(AppContext.BaseDirectory,"solostone.png")); progress("Added SoloStone to your applications menu: "+DesktopEntry.FilePath); return 0; }
+        static string Icon => Path.Combine(AppContext.BaseDirectory,"solostone.png");
+
+        static int Run(string command,string source,string prefixPath,string wine,string backupId,bool json,bool acceptWarning,bool deleteSaves,Action<string> progress,bool desktop) {
+            if(command=="desktop-entry") { DesktopEntry.Write(Environment.ProcessPath,Icon); progress("Added SoloStone to your applications menu: "+DesktopEntry.FilePath); return 0; }
             if(command=="find-clients") { foreach(string found in LinuxHost.FindClients()) Console.WriteLine(found); return 0; }
             string bundle=AppContext.BaseDirectory.TrimEnd('/');
             var config=LinuxConfig.Load();
@@ -80,7 +89,7 @@ Options:
                 progress(json?verdict.ToJson():verdict.Message); return 0;
             }
             Directory.CreateDirectory(root);
-            using(Lease.Open(root)) {
+            using(Lease.Open(root,command=="play"?"SoloStone is already running.":null)) {
                 var engine=new UpdateEngine(root,new LinuxUpdateHost(prefix),progress);
                 if(command=="status") {
                     var report=StatusReport.Build(root,engine,TestedClient.Compiled(),UpdateConfig.Compiled(),new NoBindingManifest(),LinuxHost.IdleFailures(prefix));
@@ -104,7 +113,7 @@ Options:
                         AcceptedWarning=acceptWarning, Progress=step=>{ if(step.Message!=last) progress(last=step.Message); } });
                     config.Save();
                     if(prefix.InstallDxvk(bundle)) progress("Installed DXVK in SoloStone's Wine prefix.");
-                    try { DesktopEntry.Write(Environment.ProcessPath,Path.Combine(bundle,"solostone.png")); progress("Added SoloStone to your applications menu."); }
+                    try { DesktopEntry.Write(Environment.ProcessPath,Icon); progress("Added SoloStone to your applications menu."); }
                     catch(Exception e) when(e is IOException || e is UnauthorizedAccessException) { progress("SoloStone could not add itself to your applications menu: "+e.Message); }
                     progress("Setup complete. Start SoloStone from your applications menu, or with: solostone play");
                     return 0;
@@ -126,7 +135,9 @@ Options:
                 var record=InstallRecord.Load(root);
                 Safety.Destinations(record,LinuxHost.Registered);
                 if(command=="restore-backup") { progress(engine.RestoreBackup(backupId).Message); return 0; }
-                return LinuxHost.Launch(prefix,record,bundle,engine,acceptWarning,progress);
+                // Only now, holding the lease, is this the one launcher starting the game.
+                if(desktop) Desktop.Notify("Checking your copy and starting the game…",Icon);
+                return LinuxHost.Launch(prefix,record,bundle,engine,acceptWarning,progress,desktop?Desktop.Confirm:(Func<string,bool>)null);
             }
         }
     }
