@@ -40,8 +40,14 @@ namespace SoloStone
     internal static class DesktopEntry
     {
         internal static string FilePath => Path.Combine(LinuxConfig.DataHome,"applications","solostone.desktop");
-        // Desktop Entry Exec quoting: a quoted argument escapes " ` $ and \ with a backslash.
-        internal static string Quote(string arg) => "\""+string.Concat(arg.Select(c=>"\"`$\\".IndexOf(c)>=0?"\\"+c:c.ToString()))+"\"";
+        // Desktop Entry Exec quoting: a quoted argument escapes " ` $ and \ with a backslash. The key file's string escapes apply first,
+        // so each of those backslashes is written \\: $ is \\$, \ is \\\\ (GLib refuses an entry with a single one).
+        internal static string Quote(string arg) {
+            // The spec writes a literal % as %%, but GLib and KDE both look the program up before they undo it, and a bare % starts a
+            // field code: no spelling of such a path starts. Refused, so setup says so instead of adding an entry that does nothing.
+            if(arg.Contains('%')) throw new InvalidOperationException("The applications menu can't start a program whose path holds %: "+arg+". Move the SoloStone folder somewhere without %, then run: solostone desktop-entry");
+            return "\""+string.Concat(arg.Select(c=>c=='\\'?@"\\\\":"\"`$".IndexOf(c)>=0?@"\\"+c:c.ToString()))+"\"";
+        }
         internal static string Text(string exe,string icon) => "[Desktop Entry]\nType=Application\nName=SoloStone\nComment=Play Hearthstone offline against computer opponents\n"
             +"Exec="+Quote(exe)+" play --desktop\n"+(icon!=null?"Icon="+icon+"\n":"")+"Terminal=false\nCategories=Game;CardGame;\n";
         internal static void Write(string exe,string icon) {

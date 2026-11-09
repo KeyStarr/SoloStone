@@ -31,7 +31,7 @@ Options:
 
         static int Main(string[] args) {
             string command="play", source=null, prefixPath=null, wine=null, backupId=null; bool json=false, acceptWarning=false, deleteSaves=false, desktop=false;
-            Action<string> progress=Console.WriteLine;
+            Action<string> progress=line=>Console.WriteLine(LinuxMessages.Adapt(line));
             try {
                 int i=0;
                 Func<string,string> value=name=>{ if(++i>=args.Length) throw new InvalidOperationException(name+" needs a value."); return args[i]; };
@@ -54,10 +54,10 @@ Options:
                 if(source!=null && command!="setup" && command!="check-client") throw new InvalidOperationException("--source is only valid with setup or check-client.");
                 if(command=="restore-backup" && backupId==null) throw new InvalidOperationException("Use restore-backup --id <backup id>.");
                 if(desktop && command!="play") throw new InvalidOperationException("--desktop is only valid with play.");
-                if(desktop) progress=Desktop.OpenLog();
+                if(desktop) { var log=Desktop.OpenLog(); progress=line=>log(LinuxMessages.Adapt(line)); }
                 return Run(command,source,prefixPath,wine,backupId,json,acceptWarning,deleteSaves,progress,desktop);
             } catch(Exception e) {
-                string message=Messages.Friendly(e);
+                string message=LinuxMessages.Adapt(Messages.Friendly(e));
                 if(desktop) { progress(message); Desktop.Error(message,Icon); }
                 else Console.Error.WriteLine(message);
                 return e is IOException || e is UnauthorizedAccessException ? 5 : 1;
@@ -106,16 +106,17 @@ Options:
                             : "Several Hearthstone folders were found; choose one with --source:\n  "+string.Join("\n  ",found));
                         source=found[0];
                     }
+                    // Saved before the first write, so recover and uninstall can find a copy this setup leaves half done.
+                    config.Save();
                     progress("Preparing your offline copy of "+source+"…");
                     string last=null;
                     Installer.Setup(new SetupOptions { Source=source, Root=root, Bundle=bundle, SaveRoot=prefix.SaveRoot, Registered=LinuxHost.Registered,
                         Check=facts=>ClientGate.Evaluate(facts,TestedClient.Compiled(),new ManifestStore(root,UpdateConfig.Compiled()).Current(),new NoBindingManifest(),LinuxHost.IdleFailures(prefix)),
                         AcceptedWarning=acceptWarning, Progress=step=>{ if(step.Message!=last) progress(last=step.Message); } });
-                    config.Save();
                     if(prefix.InstallDxvk(bundle)) progress("Installed DXVK in SoloStone's Wine prefix.");
                     prefix.InstallImguiFont(bundle);
                     try { DesktopEntry.Write(Environment.ProcessPath,Icon); progress("Added SoloStone to your applications menu."); }
-                    catch(Exception e) when(e is IOException || e is UnauthorizedAccessException) { progress("SoloStone could not add itself to your applications menu: "+e.Message); }
+                    catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is InvalidOperationException) { progress("SoloStone could not add itself to your applications menu: "+e.Message); }
                     progress("Setup complete. Start SoloStone from your applications menu, or with: solostone play");
                     return 0;
                 }

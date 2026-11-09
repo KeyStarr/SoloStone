@@ -17,8 +17,10 @@ import argparse
 import hashlib
 import json
 import os
+import re
 import shutil
 import struct
+import gzip
 import io
 import subprocess
 import sys
@@ -34,6 +36,12 @@ LEGAL = ['NOTICE', 'LICENSE', 'LICENSE-ADDITIONAL-PERMISSION.md', 'SOURCE.txt', 
 # The same text build.ps1 writes. Doorstop loads BepInEx's preloader, with the full Mono class libraries first on the search path.
 DOORSTOP_CONFIG = ('[General]\r\nenabled=true\r\ntarget_assembly=BepInEx\\core\\BepInEx.Preloader.dll\r\nredirect_output_log=false\r\n'
                    'ignore_disable_switch=false\r\n\r\n[UnityMono]\r\ndll_search_path_override=BepInEx\\unstripped_corlib\r\n')
+
+
+# A release version: it names the output folder, which an earlier run's copy is deleted from.
+VERSION = re.compile(r'[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?')
+# Written into the folder this script makes, so a second run only ever deletes a folder it made.
+MARKER = '.package-linux'
 
 
 def fail(message):
@@ -226,15 +234,31 @@ def icon(app):
     (app / 'solostone.png').write_bytes(best[1])
 
 
+def output_folder(out, version):
+    """<out>/SoloStone-linux-<version>, empty, with the marker in it. Refuses a version that isn't one, and a folder there that
+    this script didn't make."""
+    if not VERSION.fullmatch(version):
+        fail('--version is not a release version: ' + version)
+    app = out / ('SoloStone-linux-' + version)
+    if app.is_symlink() or (app.exists() and not (app / MARKER).is_file()):
+        fail('%s exists and was not made by this script; move or delete it yourself' % app)
+    if app.exists():
+        shutil.rmtree(app)
+    app.mkdir(parents=True)
+    (app / MARKER).write_bytes(b'')
+    return app
+
+
 def tarball(folder, path):
-    """Sorted names, fixed owner and times: the same inputs give the same bytes."""
+    """Sorted names, fixed owner and times, and no time in the gzip header: the same inputs give the same bytes."""
     def clean(info):
         info.uid = info.gid = 0
         info.uname = info.gname = ''
         info.mtime = 0
         return info
-    entries = sorted(folder.rglob('*'))
-    with tarfile.open(path, 'w:gz', format=tarfile.PAX_FORMAT) as tar:
+    entries = sorted(entry for entry in folder.rglob('*') if entry != folder / MARKER)
+    with open(path, 'wb') as raw, gzip.GzipFile(filename='', mode='wb', fileobj=raw, mtime=0) as packed, \
+            tarfile.open(fileobj=packed, mode='w', format=tarfile.PAX_FORMAT) as tar:
         tar.add(folder, arcname=folder.name, recursive=False, filter=clean)
         for entry in entries:
             tar.add(entry, arcname=folder.name + '/' + entry.relative_to(folder).as_posix(), recursive=False, filter=clean)
@@ -257,10 +281,7 @@ def main():
         fail('release.json does not match --version')
     if out == PRODUCT or PRODUCT in out.parents:
         fail('choose an output folder outside the checkout')
-    app = out / ('SoloStone-linux-' + args.version)
-    if app.exists():
-        shutil.rmtree(app)
-    app.mkdir(parents=True)
+    app = output_folder(out, args.version)
     build_launcher(args.dotnet, app)
     payload(staged, app, release['sourceRevision'])
     dxvk(app, args.cache or None)

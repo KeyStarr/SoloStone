@@ -106,7 +106,8 @@ namespace SoloStone
         }
         internal ProcessStartInfo Start(string workingDirectory,bool game,params string[] arguments) => Start(workingDirectory,game,null,arguments);
         // dxvkLog: the game's spelling of the folder for DXVK's log, which also turns DXVK on. Null keeps Wine's own Direct3D.
-        internal ProcessStartInfo Start(string workingDirectory,bool game,string dxvkLog,params string[] arguments) {
+        // Not params: with both overloads params, Start(path,false,"wineboot","--init") binds here and Wine loses "wineboot".
+        internal ProcessStartInfo Start(string workingDirectory,bool game,string dxvkLog,string[] arguments) {
             var start=new ProcessStartInfo(Sandbox.Command[0]) { UseShellExecute=false, WorkingDirectory=workingDirectory };
             foreach(string part in Sandbox.Command.Skip(1)) start.ArgumentList.Add(part);
             start.ArgumentList.Add(Wine);
@@ -124,13 +125,14 @@ namespace SoloStone
             foreach(var row in start.Environment) wrapped.Environment[row.Key]=row.Value;
             return wrapped;
         }
+        internal ProcessStartInfo CreateStart() => Start(Path,false,"wineboot","--init");
         // A new prefix is made inside the namespace too, so no wineserver for it ever had network.
         internal void Create(Action<string> progress) {
             if(ServerRunning()) throw new InvalidOperationException(ServerRunningMessage);
             Directory.CreateDirectory(Path);
             progress("Creating SoloStone's Wine prefix in "+Path+"…");
             int exit;
-            using(var boot=Process.Start(Start(Path,false,"wineboot","--init"))) { boot.WaitForExit(); exit=boot.ExitCode; }
+            using(var boot=Process.Start(CreateStart())) { boot.WaitForExit(); exit=boot.ExitCode; }
             WaitServer(); // The registry files are written when the server exits.
             if(exit!=0 || !Exists) throw new InvalidOperationException("Wine could not create SoloStone's prefix (exit "+exit+").");
         }
@@ -181,11 +183,12 @@ namespace SoloStone
             new[]{"bwrap","--dev-bind","/","/","--unshare-net","--die-with-parent","--"},
         };
         static string[] chosen;
+        // Tests set it, so building a command needs no namespace on the test host; null probes again.
         internal static string[] Command { get {
             if(chosen!=null) return chosen;
             foreach(var choice in Choices) if(Works(choice)) return chosen=choice;
             throw new InvalidOperationException("SoloStone could not create a network namespace, so it can't start the game without network. Install util-linux (unshare) or bubblewrap (bwrap), and allow unprivileged user namespaces.");
-        } }
+        } set => chosen=value; }
         static bool Works(string[] choice) {
             var start=new ProcessStartInfo(choice[0]) { UseShellExecute=false, RedirectStandardError=true, RedirectStandardOutput=true };
             foreach(string part in choice.Skip(1)) start.ArgumentList.Add(part);

@@ -70,6 +70,26 @@ static partial class Program
         File.WriteAllText(Path.Combine(dxvkBundle,"fonts",WinePrefix.ImguiFont),"font v2");
         Check(dxvkHost.InstallImguiFont(dxvkBundle) && File.ReadAllText(prefixFont)=="font v2","a newer download replaces it");
 
+        // A new prefix runs "wine wineboot --init" with Wine's own Direct3D: with two params overloads, "wineboot" once became the DXVK log.
+        try {
+            Sandbox.Command=new[]{"sandbox","--"};
+            var boot=prefix.CreateStart();
+            Check(boot.FileName=="sandbox" && boot.ArgumentList.SequenceEqual(new[]{"--","/usr/bin/wine","wineboot","--init"}) && (!boot.Environment.TryGetValue("DXVK_LOG_PATH",out string bootLog) || bootLog!="wineboot")
+                && !boot.Environment["WINEDLLOVERRIDES"].Contains("d3d11"),"prefix creation runs wineboot --init without DXVK");
+            var game=prefix.Start("/x/client",true,@"C:\reports",new[]{"Hearthstone.exe","-x"});
+            Check(game.ArgumentList.SequenceEqual(new[]{"--","/usr/bin/wine","Hearthstone.exe","-x"}) && game.Environment["DXVK_LOG_PATH"]==@"C:\reports" && game.Environment["WINEDLLOVERRIDES"].Contains("d3d11"),"the game's start takes the DXVK log folder");
+            var plain=prefix.Start("/x",false,"winecfg","/v");
+            Check(plain.ArgumentList.SequenceEqual(new[]{"--","/usr/bin/wine","winecfg","/v"}) && !plain.Environment["WINEDLLOVERRIDES"].Contains("d3d11"),"string arguments never bind to the DXVK overload");
+        } finally { Sandbox.Command=null; }
+
+        // The shared install code names the Windows launcher's commands; the Linux launcher shows its own.
+        string step=LinuxMessages.Adapt(InstallRecord.RecoveryStep("/x/prefix/drive_c/users/a/AppData/Local/SoloStone"));
+        Check(step.StartsWith("Run solostone recover. ") && step.Contains("run solostone setup again") && !step.Contains("SoloStone.exe") && !step.Contains("--root"),"recovery advice names solostone recover");
+        Check(LinuxMessages.Adapt("Committed client integrity failed. No files were changed. Run SoloStone.exe uninstall --root \"/r\"; saves stay. Then rerun the installer.")
+            =="Committed client integrity failed. No files were changed. Run solostone uninstall; saves stay. Then run solostone setup again.","uninstall advice names solostone uninstall");
+        Check(LinuxMessages.Adapt("Recovery complete. Run SoloStone.exe firewall --apply --root \"/r\", then launch; or run uninstall with the same --root.").EndsWith("solostone play"),"no firewall step on Linux");
+        Check(!LinuxMessages.Adapt(Messages.Friendly(new UnauthorizedAccessException())).Contains("Windows") && LinuxMessages.Adapt("Copying files…")=="Copying files…","other messages pass through");
+
         // The game's console output goes to a log, not the launcher's terminal; arguments, environment and exit code pass through.
         if(File.Exists("/bin/sh")) {
             string log=Path.Combine(temp,"wine output.log"); File.WriteAllText(log,"earlier\n");
@@ -86,7 +106,9 @@ static partial class Program
 
         // The applications-menu entry starts this launcher wherever the player unpacked it, quoted as the Desktop Entry spec asks.
         Check(DesktopEntry.Quote("/home/a b/SoloStone/solostone")=="\"/home/a b/SoloStone/solostone\"","a path with a space is quoted");
-        Check(DesktopEntry.Quote("/x/$HOME`\"\\y")=="\"/x/\\$HOME\\`\\\"\\\\y\"","$ ` \" and \\ are escaped");
+        // Quoting escapes come after the key file's string escapes, so the file holds two backslashes per quoting backslash.
+        Check(DesktopEntry.Quote("/x/$HOME`\"\\y")==@"""/x/\\$HOME\\`\\""\\\\y""","$ ` \" and \\ are escaped for both layers");
+        RejectsBecause(()=>DesktopEntry.Quote("/games/100%f/solostone"),"holds %","a path with % is refused: GLib and KDE can't start it, %% or not");
         string entry=DesktopEntry.Text("/opt/solo stone/solostone","/opt/solo stone/solostone.png");
         Check(entry.StartsWith("[Desktop Entry]\n") && entry.Contains("\nExec=\"/opt/solo stone/solostone\" play --desktop\n") && entry.Contains("\nIcon=/opt/solo stone/solostone.png\n") && entry.Contains("\nTerminal=false\n"),"desktop entry runs play --desktop with no terminal");
 

@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
-"""Checks for package_linux.py's font rename: python3 -I installer/test_package_linux.py"""
+"""Checks for package_linux.py (font rename, output folder, archive): python3 -I installer/test_package_linux.py"""
 import struct
 import sys
+import tarfile
+import tempfile
+import time
 import unittest
+from unittest import mock
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -94,6 +98,57 @@ class RenameFont(unittest.TestCase):
             for reserved in ('Liberation', 'Arimo', 'Tinos', 'Cousine'):
                 self.assertNotIn(reserved.lower(), text.lower())
         self.assertEqual(pl.FONT_NAMES[1], 'LegacyRuntime')
+
+
+
+class OutputFolder(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.out = Path(self.temp.name) / 'out'
+        self.out.mkdir()
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def test_versions(self):
+        for good in ('0.2.0', '10.0.402', '1.2.3-test.1', '1.2.3-rc-2'):
+            self.assertTrue(pl.VERSION.fullmatch(good), good)
+        for bad in ('0.1.0/../../x', '../x', '0.2', '1.2.3-', '1.2.3-a..b', '1.2.3/x', '1.2.3\n', ''):
+            self.assertFalse(pl.VERSION.fullmatch(bad), bad)
+            with self.assertRaises(SystemExit):
+                pl.output_folder(self.out, bad)
+
+    def test_replaces_only_its_own_folder(self):
+        app = pl.output_folder(self.out, '1.0.0')
+        (app / 'old').write_text('x')
+        app = pl.output_folder(self.out, '1.0.0')
+        self.assertEqual(sorted(entry.name for entry in app.iterdir()), [pl.MARKER])
+        stranger = self.out / 'SoloStone-linux-2.0.0'
+        stranger.mkdir()
+        (stranger / 'keep').write_text('x')
+        with self.assertRaises(SystemExit):
+            pl.output_folder(self.out, '2.0.0')
+        self.assertTrue((stranger / 'keep').exists())
+        elsewhere = Path(self.temp.name) / 'elsewhere'
+        elsewhere.mkdir()
+        (elsewhere / pl.MARKER).write_bytes(b'')
+        (self.out / 'SoloStone-linux-3.0.0').symlink_to(elsewhere)
+        with self.assertRaises(SystemExit):
+            pl.output_folder(self.out, '3.0.0')
+        self.assertTrue((elsewhere / pl.MARKER).exists())
+
+    def test_archive_is_reproducible_and_leaves_out_the_marker(self):
+        app = pl.output_folder(self.out, '1.0.0')
+        (app / 'solostone').write_text('launcher')
+        first, second = self.out / 'a.tar.gz', self.out / 'b.tar.gz'
+        with mock.patch('time.time', return_value=100.0):
+            pl.tarball(app, first)
+        with mock.patch('time.time', return_value=200.0):
+            pl.tarball(app, second)
+        self.assertEqual(first.read_bytes(), second.read_bytes())
+        self.assertEqual(first.read_bytes()[4:8], b'\0\0\0\0')
+        with tarfile.open(first) as tar:
+            self.assertEqual(tar.getnames(), ['SoloStone-linux-1.0.0', 'SoloStone-linux-1.0.0/solostone'])
 
 
 if __name__ == '__main__':
