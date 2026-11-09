@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using SoloStone;
 
@@ -50,6 +51,18 @@ static partial class Program
             var parsed=Json.Read<InstallRecord>(file);
             Check(parsed.Root==root && parsed.ClientPath==Path.Combine(root,"client"),"the data contract reader maps back (update journal)");
         } finally { RecordPaths.ToDisk=path=>path; RecordPaths.FromDisk=path=>path; }
+        // DXVK goes into the prefix only, and is switched on by the DLL overrides of the game's launch.
+        Check(prefix.Variables(true,true)["WINEDLLOVERRIDES"].EndsWith(";winhttp=n,b;d3d11,dxgi=n,b") && !prefix.Variables(true)["WINEDLLOVERRIDES"].Contains("d3d11"),"DXVK overrides only when DXVK is on");
+        Check(!prefix.Variables(false)["WINEDLLOVERRIDES"].Contains("winhttp") && prefix.Variables(false)["WINEDLLOVERRIDES"].Contains("winemenubuilder.exe=d"),"no loader outside the game; no menu entries from Wine");
+        string dxvkBundle=Path.Combine(temp,"linux-bundle"), dxvkPrefix=Path.Combine(temp,"linux-prefix");
+        Directory.CreateDirectory(Path.Combine(dxvkBundle,"dxvk")); Directory.CreateDirectory(Path.Combine(dxvkPrefix,"drive_c","windows","system32"));
+        var dxvkHost=new WinePrefix(dxvkPrefix,"/usr/bin/wine");
+        Check(!dxvkHost.InstallDxvk(dxvkBundle),"no DXVK in the download: Wine's own Direct3D");
+        foreach(string name in WinePrefix.DxvkFiles) File.WriteAllText(Path.Combine(dxvkBundle,"dxvk",name),"dxvk "+name);
+        File.WriteAllText(Path.Combine(dxvkPrefix,"drive_c","windows","system32","dxgi.dll"),"wine's own");
+        Check(dxvkHost.InstallDxvk(dxvkBundle) && WinePrefix.DxvkFiles.All(name=>File.ReadAllText(Path.Combine(dxvkPrefix,"drive_c","windows","system32",name))=="dxvk "+name),"DXVK replaces Wine's DLLs in the prefix");
+        Check(dxvkHost.InstallDxvk(dxvkBundle),"installing again is a no-op that still says DXVK is on");
+
         // The applications-menu entry starts this launcher wherever the player unpacked it, quoted as the Desktop Entry spec asks.
         Check(DesktopEntry.Quote("/home/a b/SoloStone/solostone")=="\"/home/a b/SoloStone/solostone\"","a path with a space is quoted");
         Check(DesktopEntry.Quote("/x/$HOME`\"\\y")=="\"/x/\\$HOME\\`\\\"\\\\y\"","$ ` \" and \\ are escaped");

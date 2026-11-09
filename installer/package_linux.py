@@ -4,10 +4,11 @@
 The Linux launcher is a native program; the game is still the Windows client, which it runs under Wine in a network
 namespace. This builds that launcher and puts beside it the same payload that build.ps1 puts beside the Windows one:
 the loader files listed in loader-inputs.json (hash-checked again), the plugin and engine, client.config,
-doorstop_config.ini and payload.json. Then the licence texts and SOURCE.txt, and a tarball of the whole folder.
+doorstop_config.ini and payload.json. It adds DXVK, which runs the game's Direct3D 11 on Vulkan, from the release
+pinned in linux-inputs.json. Then the licence texts and SOURCE.txt, and a tarball of the whole folder.
 
     python3 installer/stage.py --out <stage folder> --version <version>
-    python3 installer/package_linux.py --staged <stage folder> --version <version> --out <folder> [--dotnet <dotnet>]
+    python3 installer/package_linux.py --staged <stage folder> --version <version> --out <folder> [--dotnet <dotnet>] [--cache <folder>]
 
 Leaves <out>/SoloStone-linux-<version>/ and <out>/SoloStone-linux-<version>.tar.gz. No Windows, no private keys.
 """
@@ -17,9 +18,11 @@ import json
 import os
 import shutil
 import struct
+import io
 import subprocess
 import sys
 import tarfile
+import urllib.request
 from pathlib import Path
 
 sys.dont_write_bytecode = True
@@ -88,6 +91,38 @@ def payload(staged, app, revision):
     (app / 'payload.json').write_text(json.dumps(record, indent=1) + '\n', encoding='ascii')
 
 
+def dxvk(app, cache):
+    """DXVK's 64-bit d3d11.dll and dxgi.dll, from the archive pinned in linux-inputs.json."""
+    pinned = json.loads((INSTALLER / 'linux-inputs.json').read_text(encoding='utf-8'))
+    if pinned.get('schema') != 1:
+        fail('linux-inputs.json has an unknown schema')
+    source = pinned['dxvk']
+    name = source['url'].rsplit('/', 1)[-1]
+    cached = Path(cache) / (source['archiveSha256'] + '-' + name) if cache else None
+    if cached and cached.is_file():
+        data = cached.read_bytes()
+    else:
+        try:
+            with urllib.request.urlopen(urllib.request.Request(source['url'], headers={'User-Agent': 'SoloStone-build'}), timeout=120) as response:
+                data = response.read()
+        except OSError as error:
+            fail('%s: download failed (%s)' % (source['url'], error))
+    if hashlib.sha256(data).hexdigest() != source['archiveSha256']:
+        fail('%s: hash differs from linux-inputs.json' % source['url'])
+    if cached and not cached.is_file():
+        cached.parent.mkdir(parents=True, exist_ok=True)
+        cached.write_bytes(data)
+    target = app / 'dxvk'
+    target.mkdir()
+    with tarfile.open(fileobj=io.BytesIO(data), mode='r:gz') as archive:
+        top = 'dxvk-' + source['version'] + '/'
+        for path in source['files']:
+            member = archive.getmember(top + path)
+            if not member.isfile():
+                fail('DXVK archive entry is not a file: ' + path)
+            (target / path.rsplit('/', 1)[-1]).write_bytes(archive.extractfile(member).read())
+
+
 def icon(app):
     """The launcher icon's largest image, for the applications menu. Every image in launcher.ico is a stored PNG."""
     data = (INSTALLER / 'assets' / 'launcher.ico').read_bytes()
@@ -121,6 +156,7 @@ def main():
     parser.add_argument('--version', required=True)
     parser.add_argument('--out', required=True)
     parser.add_argument('--dotnet', default=shutil.which('dotnet') or 'dotnet')
+    parser.add_argument('--cache', default='', help='keeps downloaded archives, named <sha256>-<file>, as loader_inputs.py does')
     args = parser.parse_args()
     staged, out = Path(args.staged).resolve(), Path(args.out).resolve()
     for needed in ('plugin/SoloStone.Plugin.dll', 'plugin/SabberStoneCore.dll', 'release.json', 'NOTICE.txt', 'loader', 'legal'):
@@ -137,6 +173,7 @@ def main():
     app.mkdir(parents=True)
     build_launcher(args.dotnet, app)
     payload(staged, app, release['sourceRevision'])
+    dxvk(app, args.cache or None)
     icon(app)
     shutil.copyfile(staged / 'release.json', app / 'release.json')
     shutil.copyfile(staged / 'NOTICE.txt', app / 'NOTICE.txt')

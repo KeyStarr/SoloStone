@@ -20,6 +20,8 @@ issues" before you start.
 - It starts the game in its own network namespace, which has no network interface except loopback. The copy has
   no network at all, not even blocked connections. Wine's background process, `wineserver`, runs in the same
   namespace, so nothing the game does can reach the network.
+- It installs DXVK in that prefix. DXVK runs the game's Direct3D 11 graphics on Vulkan in place of Wine's own
+  translation, which is slower. The Linux download ships it, so setup needs no internet.
 - It adds SoloStone to your applications menu.
 
 SoloStone never talks to a Blizzard service and never logs in anywhere.
@@ -41,14 +43,16 @@ You need:
 
 1. 64-bit Linux on an x86-64 processor.
 2. Wine. Tested with Wine 11.21. SoloStone uses the `wine` on your `PATH` unless you choose another one.
-3. A way to make a network namespace without root. That is `unshare` from util-linux 2.38 or newer, which most
+3. A graphics driver with Vulkan support. Run `vulkaninfo --summary`, part of your distribution's `vulkan-tools`
+   package, and check that it lists your graphics card.
+4. A way to make a network namespace without root. That is `unshare` from util-linux 2.38 or newer, which most
    distributions ship, or `bwrap` from bubblewrap. Your system must allow unprivileged user namespaces, which most
    distributions do. On Ubuntu 24.04 and newer, install bubblewrap, because Ubuntu's AppArmor rules allow them for
    `bwrap` and block them for `unshare`.
-4. A Hearthstone folder, the one that holds `Hearthstone.exe`. It can come from Battle.net running in Wine, Lutris,
+5. A Hearthstone folder, the one that holds `Hearthstone.exe`. It can come from Battle.net running in Wine, Lutris,
    Bottles or Steam, or be copied from a Windows PC. It must be a version SoloStone supports, listed in the
    [README](../README.md#what-to-expect).
-5. About 13 GB free in your home folder for the copy.
+6. About 13 GB free in your home folder for the copy.
 
 If Battle.net runs in Wine, quit it before setup. SoloStone refuses to copy while Battle.net runs, because Battle.net
 could update the game halfway through.
@@ -100,6 +104,7 @@ writes its checks there and stays open while you play. Quit from the game's menu
 | The game copy | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/client` |
 | Your saves | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/saves` |
 | The game log | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/reports/Unity.log` |
+| DXVK's logs | `Hearthstone_d3d11.log` and `Hearthstone_dxgi.log` in the same `reports` folder |
 | The mod log | `<prefix>/drive_c/users/<you>/AppData/Local/SoloStone/client/BepInEx/LogOutput.log` |
 | Launcher settings | `~/.config/solostone/linux.json` |
 
@@ -126,6 +131,10 @@ To remove everything, uninstall, then delete `~/.local/share/SoloStone` and `~/.
   not tested Steam Deck or Proton.
 - The launcher has no window. Setup runs in a terminal, and the menu entry opens one.
 - The launcher does not update itself yet. "Updating" above has the steps.
+- If the game is slow, check that `vulkaninfo --summary` lists your graphics card, and that DXVK's log in the
+  `reports` folder names that card. After a graphics driver update, restart the computer before you play: until
+  then, Vulkan may not find the card and the game falls back to slower graphics. To test without DXVK, start
+  SoloStone with `SOLOSTONE_DXVK=0 solostone play`.
 - If SoloStone says a program is still running in its prefix, a Wine program from an earlier session is still open.
   Close it, or stop it with the `wineserver -k` command that the message shows.
 - Logs include your Linux user name and folder paths. Check them before you share them.

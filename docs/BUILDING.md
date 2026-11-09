@@ -130,7 +130,9 @@ needs the reference folders from step 1, or `-References <folder>` for a folder 
 The Linux launcher (`installer/SoloStone.Linux`) is a native .NET program; the game runs under Wine. It shares the
 Windows launcher's install, update and save code and adds its own host: the Wine prefix, the network namespace and
 the command line. On Linux, `package_linux.py` builds it from the stage folder of step 4 and puts beside it the same
-payload as `build.ps1`. It checks the loader files against `installer/loader-inputs.json` again.
+payload as `build.ps1`. It checks the loader files against `installer/loader-inputs.json` again, and it downloads
+DXVK, which runs the game's Direct3D 11 on Vulkan, and checks it against `installer/linux-inputs.json`. Pass
+`--cache <folder>` to keep the download.
 
 ```text
 python3 installer/package_linux.py --staged <stage folder> --version <version> --out <output folder>

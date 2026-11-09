@@ -64,22 +64,41 @@ namespace SoloStone
             }
         }
 
-        internal Dictionary<string,string> Variables(bool game) {
+        // DXVK runs the game's Direct3D 11 on Vulkan. Without it Wine's own translation (wined3d) is far slower. The Linux download ships it in dxvk/,
+        // and it goes into this prefix's system32 like any Windows DLL; the game copy is never touched. SOLOSTONE_DXVK=0 leaves Wine's own for a test.
+        internal static readonly string[] DxvkFiles={"d3d11.dll","dxgi.dll"};
+        internal static bool DxvkWanted => Environment.GetEnvironmentVariable("SOLOSTONE_DXVK")!="0";
+        internal bool InstallDxvk(string bundle) {
+            string from=System.IO.Path.Combine(bundle,"dxvk");
+            if(!DxvkWanted || !DxvkFiles.All(name=>File.Exists(System.IO.Path.Combine(from,name)))) return false;
+            string system32=System.IO.Path.Combine(DriveC,"windows","system32");
+            foreach(string name in DxvkFiles) {
+                string source=System.IO.Path.Combine(from,name), target=System.IO.Path.Combine(system32,name);
+                Safety.NoLinks(target);
+                if(File.Exists(target) && Hashes.FileHash(target)==Hashes.FileHash(source)) continue;
+                File.Copy(source,target+".solostone-tmp",true); File.Move(target+".solostone-tmp",target,true);
+            }
+            return true;
+        }
+        internal Dictionary<string,string> Variables(bool game,bool dxvk=false) {
             var env=new Dictionary<string,string> {
                 ["WINEPREFIX"]=Path,
                 // winemenubuilder would add launcher entries that start the game outside the namespace. Mono and Gecko are not needed:
                 // the game brings its own Mono, and without these overrides a new prefix asks to download them.
-                ["WINEDLLOVERRIDES"]="winemenubuilder.exe=d;mscoree=;mshtml="+(game?";winhttp=n,b":""), // winhttp: Doorstop, which loads BepInEx
+                ["WINEDLLOVERRIDES"]="winemenubuilder.exe=d;mscoree=;mshtml="+(game?";winhttp=n,b":"")+(dxvk?";d3d11,dxgi=n,b":""), // winhttp: Doorstop, which loads BepInEx
             };
             if(Environment.GetEnvironmentVariable("WINEDEBUG")==null) env["WINEDEBUG"]="-all";
             return env;
         }
-        internal ProcessStartInfo Start(string workingDirectory,bool game,params string[] arguments) {
+        internal ProcessStartInfo Start(string workingDirectory,bool game,params string[] arguments) => Start(workingDirectory,game,null,arguments);
+        // dxvkLog: the game's spelling of the folder for DXVK's log, which also turns DXVK on. Null keeps Wine's own Direct3D.
+        internal ProcessStartInfo Start(string workingDirectory,bool game,string dxvkLog,params string[] arguments) {
             var start=new ProcessStartInfo(Sandbox.Command[0]) { UseShellExecute=false, WorkingDirectory=workingDirectory };
             foreach(string part in Sandbox.Command.Skip(1)) start.ArgumentList.Add(part);
             start.ArgumentList.Add(Wine);
             foreach(string part in arguments) start.ArgumentList.Add(part);
-            foreach(var row in Variables(game)) start.Environment[row.Key]=row.Value;
+            foreach(var row in Variables(game,dxvkLog!=null)) start.Environment[row.Key]=row.Value;
+            if(dxvkLog!=null) start.Environment["DXVK_LOG_PATH"]=dxvkLog;
             return start;
         }
         // A new prefix is made inside the namespace too, so no wineserver for it ever had network.
