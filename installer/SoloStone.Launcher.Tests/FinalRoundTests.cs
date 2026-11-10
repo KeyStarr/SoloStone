@@ -436,8 +436,11 @@ static partial class Program
         File.Delete(saved); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"a removed file is"); File.WriteAllText(saved,text);
         File.WriteAllText(saved,text.Substring(0,text.Length-1)+"!"); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"so is the same size with other bytes"); File.WriteAllText(saved,text+" "); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"and another size"); File.WriteAllText(saved,text);
         string moved=Path.Combine(c.Saves,"renamed.xml"); File.Move(saved,moved); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"and another path"); File.Move(moved,saved);
-        File.SetUnixFileMode(saved,UnixFileMode.None);
-        try { Check(!cBackups.SavesUnchanged(manifest,c.Saves),"an unreadable save counts as changed"); } finally { File.SetUnixFileMode(saved,UnixFileMode.UserRead|UnixFileMode.UserWrite); }
+        if(RunsAsRoot()) Skip("an unreadable save counts as changed: root can read a file with no permissions");
+        else {
+            File.SetUnixFileMode(saved,UnixFileMode.None);
+            try { Check(!cBackups.SavesUnchanged(manifest,c.Saves),"an unreadable save counts as changed"); } finally { File.SetUnixFileMode(saved,UnixFileMode.UserRead|UnixFileMode.UserWrite); }
+        }
         Check(cBackups.SavesUnchanged(manifest,c.Saves),"and all of that came back");
         var gone=NewFixture(temp); var goneBackups=new Backups(gone.Root); var goneManifest=goneBackups.Verified(goneBackups.Create(gone.Saves,Path.Combine(gone.Client,"BepInEx","config"),"1.0.0"));
         FsOps.DeleteTree(gone.Saves); Check(!goneBackups.SavesUnchanged(goneManifest,gone.Saves),"a save folder that is gone is a change");
@@ -446,6 +449,8 @@ static partial class Program
         File.WriteAllText(Path.Combine(p.Saves,"profile.xml"),ProfileXml(15,"<Match>open</Match>"));
         Check(PlayerStart(p,pOffer).Outcome==UpdateOutcome.Refused && p.Host.HandOffs==pHandOffs && new Backups(p.Root).List().Length==1,"a pending match still refuses, with no backup spent");
     }
+    [System.Runtime.InteropServices.DllImport("libc", EntryPoint="geteuid")] static extern uint GetEffectiveUserId();
+    static bool RunsAsRoot() => !OperatingSystem.IsWindows() && GetEffectiveUserId()==0;
     // What the message says is what happens, when the swap fails before it has a journal.
     static void EarlyFailures(string temp) {
         var none=System.Threading.CancellationToken.None;
