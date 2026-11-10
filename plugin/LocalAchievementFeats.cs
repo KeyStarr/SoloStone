@@ -276,13 +276,15 @@ internal sealed class LocalAchievementFeats
         int combined = LocalCoreProgression.NeutralBaseCombinedLevel + LocalCoreProgression.Heroes.Sum(hero => LocalCoreProgression.Level(xp[hero]) - 1);
         for (int index = 0; index <= LocalCoreProgression.Heroes.Length; index++) {
             string hero = index < LocalCoreProgression.Heroes.Length ? LocalCoreProgression.Heroes[index] : "";
-            string name = hero == "" ? "All classes" : LocalCoreProgression.ClassName(hero);
+            // Sentences below are SoloStone English; only the standalone title follows the game language.
+            string english = hero == "" ? "All classes" : LocalCoreProgression.ClassName(hero);
+            string name = hero == "" ? english : NativeStrings.ClassName(english);
             var levels = new List<LocalFeat>();
             foreach (var group in LocalCoreProgression.Unlocks.Where(row => row.Hero == hero).GroupBy(row => hero == "" ? Math.Max(LocalCoreProgression.NeutralBaseCombinedLevel, row.Threshold) : row.Threshold)) {
                 int level = group.Key;
                 bool earned = group.All(card => profile.CoreGrants.Any(grant => grant.Id == card.Id && grant.Count >= card.Copies));
                 levels.Add(Track(LevelIdBase + index * 100 + level, "level:" + index + ":" + level, "Level " + level,
-                    hero == "" ? "Reach combined class level " + level + "." : "Reach " + name + " level " + level + ".",
+                    hero == "" ? "Reach combined class level " + level + "." : "Reach " + english + " level " + level + ".",
                     hero == "" ? combined : xp[hero], hero == "" ? level : LocalCoreProgression.LevelThresholds[level - 1], earned,
                     group.Select(card => Card(card.Id, 0, card.Copies)), date: GrantDate(profile,
                         match => group.Any(card => match.UnlockedCardIds?.Contains(card.Id) == true))));
@@ -296,7 +298,7 @@ internal sealed class LocalAchievementFeats
                     bool earned = claimed.Any(row => row.Hero == hero && row.Level == scheduled.Level);
                     if (!earned) profile.ClassRewardGrants.Add(grant);
                     levels.Add(Track(LevelIdBase + index * 100 + scheduled.Level, "level:" + index + ":" + scheduled.Level,
-                        "Level " + scheduled.Level, "Reach " + name + " level " + scheduled.Level + ".", xp[hero],
+                        "Level " + scheduled.Level, "Reach " + english + " level " + scheduled.Level + ".", xp[hero],
                         LocalCoreProgression.LevelThresholds[scheduled.Level - 1], earned,
                         grant.Dust == 0 ? new[] { Card(grant.CardId, grant.Premium, grant.Copies) } : null,
                         new LocalAchievementReward(dust: grant.Dust), Math.Max(UnixSeconds(grant.GrantedUtc), GrantDate(profile,
@@ -309,12 +311,12 @@ internal sealed class LocalAchievementFeats
                     var portrait = LocalClassRewards.Portraits.Single(row => row.Hero == hero);
                     string card = grant?.CardId ?? (kind == "golden" ? hero : portrait.Honored);
                     var feat = Track(LevelIdBase + index * 100 + (kind == "golden" ? 61 : 62), "portrait:" + hero + ":" + kind,
-                        (kind == "golden" ? "Golden hero" : "Honored portrait"), "Win Ranked matches as " + name + ".", wins,
+                        (kind == "golden" ? "Golden hero" : "Honored portrait"), "Win Ranked matches as " + english + ".", wins,
                         kind == "golden" ? LocalClassRewards.GoldenPortraitWins : LocalClassRewards.HonoredPortraitWins,
                         grant != null, reward: new LocalAchievementReward(heroSkinId: card), date: Math.Max(UnixSeconds(grant?.GrantedUtc), GrantDate(profile,
                             match => match.PortraitGrants?.Any(row => row.Hero == hero && row.Kind == kind) == true)));
                     feat.RewardPremium = kind == "golden" ? 1 : 0;
-                    feat.RewardText = (kind == "golden" ? "Golden " : "Honored ") + name + " portrait";
+                    feat.RewardText = (kind == "golden" ? "Golden " : "Honored ") + english + " portrait";
                     feat.Summary = feat.Condition + "\n" + feat.RewardText;
                     levels.Add(feat);
                 }
@@ -368,7 +370,7 @@ internal sealed class LocalAchievementFeats
                 mastery.Add(feat);
             }
             AddTrack(categories.Single(row => row.Id == "collection"), all, 12 + index, "mastery:" + index,
-                (hero == null ? "Neutral" : LocalCoreProgression.ClassName(hero)), "Card Mastery", mastery);
+                (hero == null ? NativeStrings.Get("GLOBAL_CLASS_NEUTRAL", "Neutral") : NativeStrings.ClassName(LocalCoreProgression.ClassName(hero))), "Card Mastery", mastery);
         }
         foreach (var feat in all.Where(row => !row.Generated && !row.Earned)) {
             int premium = feat.Id == "first-signature-mastery" ? 3 : feat.Id == "first-diamond-mastery" ? 2 : feat.Id == "fifty-golden-masteries" ? 1 : 0;
