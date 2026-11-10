@@ -1238,6 +1238,7 @@ namespace SabberStoneCore.Model
 				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
 
 			// Ordered segments take precedence over the legacy alternating/extra-turn fallback.
+            var previous = CurrentPlayer;
             var scheduled = TurnQueueRules.Take(this,out long turnOperation);
             if (scheduled != null)
             {
@@ -1270,6 +1271,10 @@ namespace SabberStoneCore.Model
 				// set player for next turn ...
 				CurrentPlayer = CurrentOpponent;
 			}
+            // An extra turn leaves CURRENT_PLAYER at 1, so no tag change is recorded; the client starts every turn
+            // (TurnStartManager, end-turn button input) on CURRENT_PLAYER=1, so record it for the same player again.
+            if (History && CurrentPlayer == previous)
+                PowerHistory.Add(PowerHistoryBuilder.TagChange(CurrentPlayer.Id, GameTag.CURRENT_PLAYER, 1));
 
 			// count next turn
 			Turn += 1;
