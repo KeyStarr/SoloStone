@@ -18,3 +18,16 @@ __pycache__/
 *.pem
 *.pfx
 *.p12
+
+# Built or kept locally, never committed: private notes, the player's own game libraries, evidence, and the data
+# generated from a client.
+private/
+references/
+evidence/
+data/carddb/
+data/shop/client/
+data/fx/*37.0.0*
+dist/manifest.json
+engine/SabberStoneCore/resources/Data/CardDefs.xml
+engine/SabberStoneCore/resources/Data/ClientOverlay.xml
+CLAUDE.local.md
