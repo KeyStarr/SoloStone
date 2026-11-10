@@ -1,5 +1,10 @@
-# Stand-in for the public-rules scan: it passes without scanning anything. It is replaced before this repository
-# relies on a scan check.
+# Public-rules release scan (tools/release_scan.py). It needs no private config and nothing from Blizzard: the only input is
+# this repository. Rules and scanner for a pull request come from the BASE commit, so a change cannot weaken the scan that
+# judges it (a file that is new in the change scans itself, with a notice). The private denylist (owner identity, lab hosts)
+# is not here; it runs in the local commit and push hooks.
+#   tree:    every file in the checkout, against the public rules
+#   commits: messages and the blobs each new commit introduces (a hit an older commit adds still fails after a later commit
+#            removes it); outside contributors' identities are not checked here
 name: scan
 
 on:
@@ -11,9 +16,51 @@ on:
 permissions:
   contents: read
 
+env:
+  SCAN_DIR: tools
+
 jobs:
   scan:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
-      - run: echo "the scan is not set up yet"
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Take the scanner and its rules from the base commit
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -eu
+          mkdir -p "$RUNNER_TEMP/scan"
+          for f in release_scan.py privacy_scan.py release_scan.public.json; do
+            if [ -n "${BASE:-}" ] && git cat-file -e "$BASE:$SCAN_DIR/$f" 2>/dev/null; then
+              git show "$BASE:$SCAN_DIR/$f" > "$RUNNER_TEMP/scan/$f"
+            else
+              cp "$SCAN_DIR/$f" "$RUNNER_TEMP/scan/$f"
+              echo "::notice::$SCAN_DIR/$f is not on the base commit, so the scan uses the copy in this change"
+            fi
+          done
+      - name: Scan the tree
+        run: |
+          set -eu
+          python3 "$RUNNER_TEMP/scan/release_scan.py" --source . --skip-git --allow-no-private-config \
+            --public-rules "$RUNNER_TEMP/scan/release_scan.public.json"
+      - name: Scan the new commits
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          set -eu
+          if [ -n "${PR_BASE:-}" ]; then
+            range="$PR_BASE..$PR_HEAD"
+          elif [ -n "${PUSH_BEFORE:-}" ] && [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ]; then
+            range="$PUSH_BEFORE..$PUSH_AFTER"
+          else
+            echo "No commit range to scan (a new branch or a manual run): the tree scan above is all there is."
+            exit 0
+          fi
+          python3 "$RUNNER_TEMP/scan/release_scan.py" --repo . --commits "$range" --allow-no-private-config \
+            --trust-public-rules --public-rules "$RUNNER_TEMP/scan/release_scan.public.json"

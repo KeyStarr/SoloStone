@@ -16,7 +16,8 @@ For people and coding agents alike. Be direct and brief.
 ## Branches, commits and pull requests
 
 - Work on a named branch (`feature/<name>` or `fix/<name>`), never on `main`. Naming and commit style: [docs/GIT.md](docs/GIT.md).
-- Open a pull request. A maintainer reviews it, CI must be green, and it is squash-merged.
+- Open a pull request. A maintainer reviews it, CI (`tests`, `dco`, `scan`) must be green, and it is squash-merged.
+  Run the scan before you push: `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --public-rules tools/release_scan.public.json`.
 - Sign every commit off under the Developer Certificate of Origin 1.1 (`git commit -s`). The DCO check fails a pull
   request with an unsigned commit. Contributions to `plugin/` and `installer/` come with the permission in
   `LICENSE-ADDITIONAL-PERMISSION.md`; see [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md).

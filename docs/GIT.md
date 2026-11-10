@@ -22,6 +22,12 @@ How SoloStone's branches and commits are named, and how a change gets into `main
 - Every change reaches `main` through a pull request. **Nothing is pushed to `main` directly**, and history on `main`
   and on tags is never rewritten or force-pushed.
 - `tests` (`python3 tests/run.py --ci`), `dco` and `scan` must pass before a merge.
+- `scan` runs `tools/release_scan.py` with the public rules in `tools/release_scan.public.json` over the whole tree and over
+  every new commit's message and the files it adds. It looks for Blizzard files and libraries, media outside the allowed list, decompiled code,
+  encoded blobs, personal data and email addresses, and wording the project does not use (for example offers of payment). The scanner and its rules come
+  from the base branch, so a pull request cannot loosen the scan that judges it. Run it locally before you push:
+  `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --public-rules tools/release_scan.public.json`.
+  A waiver for a real hit goes in the rules file, with a reason, and a maintainer reviews it.
 - A pull request is **squash-merged**: one commit on `main` per pull request. The pull request title becomes the commit
   subject, so write it as a commit subject (below).
 - Every commit carries a `Signed-off-by:` line ([Developer Certificate of Origin 1.1](https://developercertificate.org/)),

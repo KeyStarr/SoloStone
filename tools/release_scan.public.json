@@ -1,0 +1,84 @@
+{
+  "_comment": [
+    "Public rules for tools/release_scan.py (--public-rules). Nothing private: the one public identity, the reviewed waivers and size allowances of the export, the scanner's own planted phrases, and the paths that may never be tracked.",
+    "Paths are relative to the public repository root. The private denylist, lab path patterns and extra waivers stay in ~/.config/solostone/lab.json (HS_LAB_CONFIG) and merge in after these.",
+    "CI: release_scan.py --public-rules tools/release_scan.public.json --allow-no-private-config --source . --skip-git, and --commits origin/main..HEAD for the identity-free commit checks.",
+    "Waivers 1-5 are carried over from tools/release_export.json (same owner rulings). The `text` form only covers a hit whose own source line holds that text.",
+    "In the git modes (hooks) the guard ignores media_allow, large_allow, card_data and allowed_emails from this file, and waivers of privacy, path, Blizzard, lab-path, IL, decompiler, game-dll, asset-bundle, forbidden-path and git rules: those come from the private lab config. The hooks also refuse unless the sha256 of this file, release_scan.py, privacy_scan.py and installer/stage.py match the pins in private/guard_rails.json (guard_rails.py repin, after review).",
+    "Spelled with \\u0020 / \\u0040 escapes where a banned phrase or e-mail address appears, so this file passes its own scan; JSON readers see the plain text. A waiver's count caps it at that many hits per file."
+  ],
+  "allowed_emails": [
+    "KirillLoves\u0040proton.me"
+  ],
+  "forbidden_paths": [
+    "private/**",
+    "references/**",
+    "evidence/**",
+    "data/carddb/**"
+  ],
+  "large_allow": [
+    "tests/goldens/classic-source.json"
+  ],
+  "waivers": [
+    {
+      "path": "docs/images/banner.jpg",
+      "rule": "media",
+      "reason": "Original SoloStone art (docs/community/branding/banner.jpg, 2026-10-25): logo and mascot for the README.",
+      "count": 1
+    },
+    {
+      "path": "installer/assets/installer.ico",
+      "rule": "media",
+      "reason": "Original SoloStone art made 2026-11-07 from the docs/community/branding mascot.",
+      "count": 1
+    },
+    {
+      "path": "installer/assets/launcher.ico",
+      "rule": "media",
+      "reason": "Original SoloStone art made 2026-11-07 from the docs/community/branding mascot.",
+      "count": 1
+    },
+    {
+      "path": "plugin/NativeProfileSelector.cs",
+      "rule": "phrase-all-cards",
+      "text": "\"All\u0020cards owned\"",
+      "reason": "Owner ruling 2026-11-06: the 'All\u0020cards owned' cheat-toggle label stays. It is a profile option, not an advertisement.",
+      "count": 1
+    },
+    {
+      "path": "engine/SabberStoneCore/src/Model/Utils.cs",
+      "rule": "email-address",
+      "text": "vigna\u0040acm.org",
+      "reason": "Owner ruling 2026-11-06: the two addresses in the inherited public-domain xoroshiro128+ notice stay (Blackman and Vigna, CC0).",
+      "count": 2
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-free-cards",
+      "reason": "Self-waiver (text form): the module docstring names the banned phrase it scans for.",
+      "text": "free\u0020cards",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-private-server",
+      "reason": "Self-waiver (text form): the module docstring names the banned phrase it scans for.",
+      "text": "private\u0020server",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-donat\u0069on",
+      "text": "donat\u0069ons",
+      "reason": "Self-waiver (text form): the docstring and the PHRASES table name the banned phrase they scan for.",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-donat\u0069on",
+      "text": "phrase-donat\u0069on",
+      "reason": "Self-waiver (text form): the docstring and the PHRASES table name the banned phrase they scan for.",
+      "count": 1
+    }
+  ]
+}
