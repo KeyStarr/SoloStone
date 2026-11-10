@@ -3,4 +3,6 @@
     <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup><Compile Include="../../plugin/NativeTierRewards.cs" Link="NativeTierRewards.cs" /><Compile Include="../../plugin/GameTypes.cs" Link="GameTypes.cs" /></ItemGroup>
+  <!-- The tier screen looks its button labels up through NativeStrings once the plugin has that file. -->
+  <ItemGroup Condition="Exists('../../plugin/NativeStrings.cs')"><Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" /></ItemGroup>
 </Project>
