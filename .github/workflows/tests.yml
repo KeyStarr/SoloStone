@@ -1,0 +1,28 @@
+# Runs the public test suites (docs/TESTING.md, "ci" tier). It needs no Hearthstone files and downloads nothing from
+# Blizzard: the only downloads are the .NET SDK and NuGet packages. The "client" tier needs a player's own client and
+# never runs here.
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run every public suite (--ci: a skipped suite fails the run)
+        run: python tests/run.py --ci

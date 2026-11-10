@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
+    <Compile Include="../../plugin/AiFingerprint.cs" Link="AiFingerprint.cs" />
+    <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
+    <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
+    <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+  </ItemGroup>
+  <PropertyGroup><EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+</Project>

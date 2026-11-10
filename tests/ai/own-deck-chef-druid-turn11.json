@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "id": "own-deck-chef-druid-turn11",
+  "category": "plan",
+  "title": "Cast Azshara's Triumph with mana to spare instead of holding it",
+  "why": "Owner Deck playtest match 049f112a, NPC CherryOtter, Chef Druid, turn 11: attacked face 21 -> 11, Hero Power, ended with 8 of 10 mana unspent holding Azshara's Triumph (1 mana) and Innervate. Search exhausted, no clock cut, no mistake roll. Casting scored as a lost hand card with no gain.",
+  "source": "docs/reports/2026-11-02-deck-playtest-bugs.md section 2: life totals, mana and hand as reported; the journal is gone from the Deck, so the board is a synthetic Chef Druid board with the reported 10 face damage",
+  "deckId": "npc-chef-druid",
+  "seed": 20261102,
+  "turn": 11,
+  "bot": {
+    "class": "DRUID",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 9
+    },
+    "hand": [
+      {
+        "card": "CATA_136",
+        "tag": "triumph",
+        "cost": 1
+      },
+      {
+        "card": "CORE_EX1_169",
+        "tag": "innervate",
+        "cost": 0
+      }
+    ],
+    "board": [
+      {
+        "card": "JAIL_860",
+        "tag": "chef",
+        "attack": 3,
+        "health": 3,
+        "exhausted": false,
+        "cost": 3
+      },
+      {
+        "card": "JAIL_507",
+        "tag": "spiteful",
+        "attack": 3,
+        "health": 2,
+        "exhausted": false,
+        "cost": 3
+      },
+      {
+        "card": "CORE_SCH_713",
+        "tag": "neophyte",
+        "attack": 3,
+        "health": 2,
+        "exhausted": false,
+        "cost": 2
+      }
+    ],
+    "deck": [
+      {
+        "card": "CORE_UNG_205",
+        "tag": "deck0"
+      },
+      {
+        "card": "CORE_UNG_205",
+        "tag": "deck1"
+      },
+      {
+        "card": "Core_LOE_115",
+        "tag": "deck2"
+      },
+      {
+        "card": "JAIL_202",
+        "tag": "deck3"
+      },
+      {
+        "card": "JAIL_872",
+        "tag": "deck4"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck5"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck6"
+      },
+      {
+        "card": "TIME_702",
+        "tag": "deck7"
+      },
+      {
+        "card": "EDR_270",
+        "tag": "deck8"
+      },
+      {
+        "card": "CATA_135",
+        "tag": "deck9"
+      },
+      {
+        "card": "CATA_135",
+        "tag": "deck10"
+      },
+      {
+        "card": "END_007",
+        "tag": "deck11"
+      },
+      {
+        "card": "CAP_407",
+        "tag": "deck12"
+      },
+      {
+        "card": "JAIL_866",
+        "tag": "deck13"
+      },
+      {
+        "card": "JAIL_507",
+        "tag": "deck14"
+      },
+      {
+        "card": "CATA_136",
+        "tag": "deck15"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "MAGE",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 9
+    },
+    "hand": [],
+    "board": [],
+    "hidden": {
+      "hand": 4,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 99
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ]
+  }
+}

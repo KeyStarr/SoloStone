@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <DefineConstants Condition="'$(EngineDll)' == ''">$(DefineConstants);SOURCE_ENGINE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(EngineDll)' == ''">
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(EngineDll)' != ''">
+    <Reference Include="SabberStoneCore"><HintPath>$(EngineDll)</HintPath><Private>true</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../Shared/PoolSnapshots.cs" Link="PoolSnapshots.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <Compile Include="../../research/modern-mechanics/ProofDecks.cs" Link="ProofDecks.cs" />
+  </ItemGroup>
+</Project>
