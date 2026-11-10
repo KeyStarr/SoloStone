@@ -768,7 +768,7 @@ internal static class NativeUIProjection
         if (resolved == null) throw new InvalidOperationException("Selected deck is missing.");
         if (!personal)
         {
-            if (profile.IsLoanerHidden(selected)) throw new InvalidOperationException("That starter deck is hidden. Restore starter decks in Options.");
+            if (profile.IsLoanerHidden(selected)) throw new InvalidOperationException("That starter deck is hidden. Restore starter decks in Options > SoloStone Options.");
             if (!PlayerLoanerKeys.Contains(selected) && !AllowsTestLoaners(profile)) throw new InvalidOperationException(TestLoanerRefusal);
             ValidateSelection(selected, resolved.Hero, resolved.CardIds.ToArray(), new Dictionary<string, int>());
             ValidateMatchDeckBinding(selected, null);

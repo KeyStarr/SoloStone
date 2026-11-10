@@ -488,6 +488,8 @@ internal sealed partial class NativeTestControl
                         view.State["fpsCounter"] = NativeFpsCounter.State();
                         view.State["brandLabel"] = NativeBrandLabel.State();
                         view.State["deckInference"] = NativeDeckInferenceOption.State();
+                        view.State["language"] = NativeLanguageOption.State();
+                        view.State["optionsPanels"] = NativeOptionsPanels.State();
                         view.State["deckGuide"] = NativeDeckPickerGuide.State();
                         view.State["deckGuideCards"] = NativeGuideCards.State();
                         view.State["deckRecord"] = NativeDeckRecord.State();

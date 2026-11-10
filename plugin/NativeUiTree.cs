@@ -107,11 +107,16 @@ internal static class NativeUiTree
         foreach (var deckBox in UnityEngine.Object.FindObjectsByType<CollectionDeckBoxVisual>(FindObjectsSortMode.None))
             if (NativeUIProjection.HideableLoanerKey(deckBox.GetDeckID()) != null)
                 Name(deckBox.m_deleteButton, NativeStarterText.DeleteButtonId(deckBox.GetDeckID()));
+        // Options: the SoloStone Options plank, then the rows and the Back, Done and outside click of its panel.
+        Name(NativeOptionsPanels.SoloStoneButton, OptionsPanelText.SoloStoneButtonId);
+        foreach (var control in NativeOptionsPanels.Controls) Name(control.Key, control.Value);
         Name(NativeStarterDecks.OptionsButton, NativeStarterText.OptionsId);
         Name(NativeOptionsPace.OptionsButton, NativeOptionsPaceText.Id);
         Name(NativeTurnTimerOption.Checkbox, NativeTurnTimerOption.Id);
+        Name(HandheldUi.Checkbox, OptionsPanelText.HandheldId);
         Name(NativeFpsCounter.Checkbox, NativeFpsCounterText.Id);
         Name(NativeDeckInferenceOption.Checkbox, NativeDeckInferenceText.Id);
+        Name(NativeLanguageOption.OptionsButton, GameLanguage.Id);
         Name(NativeTurnTimerOption.Dismiss, "options.dismiss");
         Name(NativePackFlip.Button, PackFlipText.ButtonId);
         // The hub gear (allowed only by native identity, UiRules.GameMenuControlAllowed) and the Game Menu's Options row.
@@ -134,10 +139,10 @@ internal static class NativeUiTree
                 Name(alert.m_okayButton, NativeHelpText.DialogButtonId(popupId, "okay") ?? NativeWelcomeText.DialogButtonId(popupId, "okay")
                     ?? LocalRewardPresentation.DialogButtonId(popupId, "okay"));
                 Name(alert.m_confirmButton, NativeHelpText.DialogButtonId(popupId, "confirm") ?? NativeStarterText.DialogButtonId(popupId, "confirm")
-                    ?? NativeSaveDeleteText.DialogButtonId(popupId, "confirm") ?? NativeDeckGuideText.DialogButtonId(popupId, "confirm")
+                    ?? NativeSaveDeleteText.DialogButtonId(popupId, "confirm") ?? NativeDeckGuideText.DialogButtonId(popupId, "confirm") ?? GameLanguage.DialogButtonId(popupId, "confirm")
                     ?? LocalRewardPresentation.DialogButtonId(popupId, "confirm"));
                 Name(alert.m_cancelButton, NativeHelpText.DialogButtonId(popupId, "cancel") ?? NativeStarterText.DialogButtonId(popupId, "cancel")
-                    ?? NativeSaveDeleteText.DialogButtonId(popupId, "cancel") ?? NativeDeckGuideText.DialogButtonId(popupId, "cancel")
+                    ?? NativeSaveDeleteText.DialogButtonId(popupId, "cancel") ?? NativeDeckGuideText.DialogButtonId(popupId, "cancel") ?? GameLanguage.DialogButtonId(popupId, "cancel")
                     ?? LocalRewardPresentation.DialogButtonId(popupId, "cancel"));
                 // The save-delete body carries the player's save name: the denylist reads its header only.
                 string context = alert.GetInfo()?.m_headerText + (popupId == NativeSaveDeleteText.PopupId ? "" : " " + alert.GetInfo()?.m_text);
@@ -287,8 +292,7 @@ internal static class NativeUiTree
                 if (NativeProfileSelector.IsSelected(element)) item.Selected = true;
                 if (NativeProfileSelector.OwnsInput(element)) item.Selectable = true;
                 if (item.Id == "report.include-save") { item.Selectable = true; item.Selected = NativeReportUI.IncludeSave; }
-                if (item.Id == NativeFpsCounterText.Id) { item.Selectable = true; item.Selected = NativeFpsCounter.Checked; }
-                if (item.Id == NativeDeckInferenceText.Id) { item.Selectable = true; item.Selected = NativeDeckInferenceOption.Checked; }
+                if (NativeOptionsPanels.CheckState(item.Id, out bool optionChecked)) { item.Selectable = true; item.Selected = optionChecked; }
                 if (contexts.TryGetValue(element, out string owner)) item.Context = owner;
                 if (element is CollectionDeckBoxVisual deckBox)
                 {

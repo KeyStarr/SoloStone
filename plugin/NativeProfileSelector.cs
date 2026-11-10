@@ -52,7 +52,7 @@ internal static class NativeProfileSelector
     {
         log = logger; launch = context;
         if (context.SnapshotId != null || context.LaneId != 0) return;
-        NativeOptionsPace.Initialize(harmony, logger);
+        NativeOptionsPace.Initialize(logger);
         harmony.Patch(AccessTools.Method(typeof(BnetBar), "HandleEscapeKey") ?? throw new MissingMethodException("BnetBar", "HandleEscapeKey"),
             prefix: new HarmonyMethod(typeof(NativeProfileSelector), nameof(BeforeEscape)));
         harmony.Patch(AccessTools.Method(typeof(GameMenu), "Awake") ?? throw new MissingMethodException("GameMenu", "Awake"),
@@ -190,7 +190,7 @@ internal static class NativeProfileSelector
         catch (Exception error) { log?.LogError("SAVE_SELECTOR unavailable: " + error); ShowError(error.Message); }
     }
 
-    // Options > Pace: the Pace page on its own, with Options hidden behind it (native Sound Options pattern).
+    // Options > SoloStone Options > Pace: the Pace page on its own, with the panel hidden behind it (native Sound Options pattern).
     internal static void OpenPace()
     {
         try
@@ -201,11 +201,8 @@ internal static class NativeProfileSelector
         catch (Exception error) { log?.LogError("SAVE_SELECTOR pace unavailable: " + error); ReturnToOptions(); ShowError(error.Message); }
     }
 
-    internal static void ReturnToOptions()
-    {
-        var options = OptionsMenu.Get();
-        if (options != null && !options.IsShown()) options.Show();
-    }
+    // Back from a Pace page opened in Options > SoloStone Options: that panel again, else Options.
+    internal static void ReturnToOptions() => NativeOptionsPanels.ReturnFromPace();
 
     // Manage, its deletes and Options > Pace all check this (ProfileMenuRules.InMatch).
     internal static bool InMatch

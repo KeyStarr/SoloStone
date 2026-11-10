@@ -11,7 +11,7 @@ internal sealed class FpsCounterSettings
     {
         this.file = file;
         enabled = file.Bind("Display", "FpsCounter", false,
-            "Show the frame rate in a screen corner, averaged over half a second. Applies at once. Off by default. Also in Options.");
+            "Show the frame rate in a screen corner, averaged over half a second. Applies at once. Off by default. Also in Options > SoloStone Options.");
     }
 
     internal void Set(bool value)
