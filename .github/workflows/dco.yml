@@ -1,0 +1,46 @@
+# Checks that every commit in a pull request is signed off (Developer Certificate of Origin 1.1, docs/GIT.md).
+# Uses only git and bash on the runner: no third-party action, no app, no token beyond the default read-only one.
+name: dco
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  dco:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Every commit has a Signed-off-by line
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          bad=0
+          # Merge commits are exempt (they carry no change of their own to sign for); every other commit must be signed off.
+          for sha in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            author=$(git show -s --format='%an <%ae>' "$sha")
+            if ! git show -s --format='%B' "$sha" | grep -Eiq '^Signed-off-by: .+ <[^<>@[:space:]]+@[^<>@[:space:]]+>[[:space:]]*$'; then
+              echo "::error::commit ${sha:0:12} by $author has no Signed-off-by line (git commit -s, or git rebase --signoff)"
+              bad=1
+              continue
+            fi
+            # The sign-off must name the commit's author or committer, so nobody signs for someone else.
+            signed=$(git show -s --format='%B' "$sha" | grep -Ei '^Signed-off-by: ' | sed -E 's/^[^:]*: //; s/[[:space:]]+$//')
+            committer=$(git show -s --format='%cn <%ce>' "$sha")
+            if ! printf '%s\n' "$signed" | grep -Fxq -e "$author" -e "$committer"; then
+              echo "::error::commit ${sha:0:12}: the Signed-off-by line must match the author ($author) or the committer"
+              bad=1
+            fi
+          done
+          if [ "$bad" -ne 0 ]; then
+            echo "Sign off each commit with: git commit --amend -s   (or: git rebase --signoff $BASE)"
+            exit 1
+          fi
+          echo "All commits are signed off."

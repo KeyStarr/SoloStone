@@ -1,0 +1,19 @@
+# Stand-in for the public-rules scan: it passes without scanning anything. It is replaced before this repository
+# relies on a scan check.
+name: scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - run: echo "the scan is not set up yet"
