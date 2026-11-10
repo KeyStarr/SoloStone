@@ -990,14 +990,21 @@ internal sealed class NativeProfileMenu : ButtonListMenu
         tooltipTraceRow = null; tooltipTraceZone = null;
     }
 
-    // The native tooltip spawns at its prefab size, not the fitted menu's: bring it to a readable screen height.
+    // The native tooltip spawns at its prefab size, not the fitted menu's: bring it to a readable screen size.
+    // It keeps its width and grows downward with its text (ResizableTooltipPanel), so fit the width: text then has one size
+    // in every tooltip. A height target sized for the two-line Meta and Sandbox tooltips left the twelve-line Pace tooltip at its small spawn size.
+    private const float TooltipWidth = .32f;   // of the screen height
+
     private static void FitTooltip(TooltipZone zone, int layer)
     {
         var tip = zone.GetTooltipObject();
         var camera = CameraUtils.FindFirstByLayerMask(1 << layer);
         if (tip == null || camera == null) return;
-        float height = DeckLayout.ScreenRect(tip, camera).height, want = Screen.height * .1f;
-        if (height > 0 && (height < want * .7f || height > want * 1.5f)) tip.transform.localScale *= want / height;
+        var before = DeckLayout.ScreenRect(tip, camera);
+        float want = Screen.height * TooltipWidth;
+        if (before.width > 0) tip.transform.localScale *= want / before.width;
+        NativeProfileSelector.Log("SAVE_TOOLTIP fit screen=" + Screen.width + "x" + Screen.height + " before=" + before.width.ToString("F0") + "x" + before.height.ToString("F0")
+            + " after=" + DeckLayout.ScreenRect(tip, camera).width.ToString("F0") + "x" + DeckLayout.ScreenRect(tip, camera).height.ToString("F0"));
     }
 
     // The native tooltip shares the dialog's layer and depth plane; lift it wholly in front of the dialog so nothing covers it.
