@@ -23,11 +23,15 @@ How SoloStone's branches and commits are named, and how a change gets into `main
   and on tags is never rewritten or force-pushed.
 - `tests` (`python3 tests/run.py --ci`), `dco` and `scan` must pass before a merge.
 - `scan` runs `tools/release_scan.py` with the public rules in `tools/release_scan.public.json` over the whole tree and over
-  every new commit's message and the files it adds. It looks for Blizzard files and libraries, media outside the allowed list, decompiled code,
-  encoded blobs, personal data and email addresses, and wording the project does not use (for example offers of payment). The scanner and its rules come
-  from the base branch, so a pull request cannot loosen the scan that judges it. Run it locally before you push:
-  `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --public-rules tools/release_scan.public.json`.
-  A waiver for a real hit goes in the rules file, with a reason, and a maintainer reviews it.
+  every new commit's message and the files it adds. It looks for Blizzard files and libraries, media outside the allowed
+  list, decompiled code, encoded blobs, personal data and email addresses, and wording the project does not use (for
+  example offers of payment). Run it locally before you push:
+  `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --strict --trust-public-rules --public-rules tools/release_scan.public.json`.
+  A waiver for a real hit goes in the rules file, with a reason, and the owner reviews it.
+- The `scan` workflow runs on `pull_request_target`: GitHub runs the workflow, the scanner and the rules **as they are on
+  `main`**, and the pull request's files are only read, never run. A pull request therefore cannot loosen the scan that
+  judges it. `.github/`, `tools/release_scan.py`, `tools/release_scan.public.json`, `tools/privacy_scan.py` and
+  `installer/stage.py` are listed in `.github/CODEOWNERS` under `@KeyStarr`, so a change to them needs the owner's review.
 - A pull request is **squash-merged**: one commit on `main` per pull request. The pull request title becomes the commit
   subject, so write it as a commit subject (below).
 - Every commit carries a `Signed-off-by:` line ([Developer Certificate of Origin 1.1](https://developercertificate.org/)),

@@ -25,8 +25,9 @@ Security problems go to [SECURITY.md](SECURITY.md), not here.
    same suites (with `--ci`), and the pull request needs them green.
 4. Sign off every commit (see below).
 5. Check the files you changed against the public rules before you push:
-   `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --public-rules tools/release_scan.public.json`.
-   CI runs the same scan on the whole tree and on each commit ([scan.yml](workflows/scan.yml)).
+   `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --strict --trust-public-rules --public-rules tools/release_scan.public.json`.
+   CI runs the same scan on the whole tree and on each commit ([scan.yml](workflows/scan.yml)), using the scanner and
+   rules from `main`. Changes to `.github/` and to the scanner files need the owner's review ([CODEOWNERS](CODEOWNERS)).
 6. A maintainer reviews it. It is squash-merged into `main`, and the maintainer keeps your sign-off line in the
    squashed commit.
 

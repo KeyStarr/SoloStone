@@ -34,8 +34,13 @@ them, so a later commit cannot hide an earlier hit), `--message FILE` scans one 
 modes are strict: public waivers that name no rule, or one of the privacy, path, Blizzard, lab-path, IL, decompiler, game-dll,
 asset-bundle, forbidden-path or git rules, are ignored; content-hiding rules (encoded-blob, byte-array, opaque-file, unscannable,
 archive, binary-in-source, payment-link) accept only a public waiver on one exact path with a `count`; public allowed_emails,
-large_allow, media_allow and card_data are ignored; a waiver with no count covers one hit. `--trust-public-rules` (CI, with the
-rules taken from the base branch) lifts all of that. A waiver's `count` N always caps it at N hits per file.
+large_allow, media_allow and card_data are ignored; a waiver with no count covers one hit. `--strict` gives --source the same rules (CI). `--trust-public-rules` (CI, with the rules taken from the base branch) re-enables
+only the public allowed_emails, large_allow, media_allow and card_data; every other strict rule stays. A waiver's `count` N
+always caps it at N hits per file content (per blob, so a line that moves between commits is not a second hit; for a waiver
+with a glob path the count is per matching file) and must be a positive integer. A content-hiding public waiver must carry
+`sha256` (the blob) or `line_sha256` (the source line of the hit, exact text without its line break): it stops covering the
+file when that content changes. A hit reported for a wrapped multi-line encoding stands for the whole run, so a `line_sha256`
+never covers it: such a waiver needs the `sha256` of the blob.
 """
 import argparse
 import bz2
@@ -614,7 +619,7 @@ def parse_person(text):
 
 class Scanner:
     def __init__(self, denylist=(), extras=None, media_allow=(), large_allow=(), max_bytes=MAX_BYTES,
-                 hashes=(), client_reference=None, hook_markers=None, plugin_markers=None):
+                 hashes=(), client_reference=None, hook_markers=None, plugin_markers=None, strict=False):
         extras = extras or {}
         self.denylist = tuple(denylist)
         self.names = BLIZZARD_NAMES | {n.casefold() for n in extras.get('blizzard_names', [])}
@@ -634,9 +639,16 @@ class Scanner:
             raise ConfigError(f'Bad pattern in release_scan: {error}')
         self.allowed_emails = {e.casefold() for e in extras.get('allowed_emails', [])}
         self.waivers = extras.get('waivers', [])
+        for w in self.waivers:
+            if not isinstance(w, dict) or not isinstance(w.get('path'), str):
+                raise ConfigError('every waiver needs a path')
+            if 'count' in w and (not isinstance(w['count'], int) or isinstance(w['count'], bool) or w['count'] < 1):
+                raise ConfigError(f'waiver for {w["path"]}: count must be a positive integer')
         self.waiver_hits = [set() for _ in self.waivers]
-        self.waiver_paths = [{} for _ in self.waivers]  # per waiver: file -> the hits it absorbed there
-        self.strict = False  # set by the git modes: see UNWAIVABLE_PUBLIC
+        self.waiver_paths = [{} for _ in self.waivers]  # per waiver: (file, blob sha) -> the hits it absorbed there
+        self.strict = strict  # the git modes and CI: see UNWAIVABLE_PUBLIC
+        self.current_sha = None  # sha256 of the blob being scanned, for waivers bound to content
+        self.wrapped_hits = set()  # (path, line, rule) reported for a multi-line run of an encoding
         self.current_text = (None, [])  # (path, lines) of the text being scanned, for waivers that name their text
         self.hook_markers, self.plugin_markers = (hook_markers, plugin_markers) if hook_markers is not None else stage_markers()
         extra_markers = [m.encode() for m in extras.get('binary_markers', [])]
@@ -669,15 +681,33 @@ class Scanner:
                 continue  # and a public waiver must name its rule: a wildcard excuses nothing in the git modes
             if self.strict and rule.startswith('privacy-') and w.get('text') is None:
                 continue  # a privacy hit is only ever waived for one stated text on its own line
+            if self.strict and w.get('_public') and NARROW_PUBLIC.match(rule) and 'sha256' not in w and 'line_sha256' not in w:
+                continue  # content-hiding rules: the waiver must be bound to the content it excuses
             if not (fnmatch.fnmatchcase(path, w['path'].replace('**', '*')) and w.get('rule', '*') in ('*', rule)):
                 continue
             text = w.get('text')
             if text is not None and not self.text_covers(text, path, loc, rule):
                 continue
+            if not self.content_matches(w, path, loc, rule):
+                continue
             if self.exhausted(index, w, path, (path, loc, rule)):
                 continue
             return index
         return None
+
+    def content_matches(self, w, path, loc, rule=None):
+        """`sha256` binds a waiver to the whole blob, `line_sha256` to the one source line the hit is on (the line after
+        git's splitting, without its line break). A waiver bound to content stops covering a file once that content changes."""
+        if 'sha256' in w and w['sha256'] != self.current_sha:
+            return False
+        if 'line_sha256' in w:
+            if (path, loc, rule) in self.wrapped_hits:
+                return False  # the hit stands for a whole wrapped run, not for this one line: it needs a `sha256` of the blob
+            current, lines = self.current_text
+            if current != path or not isinstance(loc, int) or not 0 < loc <= len(lines):
+                return False
+            return hashlib.sha256(lines[loc - 1].encode('utf-8')).hexdigest() == w['line_sha256']
+        return True
 
     def exhausted(self, index, w, path, hit):
         """A waiver with `count` N covers at most N hits in one file; any further hit is unwaived. Without a count, the git
@@ -685,7 +715,7 @@ class Scanner:
         limit = w.get('count') if isinstance(w.get('count'), int) and w['count'] >= 1 else (1 if self.strict else None)
         if limit is None:
             return False
-        taken = self.waiver_paths[index].setdefault(path, set())
+        taken = self.waiver_paths[index].setdefault((path, self.current_sha), set())  # per file content: a moved line is not a second hit
         return hit not in taken and len(taken) >= limit
 
     def text_covers(self, text, path, loc, rule):
@@ -713,7 +743,7 @@ class Scanner:
         index = self.waived_by(path, loc, rule)
         if index is not None:
             self.waiver_hits[index].add((path, loc, rule))
-            self.waiver_paths[index].setdefault(path, set()).add((path, loc, rule))
+            self.waiver_paths[index].setdefault((path, self.current_sha), set()).add((path, loc, rule))
             self.waived += 1
             return
         self.hits.append((path, loc, rule))
@@ -811,6 +841,7 @@ class Scanner:
             if self.bad_email(line):
                 self.hit(rel, number, 'email-address')
         for number, rule in wrapped_encodings(lines, not glob_match(rel, ['facts/**'])):
+            self.wrapped_hits.add((rel, number, rule))  # one line stands for a whole run: only a blob hash can bind such a waiver
             self.hit(rel, number, rule)
         if kind == 'code':
             judged = code_strings(lines, CODE_LANG[Path(name).suffix.casefold()])
@@ -859,6 +890,7 @@ class Scanner:
 
     def scan_source_data(self, rel, size, read):
         """One source file by its path, size and a reader for its bytes (a file on disk or a blob from the object store)."""
+        self.current_sha = None  # until the bytes are read, nothing can be waived by content
         name = Path(rel).name
         ext = Path(rel).suffix.casefold()
         self.name_rules(rel, name)
@@ -870,6 +902,7 @@ class Scanner:
             self.hit(rel, 0, 'unscannable')
             return
         data = read()
+        self.current_sha = hashlib.sha256(data).hexdigest()
         self.hash_rule(rel, data)
         text = privacy_scan.decode_text(data)
         if text is None:
@@ -1070,6 +1103,15 @@ class Scanner:
             self.hit(rel, 0, 'unscannable')
 
     def scan_blob(self, rel, name, data, depth, embedded=False):
+        outer = self.current_sha
+        self.current_sha = hashlib.sha256(data).hexdigest() if data is not None else None
+        try:
+            self._scan_blob(rel, name, data, depth, embedded)
+        finally:
+            self.current_sha = outer  # members and resources are scanned with their own sha; the container gets its own back
+
+    def _scan_blob(self, rel, name, data, depth, embedded):
+        own = self.current_sha
         self.name_rules(rel, name)
         if data is None or depth > MAX_ZIP_DEPTH:
             self.hit(rel, 0, 'unscannable')
@@ -1082,6 +1124,7 @@ class Scanner:
         if b'Inno Setup Setup Data' in data:
             self.notes.append((rel, 'Inno Setup payload is compressed and was not read; scan the app folder and update zip it came from'))
         self.unpack(rel, name, data, depth)
+        self.current_sha = own  # unpack scanned the members: what follows judges this blob again
         self.scan_binary(rel, data, depth)
 
     def scan_strings(self, rel, data):
@@ -1144,13 +1187,15 @@ class Scanner:
 
 
 def run(source, binaries, config, allow_no_config=False, client_reference=None, media_allow=(), large_allow=(),
-        max_bytes=MAX_BYTES, hashes=None, public_rules=None, skip_git=False, strict=False):
-    denylist, extras = load_config(config, allow_no_config, public_rules, strict)
+        max_bytes=MAX_BYTES, hashes=None, public_rules=None, skip_git=False, strict=False, trust_public=False):
+    denylist, extras = load_config(config, allow_no_config, public_rules, strict and not trust_public)
     for folder in (source, binaries):
         if folder is not None and not Path(folder).is_dir():
             raise ConfigError(f'Not a folder: {folder}')
     scanner = Scanner(denylist, extras, media_allow, large_allow, max_bytes,
-                      private_blizzard_hashes() if hashes is None else hashes, client_reference)
+                      private_blizzard_hashes() if hashes is None else hashes, client_reference, strict=strict)
+    if binaries is not None and not (scanner.hook_markers or scanner.plugin_markers):
+        raise ConfigError('the launcher and plugin markers of installer/stage.py are unavailable: a binary scan without them checks nothing')
     if source is not None:
         scanner.scan_source(Path(source), git=not skip_git)
     if binaries is not None:
@@ -1175,8 +1220,10 @@ def main(argv=None):
     parser.add_argument('--commits', metavar='RANGE', help='Scan the commits `git rev-list RANGE` lists: messages, identities, blobs')
     parser.add_argument('--message', type=Path, help='Scan this commit message file')
     parser.add_argument('--ident', action='append', default=[], metavar='"Name <email>"', help='With --message: an author or committer')
+    parser.add_argument('--strict', action='store_true', help='Apply the git-mode strictness to --source/--binaries too (CI)')
     parser.add_argument('--trust-public-rules', action='store_true',
-                        help='CI: in the git modes honour the public rules fully (take them from the base branch, not from the change)')
+                        help='CI: honour the public allowed_emails, large_allow, media_allow and card_data in strict mode (take the '
+                             'rules from the base branch, not from the change); every other strict rule stays')
     parser.add_argument('--require-identity', metavar='"Name <email>"', help='With --commits or --message: any other identity is a hit')
     parser.add_argument('--blizzard-file', action='append', default=[], type=Path, help='A local Blizzard file: an identical file is a hit')
     parser.add_argument('--show-private-paths', action='store_true', help='Print paths that carry a private literal (default: a hash)')
@@ -1188,11 +1235,11 @@ def main(argv=None):
         for file in args.blizzard_file:
             if file.is_file():
                 hashes.add(hashlib.sha256(file.read_bytes()).hexdigest())
-        strict = bool(args.staged or args.commits or args.message) and not args.trust_public_rules
+        strict = bool(args.staged or args.commits or args.message or args.strict)
         scanner = run(args.source, args.binaries, args.config, args.allow_no_private_config, args.client_reference,
-                      args.media_allow, args.large_allow, args.max_bytes, hashes, args.public_rules, args.skip_git, strict)
+                      args.media_allow, args.large_allow, args.max_bytes, hashes, args.public_rules, args.skip_git, strict,
+                      args.trust_public_rules)
         identity = parse_person(args.require_identity) if args.require_identity else None
-        scanner.strict = strict
         if args.staged:
             scanner.scan_staged(args.repo)
         if args.commits:

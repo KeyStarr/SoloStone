@@ -1,0 +1,7 @@
+# Changes to what judges every other change need the owner's review (GitHub: branch protection "Require review from Code
+# Owners"). Keep this file itself covered.
+/.github/                        @KeyStarr
+/tools/release_scan.py           @KeyStarr
+/tools/release_scan.public.json  @KeyStarr
+/tools/privacy_scan.py           @KeyStarr
+/installer/stage.py              @KeyStarr

@@ -1,16 +1,25 @@
 # Public-rules release scan (tools/release_scan.py). It needs no private config and nothing from Blizzard: the only input is
-# this repository. Rules and scanner for a pull request come from the BASE commit, so a change cannot weaken the scan that
-# judges it (a file that is new in the change scans itself, with a notice). The private denylist (owner identity, lab hosts)
-# is not here; it runs in the local commit and push hooks.
-#   tree:    every file in the checkout, against the public rules
+# this repository.
+#
+# Trust model. `pull_request_target` runs THIS file as it is on the base branch, with the base branch checked out, so a pull
+# request cannot edit the workflow, the scanner or the rules that judge it. The pull request's head is fetched as DATA only
+# (`git archive` into a folder, `git log` of its commits): nothing from it is ever executed, imported or sourced, and the
+# token is the default read-only one with credentials not persisted. Never add a step that runs code from the head.
+# Bootstrap: while the base branch has no scanner yet, a pull request by the repository owner may bring it.
+# The private denylist (owner identity, lab hosts) is not here; it runs in the local commit and push hooks.
+# Required status checks: see the owner checklist in the A1 hand-over note (a ruleset that requires this workflow, no admin
+# bypass, approval for outside contributors' workflows). A pull request can add a workflow with a job of the same name.
+#   tree:    every file of the head (or of the pushed commit), strict rules, against the public rules
 #   commits: messages and the blobs each new commit introduces (a hit an older commit adds still fails after a later commit
 #            removes it); outside contributors' identities are not checked here
+# Keep .github/CODEOWNERS covering .github/**, tools/release_scan*, tools/privacy_scan.py and installer/stage.py.
 name: scan
 
 on:
   push:
     branches: [main]
-  pull_request:
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]  # `edited` fires when the base branch is retargeted
   workflow_dispatch:
 
 permissions:
@@ -27,40 +36,99 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Take the scanner and its rules from the base commit
+          persist-credentials: false
+      - name: Use the scanner and rules that are on the base branch
         env:
-          BASE: ${{ github.event.pull_request.base.sha }}
+          EVENT: ${{ github.event_name }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ github.repository_owner }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR: ${{ github.event.pull_request.number }}
         run: |
           set -eu
-          mkdir -p "$RUNNER_TEMP/scan"
-          for f in release_scan.py privacy_scan.py release_scan.public.json; do
-            if [ -n "${BASE:-}" ] && git cat-file -e "$BASE:$SCAN_DIR/$f" 2>/dev/null; then
-              git show "$BASE:$SCAN_DIR/$f" > "$RUNNER_TEMP/scan/$f"
-            else
-              cp "$SCAN_DIR/$f" "$RUNNER_TEMP/scan/$f"
-              echo "::notice::$SCAN_DIR/$f is not on the base commit, so the scan uses the copy in this change"
-            fi
-          done
+          if [ -f installer/stage.py ]; then :; elif [ "$EVENT" = pull_request_target ] && [ ! -f "$SCAN_DIR/release_scan.py" ]; then :; else
+            echo "::error::installer/stage.py is missing: the binary markers would be silently empty"; exit 1
+          fi
+          if [ -f "$SCAN_DIR/release_scan.py" ] && [ -f "$SCAN_DIR/privacy_scan.py" ] && [ -f "$SCAN_DIR/release_scan.public.json" ]; then
+            echo "SCAN=$GITHUB_WORKSPACE/$SCAN_DIR" >> "$GITHUB_ENV"
+          elif [ "$EVENT" = pull_request_target ] && [ "$PR_AUTHOR" = "$OWNER" ] && [ "$ACTOR" = "$OWNER" ] && [ "$HEAD_REPO" = "$REPO" ]; then
+            echo "::warning::the base branch has no scanner yet: this run uses the owner's copy from the pull request (bootstrap only)"
+            git fetch --no-tags origin "pull/$PR/head:refs/pr/bootstrap"
+            test "$(git rev-parse refs/pr/bootstrap)" = "$HEAD_SHA" || { echo "::error::the pull request head moved while the job ran"; exit 1; }
+            mkdir -p "$RUNNER_TEMP/scan"
+            for f in release_scan.py privacy_scan.py release_scan.public.json; do
+              git show "refs/pr/bootstrap:$SCAN_DIR/$f" > "$RUNNER_TEMP/scan/$f"
+            done
+            echo "SCAN=$RUNNER_TEMP/scan" >> "$GITHUB_ENV"
+          else
+            echo "::error::the scanner is not on the base branch, and only the owner's own pull request (from this repository) may bring it"; exit 1
+          fi
+      - name: Fetch the pull request head as data
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          git fetch --no-tags origin "pull/$PR/head:refs/pr/head"
+          test "$(git rev-parse refs/pr/head)" = "$HEAD_SHA" || { echo "::error::the pull request head moved while the job ran: run it again"; exit 1; }
+          # Files are written from git's own objects. `git archive` would honour the head's .gitattributes (export-ignore) and
+          # let a change hide files from the scan.
+          python3 - "$RUNNER_TEMP/head" <<'PY'
+          import os, subprocess, sys
+          dest = os.path.realpath(sys.argv[1])
+          os.makedirs(dest, exist_ok=True)
+          listing = subprocess.run(['git', 'ls-tree', '-r', '-z', '--full-tree', 'refs/pr/head'], capture_output=True, check=True).stdout
+          batch = subprocess.Popen(['git', 'cat-file', '--batch'], stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+          for entry in filter(None, listing.split(b'\0')):
+              meta, _, raw = entry.partition(b'\t')
+              mode, kind, sha = meta.split()
+              rel = raw.decode('utf-8', 'surrogateescape')
+              parts = rel.split('/')
+              if rel.startswith('/') or '..' in parts or '.git' in parts:
+                  print('::error::an unsafe path in the pull request:', rel.encode('unicode_escape').decode()); sys.exit(1)
+              target = os.path.join(dest, rel)
+              os.makedirs(os.path.dirname(target), exist_ok=True)
+              if not os.path.realpath(os.path.dirname(target)).startswith(dest + os.sep) and os.path.realpath(os.path.dirname(target)) != dest:
+                  print('::error::a path leaves the checkout folder'); sys.exit(1)
+              if kind == b'commit':  # a nested repository: nothing to read here, the commit scan reports it
+                  os.makedirs(target, exist_ok=True)
+                  continue
+              batch.stdin.write(sha + b'\n')
+              batch.stdin.flush()
+              size = int(batch.stdout.readline().split()[2])
+              data = batch.stdout.read(size + 1)[:-1]
+              if mode == b'120000':  # a link is written as a link, and the scanner reports it without following it
+                  os.symlink(data.decode('utf-8', 'surrogateescape'), target)
+              else:
+                  with open(target, 'wb') as out:
+                      out.write(data)
+          batch.stdin.close()
+          batch.wait()
+          PY
+          echo "TREE=$RUNNER_TEMP/head" >> "$GITHUB_ENV"
       - name: Scan the tree
         run: |
           set -eu
-          python3 "$RUNNER_TEMP/scan/release_scan.py" --source . --skip-git --allow-no-private-config \
-            --public-rules "$RUNNER_TEMP/scan/release_scan.public.json"
+          python3 "$SCAN/release_scan.py" --source "${TREE:-.}" --skip-git --allow-no-private-config --strict --trust-public-rules \
+            --public-rules "$SCAN/release_scan.public.json"
       - name: Scan the new commits
         env:
           PR_BASE: ${{ github.event.pull_request.base.sha }}
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
           PUSH_BEFORE: ${{ github.event.before }}
           PUSH_AFTER: ${{ github.sha }}
         run: |
           set -eu
           if [ -n "${PR_BASE:-}" ]; then
-            range="$PR_BASE..$PR_HEAD"
+            range="$PR_BASE..refs/pr/head"
           elif [ -n "${PUSH_BEFORE:-}" ] && [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ]; then
             range="$PUSH_BEFORE..$PUSH_AFTER"
           else
             echo "No commit range to scan (a new branch or a manual run): the tree scan above is all there is."
             exit 0
           fi
-          python3 "$RUNNER_TEMP/scan/release_scan.py" --repo . --commits "$range" --allow-no-private-config \
-            --trust-public-rules --public-rules "$RUNNER_TEMP/scan/release_scan.public.json"
+          python3 "$SCAN/release_scan.py" --repo . --commits "$range" --allow-no-private-config --trust-public-rules \
+            --public-rules "$SCAN/release_scan.public.json"
