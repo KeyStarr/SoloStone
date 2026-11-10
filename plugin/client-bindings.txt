@@ -518,11 +518,15 @@ F	Assembly-CSharp	OptionsMenu	m_graphicsFps	DropdownControl
 F	Assembly-CSharp	OptionsMenu	m_graphicsQuality	DropdownControl
 F	Assembly-CSharp	OptionsMenu	m_graphicsRes	DropdownControl
 F	Assembly-CSharp	OptionsMenu	m_languageGroup	*
+F	Assembly-CSharp	OptionsMenu	m_masterVolume	ScrollbarControl
+F	Assembly-CSharp	OptionsMenu	m_middleBottomRightPane	MultiSliceElement
 F	Assembly-CSharp	OptionsMenu	m_miscellaneousButton	*
 F	Assembly-CSharp	OptionsMenu	m_miscellaneousButton	UIBButton
+F	Assembly-CSharp	OptionsMenu	m_musicVolume	ScrollbarControl
 F	Assembly-CSharp	OptionsMenu	m_privacyButton	*
 F	Assembly-CSharp	OptionsMenu	m_screenShakeCheckbox	CheckBox
 F	Assembly-CSharp	OptionsMenu	m_signatureTextDisplayDropdown	DropdownControl
+F	Assembly-CSharp	OptionsMenu	m_soundOptionsButton	UIBButton
 F	Assembly-CSharp	OptionsMenu	m_spectatorOpenJoinCheckbox	*
 F	Assembly-CSharp	OptionsMenu	m_spectatorOpenJoinCheckbox	CheckBox
 F	Assembly-CSharp	OptionsMenu	m_switchAccountButton	*
@@ -599,6 +603,11 @@ F	Assembly-CSharp	ShopTabController	m_tabs	*
 F	Assembly-CSharp	ShopTabController+TabData	ParentTabData	Hearthstone.DataModels.ShopTabDataModel
 F	Assembly-CSharp	SoundManager	m_isMasterEnabled	*
 F	Assembly-CSharp	SoundManager	m_isMusicEnabled	*
+F	Assembly-CSharp	SoundOptionsMenu	m_backButton	*
+F	Assembly-CSharp	SoundOptionsMenu	m_backgroundSound	*
+F	Assembly-CSharp	SoundOptionsMenu	m_doneButton	*
+F	Assembly-CSharp	SoundOptionsMenu	m_monoSound	*
+F	Assembly-CSharp	SoundOptionsMenu	m_resetDefaultsButton	*
 F	Assembly-CSharp	Spell	m_activeStateType	*
 F	Assembly-CSharp	Spell	m_finishedListeners	*
 F	Assembly-CSharp	Spell	m_fsm	*
@@ -719,6 +728,7 @@ M	Assembly-CSharp	AlertPopup	Hide	*
 M	Assembly-CSharp	AlertPopup	UpdateLayout	*
 M	Assembly-CSharp	AlertPopup+ResponseCallback	Invoke	System.Void(AlertPopup+Response,System.Object)
 M	Assembly-CSharp	AnimatedLowPolyPack	Init	System.Void(System.Int32,UnityEngine.Vector3,UnityEngine.Vector3,System.Boolean,System.Boolean)
+M	Assembly-CSharp	AnimationUtil	ShowWithPunch	System.Void(UnityEngine.GameObject,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,System.String,System.Boolean,UnityEngine.GameObject,System.Object,AnimationUtil+DelOnShownWithPunch)
 M	Assembly-CSharp	ArcaneDustAmount	UpdateCurrentDustAmount	System.Void()
 M	Assembly-CSharp	ArcaneDustRewardData	get_Amount	System.Int32()
 M	Assembly-CSharp	AssetLoader	Get	*
@@ -838,6 +848,7 @@ M	Assembly-CSharp	ButtonListMenu	LayoutMenuBackground	System.Void()
 M	Assembly-CSharp	ButtonListMenu	OnBlockerRelease	System.Void(UIEvent)
 M	Assembly-CSharp	ButtonListMenu	OnDestroy	System.Void()
 M	Assembly-CSharp	ButtonListMenu	Show	System.Void(System.Boolean)
+M	Assembly-CSharp	CameraUtils	CreateInputBlocker	UnityEngine.GameObject(UnityEngine.Camera,System.String,UnityEngine.Component,UnityEngine.Component,System.Single)
 M	Assembly-CSharp	CameraUtils	FindFirstByLayerMask	UnityEngine.Camera(UnityEngine.LayerMask)
 M	Assembly-CSharp	Card	EnableAttacking	System.Void(System.Boolean)
 M	Assembly-CSharp	Card	GetActor	Actor()
@@ -1163,7 +1174,6 @@ M	Assembly-CSharp	DialogManager	ShowingDialog	System.Boolean()
 M	Assembly-CSharp	DialogManager	add_OnDialogHidden	System.Void(System.Action)
 M	Assembly-CSharp	DialogManager	remove_OnDialogHidden	System.Void(System.Action)
 M	Assembly-CSharp	DisenchantButton	OnRelease	*
-M	Assembly-CSharp	DropdownControl	isMenuShown	System.Boolean()
 M	Assembly-CSharp	EmoteHandler	Get	EmoteHandler()
 M	Assembly-CSharp	EmoteHandler	IsValidEmoteTypeForOpponent	System.Boolean(EmoteType)
 M	Assembly-CSharp	EndGameScreen	Awake	*
@@ -2001,6 +2011,7 @@ M	Assembly-CSharp	OptionsMenu	Show	System.Void()
 M	Assembly-CSharp	OptionsMenu	ToggleSpectatorOpenJoin	*
 M	Assembly-CSharp	OptionsMenu	UpdateOtherUI	*
 M	Assembly-CSharp	OptionsMenu	UpdateUI	*
+M	Assembly-CSharp	OverlayUI	AddGameObject	System.Void(UnityEngine.GameObject,CanvasAnchor,System.Boolean,CanvasScaleMode)
 M	Assembly-CSharp	OverlayUI	Get	OverlayUI()
 M	Assembly-CSharp	OverlayUI	GetRelativePosition	UnityEngine.Vector3(UnityEngine.Vector3,UnityEngine.Camera,UnityEngine.Transform,System.Single)
 M	Assembly-CSharp	OverlayUI	HasObject	System.Boolean(UnityEngine.GameObject)
@@ -2334,6 +2345,7 @@ M	Assembly-CSharp	UniversalInputManager	GetInputText	System.String()
 M	Assembly-CSharp	UniversalInputManager	IsDialogActive	System.Boolean()
 M	Assembly-CSharp	UniversalInputManager	IsTextInputActive	System.Boolean()
 M	Assembly-CSharp	UniversalInputManager	IsTouchMode	System.Boolean()
+M	Assembly-CSharp	UniversalInputManager	SetGameDialogActive	System.Void(System.Boolean)
 M	Assembly-CSharp	UniversalInputManager	UseTextInput	System.Void(UniversalInputManager+TextInputParams,System.Boolean)
 M	Assembly-CSharp	UnopenedPack	CanOpenPack	*
 M	Assembly-CSharp	UnopenedPack	GetBoosterId	System.Int32()
@@ -2591,7 +2603,6 @@ M	UnityEngine.CoreModule	UnityEngine.Vector3	get_Item	System.Single(System.Int32
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_down	UnityEngine.Vector3()
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_forward	UnityEngine.Vector3()
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_magnitude	System.Single()
-M	UnityEngine.CoreModule	UnityEngine.Vector3	get_normalized	UnityEngine.Vector3()
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_one	UnityEngine.Vector3()
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_right	UnityEngine.Vector3()
 M	UnityEngine.CoreModule	UnityEngine.Vector3	get_sqrMagnitude	System.Single()
@@ -2601,6 +2612,7 @@ M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Addition	UnityEngine.Vector3(Uni
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Division	UnityEngine.Vector3(UnityEngine.Vector3,System.Single)
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Equality	System.Boolean(UnityEngine.Vector3,UnityEngine.Vector3)
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Inequality	System.Boolean(UnityEngine.Vector3,UnityEngine.Vector3)
+M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Multiply	UnityEngine.Vector3(System.Single,UnityEngine.Vector3)
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Multiply	UnityEngine.Vector3(UnityEngine.Vector3,System.Single)
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_Subtraction	UnityEngine.Vector3(UnityEngine.Vector3,UnityEngine.Vector3)
 M	UnityEngine.CoreModule	UnityEngine.Vector3	op_UnaryNegation	UnityEngine.Vector3(UnityEngine.Vector3)
@@ -2869,6 +2881,8 @@ T	Assembly-CSharp	AlertPopup+ResponseCallback
 T	Assembly-CSharp	AlertPopup+ResponseDisplay		
 T	Assembly-CSharp	Anchor		
 T	Assembly-CSharp	AnimatedLowPolyPack		
+T	Assembly-CSharp	AnimationUtil		
+T	Assembly-CSharp	AnimationUtil+DelOnShownWithPunch		
 T	Assembly-CSharp	ArcaneDustAmount		
 T	Assembly-CSharp	ArcaneDustRewardData		
 T	Assembly-CSharp	AssetLoader		
@@ -2905,6 +2919,8 @@ T	Assembly-CSharp	ButtonListMenuDef
 T	Assembly-CSharp	BuyProductEventArgs		
 T	Assembly-CSharp	CHOICE_TYPE		
 T	Assembly-CSharp	CameraUtils		
+T	Assembly-CSharp	CanvasAnchor		
+T	Assembly-CSharp	CanvasScaleMode		
 T	Assembly-CSharp	Card		
 T	Assembly-CSharp	CardBackDbfRecord		
 T	Assembly-CSharp	CardBackInfoManager		
@@ -3271,6 +3287,7 @@ T	Assembly-CSharp	SceneMgr+OnSceneLoadCompleteForSceneDrivenTransition
 T	Assembly-CSharp	SceneMgr+ScenePreLoadCallback		
 T	Assembly-CSharp	SceneMgr+TransitionHandlerType		
 T	Assembly-CSharp	ScreenEffectsHandle		
+T	Assembly-CSharp	ScrollbarControl		
 T	Assembly-CSharp	SellableDeckDbfRecord		
 T	Assembly-CSharp	SellableDeckProductPage		
 T	Assembly-CSharp	ShareableDeck		

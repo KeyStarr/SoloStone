@@ -6,9 +6,11 @@ using HarmonyLib;
 using MiniJSON;
 using UnityEngine;
 
+// Options > SoloStone Options > "Turn Timer" (NativeOptionsPanels builds the row and hands it to Attach): the native burning rope for
+// the player's turns, from the next match. Persists in the BepInEx config ([Gameplay] TurnTimer).
 internal static class NativeTurnTimerOption
 {
-    internal const string Id = "options.turn-timer";
+    internal const string Id = "options.turn-timer", Label = "Turn Timer";
     private static TurnTimerSettings settings;
     private static ManualLogSource log;
     internal static CheckBox Checkbox { get; private set; }
@@ -23,37 +25,25 @@ internal static class NativeTurnTimerOption
     internal static void Initialize(Harmony harmony, ManualLogSource logger, ConfigFile file)
     {
         settings = new TurnTimerSettings(file); log = logger;
-        harmony.Patch(AccessTools.Method(typeof(OptionsMenu), "Awake"),
-            postfix: new HarmonyMethod(typeof(NativeTurnTimerOption), nameof(AddCheckbox)));
-        harmony.Patch(AccessTools.Method(typeof(OptionsMenu), "Show"),
-            postfix: new HarmonyMethod(typeof(NativeTurnTimerOption), nameof(Sync)));
         // Observe accepted native playback, never synthesize timer sounds. AudioModule is not in the reference subset.
         var play = AccessTools.GetDeclaredMethods(typeof(SoundManager)).Single(m => m.Name == "Play" && m.GetParameters().Length == 4);
         harmony.Patch(play, postfix: new HarmonyMethod(typeof(NativeTurnTimerOption), nameof(SoundPlayed)));
     }
 
-    private static void AddCheckbox(OptionsMenu __instance)
+    // The panel's row, built once; it stays for the session.
+    internal static void Attach(CheckBox box)
     {
-        try
-        {
-            var source = __instance.m_screenShakeCheckbox;
-            var clone = UnityEngine.Object.Instantiate(source.gameObject, source.transform.parent, false);
-            clone.name = "SoloStoneTurnTimerCheckbox";
-            // Reuse the hidden spectator row, above Screen Shake; no extra rows or overlap with Handheld/Restore.
-            clone.transform.position = __instance.m_spectatorOpenJoinCheckbox.transform.position;
-            Checkbox = clone.GetComponent<CheckBox>();
-            Checkbox.ClearEventListeners(); Checkbox.SetButtonText("Turn Timer");
-            Checkbox.AddEventListener(UIEventType.RELEASE, _ => {
-                try { settings.Set(Checkbox.IsChecked()); log.LogInfo("TURN_TIMER_OPTION enabled=" + Enabled + " applies=next-match"); }
-                catch (Exception error) { log.LogWarning("TURN_TIMER_OPTION not saved: " + error.Message); }
-                Sync();
-            });
-            clone.SetActive(true); Sync();
-        }
-        catch (Exception error) { log.LogWarning("TURN_TIMER_OPTION checkbox unavailable: " + error.Message); }
+        if (settings == null) throw new InvalidOperationException("Turn Timer not initialized");
+        box.AddEventListener(UIEventType.RELEASE, _ => {
+            try { settings.Set(box.IsChecked()); log.LogInfo("TURN_TIMER_OPTION enabled=" + Enabled + " applies=next-match"); }
+            catch (Exception error) { log.LogWarning("TURN_TIMER_OPTION not saved: " + error.Message); }
+            Sync();
+        });
+        Checkbox = box;
+        Sync();
     }
 
-    private static void Sync() { if (Checkbox != null) Checkbox.SetChecked(Enabled); }
+    internal static void Sync() { if (Checkbox != null) Checkbox.SetChecked(Enabled); }
 
     private static void SoundPlayed(object __0, bool __result)
     {

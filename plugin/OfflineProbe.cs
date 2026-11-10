@@ -204,7 +204,7 @@ public sealed class OfflineProbe : BaseUnityPlugin
         harmony.Patch(loginCheck,
             prefix: new HarmonyMethod(typeof(OfflineProbe), nameof(Disconnected)));
         harmony.Patch(launchOptions,
-            prefix: new HarmonyMethod(typeof(OfflineProbe), nameof(NoToken)));
+            prefix: new HarmonyMethod(typeof(OfflineProbe), nameof(LaunchOption)));
         harmony.Patch(AccessTools.Method(GameTypes.ByName("Blizzard.T5.Core.Utils.GeneralUtils"), "ExitApplication", Type.EmptyTypes),
             prefix: new HarmonyMethod(typeof(OfflineProbe), nameof(TraceExit)));
         harmony.Patch(AccessTools.Method(typeof(Hearthstone.HearthstoneApplication), "Exit", Type.EmptyTypes),
@@ -260,10 +260,13 @@ public sealed class OfflineProbe : BaseUnityPlugin
         DeckExperience.Initialize(harmony, Logger, Config, launch);
         StartupTiming.Mark("deck-experience");
         NativePowerSource.Initialize(harmony, Logger, launch.Deck);
-        NativeStarterDecks.Initialize(harmony, Logger);
+        NativeStarterDecks.Initialize(Logger);
         NativeTurnTimerOption.Initialize(harmony, Logger, Config);
-        NativeFpsCounter.Initialize(harmony, Logger, Config);
-        NativeDeckInferenceOption.Initialize(harmony, Logger, Config);
+        NativeFpsCounter.Initialize(Logger, Config);
+        NativeDeckInferenceOption.Initialize(Logger, Config);
+        NativeLanguageOption.Initialize(Logger, Config);
+        // SoloStone Options: the Options plank and the panels holding the controls above.
+        NativeOptionsPanels.Initialize(harmony, Logger);
         NativeReportUI.Initialize(harmony, Logger, launch);
 #if !SOLOSTONE_RELEASE
         NativeUiGestures.Initialize(new Harmony(ClientBindings.LabOwner), Logger);
@@ -368,6 +371,13 @@ public sealed class OfflineProbe : BaseUnityPlugin
 
     private static void DisableLoginIntent(ref bool __0) { __0 = false; }
     private static bool NoToken(ref string __result) { __result = null; return false; }
+    // Battle.net launch options: no token, ever. Only LOCALE may carry the game language chosen in Options (NativeLanguageOption).
+    private static bool LaunchOption(string __0, ref string __result)
+    {
+        __result = null;
+        try { __result = NativeLanguageOption.LaunchOption(__0); } catch (Exception) { __result = null; }
+        return false;
+    }
     private static bool Skip() { return false; }
     private static bool Disconnected(ref bool __result) { __result = false; return false; }
     private static void TraceExit() { diagnosticLog.LogWarning("EXIT_REQUEST " + Environment.StackTrace); }
@@ -396,10 +406,9 @@ public sealed class OfflineProbe : BaseUnityPlugin
         HubTheme.Tick(Time.realtimeSinceStartup);
         stage = DeckExperience.TraceStage("hub-theme", stage);
         DeckExperience.Tick();
-        NativeStarterDecks.Tick();
-        NativeOptionsPace.Tick();
         NativeFpsCounter.Tick();
         NativeDeckInferenceOption.Tick();
+        NativeOptionsPanels.Tick();
         stage = DeckExperience.TraceStage("deck-experience", stage);
         // client.png is captured on demand: a tool drops screenshot-request.txt and waits for a fresh client.png.
         // A periodic full-resolution PNG encode on the main thread was the routine's main hitch.

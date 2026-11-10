@@ -11,7 +11,7 @@ internal sealed class DeckInferenceSettings
     {
         this.file = file;
         enabled = file.Bind("Gameplay", "NpcDeckInference", false,
-            "Experimental: NPCs guess your deck from the cards you have played, instead of assuming a typical deck of your class. Public information only. Applies from the next match. Off by default. Also in Options.");
+            "Experimental: NPCs guess your deck from the cards you have played, instead of assuming a typical deck of your class. Public information only. Applies from the next match. Off by default. Also in Options > SoloStone Options.");
     }
 
     internal void Set(bool value)

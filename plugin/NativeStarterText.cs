@@ -3,7 +3,7 @@ internal static class NativeStarterText
 {
     // Native tray delete of a Core starter loaner hides it for this save; the native confirm says so.
     internal const string HideHeader = "Hide Starter Deck";
-    internal const string HideBody = "Hide this starter deck? Its cards and your class progress stay. You can restore starter decks in Options.";
+    internal const string HideBody = "Hide this starter deck? Its cards and your class progress stay. You can restore starter decks in Options > SoloStone Options.";
     // Native Options button (a rare fallback), shown only while this save hides at least one starter.
     internal const string OptionsObject = "SoloStoneRestoreStarters", OptionsLabel = "Restore Starter Decks", OptionsId = "options.restore-starters";
     internal const string RestorePopupId = "LOCAL_SOLOSTONE_RESTORE_STARTERS";

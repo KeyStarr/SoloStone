@@ -123,6 +123,48 @@ yours, the SoloStone version, update status, **Play**, **Roll back**, the update
   current saves are moved aside first, never deleted.
 - Backups are in `%LOCALAPPDATA%\SoloStone\backups`. The newest three stay.
 
+## SoloStone settings in Options
+
+The game's **Options** has an extra button in its Other group: **SoloStone Options**. It opens a window like the one
+**Sound Options** opens. **Back** or Escape returns to Options, and **Done** or a click outside the window closes it.
+
+**SoloStone Options** holds these. Turn Timer and NPC Deck Guess take effect from the next match; the others change at
+once.
+
+- **Turn Timer** puts the burning rope on your turns.
+- **Handheld UI** makes mulligan cards and menu text larger, for small screens.
+- **FPS Counter** shows the frame rate in the top-right corner.
+- **NPC Deck Guess (Experimental)** lets NPCs guess your deck from the cards you have played.
+- **Pace: <tier>** opens the Pace page, and its **Back** returns to this window. The button is hidden during a match.
+- **Language: <name>** is covered under "Game language" below.
+- **Restore Starter Decks** appears only while you have a starter deck hidden.
+
+The settings are saved in `BepInEx\config\solostone.plugin.cfg` in the copy.
+
+## Game language
+
+The game starts in English, or in a language your copy has if it has no English files. SoloStone's own menus are
+always in English, and so is the text of the cards described under "Known issues".
+
+To switch, open **Options**, then **SoloStone Options**, and press **Language: <name>**. It offers the next language
+your copy has files for; with only one, pressing it explains how to add another. The change applies the next time you
+start SoloStone, and until then the button shows the new name followed by "(restart)". The choice is saved as
+`Language` under `[Display]` in `BepInEx\config\solostone.plugin.cfg` in the copy. `client.config` stays as shipped,
+so the launcher's file check still passes.
+
+### Adding a language
+
+Your copy has the languages your Hearthstone had when you ran setup, usually just one. To add another:
+
+1. In the Battle.net app, select Hearthstone, click the gear next to **Play** and choose **Game Settings**. Set the
+   text language to the one you want and let Battle.net download it.
+2. Uninstall SoloStone and run the installer again, so setup makes a new copy. Don't tick "Also delete my saves".
+   SoloStone's settings in Options go back to their defaults, because they are stored in the copy.
+3. Start SoloStone, open **SoloStone Options** and press **Language: <name>**.
+
+The new copy has the languages Battle.net left installed. If Battle.net removed your old language, SoloStone starts
+in the new one. You can switch Battle.net back afterwards: the copy keeps the files it was made with.
+
 ## What SoloStone leaves alone
 
 - Your Hearthstone folder. It is only read.
@@ -162,7 +204,8 @@ markers, which include your Windows user name). Delete that folder by hand if yo
 - **Antivirus:** a loader file in the copy (`winhttp.dll`) can trigger false alarms in some antivirus programs.
   Do not switch your antivirus off. If it flags the file, check the installer as in "Optional: check your download" and
   report it to your antivirus vendor as a false positive. If you are not comfortable, do not install.
-- Windows only. English only. Steam Deck and Linux are not supported yet.
+- Windows only. Steam Deck and Linux are not supported yet. SoloStone's own menus are in English only; see "Game
+  language" for the game's text.
 
 Problems or questions: see [CONTRIBUTING.md](../.github/CONTRIBUTING.md). Logs in `%LOCALAPPDATA%\SoloStone\reports` can include
 your Windows user name and folder paths; remove those before you post a log.

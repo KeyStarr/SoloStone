@@ -299,6 +299,9 @@ row M GameEntity EnemyEmoteHandlerDoneLoadingCallback # placement callback bound
 site NativeNpcPresence.Request | Enumerate | (unknown type) # rows above: the loader Single(...); AssetReference op_Implicit is outside references/game. A miss logs request-failed and the opponent has no emote handler
 site NativeNpcPresence.Request | Method | (unknown type) # rows above: the loader Single(...); AssetReference op_Implicit is outside references/game. A miss logs request-failed and the opponent has no emote handler
 
+# NativeOptionsPanels.Open
+site NativeOptionsPanels.Open | Method | (unknown type) # NativeRewardUI.LoadRaw lookups (row under ProfileFormKit.Request); a failure logs OPTIONS_PANEL unavailable and shows Options again
+
 # NativeProfileMenu.Header
 site NativeProfileMenu.Header | Property | (unknown type) # UberText.Text on ButtonListMenuDef.m_headerText (a compiled row); UberText is outside references/game; save-picker title text only
 
