@@ -1203,6 +1203,13 @@ def run(source, binaries, config, allow_no_config=False, client_reference=None, 
     return scanner
 
 
+def printable(text):
+    """A line of output that cannot start a new line or a workflow command: control characters, line separators and a leading
+    `::` (GitHub Actions workflow commands) are escaped, so a file named after a command prints as plain text."""
+    text = re.sub('[\x00-\x1f\x7f-\x9f\u2028\u2029]', lambda m: '\\x%02x' % ord(m[0]) if ord(m[0]) < 256 else '\\u%04x' % ord(m[0]), str(text))
+    return '\\x3a' + text[1:] if text.startswith('::') else text
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--source', type=Path, help='Source tree to scan (the export folder)')
@@ -1248,16 +1255,16 @@ def main(argv=None):
             scanner.scan_message(args.message.read_text(encoding='utf-8', errors='replace'), [parse_person(i) for i in args.ident],
                                  identity)
     except (ConfigError, OSError, ValueError, subprocess.SubprocessError) as error:
-        print(f'Release scan failed: {error}', file=sys.stderr)
+        print(printable(f'Release scan failed: {error}'), file=sys.stderr)
         return 2
     except Exception as error:  # a crash must not look like "hits found" (exit 1)
-        print(f'Release scan crashed: {type(error).__name__}: {error}', file=sys.stderr)
+        print(printable(f'Release scan crashed: {type(error).__name__}: {error}'), file=sys.stderr)
         return 2
     hits = set(scanner.hits)
     for path, loc, rule in sorted(hits, key=lambda h: (h[0], str(h[1]).zfill(12), h[2])):
-        print(f'{scanner.label(path, args.show_private_paths)}:{loc} {rule}')
+        print(printable(f'{scanner.label(path, args.show_private_paths)}:{loc} {rule}'))
     for path, note in scanner.notes:
-        print(f'note: {scanner.label(path, args.show_private_paths)}: {note}', file=sys.stderr)
+        print(printable(f'note: {scanner.label(path, args.show_private_paths)}: {note}'), file=sys.stderr)
     counts = {}
     for _, _, rule in hits:
         counts[rule] = counts.get(rule, 0) + 1

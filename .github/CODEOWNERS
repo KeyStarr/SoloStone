@@ -1,5 +1,6 @@
-# Changes to what judges every other change need the owner's review (GitHub: branch protection "Require review from Code
-# Owners"). Keep this file itself covered.
+# Who reviews changes to what judges every other change. ADVISORY until there is a second maintainer: with one writer, "Require
+# review from Code Owners" would deadlock (a solo owner cannot approve their own PR), so that setting stays off. Keep this file in
+# the tree and covered by itself.
 /.github/                        @KeyStarr
 /tools/release_scan.py           @KeyStarr
 /tools/release_scan.public.json  @KeyStarr

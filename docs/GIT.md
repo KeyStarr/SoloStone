@@ -31,7 +31,9 @@ How SoloStone's branches and commits are named, and how a change gets into `main
 - The `scan` workflow runs on `pull_request_target`: GitHub runs the workflow, the scanner and the rules **as they are on
   `main`**, and the pull request's files are only read, never run. A pull request therefore cannot loosen the scan that
   judges it. `.github/`, `tools/release_scan.py`, `tools/release_scan.public.json`, `tools/privacy_scan.py` and
-  `installer/stage.py` are listed in `.github/CODEOWNERS` under `@KeyStarr`, so a change to them needs the owner's review.
+  `installer/stage.py` are listed in `.github/CODEOWNERS` under `@KeyStarr`, who reviews changes to them. This is advisory
+  while there is one maintainer: GitHub's "require review from code owners" setting stays off, because a sole owner could
+  not approve their own pull request.
 - A pull request is **squash-merged**: one commit on `main` per pull request. The pull request title becomes the commit
   subject, so write it as a commit subject (below).
 - Every commit carries a `Signed-off-by:` line ([Developer Certificate of Origin 1.1](https://developercertificate.org/)),
