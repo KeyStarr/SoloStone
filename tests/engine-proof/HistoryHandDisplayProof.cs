@@ -395,13 +395,16 @@ internal static class HistoryHandDisplayProof
                 && a.Random.CaptureState().Equals(b.Random.CaptureState())
                 && Canonical.State(a) == Canonical.State(b) && Canonical.History(a) == Canonical.History(b),
                 "no-display state/history/RNG unchanged versus legacy action path");
+#if CLIENT_TRANSPORT
             var packetsA = Native(a, out _); var packetsB = Native(b, out _);
             Verify(packetsA.Count == packetsB.Count && packetsA.Zip(packetsB).All(pair => pair.First.SequenceEqual(pair.Second)),
                 "no-display native packets byte-identical versus legacy action path");
+#endif
         }
         Console.WriteLine("PASS history display neutrality: no-display play/Trade packets and RNG identical to legacy core path");
     }
 
+#if CLIENT_TRANSPORT
     private static List<byte[]> Native(Game g, out PegasusGame.PowerHistory history)
     {
         var packets = new List<byte[]>();
@@ -417,6 +420,7 @@ internal static class HistoryHandDisplayProof
         history = sent;
         return packets;
     }
+#endif
 
     private static void Privacy()
     {
@@ -441,6 +445,7 @@ internal static class HistoryHandDisplayProof
                 && fa.Actions.Select(x => x.ToString()).SequenceEqual(fb.Actions.Select(x => x.ToString())),
                 "both viewers: hidden display vs vanilla produces identical projected state/evaluation/actions");
             if (viewer != 1) continue; // NativeMatch's human viewer is fixed to player 1.
+#if CLIENT_TRANSPORT
             var packetsA = Native(a, out var nativeA); var packetsB = Native(b, out _);
             Verify(packetsA.Count == packetsB.Count && packetsA.Zip(packetsB).All(pair => pair.First.SequenceEqual(pair.Second)),
                 "opponent-visible serialized native packets byte-identical");
@@ -454,6 +459,7 @@ internal static class HistoryHandDisplayProof
             Native(own, out var ownerPacket);
             Verify(ownerPacket.List.Any(e => e.TagChange?.Entity == visible.Id && e.TagChange.Tag == (int)GameTag.TAG_SCRIPT_DATA_NUM_1 && e.TagChange.Value == 2),
                 "owner receives refreshed text value through native projection");
+#endif
         }
     }
 }

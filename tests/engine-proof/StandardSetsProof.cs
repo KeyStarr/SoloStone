@@ -13,20 +13,27 @@ internal static class StandardSetsProof
 {
     private static readonly List<string> Failures = new();
     private static readonly HashSet<string> ProvenIds = new(StringComparer.Ordinal);
-    private static Dictionary<string, JsonElement> Definitions;
+    // The client export's rows, or null without it (ClientExport). Read at each use, never kept from an earlier proof.
+    private static IReadOnlyDictionary<string, JsonElement> Definitions => ClientExport.TryCards();
     internal static void Case(string id, Action<Game, Controller, string> scenario, [System.Runtime.CompilerServices.CallerFilePath] string proofFile = "", bool legacyPoolMember = false)
     {
         try
         {
-            var card = Cards.FromId(id); var data = Definitions[id];
+            var card = Cards.FromId(id);
             // Existing CORE members opt in while retaining their legacy pool-exclusion flag.
             Core2026Proof.Check(card != null && card.Implemented && card.ExcludeFromLegacyRandomPools != legacyPoolMember && EffectModules.ByDbfId.GetValueOrDefault(card.AssetId) == id, "registered Standard module " + id);
-            Core2026Proof.Check(data.GetProperty("isStandardLegal").GetBoolean() && Cards.IsFormatLegal(card, FormatType.FT_WILD), "client Standard identity and implemented deck legality");
-            Core2026Proof.Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
-                && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
-                && card.Text == data.GetProperty("text").GetString(), "exact pinned identity/stats/text");
-            foreach (var tag in data.GetProperty("tags").EnumerateObject())
-                Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name)) == tag.Value.GetInt32(), "pinned tag " + tag.Name);
+            Core2026Proof.Check(Cards.IsFormatLegal(card, FormatType.FT_WILD), "implemented deck legality");
+            if (Definitions != null)
+            {
+                var data = Definitions[id];
+                Core2026Proof.Check(data.GetProperty("isStandardLegal").GetBoolean(), "client Standard identity");
+                Core2026Proof.Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
+                    && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
+                    && card.Text == data.GetProperty("text").GetString(), "exact pinned identity/stats/text");
+                foreach (var tag in data.GetProperty("tags").EnumerateObject())
+                    Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name)) == tag.Value.GetInt32(), "pinned tag " + tag.Name);
+            }
+            else ClientExport.Skip("Standard card identity, stats, text and tags against the client export");
             for (int seed = 1; seed <= 3; seed++)
             {
                 var game = new Game(new GameConfig { RandomSeed = seed, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
@@ -125,10 +132,6 @@ internal static class StandardSetsProof
     {
         Failures.Clear();
         ProvenIds.Clear();
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        Definitions = doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
         if (lifestealUnblockedOnly)
         {
             StormfuryProof.Run(); WyvernsSlumberProof.Run(); GrimHarvestProof.Run(); DreadsoulCorrupterProof.Run();

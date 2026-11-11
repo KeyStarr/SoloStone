@@ -114,9 +114,13 @@ internal static class Batch14K7Proof
             PlayEntity(game, owner, source);
             PlayerDecisionProof.Answer(game, hidden.Id);
             Core2026Proof.Check(hidden.Zone == owner.DeckZone, "opponent shuffle fixture moved real hidden card");
+#if CLIENT_TRANSPORT
             packets[i] = StarsurgeProof.Packets(game, start);
+#endif
         }
+#if CLIENT_TRANSPORT
         Core2026Proof.Check(packets[0].Count == packets[1].Count && packets[0].Zip(packets[1]).All(p => p.First.SequenceEqual(p.Second)),
             "opponent receives byte-identical packets for different chosen hidden identities");
+#endif
     }
 }

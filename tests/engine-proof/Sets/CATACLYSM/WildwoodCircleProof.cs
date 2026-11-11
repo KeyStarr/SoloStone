@@ -60,23 +60,15 @@ internal static class WildwoodCircleProof
 // Shared per-family checks complement the primitive's exhaustive lifecycle proof.
 internal static class ShatterSpellProof
 {
-    private static readonly Dictionary<string, JsonElement> Definitions = Load();
-    private static Dictionary<string, JsonElement> Load()
-    {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        return doc.RootElement.GetProperty("cards").EnumerateArray()
-            .Where(c => new[] { "CATA_134", "CATA_306", "CATA_479", "CATA_820" }.Any(prefix => c.GetProperty("cardId").GetString().StartsWith(prefix, StringComparison.Ordinal)))
-            .ToDictionary(c => c.GetProperty("cardId").GetString(), c => c.Clone());
-    }
     internal static void Family(Game g, Controller p, string parent, string first, string second, params string[] helpers)
     {
         foreach (string id in new[] { parent, first, second }.Concat(helpers))
         {
-            var card = Cards.FromId(id); var data = Definitions[id];
-            Core2026Proof.Check(card.Implemented && EffectModules.ByDbfId.GetValueOrDefault(card.AssetId) == id
-                && card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Text == data.GetProperty("text").GetString()
+            var card = Cards.FromId(id);
+            Core2026Proof.Check(card.Implemented && EffectModules.ByDbfId.GetValueOrDefault(card.AssetId) == id, "registered shatter module: " + id);
+            if (ClientExport.TryCards() is not { } export) { ClientExport.Skip("Shatter family identity and tags against the client export"); continue; }
+            var data = export[id];
+            Core2026Proof.Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Text == data.GetProperty("text").GetString()
                 && card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32()
                 && card.Health == data.GetProperty("health").GetInt32() && card.Type.ToString() == data.GetProperty("cardType").GetString(),
                 "exact registered export closure: " + id);

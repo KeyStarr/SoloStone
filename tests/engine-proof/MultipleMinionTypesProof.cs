@@ -45,17 +45,14 @@ internal static class MultipleMinionTypesProof
 
     internal static void Run()
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        var rows = doc.RootElement.GetProperty("cards").EnumerateArray()
-            .ToDictionary(c => c.GetProperty("cardId").GetString());
-        var boar = Definition(rows["BE_730t"]);
+        var rows = ClientExport.TryCards();
+        // With the export the card is rebuilt from the client's own row; without it, the engine's card must already say the same.
+        var boar = rows != null ? Definition(rows["BE_730t"]) : Cards.FromId("BE_730t");
         Check(boar.IsRace(Race.BEAST) && boar.IsRace(Race.MECHANICAL), "Clockwork Boar must be both Beast and Mech");
         Check(boar.GetRawRace() == Race.BEAST && !boar.IsRace(Race.DRAGON), "primary preserved, unrelated type rejected");
         int checkedCards = 0;
         var supported = Types.Select(t => t.ToString()).Append("ALL").ToHashSet();
-        foreach (var row in rows.Values.Where(r => r.GetProperty("cardType").GetString() == "MINION"))
+        foreach (var row in (rows?.Values ?? Enumerable.Empty<JsonElement>()).Where(r => r.GetProperty("cardType").GetString() == "MINION"))
         {
             var expected = row.GetProperty("races").EnumerateArray().Select(r => r.GetString()).ToHashSet();
             if (!expected.IsSubsetOf(supported)) continue; // Other game modes have non-gameplay races.
@@ -65,9 +62,13 @@ internal static class MultipleMinionTypesProof
                 "pinned primary race " + card.Id);
             checkedCards++;
         }
-        Check(checkedCards > 1000, "broad pinned export coverage");
-        Check(Definition(rows["CATA_476t"]).IsRace(Race.ELEMENTAL)
-            && Definition(rows["TLC_888"]).IsRace(Race.DRAGON), "both primary orientations");
+        if (rows != null)
+        {
+            Check(checkedCards > 1000, "broad pinned export coverage");
+            Check(Definition(rows["CATA_476t"]).IsRace(Race.ELEMENTAL)
+                && Definition(rows["TLC_888"]).IsRace(Race.DRAGON), "both primary orientations");
+        }
+        else ClientExport.Skip("Minion types decoded from client export rows");
         foreach (var card in Cards.All)
             foreach (var race in Types)
                 Check(card.IsRaceForLegacyRandomPool(race) == (card.GetRawRace() == Race.ALL || card.GetRawRace() == race),

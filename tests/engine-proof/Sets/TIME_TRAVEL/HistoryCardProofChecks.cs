@@ -34,9 +34,11 @@ internal static class HistoryCardProofChecks
             Core2026Proof.Check(a.PowerHistory.Full.Skip(ca).Where(PublicEntry).Select(e => Canonical.Value(e))
                 .SequenceEqual(b.PowerHistory.Full.Skip(cb).Where(PublicEntry).Select(e => Canonical.Value(e))),
                 id + " hidden deck/hand display adds only private N1 changes");
+#if CLIENT_TRANSPORT
             var packetsA = StarsurgeProof.Packets(a, ca); var packetsB = StarsurgeProof.Packets(b, cb);
             Core2026Proof.Check(packetsA.Count == packetsB.Count && packetsA.Zip(packetsB).All(pair => pair.First.SequenceEqual(pair.Second)),
                 id + " hidden deck/hand identity emits identical native packets");
+#endif
             Core2026Proof.Check(Canonical.Value(a.Player1.NativeTags) == Canonical.Value(b.Player1.NativeTags)
                 && Canonical.Value(a.Player2.NativeTags) == Canonical.Value(b.Player2.NativeTags), "no public controller display leak");
             a.ProjectHistoryForFairView(a.Player1.PlayerId); b.ProjectHistoryForFairView(b.Player1.PlayerId);

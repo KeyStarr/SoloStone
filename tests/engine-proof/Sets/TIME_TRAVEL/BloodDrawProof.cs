@@ -21,8 +21,10 @@ internal static class BloodDrawProof
         var source = Add(p, id); Visible(source, 3, CostPaymentKind.Health);
         var dkCandidates = OfflineCardPools.Candidates(g, CardClass.DEATHKNIGHT, Filter(id), source.Card.AssetId);
         var candidates = OfflineCardPools.Candidates(g, p.HeroClass, Filter(id), source.Card.AssetId);
-        Core2026Proof.Check(dkCandidates.Select(c => c.Id).ToHashSet()
-            .SetEquals(OfflinePoolExpectations.Ids(Filter(id),"DEATHKNIGHT",source.Card.AssetId)), "admitted DK identities match eligibility/export");
+        if (ClientExport.Oracle)
+            Core2026Proof.Check(dkCandidates.Select(c => c.Id).ToHashSet()
+                .SetEquals(OfflinePoolExpectations.Ids(Filter(id),"DEATHKNIGHT",source.Card.AssetId)), "admitted DK identities match eligibility/export");
+        else ClientExport.Skip("Blood Draw admitted identities against the independent derivation from the client export");
         foreach (int health in new[] { 2, 3 }) {
             p.Hero.Health = health; p.Hero.Armor = 20;
             Core2026Proof.Check(!p.Options().Any(t => t.Source == source) && !g.Process(PlayCardTask.Any(p, source)) && source.Zone == p.HandZone && p.Hero.Health == health, "equal/insufficient Health rejected atomically");

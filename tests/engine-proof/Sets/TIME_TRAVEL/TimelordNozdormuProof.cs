@@ -128,15 +128,15 @@ internal static class TimelordNozdormuProof
 
     private static void NewestMetadata()
     {
-        // Export-only definitions test admission; no Fabled payload or cosmetic Coin is registered.
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
+        // Export-only definitions test admission; no Fabled payload or cosmetic Coin is registered. They exist only in the
+        // client's export, so this check runs in the client tier (ClientExport.Oracle).
+        if (!ClientExport.Oracle) { ClientExport.Skip("Nozdormu newest-spell filter on definitions built from the client export"); return; }
+        var rows = ClientExport.RequireCards();
         var g = KnownMetaProofFixture.BlackEmpireGame(CardClass.MAGE);
         var condition = Cards.FromId("TIME_063e2").Power.Trigger.Condition;
         foreach (string id in new[] { "BE_COIN1", "BE_COIN2", "BE_COIN3", "MONK_COIN", "BE_013", "BE_017", "BE_784", "BE_009" })
         {
-            var data = doc.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
+            var data = rows[id];
             var tags = data.GetProperty("tags").EnumerateObject().ToDictionary(t => (GameTag)int.Parse(t.Name), t => t.Value.GetInt32());
             tags[GameTag.CARD_SET] = data.GetProperty("cardSet").GetProperty("id").GetInt32();
             tags[GameTag.COLLECTIBLE] = data.GetProperty("collectible").GetBoolean() ? 1 : 0;

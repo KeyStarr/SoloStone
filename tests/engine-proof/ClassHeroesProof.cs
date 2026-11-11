@@ -21,22 +21,22 @@ internal static class ClassHeroesProof
 
     internal static void Run()
     {
-        using var input = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(input, CompressionMode.Decompress);
-        using var client = JsonDocument.Parse(gzip);
-        var definitions = client.RootElement.GetProperty("cards").EnumerateArray()
-            .ToDictionary(c => c.GetProperty("cardId").GetString());
+        // The client's hero power rows (HERO_xxbp) exist only in its export: compared in the client tier (ClientExport.Oracle).
+        var definitions = ClientExport.Oracle ? ClientExport.RequireCards() : null;
+        if (definitions == null) ClientExport.Skip("Class heroes' hero powers against the client export");
         for (int i = 0; i < Classes.Length; i++)
         {
             string id = $"HERO_{i + 1:00}";
             var hero = Cards.HeroCard(Classes[i]);
             var power = Cards.FromAssetId(hero[GameTag.HERO_POWER]);
-            var data = definitions[id + "bp"];
             Check(hero.Id == id && hero.Class == Classes[i] && hero.Health == 30, id + " canonical class/health");
             Check(hero.Implemented && power.Implemented, id + " hero and power implemented");
-            Check(power.AssetId == data.GetProperty("dbfId").GetInt32()
-                && power.Cost == data.GetProperty("cost").GetInt32()
-                && power.Cost == (i == 9 ? 1 : 2), id + " pinned power identity/cost");
+            Check(power.Cost == (i == 9 ? 1 : 2), id + " power cost");
+            if (definitions != null)
+            {
+                var data = definitions[id + "bp"];
+                Check(power.AssetId == data.GetProperty("dbfId").GetInt32() && power.Cost == data.GetProperty("cost").GetInt32(), id + " pinned power identity/cost");
+            }
             if (i < 9) LegacyPower(Classes[i]);
         }
         Check(Enum.GetName(typeof(CardClass), 14) == "DEMONHUNTER", "client class value 14");

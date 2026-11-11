@@ -72,18 +72,18 @@ internal static class DarkGiftProof
         try { ((IList<DarkGifts.Gift>)DarkGifts.Registry)[0] = DarkGifts.Registry[1]; }
         catch (NotSupportedException) { immutable = true; }
         Check(immutable, "immutable registry");
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var json = JsonDocument.Parse(gzip);
-        var export = json.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var export = ClientExport.TryCards();
         foreach (var identity in Expected.SelectMany(row => new[] { (row.Spell, row.Dbf), (row.Enchantment, row.EnchantmentDbf) })
             .Concat(new[] { ("EDR_102t", 115323), ("EDR_100t5e5", 120020) }))
         {
-            var card = Cards.FromId(identity.Item1); var row = export[identity.Item1];
-            Check(card.AssetId == identity.Item2 && card.AssetId == row.GetProperty("dbfId").GetInt32() &&
+            var card = Cards.FromId(identity.Item1);
+            Check(card.AssetId == identity.Item2, "pinned dbfId " + identity.Item1);
+            Check(!card.Collectible && card.Implemented && card.ExcludeFromLegacyRandomPools, "registered excluded token " + identity.Item1);
+            if (export == null) { ClientExport.Skip("Dark Gift identity, text and tags against the client export"); continue; }
+            var row = export[identity.Item1];
+            Check(card.AssetId == row.GetProperty("dbfId").GetInt32() &&
                 card.Name == row.GetProperty("name").GetString() && card.Text == row.GetProperty("text").GetString(), "pinned identity/name/text " + identity.Item1);
-            Check(card.Type.ToString() == row.GetProperty("cardType").GetString() && !card.Collectible &&
-                card.Implemented && card.ExcludeFromLegacyRandomPools, "registered excluded token " + identity.Item1);
+            Check(card.Type.ToString() == row.GetProperty("cardType").GetString(), "pinned card type " + identity.Item1);
             foreach (var tag in row.GetProperty("tags").EnumerateObject())
                 Check(card[(GameTag)int.Parse(tag.Name)] == tag.Value.GetInt32(), "export tag " + identity.Item1 + "/" + tag.Name);
         }

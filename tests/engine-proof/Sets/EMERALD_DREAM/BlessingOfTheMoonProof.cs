@@ -61,14 +61,14 @@ internal static class BlessingOfTheMoonProof
     }
     private static void Identity()
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
+        var export = ClientExport.TryCards();
         foreach (string id in new[] { "EDR_449p", "GBL_999e" })
         {
-            var data = doc.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
             var card = Cards.FromId(id);
-            Check(card.Implemented && EffectModules.ByDbfId[card.AssetId] == id && card.AssetId == data.GetProperty("dbfId").GetInt32()
+            Check(card.Implemented && EffectModules.ByDbfId[card.AssetId] == id, "registered " + id);
+            if (export == null) { ClientExport.Skip("Blessing of the Moon identity, text and tags against the client export"); continue; }
+            var data = export[id];
+            Check(card.AssetId == data.GetProperty("dbfId").GetInt32()
                 && card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32()
                 && card.Health == data.GetProperty("health").GetInt32() && card.Text == data.GetProperty("text").GetString(), "pinned identity/stats/text " + id);
             foreach (var tag in data.GetProperty("tags").EnumerateObject())

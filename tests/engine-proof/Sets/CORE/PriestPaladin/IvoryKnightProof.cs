@@ -16,15 +16,16 @@ internal static class IvoryKnightProof
 {
     internal static void Run() => StandardSetsProof.Case("CORE_KAR_057", (g, p, id) => {
         CorePoolProof.CrossClass(g, id);
-        using var gzip = new GZipStream(File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"), CompressionMode.Decompress);
-        using var export = JsonDocument.Parse(gzip);
-        var printed = export.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var printed = ClientExport.TryCards();
+        if (printed == null) ClientExport.Skip("Ivory Knight offers against the client export");
         p.Hero.Damage = 20; p.Opponent.Hero.Damage = 10;
         Play(g, p, id);
         Core2026Proof.Check(p.Choice != null && p.Choice.Choices.Count == 3 && p.Choice.Choices.Distinct().Count() == 3 && p.Choice.Choices.All(key => g.IdEntityDic[key].Card.Type == CardType.SPELL), "three distinct spell choices");
         foreach (int offer in p.Choice.Choices)
         {
-            var entity = g.IdEntityDic[offer]; var data = printed[entity.Card.Id];
+            var entity = g.IdEntityDic[offer];
+            if (printed == null) continue;
+            var data = printed[entity.Card.Id];
             Core2026Proof.Check(entity.Card.AssetId == data.GetProperty("dbfId").GetInt32() && entity.Card.Cost == data.GetProperty("cost").GetInt32(),
                 "exact pinned offered identity/Cost: " + entity.Card.Id + " actual=" + entity.Card.Cost + " export=" + data.GetProperty("cost"));
         }

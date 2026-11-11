@@ -19,19 +19,21 @@ internal static partial class EvColossalsProof
 {
     private static void ExportedTokens()
     {
-        using var input=System.IO.File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip=new System.IO.Compression.GZipStream(input,System.IO.Compression.CompressionMode.Decompress);
-        using var doc=System.Text.Json.JsonDocument.Parse(gzip);int count=0;
-        foreach(var row in doc.RootElement.GetProperty("cards").EnumerateArray()) {
-            string id=row.GetProperty("cardId").GetString();
-            if(!Ids.Any(body=>id==body || id.StartsWith(body+"t",StringComparison.Ordinal) || id.StartsWith(body+"e",StringComparison.Ordinal)))continue;
+        // The engine's own cards stand in for the export's rows when this machine has none.
+        var export=ClientExport.TryCards();int count=0;
+        var ids=export!=null ? export.Keys.Where(Wanted) : Cards.All.Select(c=>c.Id).Where(Wanted);
+        bool Wanted(string id)=>Ids.Any(body=>id==body || id.StartsWith(body+"t",StringComparison.Ordinal) || id.StartsWith(body+"e",StringComparison.Ordinal));
+        foreach(string id in ids) {
             var card=Cards.FromId(id);count++;
-            Core2026Proof.Check(card!=null && card.Implemented && card.ExcludeFromLegacyRandomPools
-                && card.AssetId==row.GetProperty("dbfId").GetInt32() && card.Cost==row.GetProperty("cost").GetInt32()
+            Core2026Proof.Check(card!=null && card.Implemented && card.ExcludeFromLegacyRandomPools,"registered full body/appendage definition "+id);
+            if(export==null)continue;
+            var row=export[id];
+            Core2026Proof.Check(card.AssetId==row.GetProperty("dbfId").GetInt32() && card.Cost==row.GetProperty("cost").GetInt32()
                 && card.ATK==row.GetProperty("atk").GetInt32() && card.Health==row.GetProperty("health").GetInt32()
                 && card.Text==row.GetProperty("text").GetString(),"pinned full body/appendage definition "+id);
             foreach(var tag in row.GetProperty("tags").EnumerateObject())Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name))==tag.Value.GetInt32(),"pinned token tag "+id+":"+tag.Name);
         }
+        if(export==null)ClientExport.Skip("Colossal bodies and appendages against the client export");
         Core2026Proof.Check(count==50,"thirteen bodies, 28 minion appendages, weapon and eight enchantments");
     }
     private static Game Fresh(int seed=41, OfflinePoolManifest pools=null)
@@ -45,21 +47,9 @@ internal static partial class EvColossalsProof
     {
         // Test candidate membership independently of coordinator-owned installed admission.
         var catalog=OfflinePoolFixtures.Catalog();var rows=catalog.Root.Element("Members");
-        using(var input=System.IO.File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"))
-        using(var gzip=new System.IO.Compression.GZipStream(input,System.IO.Compression.CompressionMode.Decompress))
-        using(var doc=System.Text.Json.JsonDocument.Parse(gzip))
-        foreach(var card in doc.RootElement.GetProperty("cards").EnumerateArray().Where(c=>Ids.Contains(c.GetProperty("cardId").GetString()))) {
-            string id=card.GetProperty("cardId").GetString();
+        foreach(string id in Ids) {
             rows.Elements("Card").Where(c=>(string)c.Attribute("cardId")==id).Remove();
-            rows.Add(new XElement("Card",new XAttribute("cardId",id),new XAttribute("dbfId",card.GetProperty("dbfId").GetInt32()),
-                new XAttribute("scope","Past"),new XAttribute("set",card.GetProperty("cardSet").GetProperty("name").GetString()),
-                new XAttribute("proofKey","EvColossalsProof.Run"),new XAttribute("registrationKind","standard-module"),
-                new XAttribute("type",card.GetProperty("cardType").GetString()),new XAttribute("cost",card.GetProperty("cost").GetInt32()),
-                new XAttribute("attack",card.GetProperty("atk").GetInt32()),new XAttribute("health",card.GetProperty("health").GetInt32()),
-                new XAttribute("rarity",card.GetProperty("rarity").GetString()),new XAttribute("spellSchool","NONE"),
-                card.GetProperty("cardClasses").EnumerateArray().Select(c=>new XElement("Class",new XAttribute("name",c.GetString()))),
-                card.GetProperty("races").EnumerateArray().Select(r=>new XElement("Race",new XAttribute("name",r.GetString()))),
-                card.GetProperty("tags").EnumerateObject().Select(t=>new XElement("Tag",new XAttribute("id",t.Name),new XAttribute("value",t.Value.GetInt32())))));
+            rows.Add(ClientExport.PoolMember(id,"EvColossalsProof.Run",spellSchool:"NONE"));
         }
         var pools=OfflinePoolFixtures.Manifest(catalog);
         var seen=new HashSet<string>();

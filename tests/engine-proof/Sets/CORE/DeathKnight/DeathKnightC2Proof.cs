@@ -42,12 +42,11 @@ internal static class DeathKnightC2Proof
 
     internal static void Dependency(string id, int dbfId)
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        var row = doc.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
         var card = Cards.FromId(id);
-        Core2026Proof.Check(card != null && card.Implemented && card.AssetId == dbfId && dbfId == row.GetProperty("dbfId").GetInt32()
+        Core2026Proof.Check(card != null && card.Implemented && card.AssetId == dbfId, "registered c2 dependency " + id);
+        if (ClientExport.TryCards() is not { } export) { ClientExport.Skip("Core death knight dependencies against the client export"); return; }
+        var row = export[id];
+        Core2026Proof.Check(dbfId == row.GetProperty("dbfId").GetInt32()
             && card.Cost == row.GetProperty("cost").GetInt32() && card.ATK == row.GetProperty("atk").GetInt32()
             && card.Health == row.GetProperty("health").GetInt32() && card.Text == row.GetProperty("text").GetString(), "exact c2 dependency " + id);
         foreach (var tag in row.GetProperty("tags").EnumerateObject())

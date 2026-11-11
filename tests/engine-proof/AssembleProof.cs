@@ -32,20 +32,23 @@ internal static class AssembleProof
         Console.WriteLine("PASS Assemble catalog, independent halves, lifecycle, hand residence, filters, seeded ordering, capacity");
     }
 
-    private static void Catalog()
+    internal static void Catalog()
     {
-        using var input = new GZipStream(File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"), CompressionMode.Decompress);
-        using var data = JsonDocument.Parse(input);
-        var rows = data.RootElement.GetProperty("cards").EnumerateArray().Where(c =>
+        // The catalogue is compared with the client export's rows in the client tier only (ClientExport.Oracle).
+        var rows = ClientExport.Oracle ? ClientExport.RequireCards().Values.Where(c =>
             c.GetProperty("tags").TryGetProperty("4533", out var tag) && tag.GetInt32() != 0
-            && c.GetProperty("text").GetString().Count(ch => ch == '&') == 1).ToArray();
-        Check(rows.Length == 321 && rows.Length == AssembleCatalog.Entries.Count, "exact curated export catalog, including alias identities");
-        foreach (var row in rows)
+            && c.GetProperty("text").GetString().Count(ch => ch == '&') == 1).ToArray() : null;
+        if (rows != null)
         {
-            var entry = AssembleCatalog.Entries[row.GetProperty("cardId").GetString()];
-            Check(entry.DbfId == row.GetProperty("dbfId").GetInt32() && entry.Text == row.GetProperty("text").GetString(),
-                "catalog identity and split text match pinned export");
+            Check(rows.Length == 321 && rows.Length == AssembleCatalog.Entries.Count, "exact curated export catalog, including alias identities");
+            foreach (var row in rows)
+            {
+                var entry = AssembleCatalog.Entries[row.GetProperty("cardId").GetString()];
+                Check(entry.DbfId == row.GetProperty("dbfId").GetInt32() && entry.Text == row.GetProperty("text").GetString(),
+                    "catalog identity and split text match pinned export");
+            }
         }
+        else ClientExport.Skip("Assemble catalogue against the client export");
         var supported = Cards.All.Where(AssembleCatalog.Supports).ToArray();
         Check(supported.Length >= 50, "audited executable subset installed");
         foreach (var top in supported)
@@ -59,7 +62,7 @@ internal static class AssembleProof
             Check(composed[(GameTag)32] == top[(GameTag)32] && composed[(GameTag)4577] == top[(GameTag)4577],
                 "native trigger presentation follows the chosen upper half");
         }
-        Console.WriteLine($"assemble catalog: pinned={rows.Length}; executable={supported.Length}");
+        Console.WriteLine($"assemble catalog: pinned={rows?.Length.ToString() ?? "skipped"}; executable={supported.Length}");
     }
 
     private static void Unpinned_SummonPayloadPosition()

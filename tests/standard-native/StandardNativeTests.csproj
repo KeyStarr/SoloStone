@@ -8,16 +8,14 @@
     <Nullable>disable</Nullable>
     <GameReferences>$(MSBuildThisFileDirectory)../../references/game</GameReferences>
   </PropertyGroup>
+  <!-- Two builds of one source (docs/TESTING.md). Default: the CI suite standard-native, no client file needed.
+       -p:ClientTransport=true: the client suite standard-native-client, which adds the native match and the client's protocol types. -->
+  <PropertyGroup Condition="'$(ClientTransport)' == 'true'"><DefineConstants>$(DefineConstants);CLIENT_TRANSPORT</DefineConstants></PropertyGroup>
   <ItemGroup>
     <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
-    <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
-    <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
-    <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
-    <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
-    <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
     <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
@@ -37,21 +35,6 @@
     <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
     <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
-    <Reference Include="blizzard.bgsclient">
-      <HintPath>$(GameReferences)/blizzard.bgsclient.dll</HintPath>
-    </Reference>
-    <Reference Include="blizzard.bgssdk">
-      <HintPath>$(GameReferences)/blizzard.bgssdk.dll</HintPath>
-    </Reference>
-    <Reference Include="Assembly-CSharp">
-      <HintPath>$(GameReferences)/Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(GameReferences)/UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GameReferences)/UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="../../research/standard-proof/ProofDecks.cs" Link="ProofDecks.cs" />
@@ -59,8 +42,23 @@
     <EmbeddedResource Include="../../research/standard-proof/definitions.json" LogicalName="StandardProofDefinitions.json" />
     <Compile Include="../../plugin/StandardProofNative.cs" Link="StandardProofNative.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'true' == 'true'">
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>$(MSBuildThisFileDirectory)../../references/game/Blizzard.T5.MiniJSON.dll</HintPath><Private>true</Private></Reference>
+  <ItemGroup><Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" /></ItemGroup>
+  <ItemGroup Condition="'$(ClientTransport)' != 'true'">
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Remove="LocationChecks.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(ClientTransport)' == 'true'">
+    <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
+    <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
+    <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
+    <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
+    <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
+    <Reference Include="blizzard.bgsclient"><HintPath>$(GameReferences)/blizzard.bgsclient.dll</HintPath></Reference>
+    <Reference Include="blizzard.bgssdk"><HintPath>$(GameReferences)/blizzard.bgssdk.dll</HintPath></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(GameReferences)/Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(GameReferences)/UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(GameReferences)/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>$(GameReferences)/Blizzard.T5.MiniJSON.dll</HintPath><Private>true</Private></Reference>
   </ItemGroup>
   <PropertyGroup><EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
 

@@ -20,8 +20,10 @@ internal static class WhisperingStoneProof
         var declaration = OfflinePoolDeclarations.Cards.Single(c => c.CardId == id);
         var report = OfflinePoolAdmission.Evaluate(g.OfflinePools, new[] { declaration }); report.ValidateRegistered();
         Core2026Proof.Check(report.Cards.Single().PoolRequirements.Single().Count >= 3, "admitted Fel spells meet threshold");
-        Core2026Proof.Check(OfflineCardPools.Candidates(g, p.HeroClass, Filter(id), Cards.FromId(id).AssetId).Select(c => c.Id).ToHashSet()
-            .SetEquals(OfflinePoolExpectations.Ids(Filter(id),p.HeroClass.ToString(),Cards.FromId(id).AssetId)), "admitted Fel identities match eligibility/export");
+        if (ClientExport.Oracle)
+            Core2026Proof.Check(OfflineCardPools.Candidates(g, p.HeroClass, Filter(id), Cards.FromId(id).AssetId).Select(c => c.Id).ToHashSet()
+                .SetEquals(OfflinePoolExpectations.Ids(Filter(id),p.HeroClass.ToString(),Cards.FromId(id).AssetId)), "admitted Fel identities match eligibility/export");
+        else ClientExport.Skip("Whispering Stone admitted identities against the independent derivation from the client export");
         var source = Summon(p, id); Core2026Proof.Check(source.HasTaunt && source.Health == 8 && source.AttackDamage == 0, "0/8 Taunt");
         var quiet = g.CloneExact(history: false); Kill(quiet, (Minion)quiet.IdEntityDic[source.Id]);
         Generated(quiet, (Minion)quiet.IdEntityDic[source.Id], quiet.Player1.HandZone, 2);

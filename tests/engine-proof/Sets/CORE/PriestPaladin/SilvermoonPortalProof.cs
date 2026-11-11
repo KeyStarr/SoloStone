@@ -14,9 +14,7 @@ namespace CoreLegacy;
 internal static class SilvermoonPortalProof
 {
     internal static void Run() => StandardSetsProof.Case("CORE_KAR_077", (g, p, id) => {
-        using var gzip = new GZipStream(File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"), CompressionMode.Decompress);
-        using var export = JsonDocument.Parse(gzip);
-        var printed = export.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var printed = ClientExport.TryCards();
         var friend = Summon(p, "CS2_182"); var enemy = Summon(p.Opponent, "CS2_182");
         TargetRules(g, p, id, enemy, friend, false);
         var location = LocationProofs.Location(p);
@@ -24,11 +22,19 @@ internal static class SilvermoonPortalProof
             Play(next, next.Player1, id, (Minion)next.IdEntityDic[friend.Id]);
             var token = next.Player1.BoardZone.Single(m => m.Id != friend.Id);
             CorePoolProof.Generated(next, next.Player1, id, token);
-            var data = printed[token.Card.Id];
-            Core2026Proof.Check(data.GetProperty("cost").GetInt32() == 2 && token.Controller == next.Player1
-                && token.Card.AssetId == data.GetProperty("dbfId").GetInt32()
-                && token.AttackDamage == data.GetProperty("atk").GetInt32() && token.Health == data.GetProperty("health").GetInt32(),
-                "random exact pinned 2-Cost minion identity/stats: " + token.Card.Id + " actual=" + token.Card.Cost + "/" + token.AttackDamage + "/" + token.Health + " export=" + data.GetProperty("cost") + "/" + data.GetProperty("atk") + "/" + data.GetProperty("health"));
+            if (printed != null)
+            {
+                var data = printed[token.Card.Id];
+                Core2026Proof.Check(data.GetProperty("cost").GetInt32() == 2 && token.Controller == next.Player1
+                    && token.Card.AssetId == data.GetProperty("dbfId").GetInt32()
+                    && token.AttackDamage == data.GetProperty("atk").GetInt32() && token.Health == data.GetProperty("health").GetInt32(),
+                    "random exact pinned 2-Cost minion identity/stats: " + token.Card.Id + " actual=" + token.Card.Cost + "/" + token.AttackDamage + "/" + token.Health + " export=" + data.GetProperty("cost") + "/" + data.GetProperty("atk") + "/" + data.GetProperty("health"));
+            }
+            else
+            {
+                ClientExport.Skip("Silvermoon Portal token against the client export");
+                Core2026Proof.Check(token.Card.Cost == 2 && token.Controller == next.Player1, "random 2-Cost minion: " + token.Card.Id);
+            }
             Core2026Proof.Check(next.Player1.BoardZone.GetSlot(2).Id == token.Id && next.Player1.BoardZone.GetSlot(1).Id == location.Id, "spell summon appends after physical location slot");
         });
         Core2026Proof.Check(friend.AttackDamage == 6 && friend.Health == 7 && friend.AppliedEnchantments.Single().Card.Id == "KAR_077e", "exact +2/+2 Silver Might buff");

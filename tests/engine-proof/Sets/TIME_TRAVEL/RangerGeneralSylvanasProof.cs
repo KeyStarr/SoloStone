@@ -104,17 +104,18 @@ internal static class RangerGeneralSylvanasProof
 
     internal static void CompanionCase(string id, Action<Game, Controller> scenario)
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var export = JsonDocument.Parse(gzip);
-        var data = export.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
         var card = Cards.FromId(id);
         Core2026Proof.Check(card.Implemented && card.ExcludeFromLegacyRandomPools && !card.Collectible && FabledRules.IsCompanion(id), "registered excluded companion");
-        Core2026Proof.Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
-            && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
-            && card.Text == data.GetProperty("text").GetString(), "exact companion identity/stats/text");
-        foreach (var tag in data.GetProperty("tags").EnumerateObject())
-            Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name)) == tag.Value.GetInt32(), "exact companion tag " + tag.Name);
+        if (ClientExport.TryCards() is { } export)
+        {
+            var data = export[id];
+            Core2026Proof.Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
+                && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
+                && card.Text == data.GetProperty("text").GetString(), "exact companion identity/stats/text");
+            foreach (var tag in data.GetProperty("tags").EnumerateObject())
+                Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name)) == tag.Value.GetInt32(), "exact companion tag " + tag.Name);
+        }
+        else ClientExport.Skip("Fabled companion identity, text and tags against the client export");
         for (int seed = 1; seed <= 3; seed++)
         {
             var g = new Game(new GameConfig { RandomSeed = seed, StartPlayer = 1, Shuffle = false, SkipMulligan = true,

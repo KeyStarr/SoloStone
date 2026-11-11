@@ -12,7 +12,8 @@ using SabberStoneCore.CardSets.Client;
 internal static class Core2026Proof
 {
     private static readonly List<string> Failures = new();
-    private static Dictionary<string, JsonElement> Definitions;
+    // The client export's rows, or null without it (ClientExport). Read at each use, never kept from an earlier proof.
+    private static IReadOnlyDictionary<string, JsonElement> Definitions => ClientExport.TryCards();
     internal static void Check(bool condition, string message)
     {
         if (!condition) throw new Exception(message);
@@ -56,13 +57,18 @@ internal static class Core2026Proof
     {
         try
         {
-            var card = Cards.FromId(id); var data = Definitions[id];
+            var card = Cards.FromId(id);
             Check(card != null && card.Implemented && RebalancedCore2026.ByDbfId.ContainsKey(card.AssetId), "registered legal module");
             Check(Cards.IsFormatLegal(card, FormatType.FT_STANDARD) && Cards.IsFormatLegal(card, FormatType.FT_WILD),
                 "deck legality includes current printing");
-            Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
-                && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
-                && card.Text == data.GetProperty("text").GetString(), "exact pinned client identity/stats/text");
+            if (Definitions != null)
+            {
+                var data = Definitions[id];
+                Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && card.Cost == data.GetProperty("cost").GetInt32()
+                    && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32()
+                    && card.Text == data.GetProperty("text").GetString(), "exact pinned client identity/stats/text");
+            }
+            else ClientExport.Skip("Core 2026 card identity against the client export");
             for (int seed = 1; seed <= 3; seed++)
             {
                 var game = new Game(new GameConfig { RandomSeed = seed, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
@@ -175,10 +181,6 @@ internal static class Core2026Proof
 
     internal static void CardProofs()
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        Definitions = doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
         Check(RebalancedCore2026.ByDbfId.Count == 68, "68 current Core modules");
         BallofSpidersProof.Run();
         AstromancerProof.Run();

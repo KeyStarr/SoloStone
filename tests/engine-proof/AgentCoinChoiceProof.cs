@@ -45,6 +45,7 @@ internal static class AgentCoinChoiceProof
         PlayerDecisionProof.Answer(mapped, heldTarget.Id);
         Core2026Proof.Check(mapped.IdEntityDic[owner.Choice.SourceId][GameTag.ZONE] == (int)Zone.REMOVEDFROMGAME,
             "legitimate bonus recipe retains removed watcher as engine source");
+#if CLIENT_TRANSPORT
         PegasusGame.EntityChoices native = null;
         var projection = new NativeMatch((id, packet) => { if (id == 17) native = (PegasusGame.EntityChoices)packet; });
         typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(projection, mapped);
@@ -54,6 +55,7 @@ internal static class AgentCoinChoiceProof
             .Invoke(projection, null);
         Core2026Proof.Check(native.Source == map.Id && native.Entities.SequenceEqual(owner.Choice.Choices),
             "production projection retains engine offers but replaces removed source with printed Map");
+#endif
         Console.WriteLine("PASS Aya/Agent engine: 9 counterfeit/type cases, clone/load, transform Power boundaries");
     }
 }

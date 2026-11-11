@@ -413,6 +413,11 @@ if (args.Contains("--class-heroes-only"))
 }
 // Legacy handlers above own their flags; only this aggregate continues into the default suite.
 if (GroupProofs.TryRun(args.Where(arg => arg != "--after-admission-only").ToArray())) return;
+#if CLIENT_TRANSPORT
+// The engine-proof-client suite runs only what needs your client (ClientTier.cs); the default suite below is engine-proof.
+ClientTier.Run();
+return;
+#endif
 if (!args.Contains("--after-admission-only"))
 {
     CompanionProof.Run();
@@ -595,7 +600,6 @@ ClassHeroesProof.Run();
 DeathKnightRulesProof.Run();
 CorpseProof.Run();
 TokenMetadataProof.Run();
-CardFactsProof.Run();
 CoreReprintsProof.Run();
 Core2026Proof.Run();
 ForcedAttackBudgetProof.Run();
@@ -641,4 +645,5 @@ PrepareProof.Run();
 OutcastProof.Run();
 StateTaskListDeterminismProof.Run();
 HistoryFactsProof.Run();
+ClientExport.PrintSkips();
 Console.WriteLine("engine-proof: PASS");

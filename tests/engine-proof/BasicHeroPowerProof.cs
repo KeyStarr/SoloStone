@@ -14,16 +14,17 @@ internal static class BasicHeroPowerProof
     private static void Check(bool value, string message) => Core2026Proof.Check(value, "basic power: " + message);
     internal static void Run()
     {
-        using var stream = new GZipStream(File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"), CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(stream);
-        var data = doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var data = ClientExport.TryCards();
         for (int i = 1; i <= 11; i++)
         {
             string id = "BE_720t" + i;
-            var definition = Cards.FromId(id); var row = data[id];
-            Check(definition.Implemented && definition.AssetId == row.GetProperty("dbfId").GetInt32()
-                && definition.Text == row.GetProperty("text").GetString() && definition.Cost == 1
-                && definition.ATK == 2 && definition.Health == 1 && definition.IsRace(Race.BEAST), id + " pinned token");
+            var definition = Cards.FromId(id);
+            Check(definition.Implemented && definition.Cost == 1
+                && definition.ATK == 2 && definition.Health == 1 && definition.IsRace(Race.BEAST), id + " token");
+            if (data != null)
+                Check(definition.AssetId == data[id].GetProperty("dbfId").GetInt32()
+                    && definition.Text == data[id].GetProperty("text").GetString(), id + " pinned token identity and text");
+            else ClientExport.Skip("Basic hero power tokens against the client export");
             foreach (bool combo in new[] { false, true })
             {
                 var g = ImbueProof.Make(CardClass.ROGUE); var p = g.Player1;

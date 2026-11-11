@@ -31,16 +31,18 @@ internal static class PastLegacyQualificationProof
     internal static void Run()
     {
         Core2026Proof.Check(Ids.All(id=>Cards.FromId(id).Implemented),"unimplemented qualification candidates: "+string.Join(",",Ids.Where(id=>!Cards.FromId(id).Implemented)));
-        using var file=File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip=new GZipStream(file,CompressionMode.Decompress);
-        using var json=JsonDocument.Parse(gzip);
-        var definitions=json.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c=>c.GetProperty("cardId").GetString());
+        var definitions=ClientExport.TryCards();
+        if(definitions==null) ClientExport.Skip("Past legacy cards against the client export (printed stats, current spell school)");
         foreach(string id in Ids)
         {
-            var card=Cards.FromId(id); var data=definitions[id]; int canonicalSchool=card[GameTag.SPELL_SCHOOL];
-            Core2026Proof.Check(card.Implemented && card.Collectible && card.AssetId==data.GetProperty("dbfId").GetInt32(),id+" registered legacy identity");
-            Core2026Proof.Check(card.Cost==data.GetProperty("cost").GetInt32() && card.ATK==data.GetProperty("atk").GetInt32()
-                && card.Health==data.GetProperty("health").GetInt32(),id+" pinned printed stats");
+            var card=Cards.FromId(id); int canonicalSchool=card[GameTag.SPELL_SCHOOL];
+            Core2026Proof.Check(card.Implemented && card.Collectible,id+" registered legacy identity");
+            if(definitions!=null) {
+                var data=definitions[id];
+                Core2026Proof.Check(card.AssetId==data.GetProperty("dbfId").GetInt32(),id+" pinned identity");
+                Core2026Proof.Check(card.Cost==data.GetProperty("cost").GetInt32() && card.ATK==data.GetProperty("atk").GetInt32()
+                    && card.Health==data.GetProperty("health").GetInt32(),id+" pinned printed stats");
+            }
             foreach(int seed in new[]{1,9})
             foreach(int option in card.ChooseOne ? new[]{1,2} : new[]{0})
             {
@@ -56,8 +58,9 @@ internal static class PastLegacyQualificationProof
                 ICharacter selected=id switch { "CS2_039" or "CS2_041"=>friend,
                     "AT_037" when option==1=>target, "EX1_245" or "BOT_453" or "EX1_048"=>target, _=>null };
                 var admitted=OfflineCardPools.Candidates(g,p.HeroClass,OfflinePoolFilter.Random(scope:PoolScope.Past),0).Single(c=>c.Id==id);
-                Core2026Proof.Check(admitted[GameTag.SPELL_SCHOOL]==data.GetProperty("tags").EnumerateObject()
-                    .Where(t=>t.Name=="1635").Select(t=>t.Value.GetInt32()).FirstOrDefault(),id+" generated current spell school");
+                if(definitions!=null)
+                    Core2026Proof.Check(admitted[GameTag.SPELL_SCHOOL]==definitions[id].GetProperty("tags").EnumerateObject()
+                        .Where(t=>t.Name=="1635").Select(t=>t.Value.GetInt32()).FirstOrDefault(),id+" generated current spell school");
                 var source=Generic.DrawCard(p,admitted); p.BaseMana=10; p.UsedMana=0;
                 Core2026Proof.Check(g.Process(PlayCardTask.Any(p,source,selected,chooseOne:option)),id+" generated legacy play accepted");
                 if(card.Type==CardType.SPELL)

@@ -28,10 +28,7 @@ internal static class CoreReprintsProof
     internal static void Run()
     {
         var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("engine/SabberStoneCore/resources/Data/ReprintAliases.json"));
-        using var compressed = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(compressed, CompressionMode.Decompress);
-        using var client = JsonDocument.Parse(gzip);
-        var definitions = client.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var definitions = ClientExport.TryCards();
         Check(aliases.Count == 57, "explicit 57 Core 2026 reprints");
         LoaderBoundaries();
         AttackRegressions();
@@ -54,15 +51,21 @@ internal static class CoreReprintsProof
                 Check(Cards.All.Any(c => c.Id == id), id + " client definition missing");
                 var card = Cards.FromId(id);
                 var original = Cards.FromId(originalId);
-                var data = definitions[id];
-                Check(card.AssetId == data.GetProperty("dbfId").GetInt32() && ReferenceEquals(Cards.FromAssetId(card.AssetId), card), id + " dbfId lookup");
-                Check(card.Name == data.GetProperty("name").GetString() && card.Text == data.GetProperty("text").GetString(), id + " client enUS strings");
-                Check(card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32(), id + " client stats");
+                Check(ReferenceEquals(Cards.FromAssetId(card.AssetId), card), id + " dbfId lookup");
+                if (definitions != null)
+                {
+                    var data = definitions[id];
+                    Check(card.AssetId == data.GetProperty("dbfId").GetInt32(), id + " client dbfId");
+                    Check(card.Name == data.GetProperty("name").GetString() && card.Text == data.GetProperty("text").GetString(), id + " client enUS strings");
+                    Check(card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32() && card.Health == data.GetProperty("health").GetInt32(), id + " client stats");
+                }
+                else ClientExport.Skip("Core reprint strings, stats and tags against the client export");
                 Check(card.Collectible && (int)card.Set == 1637, id + " client collectible/Core set");
                 Check(Reprints.ByDbfId[card.AssetId] == original.AssetId && Cards.IsFormatLegal(card, FormatType.FT_WILD)
                     && Cards.IsFormatLegal(card, FormatType.FT_STANDARD), id + " registry and deck legality");
-                foreach (var tag in data.GetProperty("tags").EnumerateObject())
-                    Check(card.Tags.TryGetValue((GameTag)int.Parse(tag.Name), out int value) && value == tag.Value.GetInt32(), id + " client tag " + tag.Name);
+                if (definitions != null)
+                    foreach (var tag in definitions[id].GetProperty("tags").EnumerateObject())
+                        Check(card.Tags.TryGetValue((GameTag)int.Parse(tag.Name), out int value) && value == tag.Value.GetInt32(), id + " client tag " + tag.Name);
                 bool standardOverride = expectedOverrides.Contains(id);
                 if (standardOverride)
                     Check(card.Implemented && StandardSets.CollectibleIds.Contains(id) && EffectModules.ByDbfId.GetValueOrDefault(card.AssetId) == id

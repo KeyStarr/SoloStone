@@ -19,12 +19,11 @@ internal static class CostSliceProof
     }
     internal static void Definition(string id)
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var json = JsonDocument.Parse(gzip);
-        var row = json.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
         var card = Cards.FromId(id);
-        Core2026Proof.Check(card.Implemented && card.AssetId == row.GetProperty("dbfId").GetInt32()
+        Core2026Proof.Check(card.Implemented, "implemented dependency " + id);
+        if (ClientExport.TryCards() is not { } export) { ClientExport.Skip("Cost slice dependencies against the client export"); return; }
+        var row = export[id];
+        Core2026Proof.Check(card.AssetId == row.GetProperty("dbfId").GetInt32()
             && card.Cost == row.GetProperty("cost").GetInt32() && card.ATK == row.GetProperty("atk").GetInt32()
             && card.Health == row.GetProperty("health").GetInt32() && card.Text == row.GetProperty("text").GetString(), "pinned dependency " + id);
         foreach (var tag in row.GetProperty("tags").EnumerateObject())

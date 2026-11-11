@@ -15,19 +15,10 @@ internal static partial class PastVarietyModernProof
     {
         var xml=OfflinePoolFixtures.Catalog();var members=xml.Root.Element("Members");
         if(only!=null) members.Elements("Card").Where(c=>(string)c.Attribute("scope")=="Past").Remove();
-        using var file=File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");using var gz=new GZipStream(file,CompressionMode.Decompress);using var doc=JsonDocument.Parse(gz);
-        foreach(var row in doc.RootElement.GetProperty("cards").EnumerateArray().Where(c=>Ids.Contains(c.GetProperty("cardId").GetString()))) {
-            string id=row.GetProperty("cardId").GetString();if(only!=null&&id!=only)continue;
+        foreach(string id in Ids) {
+            if(only!=null&&id!=only)continue;
             members.Elements("Card").Where(c=>(string)c.Attribute("cardId")==id).Remove();
-            members.Add(new XElement("Card",new XAttribute("cardId",id),new XAttribute("dbfId",row.GetProperty("dbfId").GetInt32()),
-                new XAttribute("scope","Past"),new XAttribute("set",row.GetProperty("cardSet").GetProperty("name").GetString()),
-                new XAttribute("proofKey","PastVarietyModernProof.Run"),new XAttribute("registrationKind","standard-module"),
-                new XAttribute("type",row.GetProperty("cardType").GetString()),new XAttribute("cost",row.GetProperty("cost").GetInt32()),
-                new XAttribute("attack",row.GetProperty("atk").GetInt32()),new XAttribute("health",row.GetProperty("health").GetInt32()),
-                new XAttribute("rarity",row.GetProperty("rarity").GetString()),new XAttribute("spellSchool",row.GetProperty("spellSchool").GetString()),
-                row.GetProperty("cardClasses").EnumerateArray().Select(c=>new XElement("Class",new XAttribute("name",c.GetString()))),
-                row.GetProperty("races").EnumerateArray().Select(c=>new XElement("Race",new XAttribute("name",c.GetString()))),
-                row.GetProperty("tags").EnumerateObject().Select(t=>new XElement("Tag",new XAttribute("id",t.Name),new XAttribute("value",t.Value.GetInt32())))));
+            members.Add(ClientExport.PoolMember(id,"PastVarietyModernProof.Run"));
         }
         return OfflinePoolFixtures.Manifest(xml);
     }

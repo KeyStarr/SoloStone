@@ -92,15 +92,18 @@ internal static partial class PastVarietyModernProof
     }
     private static void ExportAndScope()
     {
-        using var f=File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");using var gz=new GZipStream(f,CompressionMode.Decompress);using var doc=JsonDocument.Parse(gz);
-        var rows=doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c=>c.GetProperty("cardId").GetString());
+        var rows=ClientExport.TryCards();
+        if(rows==null)ClientExport.Skip("Modern past cards and tokens against the client export");
         var policy=OfflinePoolPolicy.Load();
         foreach(string id in Ids.Concat(Tokens)) {
-            var card=Cards.FromId(id);var row=rows[id];
+            var card=Cards.FromId(id);
             Core2026Proof.Check(card.Implemented && card.ExcludeFromLegacyRandomPools && EffectModules.ByDbfId[card.AssetId]==id,"modern registered "+id);
-            Core2026Proof.Check(card.AssetId==row.GetProperty("dbfId").GetInt32() && card.Cost==row.GetProperty("cost").GetInt32()
-                && card.ATK==row.GetProperty("atk").GetInt32() && card.Health==row.GetProperty("health").GetInt32() && card.Text==row.GetProperty("text").GetString(),"modern pinned identity "+id);
-            foreach(var tag in row.GetProperty("tags").EnumerateObject()) Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name))==tag.Value.GetInt32(),"modern pinned tag "+id+":"+tag.Name);
+            if(rows!=null) {
+                var row=rows[id];
+                Core2026Proof.Check(card.AssetId==row.GetProperty("dbfId").GetInt32() && card.Cost==row.GetProperty("cost").GetInt32()
+                    && card.ATK==row.GetProperty("atk").GetInt32() && card.Health==row.GetProperty("health").GetInt32() && card.Text==row.GetProperty("text").GetString(),"modern pinned identity "+id);
+                foreach(var tag in row.GetProperty("tags").EnumerateObject()) Core2026Proof.Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name))==tag.Value.GetInt32(),"modern pinned tag "+id+":"+tag.Name);
+            }
             Core2026Proof.Check(!Cards.IsFormatLegal(card,FormatType.FT_STANDARD) && !LocalShop.IsStandardCard(card) && !policy.IsPackEligible(card),"historical card excluded from Standard and packs "+id);
         }
         foreach(string id in Ids) {

@@ -136,6 +136,7 @@ internal static class LotusTroublemakerProof
             "full board prohibits minion play and shots");
     }
 
+#if CLIENT_TRANSPORT
     private static List<byte[]> Native(Game g)
     {
         var packets = new List<byte[]>();
@@ -147,6 +148,7 @@ internal static class LotusTroublemakerProof
             .Invoke(match, new object[] { g.PowerHistory.Full });
         return packets;
     }
+#endif
 
     private static void Privacy(Game fresh, string id)
     {
@@ -176,9 +178,11 @@ internal static class LotusTroublemakerProof
                 "both viewers: hidden hand/deck presence leaves projected state/evaluation/actions identical");
             if (viewer == 1)
             {
+#if CLIENT_TRANSPORT
                 var packetsA = Native(a); var packetsB = Native(b);
                 Verify(packetsA.Count == packetsB.Count && packetsA.Zip(packetsB).All(pair => pair.First.SequenceEqual(pair.Second)),
                     "hidden hand/deck native packets byte-identical with vanilla replacement");
+#endif
             }
         }
     }

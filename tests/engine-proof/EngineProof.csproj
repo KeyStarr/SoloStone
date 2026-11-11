@@ -5,12 +5,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
-    <DefineConstants>$(DefineConstants);SOURCE_ENGINE;ENGINE_SOURCE;PINNED_CLIENT_ALIAS</DefineConstants>
+    <DefineConstants>$(DefineConstants);SOURCE_ENGINE;ENGINE_SOURCE</DefineConstants>
   </PropertyGroup>
+  <!-- Two builds of one source (docs/TESTING.md). Default: the CI suite engine-proof, no client file needed.
+       -p:ClientTransport=true: the client suite engine-proof-client, which adds the native match and the client's own libraries. -->
+  <PropertyGroup Condition="'$(ClientTransport)' == 'true'"><DefineConstants>$(DefineConstants);CLIENT_TRANSPORT;PINNED_CLIENT_ALIAS</DefineConstants></PropertyGroup>
   <ItemGroup>
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <Compile Include="../../plugin/NativeHeraldText.cs" Link="NativeHeraldText.cs" />
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Compile Include="../GroupProofs.cs" Link="GroupProofs.cs" />
     <EmbeddedResource Include="definition-fixtures/*.b64" LogicalName="DefinitionFixtures/%(Filename).b64" />
     <None Include="legacy-generation-v1.sha256" CopyToOutputDirectory="PreserveNewest" />
@@ -23,12 +25,7 @@
     <Compile Include="../OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
     <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
-    <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
-    <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
-    <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
-    <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
-    <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
     <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
     <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
@@ -48,7 +45,18 @@
     <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
     <Compile Include="../../research/modern-mechanics/ProofDecks.cs" Link="ProofDecks.cs" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup><Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" /></ItemGroup>
+  <ItemGroup Condition="'$(ClientTransport)' != 'true'">
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Remove="PetTransportProof.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(ClientTransport)' == 'true'">
+    <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
+    <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
+    <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
+    <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
+    <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
+    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Reference Include="Assembly-CSharp"><Aliases>pinnedClient</Aliases><HintPath>../../references/game/Assembly-CSharp.dll</HintPath></Reference>
     <Reference Include="blizzard.bgsclient"><HintPath>../../references/game/blizzard.bgsclient.dll</HintPath></Reference>
     <Reference Include="blizzard.bgssdk"><HintPath>../../references/game/blizzard.bgssdk.dll</HintPath></Reference>
@@ -58,7 +66,6 @@
 
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
     <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
     <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />

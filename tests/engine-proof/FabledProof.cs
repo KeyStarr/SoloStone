@@ -8,9 +8,8 @@ internal static class FabledProof
 {
     internal static void Run()
     {
-        using var stream = new GZipStream(File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"), CompressionMode.Decompress);
-        using var export = JsonDocument.Parse(stream);
-        var definitions = export.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var definitions = ClientExport.TryCards();
+        if (definitions == null) ClientExport.Skip("Fabled bodies and companions against the client export");
         string[] bodies = "TIME_009 TIME_020 TIME_209 TIME_211 TIME_609 TIME_619 TIME_850 TIME_852 TIME_875 TIME_890 TIME_005".Split(' ');
         string[][] bundles = {
             new[] { "TIME_009t1", "TIME_009t2" }, new[] { "TIME_020t1", "TIME_020t2" },
@@ -23,7 +22,7 @@ internal static class FabledProof
         for (int i = 0; i < bodies.Length; i++)
         {
             string body = bodies[i]; var bundle = bundles[i];
-            Core2026Proof.Check(FabledRules.IsFabled(body) && definitions[body].GetProperty("tags").GetProperty("2936").GetInt32() == 1, "Fabled export identity " + body);
+            Core2026Proof.Check(FabledRules.IsFabled(body) && (definitions == null || definitions[body].GetProperty("tags").GetProperty("2936").GetInt32() == 1), "Fabled export identity " + body);
             Core2026Proof.Check(FabledRules.Bundle(body).SequenceEqual(bundle), "exact bundle " + body);
             var complete = new[] { body }.Concat(bundle).ToArray();
             Core2026Proof.Check(!FabledRules.DeckErrors(complete).Any(), "complete bundle accepted " + body);
@@ -31,7 +30,7 @@ internal static class FabledProof
             Core2026Proof.Check(FabledRules.DeckErrors(new[] { body }).Any(), "missing bundle " + body);
             foreach (string companion in bundle)
             {
-                Core2026Proof.Check(FabledRules.IsCompanion(companion) && definitions[companion].GetProperty("tags").GetProperty("4445").GetInt32() == 1, "companion export identity");
+                Core2026Proof.Check(FabledRules.IsCompanion(companion) && (definitions == null || definitions[companion].GetProperty("tags").GetProperty("4445").GetInt32() == 1), "companion export identity");
                 Core2026Proof.Check(FabledRules.DeckErrors(new[] { companion }).Any(), "orphan companion");
                 Core2026Proof.Check(FabledRules.DeckErrors(complete.Where(id => id != companion)).Any(), "missing single companion");
                 Core2026Proof.Check(FabledRules.DeckErrors(complete.Append(companion)).Any(), "extra companion");

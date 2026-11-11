@@ -145,16 +145,15 @@ internal static class BlessingOfTheBronzeProof
     }
     private static void Identity()
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var zip = new GZipStream(file, CompressionMode.Decompress);
-        using var export = JsonDocument.Parse(zip);
+        var export = ClientExport.TryCards();
         foreach (var (id, dbf) in new[] { ("END_000p", 121243), ("END_000e", 121257) })
         {
-            var raw = export.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
             var card = Cards.FromId(id);
-            Check(card.Implemented && EffectModules.ByDbfId[dbf] == id && card.AssetId == dbf
-                && card.Cost == raw.GetProperty("cost").GetInt32() && card.ATK == 0 && card.Health == 0
-                && card.Text == raw.GetProperty("text").GetString(), "pinned identity/stats/text " + id);
+            Check(card.Implemented && EffectModules.ByDbfId[dbf] == id && card.AssetId == dbf && card.ATK == 0 && card.Health == 0,
+                "pinned identity/stats " + id);
+            if (export == null) { ClientExport.Skip("Blessing of the Bronze identity, text and tags against the client export"); continue; }
+            var raw = export[id];
+            Check(card.Cost == raw.GetProperty("cost").GetInt32() && card.Text == raw.GetProperty("text").GetString(), "pinned cost/text " + id);
             foreach (var tag in raw.GetProperty("tags").EnumerateObject())
                 Check(card.Tags.GetValueOrDefault((GameTag)int.Parse(tag.Name)) == tag.Value.GetInt32(), "pinned tags " + id);
         }

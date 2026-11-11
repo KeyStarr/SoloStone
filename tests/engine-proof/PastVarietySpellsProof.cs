@@ -19,10 +19,9 @@ internal static class PastVarietySpellsProof
     [GroupProof("pastvar-spells")]
     internal static void Run()
     {
-        using var file=File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var zip=new GZipStream(file,CompressionMode.Decompress);
-        using var doc=JsonDocument.Parse(zip);
-        var export=doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c=>c.GetProperty("cardId").GetString());
+        // Every scenario below is built from, and compared with, the client export's rows: client tier only (ClientExport.Oracle).
+        if(!ClientExport.Oracle) { ClientExport.Skip("Past variety spells (scenarios built from the client export)"); PrintedMetadata(); return; }
+        var export=Export();
         PrintedMetadata();
         DamageRegressions();
         var failures=new List<string>();
@@ -60,18 +59,12 @@ internal static class PastVarietySpellsProof
             Console.WriteLine("BUCKET "+pool.Item1+"="+OfflineCardPools.Candidates(New(),pool.Item2,pool.Item3,0).Count);
 
     }
-    private static Dictionary<string,JsonElement> Export()
-    {
-        using var file=File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var zip=new GZipStream(file,CompressionMode.Decompress);
-        using var doc=JsonDocument.Parse(zip);
-        return doc.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c=>c.GetProperty("cardId").GetString(),c=>c.Clone());
-    }
+    private static Dictionary<string,JsonElement> Export() => new(ClientExport.RequireCards());
     [GroupProof("pastvar-spells-metadata")]
     internal static void PrintedMetadata()
     {
-        var export=Export();
-        foreach(var id in Ids.Concat("EX1_tk11 ICC_085t".Split(' '))) {
+        var export=ClientExport.Oracle ? Export() : null;
+        foreach(var id in export==null ? Array.Empty<string>() : Ids.Concat("EX1_tk11 ICC_085t".Split(' '))) {
             var c=Cards.FromId(id);var row=export[id];
             int race=row.GetProperty("tags").TryGetProperty("200",out var primary) ? primary.GetInt32() : 0;
             Core2026Proof.Check((int)c.GetRawRace()==race && c[GameTag.CARDRACE]==race,id+" primary Race cache matches current CARDRACE");
@@ -86,6 +79,7 @@ internal static class PastVarietySpellsProof
     [GroupProof("pastvar-spells-damage")]
     internal static void DamageRegressions()
     {
+        if(!ClientExport.Oracle) { ClientExport.Skip("Past variety spell damage scenarios built from the client export"); return; }
         var export=Export();var failures=new List<string>();
         foreach(var id in new[]{"EX1_277","CFM_623","EX1_251","AT_051","ULD_181"})
         foreach(int bonus in new[]{0,1})

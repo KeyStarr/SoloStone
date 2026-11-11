@@ -9,8 +9,9 @@ using static PoolPilotProof;
 
 internal static class AmberWardenProof
 {
-    private static string[] Past => OfflinePoolExpectations.Ids(PoolScope.Past)
-        .Where(id => Cards.FromId(id).Type == CardType.MINION && Cards.FromId(id)[(GameTag)2247] == 0).ToArray();
+    // The independent derivation from the client export (client tier only); null elsewhere, where the engine's own pool stands in.
+    private static string[] Past => ClientExport.Oracle ? OfflinePoolExpectations.Ids(PoolScope.Past)
+        .Where(id => Cards.FromId(id).Type == CardType.MINION && Cards.FromId(id)[(GameTag)2247] == 0).ToArray() : null;
 
     internal static void Run() => StandardSetsProof.Case("TIME_052", (g, p, id) => {
         var filter = PoolPilotProof.Filter(id);
@@ -18,7 +19,8 @@ internal static class AmberWardenProof
         SourceExcluded(g, id);
         foreach (CardClass hero in new[] { CardClass.DEATHKNIGHT, CardClass.DEMONHUNTER, CardClass.DRUID, CardClass.HUNTER, CardClass.MAGE,
             CardClass.PALADIN, CardClass.PRIEST, CardClass.ROGUE, CardClass.SHAMAN, CardClass.WARLOCK, CardClass.WARRIOR })
-            Core2026Proof.Check(OfflineCardPools.Candidates(g, hero, filter, Cards.FromId(id).AssetId, PoolDestination.Summon).Select(c => c.Id).SequenceEqual(Past),
+            if (Past == null) ClientExport.Skip("Amber Warden Past minions against the independent derivation from the client export");
+            else Core2026Proof.Check(OfflineCardPools.Candidates(g, hero, filter, Cards.FromId(id).AssetId, PoolDestination.Summon).Select(c => c.Id).SequenceEqual(Past),
                 "exact eligible Past minions for " + hero);
 
         EmptyHand(p);
@@ -30,7 +32,8 @@ internal static class AmberWardenProof
         Minion source = null;
         var board = DeathrattleSlotBoard(p, () => source = Summon(p, id));
         var random = g.Random.Clone();
-        string expected = Past[random.Next(Past.Length)];
+        var past = Past ?? OfflineCardPools.Candidates(g, p.HeroClass, filter, Cards.FromId(id).AssetId, PoolDestination.Summon).Select(c => c.Id).ToArray();
+        string expected = past[random.Next(past.Length)];
         Resume(g, next => Kill(next, (Minion)next.IdEntityDic[source.Id]));
         var generated = p.BoardZone.Where(m => m[GameTag.DISPLAYED_CREATOR] == source.Id).ToArray();
         Generated(g, source, generated, 1);
@@ -56,7 +59,7 @@ internal static class AmberWardenProof
         source = Summon(p, id);
         long draws = g.Random.DrawCount;
         Resolve(g, source, death: true);
-        Core2026Proof.Check(p.BoardZone.SlotCount == 7 && p.BoardZone.All(m => !Past.Contains(m.Card.Id)) &&
+        Core2026Proof.Check(p.BoardZone.SlotCount == 7 && p.BoardZone.All(m => !past.Contains(m.Card.Id)) &&
             g.Random.DrawCount == draws + 1, "full board: one draw, no eighth slot");
 
         // Silence removes the Deathrattle; an enemy Warden summons for its owner.

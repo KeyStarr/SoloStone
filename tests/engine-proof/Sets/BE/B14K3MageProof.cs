@@ -36,8 +36,14 @@ internal static class B14K3BEProof
             var sizes = costs.Select(cost => {
                 var filter = cost < 0 ? pool.Filter : pool.Filter.WithCost(cost);
                 int count = OfflineCardPools.Candidates(game, CardClass.MAGE, filter, declarations[0].DbfId).Count;
-                Core2026Proof.Check(count == OfflinePoolExpectations.Count(filter, "MAGE", declarations[0].DbfId)
-                    && (pool.CostBinding != PoolCostBinding.None || count >= 3), id + " independent admitted bucket count " + cost);
+                if (ClientExport.Oracle)
+                    Core2026Proof.Check(count == OfflinePoolExpectations.Count(filter, "MAGE", declarations[0].DbfId)
+                        && (pool.CostBinding != PoolCostBinding.None || count >= 3), id + " independent admitted bucket count " + cost);
+                else
+                {
+                    ClientExport.Skip("B14 K3 pool bucket counts against the independent derivation from the client export");
+                    Core2026Proof.Check(pool.CostBinding != PoolCostBinding.None || count >= 3, id + " admitted bucket count " + cost);
+                }
                 return count;
             });
             Console.WriteLine($"b14-k3 pool {id}/{pool.Name} MAGE costs={string.Join(",", costs)} counts={string.Join(",", sizes)}");

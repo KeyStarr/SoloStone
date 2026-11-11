@@ -103,8 +103,10 @@ internal static class StarsurgeProof
                 g.AuraUpdate(); return g;
             }
             var a = Fixture(true); var b = Fixture(false);
+#if CLIENT_TRANSPORT
             var packetsA = Packets(a); var packetsB = Packets(b);
             Core2026Proof.Check(packetsA.Count == packetsB.Count && packetsA.Zip(packetsB).All(pair => pair.First.SequenceEqual(pair.Second)), id + " hidden permutation serialized packets identical");
+#endif
             var fa = FairBotState.Create(a, 1, 42, DeckStyle.Control); var fb = FairBotState.Create(b, 1, 42, DeckStyle.Control);
             var field = typeof(FairBotState).GetField("game", BindingFlags.Instance | BindingFlags.NonPublic);
             var ga = (Game)field.GetValue(fa); var gb = (Game)field.GetValue(fb);
@@ -113,6 +115,7 @@ internal static class StarsurgeProof
         }
     }
 
+#if CLIENT_TRANSPORT
     internal static List<byte[]> Packets(Game g, int? skip = null)
     {
         var packets = new List<byte[]>();
@@ -128,4 +131,5 @@ internal static class StarsurgeProof
         send.Invoke(match, new object[] { g.PowerHistory.Full.Skip(skip ?? 0).ToList() });
         return packets;
     }
+#endif
 }

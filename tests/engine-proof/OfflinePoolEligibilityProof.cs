@@ -91,7 +91,9 @@ internal static class OfflinePoolEligibilityProof
         Check(!policy.AllowsCard(BECard("BE_037")) && !policy.AllowsCard(EventCard("BE_EVENT_103")),
             "unadmitted BE and later EVENT remain inactive");
         Check(!policy.IsPackEligible(EventCard("EDR_950")), "EVENT collection extras are never pack eligible");
-        Check(policy.Members.Where(m => m.Scope == "Past").Select(m => m.CardId).ToHashSet().SetEquals(OfflinePoolExpectations.Ids(PoolScope.Past)), "Past members exactly match eligibility/export");
+        if (ClientExport.Oracle)
+            Check(policy.Members.Where(m => m.Scope == "Past").Select(m => m.CardId).ToHashSet().SetEquals(OfflinePoolExpectations.Ids(PoolScope.Past)), "Past members exactly match eligibility/export");
+        else ClientExport.Skip("Offline pool Past members against the independent derivation from the client export");
         Check(!policy.Members.Any(m => m.CardId == "CS2_182"), "unproven legacy excluded");
         Check(policy.Members.Any(m => m.Set == "CORE" && m.CardId.StartsWith("CORE_")), "normalized Core admitted");
         Check(policy.Members.Any(m => m.Classes.Count > 1), "export multiclass retained");

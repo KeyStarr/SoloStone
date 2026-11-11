@@ -504,6 +504,7 @@ internal static class ImbueProof
         Check(Context(p).TriggerCurrentHeroPower(int.MaxValue) == TaskState.STOP && Context(p).TriggerCurrentHeroPower(-1) == TaskState.STOP, "untargeted power stale/negative explicit entity safely refused");
     }
 
+#if CLIENT_TRANSPORT
     private static void NativeProjection()
     {
         foreach (var cls in new[] { CardClass.DRUID, CardClass.HUNTER, CardClass.MAGE, CardClass.SHAMAN, CardClass.DEATHKNIGHT, CardClass.ROGUE, CardClass.PRIEST })
@@ -535,6 +536,7 @@ internal static class ImbueProof
         }
     }
 
+#endif
     internal static void Run()
     {
         Lean_WindRebornAndReadiness();
@@ -546,7 +548,10 @@ internal static class ImbueProof
             foreach (int n in new[] { 1, 2, 5 }) ActivePowers(n, seed);
             Lean_Wind(seed, 1, 5); Lean_Wind(seed, 2, 6); Lean_Wind(seed, 5, 9);
         }
-        Lean_InfiniteStaleOption(); Lean_Infinite(); MageBonuses(); Lean_WispriderChoices(); NativeProjection();
+        Lean_InfiniteStaleOption(); Lean_Infinite(); MageBonuses(); Lean_WispriderChoices();
+#if CLIENT_TRANSPORT
+        NativeProjection();
+#endif
         var g = Make(CardClass.DRUID); var p = g.Player1; string before = Canonical.State(g);
         Context(p).Imbue(0);
         bool threw = false; try { Context(p).Imbue(-1); } catch (ArgumentOutOfRangeException) { threw = true; }

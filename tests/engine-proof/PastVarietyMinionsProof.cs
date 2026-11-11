@@ -32,17 +32,17 @@ internal static class PastVarietyMinionsProof
     {
         Unpinned_DormantRandomEligibility();
         Unpinned_DormantAdjacency();
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var json = JsonDocument.Parse(gzip);
-        var export = json.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var export = ClientExport.TryCards();
         var failures = new List<string>();
         foreach (string token in ("EX1_116t EX1_561e BRM_004e AT_017e EX1_304e BRM_006t GVG_021e GVG_100e EX1_185e " +
             "PART_001 PART_001e PART_002 PART_003 PART_004 PART_004e PART_005 PART_006 PART_006a PART_007 PART_007e " +
             "BOT_537t DRG_225t DRG_225e ULD_217e").Split(' '))
         {
-            var card = Cards.FromId(token); var row = export[token];
-            Check(card.Implemented && card.AssetId == row.GetProperty("dbfId").GetInt32() && !card.Collectible, token + " real implemented dependency");
+            var card = Cards.FromId(token);
+            Check(card.Implemented && !card.Collectible, token + " real implemented dependency");
+            if (export == null) { ClientExport.Skip("Past variety minion tokens against the client export"); continue; }
+            var row = export[token];
+            Check(card.AssetId == row.GetProperty("dbfId").GetInt32(), token + " pinned token identity");
             foreach (string tag in new[] { "45", "47", "48", "190", "194", "197", "849", "1085", "2534" })
                 Check(card[(GameTag)int.Parse(tag)] == (row.GetProperty("tags").TryGetProperty(tag, out var value) ? value.GetInt32() : 0), token + " pinned token stats/keyword " + tag);
         }
@@ -50,14 +50,20 @@ internal static class PastVarietyMinionsProof
         {
             try
             {
-                var c = Cards.FromId(id); var row = export[id];
-                Check(c.Implemented && c.Collectible && c.AssetId == row.GetProperty("dbfId").GetInt32(), id + " implemented identity");
-                Check(c.Cost == row.GetProperty("cost").GetInt32() && c.ATK == row.GetProperty("atk").GetInt32()
-                    && c.Health == row.GetProperty("health").GetInt32(), id + " current printed stats");
-                Check(c.Races.Select(r => r.ToString()).ToHashSet().SetEquals(row.GetProperty("races").EnumerateArray().Select(r => r.GetString())), id + " current races");
-                foreach (int tag in new[] { 190, 192, 194, 197, 217, 218, 403, 849, 1085, 2534 })
-                    if (row.GetProperty("tags").TryGetProperty(tag.ToString(), out var expected) && expected.GetInt32() > 0)
-                        Check(c[(GameTag)tag] == expected.GetInt32(), id + " keyword " + tag);
+                var c = Cards.FromId(id);
+                Check(c.Implemented && c.Collectible, id + " implemented");
+                if (export != null)
+                {
+                    var row = export[id];
+                    Check(c.AssetId == row.GetProperty("dbfId").GetInt32(), id + " implemented identity");
+                    Check(c.Cost == row.GetProperty("cost").GetInt32() && c.ATK == row.GetProperty("atk").GetInt32()
+                        && c.Health == row.GetProperty("health").GetInt32(), id + " current printed stats");
+                    Check(c.Races.Select(r => r.ToString()).ToHashSet().SetEquals(row.GetProperty("races").EnumerateArray().Select(r => r.GetString())), id + " current races");
+                    foreach (int tag in new[] { 190, 192, 194, 197, 217, 218, 403, 849, 1085, 2534 })
+                        if (row.GetProperty("tags").TryGetProperty(tag.ToString(), out var expected) && expected.GetInt32() > 0)
+                            Check(c[(GameTag)tag] == expected.GetInt32(), id + " keyword " + tag);
+                }
+                else ClientExport.Skip("Past variety minions against the client export");
                 foreach (int seed in new[] { 1, 9, 27 })
                 foreach (int seat in new[] { 1, 2 })
                 {

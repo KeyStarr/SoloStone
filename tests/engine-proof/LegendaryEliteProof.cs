@@ -46,6 +46,7 @@ internal static class LegendaryEliteProof
         var options = player.Options().Where(t => t.Source?.Id == spell.Id && t.PlayerTaskType == PlayerTaskType.PLAY_CARD).ToList();
         Core2026Proof.Check(options.Any(t => t.Target?.Id == khelos.Id), "Garona lists Khelos as legal target");
         Core2026Proof.Check(options.All(t => t.Target?.Id != ordinary.Id), "non-Legendary token remains invalid");
+#if CLIENT_TRANSPORT
         PegasusGame.AllOptions packet = null;
         var match = new NativeMatch((_, message) => { if (message is PegasusGame.AllOptions all) packet = all; });
         typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(match, game);
@@ -53,6 +54,7 @@ internal static class LegendaryEliteProof
             .Invoke(match, null);
         Core2026Proof.Check(packet.Options.Any(o => o.MainOption?.Id == spell.Id && o.MainOption.Targets.Any(t => t.Id == khelos.Id)),
             "native options packet includes Khelos target");
+#endif
         PlayEntity(game, player, spell, khelos);
         Core2026Proof.Check(khelos.Zone.Type == Zone.GRAVEYARD && ordinary.Zone.Type == Zone.PLAY,
             "Garona destroys Khelos and preserves ordinary token");
@@ -135,9 +137,11 @@ internal static class LegendaryEliteProof
             var game = Fresh(); var player = game.Player1; var card = Add(player, id);
             card[GameTag.ELITE] = elite;
             PlayEntity(game, player, card);
+#if CLIENT_TRANSPORT
             var likes = new NativePetLikes(8, PetXpPolicy.PresetB);
             likes.Project(game.PowerHistory.Full.ToList(), player.PlayerId, 9999);
             Core2026Proof.Check(likes.Fired.Contains("legendary-minion") == (elite == 1), "pet like observes current ELITE for " + id);
+#endif
         }
     }
 }

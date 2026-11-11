@@ -79,6 +79,7 @@ internal static class CostPaymentProof
     // R5/R6: https://hearthstone.wiki.gg/wiki/Change_Cost_to_Health (strict Health; inclusive Armor).
     private static void Intrinsic(bool history)
     {
+        if (!ClientExport.Present) { ClientExport.Skip("Cost payment intrinsic definitions built from client export rows"); return; }
         foreach (var pair in new[] { ("TIME_612", CostPaymentKind.Health), ("BE_042", CostPaymentKind.Armor) })
         {
             var game = HeroDivineShieldProof.NewGame(history); var p = game.Player1;
@@ -175,10 +176,7 @@ internal static class CostPaymentProof
 
     private static Card Definition(string id)
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new System.IO.Compression.GZipStream(file, System.IO.Compression.CompressionMode.Decompress);
-        using var json = System.Text.Json.JsonDocument.Parse(gzip);
-        var row = json.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == id);
+        var row = ClientExport.RequireCards()[id];
         var xml = new System.Xml.Linq.XDocument(new System.Xml.Linq.XElement("CardDefs", new System.Xml.Linq.XElement("Entity",
             new System.Xml.Linq.XAttribute("CardID", id), new System.Xml.Linq.XAttribute("ID", row.GetProperty("dbfId").GetInt32()),
             row.GetProperty("tags").EnumerateObject().Select(t => new System.Xml.Linq.XElement("Tag",

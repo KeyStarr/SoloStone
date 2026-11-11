@@ -35,14 +35,25 @@ internal static class OfflinePoolAdmissionProof
         Check(pilots.Length == 9 && pilots.All(c => c.Registered), "nine pilots registered");
         var counted = pilots.Append(report.Cards.Single(c => c.CardId == "JAIL_892")).ToArray();
         Check(counted.Length == 10 && counted.All(c => c.Registered), "nine pilots and Cosmic Manifestations registered");
-        Check(manifest.Standard.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Standard))
-            && manifest.Past.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Past)), "membership equals eligibility/export scopes");
+        // The independent derivation from the client export (OfflinePoolExpectations) is the oracle of this proof: client tier only.
+        bool oracle = ClientExport.Oracle;
+        if (oracle)
+            Check(manifest.Standard.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Standard))
+                && manifest.Past.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Past)), "membership equals eligibility/export scopes");
+        else ClientExport.Skip("Offline pool admission against the independent derivation from the client export");
         foreach (var card in report.Cards)
             foreach (var row in card.PoolRequirements)
             {
                 var template = OfflinePoolDeclarations.Cards.Single(c => c.CardId == card.CardId).Pools.Single(p => p.Name == row.Name);
                 var filter = row.Binding != "ordinary" ? template.Filter : template.CostBinding == PoolCostBinding.StackNumberMaxCost
                     ? template.Filter.WithMaxCost(template.OrdinaryCost.Value) : template.Filter.WithCost(template.OrdinaryCost.Value);
+                if (!oracle)
+                {
+                    Check(row.Filter == filter && (!OfflinePoolPolicy.Load().AllowsCard(Cards.FromId(card.CardId)) || row.Count >= Math.Min(3, row.MinimumRequiredCandidates)
+                        || row.Filter.MinCost.HasValue && row.Filter.MinCost == row.Filter.MaxCost || template.AllowUnimplementedCuratedCards || template.AllowThinExactCost),
+                        card.CardId + " admitted filter for " + row.Class + "/" + row.Binding);
+                    continue;
+                }
                 var missing = template.AllowUnimplementedCuratedCards ? template.Filter.CardIds.Where(id =>
                     !Cards.FromId(id).Implemented && !EffectModules.ByDbfId.Values.Contains(id) &&
                     !OfflinePoolExpectations.Ids(PoolScope.Standard).Concat(OfflinePoolExpectations.Ids(PoolScope.Past)).Contains(id)).ToArray() : Array.Empty<string>();
@@ -68,13 +79,12 @@ internal static class OfflinePoolAdmissionProof
                     && PoolProofEvidence.HasPassed(card.CardId, proof), card.CardId + " Standard module with passing per-card proof");
         }
         // Verify declaration identity/class domains against pinned export, including multiclass metadata.
-        using (var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz"))
-        using (var gzip = new GZipStream(file, CompressionMode.Decompress))
-        using (var export = JsonDocument.Parse(gzip))
+        if (ClientExport.Oracle)
         {
+            var export = ClientExport.RequireCards();
             foreach (var declaration in OfflinePoolDeclarations.Cards)
             {
-                var card = export.RootElement.GetProperty("cards").EnumerateArray().Single(c => c.GetProperty("cardId").GetString() == declaration.CardId);
+                var card = export[declaration.CardId];
                 Check(card.GetProperty("dbfId").GetInt32() == declaration.DbfId, "pinned dbfId");
                 var classes = card.GetProperty("cardClasses").EnumerateArray().Select(c => c.GetString()).ToArray();
                 if (declaration.CardId == "TIME_EVENT_999t")
@@ -89,6 +99,7 @@ internal static class OfflinePoolAdmissionProof
                     Check(ExpandClasses(requirement.ClassDomain).SetEquals(ExpandClasses(classes)), "printed class domain: " + declaration.CardId + "/" + requirement.Name + " declared=" + string.Join(",", requirement.ClassDomain) + " export=" + string.Join(",", classes));
             }
         }
+        else ClientExport.Skip("Offline pool declarations against the printed class domains of the client export");
         var neutral = report.Cards.Single(c => c.CardId == "TIME_040").PoolRequirements;
         Check(neutral.Count == 11 && neutral.Any(r => r.Class == "DEATHKNIGHT") && neutral.Any(r => r.Class == "DEMONHUNTER"), "all eleven neutral classes");
         CheckControllerClasses();

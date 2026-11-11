@@ -87,6 +87,7 @@ internal static class KnockbackProof
             "automatic required-target cast fizzles without RNG when no legal targets");
     }
 
+#if CLIENT_TRANSPORT
     private static List<byte[]> Packets(Game g, out PegasusGame.PowerHistory history)
     {
         var packets = new List<byte[]>(); PegasusGame.PowerHistory sent = null;
@@ -100,6 +101,7 @@ internal static class KnockbackProof
         history = sent;
         return packets;
     }
+#endif
 
     private static void Privacy(Game baseline, string id)
     {
@@ -126,15 +128,19 @@ internal static class KnockbackProof
                 && fa.Actions.Select(x => x.ToString()).SequenceEqual(fb.Actions.Select(x => x.ToString())),
                 "hidden Knockback permutation preserves projected tags/evaluation/options for both viewers");
             if (viewer != 1) continue;
+#if CLIENT_TRANSPORT
             var pa = Packets(a, out _); var pb = Packets(b, out _);
             Core2026Proof.Check(pa.Count == pb.Count && pa.Zip(pb).All(pair => pair.First.SequenceEqual(pair.Second)),
                 "hidden Knockback permutation produces byte-identical opponent-visible native packets");
+#endif
         }
+#if CLIENT_TRANSPORT
         var visible = baseline.CloneExact(history: true); var p = visible.Player1;
         var card = Add(p, id); visible.AuraUpdate(); UnderbrushTrackerProof.Shuffle(visible, p, 3);
         Packets(visible, out var packet);
         Core2026Proof.Check(packet.List.Any(e => e.TagChange?.Entity == card.Id
             && e.TagChange.Tag == (int)GameTag.TAG_SCRIPT_DATA_NUM_1 && e.TagChange.Value == 2),
             "owner receives updated damage tag through native transport");
+#endif
     }
 }

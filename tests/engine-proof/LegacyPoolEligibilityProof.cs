@@ -14,21 +14,22 @@ internal static class LegacyPoolEligibilityProof
 
     internal static void Run()
     {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var doc = JsonDocument.Parse(gzip);
-        var definitions = doc.RootElement.GetProperty("cards").EnumerateArray()
-            .ToDictionary(c => c.GetProperty("cardId").GetString());
+        var definitions = ClientExport.TryCards();
         foreach (string id in Ids)
         {
-            var data = definitions[id];
             var card = Cards.FromId(id);
-            Check(card.Implemented && card.Collectible && card.AssetId == data.GetProperty("dbfId").GetInt32(), id + " registered pinned identity");
-            Check(card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32()
-                && card.Health == data.GetProperty("health").GetInt32() && (card.Text ?? "") == data.GetProperty("text").GetString(), id + " current export stats/cost/text");
-            Check(card.Races.Select(r => r.ToString()).Order().SequenceEqual(data.GetProperty("races").EnumerateArray().Select(r => r.GetString()).Order()), id + " current export races");
-            foreach (var tag in new[] { GameTag.STEALTH, GameTag.TAUNT, GameTag.CHARGE, GameTag.WINDFURY, GameTag.DIVINE_SHIELD })
-                Check(card[tag] == (data.GetProperty("tags").TryGetProperty(((int)tag).ToString(), out var value) ? value.GetInt32() : 0), id + " current text-relevant tag " + tag);
+            Check(card.Implemented && card.Collectible, id + " registered");
+            if (definitions != null)
+            {
+                var data = definitions[id];
+                Check(card.AssetId == data.GetProperty("dbfId").GetInt32(), id + " registered pinned identity");
+                Check(card.Cost == data.GetProperty("cost").GetInt32() && card.ATK == data.GetProperty("atk").GetInt32()
+                    && card.Health == data.GetProperty("health").GetInt32() && (card.Text ?? "") == data.GetProperty("text").GetString(), id + " current export stats/cost/text");
+                Check(card.Races.Select(r => r.ToString()).Order().SequenceEqual(data.GetProperty("races").EnumerateArray().Select(r => r.GetString()).Order()), id + " current export races");
+                foreach (var tag in new[] { GameTag.STEALTH, GameTag.TAUNT, GameTag.CHARGE, GameTag.WINDFURY, GameTag.DIVINE_SHIELD })
+                    Check(card[tag] == (data.GetProperty("tags").TryGetProperty(((int)tag).ToString(), out var value) ? value.GetInt32() : 0), id + " current text-relevant tag " + tag);
+            }
+            else ClientExport.Skip("Legacy pool eligibility cards against the client export");
             foreach (bool summon in new[] { false, true })
             {
                 var game = new Game(new GameConfig { RandomSeed = 27, StartPlayer = 1, SkipMulligan = true, Shuffle = false,

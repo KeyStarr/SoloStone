@@ -4,24 +4,54 @@ using System.Linq;
 using System.Reflection;
 using System.IO;
 using System.Text.Json;
+#if CLIENT_TRANSPORT
 using PegasusGame;
+using NativeOption = PegasusGame.Option;
+#endif
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
-using NativeOption = PegasusGame.Option;
 using EngineZone = SabberStoneCore.Enums.Zone;
 
 static partial class Program
 {
     static readonly BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
     static void Check(bool ok, string message) { if (!ok) throw new Exception("TEST: " + message); }
+    // Two tiers share this file (docs/TESTING.md); every group runs in exactly one of them. The groups that build and send native
+    // packets need the client's protocol types (CLIENT_TRANSPORT, suite standard-native-client); the others need no client.
     static void Main()
     {
+#if CLIENT_TRANSPORT
+        TransportGroups();
+#else
+        EngineGroups();
+#endif
+    }
+    static void EngineGroups()
+    {
         QuestDefinitions();
+        ProofPlayabilityPolicy();
+        ProofLoanersAndFixture();
+        DefinitionAudit();
+        CoreOriginalViews();
+        InputTraceBinding();
+    }
+    static void CoreOriginalViews()
+    {
+        var previewPolicy=typeof(NativeUIProjection).GetMethod("UseOriginalProofDefinition",BindingFlags.Static|BindingFlags.NonPublic);
+        Check(previewPolicy!=null,"new Core previews must bypass legacy overrides");
+        foreach(string id in LocalDecks.Get("proof-mage").CardIds.Concat(LocalDecks.Get("proof-warrior").CardIds).Distinct())
+            Check((bool)previewPolicy.Invoke(null,new object[]{id}) && NativeUIProjection.SupportsPreview(id),"Core original-view bypass/audit registration missing:"+id);
+        foreach(string id in new[]{"GAME_005","HERO_08","HERO_08bp","CS2_222o","EX1_604o","EX1_007","CS2_034","UNKNOWN"})
+            Check(!(bool)previewPolicy.Invoke(null,new object[]{id}),"Core override bypass escaped exact20:"+id);
+        Console.WriteLine("PASS Core original-view bypass and exact20 override policy");
+    }
+#if CLIENT_TRANSPORT
+    static void TransportGroups()
+    {
         LocationProjection();
         RequiredLiveSnapshots();
-        ProofPlayabilityPolicy();
         var packets = new List<(int Id, IProtoBuf Message)>();
         var match = new NativeMatch((id, packet) => packets.Add((id, packet)));
         match.Start();
@@ -68,17 +98,9 @@ static partial class Program
         HumanTradeDrawEdges();
         OrdinaryLibrarianPackets();
         OpponentTradeHistory();
-        ProofLoanersAndFixture();
-        DefinitionAudit();
-        var previewPolicy=typeof(NativeUIProjection).GetMethod("UseOriginalProofDefinition",BindingFlags.Static|BindingFlags.NonPublic);
-        Check(previewPolicy!=null,"new Core previews must bypass legacy overrides");
-        foreach(string id in LocalDecks.Get("proof-mage").CardIds.Concat(LocalDecks.Get("proof-warrior").CardIds).Distinct())
-            Check((bool)previewPolicy.Invoke(null,new object[]{id}) && NativeUIProjection.SupportsPreview(id),"Core original-view bypass/audit registration missing:"+id);
-        foreach(string id in new[]{"GAME_005","HERO_08","HERO_08bp","CS2_222o","EX1_604o","EX1_007","CS2_034","UNKNOWN"})
-            Check(!(bool)previewPolicy.Invoke(null,new object[]{id}),"Core override bypass escaped exact20:"+id);
         ProofPacketGames();
-        InputTraceBinding();
     }
+#endif
     // The current engine rejects empty-deck Trade; exercise its transport outcomes with real zone/draw actions.
     sealed class TradeDrawTask : PlayerTask
     {
@@ -94,6 +116,7 @@ static partial class Program
         }
         public override string FullPrint() => "Trade draw edge";
     }
+#if CLIENT_TRANSPORT
     static void HumanTradeDrawEdges()
     {
         foreach (bool draw in new[] { true, false })
@@ -123,6 +146,7 @@ static partial class Program
         }
         Console.WriteLine("PASS human Trade same-entity/no-draw trace");
     }
+#endif
     static void QuestDefinitions()
     {
         foreach (var pair in new[] { (462, 1), (535, 6), (1089, 121956), (4238, 1) })
@@ -140,6 +164,7 @@ static partial class Program
             "runtime progress not a static definition override");
         Console.WriteLine("PASS modern quest native definitions: canonical metadata and preview; scoped exceptions");
     }
+#if CLIENT_TRANSPORT
     static void RequiredLiveSnapshots()
     {
         var failures = new List<string>();
@@ -244,6 +269,7 @@ static partial class Program
         SerializePackets(packets);
         Console.WriteLine("PASS required live snapshot traits, historical overrides, hidden privacy and independent omission oracle");
     }
+#endif
     static void ProofPlayabilityPolicy()
     {
         var policy = typeof(StandardProofNative).GetMethod("AllowNativePlayability", BindingFlags.Static | BindingFlags.NonPublic);
@@ -273,6 +299,7 @@ static partial class Program
             Check(!Allows(true, true, false, true, false, id), "playability escaped exact20: " + id);
         Console.WriteLine("PASS exact20 native playability and all context gates");
     }
+#if CLIENT_TRANSPORT
     static void OrdinaryLibrarianPackets()
     {
         foreach (bool targeted in new[]{false,true})
@@ -340,6 +367,7 @@ static partial class Program
         SerializePackets(packets);
         Console.WriteLine("PASS opponent Trade history and trace privacy");
     }
+#endif
     static void ProofLoanersAndFixture()
     {
         Check(LocalDecks.All.Any(d => d.Id == "proof-mage") && LocalDecks.All.Any(d => d.Id == "proof-warrior"), "candidate proof loaners missing");
@@ -477,6 +505,7 @@ static partial class Program
         Check(badDbidRejected && badDbidRows.Any(row=>row.StartsWith("Core_CS2_200\t") && row.Contains("\tDBID\t") && row.EndsWith("\tFATAL")),"mismatched DBID audit row not marked fatal");
         Console.WriteLine("PASS explicit27 frozen metadata closure and fatal semantic mismatches");
     }
+#if CLIENT_TRANSPORT
     static void ProofPacketGames()
     {
         bool wrongPairRejected = false;
@@ -513,6 +542,7 @@ static partial class Program
             Console.WriteLine("PASS proof packet "+player+" seed0 turns="+match.Game.Turn+" result="+match.Game.Player1.PlayState+" humanActions="+actions+" humanTrades="+trades);
         }
     }
+#endif
     static void InputTraceBinding()
     {
         string root=Path.Combine(Path.GetTempPath(),"hs-standard-input-"+Guid.NewGuid()); Directory.CreateDirectory(root);
@@ -535,6 +565,7 @@ static partial class Program
         finally { Directory.Delete(root,true); }
         Console.WriteLine("PASS trace input nonce binding and stale/malformed rejection");
     }
+#if CLIENT_TRANSPORT
     static void SerializePackets(List<(int Id,IProtoBuf Message)> packets)
     {
         foreach(var packet in packets)
@@ -546,4 +577,5 @@ static partial class Program
     static string Fingerprint(NativeMatch match) => match.Game.Turn + ":" + match.Game.Player1.UsedMana + ":" +
         string.Join(",", match.Game.Player1.HandZone.Select(c => c.Id)) + ":" +
         string.Join(",", match.Game.Player1.DeckZone.Select(c => c.Id));
+#endif
 }

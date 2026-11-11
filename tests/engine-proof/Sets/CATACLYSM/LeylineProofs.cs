@@ -34,6 +34,7 @@ internal static class LeylineProofs
         foreach (var x in p.DeckZone.ToArray()) p.SetasideZone.Add(p.DeckZone.Remove(x));
         foreach (var id in ids.Reverse()) p.DeckZone.Add(Entity.FromCard(p, Cards.FromId(id)));
     }
+#if CLIENT_TRANSPORT
     private static void Lean_NativeText(Game g, Controller p)
     {
         var flags=BindingFlags.NonPublic|BindingFlags.Static;
@@ -67,6 +68,7 @@ internal static class LeylineProofs
         // Undo only fixture progress, before the main controller scope scenario.
         p[(GameTag)31121]=0; p[(GameTag)31122]=0; EmptyHand(p); EmptyHand(p.Opponent);
     }
+#endif
     private static void Lean_Bursting(Game g, Controller p, string id)
     {
         int hp = p.Opponent.Hero.Health;
@@ -147,7 +149,9 @@ internal static class LeylineProofs
     }
     private static void Lean_Walker(Game g, Controller p, string id)
     {
+#if CLIENT_TRANSPORT
         Lean_NativeText(g,p);
+#endif
         var spell=Add(p,"MEND_500"); var deck=Entity.FromCard(p,Cards.FromId("MEND_502")); p.DeckZone.Add(deck);
         var other=Add(p.Opponent,"MEND_500"); var ordinary=Add(p,"CS2_029");
         var walker=(Minion)Play(g,p,id);
