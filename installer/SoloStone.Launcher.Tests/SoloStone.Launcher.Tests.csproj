@@ -53,6 +53,8 @@
     <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
     <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
     <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
+    <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />
+    <Content Include="../../facts/violet-hold-2026-09*.json" Link="facts/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="../../plugin/OptionsPanelLayout.cs" Link="OptionsPanelLayout.cs" />
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
     <Content Include="../../plugin/**/*.cs" Link="plugin-all/%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />

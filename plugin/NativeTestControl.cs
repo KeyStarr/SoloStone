@@ -479,6 +479,7 @@ internal sealed partial class NativeTestControl
                         request.Has("after") ? request.Integer("after") : 0, request.Has("limit") ? request.Integer("limit") : 100))); return;
                     case "screenshot": HandleCapture(envelope); return;
                     case "locate": connection.Reply(Reply(request, "settled", Locate(request))); return;
+                    case "card-raw-text": AssertMainThread(); connection.Reply(Reply(request, "settled", ClientBridge.RawCardTextProbe(request.Text("cardId")))); return;
                     case "card-text": AssertMainThread(); connection.Reply(Reply(request, "settled", CardText(request))); return;
                     case "entity": connection.Reply(Reply(request, "settled", ClientBridge.TestControlEntities(request.Text("matchId"), request.EntityIds("entityIds")))); return;
                     case "ui": case "wait-ui": QueueUi(envelope); return;

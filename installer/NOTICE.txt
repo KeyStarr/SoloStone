@@ -56,8 +56,9 @@ the GNU Affero General Public License, version 3 or later, with an additional pe
 The rules engine is based on SabberStone (AGPL-3.0), with its own inherited notices. The full notice, the licence texts
 and the source are in the SoloStone repository, in NOTICE, LICENSE and LICENSES/.
 
-SoloStone's installer ships no Hearthstone program files, art or sound. Its card data file holds card names and English
-card text taken from the game; they belong to Blizzard Entertainment, and SoloStone claims no rights in them.
+SoloStone's installer ships no Hearthstone program files, art or sound. Its card data files hold card names and English
+card text taken from the game, and the card text in the client's other languages; they belong to Blizzard Entertainment,
+and SoloStone claims no rights in them.
 Your copy of Hearthstone comes from your own installation.
 Hearthstone is a trademark of Blizzard Entertainment, Inc. SoloStone is an unofficial mod and is not affiliated with,
 endorsed by, or sponsored by Blizzard.

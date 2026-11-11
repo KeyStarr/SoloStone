@@ -97,6 +97,10 @@
     <EmbeddedResource Include="../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
     <EmbeddedResource Include="../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
   </ItemGroup>
+  <!-- SoloStone's frozen card text per client language (facts/README.md): one file per non-English locale, read lazily by LocalizedCardText. -->
+  <ItemGroup>
+    <EmbeddedResource Include="../facts/violet-hold-2026-09.*.json" LogicalName="SoloStone.Facts.%(Filename)%(Extension)" />
+  </ItemGroup>
   <!-- NPC World v1 data (docs/superpowers/specs/2026-10-25-npc-world-v1-design.md); read by NpcWorldBoot only. -->
   <ItemGroup>
     <EmbeddedResource Condition="'$(EngineSource)' != 'true'" Include="../engine/SabberStoneCore/resources/Data/OfflinePoolCatalog.xml" LogicalName="SoloStone.Npc.OfflinePoolCatalog.xml" />

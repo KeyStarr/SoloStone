@@ -22,7 +22,7 @@ LICENSE-ADDITIONAL-PERMISSION.md. It does not apply to files in section 2.
 
 Our documentation (README.md, docs/INSTALL.md, docs/BUILDING.md, .github/SECURITY.md,
 .github/CONTRIBUTING.md and this file) and our own data files are licensed under CC BY 4.0
-(LICENSES/CC-BY-4.0.txt). The card data file (section 5) is not.
+(LICENSES/CC-BY-4.0.txt). The card data files (section 5) are not.
 
 
 2. SabberStone rules engine
@@ -134,7 +134,9 @@ The card data file (facts/violet-hold-2026-09.json; one file per card set) holds
 card names and English card text, taken from Hearthstone. The names and text belong to Blizzard Entertainment.
 SoloStone claims no rights in them, and none of the licences in this repository covers them. They are here only so
 the rules engine can show and play the cards. The file leaves out flavour text, artist credits and other
-languages. facts/README.md repeats this beside the file.
+languages. Thirteen sibling files (facts/violet-hold-2026-09.<locale>.json) hold only the card text, in the other
+languages the game client supports, so SoloStone shows a card's text in the client's language. The same terms apply to
+them. facts/README.md repeats this beside the file.
 
 Card names and card text also appear in our code and data files, as identifiers, in lists and in comments.
 

@@ -859,6 +859,21 @@ internal static class ClientBridge
         return false;
     }
 
+    // Read-only live probe (test-control `card-raw-text`): what LocalRawCardText hands the client for one card ID, and the language
+    // it follows. `localized` is true when that text is the card file's locale text rather than the engine's English.
+    internal static MiniJSON.JsonNode RawCardTextProbe(string cardId)
+    {
+        string locale = LocalNativeText.ClientLocale();
+        bool active = staged || NativeUIProbe.Active;
+        bool overridden = LocalNativeText.TryGetOverride(active, cardId, TextUtils.GetDefaultTextVariant, locale, out string text);
+        bool covered = LocalNativeText.TryGetOverride(true, cardId, TextUtils.GetDefaultTextVariant, null, out string english);
+        return new MiniJSON.JsonNode {
+            { "cardId", cardId }, { "locale", locale ?? "enUS" }, { "active", active }, { "covered", covered },
+            { "overridden", overridden }, { "localized", overridden && covered && locale != null && LocalNativeText.RawFor(cardId, locale) != LocalNativeText.RawFor(cardId, null) },
+            { "text", overridden ? text : null }, { "englishText", covered ? english : null }
+        };
+    }
+
     private static bool SkipLocal() { return !staged; }
     private static bool SkipAccountPrompt() { return false; }
     private static bool AllowIdleThinkEmotes() { return OfflineProbe.IdleThinkEmotes.Value; }

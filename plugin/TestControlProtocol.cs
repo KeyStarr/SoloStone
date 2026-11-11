@@ -283,6 +283,8 @@ internal sealed class ControlRequest
                 break;
             case "turn-timer-debug": extras = "matchId seconds"; Text("matchId"); Integer("seconds", 2, 75); break;
             case "hero-skin-spells": extras = "cardId"; Text("cardId"); break;
+            // Read-only: the text SoloStone gives the client for one card ID (its frozen text in the client's language), and the language.
+            case "card-raw-text": extras = "cardId"; Text("cardId"); break;
             case "options": case "choices": case "concede": extras = "matchId"; Text("matchId"); break;
             // Native squelch of the NPC opponent (EnemyEmoteHandler) and one human emote: local presentation, no game send.
             case "squelch": case "unsquelch": extras = "matchId"; Text("matchId"); break;
