@@ -6,14 +6,16 @@ using Mono.Cecil.Cil;
 
 internal static class PinnedSubSpellHooks
 {
+    internal const string ClientLibrary = "references/game/Assembly-CSharp.dll", BuiltPlugin = "plugin/bin/Release/net48/HSNativeUIProbe.dll";
+
     internal static void Run()
     {
         void Check(bool value, string name) { if (!value) throw new Exception(name); }
         using (var hash = System.Security.Cryptography.SHA256.Create())
-            Check(BitConverter.ToString(hash.ComputeHash(File.ReadAllBytes("references/game/Assembly-CSharp.dll"))).Replace("-", "").ToLowerInvariant()
+            Check(BitConverter.ToString(hash.ComputeHash(File.ReadAllBytes(ClientLibrary))).Replace("-", "").ToLowerInvariant()
                 == "786376bddad544709639d4b3ab60ce8799d4b1c6c7d7fc4c225ce79fe07228c6", "pinned client assembly hash");
-        using (var native = ModuleDefinition.ReadModule("references/game/Assembly-CSharp.dll"))
-        using (var plugin = ModuleDefinition.ReadModule("plugin/bin/Release/net48/HSNativeUIProbe.dll"))
+        using (var native = ModuleDefinition.ReadModule(ClientLibrary))
+        using (var plugin = ModuleDefinition.ReadModule(BuiltPlugin))
         {
             var sub = native.Types.Single(t => t.Name == "SubSpellController");
             var instance = sub.NestedTypes.Single(t => t.Name == "SubSpellInstance");

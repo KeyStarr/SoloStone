@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -9,7 +10,14 @@ internal static class Program
 {
     private static int Main()
     {
-        try { NativeFxTelemetry.Run(); PinnedSubSpellHooks.Run(); return 0; }
+        try
+        {
+            NativeFxTelemetry.Run();
+            // The sub-spell pin reads the client's own library and the plugin built against it (run.py builds the plugin when a client is set up).
+            if (File.Exists(PinnedSubSpellHooks.ClientLibrary) && File.Exists(PinnedSubSpellHooks.BuiltPlugin)) PinnedSubSpellHooks.Run();
+            else Console.WriteLine("SKIP pinned sub-spell hooks: needs the client's Assembly-CSharp.dll (run.py --client) and the plugin built against it");
+            return 0;
+        }
         catch (Exception error) { Console.Error.WriteLine(error); return 1; }
     }
 }
