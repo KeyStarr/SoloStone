@@ -17,9 +17,10 @@ partial class NativeBundleHarness
     {
         // The pinned iterator must still call DisplayDivder at least twice (the guard DeckSectionDividers rewrites). The exact
         // branch shape is enforced when the transpiler registers (see the Reject cases below), so no IL offsets are pinned here.
-        var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root != null && !Directory.Exists(Path.Combine(root.FullName, "references/game"))) root = root.Parent;
-        using (var game = new PEReader(File.OpenRead(Path.Combine(root.FullName, "references/game/Assembly-CSharp.dll")))) {
+        string root = RepoRoot.Find("references/game/Assembly-CSharp.dll");
+        string client = root == null ? null : Path.Combine(root, "references/game/Assembly-CSharp.dll");
+        if (client == null) Console.WriteLine("SKIP pinned section loader IL shape: needs the client's Assembly-CSharp.dll (run.py --client)");
+        else using (var game = new PEReader(File.OpenRead(client))) {
             var metadata = game.GetMetadataReader();
             var iterator = metadata.TypeDefinitions.Select(metadata.GetTypeDefinition)
                 .Single(t => metadata.GetString(t.Name) == "<LoadSectionsCoroutine>d__65");

@@ -36,9 +36,7 @@ internal static class ShopJsonTests
         var skins = expectedCatalog["Products"]!.AsArray().Where(p => (string)p!["Kind"]! == "HeroSkin").ToArray();
         check(skins.Length == 77 && skins.Count(p => (string)p!["Curation"]! == "Primary") == 55
             && skins.Count(p => (string)p!["Curation"]! == "Alternate") == 22, "curated hero counts");
-        var directory = new DirectoryInfo(Directory.GetCurrentDirectory());
-        while (directory != null && !File.Exists(Path.Combine(directory.FullName, "data/shop/cosmetics-curation-v1.json"))) directory = directory.Parent;
-        var curation = JsonNode.Parse(File.ReadAllText(Path.Combine(directory!.FullName, "data/shop/cosmetics-curation-v1.json")))!;
+        var curation = JsonNode.Parse(File.ReadAllText(Path.Combine(RepoRoot.Find("data/shop/cosmetics-curation-v1.json")!, "data/shop/cosmetics-curation-v1.json")))!;
         var curatedSkins = curation["HeroSkins"]!.AsObject().SelectMany(hero => hero.Value!.AsObject()
             .SelectMany(group => group.Value!.AsArray().Select(id => hero.Key + ":" + (string)id! + ":" + (group.Key == "Primary" ? "Primary" : "Alternate")))).ToHashSet();
         check(curatedSkins.SetEquals(skins.Select(p => (string)p!["Class"]! + ":" + (string)p["HeroSkin"]! + ":" + (string)p["Curation"]!))

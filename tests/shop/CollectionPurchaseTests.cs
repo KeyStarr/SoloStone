@@ -80,10 +80,9 @@ partial class NativeBundleHarness
                 "Collection prefix isolation/readiness " + mode);
         }
         Isolated = Enabled = ready = true;
-        var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root != null && !File.Exists(Path.Combine(root.FullName, "plugin/NativeShop.cs"))) root = root.Parent;
-        string shop = File.ReadAllText(Path.Combine(root.FullName, "plugin/NativeShop.cs"));
-        string probe = File.ReadAllText(Path.Combine(root.FullName, "plugin/NativeUIProbe.cs"));
+        string root = RepoRoot.Find("plugin/NativeShop.cs");
+        string shop = File.ReadAllText(Path.Combine(root, "plugin/NativeShop.cs"));
+        string probe = File.ReadAllText(Path.Combine(root, "plugin/NativeUIProbe.cs"));
         foreach (string flag in new[] { "BuyCardBacksFromCollectionManager", "BuyHeroSkinsFromCollectionManager", "LargeItemBundleDetailsEnabled" })
             check(shop.Contains("features.Store." + flag + " = true;"), "Store flag published " + flag);
         check(probe.Contains("features.Collection.CosmeticsRenderingEnabled = false;") && !probe.Contains("CosmeticsRenderingEnabled = true"), "BG cosmetic rendering stays false");

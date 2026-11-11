@@ -7,7 +7,9 @@
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
     <Compile Include="../../plugin/LocalCrafting.cs" />
     <Compile Include="../../plugin/LocalCraftingLedger.cs" />
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/UnityStandIns.cs" Link="UnityStandIns.cs" />
+    <Compile Include="../shared/RepoRoot.cs" Link="RepoRoot.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
     <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
     <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
@@ -23,16 +25,11 @@
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
     <Compile Include="../../plugin/LocalCollectionUI.cs" Link="LocalCollectionUI.cs" />
     <Reference Include="SabberStoneCore" Condition="'$(EngineSource)' != 'true'"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference>
-    <Reference Include="Assembly-CSharp"><HintPath>../../references/game/Assembly-CSharp.dll</HintPath><Aliases>NativeShopClient</Aliases></Reference>
-    <Reference Include="0Harmony"><HintPath>../../references/bepinex/0Harmony.dll</HintPath></Reference>
-    <Reference Include="UnityEngine"><HintPath>../../references/game/UnityEngine.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>../../references/game/UnityEngine.CoreModule.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.IMGUIModule"><HintPath>../../references/game/UnityEngine.IMGUIModule.dll</HintPath></Reference>
+    <PackageReference Include="HarmonyX" Version="2.9.0" />
   </ItemGroup>
 <PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup><ItemGroup Condition="'$(EngineSource)' == 'true'"><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" SetTargetFramework="TargetFramework=net10.0" /></ItemGroup>
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" />
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
     <Compile Include="../../plugin/BoardChoice.cs" Link="BoardChoice.cs" />
     <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />

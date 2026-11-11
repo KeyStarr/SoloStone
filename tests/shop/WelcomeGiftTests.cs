@@ -1,7 +1,6 @@
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using System.Xml.Serialization;
-using System.IO.Compression;
 using System.Reflection;
 using System.Text.Json;
 
@@ -21,21 +20,17 @@ internal static class WelcomeGiftTests
             string slot = Path.Combine(dir, name); if (Directory.Exists(slot)) Directory.Delete(slot, true);
             Directory.CreateDirectory(slot); return Path.Combine(slot, "profile.xml");
         }
-        // Derive the contract from policy + pinned client data, not the gift or pack-open grant table.
-        var productRoot = new DirectoryInfo(AppContext.BaseDirectory);
-        while (productRoot != null && !File.Exists(Path.Combine(productRoot.FullName, "data/pools/offline-standard-v1.json"))) productRoot = productRoot.Parent;
-        using var policy = JsonDocument.Parse(File.ReadAllText(Path.Combine(productRoot!.FullName, "data/pools/offline-standard-v1.json")));
+        // Derive the contract from policy + the public card file, not the gift or pack-open grant table.
+        string productRoot = RepoRoot.Find("data/pools/offline-standard-v1.json")!;
+        using var policy = JsonDocument.Parse(File.ReadAllText(Path.Combine(productRoot, "data/pools/offline-standard-v1.json")));
         var active = policy.RootElement.GetProperty("metas").EnumerateArray().Single(meta =>
             meta.GetProperty("id").GetString() == policy.RootElement.GetProperty("activeMeta").GetString());
         var extras = active.GetProperty("extraCards").EnumerateArray().Select(id => id.GetString()!).ToHashSet(StringComparer.Ordinal);
-        using var file = File.OpenRead(Path.Combine(productRoot.FullName, "data/carddb/37.0.0.254477/cards.json.gz"));
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var pinned = JsonDocument.Parse(gzip);
-        var eventCards = pinned.RootElement.GetProperty("cards").EnumerateArray().Where(card =>
-            extras.Contains(card.GetProperty("cardId").GetString()!) && card.GetProperty("cardSet").GetProperty("name").GetString() == "EVENT").ToArray();
-        check(eventCards.All(card => card.GetProperty("rarity").GetString() is "EPIC" or "LEGENDARY"), "every active event has a retail free-track rarity");
+        var eventCards = extras.Where(id => PublicFacts.Cards.Value.TryGetValue(id, out var row) && row.Set == PublicFacts.EventSet)
+            .Select(id => PublicFacts.Cards.Value[id]).ToArray();
+        check(eventCards.All(card => card.Rarity is PublicFacts.EpicRarity or PublicFacts.LegendaryRarity), "every active event has a retail free-track rarity");
         var expected = eventCards.SelectMany(card => new[] { 0, 1 }.Select(premium =>
-            (Id: card.GetProperty("cardId").GetString()!, Premium: premium, Count: card.GetProperty("rarity").GetString() == "LEGENDARY" ? 1 : 2)))
+            (Id: card.Id, Premium: premium, Count: card.Rarity == PublicFacts.LegendaryRarity ? 1 : 2)))
             .Append((Id: "BE_036", Premium: 0, Count: 1)).OrderBy(row => row.Id, StringComparer.Ordinal).ThenBy(row => row.Premium).ToArray();
         var definitions = LocalWelcomeGift.Cards;
         check(definitions.Select(row => (Id: row.CardId, row.Premium, row.Count)).OrderBy(row => row.Id, StringComparer.Ordinal).ThenBy(row => row.Premium)

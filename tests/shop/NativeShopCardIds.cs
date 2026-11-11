@@ -1,20 +1,19 @@
-using System.IO.Compression;
-using System.Text.Json;
-
-// Pinned card export replaces only Unity's DBF lookup; production uses GameUtils at runtime.
+// Stand-in for the client's GameUtils card id translation (production resolves it through the game at run time).
+// Card ids come from the public card file. Cards outside the active meta's file (hero skins, pet forms) get a stable
+// made-up DBF id: the tests only need distinct ids, and none of them pins a real one.
 internal static class GameUtils
 {
-    private static readonly Lazy<Dictionary<string, int>> ids = new(() => {
-        var root = new DirectoryInfo(AppContext.BaseDirectory);
-        while (root != null && !Directory.Exists(Path.Combine(root.FullName, "data/carddb"))) root = root.Parent;
-        using var file = File.OpenRead(Path.Combine(root.FullName, "data/carddb/37.0.0.254477/cards.json.gz"));
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var json = JsonDocument.Parse(gzip);
-        return json.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString(), c => c.GetProperty("dbfId").GetInt32());
-    });
+    private static readonly Lazy<Dictionary<string, int>> ids = new(() => PublicFacts.Cards.Value.ToDictionary(card => card.Key, card => card.Value.Dbf));
+    private static readonly Dictionary<string, int> madeUp = new();
     internal static readonly HashSet<string> MissingTranslations = new();
     internal static readonly HashSet<int> MissingHeroes = new();
     internal static object GetCardHeroRecordForCardId(int id) => id > 0 && !MissingHeroes.Contains(id) ? new object() : null;
-    internal static string TranslateDbIdToCardId(int id) => ids.Value.FirstOrDefault(pair => pair.Value == id).Key;
-    internal static int TranslateCardIdToDbId(string cardId) => !MissingTranslations.Contains(cardId) && ids.Value.TryGetValue(cardId, out var id) ? id : 0;
+    internal static string TranslateDbIdToCardId(int id) =>
+        ids.Value.FirstOrDefault(pair => pair.Value == id).Key ?? madeUp.FirstOrDefault(pair => pair.Value == id).Key;
+    internal static int TranslateCardIdToDbId(string cardId)
+    {
+        if (MissingTranslations.Contains(cardId)) return 0;
+        if (ids.Value.TryGetValue(cardId, out int id) || madeUp.TryGetValue(cardId, out id)) return id;
+        return madeUp[cardId] = 9_000_000 - madeUp.Count - 1;
+    }
 }
