@@ -233,16 +233,45 @@ def stage_markers():
         return [], []
 
 
+MAX_LOCAL_INPUT_BYTES = 512 * 1024 * 1024
+MAX_LOCAL_INPUT_FILES = 2000
+
+
+def _sha256_file(path):
+    digest = hashlib.sha256()
+    with open(path, 'rb') as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b''):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
 def private_blizzard_hashes():
-    """Hashes of the Blizzard-derived files this checkout still carries, so renamed copies are caught too."""
-    found = set()
-    try:
-        names = subprocess.check_output(['git', '-C', str(PRODUCT), 'ls-files', '-z'], text=True, stderr=subprocess.DEVNULL)
-    except (OSError, subprocess.SubprocessError):
-        return found
-    for name in filter(None, names.split('\0')):
-        if Path(name).name.casefold() in BLIZZARD_NAMES and (PRODUCT / name).is_file():
-            found.add(hashlib.sha256((PRODUCT / name).read_bytes()).hexdigest())
+    """Hashes of the Blizzard-derived files this checkout still carries, so renamed copies are caught too: files with a
+    Blizzard name that are tracked, untracked or ignored (a symlink into private/local-inputs counts, and is resolved),
+    plus every file under private/local-inputs/ when that folder exists."""
+    found, candidates = set(), []
+    for flags in ([], ['-o', '--exclude-standard'], ['-o', '-i', '--exclude-standard']):
+        try:
+            names = subprocess.check_output(['git', '-C', str(PRODUCT), 'ls-files', '-z'] + flags, text=True,
+                                            stderr=subprocess.DEVNULL, errors='surrogateescape')
+        except (OSError, subprocess.SubprocessError):
+            continue
+        candidates += [PRODUCT / name for name in names.split('\0') if name and Path(name).name.casefold() in BLIZZARD_NAMES]
+    inputs = PRODUCT / 'private' / 'local-inputs'
+    if inputs.is_dir():
+        candidates += [p for p in sorted(inputs.rglob('*'))[:MAX_LOCAL_INPUT_FILES * 4]]
+    taken = 0
+    for path in dict.fromkeys(candidates):
+        try:
+            real = path.resolve()
+            if not real.is_file() or real.stat().st_size > MAX_LOCAL_INPUT_BYTES:
+                continue
+            found.add(_sha256_file(real))
+        except OSError:
+            continue
+        taken += 1
+        if taken >= MAX_LOCAL_INPUT_FILES:
+            break
     return found
 
 
