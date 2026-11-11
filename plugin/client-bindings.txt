@@ -530,6 +530,7 @@ F	Assembly-CSharp	OptionsMenu	m_soundOptionsButton	UIBButton
 F	Assembly-CSharp	OptionsMenu	m_spectatorOpenJoinCheckbox	*
 F	Assembly-CSharp	OptionsMenu	m_spectatorOpenJoinCheckbox	CheckBox
 F	Assembly-CSharp	OptionsMenu	m_switchAccountButton	*
+F	Assembly-CSharp	OptionsMenu	m_versionLabel	*
 F	Assembly-CSharp	OrientedBounds	Extents	UnityEngine.Vector3[]
 F	Assembly-CSharp	OverlayUI	m_UICamera	UnityEngine.Camera
 F	Assembly-CSharp	PackOpening	m_BackButton	UIBButton
