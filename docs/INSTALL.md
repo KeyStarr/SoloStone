@@ -177,11 +177,11 @@ These overlays show during a match:
 - **Deck Tracker** lists the cards still in your deck down the right edge of the screen, under the deck's name. It
   counts only cards you have seen leave or enter your deck, so a card shuffled in face down shows as "Unknown card".
   Each row shows the card's art, cropped like the game's own deck list, unless **Card Art** is off. The last line says
-  how many cards are in your hand. On by default.
+  how many cards are in your hand and in your deck, as in "4 cards in hand · 25 in deck". On by default.
 - **Opponent Tracker** lists the opponent's cards you have seen down the left edge: cards from their deck that they
   played, summoned or discarded, or that were revealed some other way, with how many copies. Cards they created during
-  the match and played come in a separate "Created" list. The line under their name gives their class and how many
-  cards are left in their deck, and the last line how many are in their hand. It shows only what the game showed you,
+  the match and played come in a separate "Created" list. The line under their name gives their class, and the last
+  line how many cards are in their hand and in their deck. It shows only what the game showed you,
   so a Secret appears once it triggers and nothing in their hand is listed. On by default.
 - **Attack Counter** shows how much damage each side's characters can still attack for this turn, or could on its
   next turn: left of your hero, under the opponent's portrait. Off by default.
