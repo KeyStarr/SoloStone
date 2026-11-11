@@ -1010,16 +1010,12 @@ internal static class ProfileCatalogChecks
 
     private static bool HasRepoFile(string relative)
     {
-        var at = new DirectoryInfo(AppContext.BaseDirectory);
-        while (at != null && !File.Exists(Path.Combine(at.FullName, relative))) at = at.Parent;
-        return at != null;
+        return RepoRoot.Find(relative) != null;
     }
 
     private static string RepoFile(string relative)
     {
-        var at = new DirectoryInfo(AppContext.BaseDirectory);
-        while (at != null && !File.Exists(Path.Combine(at.FullName, relative))) at = at.Parent;
-        return File.ReadAllText(Path.Combine(at?.FullName ?? throw new Exception("repo file missing: " + relative), relative));
+        return File.ReadAllText(Path.Combine(RepoRoot.Find(relative) ?? throw new Exception("repo file missing: " + relative), relative));
     }
 
     // Both script validators hold a literal field list: every element order the game can write must pass them. Pwsh is not on the Mac, so the lists are read, not run.

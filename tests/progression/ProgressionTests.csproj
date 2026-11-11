@@ -3,14 +3,13 @@
   <PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/UnityStandIns.cs" Link="UnityStandIns.cs" />
+    <Compile Include="../shared/RepoRoot.cs" Link="RepoRoot.cs" />
     <Compile Include="../../plugin/TurnTimerSettings.cs" />
     <Compile Include="../../plugin/FpsCounterSettings.cs" />
     <Compile Include="../../plugin/DeckInferenceSettings.cs" />
-    <Reference Include="BepInEx"><HintPath>../../references/bepinex/BepInEx.dll</HintPath></Reference>
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
-    <Reference Include="UnityEngine"><HintPath>../../references/game/UnityEngine.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>../../references/game/UnityEngine.CoreModule.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.IMGUIModule"><HintPath>../../references/game/UnityEngine.IMGUIModule.dll</HintPath></Reference>
+    <Compile Include="../shared/BepInExStandIns.cs" Link="BepInExStandIns.cs" />
     <Compile Include="../CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
     <Compile Include="../StandardBatchData.cs" Link="StandardBatchData.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" />
@@ -40,7 +39,6 @@
 
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
     <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
     <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />

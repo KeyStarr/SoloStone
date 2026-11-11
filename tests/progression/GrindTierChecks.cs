@@ -20,11 +20,10 @@ internal static class GrindTierChecks
 
     private static void FreshShopQuoteBenchmark(string root)
     {
-        var source = new DirectoryInfo(AppContext.BaseDirectory);
-        while (source != null && !File.Exists(Path.Combine(source.FullName, "tools", "grind_pace.py"))) source = source.Parent;
+        string source = RepoRoot.Find("tools/grind_pace.py");
         Check(source != null, "find Python pace model in this worktree");
         var start = new System.Diagnostics.ProcessStartInfo("python3") {
-            WorkingDirectory = source!.FullName, RedirectStandardOutput = true, RedirectStandardError = true
+            WorkingDirectory = source!, RedirectStandardOutput = true, RedirectStandardError = true
         };
         start.ArgumentList.Add("-c");
         start.ArgumentList.Add("import json, sys; from pathlib import Path; sys.path.insert(0, 'tools'); "

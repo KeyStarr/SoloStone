@@ -328,6 +328,39 @@ def deck_cost_summary(catalogue):
             if catalogue.deck_costs else None}
 
 
+# Card tag numbers and enum values of the game's public card format (the same tags the engine reads from facts/).
+TAG_SET, TAG_TYPE, TAG_RARITY, TAG_COLLECTIBLE = 183, 202, 203, 321
+RARITY_NAMES = {1: "COMMON", 2: "FREE", 3: "RARE", 4: "EPIC", 5: "LEGENDARY"}
+CARD_TYPE_NAMES = {3: "HERO", 4: "MINION", 5: "SPELL", 7: "WEAPON", 39: "LOCATION"}
+
+
+def definitions_from_facts(root, manifest, meta, core):
+    """The fields of the client card export that this model reads, built from the public per-meta card file (facts/).
+
+    Used when the export (data/carddb/, built from a client and never committed) is absent. A set's name comes from the
+    fair-pack manifest: its cards give the set's number (tag 183), and every other card of that number is in the set.
+    Cards of the meta's extra list are EVENT and the unlock schedule's cards are CORE; anything else is OTHER.
+    """
+    files = sorted((root / "facts").glob(meta["id"] + "-*.json"))
+    if not files:
+        raise ValueError("No card file in facts/ for meta " + meta["id"])
+    facts = json.loads(files[-1].read_text())
+    rows = {}
+    for row in facts["cards"] + facts["overlay"]["cards"]:
+        rows.setdefault(row["id"], dict(row["tags"]))
+    set_of = {c["id"]: name for name, s in manifest["sets"].items() for c in s["cards"]}
+    name_of_number = {tags[TAG_SET]: set_of[cid] for cid, tags in rows.items() if cid in set_of and TAG_SET in tags}
+    definitions = {}
+    for cid, tags in rows.items():
+        name = (set_of.get(cid) or name_of_number.get(tags.get(TAG_SET)) or ("EVENT" if cid in meta["extraCards"] else None)
+                or ("CORE" if cid in core else "OTHER"))
+        definitions[cid] = {
+            "cardId": cid, "collectible": tags.get(TAG_COLLECTIBLE, 0) == 1, "rarity": RARITY_NAMES.get(tags.get(TAG_RARITY), "INVALID"),
+            "cardType": CARD_TYPE_NAMES.get(tags.get(TAG_TYPE), str(tags.get(TAG_TYPE))),
+            "tags": {str(k): v for k, v in tags.items()}, "cardSet": {"name": name}}
+    return definitions
+
+
 def load_catalogue(root):
     def read(relative):
         return json.loads((root / relative).read_text())
@@ -339,9 +372,13 @@ def load_catalogue(root):
     sets = [s for s in manifest["knownSets"] if s in active_sets]
     if set(sets) != active_sets or not sets:
         raise ValueError("Active sets missing from fair-pack manifest")
-    with gzip.open(root / ("data/carddb/" + policy["clientBuild"] + "/cards.json.gz"), "rt") as stream:
-        definitions = {c["cardId"]: c for c in json.load(stream)["cards"]}
     core = {c["cardId"] for c in read("data/progression/core-2026-unlocks.json")["cards"]}
+    export = root / ("data/carddb/" + policy["clientBuild"] + "/cards.json.gz")
+    if export.is_file():
+        with gzip.open(export, "rt") as stream:
+            definitions = {c["cardId"]: c for c in json.load(stream)["cards"]}
+    else:
+        definitions = definitions_from_facts(root, manifest, meta, core)
     signatures = set()
     for row in read("data/progression/card-mastery.json")["metas"].values():
         signatures.update(row["signature"])
