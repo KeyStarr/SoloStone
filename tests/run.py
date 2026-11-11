@@ -152,7 +152,9 @@ def collect_client(given):
         raise Usage(f'{managed} lacks: ' + ', '.join(lacking))
     GAME_REFERENCES.mkdir(parents=True, exist_ok=True)
     for name in CLIENT_FILES:
-        shutil.copy2(managed / name, GAME_REFERENCES / name)
+        target = GAME_REFERENCES / name
+        target.unlink(missing_ok=True)  # a client file is often read-only, and so is an earlier copy of it
+        shutil.copyfile(managed / name, target)
     return managed
 
 
