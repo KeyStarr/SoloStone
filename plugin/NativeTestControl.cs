@@ -874,6 +874,8 @@ internal sealed partial class NativeTestControl
         return new Dictionary<string, object> {
             { "present", entity != null }, { "cardId", entity?.GetCardId() },
             { "hasActor", card != null && card.GetActor() != null }, { "liveActor", HasLiveActor(card) },
+            // The ARMOR the client holds (a hero card in hand shows it on the card).
+            { "armor", entity?.GetTag(GAME_TAG.ARMOR) ?? 0 },
             { "herald", HeraldDiagnostic(entity) }
         };
     }
