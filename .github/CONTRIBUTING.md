@@ -36,7 +36,8 @@ closed, and the files must be removed from your branch history.
 
 ## Sign-off (Developer Certificate of Origin)
 
-Every commit needs a `Signed-off-by:` line with your real name and an email address, which `git commit -s` adds:
+Every commit needs a `Signed-off-by:` line, which `git commit -s` adds. Use a name you are known by (a pseudonym is
+fine) and an email address that reaches you; GitHub's noreply address works:
 
 ```text
 Signed-off-by: Your Name <you@example.com>
