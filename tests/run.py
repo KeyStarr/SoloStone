@@ -11,7 +11,9 @@
 Needs the .NET SDK that global.json names (put it on PATH, or set DOTNET, or pass --dotnet).
 
 Two tiers (docs/TESTING.md):
-  ci      every suite builds from this repository alone and needs no Hearthstone file. GitHub runs these.
+  ci      every suite builds from this repository alone and needs no Hearthstone file. GitHub runs these. A few have a
+          check that reads your client's own library: it runs when references/game is set up (see --client) and is
+          skipped, with a printed reason, when it is not.
   client  a suite marked needs_client loads your own client's libraries. --client DIR copies them (the files named in
           CLIENT_FILES, from the Hearthstone folder or its Managed folder) into references/game, which git ignores.
           Without them, or without the data the suite lists in needs_local, the suite is SKIPPED with a printed
@@ -19,7 +21,8 @@ Two tiers (docs/TESTING.md):
 
 Builds are Release builds with -p:EngineSource=true: the rules engine is built from engine/, never from a prebuilt
 DLL. Build output goes to a temporary folder (or --artifacts) and nothing is written inside the repository except
-the usual obj/ folders of the projects.
+the usual obj/ folders of the projects and, for fx-harmony with a client set up, plugin/bin/ (git ignores both).
+With --no-build, fx-harmony uses whatever plugin/bin holds.
 
 Exit code: 0 every suite passed (or was a skip that is allowed), 1 at least one failed or, with --ci, any suite was
 skipped, 2 the tool could not start (no SDK, unknown suite, bad --client folder, ...).
@@ -43,8 +46,15 @@ CLIENT_FILES = ('Assembly-CSharp.dll', 'blizzard.bgsclient.dll', 'blizzard.bgssd
                 'UnityEngine.CoreModule.dll', 'UnityEngine.IMGUIModule.dll', 'UnityEngine.InputLegacyModule.dll',
                 'UnityEngine.PhysicsModule.dll', 'UnityEngine.ScreenCaptureModule.dll')
 # Where the Managed folder sits under a Hearthstone folder: Windows, then the macOS app bundle.
+PLUGIN_REFERENCES = ('references/bepinex/BepInEx.dll', 'references/bepinex/0Harmony.dll')
 MANAGED_UNDER = (('Hearthstone_Data', 'Managed'), ('Managed',), ('Hearthstone.app', 'Contents', 'Resources', 'Data', 'Managed'),
                  ('Contents', 'Resources', 'Data', 'Managed'))
+
+
+def plugin_buildable():
+    """True when the player's libraries are set up (references/game complete, references/bepinex present): the plugin builds."""
+    return (all((GAME_REFERENCES / name).is_file() for name in CLIENT_FILES)
+            and all((ROOT / path).is_file() for path in PLUGIN_REFERENCES))
 
 
 class Usage(Exception):
@@ -55,7 +65,7 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild_in_tree_with_client=()):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -67,6 +77,8 @@ class Suite:
         self.unix_only = unix_only      # skipped, with a note, on Windows
         self.needs_client = needs_client  # client tier: needs references/game (see --client); skipped without it
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
+        # mono: projects to build first into their own bin/ (the suite reads plugin/bin/...), only when a client is set up
+        self.prebuild_in_tree_with_client = list(prebuild_in_tree_with_client)
 
     @property
     def tier(self):
@@ -76,6 +88,8 @@ class Suite:
         """Why this suite cannot run on this machine, or None. A reason is always printed and always counted."""
         if self.unix_only and os.name == 'nt':
             return 'its tests use unix paths and tools, so they do not run on Windows'
+        if self.kind == 'mono' and os.name != 'nt' and not shutil.which('mono'):
+            return 'needs mono on PATH (the client runs on Mono, and this suite patches under it)'
         if self.needs_client:
             missing = [name for name in CLIENT_FILES if not (GAME_REFERENCES / name).is_file()]
             if missing:
@@ -118,6 +132,24 @@ SUITES = [
           'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher'),
     Suite('installer-python', 'python', 'the installer build tools (stage and loader checks; not on Windows)', folder='installer',
           unix_only=True),
+]
+# Logic suites. They build from this repository alone (stand-ins for the few game types they touch, tests/shared and
+# tests/*/GameStandIns.cs), so GitHub runs them. Two checks read the client's own library and skip without it.
+SUITES += [
+    Suite('deck-ui', 'dotnet', 'deck layout geometry, button chrome and handheld rules of the native screens',
+          'tests/deck-ui/DeckUiTests.csproj'),
+    Suite('projection', 'dotnet', 'how menu and match state is projected onto the native screens',
+          'tests/projection/ProjectionTests.csproj'),
+    Suite('ladder', 'dotnet', 'the ranked ladder profile code: results, rewards, milestones, ledger, placement and casual mode',
+          'tests/ladder/LadderTests.csproj'),
+    Suite('recipe-picker', 'dotnet', 'the recipe picker and recipe guide of the native shop (one check reads the client library, if set up)',
+          'tests/recipe-picker/RecipePickerTests.csproj'),
+    Suite('progression', 'dotnet', 'profile, rewards, quests, achievements, ranks and settings logic behind the native screens',
+          'tests/progression/ProgressionTests.csproj'),
+    Suite('shop', 'dotnet', 'the native shop: catalogue, purchases, deck tiles and art maths (one check reads the client library, if set up)',
+          'tests/shop/ShopTests.csproj'),
+    Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
+          'tests/fx-harmony/FxHarmonyTests.csproj', prebuild_in_tree_with_client=['plugin/OfflineProbe.csproj']),
 ]
 BY_NAME = {suite.name: suite for suite in SUITES}
 
@@ -169,7 +201,7 @@ class Runner:
         self.logs = self.artifacts / 'logs'
         self.logs.mkdir(parents=True, exist_ok=True)
         self.engine_built = None  # None not tried, else True or False
-        self.env = dict(os.environ, DOTNET_CLI_TELEMETRY_OPTOUT='1', DOTNET_NOLOGO='1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1',
+        self.env = dict(os.environ, SOLOSTONE_ROOT=str(ROOT), DOTNET_CLI_TELEMETRY_OPTOUT='1', DOTNET_NOLOGO='1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1',
                         PYTHONDONTWRITEBYTECODE='1')
 
     def shared(self):
@@ -234,6 +266,26 @@ class Runner:
             Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())
             return False
         return self.step(log, [self.dotnet, program, *suite.args], 'run')
+
+    def run_mono(self, suite, log):
+        """A .NET Framework program (the client's runtime): built like a dotnet suite, run under mono (directly on Windows)."""
+        artifacts = self.shared()
+        if self.build:
+            if suite.prebuild_in_tree_with_client:
+                if plugin_buildable():
+                    for project in suite.prebuild_in_tree_with_client:
+                        if not self.step(log, [self.dotnet, 'build', project, '-c', 'Release', '-p:EngineSource=true', '-p:NuGetAudit=false',
+                                               '--nologo', '-v', 'quiet', '-m:1'], 'build'):
+                            return False
+                else:
+                    Path(log).write_bytes(Path(log).read_bytes() + b'plugin not built: no client set up (references/game, references/bepinex)\n')
+            if not self.build_project(log, suite.project, artifacts):
+                return False
+        program = artifacts / 'bin' / suite.assembly / 'release' / (suite.assembly + '.exe')
+        if not program.is_file():
+            Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())
+            return False
+        return self.step(log, ([] if os.name == 'nt' else [shutil.which('mono')]) + [program, *suite.args], 'run')
 
     def run_hssim(self, suite, log):
         if not self.ensure_hssim(log):
