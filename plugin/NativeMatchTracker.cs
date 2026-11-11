@@ -439,21 +439,35 @@ internal static class NativeMatchTracker
     }
 
     // A card tile for another screen (NativeStatsScreen): the tracker's row at that height, with text sized to match.
-    internal static void Tile(float x, float y, float width, float row, string id, string cost, string text, int count, bool legendary)
+    // `dim` greys a tile out without a count box (a ruled-out Secret).
+    internal static void Tile(float x, float y, float width, float row, string id, string cost, string text, int count, bool legendary,
+        bool dim = false)
     {
         if (settings == null) return;
         Styles(Mathf.Max(8, Mathf.RoundToInt(row * TextShare / RowShare)));
-        Row(x, y, width, row, id, cost, text, count, legendary);
+        Row(x, y, width, row, id, cost, text, count, legendary, dim);
+    }
+
+    // How wide a list of single-copy tiles at this height must be for its longest name: Row()'s cost badge and gap, the name, and a
+    // little room at the end.
+    internal static float TileWidth(float row, IEnumerable<string> names)
+    {
+        if (settings == null) return 0f;
+        Styles(Mathf.Max(8, Mathf.RoundToInt(row * TextShare / RowShare)));
+        float widest = 0f;
+        foreach (string text in names) widest = Mathf.Max(widest, Measure(text, name).x);
+        return widest + row * 1.4f;
     }
 
     // One card as a tile: a solid bar, the cost badge on the left, the card's art on the right fading out into the bar, the name over
     // both, and the copies left in a box at the right end (none for a single copy).
-    private static void Row(float x, float y, float width, float row, string id, string cost, string text, int count, bool legendary)
+    private static void Row(float x, float y, float width, float row, string id, string cost, string text, int count, bool legendary,
+        bool dim = false)
     {
-        float alpha = count > 0 ? 1f : .38f, gap = row * TileGap, top = y + gap / 2, tall = row - gap, size = tall * .82f, inset = (tall - size) / 2f;
+        float alpha = count > 0 && !dim ? 1f : .38f, gap = row * TileGap, top = y + gap / 2, tall = row - gap, size = tall * .82f, inset = (tall - size) / 2f;
         GUI.color = Color.white;
         GUI.DrawTexture(new Rect(x, top, width, tall), tile);
-        float box = count != 1 ? tall : 0f;
+        float box = count != 1 && !dim ? tall : 0f;
         bool art = false;
         if (settings.CardArt && id != null && CardArt.TryGet(id, out var picture))
         {
@@ -470,7 +484,7 @@ internal static class NativeMatchTracker
             GUI.DrawTexture(new Rect(x, top, width, tall), tile);
         }
         GUI.color = new Color(1f, 1f, 1f, alpha);
-        GUI.DrawTexture(new Rect(x + inset, top + inset, size, size), count > 0 ? badge : zeroBadge);
+        GUI.DrawTexture(new Rect(x + inset, top + inset, size, size), alpha < 1f ? zeroBadge : badge);
         Text(new Rect(x + inset, top, size, tall), cost, number, Align.Center);
         Color nameColor = legendary ? new Color(1f, .74f, .3f) : new Color(.95f, .95f, .97f);
         name.normal.textColor = nameColor;
