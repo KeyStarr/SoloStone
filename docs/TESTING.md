@@ -84,16 +84,34 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools). Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. Some checks skip without a Hearthstone client |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
+## Engine proofs and native flow checks
+
+`engine-proof` and `standard-native` each have two halves built from the same sources. The half that needs nothing from a
+client is in the `ci` tier. The other half is a `client` suite of its own, run with `--client DIR`:
+
+| `ci` suite | `client` suite | What the client half adds |
+|---|---|---|
+| `engine-proof` | `engine-proof-client` | Proofs that compare the engine with your client's data (the card definitions file, hero powers, the independent derivation of the offline pools, the printed class domains), and the native transport halves of 11 engine proofs (the same proof runs again with its packet checks compiled in). It also checks that `NativeMatch.TransportCardId` in the plugin equals its copy in `tests/shared/NativeMatchTransportId.cs`, which the suites without a client link instead of `NativeMatch` |
+| `standard-native` | `standard-native-client` | The groups that build and send native packets: Trade, live snapshots, location projection, proof packet games |
+
+The card export (`data/carddb/37.0.0.254477/cards.json.gz`) is optional for `engine-proof`: with it, each card is also
+compared with the export, exactly as before; without it, the run prints one `SKIP ...` line for each kind of
+comparison and a `SKIPPED n x ...` total at the end. The comparisons that need the client itself (the independent pool derivation,
+hero powers) are skipped in `engine-proof` even when the export is there, and run in `engine-proof-client`. Nothing is skipped silently. The client half builds with
+`-p:ClientTransport=true`, which defines `CLIENT_TRANSPORT`, adds the client's libraries and links the plugin's native match.
+
 ## You changed X, run Y
 
 | You changed | Run |
 |---|---|
-| A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
+| A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `engine-proof`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
 | Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world` |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
