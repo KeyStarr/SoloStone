@@ -17,11 +17,11 @@ How SoloStone's branches and commits are named, and how a change gets into `main
 - Each release is tagged `v<version>` on `main`, e.g. `v0.1.0`. The launcher downloads updates from that tag.
 - Outside contributors work on a branch in their own fork. Maintainers branch in the main repository.
 
-## Pull requests, squash merges and sign-off
+## Pull requests and squash merges
 
 - Every change reaches `main` through a pull request. **Nothing is pushed to `main` directly**, and history on `main`
   and on tags is never rewritten or force-pushed.
-- `tests` (`python3 tests/run.py --ci`), `dco` and `scan` must pass before a merge.
+- `tests` (`python3 tests/run.py --ci`) and `scan` must pass before a merge.
 - `scan` runs `tools/release_scan.py` with the public rules in `tools/release_scan.public.json` over the whole tree and over
   every new commit's message and the files it adds. It looks for Blizzard files and libraries, media outside the allowed
   list, decompiled code, encoded blobs, personal data and email addresses, and wording the project does not use (for
@@ -36,12 +36,6 @@ How SoloStone's branches and commits are named, and how a change gets into `main
   not approve their own pull request.
 - A pull request is **squash-merged**: one commit on `main` per pull request. The pull request title becomes the commit
   subject, so write it as a commit subject (below).
-- Every commit carries a `Signed-off-by:` line ([Developer Certificate of Origin 1.1](https://developercertificate.org/)),
-  which `git commit -s` adds. The `dco` check fails the pull request otherwise. GitHub's squash message can drop the
-  sign-off lines, so the maintainer copies every `Signed-off-by:` line of the pull request's commits into the squash
-  message before merging.
-- To fix a missing sign-off on your branch: `git rebase --signoff origin/main`, then `git push --force-with-lease` to
-  your own fork's branch. Never force-push `main`.
 - Commit under one identity per person, with an email that person is happy to have public.
 
 ## Commits
@@ -72,10 +66,8 @@ The manifest seq goes to 2; 0.1.0 installs pick the update up on their next laun
 - The subject line is short, in the present tense, with no full stop at the end.
 - Separate several changes with `;`. If it no longer fits on one line, split it into more commits.
 - A body is optional. Write one only when the reason for the change would surprise a reader.
-- A sign-off line ends the message, after a blank line:
+For example:
 
 ```text
 fix: Legend rank counts every NPC with a Legend medal
-
-Signed-off-by: Your Name <you@example.com>
 ```

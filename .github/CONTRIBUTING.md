@@ -23,29 +23,14 @@ Security problems go to [SECURITY.md](SECURITY.md), not here.
 2. Make one change per pull request. Say what it fixes or adds and why.
 3. Run the tests that cover your change: `python3 tests/run.py` ([docs/TESTING.md](../docs/TESTING.md)). CI runs the
    same suites (with `--ci`), and the pull request needs them green.
-4. Sign off every commit (see below).
-5. Check the files you changed against the public rules before you push:
+4. Check the files you changed against the public rules before you push:
    `python3 tools/release_scan.py --source . --skip-git --allow-no-private-config --strict --trust-public-rules --public-rules tools/release_scan.public.json`.
    CI runs the same scan on the whole tree and on each commit ([scan.yml](workflows/scan.yml)), using the scanner and
    rules from `main`. The owner reviews changes to `.github/` and to the scanner files ([CODEOWNERS](CODEOWNERS)).
-6. A maintainer reviews it. It is squash-merged into `main`, and the maintainer keeps your sign-off line in the
-   squashed commit.
+5. A maintainer reviews it, and it is squash-merged into `main`.
 
 Do not include Hearthstone files, libraries, art, sound or decompiled code, in any form. A pull request that does is
 closed, and the files must be removed from your branch history.
-
-## Sign-off (Developer Certificate of Origin)
-
-Every commit needs a `Signed-off-by:` line, which `git commit -s` adds. Use a name you are known by (a pseudonym is
-fine) and an email address that reaches you; GitHub's noreply address works:
-
-```text
-Signed-off-by: Your Name <you@example.com>
-```
-
-It says that you agree to the [Developer Certificate of Origin 1.1](https://developercertificate.org/): you wrote the
-change, or you have the right to submit it under this project's licence. A GitHub Action
-([dco.yml](workflows/dco.yml)) checks that every commit in a pull request has one.
 
 ## Licence of your contribution
 
