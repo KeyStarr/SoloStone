@@ -70,6 +70,12 @@ internal partial class NativeFxTelemetry
             .GetParameters().All(parameter => parameter.Name != "__2" && parameter.Name != "cancelDrop"),
             "drop never binds cancellation output");
         Check(typeof(Harmony).Assembly.GetName().Version == new Version(2, 9, 0, 0), "shipped HarmonyX 2.9.0");
+        // The NuGet package must be byte-identical to the library the installer ships (installer/loader-inputs.json pins its hash).
+        var pinned = System.Text.RegularExpressions.Regex.Match(File.ReadAllText("installer/loader-inputs.json"),
+            "\"path\": \"BepInEx/core/0Harmony.dll\"[^}]*?\"sha256\": \"([0-9a-f]{64})\"");
+        using (var sha = System.Security.Cryptography.SHA256.Create())
+            Check(pinned.Success && BitConverter.ToString(sha.ComputeHash(File.ReadAllBytes(typeof(Harmony).Assembly.Location))).Replace("-", "").ToLowerInvariant()
+                == pinned.Groups[1].Value, "HarmonyX from NuGet is the shipped 0Harmony.dll (hash pinned in loader-inputs.json)");
         var harmony = new Harmony("test.native-fx.ref-cancellation");
         try
         {
