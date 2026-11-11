@@ -24,6 +24,7 @@ For the `ci` tier you need no Hearthstone files.
 | .NET SDK | **10.0.402**. `global.json` pins it and refuses any other version. |
 | Python | 3.10 or newer, on your `PATH` as `python3` (or `python` on Windows). The runner uses only the standard library. |
 | Git | The installer build tools read the source revision, so use a Git checkout. |
+| Mono | Only for the `fx-harmony` suite, which patches under Mono as the game does: `mono` on your `PATH` (Linux and macOS; on Windows the suite runs without it). Without it the suite is skipped, and CI fails on a skip. |
 | Internet | Once, to restore NuGet packages. |
 
 ```text
@@ -48,6 +49,10 @@ maintainer starts it by hand ([tests.yml](../.github/workflows/tests.yml)). With
 tier out and **a skipped suite fails the run**, so a whole suite cannot silently stop running in CI. (A suite can still
 skip single checks inside itself, as `launcher` does without a client; those show in its own output.)
 
+Three checks in the `ci` tier read your client's own library, so they skip on a machine without one and run on a machine
+with one (see "The client tier"): the pinned section-loader code of the native shop (`shop`), the pinned sideboard tag
+(`recipe-picker`) and the pinned sub-spell hooks (`fx-harmony`). Their `SKIP` line says what is missing.
+
 ### The client tier
 
 ```text
@@ -63,6 +68,10 @@ in ways that are not bugs.
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed) is missing. The summary line counts every skip, for example
 `16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
+
+With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, which git ignores) so that it can check the
+compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
+[BUILDING.md](BUILDING.md)).
 
 | Option | What it does |
 |---|---|
@@ -82,6 +91,13 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 | `ai-golden` | Opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks |
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
+| `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
+| `projection` | How menu and match state is projected onto the native screens |
+| `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
+| `recipe-picker` | The recipe picker and recipe guide of the native shop |
+| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens |
+| `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
+| `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
@@ -97,9 +113,11 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
 | Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world` |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
-| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes` |
+| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder` |
+| Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
-| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation` |
+| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
@@ -154,10 +172,9 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 Some test suites are not in this repository.
 
 - **Suites that need your own Hearthstone client** (the `client` tier above). They load the game's own libraries to
-  check the plugin's native screens, hooks and message handling: the engine proofs per card, native match and shop
-  flows, profile, progression, ladder and pack screens, and the checks that every client call the plugin binds to still
-  exists. The runner already supports them (`--client`); the suites themselves are added in a later change. This
-  repository ships no client file, and CI cannot run them.
+  check the plugin's native screens, hooks and message handling: the engine proofs per card, native match flows, and
+  the checks that every client call the plugin binds to still exists. The runner already supports them (`--client`);
+  the suites themselves are added in a later change. This repository ships no client file, and CI cannot run them.
 - **The tests for the plugin's game profile and offline guard.** They spell out the paths of the maintainer's test
   machine, so they stay private for now. Part of them (achievements and rewards) could move out into a public suite later.
 - **Live tests.** These drive a real game on a real test machine: clicks, drags, matches and installs. They need that
