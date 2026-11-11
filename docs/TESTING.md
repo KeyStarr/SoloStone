@@ -69,9 +69,9 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 (built locally from your client and never committed) is missing. The summary line counts every skip, for example
 `16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
 
-With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, which git ignores) so that it can check the
+With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
 compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
-[BUILDING.md](BUILDING.md)).
+[BUILDING.md](BUILDING.md)); if they are missing, `fx-harmony` fails instead of skipping the check.
 
 | Option | What it does |
 |---|---|

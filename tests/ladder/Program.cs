@@ -58,6 +58,8 @@ static LocalReward V3(LocalMatchRecord match, string result, LocalRewardFacts fa
     LocalEconomy.RewardV3(result, turns, false, facts ?? new LocalRewardFacts(), LocalEconomy.RewardRollSeed(match.Id, match.Seed));
 ResultsTests.Run();
 string root = Path.Combine(Path.GetTempPath(), "hs-ladder-tests-" + Guid.NewGuid());
+// The two fixtures below are read only on the manual path (run with arguments, maintainer saves); tests/run.py never takes it
+// and the project no longer copies them.
 string fixture = Path.Combine(AppContext.BaseDirectory, "final-profile.xml");
 string v2Fixture = Path.Combine(AppContext.BaseDirectory, "v2-final-profile.xml");
 Directory.CreateDirectory(root);

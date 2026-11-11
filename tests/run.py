@@ -21,8 +21,9 @@ Two tiers (docs/TESTING.md):
 
 Builds are Release builds with -p:EngineSource=true: the rules engine is built from engine/, never from a prebuilt
 DLL. Build output goes to a temporary folder (or --artifacts) and nothing is written inside the repository except
-the usual obj/ folders of the projects and, for fx-harmony with a client set up, plugin/bin/ (git ignores both).
-With --no-build, fx-harmony uses whatever plugin/bin holds.
+the usual obj/ folders of the projects and, for fx-harmony with a client set up, plugin/bin/ and engine/SabberStoneCore/bin and obj (git ignores all of them).
+With --no-build, fx-harmony uses whatever plugin/bin holds. With a client set up it fails, rather than skips, its pinned check
+when references/bepinex is missing (the plugin cannot be built) or, with --no-build, plugin/bin holds no built plugin.
 
 Exit code: 0 every suite passed (or was a skip that is allowed), 1 at least one failed or, with --ci, any suite was
 skipped, 2 the tool could not start (no SDK, unknown suite, bad --client folder, ...).
@@ -49,12 +50,6 @@ CLIENT_FILES = ('Assembly-CSharp.dll', 'blizzard.bgsclient.dll', 'blizzard.bgssd
 PLUGIN_REFERENCES = ('references/bepinex/BepInEx.dll', 'references/bepinex/0Harmony.dll')
 MANAGED_UNDER = (('Hearthstone_Data', 'Managed'), ('Managed',), ('Hearthstone.app', 'Contents', 'Resources', 'Data', 'Managed'),
                  ('Contents', 'Resources', 'Data', 'Managed'))
-
-
-def plugin_buildable():
-    """True when the player's libraries are set up (references/game complete, references/bepinex present): the plugin builds."""
-    return (all((GAME_REFERENCES / name).is_file() for name in CLIENT_FILES)
-            and all((ROOT / path).is_file() for path in PLUGIN_REFERENCES))
 
 
 class Usage(Exception):
@@ -134,7 +129,7 @@ SUITES = [
           unix_only=True),
 ]
 # Logic suites. They build from this repository alone (stand-ins for the few game types they touch, tests/shared and
-# tests/*/GameStandIns.cs), so GitHub runs them. Two checks read the client's own library and skip without it.
+# tests/*/GameStandIns.cs), so GitHub runs them. Three checks read the client's own library and skip without it.
 SUITES += [
     Suite('deck-ui', 'dotnet', 'deck layout geometry, button chrome and handheld rules of the native screens',
           'tests/deck-ui/DeckUiTests.csproj'),
@@ -267,20 +262,35 @@ class Runner:
             return False
         return self.step(log, [self.dotnet, program, *suite.args], 'run')
 
+    def prebuild_with_client(self, log, suite):
+        """With a client set up, build what the suite's client-only check reads. False (a failure) when that cannot be done:
+        a green run must not hide a skipped check from someone who set up a client to run it."""
+        def note(text):
+            Path(log).write_bytes(Path(log).read_bytes() + (text + '\n').encode())
+        if not all((GAME_REFERENCES / name).is_file() for name in CLIENT_FILES):
+            note('no client set up (references/game): the pinned sub-spell check skips')
+            return True
+        absent = [path for path in PLUGIN_REFERENCES if not (ROOT / path).is_file()]
+        if absent:
+            note('references/game is set up, but ' + ', '.join(absent) + ' is missing, so the plugin cannot be built and the pinned '
+                 'sub-spell check would skip (docs/BUILDING.md step 1)')
+            return False
+        return all(self.step(log, [self.dotnet, 'build', project, '-c', 'Release', '-p:EngineSource=true', '-p:NuGetAudit=false',
+                                   '--nologo', '-v', 'quiet', '-m:1'], 'build') for project in suite.prebuild_in_tree_with_client)
+
     def run_mono(self, suite, log):
         """A .NET Framework program (the client's runtime): built like a dotnet suite, run under mono (directly on Windows)."""
         artifacts = self.shared()
         if self.build:
-            if suite.prebuild_in_tree_with_client:
-                if plugin_buildable():
-                    for project in suite.prebuild_in_tree_with_client:
-                        if not self.step(log, [self.dotnet, 'build', project, '-c', 'Release', '-p:EngineSource=true', '-p:NuGetAudit=false',
-                                               '--nologo', '-v', 'quiet', '-m:1'], 'build'):
-                            return False
-                else:
-                    Path(log).write_bytes(Path(log).read_bytes() + b'plugin not built: no client set up (references/game, references/bepinex)\n')
+            if suite.prebuild_in_tree_with_client and not self.prebuild_with_client(log, suite):
+                return False
             if not self.build_project(log, suite.project, artifacts):
                 return False
+        elif suite.prebuild_in_tree_with_client and all((GAME_REFERENCES / name).is_file() for name in CLIENT_FILES) \
+                and not (ROOT / 'plugin/bin/Release/net48/HSNativeUIProbe.dll').is_file():
+            Path(log).write_bytes(Path(log).read_bytes() + b'references/game is set up but plugin/bin holds no built plugin (--no-build): '
+                                  b'the pinned sub-spell check would skip\n')
+            return False
         program = artifacts / 'bin' / suite.assembly / 'release' / (suite.assembly + '.exe')
         if not program.is_file():
             Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())

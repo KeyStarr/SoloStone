@@ -18,6 +18,7 @@ var unavailable = NativeRecipeSafety.OrDefault<List<CollectionManager.TemplateDe
 Check(unavailable.Count == 0 && failures.Count == 1, "loader exception logs and returns empty templates for Custom flow");
 Check(NativeRecipeSafety.OrDefault(() => 7, 0, failures.Add) == 7 && failures.Count == 1,
     "successful patch result preserved");
+// CollectionDeck is a stand-in: these checks prove the model calls ClearSideboards, not what the client does inside it.
 var preview = new CollectionDeck();
 preview.GetAllSideboards().Add("JAIL_397", null!);
 NativeRecipeSafety.ResetPreview(preview);
