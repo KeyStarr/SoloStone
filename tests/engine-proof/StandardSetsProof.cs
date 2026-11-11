@@ -15,6 +15,8 @@ internal static class StandardSetsProof
     private static readonly HashSet<string> ProvenIds = new(StringComparer.Ordinal);
     // The client export's rows, or null without it (ClientExport). Read at each use, never kept from an earlier proof.
     private static IReadOnlyDictionary<string, JsonElement> Definitions => ClientExport.TryCards();
+    /// <summary>Fails if any Case since the last Run recorded a failure (Run clears the record when it starts).</summary>
+    internal static void ThrowFailures() => Core2026Proof.Check(Failures.Count == 0, string.Join("\n", Failures));
     internal static void Case(string id, Action<Game, Controller, string> scenario, [System.Runtime.CompilerServices.CallerFilePath] string proofFile = "", bool legacyPoolMember = false)
     {
         try

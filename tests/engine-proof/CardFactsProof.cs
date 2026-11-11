@@ -16,9 +16,33 @@ internal static class CardFactsProof
     private static readonly FieldInfo[] CardFields = typeof(Card)
         .GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 
-    internal static void Run()
+    /// <summary>The checks that need no client file: the engine embeds the card file and neither XML, the embedded copy is the
+    /// file on disk, the file's text hashes hold, and the reader refuses bad input. Run by the engine-proof suite.</summary>
+    internal static void RunWithoutClient()
     {
         Check(CardFields.Length > 40, "Card field reflection found the backing fields");
+        var facts = CardFacts.Read(File.OpenRead(FilePath), CardFacts.Meta);
+        Check(facts.Overlay.Cards.Count(d => d.ScopedSnapshot) == 8, "scoped snapshots are in the file");
+
+        // The embedded copy is the file on disk, and the engine loads what the client half of this proof compares.
+        Check(CardFacts.Embedded.Meta == CardFacts.Meta, "embedded meta label");
+        Check(typeof(Card).Assembly.GetManifestResourceNames().Any(n => n.EndsWith(CardFacts.Meta + ".json", StringComparison.Ordinal))
+            && !typeof(Card).Assembly.GetManifestResourceNames().Any(n => n.Contains("CardDefs") || n.Contains("ClientOverlay")),
+            "the engine embeds the card file and neither XML");
+        using (var embedded = typeof(Card).Assembly.GetManifestResourceStream("SabberStoneCore.Resources.Facts." + CardFacts.Meta + ".json"))
+        using (var bytes = new MemoryStream())
+        {
+            embedded.CopyTo(bytes);
+            Check(bytes.ToArray().SequenceEqual(File.ReadAllBytes(FilePath)), "embedded file equals " + FilePath);
+        }
+        TextHashes();
+        ReaderRefusesBadInput();
+        Console.WriteLine("PASS card file without a client: embedded file, no XML resource, text hashes, reader refusals");
+    }
+
+    /// <summary>The comparison with the client's XML files (client tier): the card file must load to exactly what they load to.</summary>
+    internal static void Run()
+    {
         var xmlBase = XDocument.Load(DataPath + "CardDefs.xml");
         var xmlOverlay = ClientOverlay.Read(File.OpenRead(DataPath + "ClientOverlay.xml"));
         var facts = CardFacts.Read(File.OpenRead(FilePath), CardFacts.Meta);
@@ -32,22 +56,7 @@ internal static class CardFactsProof
 
         CompareOverlay(xmlOverlay, facts.Overlay, differences);
         CheckEmpty(differences, "overlay rows");
-        Check(facts.Overlay.Cards.Count(d => d.ScopedSnapshot) == 8, "scoped snapshots are in the file");
-
-        // The embedded copy is the file on disk, and the engine loads what this proof just compared.
-        Check(CardFacts.Embedded.Meta == CardFacts.Meta, "embedded meta label");
-        Check(typeof(Card).Assembly.GetManifestResourceNames().Any(n => n.EndsWith(CardFacts.Meta + ".json", StringComparison.Ordinal))
-            && !typeof(Card).Assembly.GetManifestResourceNames().Any(n => n.Contains("CardDefs") || n.Contains("ClientOverlay")),
-            "the engine embeds the card file and neither XML");
-        using (var embedded = typeof(Card).Assembly.GetManifestResourceStream("SabberStoneCore.Resources.Facts." + CardFacts.Meta + ".json"))
-        using (var bytes = new MemoryStream())
-        {
-            embedded.CopyTo(bytes);
-            Check(bytes.ToArray().SequenceEqual(File.ReadAllBytes(FilePath)), "embedded file equals " + FilePath);
-        }
-        TextHashes();
         ComparatorSeesEveryDifference(xmlOverlay);
-        ReaderRefusesBadInput();
         Console.WriteLine($"PASS card file: {actual.Length} cards and {facts.Overlay.Cards.Length} overlay rows equal the XML path, {CardFields.Length} fields each");
     }
 

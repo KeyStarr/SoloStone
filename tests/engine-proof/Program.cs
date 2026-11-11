@@ -600,6 +600,7 @@ ClassHeroesProof.Run();
 DeathKnightRulesProof.Run();
 CorpseProof.Run();
 TokenMetadataProof.Run();
+CardFactsProof.RunWithoutClient();
 CoreReprintsProof.Run();
 Core2026Proof.Run();
 ForcedAttackBudgetProof.Run();

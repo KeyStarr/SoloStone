@@ -31,8 +31,8 @@ python3 tests/run.py
 ```
 
 It builds every suite in Release mode (the engine is built from `engine/`, never from a prebuilt DLL), runs it, and
-prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about six
-minutes; the launcher suite is the longest, mostly because of its package restore.
+prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about 14
+minutes on a fast Mac (`engine-proof`, 5 to 6 minutes, and `launcher`, about 5 including its package restore, are the longest).
 
 | Option | What it does |
 |---|---|
@@ -101,6 +101,9 @@ client is in the `ci` tier. The other half is a `client` suite of its own, run w
 | `engine-proof` | `engine-proof-client` | Proofs that compare the engine with your client's data (the card definitions file, hero powers, the independent derivation of the offline pools, the printed class domains), and the native transport halves of 11 engine proofs (the same proof runs again with its packet checks compiled in). It also checks that `NativeMatch.TransportCardId` in the plugin equals its copy in `tests/shared/NativeMatchTransportId.cs`, which the suites without a client link instead of `NativeMatch` |
 | `standard-native` | `standard-native-client` | The groups that build and send native packets: Trade, live snapshots, location projection, proof packet games |
 
+`engine-proof-client` requires the export (it fails, never skips, a comparison). The identity comparisons of the whole card corpus run in
+`engine-proof`, so a maintainer run needs `engine-proof` with the export present as well as `engine-proof-client`.
+
 The card export (`data/carddb/37.0.0.254477/cards.json.gz`) is optional for `engine-proof`: with it, each card is also
 compared with the export, exactly as before; without it, the run prints one `SKIP ...` line for each kind of
 comparison and a `SKIPPED n x ...` total at the end. The comparisons that need the client itself (the independent pool derivation,
@@ -113,7 +116,8 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 |---|---|
 | A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `engine-proof`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
-| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world` |
+| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world`, `engine-proof` |
+| Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |

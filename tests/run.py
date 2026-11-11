@@ -132,7 +132,7 @@ SUITES += [
     Suite('engine-proof-client', 'dotnet', 'engine proofs that compare the engine with your client (card definitions file, hero powers, '
           'independent pool derivation) and the native transport halves of engine proofs',
           'tests/engine-proof/EngineProof.csproj', props=['-p:ClientTransport=true'], artifacts='engine-proof-client', needs_client=True,
-          needs_local=(CARDDB, 'engine/SabberStoneCore/resources/Data/CardDefs.xml', 'engine/SabberStoneCore/resources/Data/ClientOverlay.xml')),
+          needs_local=(CARDDB, 'data/carddb/37.0.0.254477/set-overrides.json', 'engine/SabberStoneCore/resources/Data/CardDefs.xml', 'engine/SabberStoneCore/resources/Data/ClientOverlay.xml')),
     Suite('standard-native-client', 'dotnet', 'native match flow checks on Standard-format games: packets, Trade, live snapshots, location projection',
           'tests/standard-native/StandardNativeTests.csproj', props=['-p:ClientTransport=true'], artifacts='standard-native-client',
           needs_client=True),

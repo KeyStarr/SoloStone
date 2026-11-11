@@ -51,6 +51,8 @@ internal static class ClientExport
     /// <summary>Counts a skipped export comparison; the first skip of each kind is printed, the end of the run prints the total.</summary>
     internal static void Skip(string what)
     {
+        // The client tier exists to run these comparisons: a skipped one there is a failure, not a note.
+        if (ClientTier) throw new InvalidOperationException("engine-proof-client may not skip a comparison with the client export: " + what);
         lock (Gate)
         {
             bool first = !skips.ContainsKey(what);

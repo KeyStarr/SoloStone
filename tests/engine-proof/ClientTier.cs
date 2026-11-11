@@ -33,16 +33,19 @@ internal static class ClientTier
         AgentCoinChoiceProof.Run();
         LegendaryEliteProof.Run();
         HistoryHandDisplayProof.Run();
-        LeylineProofs.Run();
-        Batch14K7Proof.Run();
+        PetTransportProof.Run();   // a Facility group proof: the engine-proof suite finds it by reflection, so it needs the client build
+        // Case() records a failure instead of throwing, and StandardSetsProof.Run clears the record when it starts: nothing that
+        // calls Case may run directly before it. Leyline and Batch14K7 go through the selected list below.
+        StandardSetsProof.ThrowFailures();
         StandardSetsProof.Run(selectedProofs: new Action[] {
             // Oracle comparisons inside card proofs.
+            LeylineProofs.Run, Batch14K7Proof.Run,
             TimelordNozdormuProof.Run, JackpotProof.Run, AmberWardenProof.Run, BloodDrawProof.Run, WhisperingStoneProof.Run, B14K3BEProof.Run,
             CoreBallOfSpidersProof.Run, CoreJeweledMacawProof.Run, CoreShakuTheCollectorProof.Run, CoreSwashburglarProof.Run,
             CoreWebspinnerProof.Run, BlazingInvocationProof.Run, WitchsApprenticeProof.Run, BrightwingProof.Run, GorillabotA3Proof.Run,
             NetherspiteHistorianProof.Run, IvoryKnightProof.Run, SilvermoonPortalProof.Run,
             // Transport tails inside card proofs.
-            KnockbackProof.Run, StarsurgeProof.Run, LotusTroublemakerProof.Run, Batch14K7CataclysmProof.Run,
+            KnockbackProof.Run, StarsurgeProof.Run, LotusTroublemakerProof.Run,
             LightoftheNewMoonProof.Run, RitualoftheNewMoonProof.Run, ReforestationProof.Run, StormfuryProof.Run,
             SplinteredRealityProof.Run, ClockworkRagerProof.Run });
         Console.WriteLine("engine-proof-client: PASS");

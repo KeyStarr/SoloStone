@@ -48,7 +48,8 @@ internal static class HideousHuskProof
         int damageFacts = g.HistoryFacts.Query.Damage().Count();
         int healFacts = g.HistoryFacts.Query.HealthChanges().Count(f => f.Reason == HistoryHealthChangeReason.Heal);
         PoolPilotProof.Resume(g, next => End(next));
-        Core2026Proof.Check(target.BaseHealth == 4 && target.Health == 2 && p.Hero.BaseHealth == max + 1 && p.Hero.Health == health + 1
+        // Since #23/#34 the drain lowers current Health with the maximum (5 -> 4, 2 -> 1) instead of clamping to the new maximum.
+        Core2026Proof.Check(target.BaseHealth == 4 && target.Health == 1 && p.Hero.BaseHealth == max + 1 && p.Hero.Health == health + 1
             && p.Opponent.Hero.Armor == 7 && target.AppliedEnchantments.Single().Card.Id == "EDR_810e", $"base drain: target={target.BaseHealth}/{target.Health}, hero={p.Hero.BaseHealth}/{p.Hero.Health} expected={max+1}/{health+1}, armor={p.Opponent.Hero.Armor}, ench={string.Join(",", target.AppliedEnchantments?.Select(e => e.Card.Id) ?? Array.Empty<string>())}");
         int after = target.BaseHealth; End(g);
         Core2026Proof.Check(target.BaseHealth == after, "opponent end does not trigger");
@@ -56,11 +57,14 @@ internal static class HideousHuskProof
             && g.HistoryFacts.Query.HealthChanges().Count(f => f.Reason == HistoryHealthChangeReason.Heal) == healFacts,
             "Health transfer emits no damage or healing events");
         var first = Summon(p, "EDR_810"); var second = Summon(p, "EDR_810");
+        // The drain now takes current Health too, so the damaged 4/1 would die here. Heal it to keep the same check: a drain of
+        // three takes the maximum from 4 to 1 and leaves a 1/1 (it used to be reached by clamping).
+        target.Damage = 0;
         End(g);
         Core2026Proof.Check(target.BaseHealth == 1 && target.Health == 1, "two live Husks add two to single drain");
         End(g); first.Silence(); Kill(g, second); End(g);
         Core2026Proof.Check(target.Zone.Type == Zone.GRAVEYARD, "removed and silenced Husks stop bonus; final max Health reaches zero");
-        End(g); p.Opponent.Hero.Damage = p.Opponent.Hero.BaseHealth - 1;
+        End(g); p.Opponent.Hero.Damage = p.Opponent.Hero.BaseHealth - 2; // Health 2 (was 1): the drain now takes Health too and 1 would end the game
         int armor = p.Opponent.Hero.Armor, before = p.Hero.BaseHealth;
         End(g);
         Core2026Proof.Check(p.Opponent.Hero.Armor == armor && p.Hero.BaseHealth == before + 1, "lowest enemy hero eligible; Armor ignored");

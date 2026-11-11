@@ -79,11 +79,11 @@ internal static class CostPaymentProof
     // R5/R6: https://hearthstone.wiki.gg/wiki/Change_Cost_to_Health (strict Health; inclusive Armor).
     private static void Intrinsic(bool history)
     {
-        if (!ClientExport.Present) { ClientExport.Skip("Cost payment intrinsic definitions built from client export rows"); return; }
         foreach (var pair in new[] { ("TIME_612", CostPaymentKind.Health), ("BE_042", CostPaymentKind.Armor) })
         {
             var game = HeroDivineShieldProof.NewGame(history); var p = game.Player1;
-            var definition = Definition(pair.Item1);
+            // With the export the definition is rebuilt from the client's row; without it the engine's own card stands in.
+            var definition = ClientExport.Present ? Definition(pair.Item1) : Cards.FromId(pair.Item1);
             // Export-verified, unregistered definitions; no card-module admission.
             Check(definition[GameTag.CARD_ALTERNATE_COST] == (int)pair.Item2, "pinned intrinsic tag");
             var card = Generic.DrawCard(p, definition);
