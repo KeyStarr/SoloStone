@@ -195,8 +195,10 @@ These overlays show during a match:
 - **Counter Chips** puts a chip on a hero power that was Imbued, with how many times, and beside a quest or sidequest
   with its progress. On by default.
 - **Secret Helper** lists the Secrets the opponent's class could have as card tiles, left of their hero, while they have
-  one hidden. Before each of your actions the game tries that action against every candidate. When a candidate would have
-  gone off and their Secret stayed hidden, its tile is greyed out. Hover a tile to see the full card. If every tile is
+  one hidden. The tiles go in columns of five, and each new column goes further left. Before each of your actions the game
+  tries that action against every candidate. When a candidate would have gone off and their Secret stayed hidden, its tile
+  is greyed out. A player can't have two copies of the same Secret in play, so when one of their Secrets goes off, that
+  card is greyed out for the Secrets that were in play beside it. Hover a tile to see the full card. If every tile is
   greyed out, the Secret came from another class. On by default.
 - **Card History** applies to cards that resurrect minions that died, recast the spells you cast, or repeat the
   Battlecries you played. Hovering one shows the cards it would draw on so far, at 40% size, beside it. It reads

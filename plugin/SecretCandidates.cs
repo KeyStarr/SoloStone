@@ -46,10 +46,21 @@ internal sealed class SecretCandidates
         possible[secret] = new HashSet<string>(ids);
     }
 
-    // Forgets the Secrets that are no longer hidden in play: revealed, destroyed or gone.
-    internal void Keep(ICollection<int> hidden)
+    internal IReadOnlyCollection<int> Tracked => possible.Keys;
+
+    // Forgets the Secrets that are no longer hidden in play: revealed, destroyed or gone. A player can't have two copies of one Secret
+    // in play, so a Secret revealed as a card (its name, by entity in revealed) rules that card out for every Secret that was in play
+    // beside it.
+    internal void Keep(ICollection<int> hidden, IDictionary<int, string> revealed = null)
     {
-        foreach (int secret in possible.Keys.Where(id => !hidden.Contains(id)).ToList()) { possible.Remove(secret); pools.Remove(secret); }
+        var gone = possible.Keys.Where(id => !hidden.Contains(id)).ToList();
+        foreach (int secret in gone)
+        {
+            if (revealed != null && revealed.TryGetValue(secret, out string name) && !string.IsNullOrEmpty(name))
+                foreach (var other in possible.Where(pair => hidden.Contains(pair.Key)))
+                    other.Value.RemoveWhere(id => options[id].Name == name);
+        }
+        foreach (int secret in gone) { possible.Remove(secret); pools.Remove(secret); }
     }
 
     internal bool RuleOut(int secret, string card) => possible.TryGetValue(secret, out var set) && set.Remove(card);

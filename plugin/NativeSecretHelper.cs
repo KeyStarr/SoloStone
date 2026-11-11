@@ -92,7 +92,13 @@ internal static class NativeSecretHelper
     {
         var them = game.Player2;
         var hidden = them.SecretZone.Where(s => s.Card.IsSecret && !s.Card.IsQuest && s[SabberStoneCore.Enums.GameTag.REVEALED] == 0).ToList();
-        candidates.Keep(hidden.Select(s => s.Id).ToList());
+        var ids = hidden.Select(s => s.Id).ToList();
+        // Tracked Secrets that left play revealed (they went off): their card can't be any Secret that was beside them.
+        var revealed = new Dictionary<int, string>();
+        foreach (int id in candidates.Tracked)
+            if (!ids.Contains(id) && game.IdEntityDic.TryGetValue(id, out var gone) && gone[SabberStoneCore.Enums.GameTag.REVEALED] == 1)
+                revealed[id] = gone.Card.Name;
+        candidates.Keep(ids, revealed);
         foreach (var secret in hidden) if (!candidates.Tracks(secret.Id)) candidates.Track(secret.Id, Pool(them.HeroClass));
         Publish();
         return hidden;
@@ -143,8 +149,9 @@ internal static class NativeSecretHelper
 #endif
 
     // Each frame: beside the opponent's hero while they have a hidden Secret, a heading and the candidates as the deck tracker's card
-    // tiles, the ruled-out ones dimmed. Hovering a tile shows the full card beside the list (NativeTrackerPreview). A long list shrinks
-    // its tiles to stay on screen.
+    // tiles, the ruled-out ones dimmed, in columns of five: the first next to the hero, each further one to the left. Hovering a tile
+    // shows the full card beside the list (NativeTrackerPreview).
+    internal const int ColumnRows = 5;
     internal static void Draw()
     {
         if (!On || rows.Count == 0) return;
@@ -153,29 +160,31 @@ internal static class NativeSecretHelper
             var hero = GameState.Get()?.GetOpposingSidePlayer()?.GetHeroCard();
             var heroRect = NativeCardChips.CardRect(hero);
             if (heroRect.width <= 0) return;
-            int size = Mathf.Max(8, Mathf.RoundToInt(Screen.height * NativeMatchTracker.TextShare * .62f));
+            int size = Mathf.Max(8, Mathf.RoundToInt(Screen.height * NativeMatchTracker.TextShare * .5f));
             Styles(size);
             int left = rows.Count(r => r.Possible);
             string heading = candidates.Hidden == 1 ? "Secret: " + left + " possible" : candidates.Hidden + " Secrets: " + left + " possible";
             if (left == 0) heading = candidates.Hidden == 1 ? "Secret: not from their class" : candidates.Hidden + " Secrets: not from their class";
-            float line = size * 1.35f, pad = size * .55f;
-            float row = Mathf.Min(Screen.height * NativeMatchTracker.RowShare, (Screen.height * .92f - line - pad * 2f) / rows.Count);
-            float width = Mathf.Max(Measure(heading, title).x, NativeMatchTracker.TileWidth(row, rows.Select(r => r.Option.Name)));
-            var box = new Rect(heroRect.xMin - width - pad * 3f, heroRect.yMin, width + pad * 2f, line + row * rows.Count + pad * 2f);
+            float line = size * 1.35f, pad = size * .55f, gap = pad * .6f;
+            float row = Screen.height * NativeMatchTracker.RowShare * .7f;
+            int columns = (rows.Count + ColumnRows - 1) / ColumnRows, perColumn = Mathf.Min(ColumnRows, rows.Count);
+            float column = NativeMatchTracker.TileWidth(row, rows.Select(r => r.Option.Name));
+            float width = Mathf.Max(Measure(heading, title).x, columns * column + (columns - 1) * gap);
+            var box = new Rect(heroRect.xMin - width - pad * 3f, heroRect.yMin, width + pad * 2f, line + row * perColumn + pad * 2f);
             box.x = Mathf.Max(0f, box.x);
             if (box.yMax > Screen.height) box.y = Mathf.Max(0f, Screen.height - box.height);
             GUI.DrawTexture(new Rect(box.x - 1f, box.y - 1f, box.width + 2f, box.height + 2f), edge);
             GUI.DrawTexture(box, back);
             Text(new Rect(box.x + pad, box.y + pad, width, line), heading, title, Align.Left);
-            float top = box.y + pad + line;
             SecretRow hovered = null; Rect hoveredArea = Rect.zero;
-            foreach (var secret in rows)
+            for (int i = 0; i < rows.Count; i++)
             {
-                var area = new Rect(box.x + pad, top, width, row);
+                var secret = rows[i];
+                int c = i / ColumnRows;
+                var area = new Rect(box.xMax - pad - (c + 1) * column - c * gap, box.y + pad + line + (i % ColumnRows) * row, column, row);
                 NativeMatchTracker.Tile(area.x, area.y, area.width, row, secret.Option.Id, secret.Option.Cost.ToString(), secret.Option.Name, 1,
                     secret.Option.Legendary, dim: !secret.Possible);
                 if (area.Contains(Event.current.mousePosition)) { hovered = secret; hoveredArea = area; }
-                top += row;
             }
             // On the list's left, where the board is open; on its right (over the hero) when the screen's edge is too close.
             if (hovered != null) NativeTrackerPreview.Show(hovered.Option.Id, hoveredArea, box, box.x >= NativeTrackerPreview.Width);

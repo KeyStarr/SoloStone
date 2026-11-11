@@ -58,6 +58,14 @@ static partial class Program
         Check(secrets.Hidden==1 && !secrets.Tracks(30) && secrets.Summary()=="31:3/3","secrets: a revealed Secret is forgotten");
         secrets.Keep(new int[0]);
         Check(secrets.Rows().Count==0 && secrets.Summary()=="","secrets: no hidden Secret, no list");
+        var coreFreeze=new SecretOption{Id="CORE_EX1_611",Name="Freezing Trap",Cost=2};
+        secrets.Track(40,new[]{trap,freeze,snake}); secrets.Track(41,new[]{trap,coreFreeze,snake}); secrets.Track(42,new[]{trap,freeze,snake});
+        secrets.Keep(new[]{41,42},new Dictionary<int,string>{{40,"Freezing Trap"}});
+        Check(secrets.Summary()=="41:2/3 42:2/3" && !secrets.Possible(41).Contains("CORE_EX1_611") && !secrets.Possible(42).Contains("EX1_611")
+            && !secrets.Rows().First(r=>r.Option.Name=="Freezing Trap").Possible,"secrets: a revealed Secret's card, by name, is ruled out for the Secrets beside it");
+        secrets.Keep(new[]{42},new Dictionary<int,string>{{41,null}});
+        Check(secrets.Summary()=="42:2/3","secrets: a Secret gone without a reveal rules nothing out");
+        secrets.Keep(new int[0]);
         Check(HistoryQuery.For("Battlecry: Cast a random spell for each spell you've cast this game (targets chosen randomly).").Kind==HistoryKind.Spells,"history: spells cast this game");
         Check(HistoryQuery.For("Battlecry: Repeat all other Battlecries you've played this game.").Kind==HistoryKind.Battlecries,"history: Battlecries played");
         var zoth=HistoryQuery.For("Battlecry: Summon your Deathrattle minions that died this game.");
