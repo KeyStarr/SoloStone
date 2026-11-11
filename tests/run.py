@@ -287,7 +287,7 @@ def main(argv=None):
     if managed:
         try:
             collect_client(managed)
-        except OSError as error:
+        except (OSError, Usage) as error:
             print(f'run.py: could not copy the client libraries: {error}', file=sys.stderr)
             return 2
         say(f'run.py: copied {len(CLIENT_FILES)} client libraries from {managed} to references/game')
