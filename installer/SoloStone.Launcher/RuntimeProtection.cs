@@ -75,12 +75,15 @@ namespace SoloStone
         const string Policy=@"SYSTEM\CurrentControlSet\Services\SharedAccess\Parameters\FirewallPolicy";
         const string GroupPolicy=@"SOFTWARE\Policies\Microsoft\WindowsFirewall";
         static readonly string[] Profiles={"DomainProfile","StandardProfile","PublicProfile"};
+        // Group Policy's keys. The Windows Defender Firewall with Advanced Security policy writes the Private profile as PrivateProfile;
+        // the older Windows Firewall policy (Administrative Templates) writes it as StandardProfile, like the local settings above.
+        internal static readonly string[] PolicyProfiles={"DomainProfile","PrivateProfile","StandardProfile","PublicProfile"};
         const string AllProfiles="Domain|Private|Public";
         public static FirewallSnapshot Read() {
             var snapshot=new FirewallSnapshot();
             snapshot.ServiceStopped=FirewallServiceRunning()==false;
             snapshot.Rules.AddRange(RuleStrings(Policy+@"\FirewallRules"));
-            foreach(string profile in Profiles) {
+            foreach(string profile in Profiles)
                 using(var key=Registry.LocalMachine.OpenSubKey(Policy+@"\"+profile)) {
                     if(key==null) continue;
                     if(Off(key,"EnableFirewall")) snapshot.ProfileOff=true;
@@ -88,13 +91,30 @@ namespace SoloStone
                     string[] many=excluded as string[]; string one=excluded as string;
                     if((many!=null && many.Any(v=>!string.IsNullOrWhiteSpace(v))) || !string.IsNullOrWhiteSpace(one)) snapshot.ExcludedInterface=true;
                 }
-                using(var key=Registry.LocalMachine.OpenSubKey(GroupPolicy+@"\"+profile)) {
-                    if(key==null) continue;
-                    if(Off(key,"EnableFirewall")) snapshot.PolicyOff=true;
-                    if(Off(key,"AllowLocalPolicyMerge")) snapshot.PolicyNoLocalRules=true;
-                }
-            }
+            foreach(string profile in PolicyProfiles)
+                using(var key=Registry.LocalMachine.OpenSubKey(GroupPolicy+@"\"+profile))
+                    if(key!=null && Off(key,"EnableFirewall")) snapshot.PolicyOff=true;
+            snapshot.PolicyNoLocalRules=PolicyDropsLocalRules();
             return snapshot;
+        }
+        // "Apply local firewall rules: No" in any profile's Group Policy: Windows then ignores SoloStone's rules on that profile.
+        public static bool PolicyDropsLocalRules() => PolicyProfiles.Any(profile=>PolicyValue(profile,"AllowLocalPolicyMerge")==0);
+        // Group Policy's "Block all incoming connections" (DoNotAllowExceptions=1) on every profile in `active`, COM's profile bits
+        // (1 Domain, 2 Private, 4 Public). COM's BlockAllInboundTraffic shows only the local setting, so this reads the policy itself.
+        // A policy that can't be read counts as not blocking, so state 1 keeps its refusal.
+        public static bool PolicyBlocksAllInbound(int active) {
+            try {
+                foreach(int bit in new[]{1,2,4})
+                    if((active & bit)!=0 && !(bit==1?new[]{"DomainProfile"}:bit==2?new[]{"PrivateProfile","StandardProfile"}:new[]{"PublicProfile"})
+                        .Any(profile=>PolicyValue(profile,"DoNotAllowExceptions")==1)) return false;
+                return true;
+            } catch(Exception) { return false; }
+        }
+        static int? PolicyValue(string profile,string name) {
+            using(var key=Registry.LocalMachine.OpenSubKey(GroupPolicy+@"\"+profile)) {
+                object value=key==null?null:key.GetValue(name);
+                return value is int?(int)value:(int?)null;
+            }
         }
         [DllImport("advapi32.dll",CharSet=CharSet.Unicode)] static extern int RegOpenKeyExW(IntPtr key,string subKey,int options,int access,out IntPtr result);
         [DllImport("advapi32.dll",CharSet=CharSet.Unicode)] static extern int RegEnumValueW(IntPtr key,uint index,StringBuilder name,ref uint nameLength,IntPtr reserved,out uint type,byte[] data,ref uint dataLength);
