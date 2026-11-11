@@ -35,37 +35,61 @@ internal static class LocalNativeText
     internal static bool TryGetOverride(bool staged, string cardId, Func<string, string> defaultVariant,
         out string text) => TryGetOverride(staged, cardId, defaultVariant, ClientLocale(), out text);
 
-    // The client's language, as the client reports it (Localization.GetActualLocale); the Options > Language choice before the
-    // client can answer. Null for English and for anything that is not one of the client's locales. Remembered once it is known.
-    internal static string ClientLocale()
+    // The client's language, as the client reports it (Localization.GetActualLocale); the Options > Language choice when the client
+    // cannot answer. Null for English and for anything that is not one of the client's locales. Remembered once it is settled:
+    // never while the client says English and Options started it in another language (it can answer before its language is set up).
+    internal static string ClientLocale() => ClientLocale(ReadClientLocale, () => NativeLanguageOption.Running);
+
+    internal static string ClientLocale(Func<string> client, Func<string> running)
     {
         string known = clientLocale;
         if (known != null) return known.Length == 0 ? null : known;
-        string locale = null;
-        try
-        {
-            var localization = Type.GetType("Localization, Blizzard.T5.Localization", false);
-            var method = localization?.GetMethod("GetActualLocale", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
-            locale = method?.Invoke(null, null)?.ToString();
-        }
-        catch (Exception) { locale = null; }
-        bool fromClient = locale == "enGB" || GameLanguage.Known(locale);
-        if (!fromClient)
-        {
-            try { locale = NativeLanguageOption.Running; } catch (Exception) { locale = null; }
-        }
-        string normalized = LocalizedCardText.Normalize(locale);
-        if (fromClient) clientLocale = normalized ?? "";
-        return normalized;
+        string reported = null, started = null;
+        try { reported = client(); } catch (Exception) { reported = null; }
+        try { started = running(); } catch (Exception) { started = null; }
+        string locale = LocalizedCardText.Resolve(reported, started, out bool cacheable);
+        if (cacheable) clientLocale = locale ?? "";
+        return locale;
     }
 
-    // Raw text before the variant pick: the locale's own text for this card, else the engine's English.
-    internal static string RawFor(string cardId, string locale)
+    private static System.Reflection.MethodInfo actualLocale;
+    private static bool actualLocaleLooked;
+
+    private static string ReadClientLocale()
     {
+        if (!actualLocaleLooked)
+        {
+            // Looked up once, found or not.
+            actualLocaleLooked = true;
+            try
+            {
+                var localization = Type.GetType("Localization, Blizzard.T5.Localization", false);
+                actualLocale = localization?.GetMethod("GetActualLocale", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
+            }
+            catch (Exception) { actualLocale = null; }
+        }
+        return actualLocale?.Invoke(null, null)?.ToString();
+    }
+
+    internal static void ResetLocaleCache() { clientLocale = null; }
+
+    // The engine id a native (transport) id stands for, or null when SoloStone has no text for it.
+    internal static string EngineIdFor(string nativeId) =>
+        nativeId != null && EngineIdByNativeId.TryGetValue(nativeId, out string engineId) ? engineId : null;
+
+    // Raw text before the variant pick: the locale's own text for this card while the engine still plays the English it was made
+    // from, else the engine's English. `status` says which and why.
+    internal static string RawFor(string cardId, string locale) => RawFor(cardId, locale, out _);
+
+    internal static string RawFor(string cardId, string locale, out LocalizedCardText.Status status)
+    {
+        status = LocalizedCardText.Status.English;
         if (string.IsNullOrEmpty(cardId) || !TextByNativeId.TryGetValue(cardId, out string english)) return null;
-        if (locale != null && EngineIdByNativeId.TryGetValue(cardId, out string engineId)
-            && LocalizedCardText.TryGet(locale, engineId, out string localized))
-            return localized;
+        if (locale != null && EngineIdByNativeId.TryGetValue(cardId, out string engineId))
+        {
+            status = LocalizedCardText.Lookup(locale, engineId, english, out string localized);
+            if (status == LocalizedCardText.Status.Localized) return localized;
+        }
         return english;
     }
 

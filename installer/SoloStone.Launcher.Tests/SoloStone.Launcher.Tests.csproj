@@ -4,6 +4,7 @@
   <Import Project="../BuildInputs.targets" />
   <ItemGroup>
     <PackageReference Include="BouncyCastle.Cryptography" Version="[2.6.2]" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
     <Content Include="../SoloStone.Launcher/*.cs" Link="launcher-source/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../SoloStone.Launcher/Gui/*.cs" Link="launcher-source/Gui/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Content Include="../SoloStone.Launcher/SoloStone.Launcher.csproj" Link="launcher-source/SoloStone.Launcher.csproj" CopyToOutputDirectory="PreserveNewest" />

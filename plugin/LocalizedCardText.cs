@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
-// SoloStone's frozen card text in the client's language (facts/README.md, "Locale files"). One file per non-English locale,
+// SoloStone's frozen card text in the client's language (facts/README.md, "Locale files"). A translation is used only while the
+// engine still plays the English text it was made from (its Key); otherwise the card shows the engine's English. One file per non-English locale,
 // embedded in the plugin; only the running locale's file is ever read, and only on first use. Pure (no Unity, no engine types),
 // so the launcher tests run it. Keyed by engine card ID; LocalNativeText maps the client's native ID to it.
 // A closed-schema reader for the same reason CardFacts is one: Unity's Mono has no usable JSON serializer.
@@ -12,7 +13,12 @@ internal static class LocalizedCardText
     internal const string Meta = "violet-hold-2026-09";
     internal const string English = "enUS";
     private static readonly object gate = new object();
-    private static readonly Dictionary<string, Dictionary<string, string>> loaded = new Dictionary<string, Dictionary<string, string>>(StringComparer.Ordinal);
+    private static readonly Dictionary<string, Dictionary<string, Entry>> loaded = new Dictionary<string, Dictionary<string, Entry>>(StringComparer.Ordinal);
+
+    // A translation and the key of the English text it translates (Key). Used only while the engine still plays that English text.
+    internal struct Entry { internal string Key, Text; }
+
+    internal enum Status { English, NoFile, NoEntry, Stale, Localized }
 
     // Opens a locale file by its resource name; null when there is none. The plugin reads its assembly, the tests read facts/.
     internal static Func<string, Stream> Open = name => typeof(LocalizedCardText).Assembly.GetManifestResourceStream(name);
@@ -27,23 +33,57 @@ internal static class LocalizedCardText
         return GameLanguage.Known(clientLocale) ? clientLocale : null;
     }
 
-    // The raw text of a card in a locale, or false: English, no file, no text for this card, or a file that would not read.
-    internal static bool TryGet(string locale, string engineId, out string raw)
+    // The English text a translation is keyed to, as the engine plays it: no " @spelldmg" suffix, no whitespace at either end.
+    internal static string Canonical(string english)
+    {
+        if (english == null) return null;
+        const string suffix = " @spelldmg";
+        if (english.EndsWith(suffix, StringComparison.Ordinal)) english = english.Substring(0, english.Length - suffix.Length);
+        return english.Trim(' ', '\t', '\r', '\n');
+    }
+
+    // FNV-1a 32 over the UTF-8 of Canonical(english), 8 lowercase hex digits. tools/gen_card_facts.py text_key writes the same.
+    internal static string Key(string english)
+    {
+        uint hash = 2166136261;
+        foreach (byte b in Encoding.UTF8.GetBytes(Canonical(english) ?? "")) hash = (hash ^ b) * 16777619;
+        return hash.ToString("x8", System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    // Which language the card text follows, given what the client reports and what Options > Language started it with.
+    // `cacheable` is false while the two disagree about English: the client can report enUS before its language is set up.
+    internal static string Resolve(string clientLocale, string runningLocale, out bool cacheable)
+    {
+        string client = Normalize(clientLocale), running = Normalize(runningLocale);
+        bool known = client != null || clientLocale == English || clientLocale == "enGB";
+        cacheable = known && (client != null || running == null);
+        if (client != null) return client;
+        return known ? null : running;
+    }
+
+    // The translation to use for a card whose engine text is `engineText`, and why not when there is none.
+    internal static Status Lookup(string locale, string engineId, string engineText, out string raw)
     {
         raw = null;
         locale = Normalize(locale);
-        if (locale == null || string.IsNullOrEmpty(engineId)) return false;
+        if (locale == null) return Status.English;
+        if (string.IsNullOrEmpty(engineId)) return Status.NoEntry;
         var texts = Load(locale);
-        return texts != null && texts.TryGetValue(engineId, out raw) && !string.IsNullOrEmpty(raw);
+        if (texts == null) return Status.NoFile;
+        if (!texts.TryGetValue(engineId, out Entry entry) || string.IsNullOrEmpty(entry.Text)) return Status.NoEntry;
+        // The engine rewrites some cards after load (Configure hooks); a translation of the old text would say something else.
+        if (entry.Key != Key(engineText)) return Status.Stale;
+        raw = entry.Text;
+        return Status.Localized;
     }
 
     // Null when the locale has no usable file. A failure is remembered, so a broken file is not re-read on every card.
-    internal static Dictionary<string, string> Load(string locale)
+    internal static Dictionary<string, Entry> Load(string locale)
     {
         lock (gate)
         {
             if (loaded.TryGetValue(locale, out var cached)) return cached;
-            Dictionary<string, string> texts = null;
+            Dictionary<string, Entry> texts = null;
             try
             {
                 using (var stream = Open(ResourceName(locale)))
@@ -57,7 +97,7 @@ internal static class LocalizedCardText
 
     internal static void Reset() { lock (gate) loaded.Clear(); }
 
-    internal static Dictionary<string, string> Read(Stream stream, string locale)
+    internal static Dictionary<string, Entry> Read(Stream stream, string locale)
     {
         string json;
         using (var reader = new StreamReader(stream, new UTF8Encoding(false), false)) json = reader.ReadToEnd();
@@ -71,9 +111,9 @@ internal static class LocalizedCardText
 
         internal Reader(string text) { json = text; }
 
-        internal Dictionary<string, string> Document(string locale)
+        internal Dictionary<string, Entry> Document(string locale)
         {
-            Dictionary<string, string> texts = null;
+            Dictionary<string, Entry> texts = null;
             int schema = 0;
             string meta = null, fileLocale = null;
             Expect('{');
@@ -92,13 +132,13 @@ internal static class LocalizedCardText
             } while (Next('}'));
             Space();
             if (at != json.Length) throw Bad("trailing data");
-            if (schema != 1 || meta != Meta || fileLocale != locale || texts == null) throw Bad("not the " + locale + " file of " + Meta);
+            if (schema != 2 || meta != Meta || fileLocale != locale || texts == null) throw Bad("not the " + locale + " file of " + Meta);
             return texts;
         }
 
-        private Dictionary<string, string> Texts()
+        private Dictionary<string, Entry> Texts()
         {
-            var texts = new Dictionary<string, string>(10000, StringComparer.Ordinal);
+            var texts = new Dictionary<string, Entry>(10000, StringComparer.Ordinal);
             Expect('{');
             Space();
             if (Peek() == '}') { at++; return texts; }
@@ -106,7 +146,12 @@ internal static class LocalizedCardText
             {
                 string id = Str();
                 Expect(':');
-                texts.Add(id, Str());
+                Expect('[');
+                string key = Str();
+                Expect(',');
+                string text = Str();
+                Expect(']');
+                texts.Add(id, new Entry { Key = key, Text = text });
             } while (Next('}'));
             return texts;
         }
