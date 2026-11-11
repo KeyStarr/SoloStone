@@ -272,7 +272,7 @@ class Runner:
             return True
         absent = [path for path in PLUGIN_REFERENCES if not (ROOT / path).is_file()]
         if absent:
-            note('references/game is set up, but ' + ', '.join(absent) + ' is missing, so the plugin cannot be built and the pinned '
+            note('references/game is set up, but these are missing: ' + ', '.join(absent) + ', so the plugin cannot be built and the pinned '
                  'sub-spell check would skip (docs/BUILDING.md step 1)')
             return False
         return all(self.step(log, [self.dotnet, 'build', project, '-c', 'Release', '-p:EngineSource=true', '-p:NuGetAudit=false',
