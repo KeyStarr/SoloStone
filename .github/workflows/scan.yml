@@ -11,8 +11,8 @@
 # imported or sourced, the token is the default read-only one and credentials are not persisted. Never add a step that runs
 # code from the head, or that writes into $GITHUB_WORKSPACE after the head is fetched.
 # The private denylist (owner identity, lab hosts) is not here; it runs in the local commit and push hooks.
-# Required status checks: see "Owner setup on GitHub" in tools/guard_rails/README.md (a pull request can add a workflow with a
-# job of the same name).
+# Required status checks and the rest of the repository setup are in the maintainer docs (docs/GIT.md); a pull request can add
+# a workflow with a job of the same name, so the check must be required by the repository ruleset, not by name alone.
 #   tree:    every file of the head (or of the pushed commit), strict rules, against the public rules
 #   commits: messages and the blobs each new commit introduces (a hit an older commit adds still fails after a later commit
 #            removes it; a link or a nested repository is reported here); outside contributors' identities are not checked
