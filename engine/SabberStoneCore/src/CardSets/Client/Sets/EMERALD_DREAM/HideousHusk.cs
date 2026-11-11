@@ -44,6 +44,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     // A Health enchantment, not damage: the victim keeps its damage, so its current Health falls with its
                     // maximum (a 1/3 minion with 2 damage that loses 1 dies), and the hero's maximum and current Health rise.
                     ctx.GiveBuff(victim.Id, "EDR_810e", amount);
+                    // A Health enchantment never marks its target destroyed, so a victim left at 0 Health is flagged here.
+                    if (victim.Health <= 0) victim.ToBeDestroyed = true;
                     ctx.GiveBuff(c.Hero.Id, "EDR_810e2", amount);
                 })
             } };
