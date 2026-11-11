@@ -32,13 +32,8 @@
     <Compile Include="../../plugin/LocalShop.cs" />
     <Compile Include="../../plugin/FairPackRules.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
-    <Reference Include="Assembly-CSharp"><HintPath>../../references/game/Assembly-CSharp.dll</HintPath></Reference>
-    <Reference Include="blizzard.bgsclient"><HintPath>../../references/game/blizzard.bgsclient.dll</HintPath></Reference>
-    <Reference Include="blizzard.bgssdk"><HintPath>../../references/game/blizzard.bgssdk.dll</HintPath></Reference>
-    <Reference Include="Blizzard.T5.Core"><HintPath>../../references/game/Blizzard.T5.Core.dll</HintPath></Reference>
-    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
-    <Reference Include="UnityEngine"><HintPath>../../references/game/UnityEngine.dll</HintPath></Reference>
-    <Reference Include="UnityEngine.CoreModule"><HintPath>../../references/game/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/RepoRoot.cs" Link="RepoRoot.cs" />
     <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
     <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
     <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />

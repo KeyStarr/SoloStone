@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Reflection.Metadata;
 using System.Xml.Serialization;
 using PegasusShared;
 
@@ -44,7 +45,21 @@ foreach (int count in new[] { 0, 1, 2, 3 })
         count == 0 ? new[] { false, false, false } : count == 1 ? new[] { true, false, false }
         : count == 2 ? new[] { true, true, false } : new[] { true, true, true }), "picker visible slots at " + count);
 Reject(() => NativeRecipeTemplates.ButtonVisibility(4, 3), "picker capacity overflow fails closed");
-Check((int)GAME_TAG.MAX_SIDEBOARD_CARDS == 2931, "shared native-save rule uses pinned client sideboard tag");
+// The plugin hard-codes the client's sideboard tag (LocalDecks.cs, 2931), so the pin is read from the client library itself.
+// Without a client the check is skipped, never replaced by a stand-in value that would only compare itself.
+string clientRoot = RepoRoot.Find("references/game/Assembly-CSharp.dll");
+if (clientRoot == null) Console.WriteLine("SKIP pinned client sideboard tag: needs the client's Assembly-CSharp.dll (run.py --client)");
+else
+{
+    using var client = new System.Reflection.PortableExecutable.PEReader(File.OpenRead(Path.Combine(clientRoot, "references/game/Assembly-CSharp.dll")));
+    var metadata = client.GetMetadataReader();
+    var gameTag = metadata.TypeDefinitions.Select(metadata.GetTypeDefinition)
+        .Single(type => metadata.GetString(type.Name) == "GAME_TAG" && metadata.GetString(type.Namespace) == "");
+    var tag = gameTag.GetFields().Select(metadata.GetFieldDefinition).Single(field => metadata.GetString(field.Name) == "MAX_SIDEBOARD_CARDS");
+    var constant = metadata.GetConstant(tag.GetDefaultValue());
+    Check(Convert.ToInt32(metadata.GetBlobReader(constant.Value).ReadConstant(constant.TypeCode)) == 2931,
+        "shared native-save rule uses pinned client sideboard tag");
+}
 var gelbin = new LocalCustomDeck { Name = "Gelbin", Hero = "HERO_04",
     Cards = new() { "TIME_009", "TIME_009t1", "TIME_009t2" } };
 NativeRecipeSafety.AssertContents(gelbin, gelbin.Name, gelbin.Hero, gelbin.Cards, Array.Empty<LocalSideboard>());
