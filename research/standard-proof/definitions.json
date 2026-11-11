@@ -1,0 +1,396 @@
+[
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69547,
+    "faction": "HORDE",
+    "health": 1,
+    "id": "CORE_EX1_011",
+    "mechanics": [
+      "BATTLECRY"
+    ],
+    "name": "Voodoo Doctor",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "<b>Battlecry:</b> Restore #2 Health.",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69565,
+    "faction": "HORDE",
+    "health": 1,
+    "id": "CORE_CS2_189",
+    "mechanics": [
+      "BATTLECRY"
+    ],
+    "name": "Elven Archer",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "<b>Battlecry:</b> Deal 1 damage.",
+    "type": "MINION"
+  },
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 69665,
+    "health": 1,
+    "id": "CORE_EX1_096",
+    "mechanics": [
+      "DEATHRATTLE"
+    ],
+    "name": "Loot Hoarder",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "<b>Deathrattle:</b> Draw a card.",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 69718,
+    "health": 2,
+    "id": "CORE_GVG_085",
+    "mechanics": [
+      "DIVINE_SHIELD",
+      "TAUNT"
+    ],
+    "name": "Annoy-o-Tron",
+    "race": "MECHANICAL",
+    "races": [
+      "MECHANICAL"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "techLevel": 2,
+    "text": "<b>Taunt</b>\n<b>Divine Shield</b>",
+    "type": "MINION"
+  },
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76323,
+    "health": 3,
+    "id": "CORE_LOOT_413",
+    "mechanics": [
+      "DEATHRATTLE"
+    ],
+    "name": "Plated Beetle",
+    "race": "BEAST",
+    "races": [
+      "BEAST"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "<b>Deathrattle:</b> Gain 3 Armor.",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 76316,
+    "health": 4,
+    "id": "CORE_EX1_007",
+    "mechanics": [
+      "TRIGGER_VISUAL"
+    ],
+    "name": "Acolyte of Pain",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Whenever this minion takes damage, draw a card.",
+    "type": "MINION"
+  },
+  {
+    "attack": 3,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 69542,
+    "faction": "HORDE",
+    "health": 5,
+    "id": "CORE_CS2_179",
+    "mechanics": [
+      "TAUNT"
+    ],
+    "name": "Sen'jin Shieldmasta",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "<b>Taunt</b>",
+    "type": "MINION"
+  },
+  {
+    "attack": 4,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 102222,
+    "health": 4,
+    "id": "CORE_SW_066",
+    "mechanics": [
+      "BATTLECRY",
+      "TRADEABLE"
+    ],
+    "name": "Royal Librarian",
+    "rarity": "COMMON",
+    "referencedTags": [
+      "SILENCE"
+    ],
+    "set": "CORE",
+    "text": "[x]<b>Tradeable</b>\n<b>Battlecry:</b> <b>Silence</b>\na minion.",
+    "type": "MINION"
+  },
+  {
+    "attack": 6,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 6,
+    "dbfId": 112924,
+    "health": 7,
+    "id": "Core_CS2_200",
+    "name": "Boulderfist Ogre",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 7,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 7,
+    "dbfId": 69544,
+    "faction": "ALLIANCE",
+    "health": 7,
+    "id": "CORE_CS2_222",
+    "mechanics": [
+      "AURA"
+    ],
+    "name": "Stormwind Champion",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Your other minions have +1/+1.",
+    "type": "MINION"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 111365,
+    "id": "CORE_CS2_024",
+    "mechanics": [
+      "FREEZE"
+    ],
+    "name": "Frostbolt",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "FROST",
+    "text": "Deal $3 damage to a character and <b>Freeze</b> it.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 69500,
+    "id": "CORE_CS2_023",
+    "name": "Arcane Intellect",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "ARCANE",
+    "text": "Draw 2 cards.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 69501,
+    "id": "CORE_CS2_029",
+    "name": "Fireball",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "FIRE",
+    "text": "Deal $6 damage.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 6,
+    "dbfId": 76273,
+    "id": "CORE_CS2_028",
+    "mechanics": [
+      "FREEZE"
+    ],
+    "name": "Blizzard",
+    "rarity": "RARE",
+    "set": "CORE",
+    "spellSchool": "FROST",
+    "text": "Deal $2 damage to all enemy minions and <b>Freeze</b> them.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 7,
+    "dbfId": 69502,
+    "id": "CORE_CS2_032",
+    "name": "Flamestrike",
+    "rarity": "EPIC",
+    "set": "CORE",
+    "spellSchool": "FIRE",
+    "text": "Deal $5 damage to all enemy minions.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69535,
+    "id": "CORE_CS2_108",
+    "name": "Execute",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Destroy a damaged enemy minion.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69638,
+    "id": "CORE_EX1_391",
+    "name": "Slam",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Deal $2 damage to a minion. If it survives, draw a card.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76304,
+    "id": "CORE_AT_064",
+    "name": "Bash",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Deal $3 damage.\nGain 3 Armor.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76302,
+    "id": "CORE_EX1_606",
+    "name": "Shield Block",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "text": "Gain 5 Armor.\nDraw a card.",
+    "type": "SPELL"
+  },
+  {
+    "attack": 2,
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 69645,
+    "health": 4,
+    "id": "CORE_EX1_604",
+    "mechanics": [
+      "TRIGGER_VISUAL"
+    ],
+    "name": "Frothing Berserker",
+    "rarity": "RARE",
+    "set": "CORE",
+    "text": "Whenever a minion takes damage, gain +1 Attack.",
+    "type": "MINION"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "dbfId": 637,
+    "health": 30,
+    "heroPowerDbfId": 807,
+    "id": "HERO_08",
+    "name": "Jaina Proudmoore",
+    "rarity": "FREE",
+    "set": "HERO_SKINS",
+    "type": "HERO"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "dbfId": 7,
+    "health": 30,
+    "heroPowerDbfId": 725,
+    "id": "HERO_01",
+    "name": "Garrosh Hellscream",
+    "rarity": "FREE",
+    "set": "HERO_SKINS",
+    "type": "HERO"
+  },
+  {
+    "cardClass": "MAGE",
+    "cost": 2,
+    "dbfId": 807,
+    "id": "HERO_08bp",
+    "name": "Fireblast",
+    "rarity": "FREE",
+    "set": "LEGACY",
+    "text": "<b>Hero Power</b>\nDeal $1 damage.",
+    "type": "HERO_POWER"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "cost": 2,
+    "dbfId": 725,
+    "id": "HERO_01bp",
+    "name": "Armor Up!",
+    "rarity": "FREE",
+    "set": "LEGACY",
+    "text": "<b>Hero Power</b>\nGain $d2 Armor.",
+    "type": "HERO_POWER"
+  },
+  {
+    "cardClass": "NEUTRAL",
+    "cost": 0,
+    "dbfId": 1746,
+    "id": "GAME_005",
+    "name": "The Coin",
+    "set": "CORE",
+    "text": "Gain 1 Mana Crystal this turn only.",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "NEUTRAL",
+    "dbfId": 240,
+    "id": "CS2_222o",
+    "name": "Might of Stormwind",
+    "set": "LEGACY",
+    "text": "+1/+1.",
+    "type": "ENCHANTMENT"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "dbfId": 1177,
+    "id": "EX1_604o",
+    "name": "Berserk",
+    "set": "EXPERT1",
+    "text": "Increased Attack.",
+    "type": "ENCHANTMENT"
+  }
+]

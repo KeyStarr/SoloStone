@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <DefineConstants>$(DefineConstants);STANDARD_PROOF</DefineConstants>
+    <Nullable>disable</Nullable>
+    <GameReferences>$(MSBuildThisFileDirectory)../../references/game</GameReferences>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
+    <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
+    <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
+    <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
+    <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
+    <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
+    <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
+    <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
+    <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
+    <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
+    <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
+    <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
+    <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
+    <Compile Include="../../plugin/LocalAchievementCollector.cs" Link="LocalAchievementCollector.cs" />
+    <Compile Include="../../plugin/LocalProfileCheats.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" />
+    <Compile Include="../../plugin/LocalClassRewards.cs" />
+    <Compile Include="../../plugin/LocalEconomy.cs" Link="LocalEconomy.cs" />
+    <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <Reference Include="blizzard.bgsclient">
+      <HintPath>$(GameReferences)/blizzard.bgsclient.dll</HintPath>
+    </Reference>
+    <Reference Include="blizzard.bgssdk">
+      <HintPath>$(GameReferences)/blizzard.bgssdk.dll</HintPath>
+    </Reference>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(GameReferences)/Assembly-CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameReferences)/UnityEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameReferences)/UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../research/standard-proof/ProofDecks.cs" Link="ProofDecks.cs" />
+    <Compile Include="../../research/standard-proof/ProofBot.cs" Link="ProofBot.cs" />
+    <EmbeddedResource Include="../../research/standard-proof/definitions.json" LogicalName="StandardProofDefinitions.json" />
+    <Compile Include="../../plugin/StandardProofNative.cs" Link="StandardProofNative.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'true' == 'true'">
+    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>$(MSBuildThisFileDirectory)../../references/game/Blizzard.T5.MiniJSON.dll</HintPath><Private>true</Private></Reference>
+  </ItemGroup>
+  <PropertyGroup><EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
+    <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" Link="LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+    <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>
