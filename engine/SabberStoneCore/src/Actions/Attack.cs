@@ -184,17 +184,11 @@ namespace SabberStoneCore.Actions
 			=> delegate (Game g, ICharacter source, ICharacter target)
 			{
 				using var resolution = g.Resolution.Enter(ResolutionKind.AttackPreparation, source.Id);
-				//if (g.History)
-				//{
-
-				//}
-				if (g.History)
-				{
-					if (source.IsAttacking) g.PowerHistory.Add(PowerHistoryBuilder.TagChange(source.Id, GameTag.ATTACKING, 1));
-					if (target.IsDefending) g.PowerHistory.Add(PowerHistoryBuilder.TagChange(target.Id, GameTag.DEFENDING, 1));
-				}
-				source.IsAttacking = true;
-				target.IsDefending = true;
+				// The client draws a hit when ATTACKING and DEFENDING arrive with the proposal. Attack triggers see both
+				// set, but the client is told only once they resolve and the attack goes ahead; an attack they cancel
+				// (Freezing Trap) stays a proposal, and the client draws it cancelled.
+				source.NativeTags[GameTag.ATTACKING] = 1;
+				target.NativeTags[GameTag.DEFENDING] = 1;
 
 				// Invoke onAttackTrigger
 				//Trigger.ValidateTriggers(g, source, SequenceType.Attack);
@@ -206,14 +200,19 @@ namespace SabberStoneCore.Actions
 				if (DeathContextRules.ConsumeAttackCancellation(source) || source.ToBeDestroyed || target.ToBeDestroyed || (source.Zone != null && source.Zone.Type != Zone.PLAY) ||
 				    (target.Zone != null && target.Zone.Type != Zone.PLAY))
 				{
-					source.IsAttacking = false;
-					target.IsDefending = false;
+					source.NativeTags[GameTag.ATTACKING] = 0;
+					target.NativeTags[GameTag.DEFENDING] = 0;
 
 					g.Log(LogLevel.INFO, BlockType.ATTACK, "OnAttackTrigger",
 						!g.Logging ? "" : "Oh shizzle, something died to the shizzeling of triggering ...");
 					return false;
 				}
 
+				if (g.History)
+				{
+					g.PowerHistory.Add(PowerHistoryBuilder.TagChange(source.Id, GameTag.ATTACKING, 1));
+					g.PowerHistory.Add(PowerHistoryBuilder.TagChange(target.Id, GameTag.DEFENDING, 1));
+				}
 				return true;
 			};
 
