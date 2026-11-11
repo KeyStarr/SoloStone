@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings>
+    <DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/NativeRecipePickerModel.cs" />
+    <Compile Include="../../plugin/NativeRecipeProfile.cs" />
+    <Compile Include="../../plugin/NativeRecipeLibrary.cs" />
+    <Compile Include="../../plugin/NativeRecipeGuideText.cs" />
+    <Compile Include="../../plugin/NativeDeckGuideText.cs" />
+    <Compile Include="../../plugin/NativeDeckRunes.cs" />
+    <Compile Include="../../plugin/RecipeLibrary.cs" />
+    <Compile Include="../../plugin/LocalProfile.cs" />
+    <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileCheats.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" />
+    <Compile Include="../../plugin/LocalClassRewards.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" />
+    <Compile Include="../../plugin/LocalEconomy.cs" />
+    <Compile Include="../../plugin/StableSeed.cs" />
+    <Compile Include="../../plugin/LocalRewardPresentation.cs" />
+    <Compile Include="../../plugin/LocalShop.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" SetTargetFramework="TargetFramework=netstandard2.1" />
+    <Reference Include="Assembly-CSharp"><HintPath>../../references/game/Assembly-CSharp.dll</HintPath></Reference>
+    <Reference Include="blizzard.bgsclient"><HintPath>../../references/game/blizzard.bgsclient.dll</HintPath></Reference>
+    <Reference Include="blizzard.bgssdk"><HintPath>../../references/game/blizzard.bgssdk.dll</HintPath></Reference>
+    <Reference Include="Blizzard.T5.Core"><HintPath>../../references/game/Blizzard.T5.Core.dll</HintPath></Reference>
+    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
+    <Reference Include="UnityEngine"><HintPath>../../references/game/UnityEngine.dll</HintPath></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>../../references/game/UnityEngine.CoreModule.dll</HintPath></Reference>
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+    <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>

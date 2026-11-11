@@ -1,0 +1,30 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+<PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup><ItemGroup><Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference><Compile Include="../../plugin/NativeMenuFlow.cs" Condition="Exists('../../plugin/NativeMenuFlow.cs')"/><Compile Include="../../plugin/NativeUIProjection.cs" Condition="Exists('../../plugin/NativeUIProjection.cs')"/><Compile Include="../../plugin/LocalRewardPresentation.cs" Condition="Exists('../../plugin/LocalRewardPresentation.cs')"/><Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs"/><Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs"/><Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs"/><Compile Include="../../plugin/LocalProfileCheats.cs"/><Compile Include="../../plugin/ProfileCatalog.cs"/><Compile Include="../../plugin/OfflineGuard.cs"/>
+    <Compile Include="../../plugin/LocalClassRewards.cs" /><Compile Include="../../plugin/LocalDecks.cs"/><Compile Include="../../plugin/LocalDeckCards.cs"/><Compile Include="../../plugin/LocalEconomy.cs"/><Compile Include="../../plugin/StableSeed.cs" /><Compile Include="../../plugin/LocalCardCatalog.cs"/><Reference Include="SabberStoneCore" Condition="'$(EngineSource)' != 'true'"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference><Reference Include="UnityEngine"><HintPath>../../references/game/UnityEngine.dll</HintPath></Reference><Reference Include="UnityEngine.CoreModule"><HintPath>../../references/game/UnityEngine.CoreModule.dll</HintPath></Reference></ItemGroup><PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup><ItemGroup Condition="'$(EngineSource)' == 'true'"><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/BoardChoice.cs" Link="BoardChoice.cs" />
+    <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
+    <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
+    <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" Link="LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+  </ItemGroup>
+  <Target Name="ExtractCraftingProjection" BeforeTargets="CoreCompile">
+    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_crafting_projection.py&quot; &quot;$(IntermediateOutputPath)CraftingProjection.g.cs&quot;" />
+    <ItemGroup><Compile Include="$(IntermediateOutputPath)CraftingProjection.g.cs" /></ItemGroup>
+  </Target>
+  <ItemGroup><Compile Include="../CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+    <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>
