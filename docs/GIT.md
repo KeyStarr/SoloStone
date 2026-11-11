@@ -66,6 +66,7 @@ The manifest seq goes to 2; 0.1.0 installs pick the update up on their next laun
 - The subject line is short, in the present tense, with no full stop at the end.
 - Separate several changes with `;`. If it no longer fits on one line, split it into more commits.
 - A body is optional. Write one only when the reason for the change would surprise a reader.
+
 For example:
 
 ```text
