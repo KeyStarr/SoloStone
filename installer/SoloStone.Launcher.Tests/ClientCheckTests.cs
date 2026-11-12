@@ -190,6 +190,7 @@ static partial class Program
         RejectsBecause(()=>ClientBindings.ReadRows(null),"missing","no manifest refuses");
         RejectsBecause(()=>ClientBindings.ReadRows(new MemoryStream(System.Text.Encoding.UTF8.GetBytes("# only a comment\n"))),"empty","an empty manifest refuses");
         Check(ClientBindings.ReadRows(new MemoryStream(System.Text.Encoding.UTF8.GetBytes("# c\nT\t*\tX\t\t\n"))).Single()=="T\t*\tX\t\t","rows skip comments");
+        Check(ClientBindings.ReadRows(new MemoryStream(System.Text.Encoding.UTF8.GetBytes("# c\r\nT\t*\tX\t\t\r\nA\tY\t\t\t\r\n"))).SequenceEqual(new[]{"T\t*\tX\t\t","A\tY\t\t\t"}),"a CRLF manifest reads the same rows");
         // V2: a planted missing pool card. Numbers and text never reach this: only presence of a record does.
         Check(ClientBindings.MissingCards(new[]{"A","B","A"},id=>id!="A").Single()=="A" && ClientBindings.MissingCards(new[]{"A"},_=>true).Count==0,"a pool card with no client record is missing, once");
         string many=ClientBindings.Summary("cards",new[]{"A","B","C","D","E","F"});
