@@ -47,7 +47,7 @@ internal static partial class Program
         Case("sweep: no tracker drift or fault over real NPC play", NoDriftOverRealPlay);
         Case("sweep: fault mid-batch leaves no stale frames", FaultMidBatchNoStaleFrames);
         if (failed != 0) throw new InvalidOperationException("TEST: " + failed + " event-log review case(s) failed");
-        Console.WriteLine("PASS match event log review: " + 21 + " cases");
+        Console.WriteLine("PASS match event log review: " + 19 + " cases");
     }
 
     private static (NativeMatch Match, Capture Capture, List<string> Lines) LoggedBoard(int seed = 1337)

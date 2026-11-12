@@ -121,7 +121,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
 | `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
 | `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
-| `native-match-logic` | The native match checks that need no client: the opponent turn runner, presentation and memory, rematch, the quest bot, 36 showcase games, fair-view privacy, debug scenario parsing and the controller admission invariant. Slices: `--npc-runner-only`, `--npc-presentation-only`, `--rematch-only`, `--quests-only`, `--showcase-only`, `--npc-pets-only`, `--coin-flip-only`, `--debug-scenario-only`, `--fair-view-only`, `--match-event-log-only`, `--controller-admission-only`; any other argument fails |
+| `native-match-logic` | The native match checks that need no client: the opponent turn runner, presentation and memory, rematch, the quest bot, 36 showcase games, fair-view privacy, coin-flip control, debug scenario lane paths and files, the match event log budget, NPC pet seats and the controller admission invariant. Slices: `--npc-runner-only`, `--npc-presentation-only`, `--rematch-only`, `--quests-only`, `--showcase-only`, `--npc-pets-only`, `--coin-flip-only`, `--debug-scenario-only`, `--fair-view-only`, `--match-event-log-only`, `--controller-admission-only`; any other argument fails |
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
@@ -179,14 +179,13 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder`, `native-match-logic` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
-| Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-match-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |
+| Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | With a client: `native-bindings`, `native-match`, `transport-invariants` |
 | Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
 Test folders are named after their suite (`tests/ai-golden`, `tests/fair-packs`, `tests/dormant`, ...). Code that two suites compile
-lives in `tests/shared/` (linked, never copied); test data that is not a suite's own is in `tests/fixtures/`. `native-match` links the
-transport sources it uses from `tests/shared/`; it no longer references the `transport-invariants` project.
+lives in `tests/shared/` (linked, never copied); test data that is not a suite's own is in `tests/fixtures/`.
 
 If you are not sure, run everything.
 

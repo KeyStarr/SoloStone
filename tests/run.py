@@ -157,7 +157,7 @@ SUITES += [
     Suite('shop', 'dotnet', 'the native shop: catalogue, purchases, deck tiles and art maths (one check reads the client library, if set up)',
           'tests/shop/ShopTests.csproj'),
     Suite('native-match-logic', 'dotnet', 'the checks of the native match that need no client: opponent turn runner and presentation, rematch, quest bot, showcase games, '
-          'fair-view privacy, debug scenario parsing, controller admission',
+          'fair-view privacy, coin-flip control, debug scenario files, the match event log budget, NPC pet seats, controller admission',
           'tests/native-match-logic/NativeMatchLogicTests.csproj'),
     Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
           'tests/fx-harmony/FxHarmonyTests.csproj', prebuild_in_tree_with_client=['plugin/OfflineProbe.csproj']),

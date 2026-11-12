@@ -6,12 +6,23 @@ using System.Linq;
 // without the client's libraries. No argument runs them all; an argument that names no check fails.
 internal static partial class Program
 {
+    // Fail-open achievement recording must not hide recorder regressions: any evidence invalidation in a match played
+    // by these checks (including bot search clones) fails the suite, as in native-match.
+    private static readonly System.Collections.Concurrent.ConcurrentQueue<string> evidenceInvalidations = new();
+
     private static int Main(string[] args)
     {
+        typeof(SabberStoneCore.Model.HistoryFacts).GetField("EvidenceInvalidated",
+            System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)
+            .SetValue(null, (Action<string>)(reason => evidenceInvalidations.Enqueue(reason)));
         ControllerAdmissionInvariant.Install();
         // Process-wide setup that native-match gets from its earlier checks: the world code needs its JSON parser injected.
         NpcWorldJson.Parser = EmbeddedJson.Parse;
         RunSuite(args);
+        if (!evidenceInvalidations.IsEmpty)
+            throw new InvalidOperationException("TEST: " + evidenceInvalidations.Count + " match(es) invalidated achievement evidence: "
+                + string.Join(" | ", evidenceInvalidations.Distinct().Take(5)));
+        Console.WriteLine("PASS achievement evidence stayed valid in every match");
         return 0;
     }
 
@@ -23,8 +34,8 @@ internal static partial class Program
             ["--rematch-only"] = RematchTests.Run,
             ["--quests-only"] = QuestBotProof.Run,
             ["--showcase-only"] = ShowcasePlayProof.Run,
-            ["--npc-pets-only"] = NpcPetSeatTests,
-            ["--coin-flip-only"] = CoinFlipControl,
+            ["--npc-pets-only"] = () => { NpcPetSeatTests(); Console.WriteLine("PASS npc pet seats: resolution, forms, world seats"); },
+            ["--coin-flip-only"] = () => { CoinFlipControl(); Console.WriteLine("PASS coin flip: launch-bound control"); },
             ["--debug-scenario-only"] = DebugScenarioChecks,
             ["--fair-view-only"] = FairViewChecks,
             ["--match-event-log-only"] = MatchEventLogChecks,
@@ -43,6 +54,7 @@ internal static partial class Program
         AcceptsHeroCardScenario();
         DebugScenarioFile();
         DebugScenarioNeverSettles();
+        Console.WriteLine("PASS debug scenario lane paths, hero card scenario, scenario file and never-settles");
     }
 
     private static void FairViewChecks()
@@ -57,6 +69,7 @@ internal static partial class Program
     {
         EventBudgetSeparate();
         EventsCannotCloseJournal();
+        Console.WriteLine("PASS match event log: separate event budget, events cannot close the journal");
     }
 
     private static void Check(bool condition, string message)
