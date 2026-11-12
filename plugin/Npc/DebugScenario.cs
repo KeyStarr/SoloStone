@@ -34,6 +34,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 //       10 cap, for a counter gag such as 32/333. Needs humanSeat=first; excludes humanMana/npcMana; npcManaRaw CUR <= 10 (its own
 //       turn start would otherwise send a negative RESOURCES_USED). Capture-only.)
 //   npcMana=N          humanMana=N           (mana crystals on that player's FIRST turn, full)
+//   npcHero=CARDID     (the NPC plays this hero card and its own Hero Power, e.g. a Dungeon Run boss LOOTA_BOSS_18h. Any implemented
+//       HERO card the client knows; excludes npcSkin.)
+//   missionId=N        (the client's mission/scenario id for this match, e.g. 2663 = Dungeon Run: the client then runs that mission's
+//       own game entity (boss voice lines, music). 0 or absent: the ordinary staged match.)
 //   runId=<this launch's run id>   (REQUIRED by Read: the file is bound to one launch, like enable-test-control)
 // ENGINE_SOURCE builds only (the Deck and lane builds); other builds ignore the file. A file is honoured only while test
 // control is live and its runId is this launch's; anything else is rejected (renamed .rejected-<utc>), and any file left over
@@ -59,7 +63,7 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "npcHero", "missionId", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
@@ -70,6 +74,8 @@ public sealed class DebugScenario
     public string Overdraw { get; private set; }
     public string HumanSkin { get; private set; }
     public string NpcSkin { get; private set; }
+    public string NpcHero { get; private set; }
+    public int MissionId { get; private set; }
     public string HeroAttack { get; private set; }
     public string HeroPower { get; private set; }
     public string HeroPowerUpgrade { get; private set; }
@@ -178,7 +184,9 @@ public sealed class DebugScenario
         var handHealthWing = HandHealth(values, "humanHandHealthWing", humanHand);
         if (handHealth.Intersect(handHealthWing).Any())
             throw new ArgumentException("humanHandHealth and humanHandHealthWing list the same card: give each card one Health cost.");
+        if (values.ContainsKey("npcHero") && values.ContainsKey("npcSkin")) throw new ArgumentException("npcHero and npcSkin both set the NPC hero; give only one.");
         return new DebugScenario {
+            NpcHero = HeroCard(values, "npcHero", known), MissionId = Number(values, "missionId", 1, 999999),
             BoundRunId = boundRun, FirstPlayer = Seat(values),
             Overdraw = Choice(values, "overdraw", "human", "npc", "human-godfrey", "npc-godfrey"),
             HumanSkin = Skin(values, "humanSkin", known), NpcSkin = Skin(values, "npcSkin", known),
@@ -319,6 +327,18 @@ public sealed class DebugScenario
         if (!HeroSkinData.All.ContainsKey(id) || known != null && !known(id)) throw new ArgumentException(key + ": unknown hero skin " + id);
         return id;
     }
+    // A hero card the engine implements and the client can draw, with the Hero Power its card names.
+    private static string HeroCard(Dictionary<string, string> values, string key, Func<string, bool> known)
+    {
+        if (!values.TryGetValue(key, out string id)) return null;
+        SabberStoneCore.Model.Card card = null;
+        try { card = EngineCards.FromId(id); }
+        catch (Exception) { card = null; }
+        if (card == null || card.Id != id || card.Type != SabberStoneCore.Enums.CardType.HERO || !card.Implemented
+            || known != null && !known(id))
+            throw new ArgumentException(key + ": not an implemented hero card the client knows: " + id);
+        return id;
+    }
     private static string Choice(Dictionary<string, string> values, string key, params string[] allowed)
     {
         if (!values.TryGetValue(key, out string value)) return null;
@@ -389,6 +409,8 @@ public sealed class DebugScenario
         if (Overdraw != null) lines.Add("overdraw=" + Overdraw);
         if (HumanSkin != null) lines.Add("humanSkin=" + HumanSkin);
         if (NpcSkin != null) lines.Add("npcSkin=" + NpcSkin);
+        if (NpcHero != null) lines.Add("npcHero=" + NpcHero);
+        if (MissionId != 0) lines.Add("missionId=" + MissionId.ToString(CultureInfo.InvariantCulture));
         if (HeroAttack != null) lines.Add("heroAttack=" + HeroAttack);
         if (HeroPower != null) lines.Add("heroPower=" + HeroPower);
         if (HeroPowerUpgrade != null) lines.Add("heroPowerUpgrade=" + HeroPowerUpgrade);
@@ -501,6 +523,7 @@ public sealed class DebugScenario
             NpcOpeningHand.Count > game.Player2.HandZone.Count(c => c.Card.Id != "GAME_005")) return "Opening hand has too few replaceable slots.";
         if (HumanSkin != null && HeroSkinData.All[HumanSkin].BaseHero != game.Player1.Hero.Card.Id) return "humanSkin class mismatch";
         if (NpcSkin != null && HeroSkinData.All[NpcSkin].BaseHero != game.Player2.Hero.Card.Id) return "npcSkin class mismatch";
+        if (NpcHero != null && game.Player2.Hero.Card.Id != NpcHero) return "npcHero was not applied";
         if (game.Player2.BoardZone.FreeSpace < NpcBoard.Count || game.Player1.BoardZone.FreeSpace < HumanBoard.Count) return "Board has no room for scenario bodies.";
         return Fit(game.Player2, "NPC", NpcDeckTop.Count, NpcHand.Count) ?? Fit(game.Player1, "Human", HumanDeckTop.Count, HumanHand.Count);
     }
@@ -695,6 +718,8 @@ public sealed class DebugScenario
         }
         if (HumanSkin != null) applied.Add("humanSkin=" + HumanSkin);
         if (NpcSkin != null) applied.Add("npcSkin=" + NpcSkin);
+        if (NpcHero != null) applied.Add("npcHero=" + NpcHero);
+        if (MissionId != 0) applied.Add("missionId=" + MissionId.ToString(CultureInfo.InvariantCulture));
         return string.Join("; ", applied);
     }
 #endif

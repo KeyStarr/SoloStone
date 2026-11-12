@@ -751,8 +751,8 @@ public sealed class NativeMatch
         if (npcProfile != null) npcPilot = NpcPilots.Create(npcProfile, line => BotTrace?.Invoke(line));
         EngineCard hero = playerHero ?? ResolveHero("HERO_08");
         EngineCard ordinaryBotHero = ResolveHero(opponentDeck == null ? "HERO_08" : opponentDeck.Hero);
-        EngineCard botHero = ResolveHero(DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero
-            : ordinaryBotHero.Id);
+        EngineCard botHero = ResolveHero(DebugScenario?.NpcHero ?? (DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero
+            : ordinaryBotHero.Id));
         var humanCards = playerCards == null ? BuildDeck() : new List<EngineCard>(playerCards);
         var botCards = opponentDeck == null ? BuildDeck() : opponentDeck.Build();
         int firstPlayer = StartingPlayer ?? StableSeed.MatchFirstPlayer(seed);

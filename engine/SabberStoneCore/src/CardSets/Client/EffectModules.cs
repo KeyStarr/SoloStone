@@ -25,6 +25,7 @@ namespace SabberStoneCore.CardSets.Client
             Register(BuildABeast.DbfId, "ICC_828p", BuildABeast.Configure);
 
             ClassHeroes.Apply(Register);
+            Adventures.DungeonRunCards.Apply(Register);
 
             Sets.LocationCards.Apply(Register);
             // Per-set registries also define the collectible stress corpus.

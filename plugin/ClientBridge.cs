@@ -578,7 +578,8 @@ internal static class ClientBridge
             Set(manager, "m_gameType", GameType.GT_VS_AI);
             Set(manager, "m_nextGameType", GameType.GT_VS_AI);
             Set(manager, "m_nextFormatType", NativeUIProbe.LocalDeckFormat);
-            Set(manager, "m_nextMissionId", 0);
+            // A debug scenario may name a mission (e.g. 2663, Dungeon Run): the client then builds that mission's game entity.
+            Set(manager, "m_nextMissionId", scenario?.MissionId ?? 0);
             if (nativeMatchmaking) NativeMatchmaking.Begin();
             var transition = new JobDefinition("Offline.StageGame", StageGame(), Array.Empty<IJobDependency>());
             if (SplashScreen.Get() != null)
