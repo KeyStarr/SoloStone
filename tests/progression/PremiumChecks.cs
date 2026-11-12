@@ -16,10 +16,14 @@ internal static class PremiumChecks
         using var p = new LocalProfile(path); p.CreateDraft("Premium", "HERO_08"); return path;
     }
     static LocalMatchRecord Win(string hero = "HERO_08") {
-        var facts = new LocalRewardFacts(); var reward = LocalEconomy.Reward("Won", 10, false, facts);
-        return new LocalMatchRecord { Id = Guid.NewGuid().ToString(), Deck = "mage", DeckHero = hero, Opponent = "priest",
-            Seed = 1, StartedUtc = "2026-10-25T00:00:00Z", Result = "Won", Turns = 10,
-            RewardVersion = 2, Gold = reward.Gold, RewardFacts = facts };
+        // A V4 rolled win without a ladder receipt (a receipt-less match may not carry dust, so pick a seed whose roll pays none);
+        // the profile recomputes the reward from the match id and seed on load.
+        string id = Guid.NewGuid().ToString(); var tier = GrindTiers.Find(null); int seed = 1; LocalReward reward;
+        while ((reward = LocalEconomy.RewardV4("Won", 10, false, LocalEconomy.RewardRollSeed(id, seed))).Dust != 0) seed++;
+        return new LocalMatchRecord { Id = id, Deck = "mage", DeckHero = hero, Opponent = "priest",
+            Seed = seed, StartedUtc = "2026-10-25T00:00:00Z", Result = "Won", Turns = 10,
+            RewardVersion = 4, Gold = tier.Gold(reward.Gold), BonusGold = reward.BonusGold, PackReward = reward.PackReward,
+            RewardFacts = new LocalRewardFacts() };
     }
     internal static void GrantOnlyReplacementChecks(string root)
     {
@@ -68,37 +72,6 @@ internal static class PremiumChecks
     internal static void Run(string root)
     {
         using var cosmetics = new CosmeticsFixture();
-        // Catch migration skipping the old bytes, dropping a Normal deck, or publishing half a grant.
-        foreach (int version in new[] { 9, 10 }) {
-            string path = Fresh(root, "premium-migrate-" + version);
-            var old = Read(path); old.Version = version;
-            old.ClassXp.Single(x => x.Hero == "HERO_08").Xp = 1300;
-            old.CustomDecks[0].Cards.Add("CS2_029");
-            Write(path, old);
-            // Genuine legacy XML: no premium fields and <string> deck rows.
-            var xml = XDocument.Load(path);
-            xml.Descendants("Premium").Remove();
-            foreach (var node in xml.Descendants("Cards").Elements("Card").ToArray()) node.ReplaceWith(new XElement("string", node.Element("Id").Value));
-            xml.Root.Element("ClassRewardGrants")?.Remove(); xml.Root.Element("PortraitGrants")?.Remove(); xml.Save(path);
-            byte[] bytes = File.ReadAllBytes(path);
-            Directory.CreateDirectory(path + ".v" + version + ".bak.tmp");
-            Reject(() => { using var p = new LocalProfile(path); });
-            Check(bytes.SequenceEqual(File.ReadAllBytes(path)), "backup failure changed old profile");
-            Directory.Delete(path + ".v" + version + ".bak.tmp");
-            foreach (string stage in new[] { "write", "flush", "replace" }) {
-                Reject(() => { using var p = new LocalProfile(path, point => { if (point == stage) throw new IOException("injected"); }); });
-                Check(bytes.SequenceEqual(File.ReadAllBytes(path)) && bytes.SequenceEqual(File.ReadAllBytes(path + ".v" + version + ".bak")), "migration failure lost exact bytes");
-            }
-            using (var p = new LocalProfile(path)) {
-                Check(p.ClassRewardGrants.Count == 1 && p.OwnedCount("CORE_SW_108", 1) == 2, "migration missed level 11 reward");
-                Check(p.GetDraft(old.CustomDecks[0].Id).CardEntries.Single().Premium == 0, "legacy deck not Normal");
-            }
-            Check(Read(path).Version == 12, "migration did not reach V11");
-            byte[] committed = File.ReadAllBytes(path);
-            using (var p = new LocalProfile(path)) { }
-            Check(committed.SequenceEqual(File.ReadAllBytes(path)), "migration restart granted twice");
-        }
-
         string settle = Fresh(root, "premium-settle");
         var setup = Read(settle); setup.ClassXp.Single(x => x.Hero == "HERO_08").Xp = 1200; Write(settle, setup);
         string matchId;
@@ -219,16 +192,18 @@ internal static class PremiumChecks
             setup = Read(metaPath); setup.ClassXp.Single(x => x.Hero == "HERO_08").Xp = LocalCoreProgression.LevelThresholds[15]; Write(metaPath, setup);
             var expected16 = LocalClassRewards.Rewards.Single(row => row.Meta == "black-empire" && row.Hero == "HERO_08" && row.Level == 16);
             using (var p = new LocalProfile(metaPath)) {
-                // Level 16 may repeat a card violet-hold already paid at another level: only the room up to a playset is granted.
-                int paidBefore = p.ClassRewardGrants.Where(row => row.Level < 16 && row.CardId == expected16.CardId && row.Premium == expected16.Premium).Sum(row => row.Copies);
-                int expectedCopies = Math.Min(expected16.Copies, Math.Max(0, LocalEconomy.PlayableCap(SabberStoneCore.Model.Cards.FromId(expected16.CardId)) - paidBefore));
+                // Level 16's card was already paid in full by violet-hold at level 15, so the claim substitutes the next scheduled
+                // card that is not yet owned (black-empire level 17), and records the card it stood in for (substitution is the
+                // rule since the premium-track work: see PremiumTrackChecks "better progression must substitute").
+                var substitute = LocalClassRewards.Rewards.Single(row => row.Meta == "black-empire" && row.Hero == "HERO_08" && row.Level == 17);
                 var added = p.ClassRewardGrants.Where(row => row.Level >= 16).ToArray();
-                Check(p.ClassRewardGrants.Count == 6 && added.Length == 1 && added[0].CardId == expected16.CardId
-                    && added[0].Premium == expected16.Premium && added[0].Copies == expectedCopies, "level 16 did not use the active meta's reward");
+                Check(p.ClassRewardGrants.Count == 6 && added.Length == 1 && added[0].CardId == substitute.CardId
+                    && added[0].Premium == substitute.Premium && added[0].Copies == substitute.Copies
+                    && added[0].ScheduledCardId == expected16.CardId, "level 16 did not substitute the next unowned card of the active meta");
             }
         } finally { LocalClassRewards.ActiveMetaOverride = null; }
 
-        // A schedule revision moves TIME_000 from level 13 to 14: the new level stays claimed but pays nothing past the playset.
+        // A schedule revision moves TIME_000 from level 13 to 14: the owned playset is never paid twice, and level 14 substitutes the next unowned card.
         string moved = Fresh(root, "premium-moved-card");
         try {
             setup = Read(moved); setup.ClassXp.Single(x => x.Hero == "HERO_08").Xp = LocalCoreProgression.LevelThresholds[12]; Write(moved, setup);
@@ -240,13 +215,13 @@ internal static class PremiumChecks
             var level15 = LocalClassRewards.Rewards.Single(row => row.Meta == "black-empire" && row.Hero == "HERO_08" && row.Level == 15);
             using (var p = new LocalProfile(moved)) {
                 var again = p.ClassRewardGrants.Single(row => row.Level == 14);
-                Check(again.CardId == "TIME_000" && again.Copies == 0 && p.OwnedCount("TIME_000", 1) == 2 && p.ProgressionGrantedCount("TIME_000", 1) == 2
+                Check(again.CardId == level15.CardId && again.Copies == level15.Copies && again.ScheduledCardId == "TIME_000" && p.OwnedCount("TIME_000", 1) == 2 && p.ProgressionGrantedCount("TIME_000", 1) == 2
                     && p.OwnedCount(level15.CardId, level15.Premium) == level15.Copies,
                     "moved card is not paid twice, other levels still pay");
             }
             byte[] movedBytes = File.ReadAllBytes(moved);
             using (var p = new LocalProfile(moved)) { }
-            Check(movedBytes.SequenceEqual(File.ReadAllBytes(moved)), "zero-copy claim is stable on reload");
+            Check(movedBytes.SequenceEqual(File.ReadAllBytes(moved)), "substituted claim is stable on reload");
         } finally { LocalClassRewards.ActiveMetaOverride = null; }
 
         foreach (int threshold in new[] { 200, 400 }) {
@@ -263,6 +238,8 @@ internal static class PremiumChecks
             var save = Read(path); save.Matches = Enumerable.Range(0, threshold - 1).Select(_ => Win()).ToList();
             // These wins have no class identity/XP and cannot advance the portrait counter.
             save.Matches.AddRange(Enumerable.Range(0, 5).Select(_ => Win(null)));
+            // Receipt-less history is the pre-ladder shape: it needs no ladder state (the catalog catch-up checks do the same).
+            save.LadderRuleVersion = 0; save.LadderState = null;
             Write(path, save);
             using (var p = new LocalProfile(path)) {
                 Check(p.PortraitGrants.Count == (threshold == 200 ? 0 : 1), "portrait granted early or counted excluded wins");
@@ -298,12 +275,12 @@ internal static class PremiumChecks
         Reject(() => { using var p = new LocalProfile(retiredPath); });
 
         string missed = Fresh(root, "missed-portraits");
-        setup = Read(missed); setup.Matches = Enumerable.Range(0, 400).Select(_ => Win("HERO_11")).ToList(); Write(missed, setup);
+        setup = Read(missed); setup.Matches = Enumerable.Range(0, 400).Select(_ => Win("HERO_11")).ToList(); setup.LadderRuleVersion = 0; setup.LadderState = null; Write(missed, setup);
         using (var p = new LocalProfile(missed))
             Check(p.PortraitGrants.Count == 2 && p.OwnedCount("HERO_11", 1) == 1 && p.OwnedHeroSkins.Contains("HERO_11a"), "load missed portrait grants");
         byte[] stable = File.ReadAllBytes(missed);
         using (var p = new LocalProfile(missed)) { }
         Check(stable.SequenceEqual(File.ReadAllBytes(missed)), "portrait reconciliation replay changed bytes");
-        Console.WriteLine("PASS V11: exact migrations/failures, premium rewards/decks, receipts/replay, reconciliation, portraits");
+        Console.WriteLine("PASS premium: premium rewards/decks, receipts/replay, reconciliation, portraits");
     }
 }

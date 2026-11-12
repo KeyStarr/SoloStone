@@ -471,7 +471,7 @@ internal static class StandardBatchChecks
                 Check(profile.Pending?.DeckHero == spec.Hero && profile.Pending?.Opponent == spec.Opponent,
                     "overflow pending binding survives reload: " + spec.Id);
                 profile.Settle(profile.Pending.Id, "Won", 12, false);
-                Check(profile.ClassXp[spec.Hero] == LocalCoreProgression.WinXp, "overflow XP targets correct hero: " + spec.Id);
+                Check(profile.ClassXp[spec.Hero] == profile.GrindTier.ClassXp(LocalCoreProgression.WinXp), "overflow XP targets correct hero: " + spec.Id);
             }
         }
         // Seat loaners: stable ids, heroes and frozen fixed opponents; settlement credits the right class without ownership.
@@ -579,7 +579,7 @@ internal static class StandardBatchChecks
                     && profile.Collection.OrderBy(pair => pair.Key).SequenceEqual(ownedBefore),
                     "seat pending binding survives reload without ownership changes: " + spec.Id);
                 profile.Settle(profile.Pending.Id, "Won", 12, false);
-                Check(profile.ClassXp[spec.Hero] == LocalCoreProgression.WinXp
+                Check(profile.ClassXp[spec.Hero] == profile.GrindTier.ClassXp(LocalCoreProgression.WinXp)
                     && profile.ClassXp.Where(pair => pair.Key != spec.Hero).All(pair => pair.Value == 0), "seat XP targets correct hero: " + spec.Id);
             }
         }
@@ -636,7 +636,7 @@ internal static class StandardBatchChecks
                 && LocalDecks.TestStandardCardIds.Where(id => !LocalCoreProgression.IsAvailable(id)).All(id => !profile.Collection.ContainsKey(id)),
                 "showcase pending binding survives reload with no ownership beyond explicit Core/deckbuilding grants");
             profile.Settle(profile.Pending.Id, "Won", 12, false);
-            Check(profile.ClassXp["HERO_11"] == LocalCoreProgression.WinXp
+            Check(profile.ClassXp["HERO_11"] == profile.GrindTier.ClassXp(LocalCoreProgression.WinXp)
                 && profile.ClassXp.Where(pair => pair.Key != "HERO_11").All(pair => pair.Value == 0), "showcase XP targets Death Knight");
         }
         Console.WriteLine($"PASS Standard player coverage: {registeredPlayerCoverage.Count} + {exclusions.Count} exclusions = {registry.Count}, no pending seats");
@@ -664,7 +664,7 @@ internal static class StandardBatchChecks
                 Check(profile.Pending?.DeckHero == spec.Hero && profile.Pending?.Opponent == spec.OpponentId
                     && LocalDecks.TestStandardCardIds.Where(id => !LocalCoreProgression.IsAvailable(id)).All(id => !profile.Collection.ContainsKey(id)), "batch 2 pending reload preserves binding and no extra ownership: " + spec.Id);
                 var settled = profile.Settle(profile.Pending.Id, "Won", 12, false);
-                Check(settled.DeckHero == spec.Hero && profile.ClassXp[spec.Hero] == LocalCoreProgression.WinXp,
+                Check(settled.DeckHero == spec.Hero && profile.ClassXp[spec.Hero] == profile.GrindTier.ClassXp(LocalCoreProgression.WinXp),
                     "batch 2 settlement credits player class: " + spec.Id);
             }
         }

@@ -21,63 +21,17 @@ internal static class DeathKnightChecks
     }
     internal static void Run(string root)
     {
-        string path = Path.Combine(root, "dk-v7.xml");
+        string path = Path.Combine(root, "dk-current.xml");
         using (var profile = new LocalProfile(path))
         {
             profile.CreateDraft("Retained Mage", "HERO_08");
             var match = profile.Begin("mage", "priest", 42);
             profile.Settle(match.Id, "Won", 12, false);
         }
-        var v7 = Read(path); v7.Version = 7; v7.CoreScheduleVersion = 2; v7.DustBalance = 0;
-        // A real V7 record predates the V10 settlement receipts and the V3 rolled rewards.
-        foreach (var match in v7.Matches) {
-            var v2 = LocalEconomy.Reward(match.Result, match.Turns, match.Conceded, match.RewardFacts);
-            match.RewardVersion = 2; match.Gold = v2.Gold; match.BonusGold = v2.BonusGold; match.PackReward = v2.PackReward; match.DustReward = 0;
-            match.Ladder = null; match.ClassXpBefore = null; match.ClassXpAfter = null;
-            match.UnlockedCardIds = null; match.ProgressionRuleVersion = 0; match.TierRewards = null;
-            match.ClassRewardGrants = null; match.PortraitGrants = null;
-        }
-        v7.ClassXp.RemoveAll(entry => entry.Hero == "HERO_11");
-        v7.ClassXp.Single(entry => entry.Hero == "HERO_10").Xp = 12345;
-        v7.CoreGrants = LocalCoreProgression.Owned(v7.ClassXp.ToDictionary(entry => entry.Hero, entry => entry.Xp), false)
-            .Where(pair => LocalCoreProgression.ById[pair.Key].Hero != "HERO_11")
-            .Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList();
-        v7.CoreGrants.Add(new LocalCardCount { Id = "CORE_UNKNOWN_EARNED", Count = 2 });
-        Write(path, v7); byte[] original = File.ReadAllBytes(path);
-        Directory.CreateDirectory(path + ".v7.bak.tmp");
-        Reject(() => { using var ignored = new LocalProfile(path); }, "V7MigrationBackupFailureLeavesOriginal");
-        Check(File.ReadAllBytes(path).SequenceEqual(original) && !File.Exists(path + ".v7.bak"), "V7MigrationBackupFailureLeavesOriginal");
-        Directory.Delete(path + ".v7.bak.tmp");
-        Directory.CreateDirectory(path + ".tmp");
-        Reject(() => { using var ignored = new LocalProfile(path); }, "V7 migration commit failure");
-        Check(File.ReadAllBytes(path).SequenceEqual(original) && File.ReadAllBytes(path + ".v7.bak").SequenceEqual(original), "V7 failed replacement changed bytes");
-        Directory.Delete(path + ".tmp");
-        using (var profile = new LocalProfile(path))
-            Check(profile.ClassXp.Count == 11 && profile.ClassXp["HERO_11"] == 0
-                && v7.ClassXp.All(old => profile.ClassXp[old.Hero] == old.Xp), "V7ToV8PreservesBytesAndProgress XP");
-        var migrated = Read(path);
-        var additions = migrated.CoreGrants.Where(grant => v7.CoreGrants.All(old => old.Id != grant.Id)).ToList();
-        Check(additions.Select(grant => grant.Id).SequenceEqual(LocalCoreProgression.Unlocks
-            .Where(card => card.Hero == "HERO_11" && card.Threshold == 1).Select(card => card.Id)), "schedule 2 to current adds only DK level one");
-        v7.Version = 12; v7.SelectedHubTheme = "CLASSIC";
-        int folded = v7.Matches.Aggregate(0, (stars, match) => LocalProfile.NextStars(stars, match.Result));
-        var seed = LadderRules.Seed(folded, folded, v7.Matches.Select(m => LadderRules.Outcome(m.Result)).ToArray());
-        v7.LadderState = new LocalLadderState { StarIndex = folded, BestStarIndex = folded,
-            Multiplier = seed.Multiplier, StreakWins = seed.StreakWins, HiddenRating = LadderRules.StartRating };
-        v7.LadderRuleVersion = LadderRules.RuleVersion;
-        v7.LadderCalibration = new LocalLadderCalibration { Version = 1, MatchCount = v7.Matches.Count };
-        v7.CoreScheduleVersion = LocalCoreProgression.ScheduleVersion;
-        v7.ClassXp.Add(new LocalClassXp { Hero = "HERO_11" }); v7.CoreGrants.AddRange(additions);
-        Check(migrated.ClassRewardGrants.Count == LocalCoreProgression.Level(12345) - 10
-            && migrated.ClassRewardGrants.All(row => row.Hero == "HERO_10")
-            && migrated.PremiumCollection.Count == migrated.ClassRewardGrants.Count, "V7 adds earned DH premiums");
-        v7.ClassRewardGrants = migrated.ClassRewardGrants; v7.PremiumCollection = migrated.PremiumCollection;
-        string expected = path + ".expected"; Write(expected, v7);
-        Check(File.ReadAllBytes(path).SequenceEqual(File.ReadAllBytes(expected))
-            && File.ReadAllBytes(path + ".v7.bak").SequenceEqual(original), "V7ToV8PreservesBytesAndProgress all fields");
+        // (V7 to V8 migration fixtures removed: saves older than V13 are no longer supported.)
         byte[] current = File.ReadAllBytes(path);
-        using (var profile = new LocalProfile(path)) { }
-        Check(File.ReadAllBytes(path).SequenceEqual(current), "V8 stable reload");
+        using (var profile = new LocalProfile(path)) Check(profile.ClassXp.Count == 11 && profile.ClassXp["HERO_11"] == 0, "eleven classes in a new save");
+        Check(File.ReadAllBytes(path).SequenceEqual(current), "stable reload");
         foreach (var corrupt in new Action<LocalProfileData>[] {
             saved => saved.ClassXp.RemoveAt(10), saved => saved.ClassXp[10].Hero = saved.ClassXp[0].Hero,
             saved => saved.ClassXp[10].Hero = "HERO_99", saved => saved.ClassXp[10].Xp = -1 })
@@ -85,15 +39,6 @@ internal static class DeathKnightChecks
             var bad = Read(path); corrupt(bad); string badPath = path + ".bad"; Write(badPath, bad);
             Reject(() => { using var ignored = new LocalProfile(badPath); }, "V8RequiresElevenUniqueClassXpEntries");
         }
-        // Validate the frozen V7 shape before creating a backup.
-        var invalidV7 = Read(path); invalidV7.Version = 7; Write(path + ".bad-v7", invalidV7);
-        Reject(() => { using var ignored = new LocalProfile(path + ".bad-v7"); }, "frozen V7 rejects eleven heroes");
-        Check(!File.Exists(path + ".bad-v7.v7.bak"), "invalid V7 backed up");
-        invalidV7.ClassXp.RemoveAll(entry => entry.Hero == "HERO_11");
-        invalidV7.CustomDecks[0].Hero = "HERO_11";
-        Write(path + ".bad-v7-draft", invalidV7);
-        Reject(() => { using var ignored = new LocalProfile(path + ".bad-v7-draft"); }, "frozen V7 draft heroes");
-        Check(!File.Exists(path + ".bad-v7-draft.v7.bak"), "invalid V7 draft backed up");
         var previous = new HashSet<string>();
         foreach (int xp in LocalCoreProgression.LevelThresholds)
         {
@@ -182,7 +127,7 @@ internal static class DeathKnightChecks
             {
                 Check(profile.Pending.DeckHero == "HERO_11", "DK loaner pending hero binding survives reload");
                 profile.Settle(profile.Pending.Id, "Won", 12, false);
-                Check(profile.ClassXp["HERO_11"] == LocalCoreProgression.WinXp
+                Check(profile.ClassXp["HERO_11"] == profile.GrindTier.ClassXp(LocalCoreProgression.WinXp) // class XP follows the save's pace tier (default 2x)
                     && profile.ClassXp.Where(pair => pair.Key != "HERO_11").All(pair => pair.Value == 0), "DK loaner settlement targets DK XP");
             }
         }
@@ -194,7 +139,7 @@ internal static class DeathKnightChecks
             && dk.Skip(7).Take(2).All(deck => LocalDecks.RuneCounts(deck.Build()).Sum() <= 3), "mech families DK seat rune legality");
         Check(string.Join(",", LocalDecks.RuneCounts(dk.Single(deck => deck.Id == LocalDecks.TestShowcaseId).Build())) == "1,0,2", "showcase DK rune legality");
 #endif
-        Console.WriteLine("PASS DK V7/V8 migration/backup/atomicity, monotonic Core, rune maxima, modern class masks");
+        Console.WriteLine("PASS DK class XP, monotonic Core, rune maxima, modern class masks");
         ScheduleThreeToFour(root);
         ScheduleFourToFive(root);
         ScheduleFiveToCurrent(root, 5);

@@ -48,7 +48,9 @@ internal static class NpcRecordChecks
         int current = (int)typeof(LocalProfile).GetField("CurrentVersion", System.Reflection.BindingFlags.NonPublic
             | System.Reflection.BindingFlags.Static)!.GetRawConstantValue()!;
         Check(Read(path).Version == current, "fixture is the current profile version");
-        Check(!Text(path).Contains("Npc"), "legacy save writes no Npc element");
+// Match rows write no Npc element. (Not a whole-file search: the save also holds the achievements' DefeatedNpcIds list.)
+        Check(!System.Xml.Linq.XDocument.Parse(Text(path)).Descendants().Any(element => element.Name.LocalName.StartsWith("Npc", StringComparison.Ordinal)
+            && element.Ancestors().Any(parent => parent.Name.LocalName == "Matches" || parent.Name.LocalName == "Pending")), "legacy save writes no Npc element on match rows");
         using (var p = new LocalProfile(path)) {
             Check(p.History.All(NoNpc) && NoNpc(p.Pending), "V10 save loads with null NPC fields");
             Check(File.ReadAllBytes(path).SequenceEqual(legacy), "load does not rewrite the save");
