@@ -1037,7 +1037,7 @@ internal static class NpcTurnRunnerTests
             foreach (int lane in new[] { 0, 1, 2, 3 })
             {
                 var windows = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB",
-                    OfflineGuard.LaneRoot(lane) + @"\client\Hearthstone.exe", @"C:\Us"+@"ers\HSNative"+@"UIProbe\AppData\Local",
+                    OfflineGuard.LaneRoot(lane) + @"\client\Hearthstone.exe", LabTestPaths.LocalData,
                     new[] { "-hs-native-ui-run", run, "-hs-native-ui-lane", lane.ToString() }, false);
                 GoldenPilot.ConfigureLethalHost(windows.Deck);
                 Check(!GoldenPilot.ParallelLethalEnabled, "Windows lane silently enabled parallel lethal");

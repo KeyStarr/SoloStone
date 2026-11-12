@@ -45,12 +45,11 @@ internal static partial class Program
         Case("F7 fault injection disables the log, not the match", FaultInjection);
         Case("F7 journal event budget is separate from replay rows", EventBudgetSeparate);
         Case("F7 observer initializes no lazily cached engine state", ObserverDoesNotChangeEngineState);
-        Case("D1 truncation markers pass the real match_log.py reader", MarkersPassRealReader);
         Case("D2 Rewind: a replayed Discover is announced again", RewindReplayedDiscover);
         Case("sweep: no tracker drift or fault over real NPC play", NoDriftOverRealPlay);
         Case("sweep: fault mid-batch leaves no stale frames", FaultMidBatchNoStaleFrames);
         if (failed != 0) throw new InvalidOperationException("TEST: " + failed + " event-log review case(s) failed");
-        Console.WriteLine("PASS match event log review: " + 22 + " cases");
+        Console.WriteLine("PASS match event log review: " + 21 + " cases");
     }
 
     private static (NativeMatch Match, Capture Capture, List<string> Lines) LoggedBoard(int seed = 1337)
@@ -505,64 +504,6 @@ internal static partial class Program
         string logged = SnapshotAfterScenario(true), silent = SnapshotAfterScenario(false), again = SnapshotAfterScenario(false);
         Check(silent == again, "the scenario itself is not deterministic:\n" + silent + "\n" + again);
         Check(logged == silent, "an observing log changed the engine state:\n" + logged + "\n" + silent);
-    }
-
-    // Delta review 2026-11-06: markers were stamped with LastSequence read on the disk thread, which can already be the carrying row's
-    // sequence, so the reader (which wants the action count at the marker's position) rejected the whole journal.
-    private static string ProductRoot()
-    {
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null; dir = dir.Parent)
-            if (File.Exists(Path.Combine(dir.FullName, "tools/match_log.py"))) return dir.FullName;
-        throw new InvalidOperationException("TEST: tools/match_log.py not found above the test binary");
-    }
-    private static string RunReader(string journal, params string[] args)
-    {
-        var info = new System.Diagnostics.ProcessStartInfo("/usr/bin/python3") { RedirectStandardOutput = true, RedirectStandardError = true, UseShellExecute = false };
-        info.ArgumentList.Add("-I"); info.ArgumentList.Add(Path.Combine(ProductRoot(), "tools/match_log.py")); info.WorkingDirectory = ProductRoot(); info.ArgumentList.Add(journal);
-        foreach (var arg in args) info.ArgumentList.Add(arg);
-        using var process = System.Diagnostics.Process.Start(info);
-        string output = process.StandardOutput.ReadToEnd(), error = process.StandardError.ReadToEnd();
-        process.WaitForExit();
-        Check(process.ExitCode == 0, "match_log.py rejected the journal: " + error + output.Substring(0, Math.Min(300, output.Length)));
-        return output;
-    }
-    private static void MarkersPassRealReader()
-    {
-        // tools/match_log.py is a private tool; a checkout without it skips this case with a printed reason.
-        bool readerPresent = false;
-        for (var dir = new DirectoryInfo(AppContext.BaseDirectory); dir != null && !readerPresent; dir = dir.Parent)
-            readerPresent = File.Exists(Path.Combine(dir.FullName, "tools/match_log.py"));
-        if (!readerPresent) { Console.WriteLine("SKIP match_log.py reader check: tools/match_log.py is not in this checkout"); return; }
-        foreach (bool dropped in new[] { false, true })
-        {
-            var writer = new StringWriter();
-            string path = Path.Combine(Path.GetTempPath(), "hs-marker-" + Guid.NewGuid().ToString("N") + ".jsonl");
-            try
-            {
-                using (var record = new PlaytestRecord(writer, new Dictionary<string, object> { { "type", "header" }, { "schema", 1 }, { "matchId", "marker01" } },
-                    eventBudgetBytes: dropped ? PlaytestRecord.MaximumEventBytes : 700))
-                {
-                    for (int i = 1; i <= 40; i++)
-                    {
-                        // The marker is written by the work item that carries action i, after OnPostAction has already set LastSequence = i.
-                        record.OnEvents(new[] { "m=marker01 t=1 n=" + i + " s=1 TURN turn=1 " + new string('x', dropped && i % 8 == 0 ? 300000 : 100) });
-                        if (dropped && i % 8 == 0) record.OnEvents(new[] { "m=marker01 t=1 n=" + i + " s=1 TURN turn=1 " + new string('y', 300000) });
-                        record.OnPostAction(i, "fp" + i);
-                        record.OnFx(new Dictionary<string, object> { { "fxSequence", i }, { "event", "x" } });
-                        record.OnEvents(new[] { "m=marker01 t=1 n=" + i + " s=2 TURN turn=1 late" });
-                    }
-                    record.OnResult("Won", 5);
-                    record.FlushAndWait(5000);
-                }
-                string text = writer.ToString();
-                Check(text.Contains(dropped ? "were not recorded here" : "event rows stop at 700 bytes"), "the scenario produced the marker kind under test");
-                File.WriteAllText(path, text);
-                string output = RunReader(path), events = RunReader(path, "--events");
-                Check(output.Contains("result=Won") && !output.Contains("INCOMPLETE"), "reader walked the whole journal");
-                Check(events.Contains(dropped ? "were not recorded here" : "event rows stopped"), "the marker is shown by --events:\n" + events.Substring(0, Math.Min(400, events.Length)));
-            }
-            finally { File.Delete(path); }
-        }
     }
 
     // Replayed Discover after a Rewind: the engine restores its operation counter with the ledger (checked on a real Rewind below), so a

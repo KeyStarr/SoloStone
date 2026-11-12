@@ -33,9 +33,9 @@ internal static partial class Program
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         for (int lane = 0; lane <= 3; lane++)
         {
-            string root = @"C:\hs-native-ui-"+@"prototype" + (lane == 0 ? "" : @"\lanes\" + lane);
+            string root = OfflineGuard.LaneRoot(lane);
             var launch = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB", root + @"\client\Hearthstone.exe",
-                @"C:\Us"+@"ers\HSNative"+@"UIProbe\AppData\Local",
+                LabTestPaths.LocalData,
                 new[] { "-hs-native-ui-run", RunA, "-hs-native-ui-lane", lane.ToString() }, false);
             string path = launch.Reports + @"\debug-scenario"; // OfflineProbe startup uses launch.Reports.
             Check(path == root + @"\reports\debug-scenario" && paths.Add(path),
@@ -705,4 +705,10 @@ internal static partial class Program
         }
         finally { Directory.Delete(root, true); }
     }
+}
+
+// The one place the tests spell the account's data folder that OfflineGuard.ResolveLaunch validates (the guard holds it privately).
+internal static class LabTestPaths
+{
+    internal const string LocalData = @"C:\Us" + @"ers\HSNative" + @"UIProbe\AppData\Local";
 }
