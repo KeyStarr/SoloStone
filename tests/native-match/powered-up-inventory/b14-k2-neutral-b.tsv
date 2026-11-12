@@ -1,0 +1,7 @@
+id	class	reason	inventory	name
+TLC_252	N	targeted unconditional Battlecry	existing	Dissolving Ooze
+TLC_829t	N	targeted unconditional buff	existing	Bones
+TLC_829te	N	enchantment	existing	Bones of Prey
+TIME_045	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Whelp of the Infinite
+TLC_101	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Undercover Cultist
+TLC_101e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Enraged

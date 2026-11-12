@@ -1,0 +1,18 @@
+id	class	reason	inventory	name
+BE_044	N	unconditional composition; ordinary Combo uses existing generic glow	existing	F3TCH3R
+BE_045	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Mismatcher
+BE_087	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Darkest Depths
+BE_087t	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Depthguard
+BE_114	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Shadow Sculpt
+BE_229	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Sandcrafter
+BE_257	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Thaw From Ice
+BE_257e	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Thaw
+BE_257e2	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Melting
+BE_262	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Attentive Tender
+BE_553	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Tinker
+BE_571	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Fleshshape
+BE_571e	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Reshaped
+BE_702	C	client Combo glow	existing	Shadowcrafter
+BE_740	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Chisel
+BE_740e	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Runecraft
+BE_851	N	unconditional composition; ordinary Combo uses existing generic glow	existing	Steward of the Vale

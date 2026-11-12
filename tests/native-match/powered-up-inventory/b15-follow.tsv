@@ -1,0 +1,10 @@
+id	class	reason	inventory	name
+CAP_002	N	unconditional Discover and recursive grant	existing	Follow the Footsteps
+CAP_002e	N	not a hand play effect: enchantment	existing	Following the Footsteps
+CAP_101	N	unconditional random damage and handoff	existing	Follow the Fuse
+CAP_101e	N	not a hand play effect: enchantment	existing	Following the Fuse
+CAP_402	N	unconditional deck insertion and handoff	existing	Follow the Evidence
+CAP_402e	N	not a hand play effect: enchantment	existing	Following the Evidence
+CAP_802	N	unconditional summon and handoff	existing	Follow the Ghosts
+CAP_802e1	N	not a hand play effect: enchantment	existing	Following the Ghosts
+CAP_802t	N	no pre-play condition: Reborn token	existing	Spooky Ghost

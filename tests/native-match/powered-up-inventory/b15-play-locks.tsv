@@ -1,0 +1,12 @@
+id	class	reason	inventory	name
+CATA_215	N	unconditional enemy minion bounce	existing	Daze
+CATA_215e	N	hand play restriction enchantment	existing	Dazed
+EDR_234	N	unconditional draw and hand lock	existing	Emerald Bounty
+EDR_234e2	N	hand play restriction enchantment	existing	Still Growing
+EDR_526	N	Battlecry scales with controller play history	existing	Renferal, the Malignant
+EDR_526e	N	hand play restriction enchantment	existing	Webbed!
+JAIL_987	N	unconditional location activation	existing	Low Security Wing
+JAIL_987e	N	hand play restriction enchantment	existing	Low Security
+MEND_044	N	unconditional targeted location activation	existing	Tranquil Clearing
+MEND_044e3	N	removable sleep enchantment	existing	Tranquil Sleep
+MEND_044e4	N	Health and Taunt enchantment	existing	Tranquil Strength

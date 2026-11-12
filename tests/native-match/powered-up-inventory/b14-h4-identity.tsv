@@ -1,0 +1,36 @@
+id	class	reason	inventory	name
+BE_780	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Uldir Quarantine
+BE_781	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t10	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t11	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t12	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t13	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t14	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t15	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t16	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t17	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t18	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t19	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t4	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t6	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t7	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t8	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+BE_781t9	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fetid Devourer
+CATA_140	G	25+ Mana spent while holding	existing	Merithra of the Dream
+EDR_233	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spirits of the Forest
+EDR_233a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wolf's Strength
+EDR_233b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Falcon's Dexterity
+EDR_233t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spirit Falcon
+EDR_262	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spirit Bond
+EDR_263	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grace of the Greatwolf
+EDR_263a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Greatwolf's Ferocity
+EDR_263b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Greatwolf's Guidance
+EDR_270	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Horn of Plenty
+EDR_270e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Horn of Plenty
+EDR_469	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Slumbering Sprite
+END_005	G	4+ Corpses or Outcast	existing	Bygone Echoes
+JAIL_200	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Infest the Scullery

@@ -1,0 +1,5 @@
+{"type":"header","schema":1,"matchId":"12345678-abcd-4321-9876-0123456789ab","npcId":"npc.golden.2","npcVersion":3,"npcName":"FatherUther","startedUtc":"2026-10-24T21:15:00Z","humanDeck":{"id":"human-mage","cards":["CORE_CS2_029"],"sideboards":{},"hash":"fixture-human"},"npcDeck":{"id":"npc-pure-paladin","cards":["JAIL_328"],"sideboards":{"commander":["JAIL_328"]},"hash":"fixture-npc"},"engineSeed":42,"searchSeed":73,"engineSourceIdentity":"fixture-source","engineAssemblySha256":"fixture-assembly","poolHash":"fixture-pool","pluginBuild":"fixture-build","knobs":{"npc":"npc.golden.2","emotes":"off","hover":"off","skin":"off","cardback":"off","turnNodes":12000}}
+{"type":"mulligan","turn":0,"fingerprint":"fixture-mulligan"}
+{"type":"future-event","extra":{"unknown":true}}
+{"type":"decision","turn":7,"fingerprint":"fixture-action"}
+{"type":"result","result":"Won","turns":12}

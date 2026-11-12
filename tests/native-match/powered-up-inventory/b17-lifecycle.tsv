@@ -1,0 +1,19 @@
+id	class	reason	inventory	name
+BE_143	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Amitut, Keeper of Amitus
+BE_143t2e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Amitut's Blessing
+CAP_800	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sinful Steed
+CAP_800e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Neigh!
+CATA_307	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Alexstrasza, Guardian of Life
+CATA_307e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cleansed of Corruption
+MEND_801	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Resilient Savior
+MEND_801e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Recruit's Resilience
+MEND_801e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Resilience
+MEND_900	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Teamwork
+TIME_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	King Maluk
+TIME_042t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Infinite Banana
+TIME_042te	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Infinite Banana
+TIME_618	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Husk, Eternal Reaper
+TIME_618e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eternal Life Player Enchant
+TIME_618e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	A Second Chance
+TIME_618t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eternal Life
+TIME_620	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Untimely Death
