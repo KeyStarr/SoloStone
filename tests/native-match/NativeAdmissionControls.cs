@@ -8,7 +8,6 @@ internal static partial class Program
 {
     private static void NativeAdmissionControls()
     {
-        ControllerAdmissionControls();
         PowerHistoryData Full(int id, string card, int type, int zone = 1, int owner = 1, int secret = 0) => new() {
             FullEntity = new() { Entity = id, Name = card, Tags = new() {
                 new() { Name = (int)GameTag.CARDTYPE, Value = type }, new() { Name = (int)GameTag.ZONE, Value = zone },

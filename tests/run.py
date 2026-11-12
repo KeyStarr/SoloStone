@@ -156,6 +156,9 @@ SUITES += [
           needs_local=['data/carddb/37.0.0.254477/cards.json.gz', 'data/carddb/37.0.0.254477/set-overrides.json']),
     Suite('shop', 'dotnet', 'the native shop: catalogue, purchases, deck tiles and art maths (one check reads the client library, if set up)',
           'tests/shop/ShopTests.csproj'),
+    Suite('native-match-logic', 'dotnet', 'the checks of the native match that need no client: opponent turn runner and presentation, rematch, quest bot, showcase games, '
+          'fair-view privacy, debug scenario parsing, controller admission',
+          'tests/native-match-logic/NativeMatchLogicTests.csproj'),
     Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
           'tests/fx-harmony/FxHarmonyTests.csproj', prebuild_in_tree_with_client=['plugin/OfflineProbe.csproj']),
 ]
@@ -175,7 +178,7 @@ SUITES += [
           needs_client=True),
     Suite('native-bindings', 'dotnet', 'the plugin\'s bindings: every client method it patches exists in your client libraries',
           'tests/native-bindings/NativeBindingTests.csproj', needs_client=True, needs_local=PLUGIN_REFERENCES),
-    Suite('native-match', 'dotnet', 'the native match: plugin match logic on recorded games, and the recipe editor of the built plugin',
+    Suite('native-match', 'dotnet', 'the native match: plugin match logic on recorded games, and the recipe editor of the built plugin (the checks that need no client are in native-match-logic)',
           'tests/native-match/NativeMatchTests.csproj', needs_client=True, prebuild=['plugin/OfflineProbe.csproj'],
           needs_local=PLUGIN_REFERENCES + (CARDDB, 'data/fx/empty-playeffect-37.0.0.254477.tsv')),
     Suite('transport-invariants', 'dotnet', 'engine-to-client transport: invariants over recorded and random games (long)',

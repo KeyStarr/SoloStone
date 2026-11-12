@@ -7,9 +7,8 @@ using SabberStoneCore.Enums;
 // Admission at logical effect entry, never final engine state or a pending SHOW's realtime identity.
 // This checks the pinned consumers documented in draw-spell-impact-evidence.md / the admission sweep report;
 // it is not a Unity completion emulator. Native lists split at blocks, subspells, flush metadata and packets.
-internal static class NativeAdmission
+internal static partial class NativeAdmission
 {
-    internal sealed record Fault(string Rule, int Row, int Source, int Entity, string Detail, string SourceCard = "");
     private sealed class EntityState
     {
         internal string Card = "";

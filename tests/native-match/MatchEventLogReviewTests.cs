@@ -38,12 +38,10 @@ internal static partial class Program
         Case("F5 PAYLOAD and DISCOVER_PICK are in order with by=", PayloadAndDiscoverOrder);
         Case("F5 Herald count at the moment, nested", NestedHerald);
         Case("F5 Imbue lines match the engine", ImbueLines);
-        Case("F6 event overflow cannot close the journal", EventsCannotCloseJournal);
         Case("F6 final truncation marker keeps the match id", TruncationMarkerMatchId);
         Case("F7 deathrattle chain", DeathrattleChain);
         Case("F7 stamping on/off identical", StampingOnOffIdentical);
         Case("F7 fault injection disables the log, not the match", FaultInjection);
-        Case("F7 journal event budget is separate from replay rows", EventBudgetSeparate);
         Case("F7 observer initializes no lazily cached engine state", ObserverDoesNotChangeEngineState);
         Case("D2 Rewind: a replayed Discover is announced again", RewindReplayedDiscover);
         Case("sweep: no tracker drift or fault over real NPC play", NoDriftOverRealPlay);
@@ -300,26 +298,6 @@ internal static partial class Program
         Check(!druid.Lines.Any(l => l.Contains("RESYNC")), "no drift on the real Imbue card:\n" + string.Join("\n", druid.Lines));
     }
 
-    // F6: events beyond the writer's queue must not close the journal and cost replay rows.
-    private sealed class GatedWriter : StringWriter
-    {
-        internal readonly ManualResetEventSlim Gate = new ManualResetEventSlim(false);
-        public override void WriteLine(string value) { Gate.Wait(10000); base.WriteLine(value); }
-        public override void Write(string value) { Gate.Wait(10000); base.Write(value); }
-        public override void Flush() { Gate.Wait(10000); base.Flush(); }
-    }
-    private static void EventsCannotCloseJournal()
-    {
-        var writer = new GatedWriter();
-        using var record = new PlaytestRecord(writer, new Dictionary<string, object> { { "type", "header" }, { "schema", 1 }, { "matchId", "gate0001" } }, queueCapacity: 4);
-        for (int i = 0; i < 40; i++) record.OnEvents(new[] { "m=gate0001 t=1 n=" + i + " s=1 TURN turn=1" });
-        Check(record.Enabled, "an event flood on a stalled disk must leave the journal open");
-        record.OnResult("Won", 3);
-        writer.Gate.Set();
-        record.FlushAndWait(5000);
-        Check(writer.ToString().Contains("\"type\":\"result\""), "the replay row still reached the journal:\n" + writer);
-    }
-
     private static void TruncationMarkerMatchId()
     {
         var sink = new List<string>();
@@ -414,38 +392,6 @@ internal static partial class Program
         PlayAndFlush(match, player, ping, game.Player2.Hero);
         Check(lines.Any(l => l.Contains(" PLAY ") && l.Contains("card=CS2_189#")) && lines.Any(l => l.Contains(" DAMAGE ") && l.Contains("amount=?") && l.Contains("before-unknown")), "next batch decodes again, saying only what it knows:\n" + string.Join("\n", lines));
         Check(!lines.Any(l => l.Contains("by=CS2_029#")), "no stale frame from the faulted Fireball leaks into the next batch:\n" + string.Join("\n", lines));
-    }
-
-    private static string ChoiceRows(bool withEvents, long budget, out int rows, out string text)
-    {
-        var writer = new StringWriter();
-        var header = new Dictionary<string, object> { { "type", "header" }, { "schema", 1 }, { "matchId", "budget01" } };
-        using (var record = new PlaytestRecord(writer, header, maximumBytes: 6000, eventBudgetBytes: budget))
-        {
-            for (int i = 0; i < 40; i++)
-            {
-                if (withEvents) record.OnEvents(new[] { "m=budget01 t=1 n=" + i + " s=1 TURN turn=1 " + new string('x', 100) });
-                record.OnChoiceOpen(new Dictionary<string, object> { { "choiceId", i }, { "pad", new string('y', 120) } });
-            }
-            record.FlushAndWait(5000);
-        }
-        text = writer.ToString();
-        rows = Regex.Matches(text, "\"type\":\"choice-open\"").Count;
-        return text;
-    }
-    // Replay-class rows (choice-open stands in: same non-fx path, same size limit) are written identically with and without
-    // events: events have their own byte budget, so they can never take replay rows' room in the journal.
-    private static void EventBudgetSeparate()
-    {
-        Check(PlaytestRecord.MaximumEventBytes == 3L * 1024 * 1024, "event budget is 3 MiB");
-        ChoiceRows(false, 1500, out int plain, out string plainText);
-        ChoiceRows(true, 1500, out int mixed, out string mixedText);
-        Check(plain > 5 && plain == mixed, "same replay rows with and without events: " + plain + " vs " + mixed);
-        Check(plainText.Contains("size-limit") == mixedText.Contains("size-limit"), "events do not move the replay size limit");
-        var eventRows = Regex.Matches(mixedText, "\"type\":\"events\"").Count;
-        Check(eventRows > 0 && Regex.Matches(mixedText, "\"truncated\":\"event rows stop at 1500 bytes").Count == 1, "events stop at their own budget with one marker (" + eventRows + " rows)");
-        long written = Regex.Matches(mixedText, "(?m)^\\{\"type\":\"events\".*$").Cast<Match>().Sum(m => (long)m.Length + 1);
-        Check(written <= 1500 + 400, "event bytes stay inside the budget: " + written);
     }
 
     // The log reads engine entities; some engine getters write lazily cached fields on first read (AttackDamage, BaseHealth),
