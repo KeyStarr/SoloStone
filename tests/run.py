@@ -123,7 +123,7 @@ SUITES = [
     Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred/KindredProofTests.csproj', needs_engine=True),
     Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn/RebornProofTests.csproj', needs_engine=True),
     Suite('engine-proof', 'dotnet', 'card-by-card engine proofs: effects, resolution, snapshots and definitions, and the engine rule proofs '
-          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools), canonical hashes, and the planner on a recorded turn; the full run, about 5 minutes',
+          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools), canonical hashes, the planner on a recorded turn, and the engine half of the pinned transport replays; the full run, about 5 minutes',
           'tests/engine-proof/EngineProof.csproj', args=['--full']),
     Suite('standard-native', 'dotnet', 'native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, '
           'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
