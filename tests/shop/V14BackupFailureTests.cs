@@ -40,6 +40,13 @@ internal static class V14BackupFailureTests
         check(original.SequenceEqual(File.ReadAllBytes(path)) && !File.Exists(path + ".v14.bak"),
             "a failed backup write changed the save or left a backup");
 
+        // A failed Move (a directory sits at the backup path) also leaves no temporary file behind.
+        path = Fixture(root, "v14-bak-move-failure", out original);
+        Directory.CreateDirectory(path + ".v14.bak");
+        check(Throws(path), "V14 upgrade fails when the backup cannot be moved into place");
+        check(original.SequenceEqual(File.ReadAllBytes(path)) && !File.Exists(path + ".v14.bak.tmp"),
+            "a failed backup move changed the save or left the temporary file");
+
         // A failed commit after the backup keeps both; once the obstacle is gone the retry accepts the matching backup.
         path = Fixture(root, "v14-commit-failure", out original);
         Directory.CreateDirectory(path + ".tmp");

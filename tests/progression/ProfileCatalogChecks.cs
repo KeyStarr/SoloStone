@@ -274,6 +274,7 @@ internal static class ProfileCatalogChecks
         finally { LocalProfile.NpcLegendTopRating = previousTop; LocalProfile.NpcLegendNumber = previousNumber; }
     }
 
+    // A rule-0 shape no V13+ build writes; kept to cover the dormant ApplyMilestoneCatchUp path.
     private static void HistoricalCatchUp(string root)
     {
         Directory.CreateDirectory(root); string legacy = Path.Combine(root, "profile.xml");

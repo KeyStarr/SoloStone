@@ -114,6 +114,7 @@ internal static class LadderLedgerChecks
             Check(p.History.Last().Result == "Abandoned" && abandoned.Outcome == "Loss" && abandoned.StreakAfter == 0
                 && abandoned.StarsAfter == Math.Max(LadderRules.FloorBelow(beforeAbandon.StarIndex), beforeAbandon.StarIndex - 1)
                 && abandoned.RatingAfter < abandoned.RatingBefore && Matches(abandoned, p.Ladder), "abandon applies a loss");
+            Check(abandoned.StarsGained < 0 && !p.LadderArrivedByWin, "after a star loss the medal shows the 0/3 form");
         }
         // History/LadderReceipt copies carry every receipt field (a field-by-field copy must not drop new fields).
         using (var p = new LocalProfile(path))
