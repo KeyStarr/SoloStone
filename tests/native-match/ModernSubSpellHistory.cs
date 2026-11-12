@@ -31,6 +31,7 @@ internal static partial class Program
         AdditionalDamageRoutes();
         BattlecryDamageVisuals();
         GeneratedDamageVisuals();
+        Issue26EffectRoutes();
         RottenAppleVisual();
         DeathrattleDamageVisuals();
         WeaponDamageVisuals();
@@ -523,22 +524,27 @@ internal static partial class Program
                 "ONY_018t2" or "BE_554" or "BE_153" or "BE_153t" or "CAP_101" or "FIR_916" or "FIR_939" or "TLC_227" => "ReuseFX_Fire_Missile_Fireball_Medium_Super_Simultaneous:161d5760bd9de1e41baf4c5611e61eed",
                 "JAIL_307" => "ReuseFX_Fire_AE_Flood_BothSides_Super:1d77444aaeef20d4494e2ad82c551341",
                 "EDR_820b" or "EDR_570A" => "ReuseFX_Shadow_Fire_AE_Shockwave_Small_BothSides_Super:1f77cfbb2d94e3f4982cf07e849fa699",
-                "BE_086" or "BE_071" or "JAIL_941t" or "CORE_SW_088" or "CATA_498" or "JAIL_515" or "CATA_785" => "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0",
+                "BE_086" or "BE_071" or "JAIL_941t" or "CATA_498" or "JAIL_515" or "CATA_785" => "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0",
+                // Issue #26: Demonic Assault uses its CardDef's fel missile, Gorishi Stinger a glaive, Medivh's Triumph one shockwave.
+                "CORE_SW_088" => "ReuseFX_Fel_Fire_Missile_Small_Super_Quick:c09acf66646f50c4f9396a863c1e8b90",
+                "TLC_630t" => "ReuseFX_Physical_DemonHunter_Missile_Glaive_Small_Super:636507efb4db26a4a9437ed0561e110e",
+                "CATA_308" => "ReuseFX_Arcane_AE_Shockwave_Small_BothSides_Super:8e1bfdd78bbd7b3499685e8d9fd21417",
                 "BE_284" or "CATA_464t" => "ReuseFX_Frost_Missile_Snowball_Medium_Fast_Super_Simultaneous:4fecda861d7d78b4186c3a3c3091c1e5",
                 "EDR_263a" => "ReuseFX_Lightning_Missile_Bolt_Small_Super_Simultaneous:4e176ec954bdc6f4bb7494e521d35c8a",
-                "TLC_630t" or "EDR_813b" => "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1",
+                "EDR_813b" => "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1",
                 "BE_559" or "WW_001t" or "CAP_006" or "TLC_620" => "ReuseFX_Physical_Missile_Generic_Super_Simultaneous:6ff0a03c3b353254d887e154c0f94e33",
                 "JAIL_445" => "ReuseFX_Necrotic_Missile_Bone_Small_Super:d25c28f8f4b12964d8ab765bac643495",
                 _ => "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de" };
             var shots = entries.Where(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == prefab).Select(e => e.SubSpellStart).ToArray();
             var damage = entries.Where(e => e.HasMetaData && (int)e.MetaData.Type == 1).Select(e => e.MetaData.Info.Single()).ToArray();
-            bool group = id is "JAIL_307" or "EDR_820b" or "EDR_570A";
+            bool group = id is "JAIL_307" or "EDR_820b" or "EDR_570A" or "CATA_308";
             bool quarantined = FireQuarantined(id) && !group;
             Check(damage.Length > 0 && (quarantined ? shots.Length == 0 : group ? shots.Length == (id == "JAIL_307" ? 2 : 1) : shots.Length == damage.Length),
                 id + " has one cue per hit or exact wave (quarantined fire: none)");
             if (group)
             {
                 string perHit = id == "JAIL_307" ? "ReuseFX_Fire_Missile_Fireball_Medium_Super_Simultaneous:161d5760bd9de1e41baf4c5611e61eed"
+                    : id == "CATA_308" ? "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de"
                     : "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0";
                 Check(!entries.Any(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == perHit), id + " suppresses grouped per-hit cues");
             }
@@ -548,6 +554,102 @@ internal static partial class Program
             capture.SerializeAll();
         }
         Console.WriteLine("PASS standalone/generated damage routes, both seats, state and RNG");
+    }
+
+    // Issue #26 routes that aren't per-hit damage: Flame Imp's Fireblast at its own hero, Warchief Rafaam's armor impact,
+    // Calamitous Rafaam's fire wave, Mend's heal, Anti-Magic Shell on each friendly minion, and the summons of Demonic
+    // Assault, Nerubian Swarmguard and a Portal to Argus, then Raze through Deathwing's choice.
+    private static void Issue26EffectRoutes()
+    {
+        const string fireblast = "ReuseFX_Missile_Fire_Fireball_Small_Super:b8e7bb6e0944d204297efdc937967085";
+        const string armor = "ReuseFX_Physical_BuffImpact_Armor_Super_SourceHero:bf7e3e26888c9d94894b6d54a3ac6ba6";
+        const string flood = "ReuseFX_Fire_AE_Flood_BothSides_Super:1d77444aaeef20d4494e2ad82c551341";
+        const string heal = "ReuseFX_Holy_BuffImpact_Heal_Small_Super:98a6ddb5b34da2a419a16dcab9a2ef2c";
+        const string shell = "ReuseFX_Necrotic_DeathKnight_BuffImpact_AntiMagicShell_Super_WithIdle:c08f3d01cb170ce4d900696be4d8f13c";
+        const string runeCircle = "ReuseFX_Fel_Fire_OverrideSpawn_RuneCircle_Hop_Super_Random:b6770809cbf2a2b4a8a9e1bcbba84460";
+        const string fromGround = "ReuseFX_Necrotic_DeathKnight_OverrideSpawn_FromGround_Super_Random:42069975192ed4a4fb2d84d4925509b7";
+        const string portal = "TIME_020_Broxigar_Fab_OverrideSpawn_Super:3274770da35581d46b774f32fa26880d";
+        foreach (bool bot in new[] { false, true })
+        foreach (var (id, prefab) in new[] { ("CORE_EX1_319", fireblast), ("TIME_005t4", armor), ("TIME_005t6", flood), ("CATA_302", heal),
+            ("RLK_048", shell), ("CORE_SW_088", runeCircle), ("CORE_RLK_062", fromGround), ("TIME_020t2", portal) })
+        {
+            var (match, capture) = AnimationMatch(botTurn: bot, deck: "showcase-rogue-imbue"); var owner = match.Game.CurrentPlayer;
+            var allies = Enumerable.Range(0, 2).Select(_ => (Minion)EngineEntity.FromCard(owner, Cards.FromId("CS2_200"), zone: owner.BoardZone)).ToArray();
+            var enemy = (Minion)EngineEntity.FromCard(owner.Opponent, Cards.FromId("CS2_200"), zone: owner.Opponent.BoardZone);
+            foreach (var m in allies.Append(enemy)) m.BaseHealth = 30;
+            allies[0].Damage = 5;
+            var source = EngineEntity.FromCard(owner, Cards.FromId(id), zone: owner.HandZone); source.Cost = 0;
+            FlushFieldHistory(match); int cursor = capture.Packets.Count;
+            var choices = owner.Options().Where(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == source.Id).ToArray();
+            Check(choices.Length > 0, id + " is playable");
+            var task = (id == "CATA_302" ? choices.FirstOrDefault(t => t.Target?.Id == allies[0].Id) : choices.FirstOrDefault(t => t.Target?.Id == enemy.Id))
+                ?? choices.First();
+            var on = match.Game.CloneExact(history: true); var off = match.Game.CloneExact(history: false);
+            foreach (var game in new[] { on, off })
+                game.Process(game.CurrentPlayer.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == source.Id
+                    && (t.Target?.Id ?? 0) == (task.Target?.Id ?? 0)));
+            Check(on.Hash() == off.Hash(), id + " cue leaves game state unchanged");
+            var random = typeof(SabberStoneCore.Model.Game).GetProperty("Random", BindingFlags.NonPublic | BindingFlags.Instance);
+            var left = random.GetValue(on); var right = random.GetValue(off); var next = left.GetType().GetMethod("Next", System.Type.EmptyTypes);
+            for (int i = 0; i < 5; i++) Check(Equals(next.Invoke(left, null), next.Invoke(right, null)), id + " cue leaves RNG unchanged");
+            InvokeProcess(match, task); FlushFieldHistory(match); var entries = History(capture, cursor);
+            var shots = entries.Where(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == prefab).Select(e => e.SubSpellStart).ToArray();
+            var damage = entries.Where(e => e.HasMetaData && (int)e.MetaData.Type == 1).Select(e => e.MetaData.Info.Single()).ToArray();
+            Check(shots.Length > 0, id + " plays its #26 effect");
+            switch (id)
+            {
+                case "CORE_EX1_319":
+                    Check(shots.Length == damage.Length && shots.All(s => s.SourceEntityId == source.Id && s.TargetEntityIds.SequenceEqual(new[] { owner.Hero.Id })),
+                        id + " Fireblast goes from the Imp to its own hero, once per hit");
+                    break;
+                case "TIME_005t4":
+                    Check(shots.Length == 1 && shots[0].SourceEntityId == owner.Hero.Id && shots[0].TargetEntityIds.SequenceEqual(new[] { owner.Hero.Id })
+                        && owner.Hero.Armor > 0, id + " one armor impact on the hero, from the hero");
+                    break;
+                case "CATA_302":
+                    Check(shots.Length == 1 && shots[0].SourceEntityId == owner.Hero.Id && shots[0].TargetEntityIds.SequenceEqual(new[] { allies[0].Id })
+                        && allies[0].Damage < 5, id + " one heal impact on the damaged minion");
+                    break;
+                case "CORE_SW_088" or "CORE_RLK_062":
+                    Check(shots.Length == 2 && shots.All(s => s.TargetEntityIds.Count == 0), id + " one summon effect per summoned minion");
+                    break;
+                case "TIME_020t2":
+                    Check(shots.Length == 1 && shots[0].TargetEntityIds.Count == 0, id + " one portal summon effect");
+                    break;
+                case "TIME_005t6":
+                    Check(shots.Length == 1 && shots[0].SourceEntityId == source.Id && shots[0].TargetEntityIds.Count == 0 && damage.Length > 0,
+                        id + " one fire wave from Rafaam over both boards");
+                    break;
+                case "RLK_048":
+                    Check(shots.Select(s => s.TargetEntityIds.Single()).OrderBy(x => x).SequenceEqual(allies.Select(a => a.Id).OrderBy(x => x)),
+                        id + " one shell on each friendly minion");
+                    break;
+            }
+            Check(entries.Count(e => e.HasSubSpellStart) == entries.Count(e => e.HasSubSpellEnd), id + " scopes balanced");
+            capture.SerializeAll();
+        }
+        foreach (bool bot in new[] { false, true })
+        {
+            // Raze: Deathwing, Worldbreaker's half-board effect, one pulse from Deathwing over the enemy board.
+            const string halfBoard = "CATAFX_Deathwing_AE_HalfBoard_Super:6f6e7e32f2a0f2a4d906ef4aa79b185e";
+            var (match, capture) = AnimationMatch(botTurn: bot); var owner = match.Game.CurrentPlayer;
+            var enemies = Enumerable.Range(0, 2).Select(_ => (Minion)EngineEntity.FromCard(owner.Opponent, Cards.FromId("CS2_200"), zone: owner.Opponent.BoardZone)).ToArray();
+            foreach (var m in enemies) m.BaseHealth = 30;
+            var source = EngineEntity.FromCard(owner, Cards.FromId("CATA_190h"), zone: owner.HandZone); source.Cost = 0;
+            FlushFieldHistory(match); int cursor = capture.Packets.Count;
+            InvokeProcess(match, owner.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == source.Id));
+            FlushFieldHistory(match);
+            int raze = owner.Choice.Choices.First(c => match.Game.IdEntityDic[c].Card.Id == "CATA_190t12");
+            InvokeProcess(match, ChooseTask.Pick(owner, raze)); FlushFieldHistory(match);
+            var entries = History(capture, cursor);
+            var shots = entries.Where(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == halfBoard).Select(e => e.SubSpellStart).ToArray();
+            var damage = entries.Where(e => e.HasMetaData && (int)e.MetaData.Type == 1).Select(e => e.MetaData.Info.Single()).ToArray();
+            Check(shots.Length == 1 && shots[0].SourceEntityId == source.Id && shots[0].TargetEntityIds.Count == 0
+                && enemies.All(m => damage.Contains(m.Id)), "CATA_190h Raze plays one half-board pulse from Deathwing over the enemy minions");
+            Check(entries.Count(e => e.HasSubSpellStart) == entries.Count(e => e.HasSubSpellEnd), "CATA_190h Raze scopes balanced");
+            capture.SerializeAll();
+        }
+        Console.WriteLine("PASS issue #26 effect routes: Fireblast, armor, fire wave, heal, shell, summons and Raze; both seats, state and RNG");
     }
 
     private static void BattlecryDamageVisuals()
