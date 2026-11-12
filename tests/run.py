@@ -107,7 +107,7 @@ GOLDENS = ('classic-source', 'modern', 'core-reprints', 'core-2026', 'offline-st
 
 SUITES = [
     Suite('cards', 'dotnet', 'card catalog and pool counts, rarity rules, and card scenarios on the engine (damage, auras, deathrattles, secrets)', 'tests/cards/CardsTests.csproj'),
-    Suite('fair-packs', 'dotnet', 'pack opening: fair rolls, pity rules and the frozen pack results', 'tests/fairpacks/FairPackTests.csproj'),
+    Suite('fair-packs', 'dotnet', 'pack opening: fair rolls, pity rules and the frozen pack results', 'tests/fair-packs/FairPackTests.csproj'),
     Suite('ladder-rules', 'dotnet', 'ranked ladder rules (stars, floors, rewards) and a simulated climb through a synthetic opponent world',
           'tests/ladder-rules/LadderRulesTests.csproj'),
     Suite('recipes', 'dotnet', 'the shipped shop deck recipes validate and follow the recipe rules', 'tests/recipes/RecipeTests.csproj'),
@@ -115,13 +115,13 @@ SUITES = [
           'tests/npc-world/NpcWorldTests.csproj'),
     Suite('ai', 'dotnet', 'opponent AI fairness: it may not see hidden information', 'tests/ai/AiTests.csproj'),
     Suite('ai-golden', 'dotnet', 'opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks',
-          'tests/golden/GoldenTests.csproj'),
+          'tests/ai-golden/GoldenTests.csproj'),
     Suite('parallel-groups', 'dotnet', 'the card lists behind each offline card pool, and the group proof checks', 'tests/parallel-groups/ParallelGroupsTests.csproj'),
     Suite('tier-presentation', 'dotnet', 'the rank tier reward screen steps (with stand-in game classes)', 'tests/tier-presentation/TierPresentationTests.csproj'),
     Suite('fire-fx-scene', 'dotnet', 'the fire effect scene helper', 'tests/fire-fx-scene/FireFxSceneTests.csproj'),
-    Suite('dormant', 'dotnet', 'engine rules for Dormant cards', 'tests/dormant-proof/DormantProofTests.csproj', needs_engine=True),
-    Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred-proof/KindredProofTests.csproj', needs_engine=True),
-    Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn-proof/RebornProofTests.csproj', needs_engine=True),
+    Suite('dormant', 'dotnet', 'engine rules for Dormant cards', 'tests/dormant/DormantProofTests.csproj', needs_engine=True),
+    Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred/KindredProofTests.csproj', needs_engine=True),
+    Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn/RebornProofTests.csproj', needs_engine=True),
     Suite('engine-proof', 'dotnet', 'card-by-card engine proofs: effects, resolution, snapshots and definitions, and the engine rule proofs '
           '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools), canonical hashes, and the planner on a recorded turn; the full run, about 5 minutes',
           'tests/engine-proof/EngineProof.csproj', args=['--full']),
