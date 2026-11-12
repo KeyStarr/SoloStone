@@ -66,7 +66,7 @@ after your client changes. Use the client version named in `installer/tested-cli
 in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
-(built locally from your client and never committed) is missing. The summary line counts every skip, for example
+(built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary line counts every skip, for example
 `16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
 
 With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
@@ -95,7 +95,9 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `projection` | How menu and match state is projected onto the native screens |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
-| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens |
+| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
+| `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
+| `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
 | `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
@@ -171,7 +173,7 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 
 Some test suites are not in this repository.
 
-- **Suites that need your own Hearthstone client** (the `client` tier above). They load the game's own libraries to
+- **Suites that need your own Hearthstone client or data built from it** (the `client` tier above; today only `progression-standard-batches`, which needs the card export). They load the game's own libraries to
   check the plugin's native screens, hooks and message handling: the engine proofs per card, native match flows, and
   the checks that every client call the plugin binds to still exists. The runner already supports them (`--client`);
   the suites themselves are added in a later change. This repository ships no client file, and CI cannot run them.

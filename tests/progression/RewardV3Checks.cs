@@ -1,23 +1,13 @@
-using System.Xml.Serialization;
-
-// Reward V3 (owner 2026-10-25): losses pay nothing; a win rolls 50% gold 40-80, 25% dust 40-80, 25% both 30-60.
+// Reward V3 roll function (owner 2026-10-25), retired as a match reward (profiles now issue V4-V6, see RewardV5Checks): losses pay nothing; a win rolls 50% gold 40-80, 25% dust 40-80, 25% both 30-60.
 internal static class RewardV3Checks
 {
     private static void Check(bool value, string name) { if (!value) throw new Exception(name); }
-    private static void Reject(Action action, string name)
-    {
-        try { action(); }
-        catch (Exception e) when (e is InvalidOperationException || e is ArgumentException || e is IOException || e is UnauthorizedAccessException) { return; }
-        throw new Exception("Expected rejection: " + name);
-    }
-    private static LocalProfileData Read(string path) { using var s = File.OpenRead(path); return (LocalProfileData)new XmlSerializer(typeof(LocalProfileData)).Deserialize(s); }
-    private static void Write(string path, LocalProfileData d) { using var s = File.Create(path); new XmlSerializer(typeof(LocalProfileData)).Serialize(s, d); }
     private static Guid Id(int i) { var b = new byte[16]; BitConverter.GetBytes(i * 2654435761L).CopyTo(b, 0); BitConverter.GetBytes((long)i).CopyTo(b, 8); return new Guid(b); }
     private static LocalReward Roll(Guid id, int seed, LocalRewardFacts facts = null) =>
         LocalEconomy.RewardV3("Won", 12, false, facts ?? new LocalRewardFacts(), LocalEconomy.RewardRollSeed(id.ToString(), seed));
     private static int Kind(LocalReward r) => r.Gold > 0 && r.Dust > 0 ? 3 : r.Gold > 0 ? 0 : 2;
 
-    internal static void Run(string root)
+    internal static void Run()
     {
         var none = new LocalRewardFacts();
         int seedRoot = LocalEconomy.RewardRollSeed(Id(1).ToString(), 7);
@@ -68,12 +58,11 @@ internal static class RewardV3Checks
             && !Roll(Id(goldOnly), 1, new LocalRewardFacts { DistinctCardsPlayed = 6 }).PackReward
             && Roll(Id(goldOnly), 1, new LocalRewardFacts { DistinctCardsPlayed = 6 }).BonusGold == 5, "great win pack rule");
 
-        PackSetChecks(root);
-        ProfileChecks(root);
-        Console.WriteLine("PASS reward V3: loss pays 0, win roll 50/25/25 in range, EV 67.5, deterministic, bonus/pack, atomic dust settle, retry/restart, validation, V2 pending kept");
+        PackSetChecks();
+        Console.WriteLine("PASS reward V3 roll function (historical; V4 keeps its base roll): loss pays 0, win roll 50/25/25 in range, EV 67.5, deterministic, bonus/pack, weighted pack-set draw");
     }
 
-    private static void PackSetChecks(string root)
+    private static void PackSetChecks()
     {
         var weights = new List<KeyValuePair<string, int>> { new("A", 300), new("DONE", 0), new("B", 100) };
         var drawn = new Dictionary<string, int> { ["A"] = 0, ["B"] = 0, ["DONE"] = 0 };
@@ -86,134 +75,5 @@ internal static class RewardV3Checks
         }
         Check(drawn["DONE"] == 0 && Math.Abs(drawn["A"] / 8000.0 - 0.75) < 0.03, "pack set weights: " + drawn["A"] + "/" + drawn["B"]);
         Check(LocalEconomy.RewardPackSet(1, new List<KeyValuePair<string, int>> { new("A", 0), new("B", 0) }, "NEW") == "NEW", "all complete falls back");
-
-        var sets = FairPackRules.PackTypes.Where(t => t != FairPackRules.Standard && t != FairPackRules.Legacy).ToList();
-        var great = new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 };
-        // Every set but one complete: that set always drops; then all complete: the newest set.
-        string keep = sets.First(t => t != FairPackRules.NewestSet);
-        foreach (bool allComplete in new[] { false, true })
-        {
-            string path = Path.Combine(root, "pack-set-" + allComplete + ".xml");
-            using (var profile = new LocalProfile(path)) profile.Begin("mage", "priest", 3);
-            var data = Read(path);
-            foreach (string set in sets.Where(t => allComplete || t != keep))
-                foreach (var card in FairPackRules.Eligible(set, FairPackRules.RuleVersion))
-                {
-                    var row = data.Collection.SingleOrDefault(c => c.Id == card.Id);
-                    if (row == null) data.Collection.Add(row = new LocalCardCount { Id = card.Id });
-                    row.Count = Math.Max(row.Count, LocalEconomy.PlayableCap(card)); row.Acquired = LocalEconomy.PlayableCap(card);
-                }
-            Write(path, data);
-            using (var profile = new LocalProfile(path))
-            {
-                var won = profile.Settle(profile.Pending.Id, "Won", 12, false, great);
-                Check(won.PackReward && won.Packs.Single().PackType == (allComplete ? FairPackRules.NewestSet : keep)
-                    && profile.PackInventory.Single(p => p.PackType == won.Packs.Single().PackType).Count == 1, "V3 pack set completion rule " + allComplete);
-            }
-        }
-        // V2 replay: a pending match begun on the old build keeps the newest set.
-        string legacy = Path.Combine(root, "pack-set-v2.xml");
-        using (var profile = new LocalProfile(legacy)) profile.Begin("mage", "priest", 3);
-        var v2 = Read(legacy); v2.Pending.RewardVersion = 2; Write(legacy, v2);
-        using (var profile = new LocalProfile(legacy))
-            Check(profile.Settle(profile.Pending.Id, "Won", 12, false, great).Packs.Single().PackType == FairPackRules.NewestSet, "V2 pack stays newest set");
-    }
-
-    private static void ProfileChecks(string root)
-    {
-        string path = Path.Combine(root, "reward-v3.xml");
-        var facts = new LocalRewardFacts { DistinctCardsPlayed = 7, EnemyMinionsDefeated = 1, MinimumHealth = 20 };
-        LocalMatchRecord won;
-        using (var profile = new LocalProfile(path))
-        {
-            profile.CreateDraft("V3", "HERO_08");
-            // A loss: rank and class XP, no currency.
-            var lost = profile.Begin("mage", "priest", 5);
-            Check(lost.RewardVersion == 3 && Read(path).Pending.RewardVersion == 3, "new matches begin on reward V3");
-            var lostResult = profile.Settle(lost.Id, "Lost", 12, false, facts);
-            Check(lostResult.Gold == 0 && lostResult.DustReward == 0 && !lostResult.PackReward && profile.Gold == 0 && profile.DustBalance == 0
-                && profile.ClassXp["HERO_08"] > 0 && lostResult.Ladder != null, "V3 loss: XP and rank only");
-            var lossSummary = LocalRewardPresentation.Summary(lostResult, profile);
-            Check(lossSummary.Items.Count == 0 && LocalRewardPresentation.NoItemsText(lossSummary).Contains("only victories"), "V3 loss summary");
-            profile.AcknowledgeRewardPresentation(lost.Id);
-
-            profile.Begin("mage", "priest", 0);
-            profile.RecoverInterrupted();
-            Check(profile.Gold == 0 && profile.DustBalance == 0 && profile.History.Last().DustReward == 0, "abandon pays no dust");
-            // Pick the pending match's seed so its roll pays both currencies and the receipt exercises the dust path.
-            profile.Begin("mage", "priest", 0);
-        }
-        var fixture = Read(path);
-        fixture.Pending.Seed = Enumerable.Range(0, 400).First(s => Kind(LocalEconomy.RewardV3("Won", 12, false, facts,
-            LocalEconomy.RewardRollSeed(fixture.Pending.Id, s))) == 3);
-        Write(path, fixture);
-        using (var profile = new LocalProfile(path))
-        {
-            var pending = profile.Pending;
-            Check(pending.RewardVersion == 3 && pending.Seed == fixture.Pending.Seed, "edited pending reloads");
-            long goldBefore = profile.Gold, dustBefore = profile.DustBalance;
-            byte[] pendingBytes = File.ReadAllBytes(path);
-            Directory.CreateDirectory(path + ".tmp");
-            Reject(() => profile.Settle(pending.Id, "Won", 12, false, facts), "V3 settle commit failure");
-            Check(profile.Gold == goldBefore && profile.DustBalance == dustBefore && profile.Pending.Id == pending.Id
-                && File.ReadAllBytes(path).SequenceEqual(pendingBytes), "failed V3 settle changed gold or dust");
-            Directory.Delete(path + ".tmp");
-            won = profile.Settle(pending.Id, "Won", 12, false, facts);
-            var expected = LocalEconomy.RewardV3("Won", 12, false, facts, LocalEconomy.RewardRollSeed(won.Id, won.Seed));
-            Check(won.Gold == expected.Gold && won.DustReward == expected.Dust && won.BonusGold == 5 && !won.PackReward
-                && profile.Gold == goldBefore + won.Gold && profile.DustBalance == dustBefore + won.DustReward, "V3 win receipt and balances");
-            var retry = profile.Settle(pending.Id, "Won", 12, false, facts);
-            Check(retry.Gold == won.Gold && retry.DustReward == won.DustReward && profile.Gold == goldBefore + won.Gold
-                && profile.DustBalance == dustBefore + won.DustReward, "V3 settle retry is idempotent");
-            Reject(() => profile.Settle(pending.Id, "Won", 12, false, new LocalRewardFacts()), "conflicting V3 retry");
-            Check(Kind(expected) == 3, "fixture rolled both");
-            {
-                var summary = LocalRewardPresentation.Summary(won, profile);
-                Check(summary.Items.Any(i => i.Kind == LocalRewardKind.Gold && i.Amount == won.Gold)
-                    && summary.Items.Any(i => i.Kind == LocalRewardKind.Dust && i.Amount == won.DustReward)
-                    && summary.Body.Contains("Total: " + won.Gold + " gold + " + won.DustReward + " dust")
-                    && summary.Body.Contains("Bonus +5 gold"), "V3 summary lists gold and dust");
-            }
-        }
-        // Restart mid-presentation: identical bytes, balances and pending presentation; a retry pays nothing more.
-        byte[] settled = File.ReadAllBytes(path);
-        using (var profile = new LocalProfile(path))
-        {
-            Check(profile.PendingRewardPresentation?.Id == won.Id && profile.PendingRewardPresentation.DustReward == won.DustReward
-                && File.ReadAllBytes(path).SequenceEqual(settled), "restart keeps V3 presentation");
-            long gold = profile.Gold, dust = profile.DustBalance;
-            profile.Settle(won.Id, "Won", 12, false, facts);
-            Check(profile.Gold == gold && profile.DustBalance == dust, "restart retry double-paid");
-            Check(profile.AcknowledgeRewardPresentation(won.Id) && !profile.AcknowledgeRewardPresentation(won.Id), "V3 ack once");
-            Check(profile.Gold == gold && profile.DustBalance == dust, "ack changed balances");
-        }
-
-        // Validation recomputes V3 receipts: tampered dust, gold or version is rejected without touching the file.
-        foreach (var tamper in new Action<LocalProfileData>[] {
-            d => d.Matches.Single(m => m.Id == won.Id).DustReward++,
-            d => d.Matches.Single(m => m.Id == won.Id).Gold++,
-            d => d.Matches.First(m => m.Result == "Lost").RewardVersion = 4,
-            d => d.Matches.Single(m => m.Id == won.Id).RewardVersion = 2 })
-        {
-            string bad = Path.Combine(root, "reward-v3-bad.xml");
-            var data = Read(path); tamper(data); Write(bad, data);
-            byte[] bytes = File.ReadAllBytes(bad);
-            Reject(() => { using var ignored = new LocalProfile(bad); }, "tampered V3 receipt");
-            Check(File.ReadAllBytes(bad).SequenceEqual(bytes), "rejected V3 load changed bytes");
-        }
-
-        // A match begun on the previous build (pending V2) settles with the V2 rule; old V2 receipts reload unchanged.
-        string legacy = Path.Combine(root, "reward-v2-pending.xml");
-        using (var profile = new LocalProfile(legacy)) profile.Begin("mage", "priest", 9);
-        var v2 = Read(legacy); v2.Pending.RewardVersion = 2; Write(legacy, v2);
-        using (var profile = new LocalProfile(legacy))
-        {
-            var r = profile.Settle(profile.Pending.Id, "Lost", 12, false, facts);
-            Check(r.RewardVersion == 2 && r.Gold == 35 && r.BonusGold == 10 && r.DustReward == 0 && profile.Gold == 35 && profile.DustBalance == 0,
-                "pending V2 keeps the V2 rule");
-        }
-        byte[] v2Bytes = File.ReadAllBytes(legacy);
-        using (var profile = new LocalProfile(legacy))
-            Check(profile.History.Single().Gold == 35 && File.ReadAllBytes(legacy).SequenceEqual(v2Bytes), "V2 receipt reload unchanged");
     }
 }

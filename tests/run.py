@@ -16,8 +16,9 @@ Two tiers (docs/TESTING.md):
           skipped, with a printed reason, when it is not.
   client  a suite marked needs_client loads your own client's libraries. --client DIR copies them (the files named in
           CLIENT_FILES, from the Hearthstone folder or its Managed folder) into references/game, which git ignores.
-          Without them, or without the data the suite lists in needs_local, the suite is SKIPPED with a printed
-          reason, and the summary counts every skip.
+          A suite that lists needs_local reads data built from your client (git ignores it), such as the card export
+          in data/carddb/. Without the libraries or that data, the suite is SKIPPED with a printed reason, and the
+          summary counts every skip.
 
 Builds are Release builds with -p:EngineSource=true: the rules engine is built from engine/, never from a prebuilt
 DLL. Build output goes to a temporary folder (or --artifacts) and nothing is written inside the repository except
@@ -77,7 +78,7 @@ class Suite:
 
     @property
     def tier(self):
-        return 'client' if self.needs_client else 'ci'
+        return 'client' if self.needs_client or self.needs_local else 'ci'
 
     def skip_reason(self):
         """Why this suite cannot run on this machine, or None. A reason is always printed and always counted."""
@@ -90,9 +91,9 @@ class Suite:
             if missing:
                 return ('needs your own Hearthstone client: references/game lacks ' + ', '.join(missing[:3])
                         + (' and %d more' % (len(missing) - 3) if len(missing) > 3 else '') + ' (run with --client DIR)')
-            absent = [path for path in self.needs_local if not (ROOT / path).exists()]
-            if absent:
-                return 'needs data built locally from your client, not found: ' + ', '.join(absent)
+        absent = [path for path in self.needs_local if not (ROOT / path).exists()]
+        if absent:
+            return 'needs data built locally from your client, not found: ' + ', '.join(absent)
         return None
 
     @property
@@ -141,6 +142,11 @@ SUITES += [
           'tests/recipe-picker/RecipePickerTests.csproj'),
     Suite('progression', 'dotnet', 'profile, rewards, quests, achievements, ranks and settings logic behind the native screens',
           'tests/progression/ProgressionTests.csproj'),
+    Suite('progression-extended', 'dotnet', 'the older progression fixtures: migrations, full premium fixtures, Reward V3, Death Knight, hero drafts, test loaners, NPC records',
+          'tests/progression/ProgressionTests.csproj', args=['--extended']),
+    Suite('progression-standard-batches', 'dotnet', 'the Standard test loaners and batch manifests against the client card export (classes, DBF ids, set admission)',
+          'tests/progression/ProgressionTests.csproj', args=['--standard-batches-only'],
+          needs_local=['data/carddb/37.0.0.254477/cards.json.gz', 'data/carddb/37.0.0.254477/set-overrides.json']),
     Suite('shop', 'dotnet', 'the native shop: catalogue, purchases, deck tiles and art maths (one check reads the client library, if set up)',
           'tests/shop/ShopTests.csproj'),
     Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
@@ -338,9 +344,9 @@ def main(argv=None):
             raise Usage('--ci runs only the suites that need no client, so it cannot be combined with --client')
         chosen = [BY_NAME[name] for name in args.suite] if args.suite else SUITES
         if args.ci:
-            if any(suite.needs_client for suite in chosen) and args.suite:
-                raise Usage('--ci cannot run a client-tier suite: ' + ', '.join(suite.name for suite in chosen if suite.needs_client))
-            chosen = [suite for suite in chosen if not suite.needs_client]
+            if any(suite.tier == 'client' for suite in chosen) and args.suite:
+                raise Usage('--ci cannot run a client-tier suite: ' + ', '.join(suite.name for suite in chosen if suite.tier == 'client'))
+            chosen = [suite for suite in chosen if suite.tier == 'ci']
         managed = find_managed(args.client) if args.client else None
         if args.no_build and not args.artifacts:
             raise Usage('--no-build needs --artifacts, the folder of an earlier run')

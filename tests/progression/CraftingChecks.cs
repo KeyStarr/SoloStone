@@ -1,5 +1,3 @@
-using System.Runtime.CompilerServices;
-
 internal static class CraftingChecks
 {
     static void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
@@ -10,8 +8,6 @@ internal static class CraftingChecks
         Acquired = new Dictionary<string, int> { ["CATA_452"] = acquired }
     };
 
-    // Run with the existing executable suite without changing its profile-test entry point.
-    [ModuleInitializer]
     internal static void Run()
     {
         foreach (var price in new[] { ("CATA_452", 40, 20), ("EDR_001", 100, 50),
