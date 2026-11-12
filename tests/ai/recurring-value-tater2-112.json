@@ -1,0 +1,235 @@
+{
+  "schema": 1,
+  "id": "recurring-value-tater2-112",
+  "category": "plan",
+  "title": "Spend the 7/1 on the Leech engine instead of face",
+  "why": "Owner Deck playtest tater2 #112/#116: Hideous Husk plus four Bloated Leeches steal 2 Health each per human turn (human 25 -> 33, NPC minions drained). Base sends the 7/1 face (2-ply sees one drain round); recurring-value prices further rounds and removes a Leech engine piece.",
+  "source": "tests/ai/journals/deck-tater2-20261101.jsonl #112, public board and hand; human 33 Health as 30 + 3 Armor; Nefarian's Creation Stealth set by the runner; human hand/deck replaced by hidden twins.",
+  "deckId": "npc-token-druid",
+  "seed": 20261101,
+  "turn": 21,
+  "bot": {
+    "class": "DRUID",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 5
+    },
+    "hand": [
+      {
+        "card": "CATA_525",
+        "tag": "aura",
+        "cost": 1
+      },
+      {
+        "card": "END_011",
+        "tag": "hand1",
+        "cost": 2
+      },
+      {
+        "card": "FIR_907",
+        "tag": "amirdrassil",
+        "cost": 5
+      }
+    ],
+    "board": [
+      {
+        "card": "CATA_470t1",
+        "tag": "creation",
+        "attack": 7,
+        "health": 1,
+        "exhausted": false,
+        "cost": 8
+      }
+    ],
+    "deck": [
+      {
+        "card": "CORE_SCH_181",
+        "tag": "deck0"
+      },
+      {
+        "card": "CATA_131",
+        "tag": "deck1"
+      },
+      {
+        "card": "CATA_131",
+        "tag": "deck2"
+      },
+      {
+        "card": "DINO_432",
+        "tag": "deck3"
+      },
+      {
+        "card": "EDR_856",
+        "tag": "deck4"
+      },
+      {
+        "card": "MEND_046",
+        "tag": "deck5"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck6"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck7"
+      },
+      {
+        "card": "TLC_232",
+        "tag": "deck8"
+      },
+      {
+        "card": "TLC_232",
+        "tag": "deck9"
+      },
+      {
+        "card": "TLC_233",
+        "tag": "deck10"
+      },
+      {
+        "card": "TLC_603",
+        "tag": "deck11"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "DEATHKNIGHT",
+    "mana": 1,
+    "baseMana": 10,
+    "hero": {
+      "damage": 0,
+      "armor": 3
+    },
+    "board": [
+      {
+        "card": "EDR_810",
+        "tag": "husk",
+        "attack": 3,
+        "health": 5,
+        "exhausted": true,
+        "cost": 6
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech1",
+        "attack": 0,
+        "health": 2,
+        "exhausted": false,
+        "cost": 1
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech2",
+        "attack": 0,
+        "health": 2,
+        "exhausted": false,
+        "cost": 1
+      },
+      {
+        "card": "CORE_RLK_116",
+        "tag": "mortician",
+        "attack": 2,
+        "health": 3,
+        "exhausted": true,
+        "cost": 2
+      },
+      {
+        "card": "CORE_RLK_066",
+        "tag": "hematurge",
+        "attack": 2,
+        "health": 3,
+        "exhausted": true,
+        "cost": 2
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech3",
+        "attack": 0,
+        "health": 2,
+        "exhausted": true,
+        "cost": 1
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech4",
+        "attack": 0,
+        "health": 2,
+        "exhausted": true,
+        "cost": 1
+      }
+    ],
+    "hidden": {
+      "hand": 9,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 99
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ]
+  }
+}

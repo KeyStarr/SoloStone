@@ -1,0 +1,193 @@
+{
+  "schema": 1,
+  "libraryVersion": 1,
+  "clientBuild": "37.0.0.254477",
+  "recipes": [
+    {
+      "id": "mage-frost-fixture",
+      "name": "Mage Frost Fixture",
+      "class": "MAGE",
+      "hero": "HERO_08",
+      "archetype": "Fixture control",
+      "role": "fun",
+      "difficulty": "medium",
+      "tag": "fan",
+      "style": "midrange",
+      "preview": "Fixture: adapted Classic control list; no meta-strength claim.",
+      "guide": {
+        "strategy": "Fixture: answer threats and develop durable minions.",
+        "strategyCards": ["CORE_CS2_024"],
+        "mulligan": "Fixture: keep cheap plays.",
+        "keepCards": ["CORE_CS2_023"]
+      },
+      "cards": [
+        {
+          "id": "CORE_CS2_024",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_023",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_179",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_029",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_028",
+          "count": 2
+        },
+        {
+          "id": "CORE_NEW1_021",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_096",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_007",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_032",
+          "count": 1
+        },
+        {
+          "id": "CORE_EX1_012",
+          "count": 1
+        },
+        {
+          "id": "CORE_DRG_107",
+          "count": 2
+        },
+        {
+          "id": "CORE_SW_108",
+          "count": 2
+        },
+        {
+          "id": "CORE_BAR_541",
+          "count": 2
+        },
+        {
+          "id": "CORE_BT_072",
+          "count": 2
+        },
+        {
+          "id": "JAIL_379",
+          "count": 2
+        },
+        {
+          "id": "CATA_485",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "source": {
+        "site": "LocalDecks.All fixture",
+        "url": "local:plugin/LocalDecks.cs#mage-frost",
+        "accessed": "2026-10-24",
+        "patch": "37.0.0.254477",
+        "deckCode": "fixture: locally constructed; no imported deck code",
+        "changes": "Fixture based on LocalDecks.All mage-frost. Use current Core reprints; replace retired cards (CS2_031, CS2_027, CS2_026, CS2_033, EX1_284, EX1_279, EX1_561) with current class/neutral cards. Replace inactive Astral Rain (BE_258) with Spire Security (JAIL_379) for the pre-BE release meta."
+      }
+    },
+    {
+      "id": "paladin-control-fixture",
+      "name": "Paladin Control Fixture",
+      "class": "PALADIN",
+      "hero": "HERO_04",
+      "archetype": "Fixture control",
+      "role": "fun",
+      "difficulty": "medium",
+      "tag": "fan",
+      "style": "midrange",
+      "preview": "Fixture: adapted Classic control list; no meta-strength claim.",
+      "guide": {
+        "strategy": "Fixture: answer threats and develop durable minions.",
+        "strategyCards": ["CORE_CS2_093"],
+        "mulligan": "Fixture: keep cheap plays.",
+        "keepCards": ["CORE_CS2_094"]
+      },
+      "cards": [
+        {
+          "id": "CORE_CS2_093",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_094",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_619",
+          "count": 2
+        },
+        {
+          "id": "CORE_CS2_179",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_362",
+          "count": 1
+        },
+        {
+          "id": "CORE_EX1_005",
+          "count": 2
+        },
+        {
+          "id": "CORE_ICC_038",
+          "count": 2
+        },
+        {
+          "id": "CORE_CFM_753",
+          "count": 2
+        },
+        {
+          "id": "CORE_GVG_061",
+          "count": 2
+        },
+        {
+          "id": "CORE_GVG_059",
+          "count": 2
+        },
+        {
+          "id": "CORE_KAR_057",
+          "count": 2
+        },
+        {
+          "id": "CORE_UNG_952",
+          "count": 2
+        },
+        {
+          "id": "CORE_UNG_848",
+          "count": 2
+        },
+        {
+          "id": "CORE_EX1_110",
+          "count": 1
+        },
+        {
+          "id": "CORE_KAR_062",
+          "count": 2
+        },
+        {
+          "id": "CORE_LOOT_137",
+          "count": 2
+        }
+      ],
+      "sideboards": [],
+      "source": {
+        "site": "LocalDecks.All fixture",
+        "url": "local:plugin/LocalDecks.cs#paladin-control",
+        "accessed": "2026-10-24",
+        "patch": "37.0.0.254477",
+        "deckCode": "fixture: locally constructed; no imported deck code",
+        "changes": "Fixture based on LocalDecks.All paladin-control. Use current Core reprints; replace retired cards (CS2_089, CS2_097, EX1_360, EX1_371, EX1_382, CS2_200, EX1_366, CS2_087, CS2_088, CS2_092, EX1_354, EX1_355, EX1_561) with current class/neutral cards."
+      }
+    }
+  ]
+}

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- NPC World v1 suites (spec 2026-10-25-npc-world-v1-design.md). C# 7.3 like the plugin's shared NPC sources. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <LangVersion>7.3</LangVersion><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable>
+    <EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
+    <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
+    <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
+    <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <None Include="fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../goldens/pools/*" LinkBase="pools" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/npc/*.json" LinkBase="data/npc" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>

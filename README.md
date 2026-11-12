@@ -18,7 +18,7 @@ SoloStone is an unofficial offline single-player mod for Hearthstone®. It requi
 **Play Hearthstone offline, on your own PC, against computer opponents.** You get the game's own screens, ranked and
 casual matches, deck building, packs and progress, all kept on your machine.
 
-[Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md)
+[Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md) · [Run the tests](docs/TESTING.md)
 
 ## Just want to play?
 
@@ -118,8 +118,8 @@ app and your account are never touched.
 
 ## Contributing
 
-**For now SoloStone takes issues, not pull requests** ([CONTRIBUTING.md](.github/CONTRIBUTING.md)). If there is real
-demand, proper contribution rules, CI and a mod API come next. Until then, the most useful help is:
+**Issues and pull requests are welcome** ([CONTRIBUTING.md](.github/CONTRIBUTING.md): commits are signed off, and CI
+runs the public tests). The most useful help is:
 
 | You can | How |
 |---|---|
@@ -127,6 +127,7 @@ demand, proper contribution rules, CI and a mod API come next. Until then, the m
 | Report a wrong card or rule | Name the card (or its ID), say what it did and what it should do. A link to a source helps |
 | Tell us an opponent played badly | Say what it did and what a good player would have done |
 | Build it yourself | [BUILDING.md](docs/BUILDING.md). You need your own Hearthstone client as reference libraries |
+| Send a fix | A pull request, with every commit signed off: [CONTRIBUTING.md](.github/CONTRIBUTING.md), [GIT.md](docs/GIT.md) |
 | Report a security problem | [SECURITY.md](.github/SECURITY.md). Not as a public issue |
 
 Please don't post account details, passwords or tokens, and don't attach game files or card art. Logs can include
@@ -136,10 +137,11 @@ Chat: [Discord](https://discord.gg/e45QgKHmC2)
 
 ### Not there yet
 
-- **The test suite is not published yet.** The card, rules and match tests stay private for now, so a change you
-  make here is not checked by them.
+- **Only part of the test suite is published.** The card, rules, opponent AI, pack, ladder and launcher tests are here
+  and run on GitHub ([TESTING.md](docs/TESTING.md)). The tests that need your own Hearthstone client, and the live
+  tests on a real test machine, stay private for now, so a change you make here is not checked by them.
 - **There is no mod API or developer mode yet.** If there is demand, it gets designed properly. Until then, a mod is
-  a set of patches on top of ours in your own fork. Pull requests are not encouraged yet; open an issue instead.
+  a set of patches on top of ours in your own fork.
 
 ### Repository layout
 
@@ -148,6 +150,9 @@ Chat: [Discord](https://discord.gg/e45QgKHmC2)
 | `engine/` | The rules engine: a modified SabberStone (AGPL) with the newer card mechanics |
 | `plugin/` | The plugin that runs inside the game: game messages, screens, opponents, saves |
 | `installer/` | The setup and the launcher (`SoloStone.exe`), with its tests |
+| `tests/` | The public test suites and the one command that runs them ([TESTING.md](docs/TESTING.md)) |
+| `sim/HsSim/` | The headless simulator behind the golden-game and random-game tests |
+| `research/` | Two small files of proof decks that the tests and the simulator use |
 | `facts/` | The card data for the fixed card set, one file per meta |
 | `data/` | Opponent decks and personalities, card pools, shop, packs and progression data |
 

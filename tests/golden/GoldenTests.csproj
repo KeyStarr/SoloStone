@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <LangVersion>7.3</LangVersion><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable>
+    <EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants>
+    <!-- The exact-zero allocation checks need fully optimized code from the first call: tiered JIT can allocate on a call that gets promoted. -->
+    <TieredCompilation>false</TieredCompilation>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
+    <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
+    <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
+    <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
+    <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <None Include="../../facts/violet-hold-2026-09.json" Link="facts.json" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Private tree only: the client export, for the strict hero skin check. -->
+    <None Include="../../data/carddb/37.0.0.254477/cards.json.gz" Link="cards.json.gz" CopyToOutputDirectory="PreserveNewest" Condition="Exists('../../data/carddb/37.0.0.254477/cards.json.gz')" />
+  </ItemGroup>
+</Project>

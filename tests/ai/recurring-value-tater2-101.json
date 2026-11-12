@@ -1,0 +1,218 @@
+{
+  "schema": 1,
+  "id": "recurring-value-tater2-101",
+  "category": "plan",
+  "title": "Remove a Bloated Leech instead of trading into Chillfallen Baron",
+  "why": "Owner Deck playtest tater2 #101 (Druid tater96 vs Death Knight): Hideous Husk plus two Bloated Leeches. Base kills Chillfallen Baron with the 2/1 Whelp because every reply of that line is refused (the human's end-of-turn Leech kills Platysaur, whose Deathrattle discards a card the reply view cannot see), so it keeps an unreplied static value; with honest replies and recurring Leech value the Whelp kills a Leech and survives.",
+  "source": "tests/ai/journals/deck-tater2-20261101.jsonl #101, public board and hand; human hand/deck replaced by hidden twins; bot deck = public own-deck knowledge.",
+  "deckId": "npc-token-druid",
+  "seed": 20261101,
+  "turn": 19,
+  "bot": {
+    "class": "DRUID",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 2
+    },
+    "hand": [
+      {
+        "card": "CATA_470t1",
+        "tag": "creation",
+        "attack": 7,
+        "health": 7,
+        "cost": 8
+      },
+      {
+        "card": "END_011",
+        "tag": "hand2",
+        "cost": 2
+      },
+      {
+        "card": "TLC_603",
+        "tag": "platysaur",
+        "cost": 1
+      }
+    ],
+    "board": [
+      {
+        "card": "CATA_210t",
+        "tag": "whelp",
+        "attack": 2,
+        "health": 1,
+        "exhausted": false,
+        "cost": 2
+      }
+    ],
+    "deck": [
+      {
+        "card": "CORE_SCH_181",
+        "tag": "deck0"
+      },
+      {
+        "card": "CATA_138",
+        "tag": "deck1"
+      },
+      {
+        "card": "DINO_130",
+        "tag": "deck2"
+      },
+      {
+        "card": "EDR_270",
+        "tag": "deck3"
+      },
+      {
+        "card": "EDR_856",
+        "tag": "deck4"
+      },
+      {
+        "card": "FIR_906",
+        "tag": "deck5"
+      },
+      {
+        "card": "MEND_046",
+        "tag": "deck6"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck7"
+      },
+      {
+        "card": "TIME_701",
+        "tag": "deck8"
+      },
+      {
+        "card": "TLC_232",
+        "tag": "deck9"
+      },
+      {
+        "card": "TLC_233",
+        "tag": "deck10"
+      },
+      {
+        "card": "TLC_603",
+        "tag": "deck11"
+      },
+      {
+        "card": "END_011",
+        "tag": "deck12"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "DEATHKNIGHT",
+    "mana": 0,
+    "baseMana": 9,
+    "hero": {
+      "damage": 5
+    },
+    "board": [
+      {
+        "card": "RLK_708",
+        "tag": "baron",
+        "attack": 2,
+        "health": 2,
+        "exhausted": true,
+        "cost": 3
+      },
+      {
+        "card": "EDR_810",
+        "tag": "husk",
+        "attack": 3,
+        "health": 5,
+        "exhausted": true,
+        "cost": 6
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech1",
+        "attack": 0,
+        "health": 2,
+        "exhausted": true,
+        "cost": 1
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "leech2",
+        "attack": 0,
+        "health": 2,
+        "exhausted": true,
+        "cost": 1
+      }
+    ],
+    "hidden": {
+      "hand": 6,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 99
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ]
+  }
+}
