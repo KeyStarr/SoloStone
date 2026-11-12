@@ -52,13 +52,16 @@ internal static class Unpinned_FacelessEnigmaProof
                 && next.Player2.SecretZone.Single().Card.Id == otherId
                 && !next.Resolution.HasSuspendedEffect, "saved all-class pair survives snapshot and casts for separate owners");
         });
+        // Both zones end up full (5 each). The enemy zone skips Explosive Runes (CORE_LOOT_101), the only listed Secret that reacts to p
+        // playing a minion; the rest react to spells or attacks. Enemy Secrets stay live, as in a real game: the engine only exhausts a
+        // player's Secrets during their own turn, so on p's turn the opponent's are always live.
         foreach (var owner in new[] { p, p.Opponent })
             foreach (var secretId in new[] { "CORE_EX1_287", "CORE_EX1_289", "CORE_LOOT_101", "CORE_BAR_812", "CORE_EX1_610", "CORE_EX1_611" })
-                if (owner.SecretZone.Count < 5 && !owner.SecretZone.Any(s => s.Card.Id == secretId))
+                if (owner.SecretZone.Count < 5 && !owner.SecretZone.Any(s => s.Card.Id == secretId)
+                    && !(owner == p.Opponent && secretId == "CORE_LOOT_101"))
                     AutomaticCastProof.Cast(g, (Spell)Entity.FromCard(owner, Cards.FromId(secretId)));
-        // 7f5de0c (#32): a secret cast on the opponent's turn is live at once, and these enemy secrets are cast on p's turn. The proof is
-        // about the saved casts, so the enemy secrets are put back to the state they had before #32 (inert: exhausted, as when cast on their own turn).
-        foreach (var enemySecret in p.Opponent.SecretZone) enemySecret.IsExhausted = true;
+        Core2026Proof.Check(p.SecretZone.Count == 5 && p.Opponent.SecretZone.Count == 5
+            && p.Opponent.SecretZone.All(s => !s.IsExhausted), "setup: both Secret zones full, enemy Secrets live");
         var activeOwn = p.SecretZone.Select(s => s.Id).ToArray();
         var activeEnemy = p.Opponent.SecretZone.Select(s => s.Id).ToArray();
         Play(g, p, id);
