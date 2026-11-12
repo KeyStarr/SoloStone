@@ -5728,7 +5728,10 @@ public sealed class NativeMatch
                 return new NativePlayer
                 {
                     Id = player.PlayerId,
-                    GameAccountId = new NativeBnetId { Hi = 0, Lo = (ulong)(index + 1) },
+                    // A mission's game entity (e.g. Dungeon Run's per-boss entity) finds its AI opponent as the player with an empty
+                    // game account (GenericDungeonMissionEntity.GetOpposingHeroCardID), as retail AI opponents have.
+                    GameAccountId = new NativeBnetId { Hi = 0,
+                        Lo = player.PlayerId == BotPlayerId && (DebugScenario?.MissionId ?? 0) != 0 ? 0UL : (ulong)(index + 1) },
                     CardBack = player.PlayerId == HumanPlayerId && cosmeticCardBack.HasValue ? cosmeticCardBack.Value : npcPresentation?.CardBack(player.PlayerId, player.CardBack) ?? player.CardBack,
                     Entity = entity
                 };
