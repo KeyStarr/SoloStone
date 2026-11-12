@@ -78,7 +78,7 @@ internal static partial class Program
     private static void RunSuite(string[] args)
     {
         // These slices moved to native-match-logic; fail at once instead of running the default suite.
-        foreach (string moved in new[] { "--rematch-only", "--canonical-privacy-assertions-only", "--b16-discover-ext-native-only", "--ev-time-native-only", "--native-b18-o-native-only" })
+        foreach (string moved in new[] { "--rematch-only", "--canonical-privacy-assertions-only" })
             if (args.Contains(moved)) throw new ArgumentException(moved + " moved to the native-match-logic suite");
         ControllerAdmissionInvariant.Install();
         if (args.Contains("--match-event-log-review-only")) { NativeMatch.ClockFreeBot = true; MatchEventLogReview(); return; }

@@ -193,7 +193,7 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
 Test folders are named after their suite (`tests/ai-golden`, `tests/fair-packs`, `tests/dormant`, ...). Code that two suites compile
-lives in `tests/shared/` (linked, never copied); test data that is not a suite's own is in `tests/fixtures/`.
+lives in `tests/shared/`, linked into each suite (a few small test helpers are still duplicated between `native-match` and `native-match-logic`); test data that is not a suite's own is in `tests/fixtures/`.
 
 If you are not sure, run everything.
 

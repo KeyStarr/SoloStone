@@ -47,9 +47,9 @@ internal static class PinnedReplayEngineProof
                     name + " pins both original stress decks independently of registry growth");
                 if (kind == "deathrattle")
                     Check(!string.IsNullOrEmpty(replay.EngineFingerprint), name + " pins engine state/history/RNG");
-                // Name the replay: a bare "fingerprint changed" does not say which one moved (all are listed before failing).
                 Check(!replay.Focused && !replay.Game.Player.StartsWith("standard-coverage-", StringComparison.Ordinal),
                     name + " is a plain recorded game: focused and standard-coverage replays need the packet runner and stay in transport-invariants");
+                // Name the replay: a bare "fingerprint changed" does not say which one moved (all are listed before failing).
                 try { Replay(replay); }
                 catch (Exception error) when (error is InvalidOperationException or InvariantException or ArgumentException)
                 { drifted.Add(name + ": " + error.Message); continue; }
