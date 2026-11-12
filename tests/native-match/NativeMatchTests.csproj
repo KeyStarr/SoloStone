@@ -11,7 +11,7 @@
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
-    <Compile Include="../GroupProofs.cs" Link="GroupProofs.cs" />
+    <Compile Include="../shared/GroupProofs.cs" Link="GroupProofs.cs" />
     <Compile Include="../../plugin/TestControlRules.cs" Link="TestControlRules.cs" />
     <Compile Include="../test-control/PackHookIlChecks.cs" Link="PackHookIlChecks.cs" />
     <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
@@ -85,7 +85,7 @@
     <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_native_cosmetics.py&quot; &quot;$(IntermediateOutputPath)NativeCosmetics.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)NativeCosmetics.g.cs" /></ItemGroup>
   </Target>
-  <ItemGroup><Compile Include="../CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
