@@ -30,7 +30,7 @@ internal sealed class LocalCraftingLedger : ICraftingLedger
     public bool PackRevealPending => profile.PackRevealPending;
     public IReadOnlyDictionary<string, int> OwnedCounts() => profile.Collection;
     public int OwnedCount(string cardId) => OwnedCounts().TryGetValue(cardId, out int count) ? count : 0;
-    // Infinite dust never spends tokens: the player keeps them for a profile with a real wallet.
+    // An infinite-dust save never spends tokens (its crafts are free anyway); tokens belong to that one save and stay unspent.
     public bool CraftsWithToken(string cardId) => !profile.InfiniteDust
         && LocalCrafting.TryGetTokenRarity(cardId, out var rarity) && profile.CardTokenCount(rarity) > 0;
 

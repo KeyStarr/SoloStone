@@ -196,10 +196,16 @@ internal static class NativeCrafting
     }
 
     internal const string TokenOneCopy = "A craft token makes one copy. Close the card to save it, then open it again to craft another.";
-    internal const string TokenCraftLabel = "Free";
+    // The client's own localized price word for free (the shop's GLUE_SHOP_FREE); a plain 0 if this client lacks the key.
+    internal static string TokenCraftLabel()
+    {
+        return NativeStrings.Get("GLUE_SHOP_FREE", "0");
+    }
 
-    // After native draws the buttons: a token-paid Normal craft reads "Free" in the cost bar instead of "-0", and once its
-    // one copy is pending the Create button is disabled (AllowTokenCraft refuses it as well). Undo stays native.
+    // After native draws the buttons: a token-paid Normal craft reads the client's word for free in the cost bar instead of
+    // "-0", and once its one copy is pending the Create button is disabled (AllowTokenCraft refuses it as well). Undo stays
+    // native. Presentation only: a missing client member logs and leaves native's drawing; the 0 price (Price) and the
+    // second-copy refusal (AllowTokenCraft) do not depend on it.
     private static void ShowTokenCraft(CraftingUI __instance)
     {
         if (!Enabled) return;
@@ -209,13 +215,17 @@ internal static class NativeCrafting
         var pending = manager.GetPendingClientTransaction();
         if (pending != null && pending.CardID == card.GetCardId() && pending.NormalCreateCount > 0)
         {
-            __instance.m_buttonCreate.DisableButton();
-            Required(typeof(CraftingUI), "SetCreateCostBarActive").Invoke(__instance, new object[] { false });
+            SafeStep("token create button", () => {
+                __instance.m_buttonCreate.DisableButton();
+                Required(typeof(CraftingUI), "SetCreateCostBarActive").Invoke(__instance, new object[] { false });
+            });
             return;
         }
         // Native prints "-" + the buy value when no net disenchant is pending, else the sell value (an Undo of a sale).
-        if (manager.GetNumClientTransactions() >= 0 && UiText(__instance, false) == "-0")
-            SetUiText(__instance, TokenCraftLabel);
+        SafeStep("token cost label", () => {
+            if (manager.GetNumClientTransactions() >= 0 && UiText(__instance, false) == "-0")
+                SetUiText(__instance, TokenCraftLabel());
+        });
     }
 
     // CraftingUI's cost labels are UberText, from a client library the plugin does not reference: reach them by reflection.

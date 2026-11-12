@@ -588,11 +588,16 @@ internal static partial class NativeCrafting
         Price("PROFILE_ONLY", TAG_PREMIUM.NORMAL, ref record, ref value);
         Assert(value.BaseBuyValue == 40, "a token for another card's rarity leaves its price");
         var craft = CraftingManager.CanCraftCardResult.NotEnoughDust;
-        Assert(CanCraft(new EntityDef(), TAG_PREMIUM.NORMAL, ref craft), "token craft goes to native's own check (0 cost, any dust)");
+        Assert(CanCraft(new EntityDef(), TAG_PREMIUM.NORMAL, ref craft), "token craft is handed to native's own craftability check");
 
         var ui = new CraftingUI(); ui.m_buttonCreate.SetEnabled(true); ui.m_craftValue.Text = "-0";
         ShowTokenCraft(ui);
-        Assert(ui.m_craftValue.Text == TokenCraftLabel && ui.m_buttonCreate.Enabled && ui.CreateCostBar, "token craft reads Free");
+        Assert(ui.m_craftValue.Text == "0" && ui.m_buttonCreate.Enabled && ui.CreateCostBar, "without the client's free word the label reads 0, unsigned");
+        GameStrings.Translations["GLUE_SHOP_FREE"] = "Gratis";
+        ui.m_craftValue.Text = "-0";
+        ShowTokenCraft(ui);
+        GameStrings.Translations.Remove("GLUE_SHOP_FREE");
+        Assert(ui.m_craftValue.Text == "Gratis" && TokenCraftLabel() == "0", "token craft reads the client's localized free word"); 
         Assert(BeforeCreate(false) && BeforeUpgradeEvent("CODE_CREATE") && Popups.Count == 0, "first token copy may be created");
         manager.m_pendingClientTransaction.NormalCreateCount = 1;
         Assert(!BeforeCreate(false) && !BeforeUpgradeEvent("CODE_CREATE") && Popups.Count == 2 && Popups.All(text => text == TokenOneCopy)
@@ -600,6 +605,11 @@ internal static partial class NativeCrafting
         ui.m_craftValue.Text = "-0";
         ShowTokenCraft(ui);
         Assert(!ui.m_buttonCreate.Enabled && !ui.CreateCostBar, "pending token copy disables Create; Undo stays on Disenchant");
+        var broken = new CraftingUI(); broken.m_buttonCreate.SetEnabled(true); broken.m_buttonCreate.Throws = true;
+        int errors = log.Errors.Count;
+        ShowTokenCraft(broken);
+        Assert(log.Errors.Count == errors + 1 && !BeforeCreate(false) && Price("TEST_CARD", TAG_PREMIUM.NORMAL, ref record, ref value) == false
+            && value.BaseBuyValue == 0, "a missing client member logs; the 0 price and second-copy refusal still hold");
         Assert(BeforeDisenchant(), "Undo of the token copy passes");
 
         ui = new CraftingUI(); ui.m_buttonCreate.SetEnabled(true);
@@ -614,7 +624,7 @@ internal static partial class NativeCrafting
         manager.ShownPremium = TAG_PREMIUM.NORMAL; ledger.Tokens.Clear(); ui.m_craftValue.Text = "-40";
         ShowTokenCraft(ui);
         manager.m_pendingClientTransaction.NormalCreateCount = 1;
-        Assert(ui.m_craftValue.Text == "-40" && BeforeCreate(false) && Popups.Count == 2, "no token: native price and repeated crafts unchanged");
+        Assert(ui.m_craftValue.Text == "-40" && BeforeCreate(false) && Popups.Count == 3, "no token: native price and repeated crafts unchanged");
 
         ledger = ResetHooks(); manager = CraftingManager.Get(); manager.Shown = new EntityDef();
         ledger.Tokens.Add("TEST_CARD"); ledger.DustBalance = 0;
@@ -837,7 +847,8 @@ internal sealed class CollectionManager
 internal sealed class TestButton {
     internal bool Enabled = false;
     internal void SetEnabled(bool enabled) => Enabled = enabled;
-    internal void DisableButton() => Enabled = false;
+    internal bool Throws;
+    internal void DisableButton() { if (Throws) throw new MissingMethodException("CraftingButton", "DisableButton"); Enabled = false; }
 }
 public enum LocalTokenRarity { Common, Rare, Epic, Legendary }
 public sealed class LocalCardTokens { public int Common, Rare, Epic, Legendary; }
