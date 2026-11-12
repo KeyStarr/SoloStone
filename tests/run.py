@@ -19,7 +19,7 @@ Two tiers (docs/TESTING.md):
 
 Builds are Release builds with -p:EngineSource=true: the rules engine is built from engine/, never from a prebuilt
 DLL. Build output goes to a temporary folder (or --artifacts) and nothing is written inside the repository except
-the usual obj/ folders of the projects.
+the usual obj/ folders of the projects and, for the client suite transport-invariants, sim/out/ (git ignores both).
 
 Exit code: 0 every suite passed (or was a skip that is allowed), 1 at least one failed or, with --ci, any suite was
 skipped, 2 the tool could not start (no SDK, unknown suite, bad --client folder, ...).

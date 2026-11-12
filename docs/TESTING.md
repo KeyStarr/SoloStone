@@ -118,8 +118,9 @@ These suites compile or load your client's libraries. Run one with `python3 test
 | `native-match` | The native match: plugin match logic on recorded games, and the recipe editor of the built plugin |
 | `transport-invariants` | Engine-to-client transport: invariants over recorded and random games. It is the longest suite (about 45 minutes) |
 
-The data they read is in the repository: `tests/fixtures/playtest/` (recorded matches), `research/`, and the card, pool,
-shop, progression and ladder files under `data/`.
+Apart from the data built locally (above), what they read is in the repository: `tests/fixtures/playtest/` (recorded
+matches), `research/`, and the card, pool, shop, progression and ladder files under `data/`. `transport-invariants` writes
+its packet logs to `sim/out/transport/` (git ignores it).
 
 ## You changed X, run Y
 

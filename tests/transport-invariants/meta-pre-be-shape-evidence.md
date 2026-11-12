@@ -105,6 +105,8 @@ code, classifier baseline or golden was changed.
 | TIME_876e | 179 checkpoints | 186 / 188 | 43 / player 1 | Original Shapeshifter transform at step 99 remains before any divergence |
 | TLC_100t3 | 77 checkpoints | 97 / 99 | 24 / player 2 | Original exhaustion Deathrattle at step 96 is now step 98, same `sibling-POWER under=PLAY header=differs meta=DAMAGE` and `ExhaustionDeathrattle` condition |
 
+The TIME_876e row is as of 2026-11-02; the fixture was re-recorded on 2026-11-12 (138 actions, 35 turns, player 1; last section).
+
 `MetaPreBeProof` now explicitly requires that TLC_100t3 witness, so a renewal
 that merely avoids the activation cannot pass. Both old fixtures pass against
 main `878919628`; current integration first diverges immediately after Alter
@@ -238,3 +240,38 @@ Independent check (second worker): reverting only the engine part of `05236b28e`
 `MugZee.cs`, `TimethiefRafaam.cs`) on `1a743e2cd` and running `--private-return-only` and
 `--deathrattle-replay-only` against the pre-renewal JSON reproduced all seven old fingerprints
 (exit 0, history-shape `new=0`), so that commit is the sole cause. The revert was undone.
+
+## 2026-11-12 fixtures after main's engine fixes (PR 3c)
+
+Three replay fixtures no longer matched the current engine. Each cause was found by replaying the previous record on the
+engine and reverting single commits (review of PR 3c; the engine-only fingerprint parts were compared, no client files):
+
+| Fixture | Before | Cause | Action |
+|---|---|---|---|
+| `meta-pre-be/TIME_876e` | diverges at action 100 (legal hash) | `7f5de0c` (#32), `CastSpell.cs` only | re-recorded, same decks, seed, policy and pinned pool: 188 to 138 actions, 43 to 35 turns, winner still player 1 |
+| `deathrattle/...21-vs-...25-s4` (Felhunter) | diverges at action 127 | Bloated Leech `6f7836b` + `9b2d7ef` (#23/#34) alone | re-recorded in 36d0e4b (259 to 190 actions, 52 to 41 turns, winner 2 to 1), then fingerprint renewed (below) |
+| Felhunter and `private-return/reset-36-vs-31-s8` | same actions, fingerprint drift | `7f5de0c` (#32), `Attack.cs` only (ATTACKING and DEFENDING reach the client after the attack triggers) | fingerprint renewed, every action kept |
+
+Reverting any one of `9db9649`, `9ff3bf5`, `f6cf092` (and, for Felhunter, `7923f07` or `d701ddf`) alone does not change
+these results. For the renewals the engine-only parts were compared: final state and RNG are unchanged, only the history
+differs; reverting just `Attack.cs` of `7f5de0c` restores the old history hash.
+
+- Felhunter fingerprint: `73c55933...a43f` (36d0e4b) to `069c4d6c...cfcf`. The original, pre-PR record had `25cbe9e8...a3e`.
+- reset-36-vs-31-s8: `83876546...0608` to `209445cd...5c9e`.
+
+Witnesses. In both re-recorded games the prefix before the divergence is byte-identical (actions and legal hashes 0..99
+and 0..126), so each original regression moment is still there: for TIME_876e the held Shapeshifter (entity 17,
+TIME_852) turns into TIME_858 at step 99, and the Felhunter lifecycle (EDR_891, played at step 23, dies at step 50) comes
+before step 127. `MetaPreBeProof` now requires the TIME_876e witness (CHANGE_ENTITY 17 to TIME_858 at step 99, and no
+HAND_BUFF_FX finding), so a later re-record that drops it cannot pass. `DeathrattleReplayProof` pins the one finding the
+Felhunter game produces (an accepted SPLIT_EFFECT_BLOCK of TLC_100t1, exhaustion Deathrattle) and fails on any other,
+info findings included.
+
+Corrections to commit messages already on the branch (the history is kept): the f2818c6 message calls TIME_876e a focused
+game; it is not (`focused` is false in the old and the new record), the card is played because the pinned prefix is
+unchanged. The 36d0e4b message names the Bloated Leech, Deathlord and Collapsing Star fixes; only the Bloated Leech pair
+is needed.
+
+Behaviour to confirm once (it is `7f5de0c`'s rule, not this change): in the new TIME_876e game a Rat Trap given to the
+opponent by Faceless Enigma on that player's own turn counts the Faceless Enigma played just before the Secret existed.
+That fits a per-turn "cards played" counter.
