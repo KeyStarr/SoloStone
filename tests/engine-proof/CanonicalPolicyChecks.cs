@@ -6,7 +6,6 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using System.Text.Json;
 
-namespace TransportInvariants;
 using Entity = SabberStoneCore.Model.Entities.Entity;
 using Game = SabberStoneCore.Model.Game;
 

@@ -58,7 +58,6 @@ internal static class Program
             {
                 TransportHooks.Install();
                 HsSim.PoolSnapshots.Save();
-                CanonicalPolicyChecks.Run();
                 TransportHarnessChecks.Focused();
                 return 0;
             }
@@ -91,7 +90,6 @@ internal static class Program
             if (args is ["--result-settlement-only"]) { TransportHooks.Install(); ResultSettlementObserverProof.Run(); return 0; }
             if (args is ["--prepare-only"]) { TransportHooks.Install(); PrepareProof.Run(); return 0; }
             if (args is ["--colossal-only"]) { TransportHooks.Install(); ColossalAppendageProof.Run(); return 0; }
-            if (args is ["--ai-frontier-only"]) { TransportHooks.Install(); AiFrontierProof.Run(); return 0; }
             if (args is ["--auto-cast-card", var autoCastCard]) { TransportHooks.Install(); AutoCastProof.CoverOne(autoCastCard); return 0; }
             if (args is ["--auto-cast-identity-only"]) { TransportHooks.Install(); AutoCastProof.IdentityRegressions(); return 0; }
             if (args is ["--auto-cast-only"]) { TransportHooks.Install(); AutoCastProof.Run(); return 0; }
@@ -173,7 +171,6 @@ internal static class Program
                 if (!selfTest) Batch13PrivateStateProof.Run();
                 DarkGiftProof.Run();
                 ColossalAppendageProof.Run();
-                AiFrontierProof.Run();
                 TradeRedrawProof.Run();
                 StandardCoverageChecks.Run(includeCorpus: !poolEvidenceOnly);
             }

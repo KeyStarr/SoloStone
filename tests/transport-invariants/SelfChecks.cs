@@ -20,7 +20,6 @@ internal static class SelfChecks
 
     internal static void Run()
     {
-        CanonicalPolicyChecks.Run();
         CardStateChecks.Run();
         HandCardStateChecks.Run();
         CostRulesChecks.Run();

@@ -7,8 +7,6 @@ using SabberStoneCore.Model.Decisions;
 using SabberStoneCore.Tasks.PlayerTasks;
 using EngineGame = SabberStoneCore.Model.Game;
 
-namespace TransportInvariants;
-
 internal static class AiFrontierProof
 {
     internal static void Run()
@@ -46,16 +44,16 @@ internal static class AiFrontierProof
             if (pending != null && (kind == "mulligan" || action.StartsWith("CHOOSE:", StringComparison.Ordinal)))
             {
                 int[] picks = row.GetProperty(kind == "mulligan" ? "keeps" : "choices").EnumerateArray().Select(p => p.GetInt32()).ToArray();
-                SelfChecks.Check(game.TryAnswer(new DecisionAnswer(pending.Id, pending.ControllerId, picks), out string error),
+                Core2026Proof.Check(game.TryAnswer(new DecisionAnswer(pending.Id, pending.ControllerId, picks), out string error),
                     "recorded fixture choice succeeds: " + error);
             }
             else
             {
                 PlayerTask task = owner.Options().Single(t => BotAction.From(t).ToString() == action);
-                SelfChecks.Check(game.Process(task), "recorded fixture action succeeds: " + action);
+                Core2026Proof.Check(game.Process(task), "recorded fixture action succeeds: " + action);
             }
         }
-        SelfChecks.Check(game.Turn == 10 && game.CurrentPlayer == game.Player2 &&
+        Core2026Proof.Check(game.Turn == 10 && game.CurrentPlayer == game.Player2 &&
             game.Player2.BoardZone.Select(m => m.Id).SequenceEqual(new[] { 74, 99, 100 }) &&
             game.Player2.Options().Count(t => t.PlayerTaskType == PlayerTaskType.MINION_ATTACK && t.ActionTarget?.Id == 4) == 3,
             "recorded turn has three legal face attacks");
@@ -68,10 +66,10 @@ internal static class AiFrontierProof
         var job = TurnPlanner.Job(view, profile, plan, 10435, 30502, pilot.PublicInputs.OpponentPlayed, pilot.PublicInputs);
         while (!job.IsDone) job.StepNode();
         var line = job.Result.Line;
-        SelfChecks.Check(job.Result.Nodes <= 30502 && line.Any(a => a.Type == PlayerTaskType.PLAY_CARD && a.Source == 65)
+        Core2026Proof.Check(job.Result.Nodes <= 30502 && line.Any(a => a.Type == PlayerTaskType.PLAY_CARD && a.Source == 65)
             && new[] { 74, 99, 100 }.All(id => line.Any(a => a.Type == PlayerTaskType.MINION_ATTACK && a.Source == id && a.Target == 4)),
             "bounded planner retains free attacks: " + string.Join(";", line));
-        SelfChecks.Check(line.Last().Type == PlayerTaskType.END_TURN && job.Result.Value > 132.797411067087,
+        Core2026Proof.Check(line.Last().Type == PlayerTaskType.END_TURN && job.Result.Value > 132.797411067087,
             "complete improved plan scores above observed early end");
         Console.WriteLine("PASS AiFrontier: bounded live fixture retains Nozdormu and all three legal attacks");
     }
