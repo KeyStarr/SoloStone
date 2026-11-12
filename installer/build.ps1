@@ -133,9 +133,9 @@ if ($Staged) {
     $saveSchema=[int]$match.Groups[1].Value
     @{schema=1; version=$Version; saveSchema=$saveSchema; sourceRevision=$revision} | ConvertTo-Json | Set-Content -LiteralPath "$app\release.json" -Encoding ascii
     Copy-Item -LiteralPath "$PSScriptRoot\NOTICE.txt" -Destination "$app\NOTICE.txt"
-    # Licence texts: public\ in the private checkout, the product root in a public export. Same files stage.py copies.
-    $legalRoot=@("$product\public",$product) | Where-Object { (Test-Path -LiteralPath "$_\NOTICE") -and (Test-Path -LiteralPath "$_\LICENSES") } | Select-Object -First 1
-    if (-not $legalRoot) { throw 'Cannot find the licence files (NOTICE, LICENSE, LICENSES\)' }
+    # Licence texts from the repository root. Same files stage.py copies.
+    $legalRoot=$product
+    if (-not ((Test-Path -LiteralPath "$legalRoot\NOTICE") -and (Test-Path -LiteralPath "$legalRoot\LICENSES"))) { throw 'Cannot find the licence files (NOTICE, LICENSE, LICENSES\)' }
     foreach($name in 'NOTICE','LICENSE','LICENSE-ADDITIONAL-PERMISSION.md') { Copy-Item -LiteralPath "$legalRoot\$name" -Destination "$app\$name" }
     Copy-Item -LiteralPath "$legalRoot\LICENSES" -Destination "$app\LICENSES" -Recurse
     $sourceLine=if ($Repo) { "https://github.com/$Repo" } else { '(the repository address was not set when this was built)' }

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 """Monte Carlo collection pace for SoloStone; Python 3 standard library only.
 
 Rules audited against FairPackRules.cs, LocalCrafting.cs, LocalEconomy.cs,
@@ -67,7 +67,7 @@ Assumptions (also printed and included in JSON):
   completion, including welcome, earned achievements and extra-card dust, divided
   by that run's hours (then median). Packs/tokens are not currency income.
 
-Usage (docs/design/2026-10-31-grind-tiers.md): /usr/bin/python3 tools/grind_pace.py --runs 20
+Usage: python3 tools/grind_pace.py --runs 20
        --root REPO --tier relaxed-6x:6:101 --json [FILE]
 --json alone emits JSON instead of Markdown; --json FILE also saves JSON.
 """

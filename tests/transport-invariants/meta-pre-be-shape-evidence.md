@@ -1,6 +1,6 @@
 # Pre-Black-Empire pool regression evidence
 
-Scope: `chore/release-meta-pre-be`, base `f48e7a23`; active policy `offline-standard/2`,
+Scope: the pre-Black-Empire meta change; active policy `offline-standard/2`,
 meta `violet-hold`. No pool members, BE implementations, or gameplay rulings changed.
 
 ## Repeat installation
@@ -61,7 +61,7 @@ reviewed shapes as diagnostics, not invalid entries. No classifier weakening or
 stale-entry pruning. Dependency closure was recomputed unchanged before renewing
 its source hash. No golden acceptance or renewal is authorized here.
 
-Failing-first logs and exact exits: `sim/.build/meta-fix/exits.jsonl`; original
+Failing-first exits (logs were kept locally, not in the repository): original
 crash replay exits 2, each of the five history cases exits 1. Engine regressions
 abort with signal 6 (shell 134) before their fixes. No Windows/client visual test.
 
@@ -82,7 +82,7 @@ abort with signal 6 (shell 134) before their fixes. No Windows/client visual tes
   buckets. Stale diagnostics now number 65 (the fixed reset also stops sampling
   DINO_407e's old hand-buff ambiguity); all original 64 entries remain preserved.
   Catalog current: Standard 1,118, Past 33, Inactive 131. Full transport wall 2729.940s.
-- Dependency graph unchanged; source pin renewed. HEAD remains f48e7a23;
+- Dependency graph unchanged; source pin renewed. HEAD unchanged;
   no staging, commit, delegation, Windows or PowerShell checks. Exact native visual
   timing remains unverified; no new retail capture or rule approval is claimed.
 

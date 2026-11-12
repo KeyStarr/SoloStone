@@ -430,11 +430,7 @@ try
             "failed purchase or zero-pack native open mutated state");
     }
 
-#if ENGINE_SOURCE
     string[] expectedHeroes = LocalCoreProgression.Heroes.ToArray();
-#else
-    string[] expectedHeroes = LocalCoreProgression.Heroes.Where(hero => hero != "HERO_10" && hero != "HERO_11").ToArray();
-#endif
     Check(LocalDecks.PlayerHeroes.SequenceEqual(expectedHeroes), "player hero authority matches running engine");
     var neutralDeck = LocalCardCatalog.Supported.Where(card => card.Class == SabberStoneCore.Enums.CardClass.NEUTRAL)
         .GroupBy(card => LocalCardCatalog.CopyGroup(card.Id)).Select(group => group.First())
@@ -450,10 +446,6 @@ try
     }
     Reject(() => LocalDecks.Custom("Invalid hero", "HERO_99", neutralDeck), "invalid hero custom");
     Reject(() => LocalDecks.Draft("Invalid hero", "HERO_99", Array.Empty<string>()), "invalid hero draft");
-#if !ENGINE_SOURCE
-    Reject(() => LocalDecks.Custom("Demon Hunter", "HERO_10", neutralDeck), "vendor Demon Hunter custom");
-    Reject(() => LocalDecks.Draft("Demon Hunter", "HERO_10", Array.Empty<string>()), "vendor Demon Hunter draft");
-#endif
     var mageCards = LocalDecks.Get("mage").CardIds;
     var mutable = mageCards.ToList();
     var custom = LocalDecks.Custom("Arcane", "HERO_08", mutable);

@@ -27,18 +27,17 @@ INSTALLER = Path(__file__).resolve().parent
 sys.path.insert(0, str(INSTALLER))
 import loader_inputs  # noqa: E402
 PRODUCT = INSTALLER.parent
-LAB_DOTNET = '/tmp/hs-prototype-tools/dotnet/dotnet'
 
 
 def git_toplevel():
-    """The work tree this product sits in: the private checkout (product is a subfolder) or a public export (product is the root)."""
+    """The git work tree that holds this repository, or PRODUCT when it is not a git checkout."""
     result = subprocess.run(['git', '-C', str(PRODUCT), 'rev-parse', '--show-toplevel'], capture_output=True, text=True)
     return Path(result.stdout.strip()).resolve() if result.returncode == 0 and result.stdout.strip() else PRODUCT
 
 
 CHECKOUT = git_toplevel()
-# An explicit DOTNET wins; then the maintainers' tool folder when it exists; then whatever `dotnet` is on the PATH.
-DEFAULT_DOTNET = os.environ.get('DOTNET') or (LAB_DOTNET if Path(LAB_DOTNET).exists() else shutil.which('dotnet') or 'dotnet')
+# An explicit DOTNET wins; otherwise whatever `dotnet` is on the PATH.
+DEFAULT_DOTNET = os.environ.get('DOTNET') or (shutil.which('dotnet') or 'dotnet')
 # Licence texts that ride with every download (stage folder `legal/`, then the app folder). SOURCE.txt is made from SOURCE.template.txt.
 LEGAL_FILES = ('NOTICE', 'LICENSE', 'LICENSE-ADDITIONAL-PERMISSION.md')
 LEGAL_FOLDER = 'LICENSES'
@@ -174,16 +173,15 @@ def build_plugin(dotnet, work, out, hooks=False, references=None):
 
 
 def legal_root():
-    """Where the public licence files are: `public/` in the private checkout, the product root in a public export."""
-    for candidate in (PRODUCT / 'public', PRODUCT):
-        if all((candidate / name).is_file() for name in LEGAL_FILES) and (candidate / LEGAL_FOLDER).is_dir():
-            return candidate
-    fail('The licence files (%s and %s/) are not in %s or %s' % (', '.join(LEGAL_FILES), LEGAL_FOLDER, PRODUCT / 'public', PRODUCT))
+    """The licence files at the repository root: NOTICE, LICENSE, LICENSE-ADDITIONAL-PERMISSION.md and LICENSES/."""
+    if all((PRODUCT / name).is_file() for name in LEGAL_FILES) and (PRODUCT / LEGAL_FOLDER).is_dir():
+        return PRODUCT
+    fail('The licence files (%s and %s/) are not in %s' % (', '.join(LEGAL_FILES), LEGAL_FOLDER, PRODUCT))
 
 
 def source_text(version, revision, repo):
     """SOURCE.txt for the download: where the source of this build is. Without a repository name the line says so; a release
-    build always has one (tools/release_build.py insists)."""
+    build always has one (a release build always passes --repo)."""
     line = 'https://github.com/' + repo if repo else '(the repository address was not set when this was built)'
     template = (INSTALLER / 'SOURCE.template.txt').read_text(encoding='utf-8')
     return template.replace('@VERSION@', version).replace('@SOURCE_LINE@', line).replace('@REVISION@', revision)

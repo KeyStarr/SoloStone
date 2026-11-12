@@ -1,6 +1,2 @@
-/out/
 /failures/
 /.build/
-**/bin/
-**/obj/
-__pycache__/

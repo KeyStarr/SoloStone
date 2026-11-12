@@ -263,8 +263,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
             Check(LocalCoreProgression.Owned(progress, false).Keys.Where(id => LocalCoreProgression.ById[id].Hero == "").SequenceEqual(expected), "new class must advance neutral");
         }
         var available = LocalCoreProgression.AvailableCards;
-        bool source = Cards.All.Any(card => card.Id == "CORE_CS2_024");
-        Check(available.Count == (source ? 289 : 0), "engine-aware catalog must omit unknown Core cards");
+        Check(available.Count == 289, "catalog holds the 289 supported Core cards");
         Check(LocalEconomy.Catalog.Count == 252 + available.Count, "catalog extension");
         Check(available.All(card => NativeUIProjection.ForcesCorePlayability(true, card.Id))
             && !available.Any(card => NativeUIProjection.ForcesCorePlayability(false, card.Id))
@@ -276,7 +275,6 @@ if (args.SequenceEqual(new[] { "--extended" }))
         using (var profile = new LocalProfile(path))
         {
             var draft = profile.CreateDraft("Mage Core", "HERO_08");
-            if (source)
             {
                 var locked = LocalCoreProgression.Unlocks.First(card => card.Hero == "HERO_08" && card.Threshold > 1);
                 profile.SaveDraft(draft.Id, draft.Name, draft.Hero, new[] { locked.Id }, 0);
@@ -313,10 +311,9 @@ if (args.SequenceEqual(new[] { "--extended" }))
                     profile.Collection.ToDictionary(pair => pair.Key, pair => pair.Value));
                 Check(Read(path).Collection.All(card => !LocalCoreProgression.ById.ContainsKey(card.Id)), "derived copies persisted");
             }
-            else Reject(() => LocalDecks.Draft("Unavailable", "HERO_08", new[] { "CORE_CS2_024" }), "vendor Core draft");
         }
         using (var profile = new LocalProfile(path))
-            Check(!source || profile.ClassXp["HERO_08"] == 1000 && profile.CustomDecks.Single().Cards.Count == 30,
+            Check(profile.ClassXp["HERO_08"] == 1000 && profile.CustomDecks.Single().Cards.Count == 30,
                 "restart lost derived deck ownership");
         var native = new Dictionary<string, int> { { "CORE_CS2_024", 1 } };
         var derived = new Dictionary<string, int> { { "CORE_CS2_024", 2 } };
@@ -326,12 +323,11 @@ if (args.SequenceEqual(new[] { "--extended" }))
         Check(NativeUIProjection.CoreGrantCounts(derived, id => native[id]).Count == 0, "native refresh retry duplicates Core");
         Reject(() => NativeUIProjection.CoreGrantCounts(derived, id => 3), "native Core overgrant");
         var saved = Read(path);
-        // A profile produced by the source engine must remain readable on the vendor engine.
         saved.ClassXp.ForEach(entry => entry.Xp = 2700);
         saved.CustomDecks[0].Cards = new() { "CORE_CS2_024" };
         Write(path, saved);
         using (var profile = new LocalProfile(path))
-            Check(profile.CustomDecks.Count == (source ? 1 : 0), "unavailable saved Core drafts must be hidden, preserved");
+            Check(profile.CustomDecks.Count == 1, "saved Core drafts stay visible and preserved");
         Check(Read(path).CustomDecks[0].Cards.Single() == "CORE_CS2_024", "downgrade destroyed draft");
         var invalidXp = Read(path);
         invalidXp.ClassXp[0].Xp = -1; Write(path, invalidXp);
@@ -353,7 +349,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
         Reject(() => { using var profile = new LocalProfile(path); }, "Core in pack receipt");
         saved.Collection.Add(new LocalCardCount { Id = "CORE_CS2_024", Count = 2 }); Write(path, saved);
         Reject(() => { using var profile = new LocalProfile(path); }, "stored Core ownership");
-        Console.WriteLine("PASS Core progression: " + (source ? "source 289 cards" : "vendor graceful degradation")
+        Console.WriteLine("PASS Core progression: " + "289 cards"
             + "; exact backup/failure/restart, eleven-class XP, neutral compatibility, ownership/decks, reward summary");
         TestLoanerChecks.Run(root);
         NpcRecordChecks.Run(root);

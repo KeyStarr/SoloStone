@@ -26,7 +26,7 @@ each keeps its newest sixteen entries. Old classification diagnostics are
 removed from replayed output so a renewed baseline cannot leave stale NEW/STALE lines.
 
 The maintainer's `test_history_shapes` test requires the transport harness built in
-`sim/.build/transport`; it exercises the real classifier using disposable raw data.
+a local build folder; it exercises the real classifier using disposable raw data.
 Its cache test replaces only the expensive corpus producer and verifies that a
 shape-only failure, baseline acceptance, and later rejection require one production
 of game evidence total. No test edits the repository baseline or goldens.

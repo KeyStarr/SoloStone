@@ -7,8 +7,7 @@
     <EmbeddedResource Include="golden-v1.json" LogicalName="FairPackGoldenV1.json" />
     <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
-    <Reference Include="SabberStoneCore" Condition="'$(EngineSource)' != 'true'"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference>
   </ItemGroup>
-  <PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
-  <ItemGroup Condition="'$(EngineSource)' == 'true'"><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
+  <PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
 </Project>

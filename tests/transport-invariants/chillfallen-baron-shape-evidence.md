@@ -59,8 +59,8 @@ All commands ran from the repository root. Logs and bulk outputs stayed untracke
 | Original strict replay, before baseline edit | 1 | Expected new Baron bucket; zero transport violations/failures |
 | Strict transport run, after edit | 0 | Fresh cache miss; 9,131 games, zero violations/failures; 860 Standard cards played; 779.799s |
 | Full history-shape report | 0 | 264 events in 26 baselined buckets, `new=0 stale=0`; Baron count=3, exactly the reviewed detail |
-| `dotnet build tests/native-match/NativeMatchTests.csproj -c Release --artifacts-path sim/.build/baron-native -p:EngineSource=true -p:NuGetAudit=false -p:UseSharedCompilation=false --nologo -v quiet -m:1` | 0 | Two existing obsolete `Game.Clone` warnings, zero errors |
-| `dotnet sim/.build/baron-native/bin/NativeMatchTests/release/NativeMatchTests.dll` | 0 | Full native-match contract; 280 draw cases and 24 draw-entry cases pass |
+| `dotnet build tests/native-match/NativeMatchTests.csproj -c Release --artifacts-path <build folder> -p:EngineSource=true -p:NuGetAudit=false -p:UseSharedCompilation=false --nologo -v quiet -m:1` | 0 | Two existing obsolete `Game.Clone` warnings, zero errors |
+| `dotnet <build folder>/bin/NativeMatchTests/release/NativeMatchTests.dll` | 0 | Full native-match contract; 280 draw cases and 24 draw-entry cases pass |
 | `git diff --check` | 0 | No whitespace errors |
 
 Logs: `transport-full.log`, `native-build.log`, `native-match.log`.

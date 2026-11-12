@@ -1,7 +1,6 @@
-"""Checks for stage.py and the build files it stages: unittest, no network, no dotnet. Run from the product folder
-(the repository root in a public export):
-    /usr/bin/python3 -I installer/test_stage.py
-They run in a public export too: a build from the export must need nothing outside it (plan K2p).
+"""Checks for stage.py and the build files it stages: unittest, no network, no dotnet. Run from the repository root:
+    python3 -I installer/test_stage.py
+A build from a clean checkout must need nothing outside it.
 """
 import re
 import subprocess
@@ -45,12 +44,12 @@ class Folders(unittest.TestCase):
 
 class OutputFolder(Folders):
     def test_checkout_is_the_git_toplevel_not_the_folder_above_the_product(self):
-        """An export has the product at the repository root. CHECKOUT = PRODUCT.parent made every folder beside it 'inside'."""
+        """The product is the repository root; CHECKOUT = PRODUCT.parent made every folder beside it 'inside'."""
         git(self.dir, 'init', '-q')
         (self.dir / 'installer').mkdir()
         with mock.patch.object(stage, 'PRODUCT', self.dir):
             self.assertEqual(stage.git_toplevel(), self.dir)
-        (self.dir / 'sub' / 'product').mkdir(parents=True)  # the private layout: the product is a subfolder
+        (self.dir / 'sub' / 'product').mkdir(parents=True)  # the product inside a larger work tree
         with mock.patch.object(stage, 'PRODUCT', self.dir / 'sub' / 'product'):
             self.assertEqual(stage.git_toplevel(), self.dir)
         with mock.patch.object(stage, 'PRODUCT', self.dir / 'not-git-xyz'), mock.patch('subprocess.run', side_effect=lambda *a, **k: subprocess.CompletedProcess(a, 128, '', '')):
@@ -67,39 +66,32 @@ class OutputFolder(Folders):
             self.failing(stage.outside_checkout, self.dir / 'work')              # would contain it
             self.failing(stage.outside_checkout, self.dir)
 
-    def test_dotnet_default_prefers_the_environment_then_the_tool_folder_then_the_path(self):
+    def test_dotnet_default_prefers_the_environment_then_the_path(self):
         source = (PRODUCT / 'installer' / 'stage.py').read_text(encoding='utf-8')
         self.assertIn("os.environ.get('DOTNET') or", source)
         self.assertIn("shutil.which('dotnet')", source)
 
 
 class LegalFiles(Folders):
-    def layout(self, public):
+    def layout(self):
         product = self.dir / 'product'
         (product / 'installer').mkdir(parents=True)
-        folder = product / 'public' if public else product
-        folder.mkdir(exist_ok=True)
-        write_legal(folder)
+        write_legal(product)
         return product
 
-    def test_licence_files_come_from_public_in_the_private_tree(self):
-        product = self.layout(True)
-        with mock.patch.object(stage, 'PRODUCT', product):
-            self.assertEqual(stage.legal_root(), product / 'public')
-
-    def test_licence_files_come_from_the_root_in_an_export(self):
-        product = self.layout(False)
+    def test_licence_files_come_from_the_repository_root(self):
+        product = self.layout()
         with mock.patch.object(stage, 'PRODUCT', product):
             self.assertEqual(stage.legal_root(), product)
 
     def test_missing_licence_files_stop_the_stage(self):
-        product = self.layout(False)
+        product = self.layout()
         (product / 'LICENSE').unlink()
         with mock.patch.object(stage, 'PRODUCT', product):
             self.failing(stage.legal_root)
 
     def test_stage_legal_copies_the_texts_and_writes_the_source_pointer(self):
-        product = self.layout(False)
+        product = self.layout()
         out = self.dir / 'stage'
         out.mkdir()
         with mock.patch.object(stage, 'PRODUCT', product):
@@ -131,8 +123,7 @@ class LegalFiles(Folders):
         self.assertEqual(in_script, in_engine)
         self.assertTrue({'NOTICE', 'LICENSE', 'LICENSE-ADDITIONAL-PERMISSION.md', 'SOURCE.txt'} <= in_engine)
         self.assertTrue(any(name.startswith('LICENSES/') for name in in_engine))
-        public = PRODUCT / 'public'
-        base = public if (public / 'NOTICE').is_file() else PRODUCT
+        base = PRODUCT
         for name in in_engine - {'SOURCE.txt'}:
             self.assertTrue((base / name).is_file(), f'{name} is required in the download but is not in {base}')
 
@@ -157,11 +148,16 @@ class NothingOutside(unittest.TestCase):
             self.assertNotIn('PRODUCT.parent', text, name)
             self.assertNotIn('hearthstone-native-ui-prototype', text, name)
             self.assertNotIn('python3 -c', text, name)
+            self.assertNotIn('hs-prototype-tools', text, name)
+            self.assertNotIn('/usr/bin/python3', text, name)
 
-    def test_the_plugin_builds_the_engine_from_source_when_there_is_no_vendor_dll(self):
+    def test_the_plugin_builds_the_engine_from_source_by_default(self):
         project = (PRODUCT / 'plugin' / 'OfflineProbe.csproj').read_text(encoding='utf-8')
-        self.assertRegex(project, r"<EngineSource Condition=\"[^\"]*!Exists\('\$\(MSBuildThisFileDirectory\)\.\./vendor/SabberStoneCore\.dll'\)\">true</EngineSource>")
-        self.assertIn('No prebuilt engine at', project)
+        self.assertRegex(project, r"<EngineSource Condition=\"'\$\(EngineSource\)' == '' and '\$\(StandardProof\)' != 'true' and '\$\(SabberStoneCorePath\)' == ''\">true</EngineSource>")
+        for csproj in PRODUCT.rglob('*.csproj'):
+            if {'bin', 'obj', 'out'} & set(csproj.relative_to(PRODUCT).parts):
+                continue
+            self.assertNotIn('vendor/SabberStoneCore.dll', csproj.read_text(encoding='utf-8'), str(csproj))
 
 
     def test_release_builds_carry_no_build_machine_path(self):

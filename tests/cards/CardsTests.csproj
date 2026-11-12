@@ -18,10 +18,9 @@
     <Compile Include="../../plugin/LocalClassRewards.cs" />
     <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
-    <Reference Condition="'$(EngineSource)' != 'true'" Include="SabberStoneCore"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference>
   </ItemGroup>
-  <PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
-  <ItemGroup Condition="'$(EngineSource)' == 'true'"><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
+  <PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />

@@ -7,9 +7,8 @@
     <AssemblyName>HSNativeUIProbe</AssemblyName>
     <GameReferences Condition="'$(GameReferences)' == ''">$(MSBuildThisFileDirectory)../references/game</GameReferences>
     <BepInExReferences Condition="'$(BepInExReferences)' == ''">$(MSBuildThisFileDirectory)../references/bepinex</BepInExReferences>
-    <!-- Vendor mode is a maintainer convenience: a prebuilt engine at vendor/SabberStoneCore.dll, which is never tracked and not in a public export. Without one (and with no engine path given) the plugin builds the engine from source. -->
-    <EngineSource Condition="'$(EngineSource)' == '' and '$(StandardProof)' != 'true' and '$(SabberStoneCorePath)' == '' and !Exists('$(MSBuildThisFileDirectory)../vendor/SabberStoneCore.dll')">true</EngineSource>
-    <SabberStoneCorePath Condition="'$(SabberStoneCorePath)' == '' and '$(StandardProof)' != 'true'">$(MSBuildThisFileDirectory)../vendor/SabberStoneCore.dll</SabberStoneCorePath>
+    <!-- The engine always builds from engine/ source. A prebuilt engine is an explicit opt-out: -p:SabberStoneCorePath=<path to SabberStoneCore.dll> (that alone turns the source build off). -->
+    <EngineSource Condition="'$(EngineSource)' == '' and '$(StandardProof)' != 'true' and '$(SabberStoneCorePath)' == ''">true</EngineSource>
   </PropertyGroup>
   <PropertyGroup Condition="'$(EngineSource)' == 'true'">
     <!-- Unity loads this engine already; net48 alone does not advertise netstandard2.1 compatibility. -->
@@ -49,7 +48,7 @@
     <DefineConstants>$(DefineConstants);MODERN_MECHANICS</DefineConstants>
   </PropertyGroup>
   <Target Name="ValidateStandardProofBuild" BeforeTargets="PrepareForBuild">
-    <Error Condition="'$(EngineSource)' != 'true' and '$(StandardProof)' != 'true' and !Exists('$(SabberStoneCorePath)')" Text="No prebuilt engine at $(SabberStoneCorePath). Build with -p:EngineSource=true to compile the engine from source." />
+    <Error Condition="'$(EngineSource)' != 'true' and '$(StandardProof)' != 'true' and !Exists('$(SabberStoneCorePath)')" Text="No prebuilt engine at '$(SabberStoneCorePath)'. Pass -p:SabberStoneCorePath=/path/to/SabberStoneCore.dll, or drop -p:EngineSource=false to compile the engine from source." />
     <Error Condition="'$(EngineSource)' == 'true' and '$(StandardProof)' == 'true'" Text="EngineSource=true cannot be combined with StandardProof=true." />
     <Error Condition="'$(ModernMechanics)' == 'true' and '$(StandardProof)' != 'true'" Text="ModernMechanics requires StandardProof=true." />
     <Error Condition="'$(ModernMechanics)' == 'true' and !$([System.String]::Copy(';$(DefineConstants);').Contains(';MODERN_MECHANICS;'))" Text="Modern build must define MODERN_MECHANICS." />
