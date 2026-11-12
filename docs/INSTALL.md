@@ -125,8 +125,9 @@ yours, the SoloStone version, update status, **Play**, **Roll back**, the update
 
 ## SoloStone settings in Options
 
-The game's **Options** has an extra button in its Other group: **SoloStone Options**. It opens a window like the one
-**Sound Options** opens. **Back** or Escape returns to Options, and **Done** or a click outside the window closes it.
+The game's **Options** has two extra buttons in its Other group: **SoloStone Options** and **Tracker Options**. Each
+opens a window like the one **Sound Options** opens. **Back** or Escape returns to Options, and **Done** or a click
+outside the window closes it.
 
 **SoloStone Options** holds these. Turn Timer and NPC Deck Guess take effect from the next match; the others change at
 once.
@@ -138,6 +139,9 @@ once.
 - **Pace: <tier>** opens the Pace page, and its **Back** returns to this window. The button is hidden during a match.
 - **Language: <name>** is covered under "Game language" below.
 - **Restore Starter Decks** appears only while you have a starter deck hidden.
+
+**Tracker Options** turns the three match overlays on and off: Countdown, Deck Tracker and Attack Counter. A change
+applies at once.
 
 The settings are saved in `BepInEx\config\solostone.plugin.cfg` in the copy.
 
@@ -164,6 +168,21 @@ Your copy has the languages your Hearthstone had when you ran setup, usually jus
 
 The new copy has the languages Battle.net left installed. If Battle.net removed your old language, SoloStone starts
 in the new one. You can switch Battle.net back afterwards: the copy keeps the files it was made with.
+
+## Match overlays
+
+Three overlays show during a match:
+
+- **Deck Tracker** lists the cards still in your deck down the right edge of the screen, under the deck's name. It
+  counts only cards you have seen leave or enter your deck, so a card shuffled in face down shows as "Unknown card".
+  On by default.
+- **Attack Counter** shows beside each hero how much damage that side's characters can still attack for this turn,
+  or could on its next turn. Off by default.
+- **Countdown** shows the time left in your turn above the End Turn button. It runs only while the Turn Timer option
+  is on. On by default.
+
+The T key hides and shows all three during a match. To turn one off, use **Tracker Options** in Options.
+`DeckTrackerKey` under `[Display]` in `BepInEx\config\solostone.plugin.cfg` changes the key.
 
 ## What SoloStone leaves alone
 
