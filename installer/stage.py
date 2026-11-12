@@ -27,7 +27,6 @@ INSTALLER = Path(__file__).resolve().parent
 sys.path.insert(0, str(INSTALLER))
 import loader_inputs  # noqa: E402
 PRODUCT = INSTALLER.parent
-LAB_DOTNET = '/tmp/hs-prototype-tools/dotnet/dotnet'
 
 
 def git_toplevel():
@@ -37,8 +36,8 @@ def git_toplevel():
 
 
 CHECKOUT = git_toplevel()
-# An explicit DOTNET wins; then the maintainers' tool folder when it exists; then whatever `dotnet` is on the PATH.
-DEFAULT_DOTNET = os.environ.get('DOTNET') or (LAB_DOTNET if Path(LAB_DOTNET).exists() else shutil.which('dotnet') or 'dotnet')
+# An explicit DOTNET wins; otherwise whatever `dotnet` is on the PATH.
+DEFAULT_DOTNET = os.environ.get('DOTNET') or (shutil.which('dotnet') or 'dotnet')
 # Licence texts that ride with every download (stage folder `legal/`, then the app folder). SOURCE.txt is made from SOURCE.template.txt.
 LEGAL_FILES = ('NOTICE', 'LICENSE', 'LICENSE-ADDITIONAL-PERMISSION.md')
 LEGAL_FOLDER = 'LICENSES'
