@@ -13,7 +13,7 @@
     <Reference Include="Blizzard.T5.MiniJSON"><HintPath>../../references/game/Blizzard.T5.MiniJSON.dll</HintPath></Reference>
     <Compile Include="../shared/GroupProofs.cs" Link="GroupProofs.cs" />
     <Compile Include="../../plugin/TestControlRules.cs" Link="TestControlRules.cs" />
-    <Compile Include="../test-control/PackHookIlChecks.cs" Link="PackHookIlChecks.cs" />
+    <Compile Include="../shared/IlCalls.cs" Link="IlCalls.cs" />
     <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
     <Compile Include="../../plugin/NativeDeckEditorSave.cs" Link="NativeDeckEditorSave.cs" />
     <Compile Include="../../plugin/NativeDeckRunes.cs" Link="NativeDeckRunes.cs" />

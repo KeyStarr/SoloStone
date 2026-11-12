@@ -1364,6 +1364,7 @@ catch (Exception error) { failures.Add("ChoiceCardMgr.ChoiceState opposing revea
         || !StaticOwners(plugin, pluginMetadata, loanerPath).Contains("NativeUIProjection"))
         failures.Add("OfflineProbe.ConfigureLoanerGroupPath no longer isolates the card catalog initialization");
 }
+PackHookIlChecks.Run(root, (ok, message) => { if (!ok) failures.Add(message); });
 if (failures.Count != 0) throw new Exception(string.Join("\n", failures));
 NativeCrafting.RunBatchTests();
 NativeCrafting.RunHookTests();

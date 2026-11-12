@@ -23,7 +23,7 @@ internal static partial class Program
                 metadata.GetString(metadata.GetMethodDefinition(h).Name) == methodName));
             return pe.GetMethodBody(method.RelativeVirtualAddress).GetILBytes();
         }
-        List<string> Calls(string type, string method) => PackHookIlChecks.Calls(Body(type, method), metadata);
+        List<string> Calls(string type, string method) => IlCalls.Calls(Body(type, method), metadata);
         Check(Calls("GameState", "EnterChoiceMode").Contains("Entity.HasHandTarget")
             && Body("Entity", "HasHandTarget").AsSpan().IndexOf(BitConverter.GetBytes(1508)) >= 0
             && Calls("Entity", "HasHandTarget").Contains("GameState.GetFriendlyEntityChoices")

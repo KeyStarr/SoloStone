@@ -5,6 +5,7 @@
   <ItemGroup>
     <ProjectReference Include="../../plugin/OfflineProbe.csproj" ReferenceOutputAssembly="false" AdditionalProperties="EngineSource=true"
       Condition="'$(SkipPluginBuild)' != 'true'" />
+    <Compile Include="../shared/IlCalls.cs" Link="IlCalls.cs" />
     <Compile Include="../../plugin/NativeHomeUI.cs" Link="NativeHomeUI.cs" />
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
     <Compile Include="../../plugin/StatusRoutine.cs" Link="StatusRoutine.cs" />
