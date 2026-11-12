@@ -98,6 +98,7 @@ namespace SabberStoneCore.Actions
 
         internal static void RetireResolvedSpell(Controller owner, Spell spell)
         {
+            if (SigilRules.Install(owner, spell)) return;
             if (SupplierActive(spell))
             {
                 if (spell.Zone != null) spell.Zone.Remove(spell);

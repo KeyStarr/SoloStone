@@ -403,14 +403,22 @@ namespace SabberStoneCore.Triggers
 			// Target: The source of this trigger or
 			//			if the owner is Enchantment, the target of the enchantment.
             // Grant metadata is scoped to the event; mirrors must resolve before the recipient is drawn.
+            // A waiting Sigil fires as a SIGIL-keyed TRIGGER block and leaves SECRET at its end (Actions/SigilRules).
+            ISimpleTask task = SingleTask;
+            int? keyword = null;
+            if (Actions.SigilRules.IsActive(_owner))
+            {
+                keyword = (int)Actions.SigilRules.Sigil;
+                if (RemoveAfterTriggered) task = ComplexTask.Create(SingleTask, Actions.SigilRules.Retire);
+            }
 			if (FastExecution || _triggerType == TriggerType.DARK_GIFT_GIVEN)
-			    Game.TaskQueue.Execute(SingleTask, _owner.Controller, _owner,
+			    Game.TaskQueue.Execute(task, _owner.Controller, _owner,
 				    source is IPlayable playable ? playable
 										: _owner is Enchantment ew && ew.Target is IPlayable p ? p
-										: null, historyTrigger: true);
+										: null, historyTrigger: true, triggerKeyword: keyword);
 		    else
 		    {
-			    Game.TaskQueue.Enqueue(SingleTask, _owner.Controller,
+			    Game.TaskQueue.Enqueue(task, _owner.Controller,
 				    /*_owner is Enchantment ec ? ec : */_owner,
 				    source is IPlayable pSource?
 					    pSource :
@@ -420,7 +428,7 @@ namespace SabberStoneCore.Triggers
                     deathId: _triggerType == TriggerType.DEATH ? source.Id : 0,
                     orderDeathByPlay: _triggerType == TriggerType.DEATH && OrderDeathByPlay,
                     deathTrigger: _triggerType == TriggerType.DEATH && OrderDeathByPlay && !RemoveAfterTriggered ? this : null,
-                    historyTrigger: true);
+                    historyTrigger: true, triggerKeyword: keyword);
 		    }
 	    }
 

@@ -334,7 +334,7 @@ namespace SabberStoneCore.Model
 		}
 
 		public void Execute(in ISimpleTask task, in Controller controller, in IPlayable source, in IPlayable target, int number = 0,
-            bool historyTrigger = false, int subOption = -1)
+            bool historyTrigger = false, int subOption = -1, int? triggerKeyword = null)
 		{
             var observation = _game.Resolution.Queued(task);
             using var resolution = _game.Resolution.Enter(observation.Id != 0 ? ResolutionKind.TriggerResolution : ResolutionKind.TaskResolution, source?.Id ?? 0);
@@ -349,7 +349,8 @@ namespace SabberStoneCore.Model
 			if (controller.Game.History)
             {
                 parentHadEffects = _game.PowerHistory.CurrentBlockHasEffects;
-				historyStart = PowerHistoryBuilder.BlockStart(historyTrigger || task.IsTrigger ? BlockType.TRIGGER : BlockType.POWER, source.Id, "", historyTrigger || task.IsTrigger ? -1 : subOption, target?.Id ?? 0);
+				historyStart = PowerHistoryBuilder.BlockStart(historyTrigger || task.IsTrigger ? BlockType.TRIGGER : BlockType.POWER, source.Id, "", historyTrigger || task.IsTrigger ? -1 : subOption, target?.Id ?? 0,
+                    triggerKeyword: triggerKeyword);
 				controller.Game.PowerHistory.Add(historyStart);
                 if (!historyTrigger && !task.IsTrigger) _game.PowerHistory.TargetHeader(source, target);
             }
