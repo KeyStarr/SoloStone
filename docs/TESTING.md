@@ -125,7 +125,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and the state/history/RNG fingerprint, on the pinned pool snapshot), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/history/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
@@ -176,7 +176,7 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
-| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder`, `native-bindings-logic` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
 | Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-bindings-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |

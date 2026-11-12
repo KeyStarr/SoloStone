@@ -10,6 +10,8 @@ using System.Text.RegularExpressions;
 string root = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../../"));
 if (!Directory.Exists(Path.Combine(root, "references/game"))) root = Directory.GetCurrentDirectory();
 bool runtimeGuardOnly = args.Contains("--runtime-guard-only");
+foreach (string arg in args)
+    if (arg.StartsWith("--", StringComparison.Ordinal) && arg != "--runtime-guard-only") throw new ArgumentException("unknown argument: " + arg);
 string candidatePlugin = args.Where(arg => arg != "--runtime-guard-only").SingleOrDefault();
 #if DEBUG
 const string configuration = "Debug";

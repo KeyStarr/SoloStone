@@ -48,13 +48,18 @@ internal static class PinnedReplayEngineProof
                 if (kind == "deathrattle")
                     Check(!string.IsNullOrEmpty(replay.EngineFingerprint), name + " pins engine state/history/RNG");
                 // Name the replay: a bare "fingerprint changed" does not say which one moved (all are listed before failing).
+                Check(!replay.Focused && !replay.Game.Player.StartsWith("standard-coverage-", StringComparison.Ordinal),
+                    name + " is a plain recorded game: focused and standard-coverage replays need the packet runner and stay in transport-invariants");
                 try { Replay(replay); }
-                catch (InvalidOperationException error) { drifted.Add(name + ": " + error.Message); continue; }
+                catch (Exception error) when (error is InvalidOperationException or InvariantException or ArgumentException)
+                { drifted.Add(name + ": " + error.Message); continue; }
                 replays++;
                 if (replay.EngineFingerprint != null) fingerprints++;
             }
         }
-        Check(drifted.Count == 0, "pinned replays failed on the engine: " + string.Join("; ", drifted));
+        Check(drifted.Count == 0, "pinned replays failed on the engine: " + string.Join("; ", drifted)
+            + ". A pinned replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through transport-invariants, after the same per-game review as a golden.");
+        Check(replays == 17 && fingerprints == 8, $"expected 17 pinned replays and 8 fingerprints, found {replays} and {fingerprints} (a replay file was added or removed: update this count with it)");
         Console.WriteLine($"PASS pinned replays on the engine: {replays} replays, legal-move hash chain and actions at every step, {fingerprints} state/history/RNG fingerprints");
     }
 
