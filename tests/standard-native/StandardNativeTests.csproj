@@ -17,6 +17,8 @@
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
+    <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />
+    <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
     <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
     <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />

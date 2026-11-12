@@ -349,7 +349,8 @@ def definitions_from_facts(root, manifest, meta, core):
     fair-pack manifest: its cards give the set's number (tag 183), and every other card of that number is in the set.
     Cards of the meta's extra list are EVENT and the unlock schedule's cards are CORE; anything else is OTHER.
     """
-    files = sorted((root / "facts").glob(meta["id"] + "-*.json"))
+    # The card file is <meta>-<date>.json; the <meta>-<date>.<locale>.json files beside it hold only translated text.
+    files = sorted(f for f in (root / "facts").glob(meta["id"] + "-*.json") if f.name.count(".") == 1)
     if not files:
         raise ValueError("No card file in facts/ for meta " + meta["id"])
     facts = json.loads(files[-1].read_text())

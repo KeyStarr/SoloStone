@@ -33,6 +33,8 @@
     <Compile Include="../../plugin/CopyTransportBridge.cs" Link="CopyTransportBridge.cs" />
     <Compile Include="../../plugin/AuraTransportBridge.cs" Link="AuraTransportBridge.cs" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
+    <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />
+    <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
     <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
     <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />

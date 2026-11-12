@@ -35,6 +35,7 @@ static partial class Program
             // Fast loop for this swap work: dotnet run -- --retry
             if (args.Contains("--retry")) { EarlyFailures(temp); ReusedBackups(temp); LastSmallRound(temp); FailingSwaps(temp); FinalRoundRelease(temp); KillThenRetry(temp); BusyFiles(temp); Console.WriteLine("PASS " + count + " retry checks"); return 0; }
             if (args.Contains("--preflight")) { AppOnlyPreflight(temp); Console.WriteLine("PASS " + count + " app preflight checks"); return 0; }
+            if (args.Contains("--text")) { LocalizedTextTests(temp); Console.WriteLine("PASS " + count + " localized card text checks"); return 0; }
             if (args.Contains("--policy")) { ClientPolicyTests(temp); Console.WriteLine("PASS " + count + " policy checks"); return 0; }
             // Fast loop for window work: dotnet run -- --gui
             if (args.Contains("--gui")) { GuiTests(); HookTests(temp); GuiBoundaryTests(); Console.WriteLine("PASS " + count + " window checks"); return 0; }
@@ -153,6 +154,7 @@ static partial class Program
             EngineTests(temp);
             PluginSubsetTests(temp);
             LanguageTests(temp);
+            LocalizedTextTests(temp);
             OptionsPanelTests();
             NativeStringsTests(temp);
             ClientCheckTests(temp);

@@ -16,7 +16,10 @@ internal static class LocalNativeText
         "EX1_411e", "EX1_414e", "CS1_129e", "CS2_236e", "CS2_087e", "CS2_092e",
         "EX1_360e", "EX1_382e", "EX1_619e", "EX1_366e", "EX1_355e"
     };
+    // Native (transport) ID -> engine ID, for the card file's locale texts, which are keyed by engine ID.
+    private static readonly Dictionary<string, string> EngineIdByNativeId = new Dictionary<string, string>(StringComparer.Ordinal);
     private static readonly Dictionary<string, string> TextByNativeId = BuildTextByNativeId();
+    private static string clientLocale;
 
     internal static IReadOnlyCollection<string> SupportedIds => TextByNativeId.Keys;
 
@@ -30,14 +33,79 @@ internal static class LocalNativeText
     }
 
     internal static bool TryGetOverride(bool staged, string cardId, Func<string, string> defaultVariant,
-        out string text)
+        out string text) => TryGetOverride(staged, cardId, defaultVariant, ClientLocale(), out text);
+
+    // The client's language, as the client reports it (Localization.GetActualLocale); the Options > Language choice when the client
+    // cannot answer. Null for English and for anything that is not one of the client's locales. Remembered once it is settled:
+    // never while the client says English and Options started it in another language (it can answer before its language is set up).
+    internal static string ClientLocale() => ClientLocale(ReadClientLocale, RunningLocale);
+
+    // Options > Language's running locale. NativeLanguageOption.Initialize sets it; this file stays free of client UI types, so
+    // the client-free test suites compile it. While unset, the answer is never remembered.
+    internal static Func<string> RunningLocale;
+
+    internal static string ClientLocale(Func<string> client, Func<string> running)
+    {
+        string known = clientLocale;
+        if (known != null) return known.Length == 0 ? null : known;
+        string reported = null, started = null;
+        try { reported = client(); } catch (Exception) { reported = null; }
+        try { started = running?.Invoke(); } catch (Exception) { started = null; }
+        string locale = LocalizedCardText.Resolve(reported, started, out bool cacheable);
+        if (cacheable && running != null) clientLocale = locale ?? "";
+        return locale;
+    }
+
+    private static System.Reflection.MethodInfo actualLocale;
+    private static bool actualLocaleLooked;
+
+    private static string ReadClientLocale()
+    {
+        if (!actualLocaleLooked)
+        {
+            // Looked up once, found or not.
+            actualLocaleLooked = true;
+            try
+            {
+                var localization = Type.GetType("Localization, Blizzard.T5.Localization", false);
+                actualLocale = localization?.GetMethod("GetActualLocale", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static, null, Type.EmptyTypes, null);
+            }
+            catch (Exception) { actualLocale = null; }
+        }
+        return actualLocale?.Invoke(null, null)?.ToString();
+    }
+
+    internal static void ResetLocaleCache() { clientLocale = null; }
+
+    // The engine id a native (transport) id stands for, or null when SoloStone has no text for it.
+    internal static string EngineIdFor(string nativeId) =>
+        nativeId != null && EngineIdByNativeId.TryGetValue(nativeId, out string engineId) ? engineId : null;
+
+    // Raw text before the variant pick: the locale's own text for this card while the engine still plays the English it was made
+    // from, else the engine's English. `status` says which and why.
+    internal static string RawFor(string cardId, string locale) => RawFor(cardId, locale, out _);
+
+    internal static string RawFor(string cardId, string locale, out LocalizedCardText.Status status)
+    {
+        status = LocalizedCardText.Status.English;
+        if (string.IsNullOrEmpty(cardId) || !TextByNativeId.TryGetValue(cardId, out string english)) return null;
+        if (locale != null && EngineIdByNativeId.TryGetValue(cardId, out string engineId))
+        {
+            status = LocalizedCardText.Lookup(locale, engineId, english, out string localized);
+            if (status == LocalizedCardText.Status.Localized) return localized;
+        }
+        return english;
+    }
+
+    internal static bool TryGetOverride(bool staged, string cardId, Func<string, string> defaultVariant,
+        string locale, out string text)
     {
         text = null;
         if (!staged || string.IsNullOrEmpty(cardId) || defaultVariant == null) return false;
         try
         {
-            if (!TextByNativeId.TryGetValue(cardId, out string rawText) || string.IsNullOrEmpty(rawText))
-                return false;
+            string rawText = RawFor(cardId, locale);
+            if (string.IsNullOrEmpty(rawText)) return false;
             text = NormalizeRawText(defaultVariant(rawText));
             return !string.IsNullOrEmpty(text);
         }
@@ -78,7 +146,10 @@ internal static class LocalNativeText
             try
             {
                 if (card.Implemented && !result.ContainsKey(card.Id) && NativeMatch.TransportCardId(card.Id) == card.Id)
+                {
                     result[card.Id] = card.Text;
+                    EngineIdByNativeId[card.Id] = card.Id;
+                }
             }
             catch { }
         }
@@ -87,6 +158,9 @@ internal static class LocalNativeText
 
     private static void Add(Dictionary<string, string> result, EngineCard card)
     {
-        if (card != null) result[NativeMatch.TransportCardId(card.Id)] = card.Text;
+        if (card == null) return;
+        string native = NativeMatch.TransportCardId(card.Id);
+        result[native] = card.Text;
+        EngineIdByNativeId[native] = card.Id;
     }
 }

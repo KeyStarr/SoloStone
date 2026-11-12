@@ -859,6 +859,26 @@ internal static class ClientBridge
         return false;
     }
 
+    // Read-only live probe (test-control `card-raw-text`): what LocalRawCardText hands the client for one card ID, and the language
+    // it follows. `status` is why the text is what it is: localized (the card file's locale text), english (the client is English),
+    // noFile (no locale file in this build), noEntry (the locale has no text for the card: a gap or a placeholder mismatch),
+    // stale (the engine plays other English than the file was made from, so English is shown). `localized` is status == localized.
+    internal static MiniJSON.JsonNode RawCardTextProbe(string cardId)
+    {
+        string locale = LocalNativeText.ClientLocale();
+        bool active = staged || NativeUIProbe.Active;
+        bool overridden = LocalNativeText.TryGetOverride(active, cardId, TextUtils.GetDefaultTextVariant, locale, out string text);
+        bool covered = LocalNativeText.TryGetOverride(true, cardId, TextUtils.GetDefaultTextVariant, null, out string english);
+        LocalNativeText.RawFor(cardId, locale, out LocalizedCardText.Status status);
+        string reason = status.ToString(); reason = char.ToLowerInvariant(reason[0]) + reason.Substring(1);
+        return new MiniJSON.JsonNode {
+            { "cardId", cardId }, { "locale", locale ?? "enUS" }, { "active", active }, { "covered", covered },
+            { "overridden", overridden }, { "status", reason }, { "localized", overridden && status == LocalizedCardText.Status.Localized },
+            { "hashMismatch", status == LocalizedCardText.Status.Stale },
+            { "text", overridden ? text : null }, { "englishText", covered ? english : null }
+        };
+    }
+
     private static bool SkipLocal() { return !staged; }
     private static bool SkipAccountPrompt() { return false; }
     private static bool AllowIdleThinkEmotes() { return OfflineProbe.IdleThinkEmotes.Value; }

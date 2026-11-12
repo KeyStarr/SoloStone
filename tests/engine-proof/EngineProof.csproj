@@ -27,6 +27,8 @@
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
+    <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />
+    <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
     <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
     <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
