@@ -5524,6 +5524,9 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
             if (start.EffectIndex.HasValue) native.PowerStart.EffectIndex = start.EffectIndex.Value;
             if (start.TriggerKeyword.HasValue) native.PowerStart.TriggerKeyword = start.TriggerKeyword.Value;
+            // A card cast as it is drawn (TOPDECK, 377): PowerProcessor makes its history tile, and its big card when the
+            // card is shown in hand, only for a block marked ShowInHistory, as retail marks it.
+            if (start.BlockType == BlockType.TRIGGER && start.TriggerKeyword == 377) native.PowerStart.ShowInHistory = true;
             // Automatic plays: PowerProcessor creates and holds the big card only when asked (no hand-play reveal).
             if (start is PowerHistoryEffectPlayStart effectPlay && effectPlay.ForceShowBigCard) native.PowerStart.ForceShowBigCard = true;
 #endif
