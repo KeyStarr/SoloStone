@@ -6,19 +6,5 @@
     <ProjectReference Include="../../plugin/OfflineProbe.csproj" ReferenceOutputAssembly="false" AdditionalProperties="EngineSource=true"
       Condition="'$(SkipPluginBuild)' != 'true'" />
     <Compile Include="../shared/IlCalls.cs" Link="IlCalls.cs" />
-    <Compile Include="../../plugin/NativeHomeUI.cs" Link="NativeHomeUI.cs" />
-    <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
-    <Compile Include="../../plugin/StatusRoutine.cs" Link="StatusRoutine.cs" />
-    <Compile Include="../../plugin/ProfileStartupStatus.cs" Link="ProfileStartupStatus.cs" />
   </ItemGroup>
-  <Target Name="ExtractCraftingBatch" BeforeTargets="CoreCompile">
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_crafting.py&quot; &quot;$(IntermediateOutputPath)CraftingBatch.g.cs&quot;" />
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_matchmaking.py&quot; &quot;$(IntermediateOutputPath)Matchmaking.g.cs&quot;" />
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_gameplay_rank.py&quot; &quot;$(IntermediateOutputPath)GameplayRank.g.cs&quot;" />
-    <ItemGroup>
-      <Compile Include="$(IntermediateOutputPath)CraftingBatch.g.cs" />
-      <Compile Include="$(IntermediateOutputPath)Matchmaking.g.cs" />
-      <Compile Include="$(IntermediateOutputPath)GameplayRank.g.cs" />
-    </ItemGroup>
-  </Target>
 </Project>
