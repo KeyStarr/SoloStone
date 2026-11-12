@@ -27,7 +27,7 @@ internal static class CoreReprintsProof
     private static void Check(bool condition, string message) => EventTraceProof.Check(condition, message);
     internal static void Run()
     {
-        var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("engine/SabberStoneCore/resources/Data/ReprintAliases.json"));
+        var aliases = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText("tests/engine-proof/ReprintAliases.json"));
         var definitions = ClientExport.TryCards();
         Check(aliases.Count == 57, "explicit 57 Core 2026 reprints");
         LoaderBoundaries();
