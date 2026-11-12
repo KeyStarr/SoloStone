@@ -32,6 +32,7 @@ internal static class NativeLanguageOption
     internal static void Initialize(ManualLogSource logger, ConfigFile file)
     {
         log = logger;
+        LocalNativeText.RunningLocale = () => Running;
         try
         {
             settings = new LanguageSettings(file);

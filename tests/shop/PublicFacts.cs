@@ -13,7 +13,8 @@ internal static class PublicFacts
         string root = RepoRoot.Find("data/pools/offline-standard-v1.json")!;
         using var policy = JsonDocument.Parse(File.ReadAllText(Path.Combine(root, "data/pools/offline-standard-v1.json")));
         string meta = policy.RootElement.GetProperty("activeMeta").GetString()!;
-        string file = Directory.GetFiles(Path.Combine(root, "facts"), meta + "-*.json").OrderBy(path => path, StringComparer.Ordinal).Last();
+        // The card file is <meta>-<date>.json; <meta>-<date>.<locale>.json beside it hold only translated text.
+        string file = Directory.GetFiles(Path.Combine(root, "facts"), meta + "-*.json").Where(path => Path.GetFileName(path).Count(c => c == '.') == 1).OrderBy(path => path, StringComparer.Ordinal).Last();
         using var json = JsonDocument.Parse(File.ReadAllText(file));
         var rows = new Dictionary<string, Row>(StringComparer.Ordinal);
         foreach (var list in new[] { json.RootElement.GetProperty("cards"), json.RootElement.GetProperty("overlay").GetProperty("cards") })

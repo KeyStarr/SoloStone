@@ -38,7 +38,11 @@ internal static class LocalNativeText
     // The client's language, as the client reports it (Localization.GetActualLocale); the Options > Language choice when the client
     // cannot answer. Null for English and for anything that is not one of the client's locales. Remembered once it is settled:
     // never while the client says English and Options started it in another language (it can answer before its language is set up).
-    internal static string ClientLocale() => ClientLocale(ReadClientLocale, () => NativeLanguageOption.Running);
+    internal static string ClientLocale() => ClientLocale(ReadClientLocale, RunningLocale);
+
+    // Options > Language's running locale. NativeLanguageOption.Initialize sets it; this file stays free of client UI types, so
+    // the client-free test suites compile it. While unset, the answer is never remembered.
+    internal static Func<string> RunningLocale;
 
     internal static string ClientLocale(Func<string> client, Func<string> running)
     {
@@ -46,9 +50,9 @@ internal static class LocalNativeText
         if (known != null) return known.Length == 0 ? null : known;
         string reported = null, started = null;
         try { reported = client(); } catch (Exception) { reported = null; }
-        try { started = running(); } catch (Exception) { started = null; }
+        try { started = running?.Invoke(); } catch (Exception) { started = null; }
         string locale = LocalizedCardText.Resolve(reported, started, out bool cacheable);
-        if (cacheable) clientLocale = locale ?? "";
+        if (cacheable && running != null) clientLocale = locale ?? "";
         return locale;
     }
 
