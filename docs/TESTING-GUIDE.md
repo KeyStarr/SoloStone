@@ -110,7 +110,7 @@ text instead of calling a module ([#44](https://github.com/KeyStarr/SoloStone/is
 | The plugin starts using a new Unity, BepInEx or game member | Add only that member to the stand-in the suite compiles with (there are several). Get its shape from the real client: no test compares the two |
 | You add or remove a Harmony hook | Regenerate `plugin/client-bindings.txt` (next section). Nothing in CI does it |
 | A rules change changes a golden | Re-record only when the change is meant, and say why each changed game changes ([TESTING.md](TESTING.md), "Goldens") |
-| A transport replay drifts | Same review as a golden. A maintainer with a client renews it ([transport-invariants](../tests/transport-invariants/README.md)) |
+| A transport replay drifts | Same review as a golden. A maintainer with a client renews it; the re-record tool for these replays is not public yet ([transport-invariants](../tests/transport-invariants/README.md)) |
 | A new Hearthstone version | Maintainer work today: the client build is pinned in `installer/tested-client.json` (embedded in the launcher), in `tests/run.py`, in many test files and in the locally built data, whose export tools are not public. `native-bindings` and `transport-invariants` are the first suites to run |
 | A test needs a new file built from the client | Add it to "Data built locally" in [TESTING.md](TESTING.md) and to the suite's `needs_local`, so machines without it skip with the reason instead of failing |
 
