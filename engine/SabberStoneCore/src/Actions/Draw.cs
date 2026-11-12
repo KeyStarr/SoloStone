@@ -105,7 +105,10 @@ namespace SabberStoneCore.Actions
             if (task != null)
             {
                 if (game.History)
-                    game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, playable.Id, "", 0, 0));
+                    // Retail: TRIGGER, EffectIndex 0, TriggerKeyword TOPDECK. The keyword is what tells the client (through
+                    // NativeMatch's ShowInHistory) that this is a card drawn and cast, so it gets a history tile.
+                    game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, playable.Id, "", 0, 0,
+                        effectIndex: 0, triggerKeyword: (int)GameTag.TOPDECK));
                 // Illusion retains its actual hand residence when its summon cannot fit.
                 if (playable.Card.Id != "EDR_260t" || !controller.BoardZone.IsFull)
                     controller.SetasideZone.Add(controller.HandZone.Remove(playable));
