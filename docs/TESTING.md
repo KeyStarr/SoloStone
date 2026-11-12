@@ -147,14 +147,29 @@ HsSim.dll goldens rerecord tests/goldens/core-2026.json --only <game-id> [<game-
 ```
 
 It replays every game (or just the `--only` ones) and re-records only the games that no longer match. Each one is run
-again as the same case (decks, seed, policy) on the card pool its own record names, so a pool or deck-list edit made
-since then cannot leak in. Games that still match stay byte-identical, and games are never added or removed. It prints
-the old and new winner and turn count of every changed game and a total; `--dry-run` prints the same and writes
-nothing. Exit code 0 is success, 1 means a game could not be re-recorded (nothing is written), 2 is a usage error.
+again as the same case (suite, deck pair, seed, policy). Games that still match stay byte-identical, and games are never
+added or removed. A record pins the card pool and the deck's id, not the deck's cards, so a changed deck list or card
+shows up as a changed game, not as a quiet success.
+
+Every re-recorded game is classified and printed:
+
+- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history/state hashes
+  moved. This is what an intended engine change that does not alter play looks like.
+- `BEHAVIOUR`: the game itself changed (different actions or legal moves, turns, winner, or a pool/Dark Gift version
+  field). The line shows how many actions changed and where they first differ. These are refused (exit 1, nothing
+  written) unless you pass `--allow-behaviour-change`, which prints a warning per game. A behaviour change needs a
+  reviewer's eye on each listed game: say in your change why it changed.
+
+`--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
+re-recorded, a behaviour change without the flag, a re-recorded game that still does not match, or a file not in the
+form `goldens record` writes); nothing is written then. 2 is a usage error.
+
 Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card pool their record pins. Schema 2 files
-(`classic-source`, `modern`, `core-reprints`) record no pool, so their games are re-run as `goldens record` would run them
-and stored in the schema 2 form. It fails, writing nothing, if a case can no longer be built or its identity (id, decks,
-seed, policy) changed. Afterwards it re-checks the games it looked at and prints `N re-recorded, M unchanged, all K match`.
+(`classic-source`, `modern`, `core-reprints`) record no pool, so their games are re-run unpinned, under the current
+pool and Dark Gift rules, and stored in the schema 2 form. They replay under the legacy rules, so the re-check is what
+guards them: a re-recorded game is replayed from the text that would be written, and nothing is written if any one still
+mismatches. Rerecord also refuses a case that can no longer be built or whose identity (id, decks, seed, policy)
+changed. It prints `N re-recorded (S shape only, B behaviour), M unchanged, all K match`.
 
 `goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
 and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine

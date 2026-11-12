@@ -36,6 +36,13 @@ class RerecordTests:
         cls.chunks = game_chunks(cls.original)
         cls.ids = game_ids(cls.original)
         assert len(cls.ids) >= 3
+        # Run from a scratch folder holding only the pool snapshots, so the traces rerecord dumps stay out of the repository.
+        cls.work = tempfile.TemporaryDirectory()
+        shutil.copytree(ROOT / 'tests' / 'goldens' / 'pools', Path(cls.work.name) / 'tests' / 'goldens' / 'pools')
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.work.cleanup()
 
     def setUp(self):
         folder = tempfile.TemporaryDirectory()
@@ -44,8 +51,8 @@ class RerecordTests:
         self.path.write_text(self.original)
 
     def rerecord(self, *extra):
-        # Run from the repository root: the pool snapshots are found at tests/goldens/pools.
-        result = subprocess.run([DOTNET, DLL, 'goldens', 'rerecord', str(self.path), *extra], cwd=ROOT,
+        # The pool snapshots are found at tests/goldens/pools under the working folder.
+        result = subprocess.run([DOTNET, DLL, 'goldens', 'rerecord', str(self.path), *extra], cwd=self.work.name,
                                 capture_output=True, text=True, timeout=1200)
         return result
 
@@ -68,20 +75,21 @@ class RerecordTests:
     def test_no_change_leaves_the_file_byte_identical(self):
         result = self.rerecord()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn(f'0 re-recorded, {len(self.ids)} unchanged, all {len(self.ids)} match', result.stdout)
+        self.assertIn(f'0 re-recorded (0 shape only, 0 behaviour), {len(self.ids)} unchanged, all {len(self.ids)} match', result.stdout)
         self.assertEqual(self.path.read_text(), self.original)
 
     def test_restores_only_the_corrupted_games(self):
-        # Game 1: wrong history hash. Game 3: one action changed, so its replay diverges.
+        # Game 1: wrong history hash (shape only). Game 3: one action changed, so its replay diverges (behaviour).
         self.corrupt(1, self.history_sha(1), '0' * 64)
         first_action = re.search(r'"actions":\[(\d+)', self.chunks[3]).group(1)
         self.corrupt(3, f'"actions":[{first_action}', f'"actions":[{int(first_action) + 1}')
         broken = self.path.read_text()
-        result = self.rerecord()
+        result = self.rerecord('--allow-behaviour-change')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('2 re-recorded, %d unchanged, all %d match' % (len(self.ids) - 2, len(self.ids)), result.stdout)
-        self.assertIn(f'changed {self.ids[0]}: winner', result.stdout)
-        self.assertIn(f'changed {self.ids[2]}: winner', result.stdout)
+        self.assertIn('2 re-recorded (1 shape only, 1 behaviour), %d unchanged, all %d match' % (len(self.ids) - 2, len(self.ids)), result.stdout)
+        self.assertIn(f'changed {self.ids[0]}: shape only (history moved), 0 actions changed', result.stdout)
+        self.assertIn(f'changed {self.ids[2]}: BEHAVIOUR', result.stdout)
+        self.assertIn(f'WARNING {self.ids[2]}', result.stderr)
         self.assertNotEqual(self.path.read_text(), broken)
         # The same case on the same pool gives the same game back; every other game is untouched.
         self.assertEqual(self.games(), self.expected_games())
@@ -93,7 +101,7 @@ class RerecordTests:
         self.corrupt(2, self.history_sha(2), '0' * 64)
         result = self.rerecord('--only', self.ids[1])
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('1 re-recorded, 0 unchanged, all 1 in scope match', result.stdout)
+        self.assertIn('1 re-recorded (1 shape only, 0 behaviour), 0 unchanged, all 1 in scope match', result.stdout)
         games = self.games()
         self.assertEqual(games[2], self.expected_games()[2])
         self.assertIn('0' * 64, games[1])  # game 1 was out of scope and stays broken
@@ -103,15 +111,71 @@ class RerecordTests:
         broken = self.path.read_text()
         result = self.rerecord('--dry-run')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('1 re-recorded, %d unchanged' % (len(self.ids) - 1), result.stdout)
+        self.assertIn('1 re-recorded (1 shape only, 0 behaviour), %d unchanged' % (len(self.ids) - 1), result.stdout)
+        self.assertIn('shape only', result.stdout)
         self.assertIn('dry run', result.stdout)
         self.assertEqual(self.path.read_text(), broken)
 
     def test_usage_errors_exit_2(self):
-        for extra in (['--only'], ['--bogus'], ['--only', 'no-such-game']):
+        for extra in (['--only'], ['--bogus'], ['--allow-behaviour'], ['--only', 'no-such-game']):
             result = self.rerecord(*extra)
             self.assertEqual(result.returncode, 2, (extra, result.stderr))
         self.assertEqual(self.path.read_text(), self.original)
+
+    def test_a_shape_only_change_needs_no_flag(self):
+        self.corrupt(1, self.history_sha(1), '0' * 64)
+        self.corrupt(2, re.search(r'"stateSha":"([0-9a-f]+)"', self.chunks[2]).group(1), '1' * 64)
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.count('shape only ('), 2, result.stdout)
+        self.assertNotIn('BEHAVIOUR', result.stdout)
+        self.assertEqual(self.games(), self.expected_games())
+
+    def behaviour_changed(self, old, new, shown):
+        """A recorded game that differs in play (a deck or card edit, or a rules change, would look like this)."""
+        self.corrupt(1, old, new)
+        broken = self.path.read_text()
+        refused = self.rerecord()
+        self.assertEqual(refused.returncode, 1, refused.stderr)
+        self.assertIn('--allow-behaviour-change', refused.stderr)
+        self.assertIn(f'changed {self.ids[0]}: BEHAVIOUR', refused.stdout)
+        self.assertIn(shown, refused.stdout)
+        self.assertEqual(self.path.read_text(), broken)
+        dry = self.rerecord('--dry-run', '--allow-behaviour-change')
+        self.assertEqual(dry.returncode, 0, dry.stderr)
+        self.assertEqual(self.path.read_text(), broken)
+        allowed = self.rerecord('--allow-behaviour-change')
+        self.assertEqual(allowed.returncode, 0, allowed.stderr)
+        self.assertIn(f'WARNING {self.ids[0]}: BEHAVIOUR', allowed.stderr)
+        self.assertEqual(self.games(), self.expected_games())
+
+    def test_changed_actions_are_refused_without_the_flag(self):
+        first = re.search(r'"actions":\[(\d+)', self.chunks[1]).group(1)
+        self.behaviour_changed(f'"actions":[{first}', f'"actions":[{int(first) + 1}', '1 changed, first at step 0')
+
+    def test_changed_legal_moves_are_refused_without_the_flag(self):
+        sha = re.search(r'"legalShas":\["([0-9a-f]+)"', self.chunks[1]).group(1)
+        self.behaviour_changed(f'"legalShas":["{sha}"', '"legalShas":["' + '2' * 64 + '"', 'legal moves differ from step 0')
+
+    def test_a_mix_of_fixable_and_unbuildable_games_writes_nothing(self):
+        self.corrupt(1, self.history_sha(1), '0' * 64)  # fixable
+        player = re.search(r'"player":"([^"]+)"', self.chunks[2]).group(1)
+        self.corrupt(2, f'"player":"{player}"', '"player":"no-such-deck"')  # not buildable
+        broken = self.path.read_text()
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('nothing written', result.stdout)
+        self.assertEqual(self.path.read_text(), broken)
+
+    def test_a_file_not_in_record_form_is_not_rewritten(self):
+        import json
+        self.corrupt(1, self.history_sha(1), '0' * 64)
+        self.path.write_text(json.dumps(json.loads(self.path.read_text()), indent=1))
+        broken = self.path.read_text()
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('not in the form', result.stderr)
+        self.assertEqual(self.path.read_text(), broken)
 
     def test_a_game_that_cannot_be_rebuilt_fails_and_writes_nothing(self):
         player = re.search(r'"player":"([^"]+)"', self.chunks[1]).group(1)

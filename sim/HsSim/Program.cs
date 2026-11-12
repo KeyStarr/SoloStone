@@ -40,7 +40,7 @@ public static class Program
             if (args.Length == 0) throw new ArgumentException("usage: hs build|check|sim|goldens|fuzz|replay (see sim/README.md)");
             if (args[0] == "goldens")
             {
-                if (args.Length < 3 && args.Length == 2 && args[1] == "rerecord") throw new UsageException(RerecordUsage);
+                if (args.Length == 2 && args[1] == "rerecord") throw new UsageException(RerecordUsage);
                 if (args.Length < 3) throw new ArgumentException("goldens record|check|rerecord <file>");
                 if (args[1] == "rerecord") return Rerecord(args[2], args[3..]);
                 if (args[1] == "record")
@@ -49,7 +49,7 @@ public static class Program
                     string suite = Get(options, "suite", "classic"), policy = Policy(options);
                     var watch = Stopwatch.StartNew();
                     var data = new GoldenSuite { Suite = suite, Policy = policy,
-                        EngineSha = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location))) };
+                        EngineSha = EngineSha() };
 #if SOURCE_ENGINE
                     var pools = PoolSnapshots.Save(Get(options, "pool-snapshot", null));
 #endif
@@ -119,9 +119,11 @@ public static class Program
         }
     }
 
+    private static string EngineSha() => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location)));
+
     private sealed class UsageException(string message) : ArgumentException(message);
 
-    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run]";
+    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run] [--allow-behaviour-change]";
 
     private static void ValidateSuite(GoldenSuite data)
     {
@@ -138,10 +140,11 @@ public static class Program
     private static int Rerecord(string path, string[] rest)
     {
         var only = new List<string>();
-        bool dryRun = false;
+        bool dryRun = false, allowBehaviour = false;
         for (int i = 0; i < rest.Length; i++)
         {
             if (rest[i] == "--dry-run") dryRun = true;
+            else if (rest[i] == "--allow-behaviour-change") allowBehaviour = true;
             else if (rest[i] == "--only")
             {
                 int first = i + 1;
@@ -159,6 +162,7 @@ public static class Program
         var watch = Stopwatch.StartNew();
         var replaced = new Dictionary<int, GameRecord>();
         var scope = new List<int>();
+        var behavioural = new List<string>();
         int failed = 0;
         for (int i = 0; i < data.Games.Count; i++)
         {
@@ -170,7 +174,9 @@ public static class Program
             {
                 GameRecord fresh = Recreate(old, data.Schema);
                 replaced[i] = fresh;
-                Console.WriteLine($"changed {old.Id}: winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}");
+                string line = Classify(old, fresh, out bool behaviour);
+                if (behaviour) behavioural.Add(old.Id);
+                Console.WriteLine($"changed {old.Id}: {line}");
             }
             catch (Exception error)
             {
@@ -183,6 +189,19 @@ public static class Program
             Console.WriteLine($"{replaced.Count} re-recorded, {failed} could not be; nothing written");
             return 1;
         }
+        if (behavioural.Count > 0)
+        {
+            // Same actions and legal moves mean only the recorded hashes moved. Anything else is a different game: a rules,
+            // deck or card change. That needs a reviewer to look at each listed game, so it is opt-in.
+            if (!allowBehaviour)
+            {
+                Console.Error.WriteLine("refusing behaviour changes without --allow-behaviour-change: " + string.Join(", ", behavioural));
+                Console.WriteLine($"{replaced.Count} could be re-recorded ({behavioural.Count} behaviour); nothing written");
+                return 1;
+            }
+            foreach (string id in behavioural)
+                Console.Error.WriteLine($"WARNING {id}: BEHAVIOUR change re-recorded on request; review this game before committing");
+        }
         if (replaced.Count > 0)
         {
             // Rewrite only if the file round-trips, so every game we did not touch stays byte-identical.
@@ -190,12 +209,13 @@ public static class Program
             if ((JsonSerializer.Serialize(output, Json) + "\n").ReplaceLineEndings("\n") != text.ReplaceLineEndings("\n"))
                 throw new InvalidDataException("golden file is not in the form `goldens record` writes; refusing to rewrite it");
             foreach (var (index, fresh) in replaced) output.Games[index] = fresh;
-            output.EngineSha = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location)));
-            // Re-check exactly what would be written, loaded back from its own text, before touching the file.
+            output.EngineSha = EngineSha();
+            // Re-check what would be written, loaded back from its own text, before touching the file. Only the re-recorded
+            // games need it: the others matched above, and the round-trip check shows their records did not change.
             string result = JsonSerializer.Serialize(output, Json) + "\n";
             GoldenSuite reloaded = Deserialize<GoldenSuite>(result);
             ValidateSuite(reloaded);
-            string[] still = scope.Where(index => !Check(reloaded.Games[index], false)).Select(index => reloaded.Games[index].Id).ToArray();
+            string[] still = replaced.Keys.Where(index => !Check(reloaded.Games[index], false)).Select(index => reloaded.Games[index].Id).ToArray();
             if (still.Length > 0)
             {
                 Console.Error.WriteLine("still mismatching after re-recording: " + string.Join(", ", still));
@@ -205,7 +225,7 @@ public static class Program
             if (!dryRun) Save(path, output);
         }
         string all = only.Count > 0 ? $"all {scope.Count} in scope" : $"all {scope.Count}";
-        Console.WriteLine($"{replaced.Count} re-recorded, {scope.Count - replaced.Count} unchanged, {all} match"
+        Console.WriteLine($"{replaced.Count} re-recorded ({replaced.Count - behavioural.Count} shape only, {behavioural.Count} behaviour), {scope.Count - replaced.Count} unchanged, {all} match"
             + (dryRun ? "; dry run, nothing written" : "") + $" ({watch.Elapsed.TotalSeconds:F3}s)");
         return 0;
 #else
@@ -214,8 +234,37 @@ public static class Program
     }
 
 #if SOURCE_ENGINE
+    // One line saying how a re-recorded game differs. SHAPE: same actions and legal moves (so same turns and winner), only
+    // the history/state hashes moved. BEHAVIOUR: anything else, including a changed rules/pool version field.
+    private static string Classify(GameRecord old, GameRecord fresh, out bool behaviour)
+    {
+        static int Differing<T>(List<T> a, List<T> b) =>
+            Enumerable.Range(0, Math.Max(a.Count, b.Count)).Count(i => i >= a.Count || i >= b.Count || !EqualityComparer<T>.Default.Equals(a[i], b[i]));
+        static int FirstDiff<T>(List<T> a, List<T> b) =>
+            Enumerable.Range(0, Math.Max(a.Count, b.Count)).First(i => i >= a.Count || i >= b.Count || !EqualityComparer<T>.Default.Equals(a[i], b[i]));
+        var others = new List<string>();
+        if (old.PoolPolicyVersion != fresh.PoolPolicyVersion) others.Add($"poolPolicyVersion {old.PoolPolicyVersion ?? "none"}->{fresh.PoolPolicyVersion ?? "none"}");
+        if (old.DarkGiftPolicyVersion != fresh.DarkGiftPolicyVersion) others.Add($"darkGiftPolicyVersion {old.DarkGiftPolicyVersion ?? "none"}->{fresh.DarkGiftPolicyVersion ?? "none"}");
+        if (old.Failure != null) others.Add("recorded failure dropped");
+        int actions = Differing(old.Actions, fresh.Actions), legal = Differing(old.LegalShas, fresh.LegalShas);
+        behaviour = actions > 0 || legal > 0 || old.Turns != fresh.Turns || old.Winner != fresh.Winner || others.Count > 0;
+        if (!behaviour)
+        {
+            var moved = new List<string>();
+            if (old.HistorySha != fresh.HistorySha) moved.Add("history");
+            if (old.StateSha != fresh.StateSha) moved.Add("state");
+            return $"shape only ({(moved.Count > 0 ? string.Join(", ", moved) : "no hash")} moved), 0 actions changed";
+        }
+        string text = $"BEHAVIOUR winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}, actions {old.Actions.Count}->{fresh.Actions.Count} ({actions} changed"
+            + (actions > 0 ? $", first at step {FirstDiff(old.Actions, fresh.Actions)}" : "") + ")";
+        if (legal > 0) text += $", legal moves differ from step {FirstDiff(old.LegalShas, fresh.LegalShas)}";
+        return others.Count > 0 ? text + "; " + string.Join(", ", others) : text;
+    }
+
     // The same case again (suite, decks, seed, policy), made the way `goldens record` makes it. Schema 3 runs on the pool
-    // snapshot the old record names; schema 2 records no pool, so it runs unpinned and is stored without pool fields.
+    // snapshot the old record names. Schema 2 records no pool, so it runs unpinned, under today's pool and Dark Gift rules,
+    // and is stored without those fields. Replaying it later uses the legacy rules, so the whole-file re-check after
+    // re-recording is what guards a schema 2 game: if the legacy replay does not reproduce it, nothing is written.
     private static GameRecord Recreate(GameRecord old, int schema)
     {
         GameRecord fresh = Cases(old.Suite, (old.Seed, old.Seed), old.Policy)
@@ -430,6 +479,8 @@ public static class Program
     {
         string full = Path.GetFullPath(path);
         Directory.CreateDirectory(Path.GetDirectoryName(full));
-        File.WriteAllText(full, JsonSerializer.Serialize(value, Json) + "\n");
+        string temporary = full + ".tmp";
+        File.WriteAllText(temporary, JsonSerializer.Serialize(value, Json) + "\n");
+        File.Move(temporary, full, overwrite: true);
     }
 }
