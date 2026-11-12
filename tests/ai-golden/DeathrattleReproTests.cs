@@ -8,6 +8,9 @@ using static ReplyTests;
 
 public static class DeathrattleReproTests
 {
+    // Playtest game, Hunter NPC TinkerTempo, turn 18: seven minions on board, six mana left, Dig for Freedom in hand,
+    // and the NPC passed. The evaluator gave a flat bonus to any minion with a Deathrattle flag, so Dig (which stacks
+    // a second Deathrattle) scored below passing. This is the board shape and stats of that turn, not an exact replay.
     // Minimal turn-18 equivalent: seven bodies, six mana left, Dig held, no enemy minions.
     // Exhaust attacks to isolate the spell decision from the intentionally unchanged mistake layer.
     public static void Audit20261031_D1_DigBeatsPassingOnFullBoard() => TestDigBeatsPassingOnFullBoard();

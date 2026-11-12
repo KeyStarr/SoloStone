@@ -4,6 +4,10 @@ using System.Runtime.CompilerServices;
 using SabberStoneCore.CardSets.Client;
 using SabberStoneCore.Model;
 
+// Regression test for a plugin crash at load. Set pool classes call OfflinePoolDeclarations from their own static
+// initializers, so if one of them ran first (as in Unity/Mono) the card aggregate read a Declarations list that was
+// still null. Static-constructor order is per process, so each type is forced first in a child process; one process
+// could only ever test the order it happens to start in.
 internal static class PoolInitOrderProof
 {
     internal static void Run()

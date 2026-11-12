@@ -36,6 +36,10 @@ namespace SabberStoneCore.Model.Zones
         private List<Spell> _auras;
         public IReadOnlyList<Spell> Auras => _auras?.Where(s => s.IsAura).ToArray() ?? Array.Empty<Spell>();
         public IReadOnlyList<Spell> ModernQuests => (IReadOnlyList<Spell>)_modernQuests ?? Array.Empty<Spell>();
+        // Tag 1192 marks a Sidequest (e.g. Storm the Gates). A Sidequest sits beside one ordinary Quest and both occupy
+        // secret slots, so the separate legacy Quest slot is only counted here while a Sidequest is active. Without
+        // one, Quest keeps its own slot as before. Sidequests are also not part of the guaranteed Quest draw in the
+        // opening hand (Game.BeginDraw).
         public int OccupiedSecretSlots => _count + (_modernQuests?.Count ?? 0)
             + (Quest != null && _modernQuests?.Any(q => q.Card[(GameTag)1192] != 0) == true ? 1 : 0);
 
@@ -75,7 +79,7 @@ namespace SabberStoneCore.Model.Zones
 
         public override void MoveTo(Spell entity, int zonePosition = -1)
         {
-            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity))
+            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity) || Actions.SigilRules.IsSigil(entity))
             {
                 if (entity.Controller != Controller || entity.Zone != null && entity.Zone != this)
                     throw new ZoneException("Aura must be detached and owned by this controller.");
@@ -119,7 +123,7 @@ namespace SabberStoneCore.Model.Zones
 
 		public override void Add(Spell entity, int zonePosition = -1)
 		{
-            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity)) { MoveTo(entity, zonePosition); return; }
+            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity) || Actions.SigilRules.IsSigil(entity)) { MoveTo(entity, zonePosition); return; }
 			if (entity.Card.IsQuest && QuestDefinition.TryGet(entity.Card.AssetId, out _))
             {
                 if (!Actions.QuestRules.CanInstall(Controller, entity.Card))

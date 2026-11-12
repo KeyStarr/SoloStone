@@ -11,6 +11,11 @@ using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 using Type = System.Type;
 
+// The old random generators (Lackeys, Adapt, class and cost pools, Entourage, Discover and so on) read a frozen,
+// ordered snapshot of cards (LegacyGenerationV1, 124 inputs), so registering or admitting new cards cannot change
+// the random picks in the seeded golden games. legacy-generation-v1.sha256 pins the name, count and hash of every
+// input; this proof fails if any input changes and injects fake new cards to show they never enter one. A failure
+// after adding cards means a new card leaked into a legacy pool.
 internal static class OfflinePoolLegacyCompatibilityProof
 {
     private static void Check(bool value, string message)

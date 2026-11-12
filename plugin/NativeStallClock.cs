@@ -9,6 +9,7 @@ internal sealed class NativeStallClock
     private string claimedMatch;
     internal double Elapsed(double now) => now - since;
     internal void Invalidate() => controller = null;
+    // The default 30 s is the audited attack-recovery grace (NativeSpellWatchdog); the general fallback passes 60, choices 15.
     internal bool Observe(bool eligible, string matchId, object owner, object list, string revision, double now, double deadline = 30)
     {
         if (!eligible || owner == null || list == null || string.IsNullOrEmpty(matchId)

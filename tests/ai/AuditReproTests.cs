@@ -5,6 +5,11 @@ using SabberStoneCore.Model.Decisions;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+// Regression proofs from a read-only audit of the NPC AI on 2026-10-31. They were first committed failing, one test per
+// confirmed finding, each asserting the correct behaviour; the AI fixes landed afterwards, so they now pass and guard
+// those fixes. Here: C1 (selector effects such as Osk's second choice must search every eligible target, not take the
+// first) and C4 (a reply simulation must use the NPC's real own Secret, not invent one). C4 is also run by the normal
+// fairness suite; C1 only runs through --audit. The other findings are in tests/ai-golden/AuditReproTests.cs.
 // --audit runs each proof independently and returns nonzero when any correct-behavior assertion fails.
 internal static class AuditReproTests
 {

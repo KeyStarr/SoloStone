@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+// One id manifest per batch (see GroupProofs for why): parallel branches add files instead of editing a shared list. Empty
+// files and repeated or malformed ids are rejected rather than skipped.
 internal static class StandardBatchData
 {
     internal static SortedDictionary<string, string[]> Load(string directory)

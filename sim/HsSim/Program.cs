@@ -443,6 +443,8 @@ public static class Program
                     // Sample three distinct points from the actual game, including short games; separate probe PRNG.
                     var points = new PolicyRandom(unchecked((ulong)(long)gameSeed) ^ 0x434C4F4E45UL);
                     var selected = new HashSet<int>();
+                    // Clones live 20 steps (Simulation.Run). The last eligible point is Count - 20, so a full window still fits inside the game;
+                    // in games of 21 actions or fewer any point is allowed, and the window may run past the end of the game.
                     int eligible = record.Actions.Count >= 22 ? record.Actions.Count - 19 : record.Actions.Count;
                     while (selected.Count < Math.Min(3, eligible)) selected.Add(points.Index(eligible));
                     record.ClonePoints = selected.OrderBy(point => point).ToList();

@@ -1,6 +1,10 @@
 using System;
 using System.Threading;
 
+// Regression from review: when a skill variant (IgnoreAoeRisk / LethalMiss) replaced the search job after the scheduler had
+// already dequeued the finished lethal probe, the turn runner kept stepping an empty queue until the clock cut in. The runner
+// now refreshes its lethal queue from the current job each step. The fixture has plausible raw damage but no legal lethal
+// (immune hero), so fresh probes are admitted and must finish.
 internal static class ReplacementLethalSuite
 {
     internal static void Run()

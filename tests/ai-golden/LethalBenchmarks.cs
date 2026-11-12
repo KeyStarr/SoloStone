@@ -7,6 +7,11 @@ using System.Threading;
 using SabberStoneCore.Model;
 
 // Focused, device-independent benchmark entry point; snapshot input never touches a profile or client.
+// Usage: --lethal-benchmark <snapshot|-> [node cap] [wall ms]. Defaults: a 4000-node cap for the fixed-work runs, 500 ms
+// for the fixed-wall runs. "captured-turn28" is a saved game snapshot (not in the repo) of a live turn from
+// 2026-10-27, taken just before its END_TURN (action 149); pass "-" to skip it. Compares serial lethal search, matched
+// serial partitions and two workers; the tiny cases are latency controls, not speed-up evidence. Snapshot and runtime
+// must come from the same engine build.
 internal static class LethalBenchmarks
 {
     internal static int Run(string[] args)

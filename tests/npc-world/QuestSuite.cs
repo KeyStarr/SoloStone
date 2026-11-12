@@ -65,6 +65,11 @@ internal static class QuestSuite
     private static void OwlFirstOpportunity(NpcDeckLibrary library, SkillCatalog skills)
     {
         // Journal 04f3c5ed, sequence 30: Storm is first drawn on state turn 10 (Hunter turn 5).
+        // Rebuilds one position from a recorded NPC match (an NPC called owl828 playing the Hunter quest deck). The NPC held its quest
+        // Storm the Gates for several turns after drawing it and played other cards instead; this is the first turn it could afford
+        // it (29 life, 5 mana, 20-card deck, a ready minion on board). The fix values quests properly (reward, feasibility, horizon).
+        // The test needs the quest played at caps 1926, 2500 and 7000 and under four casual seeds. 1926 is a reduced live cap seen in
+        // NPC journals; the original mistake RNG and cap were not recovered, so this is a reconstruction of the position.
         var deck = library.Admitted.Single(d => d.Id == "npc-hunter-quest");
         var plan = AutoDeckPlan.Derive(deck);
         var profile = new NpcProfile("npc.g.0942", 1, "owl828", deck.Id, null, 3,

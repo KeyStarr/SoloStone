@@ -9,6 +9,10 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 
+// Guards skill "mistakes" that look like blunders a human would never make. Before the guard, softmax and typed
+// mistakes could swap the search's face ping for a ping on the NPC's own hero (14 of 200 seeds) or its own minion (11
+// of 200). A mistake may now only pick a target of the same polarity (hurt an enemy, help a friend), unless the search
+// itself hurt or helped that same entity the same way.
 internal static class MistakeTargetSuite
 {
     internal static void Run()

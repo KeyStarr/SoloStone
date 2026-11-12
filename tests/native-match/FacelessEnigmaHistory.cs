@@ -9,6 +9,10 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // Regression for a stall (fixed 2026-10-30): Faceless Enigma (TIME_860) casts a generated Secret for the opponent.
+    // That entity had no SECRET tag, so the client never admitted the played "big card" and its power queue stopped for
+    // the rest of the match. The opponent's Secret is now tagged (still without identity), and the prompt/answer
+    // packets must stay balanced.
     private static void FacelessEnigmaHistory()
     {
         foreach (int pick in new[] { 0, 1 })

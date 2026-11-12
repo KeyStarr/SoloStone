@@ -9,6 +9,10 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static partial class Program
 {
+    // Transform-copy (Harbinger Celestia becoming a copy) copied the target's raw EXHAUSTED value into the history
+    // baseline, so a later exhaustion change was never published (strict transport run: TLC_247 EXHAUSTED 1 vs 0). The
+    // fixture runs with the destination both ready and already exhausted: the tag change must appear exactly when
+    // readiness changes.
     private static void TransformCopyReadinessIsPublished()
     {
         foreach (bool alreadyExhausted in new[] { false, true })

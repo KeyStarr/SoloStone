@@ -7,6 +7,10 @@ using SabberStoneCore.Enums;
 // Admission at logical effect entry, never final engine state or a pending SHOW's realtime identity.
 // This checks the pinned consumers documented in draw-spell-impact-evidence.md / the admission sweep report;
 // it is not a Unity completion emulator. Native lists split at blocks, subspells, flush metadata and packets.
+// Why this exists: a native SuperSpell without TARGET metadata infers its targets from the TAG_CHANGEs in its task list.
+// If a hidden (client-untyped) entity is among them, e.g. a card being drawn, the impact state machine sits at
+// CARDTYPE=0 with no exit and the client's history queue freezes. Chaos Strike hit it first; about ten more cards had
+// been patched one by one before this check (rule R1 below) was added.
 internal static partial class NativeAdmission
 {
     private sealed class EntityState

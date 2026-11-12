@@ -11,6 +11,11 @@ using EngineGame = SabberStoneCore.Model.Game;
 using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 using EngineZone = SabberStoneCore.Enums.Zone;
 
+// Catches the "stale controller" class of engine bug: an entity moves to the other player (stolen, returned, or
+// transferred at game start) with its engine Controller changed but its CONTROLLER tag left behind, so the client draws
+// the card on the wrong side. Hit with King Llane (Garona's start-of-game transfer) and Broxigar (returned to the other
+// player's hand with CONTROLLER unchanged). Patching the Zone setter checks every HAND/DECK/PLAY admission as it
+// happens, over all native-admission fixtures.
 // Observe the actual admission boundary, including transient mismatches later repaired by a card task.
 internal static class ControllerAdmissionInvariant
 {

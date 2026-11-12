@@ -8,6 +8,11 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static partial class Program
 {
+    // The client draws the hand "shifting" hint from the card's SHIFTING_SPELL / SHIFTING_MINION tag. Our recurring
+    // hand enchantments (Shadow of Demise, Mirrex, Shapeshifter) set no tag, so a transformed Shadow looked like a
+    // plain spell. The tag must be set after every transform of the held card, cleared when it leaves the hand, and
+    // visible to its controller only. Tags 1020 and 1544 are the unplayable/retired printing tags that a copied spell
+    // must not inherit.
     [GroupProof("held-form-overlay", ProofKind.Native)]
     private static void HeldFormOverlayHistory()
     {

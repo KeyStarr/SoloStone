@@ -15,6 +15,10 @@ public sealed class GroupProofAttribute : Attribute
     { Name = name; Kind = kind; }
 }
 
+// Proofs register themselves with [GroupProof] and batch id lists are one file each, so card groups added in parallel branches
+// never edit the same call list or count literal and cannot merge-conflict. Totals are derived from what is discovered.
+// Duplicate names, bad signatures and empty or repeated ids are rejected here because a silent skip would hide a proof that
+// never ran.
 internal static class GroupProofs
 {
     private static readonly Lazy<(GroupProofAttribute Spec, Action Run)[]> Entries = new(() =>

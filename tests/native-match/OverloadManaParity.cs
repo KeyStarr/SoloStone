@@ -25,6 +25,10 @@ internal static partial class Program
         return tags;
     }
 
+    // Playtest (Herald Shaman): after Overload the client showed 8 available mana while the engine allowed 7. The client
+    // computes available mana as RESOURCES + TEMP_RESOURCES - RESOURCES_USED and expects the overload-locked part inside
+    // RESOURCES_USED; the engine keeps OVERLOAD_LOCKED separate. Transport therefore projects spent plus locked mana into
+    // RESOURCES_USED (snapshots, Rewind resets and unlocks too).
     private static void OverloadManaParity()
     {
         foreach (bool bot in new[] { false, true })

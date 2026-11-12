@@ -11,6 +11,10 @@ using SabberStoneCore.Tasks.SimpleTasks;
 
 internal static partial class PoweredUpGlowTests
 {
+    // Every live card registration must be classified in the powered-up-inventory TSVs, so a conditional card cannot
+    // silently lack its hand glow (2026-10-21 playtest: CORE_KAR_062, Netherspite Historian, never glowed; legacy Core,
+    // RebalancedCore2026 and Reprints were not inventoried). G = glow predicate in PoweredUp, K = Kindred (4028), O =
+    // Outcast, C = Combo, N = no pre-play condition. Each G needs a true/false outcome scenario.
     private static void InventoryIsComplete()
     {
         var policy = OfflinePoolPolicy.Load();
@@ -51,6 +55,8 @@ internal static partial class PoweredUpGlowTests
             + glowIds.Length + " conditional outcomes covered");
     }
 
+    // The first conditional legacy, Core 2026 and reprint cards fixed after that playtest (see InventoryIsComplete
+    // above).
     [GroupProof("powered-up-legacy-core", ProofKind.PoweredUp)]
     private static void RunLegacyCore()
     {

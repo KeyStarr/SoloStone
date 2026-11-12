@@ -10,6 +10,10 @@ namespace SabberStoneCore.Model
     /// <summary>Runs only after Cards and the complete module registry have loaded; never in their initializers.</summary>
     public static class OfflinePoolAdmission
     {
+        // A Discover offers three cards, so each random pool needs at least this many distinct candidates for every
+        // class that can play the card. A registered card with a smaller pool fails validation ("pool too small"),
+        // except for the pools that opt out (thin exact-cost pools; curated pools with unimplemented cards use a lower
+        // minimum).
         public const int MinimumCandidates = 3;
         public static Report Evaluate(OfflinePoolManifest manifest, IEnumerable<OfflinePoolDeclaration> declarations = null,
             IReadOnlyDictionary<int, string> registeredModules = null)

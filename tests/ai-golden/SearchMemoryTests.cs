@@ -11,6 +11,10 @@ using SabberStoneCore.Tasks.SimpleTasks;
 using SabberStoneCore.Triggers;
 using static ReplyTests;
 
+// Elite turn-search memory. A live game (Medivh Priest, turn 20) allocated 122 GB in one decision: Farseer Wo plus a
+// 0-cost Ancestral Healing Discovers another free one forever, so the own beam ran thousands of actions deep and kept
+// a full engine clone per leaf. Now a line ends at 64 actions, and own-beam lines release their clone once scored and
+// rebuild it from the last action when selected.
 // Own-beam lines release their game clones once scored (docs/roadmap/2026-10-28-elite-search-memory.md): same search,
 // bounded retained states.
 public static class SearchMemoryTests

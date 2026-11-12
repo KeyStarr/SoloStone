@@ -308,13 +308,17 @@ public static class Simulation
 #endif
             );
         started?.Invoke(game);
+        // The XOR salts (0x485353494D = "HSSIM" here, 0x434C4F4E45 = "CLONE" for fuzz clone points) derive separate PRNG streams from
+        // the game seed, so the policy and the clone-point choice never consume the game's own randomness.
         var random = new PolicyRandom(unchecked((ulong)(long)record.Seed) ^ 0x485353494DUL);
         var clones = new List<(Game Game, int Until)>();
         int step = 0;
         while (game.State != State.COMPLETE)
         {
+            // Safety stops, not game rules: passing either bound means the game cannot end, and is reported as an invariant failure.
             if (game.Turn > 200) throw new InvariantException("termination.turns", $"turn {game.Turn}");
             if (step >= 20000) throw new InvariantException("termination.actions", "20000 actions");
+            // A clone probe runs the copy beside the original for up to 20 steps (step + 20 below), comparing state after every action.
             if (record.ClonePoints?.Contains(step) == true)
             {
                 Game clone = game.Clone(logging: false, resetRandomSeed: false, history: true);
@@ -383,6 +387,8 @@ public static class Simulation
         }
 #endif
         bool accepted = game.Process(task);
+        // The product calls MainBegin() explicitly once both mulligans are done (NativeMatch, after the last mulligan answer), and the
+        // harness must do the same or its recorded games would start the first turn differently from real ones.
         if (game.Step == Step.BEGIN_MULLIGAN && game.Player1.MulliganState == Mulligan.DONE
             && game.Player2.MulliganState == Mulligan.DONE) game.MainBegin();
         return accepted;

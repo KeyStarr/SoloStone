@@ -8,6 +8,11 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
 // Engine-backed regressions; fixed search output isolates the mistake layer from search randomness.
+// These cover NPCs that played too passively: a Warrior skipped turns with Armor Up and affordable plays available, and kept
+// Axe in hand as a "board clear" instead of equipping it. Causes: (1) the mistake layer's softmax could choose END_TURN while
+// other actions remained; (2) the board-clear hold bonus applied to weapons and minions, not only spells; (3) a hold could drop
+// a free (0 mana) play; (4) mistakes were priced one ply deep, so a loss bound could still let a larger real loss through.
+// 1926 is a reduced live search cap (see RoundTwoSuite.Profile).
 internal static class PassivitySuite
 {
     internal static Game Fixture(int mana, params string[] hand)

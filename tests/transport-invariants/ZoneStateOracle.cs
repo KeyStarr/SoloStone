@@ -10,6 +10,9 @@ using Game = SabberStoneCore.Model.Game;
 using Zone = SabberStoneCore.Enums.Zone;
 
 // Shared serialized-client oracle for native regressions and transport qualification.
+// Added for the Godfrey burn bug: the client indexes entities by the ENTITY_ID tag, and both burn displays arrived
+// with 0, so one ghost card stayed in the client's deck (client 28 vs engine 27). Comparing per-zone entity sets
+// catches that class.
 public sealed class ZoneStateOracle
 {
     private readonly ClientModel client = new();

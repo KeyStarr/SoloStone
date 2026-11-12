@@ -3,6 +3,12 @@ using static TransportInvariants.SelfChecks;
 
 namespace TransportInvariants;
 
+// The random stress corpus cannot reliably play every Standard card: class-gated cards can land in a deck whose hero
+// never makes them legal (the first case: two Herald cards), and some need a specific board to be playable at all.
+// Cards the corpus missed get a deterministic strict-transport game with a compatible setup. The per-card checks below
+// pin the setups that need special handling: a friendly Wisp (EDR_804), a friendly Undead (CORE_EDR_002, Poison
+// Breath), Armor to pay BE_042, a held Shadow of Demise (CORE_RLK_567, playable only after it turns into a spell
+// already cast, here the Coin) and Osk (TLC_452).
 internal static class StandardCoverageChecks
 {
     internal static void Run(bool includeCorpus = true)

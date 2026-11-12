@@ -6,6 +6,11 @@ using SabberStoneCore.Model;
 
 internal static partial class Program
 {
+    // Regression for lost achievement toasts (fixed 2026-10-31). The post-match toast was gated on being in the hub, and
+    // the results flow treated a toast that failed to show like one that had been shown, so a feat could finish without
+    // the player ever seeing it. The toast now plays in the finished match scene, and a durable queue saved together
+    // with the grant retries it until it was visibly shown. These checks cover that queue: atomic with the grant,
+    // idempotent on settlement retry, defensive copy, and rejection of invalid saved queues.
     private static void AchievementToastQueue()
     {
         AchievementPrimeRefreshesQuestRewardOptions();

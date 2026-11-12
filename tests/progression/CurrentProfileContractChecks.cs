@@ -29,6 +29,10 @@ internal static class CurrentProfileContractChecks
         Console.WriteLine("PASS current profile contracts: settlement, native pack, deck CRUD/security/restart");
     }
 
+    // Deck size is now rule-driven (an Azalina deck holds 20 cards, not 30), so a stored draft can hold more cards than
+    // its limit; the test builds one with 25. Such a draft must still load byte for byte, stay incomplete and
+    // unplayable, report the 20-card limit in its summary and still project all 25 cards natively. A stored draft above
+    // 30 cards is still rejected as a damaged save.
     private static void LegacyAzalinaDraft(string root)
     {
         string path = Path.Combine(root, "legacy-azalina.xml");

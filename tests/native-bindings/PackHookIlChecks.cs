@@ -9,6 +9,10 @@ using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 
 // Inspect pinned client IL without loading Unity or depending on decompiler text.
+// The pack-opening hooks patch methods of the shipped client. Two of them (OnFakeBoosterOpened, NewHighlightsReadyImpl)
+// are 14-byte iterator factories without NoInlining, so the runtime may inline them and bypass a method patch (once, a
+// mass open received only five cards). The hooks therefore patch the OpenBooster call site and the iterator MoveNext
+// instead; these checks fail if a client update changes those IL shapes.
 internal static class PackHookIlChecks
 {
     internal static void Run(string root, Action<bool, string> check)

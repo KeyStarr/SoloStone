@@ -9,6 +9,8 @@ namespace SabberStoneCore.Actions
     {
         public const GameTag SorryEnabled = (GameTag)33200;
         public const GameTag NozdormuEnabled = (GameTag)33201;
+        // Key for the private marker of Bloodthistle Illusionist (EDR_780, dbfId 115174) that says which copy is the
+        // Illusion. It is stored as a payload entry on both copies; the copy marked 1 dies from any positive damage.
         public const int IllusionKey = 115174;
         public static bool IsInternalTag(GameTag tag) => tag == SorryEnabled || tag == NozdormuEnabled;
 
@@ -38,6 +40,9 @@ namespace SabberStoneCore.Actions
                 target.ToBeDestroyed = true;
         }
 
+        // Used on the copy of the game made for the NPC's search. Which Illusionist copy is the Illusion is hidden
+        // information, so the search must not see it: it gets a freshly sampled belief for each pair instead. No stored
+        // pairs means no random numbers consumed.
         public static void RedactIllusions(Game game)
         {
             // Sample a belief per pair; copied members retain their shared designation in that belief.

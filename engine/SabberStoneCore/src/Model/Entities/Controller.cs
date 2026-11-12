@@ -177,6 +177,10 @@ namespace SabberStoneCore.Model.Entities
 			{
 				if (_logging)
 					Game.Log(LogLevel.DEBUG, BlockType.TRIGGER, "Entity", !Game.Logging ? "" : $"{this} set data {t} to {value}");
+				// Only a fixed set of controller tags is written to the client-facing history: everything below
+				// 1000 plus the few higher ones the client reads. Other controller tags, including all engine-private
+				// state stored here, must not be published. 4806 is the Silver Hand Recruit health bonus (MEND_801)
+				// that the client's card-text builder reads.
 				if (_history && ((int)t < 1000 || t == Actions.HeraldRules.Progress || t == Actions.HeraldRules.Profile || t == GameTag.IMBUE ||
 					t == GameTag.CORPSES || t == GameTag.CORPSES_SPENT_THIS_GAME || t == (GameTag)4806 || t == Actions.BasicHeroPowerRules.SecondaryEntity))
 					if (value + ControllerAuraEffects[t] != this[t])

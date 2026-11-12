@@ -2,6 +2,11 @@ using System.Text.Json;
 
 namespace TransportInvariants;
 
+// Replays a recorded game (standard-batch-1 deck 21 vs 25, seed s4) where Ravenous Felhunter has two Deathrattles: its
+// own empty one and a granted one. An earlier fix pruned empty root Deathrattle TRIGGERs, so only one block was sent
+// where the engine ran two, and the nested Lifesteal took the Deathrattle slot. Every engine Deathrattle must keep its
+// own keyword-217 boundary (EffectIndex -1 when empty). The fingerprint pins state, history and RNG, so a change that
+// alters the game fails loudly.
 internal static class DeathrattleReplayProof
 {
     internal static void Run()

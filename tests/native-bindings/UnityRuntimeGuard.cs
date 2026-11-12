@@ -1,6 +1,10 @@
 using System.Reflection.Metadata;
 using System.Text.RegularExpressions;
 
+// Guard added on 2026-10-24 after a build crashed at client start: the plugin used DataContractJsonSerializer,
+// which the game's Unity Mono does not ship. Every test suite runs on modern .NET, where the API exists, so all
+// of them passed. This scan (banned serializer APIs in source, plus the built plugin's assembly/type references
+// against the client's own assemblies) catches that class of mistake without launching the client.
 internal static class UnityRuntimeGuard
 {
     private static readonly Regex BannedSource = new(

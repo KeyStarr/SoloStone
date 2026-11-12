@@ -11,6 +11,11 @@ internal static class PinnedSubSpellHooks
     internal static void Run()
     {
         void Check(bool value, string name) { if (!value) throw new Exception(name); }
+        // SHA-256 of Assembly-CSharp.dll from the pinned client build 37.0.0.254477. The hook names and signatures checked below were
+        // read from exactly this build with Mono.Cecil, and the production plugin patches those methods by name, so a different client
+        // must fail here until the hooks are inspected again. The IL checks keep the FX telemetry passive: it may observe sub-spell
+        // loading and attaching but never create, attach or drive a native spell or write a native field, because presentation must
+        // not change gameplay or RNG.
         using (var hash = System.Security.Cryptography.SHA256.Create())
             Check(BitConverter.ToString(hash.ComputeHash(File.ReadAllBytes(ClientLibrary))).Replace("-", "").ToLowerInvariant()
                 == "786376bddad544709639d4b3ab60ce8799d4b1c6c7d7fc4c225ce79fe07228c6", "pinned client assembly hash");

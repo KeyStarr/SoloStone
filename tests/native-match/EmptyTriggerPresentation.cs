@@ -12,6 +12,12 @@ using SabberStoneCore.Model.Entities;
 
 internal static partial class Program
 {
+    // A trigger block with no visible content (no tasks, metadata, sub-spell, keyword or Secret) makes the client
+    // animate the card as if it fired. Wrathspike Brute did this on every friendly attack (seen in a playtest) and
+    // Chillmaw did it when its condition failed. The transport now drops such empty trigger blocks, but must keep
+    // anything that still means something: nested content, metadata, keyword boundaries (Poisonous, Lifesteal, empty
+    // Deathrattle), Secrets, split packets. The private-effect cases check that hiding a private effect looks the
+    // same to the opponent as an activation that did nothing.
     [GroupProof("empty-triggers", ProofKind.Native)]
     private static void EmptyTriggerPresentation()
     {

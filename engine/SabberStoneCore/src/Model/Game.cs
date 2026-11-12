@@ -718,6 +718,8 @@ namespace SabberStoneCore.Model
             if (State != State.COMPLETE) return;
             // Presentation must end even when an interrupted action leaves the task queue stranded.
             foreach (var player in _players)
+                // Hero tag 4717 keeps the persistent deck-portal visual of Godfrey the Betrayer running in the
+                // client. Clear it on both heroes when the match ends so the portal does not outlive the game.
                 if (player.Hero[(GameTag)4717] != 0) player.Hero[(GameTag)4717] = 0;
             // FinalGameOver can run inside spell text or a death phase; settle after those scopes unwind.
             if (!Resolution.IsQuiescent || !TaskQueue.IsQuiescent) return;
@@ -879,6 +881,7 @@ namespace SabberStoneCore.Model
 			_players.ToList().ForEach(p =>
 			{
 				// quest draw if there is
+				// Tag 1192 marks a Sidequest; Sidequests are not part of this guaranteed Quest draw.
 				IPlayable quest = p.DeckZone.FirstOrDefault(q => q is Spell spell && spell.IsQuest && spell.Card[(GameTag)1192] == 0);
 				if (quest != null) Generic.Draw(p, quest); else Deal(p);
 				Deal(p);
@@ -901,6 +904,8 @@ namespace SabberStoneCore.Model
 				p.NumTurnsLeft = 1;
 			});
 
+			// TIMEOUT is the turn length in seconds; 75 is the default. If both decks hold Nozdormu the Eternal,
+			// MainBegin sets it to 15 for both players once Start of Game has resolved.
 			Player1.TimeOut = 75;
 			Player2.TimeOut = 75;
 

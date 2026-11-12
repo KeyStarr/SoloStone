@@ -2,6 +2,13 @@ using System.Text.Json;
 
 namespace TransportInvariants;
 
+// Six immutable replays of stress-deck games from the pre-Black-Empire card pool, each the game that exposed one
+// finding (details in meta-pre-be-shape-evidence.md). ice-barrier: a repeated cast installed an already-active
+// Secret twice and crashed the game (the original 67 actions are kept, then extended to completion). TIME_876e: a
+// held Shapeshifter's transform must not be read as a hand buff. CORE_BT_416, EDR_226, TIME_704: a held card becomes
+// its Genn form and gets its old buff layer back, which is a restore, not a new buff. TLC_100t3: an exhausted
+// location's Deathrattle arrives as its own block. A re-recorded replay must still pass its witness check below
+// (TLC_100t3, TIME_876e).
 internal static class MetaPreBeProof
 {
     internal static int Run(string only = null)

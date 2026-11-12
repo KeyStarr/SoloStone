@@ -365,6 +365,9 @@ internal sealed class NativeAchievementStep : ILocalAchievementStep
             && !string.IsNullOrWhiteSpace(text as string);
     }
 
+    // A toast is confirmed only after Show, an active caption with text held for 0.5 s, and then its normal hide. The
+    // camera render callback (ObserveRendered) is only a diagnostic: in live play the toast drew in the top bar but
+    // that callback never fired, so gating on it treated every toast as unseen and replayed it.
     private void ObserveCaptionHold()
     {
         if (!CaptionReady()) { captionReadyAt = -1f; return; }

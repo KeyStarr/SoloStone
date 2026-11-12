@@ -14,6 +14,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Replay of a real playtest game: Holy Bola played between the two halves of a split (Shatter) card merged them
+    // before its draw. The native client ignores replacements inside the PLAY zone list, so the halves stayed, the
+    // merged card never appeared and the draw stalled. The seed, actions, pool snapshot and final hand ids are the
+    // recorded ones; the merge must now sit in its own TRIGGER block and the retired halves must be hidden.
     private static void HolyBolaLiveReplay()
     {
         var capture = new Capture();

@@ -23,6 +23,10 @@ internal static partial class Program
         Offers = new[] { default(NativeMatch.OfferPresentation) }
     };
 
+    // Table of states for the predicate behind the choice-stall watchdog (ChoicePresentation.Renderable), added after
+    // the Cultist Map freeze (see AgentCoinChoiceHistory). Renderable must say "broken" only when a settled choice
+    // really cannot be clicked, because a false positive makes the game answer for the player. Hence the cases for
+    // Hide/Show, rerolls, alternate pickers, TARGET and HERO choices and still-loading actors.
     private static void ChoicePresentationDetection()
     {
         var view = MissingChoicePresentation(17);
@@ -103,6 +107,9 @@ internal static partial class Program
         Console.WriteLine("PASS production choice predicate: Hide/Show, missing, loading, reroll, alternate, TARGET/HERO");
     }
 
+    // Same freeze class as the Cultist Map case, found in review: if the choice's printed creator (here Geddon, banished
+    // by Osk) is gone from the client, the source must fall back to the enchantment that still exists, and only then to
+    // the owning player. Engine state is never changed, only what is shown. Both seats, both Osk variants.
     private static void BanishedChoiceCreator()
     {
         foreach (bool opposing in new[] { false, true })

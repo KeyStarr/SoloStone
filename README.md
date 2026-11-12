@@ -18,7 +18,7 @@ SoloStone is an unofficial offline single-player mod for Hearthstone®. It requi
 **Play Hearthstone offline, on your own PC, against computer opponents.** You get the game's own screens, ranked and
 casual matches, deck building, packs and progress, all kept on your machine.
 
-[Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md) · [Run the tests](docs/TESTING.md)
+[Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md) · [Run the tests](docs/TESTING.md) ([how testing works](docs/TESTING-GUIDE.md))
 
 ## Just want to play?
 

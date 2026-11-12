@@ -6,6 +6,10 @@ using SabberStoneCore.Kettle;
 
 internal static partial class Program
 {
+    // A match with the Ragnaros skin (HERO_01bb) froze in a playtest (fixed 2026-11-01). Transport swapped the hero's
+    // card id to the skin but kept Garrosh's presentation tags, so the client's attack spell took the moving-hero path
+    // and waited forever for a static-attack spell. Skin heroes must project their own 3211 / 3564 tags and power ids
+    // while the engine hero is unchanged.
     private static void HeroSkinPresentationTests()
     {
         var capture = new Capture();

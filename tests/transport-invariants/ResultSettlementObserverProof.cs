@@ -7,6 +7,9 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 namespace TransportInvariants;
 
+// Settlement after an engine fault: an action throws mid-match, the player concedes, and the first attempt to save
+// the result fails with an injected IOException. The pending match and its bytes must survive, a retry must settle
+// exactly one Lost receipt, and observing the finished match again must not grant it twice.
 internal static class ResultSettlementObserverProof
 {
     internal static void Run()

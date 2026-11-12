@@ -68,6 +68,10 @@ sys.path.insert(0, str(TOOLS))
 import privacy_scan  # noqa: E402
 
 PRODUCT = TOOLS.parent
+# Limits. A file over MAX_BYTES must be named in large_allow (facts/** always is), so a big file cannot be added
+# unnoticed. Archives are opened only MAX_ZIP_DEPTH levels deep and MAX_INFLATED bytes in total, and a zip member that
+# inflates past 64 MiB and to more than MAX_RATIO times its compressed size is reported as unscannable instead of being
+# opened, so a crafted archive cannot exhaust memory.
 MAX_BYTES = 2 * 1024 * 1024
 MAX_READ = 512 * 1024 * 1024
 MAX_ZIP_DEPTH = 3

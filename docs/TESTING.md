@@ -2,6 +2,8 @@
 
 SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
 
+New to the tests? Start with the short [testing guide](TESTING-GUIDE.md): why they exist, how they fit together and how to keep them healthy.
+
 This page says which tests are in this repository, how to run them, and which ones are not here yet. Run every command
 from the repository root.
 

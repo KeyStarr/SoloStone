@@ -24,6 +24,8 @@ internal static class Batch13PrivateStateProof
             session.Flush(); game.PowerHistory.Last.Clear();
             session.Process(PlayCardTask.Any(owner, source));
             SelfChecks.Check(owner[CompanionRules.Cost] == 4, "companion roster really upgraded");
+            // Engine-only rule state with no client counterpart: companion extra summons (31074), completed rituals
+            // (32901), the Sorry unlock (33200) and the autonomous-turn counter (33420). None may ever reach the client.
             foreach (int tag in new[] { 31074, 32901, 33200, 33420 }) owner[(GameTag)tag] = 1;
             session.Flush();
             SelfChecks.Check(Invariants.Compare(game, session.Client).All(v => v.Tag != "PRIVATE_RULE_TAG"),

@@ -221,6 +221,9 @@ namespace SoloStone
         [DllImport("advapi32.dll")] static extern int RegCloseKey(IntPtr key);
         // The client's stripped mscorlib has no RegistryKey.GetValueNames, so the value list comes from Win32 directly.
         static List<string> RuleStrings(string path) {
+            // Raw Win32 constants: KeyRead 0x20019 = KEY_READ, 0x0100 = KEY_WOW64_64KEY, 259 = ERROR_NO_MORE_ITEMS, 234 = ERROR_MORE_DATA
+            // (grow the buffer and retry the same index), 1 = REG_SZ, 16384 = name buffer (a value name has at most 16,383 characters).
+            // 0x80000002 = HKEY_LOCAL_MACHINE; an open result of 2 means the key is absent, which gives an empty list, not an error.
             const int KeyRead=0x20019, Wow64Key64=0x0100, NoMoreItems=259, MoreData=234, RegSz=1, MaxName=16384;
             var found=new List<string>();
             IntPtr key;
@@ -245,6 +248,7 @@ namespace SoloStone
         [DllImport("advapi32.dll",CharSet=CharSet.Unicode,SetLastError=true,EntryPoint="OpenServiceW")] static extern IntPtr OpenService(IntPtr manager,string name,uint access);
         [DllImport("advapi32.dll",SetLastError=true)] static extern bool QueryServiceStatus(IntPtr service,uint[] status);
         [DllImport("advapi32.dll")] static extern bool CloseServiceHandle(IntPtr handle);
+        // Win32 constants: 1 = SC_MANAGER_CONNECT, 4 = SERVICE_QUERY_STATUS, and status[1] == 4 is dwCurrentState SERVICE_RUNNING.
         static bool? FirewallServiceRunning() {
             IntPtr manager=OpenSCManager(null,null,1);
             if(manager==IntPtr.Zero) return null;
