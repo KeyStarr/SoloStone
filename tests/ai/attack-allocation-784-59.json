@@ -1,0 +1,286 @@
+{
+  "schema": 1,
+  "id": "attack-allocation-784-59",
+  "category": "combat-allocation",
+  "title": "Public position from 784:59",
+  "why": "Retain reply alternatives after combat frontier protection.",
+  "source": "mine-20261031-master 784:59; public state only, no private history; remaining declared deck uses sorted artificial order; public history omitted",
+  "deckId": "npc-recipe-manastorm-mage",
+  "seed": 71,
+  "turn": 19,
+  "bot": {
+    "class": "MAGE",
+    "hero": {
+      "damage": 1
+    },
+    "heroPower": "CS2_034",
+    "mana": 10,
+    "baseMana": 10,
+    "heroReady": true,
+    "heroPowerExhausted": false,
+    "hand": [
+      {
+        "card": "END_023",
+        "tag": "e27",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 5
+      },
+      {
+        "card": "END_025",
+        "tag": "e22",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 3
+      },
+      {
+        "card": "TLC_334",
+        "tag": "e34",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 7
+      },
+      {
+        "card": "JAIL_803t",
+        "tag": "e99",
+        "attack": 5,
+        "health": 5,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 5
+      },
+      {
+        "card": "DINO_429",
+        "tag": "e101",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 4
+      },
+      {
+        "card": "END_025",
+        "tag": "e21",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 3
+      },
+      {
+        "card": "CORE_BT_072",
+        "tag": "e33",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 7
+      },
+      {
+        "card": "CATA_485",
+        "tag": "e11",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 1
+      }
+    ],
+    "deck": [
+      {
+        "card": "BE_EVENT_101",
+        "tag": "deck0"
+      },
+      {
+        "card": "BE_EVENT_101",
+        "tag": "deck1"
+      },
+      {
+        "card": "CATA_484",
+        "tag": "deck2"
+      },
+      {
+        "card": "CATA_484",
+        "tag": "deck3"
+      },
+      {
+        "card": "CORE_SW_108",
+        "tag": "deck4"
+      },
+      {
+        "card": "EDR_856",
+        "tag": "deck5"
+      },
+      {
+        "card": "END_023",
+        "tag": "deck6"
+      },
+      {
+        "card": "JAIL_122",
+        "tag": "deck7"
+      },
+      {
+        "card": "JAIL_125",
+        "tag": "deck8"
+      },
+      {
+        "card": "JAIL_319",
+        "tag": "deck9"
+      },
+      {
+        "card": "JAIL_321",
+        "tag": "deck10"
+      },
+      {
+        "card": "TIME_003",
+        "tag": "deck11"
+      },
+      {
+        "card": "TIME_006",
+        "tag": "deck12"
+      },
+      {
+        "card": "TLC_334",
+        "tag": "deck13"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "DEATHKNIGHT",
+    "hero": {
+      "damage": 3
+    },
+    "heroPower": "HERO_11bp",
+    "mana": 0,
+    "baseMana": 9,
+    "heroReady": true,
+    "heroPowerExhausted": false,
+    "board": [
+      {
+        "card": "CS2_tk1",
+        "tag": "e108",
+        "attack": 1,
+        "health": 1,
+        "exhausted": true,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 1
+      },
+      {
+        "card": "EDR_462",
+        "tag": "e117",
+        "attack": 3,
+        "health": 6,
+        "exhausted": true,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 4
+      },
+      {
+        "card": "EDR_810t",
+        "tag": "e118",
+        "attack": 0,
+        "health": 2,
+        "exhausted": true,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 1
+      },
+      {
+        "card": "TIME_618",
+        "tag": "e54",
+        "attack": 5,
+        "health": 3,
+        "exhausted": true,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 4
+      },
+      {
+        "card": "TLC_436",
+        "tag": "e60",
+        "attack": 4,
+        "health": 3,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 5
+      }
+    ],
+    "hidden": {
+      "hand": 7,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71,
+          "shuffleOwnDeck": false
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 71,
+          "shuffleOwnDeck": false
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ],
+    "coin": false
+  }
+}

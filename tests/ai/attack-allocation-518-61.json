@@ -1,0 +1,317 @@
+{
+  "schema": 1,
+  "id": "attack-allocation-518-61",
+  "category": "combat-allocation",
+  "title": "Public position from 518:61",
+  "why": "Retain reply alternatives after combat frontier protection.",
+  "source": "mine-20261031-master 518:61; public state only, no private history; remaining declared deck uses sorted artificial order; public history omitted",
+  "deckId": "npc-casual-rafaam-fordaking",
+  "seed": 71,
+  "turn": 15,
+  "bot": {
+    "class": "WARLOCK",
+    "hero": {
+      "damage": 21
+    },
+    "heroPower": "CS2_056",
+    "mana": 7,
+    "baseMana": 7,
+    "heroReady": true,
+    "heroPowerExhausted": false,
+    "hand": [
+      {
+        "card": "JAIL_399",
+        "tag": "e53",
+        "attack": 2,
+        "health": 5,
+        "divineShield": false,
+        "taunt": true,
+        "cost": 3
+      },
+      {
+        "card": "TIME_005t9",
+        "tag": "e73",
+        "attack": 11,
+        "health": 11,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 9
+      },
+      {
+        "card": "TLC_100",
+        "tag": "e75",
+        "attack": 3,
+        "health": 5,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 4
+      },
+      {
+        "card": "CAP_405tb1",
+        "tag": "e90",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 7
+      },
+      {
+        "card": "CATA_190h",
+        "tag": "e39",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 10
+      },
+      {
+        "card": "TIME_005t7",
+        "tag": "e71",
+        "attack": 10,
+        "health": 10,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 4
+      },
+      {
+        "card": "TIME_005",
+        "tag": "e64",
+        "attack": 12,
+        "health": 12,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 9
+      },
+      {
+        "card": "CORE_EX1_312",
+        "tag": "e48",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 7
+      },
+      {
+        "card": "CORE_CS2_062",
+        "tag": "e47",
+        "attack": 0,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 3
+      },
+      {
+        "card": "TIME_875t",
+        "tag": "e26",
+        "attack": 3,
+        "health": 3,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 3
+      }
+    ],
+    "board": [
+      {
+        "card": "TIME_005t6",
+        "tag": "e70",
+        "attack": 8,
+        "health": 8,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 6
+      }
+    ],
+    "deck": [
+      {
+        "card": "CATA_492",
+        "tag": "deck0"
+      },
+      {
+        "card": "CATA_492",
+        "tag": "deck1"
+      },
+      {
+        "card": "CATA_496",
+        "tag": "deck2"
+      },
+      {
+        "card": "CATA_496",
+        "tag": "deck3"
+      },
+      {
+        "card": "CORE_CS2_062",
+        "tag": "deck4"
+      },
+      {
+        "card": "CORE_ICC_055",
+        "tag": "deck5"
+      },
+      {
+        "card": "CORE_UNG_205",
+        "tag": "deck6"
+      },
+      {
+        "card": "CORE_UNG_205",
+        "tag": "deck7"
+      },
+      {
+        "card": "JAIL_399",
+        "tag": "deck8"
+      },
+      {
+        "card": "JAIL_509",
+        "tag": "deck9"
+      },
+      {
+        "card": "JAIL_510",
+        "tag": "deck10"
+      },
+      {
+        "card": "JAIL_510",
+        "tag": "deck11"
+      },
+      {
+        "card": "JAIL_511",
+        "tag": "deck12"
+      },
+      {
+        "card": "JAIL_511",
+        "tag": "deck13"
+      },
+      {
+        "card": "JAIL_513",
+        "tag": "deck14"
+      },
+      {
+        "card": "JAIL_514",
+        "tag": "deck15"
+      },
+      {
+        "card": "TIME_005",
+        "tag": "deck16"
+      },
+      {
+        "card": "TIME_005t3",
+        "tag": "deck17"
+      },
+      {
+        "card": "TIME_005t7",
+        "tag": "deck18"
+      },
+      {
+        "card": "TIME_005t8",
+        "tag": "deck19"
+      },
+      {
+        "card": "TIME_031",
+        "tag": "deck20"
+      },
+      {
+        "card": "TLC_451",
+        "tag": "deck21"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "ROGUE",
+    "hero": {
+      "damage": 8
+    },
+    "heroPower": "CS2_083b",
+    "mana": 5,
+    "baseMana": 7,
+    "heroReady": true,
+    "heroPowerExhausted": true,
+    "board": [
+      {
+        "card": "CATA_497",
+        "tag": "e31",
+        "attack": 6,
+        "health": 1,
+        "exhausted": true,
+        "divineShield": false,
+        "taunt": false,
+        "cost": 6
+      }
+    ],
+    "weapon": {
+      "card": "CS2_082",
+      "tag": "e111",
+      "attack": 1,
+      "durability": 2
+    },
+    "hidden": {
+      "hand": 10,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71,
+          "shuffleOwnDeck": false
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 71,
+          "shuffleOwnDeck": false
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ],
+    "coin": false
+  }
+}

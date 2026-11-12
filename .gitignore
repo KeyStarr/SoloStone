@@ -4,7 +4,6 @@ bin/
 obj/
 out/
 packages/
-references/
 __pycache__/
 *.pyc
 .DS_Store
@@ -18,3 +17,22 @@ __pycache__/
 *.pem
 *.pfx
 *.p12
+
+# Built from your own Hearthstone client (docs/BUILDING.md), or kept locally: linked or copied in, never committed.
+# In a worktree some of these are symlinks, which a pattern with a trailing slash does not match, so the names that can
+# be links have none.
+/references
+/evidence
+/private
+/data/carddb
+/data/shop/client
+/data/fx/*37.0.0*
+/dist/manifest.json
+/vendor/SabberStoneCore.dll
+CardDefs.xml
+ClientOverlay.xml
+
+# Agent files of the private side and linked worktrees: never committed.
+/CLAUDE.local.md
+/.claude
+/.worktrees

@@ -1,0 +1,98 @@
+# Public-rules release scan (tools/release_scan.py). It needs no private config and nothing from Blizzard: the only input is
+# this repository.
+#
+# Trust model. `pull_request_target` runs THIS file as it is on the default branch, with the default branch checked out, so a
+# pull request cannot edit the workflow, the scanner or the rules that judge it (and a pull request that ADDS this file, like
+# the first one, gets no scan run at all: the workflow does not exist on the default branch yet). The pull request's head is
+# fetched as DATA only: `fetch.fsckObjects` makes git reject malformed trees (duplicate entries, `.git` in any spelling, `..`),
+# and it is checked out with core.symlinks=false (links come out as plain files holding their target text) into a folder
+# outside the workspace. The scanner, its rules and installer/stage.py are copied from the base checkout into
+# $RUNNER_TEMP/base-tools BEFORE the head is touched and are only ever run from there. Nothing from the head is executed,
+# imported or sourced, the token is the default read-only one and credentials are not persisted. Never add a step that runs
+# code from the head, or that writes into $GITHUB_WORKSPACE after the head is fetched.
+# The private denylist (owner identity, lab hosts) is not here; it runs in the local commit and push hooks.
+# Required status checks and the rest of the repository setup are in the maintainer docs (docs/GIT.md); a pull request can add
+# a workflow with a job of the same name, so the check must be required by the repository ruleset, not by name alone.
+#   tree:    every file of the head (or of the pushed commit), strict rules, against the public rules
+#   commits: messages and the blobs each new commit introduces (a hit an older commit adds still fails after a later commit
+#            removes it; a link or a nested repository is reported here); outside contributors' identities are not checked
+# Keep .github/CODEOWNERS covering .github/**, tools/release_scan*, tools/privacy_scan.py and installer/stage.py (advisory until
+# there is a second maintainer).
+name: scan
+
+on:
+  push:
+    branches: [main]
+  pull_request_target:
+    types: [opened, synchronize, reopened, edited]  # `edited` fires when the base branch is retargeted
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  SCAN_DIR: tools
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2 (pinned to the commit: a moved tag cannot change what runs)
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Copy the scanner and its rules from the base checkout
+        run: |
+          set -eu
+          for f in release_scan.py privacy_scan.py release_scan.public.json; do
+            test -f "$SCAN_DIR/$f" || { echo "::error::$SCAN_DIR/$f is not on the base branch: the scan cannot run"; exit 1; }
+          done
+          test -f installer/stage.py || { echo "::error::installer/stage.py is missing: the binary markers would be silently empty"; exit 1; }
+          mkdir -p "$RUNNER_TEMP/base-tools/tools" "$RUNNER_TEMP/base-tools/installer"
+          cp "$SCAN_DIR/release_scan.py" "$SCAN_DIR/privacy_scan.py" "$SCAN_DIR/release_scan.public.json" "$RUNNER_TEMP/base-tools/tools/"
+          cp installer/stage.py "$RUNNER_TEMP/base-tools/installer/stage.py"
+          echo "SCAN=$RUNNER_TEMP/base-tools/tools" >> "$GITHUB_ENV"
+      - name: Fetch the pull request head as data
+        if: github.event_name == 'pull_request_target'
+        env:
+          PR: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -eu
+          git -c fetch.fsckObjects=true -c transfer.fsckObjects=true fetch --no-tags origin "pull/$PR/head:refs/pr/head"
+          test "$(git rev-parse refs/pr/head)" = "$HEAD_SHA" || { echo "::error::the pull request head moved while the job ran: run it again"; exit 1; }
+          # A throwaway index, a work tree outside the workspace and no symlinks: the head cannot write anywhere else.
+          head_dir="$RUNNER_TEMP/head"
+          mkdir -p "$head_dir"
+          # The head's .gitattributes must not change the bytes the scan sees (working-tree-encoding, eol, ident): attributes are
+          # read from the empty tree instead (git 2.40+; an older git fails here, loudly, rather than scanning converted files).
+          empty_tree="$(git hash-object -t tree -w /dev/null)"
+          git --attr-source="$empty_tree" check-attr -a README.md > /dev/null || { echo "::error::this git cannot ignore the head's attributes (needs 2.40+)"; exit 1; }
+          export GIT_ATTR_SOURCE="$empty_tree"
+          export GIT_INDEX_FILE="$RUNNER_TEMP/head.index"
+          git read-tree "$HEAD_SHA"
+          git -c core.symlinks=false -c core.autocrlf=false checkout-index -a --prefix="$head_dir/"
+          echo "TREE=$head_dir" >> "$GITHUB_ENV"
+      - name: Scan the tree
+        run: |
+          set -eu
+          python3 -I "$SCAN/release_scan.py" --source "${TREE:-.}" --skip-git --allow-no-private-config --strict --trust-public-rules \
+            --public-rules "$SCAN/release_scan.public.json"
+      - name: Scan the new commits
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          set -eu
+          if [ -n "${PR_BASE:-}" ]; then
+            range="$PR_BASE..refs/pr/head"
+          elif [ -n "${PUSH_BEFORE:-}" ] && [ "$PUSH_BEFORE" != 0000000000000000000000000000000000000000 ]; then
+            range="$PUSH_BEFORE..$PUSH_AFTER"
+          else
+            echo "No commit range to scan (a new branch or a manual run): the tree scan above is all there is."
+            exit 0
+          fi
+          python3 -I "$SCAN/release_scan.py" --repo . --commits "$range" --allow-no-private-config --trust-public-rules \
+            --public-rules "$SCAN/release_scan.public.json"
