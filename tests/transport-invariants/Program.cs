@@ -27,7 +27,7 @@ internal static class Program
         try
         {
             if (args is ["--hand-card-state-only"]) { TransportHooks.Install(); HandCardStateChecks.Run(); return 0; }
-            // One corpus game by id: the full inner exception, without the proofs or the 64-minute corpus.
+            // One corpus game by id: the full inner exception, without the proofs or the corpus of about 50 minutes.
             if (args is ["--game", var gameId])
             {
                 TransportHooks.Install();
@@ -122,7 +122,7 @@ internal static class Program
                     case "--overload-only": overloadOnly = true; break;
                     case "--pool-evidence-only": poolEvidenceOnly = true; break;
                     case "--replay" when i + 1 < args.Length: replayPath = args[++i]; break;
-                    default: throw new ArgumentException("usage: hs transport [--strict] [--focused|--self-test|--rewind-only|--overload-only|--pool-evidence-only|--replay file] or --classify-history raw-file");
+                    default: throw new ArgumentException("usage: dotnet TransportInvariants.dll [--strict] [--focused|--self-test|--rewind-only|--overload-only|--pool-evidence-only|--replay file] or --classify-history raw-file");
                 }
             }
             if ((focused ? 1 : 0) + (selfTest ? 1 : 0) + (rewindOnly ? 1 : 0) + (overloadOnly ? 1 : 0) + (poolEvidenceOnly ? 1 : 0) + (replayPath != null ? 1 : 0) > 1)

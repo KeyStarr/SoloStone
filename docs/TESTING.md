@@ -147,7 +147,7 @@ These suites compile or load your client's libraries. Run one with `python3 test
 |---|---|
 | `native-bindings` | The plugin's bindings: every client method it patches exists in your client libraries, the built plugin's references, and the pack hook IL. Its client-free checks are in `native-bindings-logic` |
 | `native-match` | The native match: plugin match logic on recorded games, and the recipe editor of the built plugin. Its checks that need no client run in `native-match-logic` |
-| `transport-invariants` | Engine-to-client transport: invariants over recorded and random games. It is the longest suite (about 45 minutes) |
+| `transport-invariants` | Engine-to-client transport: invariants over recorded and random games. It is the longest suite (about 50 minutes on a fast Mac) |
 
 Apart from the data built locally (above), what they read is in the repository: `tests/fixtures/playtest/` (recorded
 matches), `research/`, and the card, pool, shop, progression and ladder files under `data/`. `transport-invariants` writes
