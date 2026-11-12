@@ -154,9 +154,10 @@ class NothingOutside(unittest.TestCase):
     def test_the_plugin_builds_the_engine_from_source_by_default(self):
         project = (PRODUCT / 'plugin' / 'OfflineProbe.csproj').read_text(encoding='utf-8')
         self.assertRegex(project, r"<EngineSource Condition=\"'\$\(EngineSource\)' == '' and '\$\(StandardProof\)' != 'true' and '\$\(SabberStoneCorePath\)' == ''\">true</EngineSource>")
-        for csproj in PRODUCT.rglob('*.csproj'):
-            if {'bin', 'obj', 'out'} & set(csproj.relative_to(PRODUCT).parts):
-                continue
+        # Tracked files only: a maintainer's ignored private/ checkout has projects that do name the vendor DLL.
+        projects = [PRODUCT / name for name in git(PRODUCT, 'ls-files', '--', '*.csproj').splitlines()]
+        self.assertIn(PRODUCT / 'plugin' / 'OfflineProbe.csproj', projects)
+        for csproj in projects:
             self.assertNotIn('vendor/SabberStoneCore.dll', csproj.read_text(encoding='utf-8'), str(csproj))
 
 
