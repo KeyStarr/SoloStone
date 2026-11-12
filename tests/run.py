@@ -128,6 +128,11 @@ SUITES = [
     Suite('dormant', 'dotnet', 'engine rules for Dormant cards', 'tests/dormant-proof/DormantProofTests.csproj', needs_engine=True),
     Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred-proof/KindredProofTests.csproj', needs_engine=True),
     Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn-proof/RebornProofTests.csproj', needs_engine=True),
+    Suite('engine-proof', 'dotnet', 'card-by-card engine proofs: effects, resolution, snapshots and definitions, and the engine rule proofs '
+          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools); the full run, about 5 minutes',
+          'tests/engine-proof/EngineProof.csproj', args=['--full']),
+    Suite('standard-native', 'dotnet', 'native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, '
+          'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
     Suite('goldens', 'hssim', 'recorded games replay to the same result on the current engine (5 golden files)',
           commands=[['goldens', 'check', f'tests/goldens/{name}.json'] for name in GOLDENS]),
     Suite('fuzz', 'hssim', '200 random games: no crash, same result twice, no broken invariant',
@@ -161,6 +166,19 @@ SUITES += [
           'tests/shop/ShopTests.csproj'),
     Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
           'tests/fx-harmony/FxHarmonyTests.csproj', prebuild_in_tree_with_client=['plugin/OfflineProbe.csproj']),
+]
+# Client tier: the halves of engine-proof and standard-native that need your own client (references/game; docs/BUILDING.md step 1).
+# The same sources build a second time with -p:ClientTransport=true, which adds the client's libraries and the native match,
+# and each client suite runs only what needs them. The card export they read is built locally from a client (needs_local).
+CARDDB = 'data/carddb/37.0.0.254477/cards.json.gz'
+SUITES += [
+    Suite('engine-proof-client', 'dotnet', 'engine proofs that compare the engine with your client (card definitions file, hero powers, '
+          'independent pool derivation) and the native transport halves of engine proofs',
+          'tests/engine-proof/EngineProof.csproj', props=['-p:ClientTransport=true'], artifacts='engine-proof-client', needs_client=True,
+          needs_local=(CARDDB, 'data/carddb/37.0.0.254477/set-overrides.json', 'engine/SabberStoneCore/resources/Data/CardDefs.xml', 'engine/SabberStoneCore/resources/Data/ClientOverlay.xml')),
+    Suite('standard-native-client', 'dotnet', 'native match flow checks on Standard-format games: packets, Trade, live snapshots, location projection',
+          'tests/standard-native/StandardNativeTests.csproj', props=['-p:ClientTransport=true'], artifacts='standard-native-client',
+          needs_client=True),
 ]
 BY_NAME = {suite.name: suite for suite in SUITES}
 

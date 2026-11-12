@@ -1,0 +1,30 @@
+internal static class CoreDruidWarlockProofs
+{
+    internal static void Run()
+    {
+        Unpinned_UlfarProof.Run();
+        CoreLegacy.SpiritBombProof.Run();
+        CoreLegacy.CoreMarkOfTheWildProof.Run();
+        CoreLegacy.CoreHellfireProof.Run();
+        CoreLegacy.InnervateProof.Run();
+        CoreLegacy.CoreMortalCoilProof.Run();
+        CoreLegacy.CoreSiphonSoulProof.Run();
+        CoreLegacy.CoreDoomguardProof.Run();
+        CoreLegacy.CoreFlameImpProof.Run();
+        CoreLegacy.CoreLordJaraxxusProof.Run();
+        CoreLegacy.CoreDrainSoulProof.Run();
+        CoreLegacy.CoreGnomeferatuProof.Run();
+        CoreLegacy.CoreVulgarHomunculusProof.Run();
+        CoreLegacy.CoreOakenSummonsProof.Run();
+        CoreLegacy.SavageStrikerProof.Run();
+        CoreLegacy.VoidlordProof.Run();
+        DarkPeddlerProof.Run();
+        UnderkingProof.Run();
+        BestInShellProof.Run();
+        VibrantSquirrelProof.Run();
+        CrystalMerchantProof.Run();
+        ArchwitchWillowProof.Run();
+        DemonicAssaultProof.Run();
+        RiftcleaverProof.Run();
+    }
+}

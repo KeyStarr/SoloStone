@@ -32,8 +32,8 @@ python3 tests/run.py
 ```
 
 It builds every suite in Release mode (the engine is built from `engine/`, never from a prebuilt DLL), runs it, and
-prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about six
-minutes; the launcher suite is the longest, mostly because of its package restore.
+prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about 15 to 20
+minutes on a fast Mac (`engine-proof`, 5 to 6 minutes, and `launcher`, about 5 including its package restore, are the longest).
 
 | Option | What it does |
 |---|---|
@@ -67,7 +67,8 @@ in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary line counts every skip, for example
-`16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
+`31 of 34 suites passed, 3 skipped (progression-standard-batches, engine-proof-client, standard-native-client)` on a
+machine without a client. A skip is not a pass: look at the reason.
 
 With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
 compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
@@ -106,18 +107,40 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools). Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
+## Engine proofs and native flow checks
+
+`engine-proof` and `standard-native` each have two halves built from the same sources. The half that needs nothing from a
+client is in the `ci` tier. The other half is a `client` suite of its own, run with `--client DIR`:
+
+| `ci` suite | `client` suite | What the client half adds |
+|---|---|---|
+| `engine-proof` | `engine-proof-client` | Proofs that compare the engine with your client's data (the card definitions file, hero powers, the independent derivation of the offline pools, the printed class domains), and the native transport halves of 11 engine proofs (the same proof runs again with its packet checks compiled in). It also checks that `NativeMatch.TransportCardId` in the plugin equals its copy in `tests/shared/NativeMatchTransportId.cs`, which the suites without a client link instead of `NativeMatch` |
+| `standard-native` | `standard-native-client` | The groups that build and send native packets: Trade, live snapshots, location projection, proof packet games |
+
+`engine-proof-client` requires the export (it fails, never skips, a comparison). The identity comparisons of the whole card corpus run in
+`engine-proof`, so a maintainer run needs `engine-proof` with the export present as well as `engine-proof-client`.
+
+The card export (`data/carddb/37.0.0.254477/cards.json.gz`) is optional for `engine-proof`: with it, each card is also
+compared with the export, exactly as before; without it, the run prints one `SKIP ...` line for each kind of
+comparison and a `SKIPPED n x ...` total at the end. The comparisons that need the client itself (the independent pool derivation,
+hero powers) are skipped in `engine-proof` even when the export is there, and run in `engine-proof-client`. Nothing is skipped silently. The client half builds with
+`-p:ClientTransport=true`, which defines `CLIENT_TRANSPORT`, adds the client's libraries and links the plugin's native match.
+
 ## You changed X, run Y
 
 | You changed | Run |
 |---|---|
-| A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
+| A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `engine-proof`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
-| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-audit`, `ai-golden`, `ai-golden-audit`, `npc-world`, `npc-world-distribution` |
+| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-audit`, `ai-golden`, `ai-golden-audit`, `npc-world`, `npc-world-distribution`, `engine-proof` |
+| Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
 | The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `progression-extended`, `shop`, `ladder`, `ladder-extended` |
@@ -177,10 +200,11 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 
 Some test suites are not in this repository.
 
-- **Suites that need your own Hearthstone client or data built from it** (the `client` tier above; today only `progression-standard-batches`, which needs the card export). They load the game's own libraries to
-  check the plugin's native screens, hooks and message handling: the engine proofs per card, native match flows, and
-  the checks that every client call the plugin binds to still exists. The runner already supports them (`--client`);
-  the suites themselves are added in a later change. This repository ships no client file, and CI cannot run them.
+- **The native match, binding and transport suites.** They load the game's own libraries to check the plugin's native
+  match flows, hooks and message handling, and that every client call the plugin binds to still exists. The runner
+  already supports them (`--client`); the suites themselves are added in a later change. The `client` suites that are
+  here (`engine-proof-client`, `standard-native-client`, `progression-standard-batches`) run with `--client` and the
+  card export. This repository ships no client file, and CI cannot run them.
 - **The offline guard and save-flow tests.** They spell out the paths of the maintainer's test machine, so they stay
   private. The profile, rewards and achievements logic is in the `progression` suite above.
 - **Checks against maintainer-only files.** A few checks in `progression` and `projection` compare the plugin with the

@@ -1,0 +1,43 @@
+internal static class CoreNeutralBProofs
+{
+    internal static void Run()
+    {
+        MenagerieMugProof.Run();
+        RaptorHeraldProof.Run();
+        CoreLegacy.HenchClanThugProof.Run();
+        CoreLegacy.SwampLeechProof.Run();
+        CoreLegacy.LifedrinkerProof.Run();
+        CoreLegacy.WitchwoodGrizzlyProof.Run();
+        CoreLegacy.MicroMachineProof.Run();
+        CoreLegacy.TheCuratorProof.Run();
+        CoreLegacy.NetherspiteHistorianProof.Run();
+        CoreLegacy.GorillabotA3Proof.Run();
+        CoreLegacy.SleepyDragonProof.Run();
+        CoreLegacy.BloodsailRaiderProof.Run();
+        CoreLegacy.WildPyromancerProof.Run();
+        CoreLegacy.DoomsayerProof.Run();
+        CoreLegacy.DreadCorsairProof.Run();
+        CoreLegacy.SouthseaCaptainProof.Run();
+        CoreLegacy.MurmyProof.Run();
+        CoreLegacy.FirePlumePhoenixProof.Run();
+        CoreLegacy.GlacialShardProof.Run();
+        CoreLegacy.FireFlyProof.Run();
+        CoreLegacy.PrimordialDrakeProof.Run();
+        CoreLegacy.TarCreeperProof.Run();
+        CoreLegacy.BoulderfistOgreProof.Run();
+        CoreLegacy.RoyalLibrarianProof.Run();
+        CoreLegacy.PlatedBeetleProof.Run();
+        CoreLegacy.SneedsOldShredderProof.Run();
+        SiamatProof.Run();
+        KeymasterAlabasterBlockerProof.Run();
+        TaelanFordringProof.Run();
+        MazeGuideProof.Run();
+        RustrotViperProof.Run();
+        BeamingSidekickProof.Run();
+        InjuredTolvirProof.Run();
+        SmallTimeBuccaneerProof.Run();
+        RunawayBlackwingProof.Run();
+        OverlordRunthakProof.Run();
+        RedgillRazorjawProof.Run();
+    }
+}
