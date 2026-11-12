@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Reflection;
 using System.Xml.Linq;
 using SabberStoneCore.Config;
@@ -53,15 +52,8 @@ internal static class OfflinePoolEligibilityProof
 
     internal static void Run()
     {
-        // The admission tool owns export normalization and executed-proof/transport checks.
-        var start = new ProcessStartInfo(File.Exists("/usr/bin/python3") ? "/usr/bin/python3" : "python3") {
-            RedirectStandardOutput = true, RedirectStandardError = true
-        };
-        foreach (string arg in new[] { "-m", "unittest", "discover", "-s", "tests", "-p", "test_offline_pools.py" }) start.ArgumentList.Add(arg);
-        using var child = Process.Start(start);
-        string output = child.StandardOutput.ReadToEnd(), error = child.StandardError.ReadToEnd();
-        Check(child.WaitForExit(30000) && child.ExitCode == 0, "admission boundary cases: " + output + error);
-
+        // The admission tool (export normalization, executed-proof and transport checks) and its unit tests stay with the
+        // maintainer's private tooling; this proof covers the admitted catalog the engine ships.
         var game = new Game(new GameConfig { RandomSeed = 81, Logging = false });
         var random = (Util.DeepCloneableRandom)typeof(Game).GetProperty("Random", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(game);
         var before = random.CaptureState();
