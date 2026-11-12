@@ -18,16 +18,6 @@
     <Compile Include="../../sim/HsSim/Canonical.cs" Link="Canonical.cs" />
     <Compile Include="../shared/OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
     <Compile Include="../shared/PinnedPoolFixture.cs" Link="PinnedPoolFixture.cs" />
-    <Compile Include="../shared/AutoCastProof.cs" Link="AutoCastProof.cs" />
-    <Compile Include="../shared/BoardActorInvariant.cs" Link="BoardActorInvariant.cs" />
-    <Compile Include="../shared/ClientModel.cs" Link="ClientModel.cs" />
-    <Compile Include="../shared/Invariants.cs" Link="Invariants.cs" />
-    <Compile Include="../shared/NativeSession.cs" Link="NativeSession.cs" />
-    <Compile Include="../shared/ZoneStateOracle.cs" Link="ZoneStateOracle.cs" />
-    <Compile Include="../shared/CardStateChecks.cs" Link="CardStateChecks.cs" />
-    <Compile Include="../shared/HistoryShape.cs" Link="HistoryShape.cs" />
-    <Compile Include="../shared/HistoryShapeHooks.cs" Link="HistoryShapeHooks.cs" />
-    <Compile Include="../shared/TransportSelfCheck.cs" Link="TransportSelfCheck.cs" />
     <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
     <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
     <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />

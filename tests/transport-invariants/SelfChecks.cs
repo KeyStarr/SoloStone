@@ -11,8 +11,13 @@ using Card = SabberStoneCore.Model.Card;
 using Tag = PegasusGame.Tag;
 using Zone = SabberStoneCore.Enums.Zone;
 
-internal static partial class SelfChecks
+internal static class SelfChecks
 {
+    internal static void Check(bool condition, string message)
+    {
+        if (!condition) throw new InvalidOperationException("SELF-CHECK: " + message);
+    }
+
     internal static void Run()
     {
         CardStateChecks.Run();

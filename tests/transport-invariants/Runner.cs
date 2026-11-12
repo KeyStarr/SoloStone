@@ -36,7 +36,7 @@ internal sealed class Bucket
     public Example Example { get; init; }
 }
 
-internal sealed partial class Runner
+internal sealed class Runner
 {
     internal readonly Dictionary<(string Card, string Tag, string Expected, string Shown), Bucket> Buckets = new();
     internal readonly Dictionary<string, int> EntryCounts = new();
@@ -44,6 +44,7 @@ internal sealed partial class Runner
     internal int Checkpoints, Packets, Failures, CenariusPlayed, SuspendedAnswers, StandardBatchViolations;
     internal int LocationsPlayed, LocationActivations;
     internal int RewindOffers, RewindKeeps, Rewinds, FuzzRewindOffers, FuzzRewindKeeps, FuzzRewinds;
+    internal const string Output = "sim/out/transport";
     internal bool LightspawnPlayed;
     internal readonly HashSet<string> CardsPlayed = new(StringComparer.Ordinal);
     // CHANGE_ENTITY packets by the step whose action produced them: (step, entity, new card).
