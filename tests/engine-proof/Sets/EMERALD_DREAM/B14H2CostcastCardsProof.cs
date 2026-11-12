@@ -131,7 +131,7 @@ internal static class B14H2CostcastCardsProof
         Check(p.Choice.Choices.Any(x=>g.IdEntityDic[x].Card.Id=="skele21"),"second offer includes new Deathrattle summon");
         Answer(g,c=>c.Card.Id=="skele21");Check(p.OverloadOwed==2,"two hits still one Overload");
         StandardSetsProof.ParkBoard(p.Opponent);
-        var fireImmune=Summon(p.Opponent,"FIR_959");fireImmune[CombatRules.FireImmune]=1;
+        var fireImmune=Summon(p.Opponent,"FIR_959"); // Fyrakk is immune to Fire spells by identity (9ff3bf5); no tag is set
         Play(g,p,id,p.Opponent.Hero);
         Check(p.Choice==null && fireImmune.Damage==0,"second target uses complete Fire spell targeting rules");
         StandardSetsProof.ParkBoard(p.Opponent);p.Opponent.Hero.IsImmune=true;

@@ -49,7 +49,10 @@ internal static class QuestLifecycleProof
                     && show.Entity.Tags[GameTag.ZONE] == (int)Zone.SECRET
                     && show.Entity.Tags[GameTag.ZONE_POSITION] == quest.ZonePosition + 1),
                 "automatically cast quest publishes installed identity: " + id + "/" + p.PlayerId);
-            Core2026Proof.Check(quest.ActivatedTrigger != null && quest.IsExhausted
+            Core2026Proof.Check(quest.ActivatedTrigger != null
+                // 7f5de0c (#32): a legacy quest cast as a secret on the opponent's turn is live at once; modern quests install through
+                // QuestRules, which still exhausts them, and so does a cast on the owner's own turn.
+                && quest.IsExhausted == (id == "TLC_426" || p == g.CurrentPlayer)
                 && (id != "TLC_426" || quest.QuestState != null && quest.QuestProgress == 0 && quest.QuestTotalProgress == 6),
                 "automatic quest uses normal installation state");
         }

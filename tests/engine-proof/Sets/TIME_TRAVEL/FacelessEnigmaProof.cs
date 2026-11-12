@@ -56,6 +56,9 @@ internal static class Unpinned_FacelessEnigmaProof
             foreach (var secretId in new[] { "CORE_EX1_287", "CORE_EX1_289", "CORE_LOOT_101", "CORE_BAR_812", "CORE_EX1_610", "CORE_EX1_611" })
                 if (owner.SecretZone.Count < 5 && !owner.SecretZone.Any(s => s.Card.Id == secretId))
                     AutomaticCastProof.Cast(g, (Spell)Entity.FromCard(owner, Cards.FromId(secretId)));
+        // 7f5de0c (#32): a secret cast on the opponent's turn is live at once, and these enemy secrets are cast on p's turn. The proof is
+        // about the saved casts, so the enemy secrets are put back to the state they had before #32 (inert: exhausted, as when cast on their own turn).
+        foreach (var enemySecret in p.Opponent.SecretZone) enemySecret.IsExhausted = true;
         var activeOwn = p.SecretZone.Select(s => s.Id).ToArray();
         var activeEnemy = p.Opponent.SecretZone.Select(s => s.Id).ToArray();
         Play(g, p, id);
