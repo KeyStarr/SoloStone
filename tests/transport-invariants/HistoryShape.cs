@@ -320,10 +320,12 @@ internal sealed class HistoryShape
     }
     private static bool IsPublic(int zone) => zone is (int)Zone.PLAY or (int)Zone.GRAVEYARD or (int)Zone.REMOVEDFROMGAME;
     private static bool IsHidden(int zone) => zone is (int)Zone.DECK or (int)Zone.HAND;
-    // Active Sidequests/Auras/Objectives are public in SECRET; stale tags never reveal a real Secret.
+    // Active Sidequests/Auras/Objectives/Sigils are public in SECRET; stale tags never reveal a real Secret.
+    // A waiting Sigil (SIGIL 1749) is public in retail: both players can mouse over it (Actions/SigilRules).
     private bool PublicSecret(int id) => Entity(id).Get(GameTag.QUEST) == 1
         || Entity(id).Get(GameTag.CARDTYPE) == (int)CardType.SPELL
-            && (Entity(id).Get((GameTag)1192) == 1 || Entity(id).Get((GameTag)3429) == 1 || Entity(id).Get((GameTag)2311) == 1)
+            && (Entity(id).Get((GameTag)1192) == 1 || Entity(id).Get((GameTag)3429) == 1 || Entity(id).Get((GameTag)2311) == 1
+                || Entity(id).Get((GameTag)1749) == 1)
             && Entity(id).Get(GameTag.SECRET) != 1 && !SecretCards.Contains(Entity(id).CardId);
     private bool Public(int id, int zone)
     {
