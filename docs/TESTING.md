@@ -62,7 +62,7 @@ in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed) is missing. The summary line counts every skip, for example
-`16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
+`17 of 18 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
 
 | Option | What it does |
 |---|---|
@@ -85,6 +85,7 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
+| `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. Some checks skip without a Hearthstone client |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
@@ -135,8 +136,26 @@ dotnet /tmp/hssim/bin/HsSim/release/HsSim.dll goldens check tests/goldens/modern
 ```
 
 **Only re-record a golden when you meant to change the rules.** Look at every game that changed first, and say in your
-change why each one changes. Re-recording just to make the test pass hides the bug it found. The commands that made the
-current files are:
+change why each one changes. Re-recording just to make the test pass hides the bug it found.
+
+To absorb an intended engine change, use `rerecord`:
+
+```text
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --dry-run
+HsSim.dll goldens rerecord tests/goldens/core-2026.json
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --only <game-id> [<game-id>...]
+```
+
+It replays every game (or just the `--only` ones) and re-records only the games that no longer match. Each one is run
+again as the same case (decks, seed, policy) on the card pool its own record names, so a pool or deck-list edit made
+since then cannot leak in. Games that still match stay byte-identical, and games are never added or removed. It prints
+the old and new winner and turn count of every changed game and a total; `--dry-run` prints the same and writes
+nothing. Exit code 0 is success, 1 means a game could not be re-recorded (nothing is written), 2 is a usage error.
+It only works on files that pin a card pool (schema 3: `core-2026` and `offline-standard-pools-v1`).
+
+`goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
+and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine
+change. The commands that made the current files are:
 
 ```text
 HsSim.dll goldens record tests/goldens/classic-source.json --suite classic --seeds 0..4 --policy random
@@ -146,8 +165,8 @@ HsSim.dll goldens record tests/goldens/core-2026.json --suite core-2026 --seeds 
 HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite offline-standard-pools-v1 --seeds 1..3 --policy random
 ```
 
-`HsSim.dll` is the file built above. Recording replaces the file. It also saves the card pool it used in
-`tests/goldens/pools/` (the `.xml` and its `.xml.sha256`); commit both with the golden.
+`HsSim.dll` is the file built above. Recording also saves the card pool it used in `tests/goldens/pools/` (the `.xml`
+and its `.xml.sha256`); commit both with the golden. `rerecord` never adds a pool.
 
 ## Not here yet
 
