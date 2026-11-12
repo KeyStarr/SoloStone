@@ -217,7 +217,9 @@ internal static class PremiumChecks
                 var again = p.ClassRewardGrants.Single(row => row.Level == 14);
                 Check(again.CardId == level15.CardId && again.Copies == level15.Copies && again.ScheduledCardId == "TIME_000" && p.OwnedCount("TIME_000", 1) == 2 && p.ProgressionGrantedCount("TIME_000", 1) == 2
                     && p.OwnedCount(level15.CardId, level15.Premium) == level15.Copies,
-                    "moved card is not paid twice, other levels still pay");
+                    "moved card is not paid twice, level 14 substitutes");
+                Check(p.ClassRewardGrants.Any(row => row.Level == 15 && p.OwnedCount(row.CardId, row.Premium) >= row.Copies),
+                    "level 15 still pays its own reward after the move");
             }
             byte[] movedBytes = File.ReadAllBytes(moved);
             using (var p = new LocalProfile(moved)) { }

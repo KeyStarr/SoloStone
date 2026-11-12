@@ -354,7 +354,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
         saved.Collection.Add(new LocalCardCount { Id = "CORE_CS2_024", Count = 2 }); Write(path, saved);
         Reject(() => { using var profile = new LocalProfile(path); }, "stored Core ownership");
         Console.WriteLine("PASS Core progression: " + (source ? "source 289 cards" : "vendor graceful degradation")
-            + "; V1/V5/V6 migrations, exact backup/failure/restart, eleven-class XP, neutral compatibility, ownership/decks, reward summary");
+            + "; exact backup/failure/restart, eleven-class XP, neutral compatibility, ownership/decks, reward summary");
         TestLoanerChecks.Run(root);
         NpcRecordChecks.Run(root);
     }
