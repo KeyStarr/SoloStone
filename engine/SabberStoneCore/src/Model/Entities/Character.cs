@@ -555,7 +555,7 @@ namespace SabberStoneCore.Model.Entities
                 Presentation.VisualPhase.Heal, source, this) : null;
             if (_history && amount > 0)
             {
-                Game.PowerHistory.HitTarget(Id);
+                Game.PowerHistory.HealTarget(Id);
                 Game.PowerHistory.Add(new PowerHistoryMetaData { Type = MetaDataType.HEALING,
                     Data = amount, Info = new List<int> { Id } });
             }

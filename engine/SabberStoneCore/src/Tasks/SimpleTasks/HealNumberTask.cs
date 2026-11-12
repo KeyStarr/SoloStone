@@ -32,7 +32,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			var playable = source as IPlayable;
 
 			var entities = IncludeTask.GetEntities(Type, in controller, playable, target, stack?.Playables);
-            if (game.History) game.PowerHistory.TargetRange(entities, Type);
+            if (game.History) game.PowerHistory.HealTargetRange(entities, Type);
             SabberStoneCore.Actions.HealingRules.Heal(playable, System.Linq.Enumerable.OfType<ICharacter>(entities), stack.Number);
 
 			return TaskState.COMPLETE;
