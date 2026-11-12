@@ -4,4 +4,4 @@
 harness (`sim/AiHarness`), which is not in this repository yet but will be published. No suite in this repository
 reads them today, and the C# files next to them do not use them.
 
-The `tools/hs ai hard-fixture` commands named inside some fixtures refer to that harness. Do not edit the files by hand.
+The commands (such as `tools/hs ai hard-fixture`) and docs named inside some fixtures belong to that harness and are not published yet. Do not edit the files by hand.

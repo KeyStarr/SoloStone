@@ -27,12 +27,10 @@ __pycache__/
 /data/carddb
 /data/shop/client
 /data/fx/*37.0.0*
-/dist/manifest.json
-/vendor/SabberStoneCore.dll
 CardDefs.xml
 ClientOverlay.xml
 
-# Agent files of the private side and linked worktrees: never committed.
+# Local agent files and worktrees: never committed.
 /CLAUDE.local.md
 /.claude
 /.worktrees
