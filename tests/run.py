@@ -55,7 +55,7 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild=()):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -67,6 +67,7 @@ class Suite:
         self.unix_only = unix_only      # skipped, with a note, on Windows
         self.needs_client = needs_client  # client tier: needs references/game (see --client); skipped without it
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
+        self.prebuild = list(prebuild)  # dotnet: projects to build first into the shared artifacts (the suite loads their output)
 
     @property
     def tier(self):
@@ -118,6 +119,20 @@ SUITES = [
           'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher'),
     Suite('installer-python', 'python', 'the installer build tools (stage and loader checks; not on Windows)', folder='installer',
           unix_only=True),
+]
+# The client tier: suites that compile or load your own client's libraries (references/game; BepInEx in references/bepinex,
+# docs/BUILDING.md step 1). The data they read is in the repository, except what is built locally from a client (needs_local).
+BEPINEX = ('references/bepinex/BepInEx.dll', 'references/bepinex/0Harmony.dll')
+# Card and shop data exported from your own client with maintainer tools (docs/TESTING.md, "Data built locally"). Never committed.
+CARDDB = 'data/carddb/37.0.0.254477/cards.json.gz'
+SUITES += [
+    Suite('native-bindings', 'dotnet', 'the plugin\'s bindings: every client method it patches exists in your client libraries',
+          'tests/native-bindings/NativeBindingTests.csproj', needs_client=True, needs_local=BEPINEX),
+    Suite('native-match', 'dotnet', 'the native match: plugin match logic on recorded games, and the recipe editor of the built plugin',
+          'tests/native-match/NativeMatchTests.csproj', needs_client=True, prebuild=['plugin/OfflineProbe.csproj'],
+          needs_local=BEPINEX + (CARDDB, 'data/fx/empty-playeffect-37.0.0.254477.tsv')),
+    Suite('transport-invariants', 'dotnet', 'engine-to-client transport: invariants over recorded and random games (long)',
+          'tests/transport-invariants/TransportInvariants.csproj', args=['--strict'], needs_client=True, needs_local=(CARDDB,)),
 ]
 BY_NAME = {suite.name: suite for suite in SUITES}
 
@@ -227,8 +242,12 @@ class Runner:
             if not self.ensure_hssim(log):
                 return False
             props.append(f'-p:SabberStoneCorePath={self.engine_dll()}')
-        if self.build and not self.build_project(log, suite.project, artifacts, props):
-            return False
+        if self.build:
+            for project in suite.prebuild:
+                if not self.build_project(log, project, artifacts):
+                    return False
+            if not self.build_project(log, suite.project, artifacts, props):
+                return False
         program = artifacts / 'bin' / suite.assembly / 'release' / (suite.assembly + '.dll')
         if not program.is_file():
             Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())
