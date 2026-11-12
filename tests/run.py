@@ -55,7 +55,7 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), needs_hssim=False):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -66,6 +66,7 @@ class Suite:
         self.artifacts = artifacts      # dotnet: own artifacts sub-folder (default: the shared one)
         self.unix_only = unix_only      # skipped, with a note, on Windows
         self.needs_client = needs_client  # client tier: needs references/game (see --client); skipped without it
+        self.needs_hssim = needs_hssim    # python: build HsSim first and hand its path over (HSSIM_DLL, DOTNET_PATH)
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
 
     @property
@@ -112,6 +113,8 @@ SUITES = [
     Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn-proof/RebornProofTests.csproj', needs_engine=True),
     Suite('goldens', 'hssim', 'recorded games replay to the same result on the current engine (5 golden files)',
           commands=[['goldens', 'check', f'tests/goldens/{name}.json'] for name in GOLDENS]),
+    Suite('goldens-rerecord', 'python', '`goldens rerecord` restores only the games that changed and leaves the rest of the file byte-identical',
+          folder='tests/goldens-rerecord', needs_hssim=True),
     Suite('fuzz', 'hssim', '200 random games: no crash, same result twice, no broken invariant',
           commands=[['fuzz', '--games', '200', '--seed', '1']]),
     Suite('launcher', 'dotnet', 'the launcher and installer logic (some checks skip without a Hearthstone client)',
@@ -181,19 +184,19 @@ class Runner:
     def hssim_dll(self):
         return self.shared() / 'bin' / 'HsSim' / 'release' / 'HsSim.dll'
 
-    def step(self, log, command, label):
+    def step(self, log, command, label, env=None):
         """Run one command from the repository root, appending its output to `log`. Returns True on exit 0."""
         with open(log, 'ab') as handle:
             handle.write(f'$ {" ".join(str(part) for part in command)}\n'.encode())
             handle.flush()
             if self.verbose:
-                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=self.env, stdout=subprocess.PIPE,
+                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT)
                 handle.write(result.stdout)
                 sys.stdout.buffer.write(result.stdout)
                 sys.stdout.flush()
             else:
-                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=self.env, stdout=handle,
+                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=handle,
                                         stderr=subprocess.STDOUT)
             handle.write(f'[{label} exit {result.returncode}]\n'.encode())
         return result.returncode == 0
@@ -244,7 +247,12 @@ class Runner:
         return ok
 
     def run_python(self, suite, log):
-        return self.step(log, [sys.executable, '-I', '-B', '-m', 'unittest', 'discover', '-s', suite.folder, '-p', 'test_*.py'], 'run')
+        env = None
+        if suite.needs_hssim:
+            if not self.ensure_hssim(log):
+                return False
+            env = dict(self.env, HSSIM_DLL=str(self.hssim_dll()), DOTNET_PATH=str(self.dotnet))
+        return self.step(log, [sys.executable, '-I', '-B', '-m', 'unittest', 'discover', '-s', suite.folder, '-p', 'test_*.py'], 'run', env)
 
 
 def parse(argv):
@@ -282,7 +290,7 @@ def main(argv=None):
         managed = find_managed(args.client) if args.client else None
         if args.no_build and not args.artifacts:
             raise Usage('--no-build needs --artifacts, the folder of an earlier run')
-        dotnet = find_dotnet(args.dotnet) if any(suite.kind != 'python' for suite in chosen) else None
+        dotnet = find_dotnet(args.dotnet) if any(suite.kind != 'python' or suite.needs_hssim for suite in chosen) else None
     except Usage as error:
         print('run.py: ' + str(error), file=sys.stderr)
         return 2
