@@ -355,6 +355,8 @@ namespace SabberStoneCore.Kettle
             internal readonly HashSet<int> SelectedTargets = new HashSet<int>();
             internal bool HasEffects;
             internal bool Appendages;
+            // A META_DATA TARGET was published in this block (Targets drops ids as their hits land).
+            internal bool Targeted;
         }
         private readonly Stack<BlockFrame> _blocks = new Stack<BlockFrame>();
         private readonly Stack<PowerHistoryBlockStart> _damageGroups = new Stack<PowerHistoryBlockStart>();
@@ -410,6 +412,23 @@ namespace SabberStoneCore.Kettle
             if (!frame.HasEffects && ids.All(id => frame.Targets.Contains(id))) return;
             Add(new PowerHistoryMetaData { Type = MetaDataType.TARGET, Data = frame.Start.Source, Info = ids });
         }
+
+        // Retail publishes no TARGET for a heal that follows another target in the same POWER block (Drain Life CS2_061,
+        // Tidal Surge UNG_817, RLK_219, UNG_030 in the HearthSim logs): the play spell aims at the first target only.
+        // A second TARGET made Lifedrinker's Drain Life play again on its own hero.
+        internal void HealTargetRange(IEnumerable<IPlayable> targets, EntityType type)
+        {
+            if (!_enabled || HealFollowsTarget(targets.Select(p => p.Id))) return;
+            TargetRange(targets, type);
+        }
+
+        internal void HealTarget(int victim)
+        {
+            if (_enabled && !HealFollowsTarget(new[] { victim })) HitTarget(victim);
+        }
+
+        private bool HealFollowsTarget(IEnumerable<int> healed) => CurrentBlock?.BlockType == BlockType.POWER
+            && _blocks.Peek().Targeted && !healed.Any(id => _blocks.Peek().Targets.Contains(id));
 
         internal void HitTarget(int victim)
         {
@@ -821,7 +840,7 @@ namespace SabberStoneCore.Kettle
             foreach (var frame in source._blocks.Reverse())
             {
                 var start = frame.Start;
-                var copy = new BlockFrame { HasEffects = frame.HasEffects, Appendages = frame.Appendages, Start = new PowerHistoryBlockStart {
+                var copy = new BlockFrame { HasEffects = frame.HasEffects, Appendages = frame.Appendages, Targeted = frame.Targeted, Start = new PowerHistoryBlockStart {
                     BlockType = start.BlockType, Index = start.Index, EffectIndex = start.EffectIndex,
                     TriggerKeyword = start.TriggerKeyword, Source = start.Source, Target = start.Target, EffectCardId = start.EffectCardId
                 } };
@@ -909,6 +928,7 @@ namespace SabberStoneCore.Kettle
                         frame.Targets.Clear();
                         frame.Targets.AddRange(meta.Info);
                         frame.HasEffects = false;
+                        frame.Targeted = true;
                     }
                     else if (meta.Type == MetaDataType.DAMAGE || meta.Type == MetaDataType.HEALING)
                     {
