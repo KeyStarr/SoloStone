@@ -592,11 +592,11 @@ namespace SabberStoneCore.Kettle
                     return null;
                 identity = timer; requirePublicOrigin = true;
             }
-            // Past Gnomeregan's granted Deathrattle resolves as the dying minion's own TRIGGER block (no effect card id),
-            // so the enchantment, not the minion, names the recipe.
-            if (phase == VisualPhase.Damage && CurrentBlock.BlockType == BlockType.TRIGGER && CurrentBlock.TriggerKeyword == (int)GameTag.DEATHRATTLE
-                && GrantedDeathrattle != null && GrantedDeathrattle.Card.Id == "TIME_044t1e" && GrantedDeathrattle.Target?.Id == CurrentBlock.Source
-                && source.Id == CurrentBlock.Source)
+            // A granted Deathrattle (Past Gnomeregan's, Amphibian's Spirit's) resolves as the dying minion's own TRIGGER block
+            // (no effect card id), so the enchantment, not the minion, names the recipe when it has one.
+            if (CurrentBlock.BlockType == BlockType.TRIGGER && CurrentBlock.TriggerKeyword == (int)GameTag.DEATHRATTLE
+                && GrantedDeathrattle != null && GrantedDeathrattle.Target?.Id == CurrentBlock.Source
+                && source.Id == CurrentBlock.Source && SubSpellRecipes.Find(CurrentBlock, GrantedDeathrattle.Card.Id, phase) != null)
                 identity = GrantedDeathrattle;
             var recipe = SubSpellRecipes.Find(CurrentBlock, identity.Card.Id, phase);
             if (recipe == null || (recipe.Group ? target != null
