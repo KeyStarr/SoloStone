@@ -15,6 +15,8 @@ DOCUMENTATION = tuple(ipaddress.ip_network(value) for value in
                       ('192.0.2.0/24', '198.51.100.0/24', '203.0.113.0/24'))
 PRIVATE = tuple(ipaddress.ip_network(value) for value in
                 ('10.' + '0.0.0/8', '172.' + '16.0.0/12', '192.168.' + '0.0/16'))
+# Names fixed by the platform that are not personal, so they are never reported: Proton's default Windows user (steamuser) and
+# the Windows Public profile. The two project test-account entries are spelled in pieces on purpose.
 WINDOWS_USERS = {'hsnativeui' + 'probe', 'hsoffline' + 'probe', 'steamuser', 'public', '<lab-user>'}
 TOKENS = {
     'discord-token': r"(?<![\w-])(?:mfa\.[\w-]{80,}|[\w-]{23,28}\.[\w-]{6}\.[\w-]{27,})(?![\w-])",
@@ -45,6 +47,9 @@ def scan_text(path, source, denylist=()):
                 continue
             if documentation_address(address):
                 continue
+            # This is the plugin's own network canary (plugin/OfflineProbe.cs tries to connect to it and to 1.1.1.1 to confirm the game has
+            # no outbound network) and docs describe it. It is a generic router address, not a real host, so it is allowed only in those
+            # places and flagged everywhere else.
             canary = str(address) == '192.168.' + '1.1' and (
                 path.endswith('/plugin/OfflineProbe.cs') or path == 'plugin/OfflineProbe.cs'
                 or '/docs/' in '/' + path)
@@ -66,6 +71,7 @@ def scan_text(path, source, denylist=()):
         if re.search(r"-Users-" + user + r"-", decoded, re.I):
             kinds.add('mac-home')
         for match in re.finditer(r"/home/" + '(' + user + ')' + boundary, decoded):
+            # Default Linux users of SteamOS (deck) and Proton (steamuser) are not personal either.
             if match[1] not in ('deck', 'steamuser'):
                 kinds.add('linux-home')
         for match in re.finditer(r"C:\\Users\\([A-Za-z0-9_][A-Za-z0-9_. -]*|<lab-user>)", normalized, re.I):

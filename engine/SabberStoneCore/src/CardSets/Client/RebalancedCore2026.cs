@@ -7,6 +7,10 @@ using SabberStoneCore.CardSets.Client.Core2026;
 
 namespace SabberStoneCore.CardSets.Client
 {
+    // Cards whose Core 2026 version has new numbers or text under a new client id. Each one starts from
+    // the behaviour of its original card (UseBehaviourFrom) and its Configure applies only what changed,
+    // so registration fails if the original is not implemented. Reprints with no change are handled by
+    // Reprints instead.
     public static class RebalancedCore2026
     {
         private static readonly Dictionary<int, string> Originals = new Dictionary<int, string>();

@@ -27,6 +27,9 @@ namespace SoloStone
             };
             bool quiet=args.Contains("--quiet") || args.Contains("--json");
             if(quiet) AttachConsole(uint.MaxValue);
+            // Exit codes SoloStone.iss reads (preflight and uninstall): 3 another SoloStone operation or update is
+            // running, 4 the folder holds another or incomplete installation, 5 the folder could not be read
+            // (IO/access), 6 the firewall permission prompt was cancelled, 1 anything else. Keep SoloStone.iss in step.
             Options options=null;
             try {
                 options=Options.Parse(args);

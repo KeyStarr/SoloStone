@@ -124,6 +124,8 @@ def build_launcher(dotnet, work, out, args):
             shutil.copy2(item, out / item.name)
     exe = out / 'SoloStone.exe'
     traces = has_hook_traces(exe)
+    # A hook build must trip several markers. A scan that finds almost none means HOOK_MARKERS no longer matches the code, and the
+    # "release build has no traces" check below would then pass for nothing.
     if args.hooks and len(traces) < 3:
         fail('A hook build should carry the test hooks, but the scan found %s' % traces)
     if not args.hooks and traces:

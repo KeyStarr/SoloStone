@@ -14,6 +14,7 @@ using NativeHistory = PegasusGame.PowerHistoryData;
 // lists are PetXpPolicy.LikesFor. Settlement reads the banked totals (Small/Medium/Large), not what was shown.
 internal sealed class NativePetLikes
 {
+    // PET_SMALL / PET_MEDIUM / PET_LARGE _XP_TRIGGER_COUNT; each is sent as the absolute running count of that counter (ShownTags).
     internal const int SmallTag = 4076, MediumTag = 4077, LargeTag = 4078;
 
     private readonly PetXpPolicy policy;

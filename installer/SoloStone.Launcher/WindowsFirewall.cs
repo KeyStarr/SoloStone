@@ -19,6 +19,7 @@ namespace SoloStone
         // Tests supply API-shaped snapshots, registry contents for adapter names, and what Group Policy sets (FirewallRegistry reads it on a real machine).
         internal static void VerifyPolicy(InstallRecord record,string[] executables,dynamic policy,NetworkAdapters adapters=null,
             Func<int,bool> policyBlocksAllInbound=null,Func<bool> policyDropsLocalRules=null) {
+            // Profile bits: 1 Domain, 2 Private, 4 Public. 0 or any other bit is not a state we can verify.
             int active=(int)policy.CurrentProfileTypes;
             if(active==0 || (active & ~7)!=0)
                 throw new InvalidOperationException("Windows Firewall active profiles could not be verified. SoloStone cannot start.");
@@ -50,6 +51,9 @@ namespace SoloStone
                 dynamic r=matches[0];
                 // netsh-created rules have no group; retain compatibility with the previous SoloStone group.
                 string group=(string)r.Grouping;
+                // Enum values from the Windows Firewall API: Direction 2 = outbound, Action 0 = block, Profiles int.MaxValue = every profile,
+                // Protocol 256 = any. Anything narrower than SoloStone's own netsh rule (profile=any protocol=any ...) would leave a gap, so
+                // any difference refuses.
                 if(!(bool)r.Enabled || (int)r.Direction!=2 || (int)r.Action!=0 || (int)r.Profiles!=int.MaxValue
                     || (!string.IsNullOrEmpty(group) && group!="SoloStone")
                     || !Safety.Same((string)r.ApplicationName,exe) || (int)r.Protocol!=256

@@ -162,6 +162,9 @@ namespace SoloStone
                     }
                     progress("SoloStone is running. Quit from the game to close this launcher.");
                     client.WaitForExit();
+                    // 46 = Health.ExitSaveSwitch: the game quits with this code when the player picks another save in its save selector
+                    // (NativeProfileSelector). The launcher reads the switch request and starts the game again for that save instead of treating
+                    // the exit as a failure.
                     if(client.ExitCode==46) {
                         string request=Path.Combine(SaveRoot,"profile-switch.xml");
                         token=Relaunch.Read(request,run,started,out target);

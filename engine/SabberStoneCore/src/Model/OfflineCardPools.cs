@@ -41,6 +41,7 @@ namespace SabberStoneCore.Model
                     : filter.Scope == PoolScope.Standard ? (IEnumerable<OfflinePoolPolicy.Member>)manifest.Standard : manifest.Past)
                 .Where(m => m.DbfId != sourceDbfId &&
                     // Colossal bodies may be generated off-board, never selected for a direct summon/transform.
+                    // Tag 2247 marks a Colossal body. Tag 4538 marks a Herald Colossal, which is rejected from every pool.
                     (!m.Tags.TryGetValue(2247, out int colossal) || colossal <= 0 ||
                         (destination == PoolDestination.Hand || destination == PoolDestination.Deck) &&
                         (!m.Tags.TryGetValue(4538, out int herald) || herald <= 0))).ToArray();
@@ -79,6 +80,8 @@ namespace SabberStoneCore.Model
                 (f.ClassMode == PoolClassMode.ControllerAndNeutral && (m.Classes.Contains(hero) || m.Classes.Contains("NEUTRAL"))) ||
                 (f.ClassMode == PoolClassMode.OtherClass && !m.Classes.Contains(hero) && !m.Classes.Contains("NEUTRAL")) ||
                 (f.ClassMode == PoolClassMode.Exact && m.Classes.Contains(ClassName(f.ExactClass.Value)));
+            // Tag 4754 marks an Old God. Old Gods are left out of ordinary pools; they appear only when the
+            // filter asks for the tag itself or names the card.
             bool oldGod = m.Tags.TryGetValue(4754,out int oldGodTag) && oldGodTag > 0;
             return (!f.ExactAttack.HasValue || m.Attack == f.ExactAttack.Value) &&
                 (!f.AttackParity.HasValue || m.Attack % 2 == f.AttackParity.Value) &&

@@ -337,6 +337,10 @@ namespace SabberStoneCore.Enums
 	/// Both properties have no relation with each other and the available amount of health is calculated
 	/// from these properties and others.
 	/// </summary>
+	// Tag values from 31000 up (to 33903, plus 38000 in BonusEffects) are not client tags. They are engine-private
+	// state kept on entities and controllers, one block per rules file (see each file's IsInternalTag / IsPrivateTag
+	// check). Keep the blocks disjoint: a past batch had to move its block after it overlapped another one at
+	// integration. These tags are meant to stay out of the client-facing history.
 	public enum GameTag
 #pragma warning disable CS1591 // Missing XML comment for publicly visible type or member
 	{

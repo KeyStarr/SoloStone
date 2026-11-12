@@ -29,6 +29,10 @@ public static class FairPackRules
     public const int RuleVersion = 2;
     public const string Standard = "STANDARD";
     public const string Legacy = "LEGACY";
+    // Pack rolls are deterministic and a pending pack is re-generated from its seed and sequence when a profile is validated,
+    // so the data behind a rule version must never change silently. ManifestHash pins the embedded eligibility file;
+    // SignatureHashV2 pins the set of Signature-capable cards that rule 2 draws from. If either has to change, add a new
+    // RuleVersion instead of editing the hash.
     public const string SignatureHashV2 = "123334e1e60aef43b02fc32de5e240c48d017f21ce0bd3ed712cea0a2500aa25";
     public const string ManifestHash = "7ce9533f2bd8ae14d49eec7d392a9224db134bdf592a027da80caf8838dc0611";
 

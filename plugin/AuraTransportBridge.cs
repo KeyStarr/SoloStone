@@ -10,6 +10,11 @@ using SabberStoneCore.Model.Entities;
 using EngineGame = SabberStoneCore.Model.Game;
 using EngineZone = SabberStoneCore.Enums.Zone;
 
+// Removing an aura changes the tags of the entities it was applied to without a power-history entry of its own, so the
+// native client could keep showing the aura's stats on public minions and on player 1's hand. Before RemoveInternal we
+// remember which public entities and tags are affected; afterwards we record their new values as corrections at the
+// exact history position (NativeMatch.RecordTransportCorrection); if the match or history batch changed in between, it
+// throws. Controller/opponent-scope auras are skipped: they have no per-entity tags to correct.
 internal static class AuraTransportBridge
 {
     internal sealed class RemovalState

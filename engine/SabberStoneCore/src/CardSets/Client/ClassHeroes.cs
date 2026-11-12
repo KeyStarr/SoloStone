@@ -7,6 +7,9 @@ using SabberStoneCore.Tasks.SimpleTasks;
 
 namespace SabberStoneCore.CardSets.Client
 {
+    // Demon Hunter (HERO_10) and Death Knight (HERO_11) heroes and basic powers. The hero cards are
+    // kept out of the legacy random pools so existing random effects, and recorded games that used them,
+    // draw exactly the same cards as before.
     internal static class ClassHeroes
     {
         internal static void Apply(Action<int, string, Action<Card>> register)

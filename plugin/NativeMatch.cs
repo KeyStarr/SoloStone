@@ -33,6 +33,8 @@ public sealed class NativeMatch
     private const int BotPlayerId = 2;
     private const int MaxBotActions = 128;
     private const int CurrentSpellPowerBaseTag = 291;
+    // Engine-side Temporary tag. The client's TagVisualConfiguration reads GHOSTLY (785) for the Temporary hand look, not 3630,
+    // so transport projects Temporary onto GHOSTLY; an Echo card's own GHOSTLY stays independent of it.
     private const GameTag TemporaryCardTag = (GameTag)3630;
     // Keep raw causes separate: removing Temporary must not remove an existing Echo visual.
     private readonly Dictionary<int, (int Temporary, int Ghostly)> historicalTemporaryVisuals = new Dictionary<int, (int, int)>();
@@ -3758,6 +3760,9 @@ public sealed class NativeMatch
         }
         // Hand cost resets can be filtered before an opponent's move to PLAY becomes public.
         yield return new KeyValuePair<GameTag, int>(GameTag.COST, entity.Cost);
+        // 2837 is CARD_ALTERNATE_COST, the client's payment-display selector (Mana, Health, Armor, Corpses, ...), taken
+        // from the engine's payment kind. A complete snapshot that omits it must send 0 when the client previously held
+        // a nonzero value.
 #if ENGINE_SOURCE
         yield return new KeyValuePair<GameTag, int>((GameTag)2837, (int)SabberStoneCore.Actions.CostRules.PaymentKind(entity));
 #else
@@ -5684,6 +5689,8 @@ public sealed class NativeMatch
         if (petLikes != null)
             foreach (var shown in petLikes.ShownTags()) yield return shown;
     }
+    // PET_TREATS_FED and PET_TREATS_GENERATED: the counters retail answers the feed/generate packets with. Feeding is capped by
+    // the number generated (see ReceiveNativePetTreat).
     internal const int PetTreatsFedTag = 4280, PetTreatsGeneratedTag = 4281;
 
     // Client packets 68 (GeneratePetTreat) and 67 (FeedPet) are empty; retail answers with standalone tag changes on the pet.

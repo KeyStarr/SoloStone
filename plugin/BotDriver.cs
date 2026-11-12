@@ -181,6 +181,9 @@ public static class BotDriver
         {
             var forced = Forced(game, tasks, out var trace, options);
             if (forced != null) return (ForGame(forced), trace);
+            // Seed for the search's simulated copy of the game (including its draws for cards it cannot see). Built only from
+            // public counters (turn and the caller's decision index), and the formula matches the live match in NativeMatch, so
+            // headless runs and replays make the same draws as the live bot. Change the constants in both places together.
             int seed = unchecked(997 * game.Turn + ++decisionIndex * 31);
             state = options?.FairViewFactory == null ? FairBotState.Create(game, botId, seed, style)
                 : options.FairViewFactory(game, botId, seed, style);
