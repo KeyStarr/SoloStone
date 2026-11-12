@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><EngineSource>true</EngineSource></PropertyGroup>
   <Import Project="../../data/packs/FairPackResources.props" />
-  <PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+  <PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
   <ItemGroup>
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
@@ -33,8 +34,7 @@
     <Compile Include="../../plugin/LocalRewardPresentation.cs" />
     <Compile Include="../../plugin/NativeUIProjection.cs" />
     <Compile Include="../../plugin/LocalCollectionUI.cs" Link="LocalCollectionUI.cs" />
-    <Reference Condition="'$(EngineSource)' != 'true'" Include="SabberStoneCore"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference>
-    <ProjectReference Condition="'$(EngineSource)' == 'true'" Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>

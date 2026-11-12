@@ -158,10 +158,10 @@ class NothingOutside(unittest.TestCase):
             self.assertNotIn('hearthstone-native-ui-prototype', text, name)
             self.assertNotIn('python3 -c', text, name)
 
-    def test_the_plugin_builds_the_engine_from_source_when_there_is_no_vendor_dll(self):
+    def test_the_plugin_builds_the_engine_from_source_by_default(self):
         project = (PRODUCT / 'plugin' / 'OfflineProbe.csproj').read_text(encoding='utf-8')
-        self.assertRegex(project, r"<EngineSource Condition=\"[^\"]*!Exists\('\$\(MSBuildThisFileDirectory\)\.\./vendor/SabberStoneCore\.dll'\)\">true</EngineSource>")
-        self.assertIn('No prebuilt engine at', project)
+        self.assertRegex(project, r"<EngineSource Condition=\"'\$\(EngineSource\)' == '' and '\$\(StandardProof\)' != 'true'\">true</EngineSource>")
+        self.assertNotIn('vendor/SabberStoneCore.dll', project)
 
 
     def test_release_builds_carry_no_build_machine_path(self):

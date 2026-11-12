@@ -24,10 +24,9 @@
     <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
     <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
     <Compile Include="../../plugin/LocalCollectionUI.cs" Link="LocalCollectionUI.cs" />
-    <Reference Include="SabberStoneCore" Condition="'$(EngineSource)' != 'true'"><HintPath>../../vendor/SabberStoneCore.dll</HintPath></Reference>
     <PackageReference Include="HarmonyX" Version="2.9.0" />
   </ItemGroup>
-<PropertyGroup Condition="'$(EngineSource)' == 'true'"><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup><ItemGroup Condition="'$(EngineSource)' == 'true'"><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" SetTargetFramework="TargetFramework=net10.0" /></ItemGroup>
+<PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup><ItemGroup><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" SetTargetFramework="TargetFramework=net10.0" /></ItemGroup>
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" />
     <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
