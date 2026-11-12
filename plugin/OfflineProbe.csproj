@@ -7,8 +7,8 @@
     <AssemblyName>HSNativeUIProbe</AssemblyName>
     <GameReferences Condition="'$(GameReferences)' == ''">$(MSBuildThisFileDirectory)../references/game</GameReferences>
     <BepInExReferences Condition="'$(BepInExReferences)' == ''">$(MSBuildThisFileDirectory)../references/bepinex</BepInExReferences>
-    <!-- The engine always builds from engine/ source. A prebuilt engine is an explicit opt-out: -p:EngineSource=false -p:SabberStoneCorePath=<path to SabberStoneCore.dll>. -->
-    <EngineSource Condition="'$(EngineSource)' == '' and '$(StandardProof)' != 'true'">true</EngineSource>
+    <!-- The engine always builds from engine/ source. A prebuilt engine is an explicit opt-out: -p:SabberStoneCorePath=<path to SabberStoneCore.dll> (that alone turns the source build off). -->
+    <EngineSource Condition="'$(EngineSource)' == '' and '$(StandardProof)' != 'true' and '$(SabberStoneCorePath)' == ''">true</EngineSource>
   </PropertyGroup>
   <PropertyGroup Condition="'$(EngineSource)' == 'true'">
     <!-- Unity loads this engine already; net48 alone does not advertise netstandard2.1 compatibility. -->
