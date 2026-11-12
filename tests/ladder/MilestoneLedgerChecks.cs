@@ -22,18 +22,22 @@ internal static class MilestoneLedgerChecks
         System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(p));
     static void Ack(LocalProfile p, LocalMatchRecord m) => p.AcknowledgeRewardPresentation(m.Id);
 
-    // Real historical receipts, accepted by the V9 validator; migration must stay separate from catch-up.
+    // Old ranked history a current save still carries: V6 rewards with folded rule-1 ladder receipts (the plugin loads no
+    // save before V13); migration must stay separate from catch-up.
     static void Legacy(string path, int wins, bool pendingPresentation = false)
     {
         using (var p = new LocalProfile(path)) p.SelectCardBack(0);
         var profile = Read(path);
-        profile.Version = 9; profile.LadderRuleVersion = 0; profile.LadderState = null;
-        profile.Matches = Enumerable.Range(0, wins).Select(i => new LocalMatchRecord {
-            Id = Guid.NewGuid().ToString(), Deck = "mage", DeckHero = "HERO_08", Opponent = "priest", Seed = i,
-            StartedUtc = "2026-10-24T00:00:00.0000000Z", Result = "Won", Turns = 10, RewardVersion = 2,
-            RewardFacts = new LocalRewardFacts(), Gold = LocalEconomy.Reward("Won", 10, false, new LocalRewardFacts()).Gold
+        profile.LadderRuleVersion = 0; profile.LadderState = null;
+        int stars = 0;
+        profile.Matches = Enumerable.Range(0, wins).Select(i => {
+            var m = RatingPlacementChecks.Folded(RatingPlacementChecks.Record("Won", i), stars);
+            stars = m.Ladder.StarsAfter; m.DeckHero = "HERO_08"; m.Deck = "mage";
+            m.StartedUtc = "2026-10-24T00:00:00.0000000Z";
+            return m;
         }).ToList();
         profile.GoldBalance = profile.Matches.Sum(m => m.Gold);
+        profile.DustBalance = profile.Matches.Sum(m => m.DustReward);
         profile.PendingRewardPresentationId = pendingPresentation ? profile.Matches.Last().Id : null;
         Write(path, profile);
     }
@@ -42,7 +46,7 @@ internal static class MilestoneLedgerChecks
     {
         string nullPath = Path.Combine(root, "milestone-null-reservation.xml");
         using (var p = new LocalProfile(nullPath)) p.SelectCardBack(0);
-        var nullReservation = Read(nullPath); nullReservation.LadderState = null; Write(nullPath, nullReservation);
+        var nullReservation = Read(nullPath); nullReservation.LadderState = null; nullReservation.LadderRuleVersion = 0; Write(nullPath, nullReservation);
         using (var p = new LocalProfile(nullPath)) Check(p.PendingMilestoneCatchUp == null, "null V10 reservation uses effective ladder");
 
         string path = Path.Combine(root, "milestone-ledger.xml");
@@ -340,7 +344,7 @@ internal static class MilestoneLedgerChecks
         string pending = Read(path).PendingRewardPresentationId;
         using (var p = new LocalProfile(path)) {
             var saved = Read(path); var receipt = p.PendingMilestoneCatchUp;
-            Check(saved.Version == 12 && receipt != null && receipt.Id == "catchup:v1" && !receipt.Acknowledged
+            Check(saved.Version == 15 && receipt != null && receipt.Id == "catchup:v1" && !receipt.Acknowledged
                 && receipt.TierRewards.Select(r => r.MilestoneId).SequenceEqual(new[] {
                     "floor:bronze-5", "floor:silver-10", "floor:silver-5", "floor:gold-10", "floor:gold-5" }), "Gold 5 catch-up receipt");
             Check(p.UnopenedPacks == 13 && saved.CardTokens.Epic == 1 && saved.DeckKits.Single().GoldCap == 3200
@@ -396,7 +400,7 @@ internal static class MilestoneLedgerChecks
         // A validated V10 reservation lets each injected failure target catch-up, not the preceding schema migration.
         string failurePath = Path.Combine(root, "milestone-catchup-failure.xml");
         Legacy(failurePath, 75);
-        var reservation = Read(failurePath); reservation.Version = 12; reservation.SelectedHubTheme = "CLASSIC";
+        var reservation = Read(failurePath); reservation.SelectedHubTheme = "CLASSIC";
         reservation.LadderState = new LocalLadderState { StarIndex = 75, BestStarIndex = 75 };
         Write(failurePath, reservation);
         original = File.ReadAllBytes(failurePath);
@@ -419,7 +423,7 @@ internal static class MilestoneLedgerChecks
             p.BuyPack(); p.BeginNativePack("STANDARD");
         }
         reveal = Read(revealPath);
-        reveal.Matches = reservation.Matches;
+        reveal.Matches = reservation.Matches; reveal.LadderRuleVersion = 0;
         reveal.LadderState = new LocalLadderState { StarIndex = 75, BestStarIndex = 75 };
         reveal.PendingRewardPresentationId = reveal.Matches.Last().Id;
         Write(revealPath, reveal);

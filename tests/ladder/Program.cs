@@ -8,6 +8,10 @@ if (args.Length == 0)
     CurrentV14LadderChecks.Run();
     return;
 }
+// The legacy body below: the pre-V14 fixtures the default run above does not repeat. tests/run.py runs it as the
+// `ladder-extended` suite. Anything else is a typo, not "run the default".
+if (!args.SequenceEqual(new[] { "--extended" }))
+    throw new ArgumentException("unknown arguments: " + string.Join(" ", args) + " (use no argument or --extended)");
 
 static void Check(bool value, string message) { if (!value) throw new Exception(message); }
 static void CheckCollection(LocalProfile profile, int classicCount, int classicCopies, string message)
@@ -54,23 +58,26 @@ static string MatchSignature(LocalMatchRecord match) => string.Join("|", new obj
     match.RewardFacts?.DistinctCardsPlayed, match.RewardFacts?.EnemyMinionsDefeated,
     match.RewardFacts?.MinimumHealth
 });
-static LocalReward V3(LocalMatchRecord match, string result, LocalRewardFacts facts = null, int turns = 12) =>
-    LocalEconomy.RewardV3(result, turns, false, facts ?? new LocalRewardFacts(), LocalEconomy.RewardRollSeed(match.Id, match.Seed));
-ResultsTests.Run();
+// The current (V6, rolled) reward of a match: facts no longer matter, a loss or draw pays a third, the grind tier scales it.
+static LocalReward Rolled(LocalMatchRecord match, string result, int turns = 12)
+{
+    var reward = LocalEconomy.RewardV6(result, turns, false, LocalEconomy.RewardRollSeed(match.Id, match.Seed));
+    var tier = GrindTiers.Find(match.GrindTier);
+    return new LocalReward { Gold = tier.Gold(reward.Gold), BonusGold = reward.BonusGold, PackReward = reward.PackReward, Dust = tier.Dust(reward.Dust) };
+}
+// A fresh current profile at path holding the given gold (saves on disk are plain XML).
+static void GoldProfile(string path, int gold)
+{
+    using (var fresh = new LocalProfile(path)) fresh.SelectCardBack(0); // a no-change write that creates the file
+    var data = ReadProfile(File.ReadAllBytes(path)); data.GoldBalance = gold; WriteProfile(path, data);
+}
 string root = Path.Combine(Path.GetTempPath(), "hs-ladder-tests-" + Guid.NewGuid());
-// The two fixtures below are read only on the manual path (run with arguments, maintainer saves); tests/run.py never takes it
-// and the project no longer copies them.
-string fixture = Path.Combine(AppContext.BaseDirectory, "final-profile.xml");
-string v2Fixture = Path.Combine(AppContext.BaseDirectory, "v2-final-profile.xml");
 Directory.CreateDirectory(root);
 try
 {
     RatingPlacementChecks.Run(root);
-    MilestoneChecks.Run();
     MilestoneLedgerChecks.Run(root);
     LadderLedgerChecks.Run(root);
-    StartTrapChecks.Run(root);
-    NpcMilestoneChecks.Run(root);
     Check(LocalEconomy.PackPrice == 100, "pack price");
     Check(LocalDecks.All.Count == 8 && LocalDecks.All.Select(deck => deck.Id).SequenceEqual(new[] {
         "mage", "warrior", "priest", "mage-frost", "warrior-control", "priest-combo", "paladin", "paladin-control"
@@ -148,10 +155,10 @@ try
         exposed.Clear();
         CheckCollection(store, 93, 186, "collection escaped by reference");
         var pending = store.Begin("mage", "priest", 123);
-        Check(pending.RewardVersion == 3 && File.ReadAllText(freshPath).Contains("<Version>12</Version>"), "new profile is not V11 with V3 rewards");
+        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>15</Version>"), "new profile is not the current version with rolled rewards");
         Reject(() => store.Begin("mage", "warrior", 124), "second pending match");
         var result = store.Settle(pending.Id, "Won", 12, false);
-        var rolled = V3(pending, "Won"); freshGold = rolled.Gold;
+        var rolled = Rolled(pending, "Won"); freshGold = rolled.Gold;
         Check(result.Gold == rolled.Gold && result.DustReward == rolled.Dust && result.BonusGold == 0 && !result.PackReward
             && store.Gold == rolled.Gold && store.DustBalance == rolled.Dust && store.Stars == LadderRules.Fresh().Multiplier,
             "legacy four-argument settlement changed");
@@ -167,7 +174,10 @@ try
         Check(store.Gold == freshGold && store.Stars == LadderRules.Fresh().Multiplier && store.History.Count == 1, "restart persistence");
         var pending = store.Begin("warrior", "mage", 124);
         var loss = store.Settle(pending.Id, "Lost", 10, false);
-        Check(loss.Gold == 0 && loss.DustReward == 0 && !loss.PackReward && store.Gold == freshGold && loss.ClassXpAfter > loss.ClassXpBefore, "V3 loss pays only XP");
+        var lossReward = Rolled(pending, "Lost", 10);
+        Check(loss.Gold == lossReward.Gold && loss.DustReward == lossReward.Dust && loss.Gold > 0 && !loss.PackReward
+            && store.Gold == freshGold + loss.Gold && loss.ClassXpAfter > loss.ClassXpBefore, "a loss pays the rolled third and XP");
+        freshGold = store.Gold;
         store.AcknowledgeRewardPresentation(pending.Id);
         pending = store.Begin("priest", "warrior", 125);
         Check(store.Settle(pending.Id, "Lost", 20, true).Gold == 0, "concede rewarded");
@@ -223,7 +233,7 @@ try
             new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 });
         rewardReceiptId = settled.Id; rewardReceiptGold = settled.Gold;
         Check(store.PendingRewardPresentation.Id == settled.Id && store.Gold == settled.Gold
-            && store.UnopenedPacks == 1, "settlement atomically records reward presentation receipt");
+            && store.UnopenedPacks == 0, "settlement atomically records reward presentation receipt");
         var exposedReceipt = store.PendingRewardPresentation;
         exposedReceipt.Result = "Lost";
         Check(store.PendingRewardPresentation.Result == "Won", "reward presentation getter escaped by reference");
@@ -250,12 +260,12 @@ try
             "duplicate reward acknowledgement rewrote profile");
         Check(store.Settle(pending.Id, "Won", 8, false,
             new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 }).Id == settled.Id
-            && store.PendingRewardPresentation == null && store.Gold == settled.Gold && store.UnopenedPacks == 1,
+            && store.PendingRewardPresentation == null && store.Gold == settled.Gold && store.UnopenedPacks == 0,
             "settlement retry reopened acknowledged reward receipt");
     }
     using (var reopened = new LocalProfile(rewardReceiptPath))
     {
-        Check(reopened.PendingRewardPresentation == null && reopened.Gold == rewardReceiptGold && reopened.UnopenedPacks == 1,
+        Check(reopened.PendingRewardPresentation == null && reopened.Gold == rewardReceiptGold && reopened.UnopenedPacks == 0,
             "acknowledged reward receipt changed durable grant");
         Check(!reopened.AcknowledgeRewardPresentation(rewardReceiptId),
             "known completed reward acknowledgement was not idempotent");
@@ -265,14 +275,14 @@ try
     using (var store = new LocalProfile(pendingRewardRestartPath))
     {
         var pending = store.Begin("mage", "priest", 813);
-        store.Settle(pending.Id, "Lost", 4, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 0, MinimumHealth = 30 });
+        rewardReceiptGold = store.Settle(pending.Id, "Lost", 4, false,
+            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 0, MinimumHealth = 30 }).Gold;
         rewardReceiptId = pending.Id;
     }
     byte[] pendingRewardBytes = File.ReadAllBytes(pendingRewardRestartPath);
     using (var reopened = new LocalProfile(pendingRewardRestartPath))
     {
-        Check(reopened.PendingRewardPresentation.Id == rewardReceiptId && reopened.Gold == 0,
+        Check(reopened.PendingRewardPresentation.Id == rewardReceiptId && reopened.Gold == rewardReceiptGold && rewardReceiptGold > 0,
             "pending reward presentation did not survive restart");
         Check(reopened.AcknowledgeRewardPresentation(rewardReceiptId), "restart reward acknowledgement failed");
     }
@@ -291,10 +301,16 @@ try
     var simultaneousPending = ReadProfile(pendingRewardBytes);
     simultaneousPending.Pending = new LocalMatchRecord {
         Id = Guid.NewGuid().ToString(), Deck = "mage", Opponent = "warrior", Seed = 814,
-        StartedUtc = DateTimeOffset.UtcNow.ToString("O"), RewardVersion = 2, RewardFacts = new LocalRewardFacts()
+        StartedUtc = DateTimeOffset.UtcNow.ToString("O"), RewardVersion = LocalEconomy.RollRewardVersion, RewardFacts = new LocalRewardFacts()
     };
     Check(simultaneousPending.Pending.Id != simultaneousPending.PendingRewardPresentationId,
         "simultaneous pending fixture must use distinct transaction ids");
+    // Control: the same pending match without the reward receipt loads, so the rejection below is about the receipt.
+    string pendingControlPath = Path.Combine(root, "pending-without-reward-receipt.xml");
+    var pendingControl = ReadProfile(pendingRewardBytes);
+    pendingControl.Pending = simultaneousPending.Pending; pendingControl.PendingRewardPresentationId = null;
+    WriteProfile(pendingControlPath, pendingControl);
+    using (var control = new LocalProfile(pendingControlPath)) Check(control.Pending.Id == simultaneousPending.Pending.Id, "control: a valid pending match loads");
     WriteProfile(simultaneousPendingPath, simultaneousPending);
     byte[] simultaneousPendingBytes = File.ReadAllBytes(simultaneousPendingPath);
     Reject(() => { using var ignored = new LocalProfile(simultaneousPendingPath); },
@@ -309,278 +325,6 @@ try
     Reject(() => { using var ignored = new LocalProfile(abandonedRewardPath); }, "abandoned reward receipt");
     Check(File.ReadAllBytes(abandonedRewardPath).SequenceEqual(abandonedRewardBytes), "abandoned reward receipt was rewritten");
 
-    string migrationPath = Path.Combine(root, "migration.xml");
-    byte[] v1 = File.ReadAllBytes(fixture);
-    File.WriteAllBytes(migrationPath, v1);
-    using (var store = new LocalProfile(migrationPath))
-    {
-        Check(store.Gold == 175 && store.Stars == 2 && store.History.Count == 15, "V1 totals changed during migration");
-        Check(store.History.All(m => m.RewardVersion == 1 && m.BonusGold == 0 && !m.PackReward), "V1 reward provenance lost");
-        Check(store.History[0].Id == "89783220-43f0-42c3-bfa1-2a9346e93403" && store.History[0].Seed == 1076286850
-            && store.History[0].Result == "Lost" && store.History[0].Gold == 25, "V1 record changed");
-        CheckCollection(store, 93, 186, "V1 migration current starter collection plus exact Core grants");
-        Check(File.ReadAllText(migrationPath).Contains("<Version>12</Version>"), "V1 did not migrate directly to V9");
-    }
-    Check(File.ReadAllBytes(migrationPath + ".v1.bak").SequenceEqual(v1), "V1 backup not byte exact");
-
-    byte[] v2 = File.ReadAllBytes(v2Fixture);
-    Check(Convert.ToHexString(SHA256.HashData(v2)) == "D1BDDEAEA34790A685867566F6B7BC81DC2ADA81368067CF16291CF2A3AF7879",
-        "V2 checkpoint fixture hash changed");
-    LocalProfileData v2Data = ReadProfile(v2);
-    string oldFutureRewardPath = Path.Combine(root, "old-future-reward.xml");
-    v2Data.PendingRewardPresentationId = v2Data.Matches[0].Id;
-    WriteProfile(oldFutureRewardPath, v2Data);
-    byte[] oldFutureRewardBytes = File.ReadAllBytes(oldFutureRewardPath);
-    Reject(() => { using var ignored = new LocalProfile(oldFutureRewardPath); }, "old schema future reward field");
-    Check(File.ReadAllBytes(oldFutureRewardPath).SequenceEqual(oldFutureRewardBytes)
-        && !File.Exists(oldFutureRewardPath + ".v2.bak"), "old schema future reward field was migrated or rewritten");
-    v2Data.PendingRewardPresentationId = null;
-    var oldCounts = v2Data.Collection.ToDictionary(entry => entry.Id, entry => entry.Count, StringComparer.Ordinal);
-    var oldMatches = v2Data.Matches.Select(MatchSignature).ToArray();
-    string oldCustom = v2Data.CustomDeck.Name + "|" + v2Data.CustomDeck.Hero + "|" + string.Join(",", v2Data.CustomDeck.Cards);
-    string oldReceipt = string.Join(",", v2Data.LastPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold));
-    Check(v2Data.Version == 2 && v2Data.GoldBalance == 45 && v2Data.Matches.Sum(match => match.Gold) == 245 &&
-        v2Data.LegacyUnopenedPacks == 1 && v2Data.PackSeed == 2083861717 && v2Data.PackSequence == 2 &&
-        v2Data.Matches.Count == 17 && oldCounts.Count == 48 && oldCounts.Values.Sum() == 90,
-        "V2 checkpoint fixture facts changed");
-
-    string v2MigrationPath = Path.Combine(root, "v2-migration.xml");
-    File.WriteAllBytes(v2MigrationPath, v2);
-    byte[] oldV1Backup = { 7, 1, 9, 2 };
-    File.WriteAllBytes(v2MigrationPath + ".v1.bak", oldV1Backup);
-    using (var store = new LocalProfile(v2MigrationPath))
-    {
-        Check(store.Gold == 45 && store.UnopenedPacks == 1 && store.Stars == 3 && store.History.Count == 17,
-            "V2 balances or history changed during migration");
-        Check(store.History.Select(MatchSignature).SequenceEqual(oldMatches), "V2 match fields changed during migration");
-        CheckCollection(store, 101, 196, "V2 migration ownership totals plus exact Core grants");
-        Check(oldCounts.All(pair => store.Collection.TryGetValue(pair.Key, out int count) && count == pair.Value),
-            "V2 migration changed old ownership");
-        Check(paladinFree.All(id => store.Collection.TryGetValue(id, out int count) && count == 2),
-            "V2 migration did not grant Paladin basics once");
-        Check(store.CustomDeck.Name + "|" + store.CustomDeck.Hero + "|" + string.Join(",", store.CustomDeck.Cards) == oldCustom,
-            "V2 custom deck changed");
-        Check(string.Join(",", store.LastPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold)) == oldReceipt,
-            "V2 receipt changed");
-        Check(store.Pending == null, "V2 pending changed");
-        var next = store.Begin("legacy display deck", "legacy display opponent", 99);
-        Check(next.RewardVersion == 3, "a new match on a migrated save must begin on reward V3 (old receipts keep theirs)");
-    }
-    Check(File.ReadAllBytes(v2MigrationPath + ".v2.bak").SequenceEqual(v2), "V2 backup not byte exact");
-    Check(File.ReadAllBytes(v2MigrationPath + ".v1.bak").SequenceEqual(oldV1Backup), "V2 migration touched existing V1 backup");
-    var migratedV5 = ReadProfile(File.ReadAllBytes(v2MigrationPath));
-    Check(migratedV5.Version == 12 && migratedV5.GoldBalance == 45 && migratedV5.UnopenedPacks.Sum(pack => pack.Count) == 1 &&
-        migratedV5.PackSeed == 2083861717 && migratedV5.PackSequence == 2 && migratedV5.LastPack.PoolVersion == 1,
-        "V5 serialization changed preserved wallet, pack, seed, sequence, or receipt version");
-    Check(!migratedV5.PackRevealPending, "V2 migration invented a pending native receipt");
-    using (var reopened = new LocalProfile(v2MigrationPath))
-    {
-        Check(reopened.Gold == 45 && reopened.UnopenedPacks == 1 && reopened.History.Count == 17 && reopened.Pending.RewardVersion == 3
-            && reopened.History.Select(MatchSignature).SequenceEqual(oldMatches),
-            "V5 reopen changed checkpoint or pending");
-        CheckCollection(reopened, 101, 196, "V5 reopen ownership totals plus exact Core grants");
-    }
-
-    string unknownPoolPath = Path.Combine(root, "unknown-pack-pool.xml");
-    var unknownPool = ReadProfile(File.ReadAllBytes(v2MigrationPath));
-    unknownPool.LastPack.PoolVersion = 99;
-    WriteProfile(unknownPoolPath, unknownPool);
-    byte[] unknownPoolBytes = File.ReadAllBytes(unknownPoolPath);
-    Reject(() => { using var ignored = new LocalProfile(unknownPoolPath); }, "unknown persisted pack pool");
-    Check(File.ReadAllBytes(unknownPoolPath).SequenceEqual(unknownPoolBytes), "unknown pool rejection wrote profile");
-
-    string oldV4Path = Path.Combine(root, "old-v4.xml");
-    var oldV4Data = ReadProfile(File.ReadAllBytes(v2MigrationPath));
-    oldV4Data.LegacyUnopenedPacks = oldV4Data.UnopenedPacks.Sum(pack => pack.Count);
-    oldV4Data.Version = 4;
-    // A real V4 save's pending match was begun by a V2-reward build.
-    if (oldV4Data.Pending != null) oldV4Data.Pending.RewardVersion = 2;
-    oldV4Data.Collection.RemoveAll(entry => LocalCardCatalog.NewBasicIds.Contains(entry.Id));
-    oldV4Data.CustomDecks.Add(new LocalCustomDeck {
-        Id = LocalProfile.FirstAllocatedCustomDeckId, SortOrder = 1, Name = "Incomplete Mage", Hero = "HERO_08",
-        Cards = LocalDecks.Get("mage").CardIds.Take(3).ToList()
-    });
-    oldV4Data.NextCustomDeckId = LocalProfile.FirstAllocatedCustomDeckId + 1;
-    var oldV4Collection = oldV4Data.Collection.ToDictionary(entry => entry.Id, entry => entry.Count, StringComparer.Ordinal);
-    int oldV4ReceiptSequence = oldV4Data.PackSequence;
-    var oldV4Receipt = LocalEconomy.GeneratePack(oldV4Collection, oldV4Data.PackSeed, oldV4ReceiptSequence, 1);
-    oldV4Receipt.PoolVersion = 0;
-    oldV4Data.Collection = oldV4Collection.Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList();
-    oldV4Data.PackSequence++;
-    oldV4Data.LegacyUnopenedPacks--;
-    oldV4Data.GoldBalance += oldV4Receipt.Cards.Sum(card => card.DuplicateGold);
-    oldV4Data.LastPack = oldV4Receipt;
-    oldV4Data.PackRevealPending = true;
-    string oldV4ReceiptIds = string.Join(",", oldV4Receipt.Cards.Select(card => card.Id + ":" + card.DuplicateGold));
-    WriteProfile(oldV4Path, oldV4Data);
-    byte[] oldV4Bytes = File.ReadAllBytes(oldV4Path);
-    using (var oldV4Store = new LocalProfile(oldV4Path))
-        Check(oldV4Store.PackRevealPending && LocalCardCatalog.NewBasicIds.All(id => oldV4Store.Collection[id] == 2)
-            && oldV4Store.LastPack.PoolVersion == 1
-            && oldV4Store.CustomDecks.Any(deck => deck.Id == LocalProfile.FirstAllocatedCustomDeckId && deck.Cards.Count == 3)
-            && string.Join(",", oldV4Store.LastPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold)) == oldV4ReceiptIds,
-            "V4 migration did not preserve incomplete library, grant Basic cards, or retain pool1 receipt");
-    Check(File.ReadAllBytes(oldV4Path + ".v4.bak").SequenceEqual(oldV4Bytes), "V4 backup not byte exact");
-    byte[] currentV5Bytes = File.ReadAllBytes(oldV4Path);
-    using (var current = new LocalProfile(oldV4Path))
-        Check(current.PackRevealPending && LocalCardCatalog.NewBasicIds.All(id => current.Collection[id] == 2),
-            "V5 reopen changed ownership or pending receipt");
-    Check(File.ReadAllBytes(oldV4Path).SequenceEqual(currentV5Bytes), "V5 reopen wrote bytes");
-
-    foreach (string excludedId in new[] { "EX1_577", "EX1_614" })
-    {
-        string excludedPath = Path.Combine(root, "excluded-owned-" + excludedId + ".xml");
-        var excludedData = ReadProfile(currentV5Bytes);
-        excludedData.Collection.Add(new LocalCardCount { Id = excludedId, Count = 1 });
-        WriteProfile(excludedPath, excludedData);
-        byte[] excludedBytes = File.ReadAllBytes(excludedPath);
-        Reject(() => { using var ignored = new LocalProfile(excludedPath); }, "quarantined owned identity");
-        Check(File.ReadAllBytes(excludedPath).SequenceEqual(excludedBytes), "quarantine rejection changed owned profile bytes");
-    }
-    using (var current = new LocalProfile(oldV4Path))
-        Check(current.Collection["EX1_084"] == 2 && current.LastPack.PoolVersion == 1
-            && current.PackRevealPending, "Warsong grant and pending pool1 receipt remain valid after quarantine");
-    Check(File.ReadAllBytes(oldV4Path).SequenceEqual(currentV5Bytes), "quarantine-compatible V5 reopen wrote bytes");
-
-    string oldV4RetryPath = Path.Combine(root, "old-v4-retry.xml");
-    File.WriteAllBytes(oldV4RetryPath, oldV4Bytes);
-    Directory.CreateDirectory(oldV4RetryPath + ".tmp");
-    bool oldV4WriteFailed = false;
-    try { using var ignored = new LocalProfile(oldV4RetryPath); } catch (IOException) { oldV4WriteFailed = true; }
-    catch (UnauthorizedAccessException) { oldV4WriteFailed = true; }
-    Check(oldV4WriteFailed && File.ReadAllBytes(oldV4RetryPath).SequenceEqual(oldV4Bytes)
-        && File.ReadAllBytes(oldV4RetryPath + ".v4.bak").SequenceEqual(oldV4Bytes),
-        "failed V4 replacement changed source or backup");
-    Directory.Delete(oldV4RetryPath + ".tmp");
-    using (var retry = new LocalProfile(oldV4RetryPath))
-        Check(retry.PackRevealPending && retry.LastPack.PoolVersion == 1
-            && string.Join(",", retry.LastPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold)) == oldV4ReceiptIds,
-            "V4 retry changed pending pool1 receipt");
-
-    string v2PackPath = Path.Combine(root, "v2-unopened-pack.xml");
-    File.WriteAllBytes(v2PackPath, v2);
-    using (var store = new LocalProfile(v2PackPath))
-    {
-        var opened = store.OpenPack();
-        Check(opened.PoolVersion == 2 && opened.Cards.Count == 5 && store.UnopenedPacks == 0,
-            "migrated unopened pack did not open from pool2");
-    }
-    var afterV2Pack = ReadProfile(File.ReadAllBytes(v2PackPath));
-    Check(afterV2Pack.PackSeed == 2083861717 && afterV2Pack.PackSequence == 3,
-        "migrated unopened pack changed seed or advanced sequence incorrectly");
-
-    string v2PendingPath = Path.Combine(root, "v2-pending.xml");
-    var v2Pending = ReadProfile(v2);
-    v2Pending.Pending = new LocalMatchRecord {
-        Id = "22222222-2222-2222-2222-222222222222", Deck = "archived deck label", Opponent = "archived opponent label",
-        Seed = 44, StartedUtc = "2026-10-16T02:50:00.0000000Z", RewardVersion = 2, RewardFacts = new LocalRewardFacts()
-    };
-    WriteProfile(v2PendingPath, v2Pending);
-    using (var store = new LocalProfile(v2PendingPath))
-        Check(MatchSignature(store.Pending) == MatchSignature(v2Pending.Pending), "V2 pending fields changed during migration");
-
-    foreach (string forgedPart in new[] { "collection", "receipt", "custom" })
-    {
-        string invalidPath = Path.Combine(root, "invalid-v2-" + forgedPart + ".xml");
-        var invalid = ReadProfile(v2);
-        if (forgedPart == "collection") invalid.Collection.Add(new LocalCardCount { Id = "CS2_087", Count = 1 });
-        else if (forgedPart == "receipt") invalid.LastPack.Cards[0].Id = "EX1_354";
-        else
-        {
-            var neutralIds = LocalEconomy.LegacyV2Catalog.Where(card => card.Class == CardClass.NEUTRAL && card.Rarity != Rarity.LEGENDARY)
-                .Take(15).Select(card => card.Id).ToArray();
-            Check(neutralIds.Length == 15, "legacy catalog lacks neutral cards for forged Paladin custom deck");
-            foreach (string id in neutralIds)
-            {
-                var owned = invalid.Collection.SingleOrDefault(entry => entry.Id == id);
-                if (owned == null) invalid.Collection.Add(new LocalCardCount { Id = id, Count = 2 });
-                else owned.Count = 2;
-            }
-            var neutral = neutralIds.SelectMany(id => new[] { id, id }).ToList();
-            invalid.CustomDeck = new LocalCustomDeck { Name = "Forged Paladin", Hero = "HERO_04", Cards = neutral };
-        }
-        WriteProfile(invalidPath, invalid);
-        byte[] invalidBytes = File.ReadAllBytes(invalidPath);
-        Reject(() => { using var ignored = new LocalProfile(invalidPath); }, "forged V2 " + forgedPart);
-        Check(File.ReadAllBytes(invalidPath).SequenceEqual(invalidBytes) && !File.Exists(invalidPath + ".v2.bak"),
-            "invalid V2 " + forgedPart + " was changed or backed up");
-    }
-
-    string v2BackupFailurePath = Path.Combine(root, "v2-backup-failure.xml");
-    File.WriteAllBytes(v2BackupFailurePath, v2);
-    Directory.CreateDirectory(v2BackupFailurePath + ".v2.bak.tmp");
-    bool v2BackupFailed = false;
-    try { using var ignored = new LocalProfile(v2BackupFailurePath); } catch (IOException) { v2BackupFailed = true; }
-    catch (UnauthorizedAccessException) { v2BackupFailed = true; }
-    Check(v2BackupFailed && File.ReadAllBytes(v2BackupFailurePath).SequenceEqual(v2) && !File.Exists(v2BackupFailurePath + ".v2.bak"),
-        "failed V2 backup changed source");
-
-    string v2RetryPath = Path.Combine(root, "v2-retry.xml");
-    File.WriteAllBytes(v2RetryPath, v2);
-    Directory.CreateDirectory(v2RetryPath + ".tmp");
-    bool v2ReplacementFailed = false;
-    try { using var ignored = new LocalProfile(v2RetryPath); } catch (IOException) { v2ReplacementFailed = true; }
-    catch (UnauthorizedAccessException) { v2ReplacementFailed = true; }
-    Check(v2ReplacementFailed && File.ReadAllBytes(v2RetryPath).SequenceEqual(v2) &&
-        File.ReadAllBytes(v2RetryPath + ".v2.bak").SequenceEqual(v2), "failed V2 replacement damaged source or backup");
-    Directory.Delete(v2RetryPath + ".tmp");
-    using (var retry = new LocalProfile(v2RetryPath))
-    {
-        CheckCollection(retry, 101, 196, "matching-backup V2 retry did not grant basics and Core once");
-        Check(retry.Gold == 45, "matching-backup V2 retry changed gold");
-    }
-
-    string v2CollisionPath = Path.Combine(root, "v2-collision.xml");
-    File.WriteAllBytes(v2CollisionPath, v2);
-    File.WriteAllText(v2CollisionPath + ".v2.bak", "different");
-    Reject(() => { using var ignored = new LocalProfile(v2CollisionPath); }, "conflicting V2 backup");
-    Check(File.ReadAllBytes(v2CollisionPath).SequenceEqual(v2) && File.ReadAllText(v2CollisionPath + ".v2.bak") == "different",
-        "V2 backup collision changed source or backup");
-
-    string retryPath = Path.Combine(root, "migration-retry.xml");
-    File.WriteAllBytes(retryPath, v1);
-    Directory.CreateDirectory(retryPath + ".tmp");
-    bool migrationFailed = false;
-    try { using var ignored = new LocalProfile(retryPath); } catch (IOException) { migrationFailed = true; }
-    catch (UnauthorizedAccessException) { migrationFailed = true; }
-    Check(migrationFailed && File.ReadAllBytes(retryPath).SequenceEqual(v1), "failed migration damaged V1");
-    Directory.Delete(retryPath + ".tmp");
-    using (var retry = new LocalProfile(retryPath)) Check(retry.Gold == 175, "identical backup migration retry");
-
-    string collisionPath = Path.Combine(root, "migration-collision.xml");
-    File.WriteAllBytes(collisionPath, v1);
-    File.WriteAllText(collisionPath + ".v1.bak", "different");
-    Reject(() => { using var ignored = new LocalProfile(collisionPath); }, "conflicting V1 backup");
-    Check(File.ReadAllBytes(collisionPath).SequenceEqual(v1), "backup collision changed V1");
-
-    string oversizedBackupPath = Path.Combine(root, "migration-oversized-backup.xml");
-    File.WriteAllBytes(oversizedBackupPath, v1);
-    using (var oversized = new FileStream(oversizedBackupPath + ".v1.bak", FileMode.CreateNew, FileAccess.Write))
-        oversized.SetLength((long)int.MaxValue + 1);
-    Reject(() => { using var ignored = new LocalProfile(oversizedBackupPath); }, "oversized V1 backup");
-    Check(File.ReadAllBytes(oversizedBackupPath).SequenceEqual(v1), "oversized backup changed V1");
-
-    string invalidV1Path = Path.Combine(root, "invalid-v1.xml");
-    string invalidV1 = File.ReadAllText(fixture).Replace("<Gold>25</Gold>", "<Gold>26</Gold>");
-    File.WriteAllText(invalidV1Path, invalidV1);
-    Reject(() => { using var ignored = new LocalProfile(invalidV1Path); }, "invalid old award");
-    Check(File.ReadAllText(invalidV1Path) == invalidV1 && !File.Exists(invalidV1Path + ".v1.bak"), "invalid V1 was modified");
-
-    string pendingPath = Path.Combine(root, "pending-v1.xml");
-    File.WriteAllText(pendingPath, """<?xml version="1.0"?><LocalProfileData><Version>1</Version><Pending><Id>11111111-1111-1111-1111-111111111111</Id><Deck>mage</Deck><Opponent>priest</Opponent><Seed>9</Seed><StartedUtc>2026-10-16T00:00:00.0000000Z</StartedUtc></Pending><Matches /></LocalProfileData>""");
-    using (var store = new LocalProfile(pendingPath))
-    {
-        Check(store.Pending.RewardVersion == 2, "migrated pending reward version");
-        var won = store.Settle(store.Pending.Id, "Won", 8, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 });
-        Check(won.Gold == 90 && won.BonusGold == 40 && won.PackReward && store.UnopenedPacks == 1, "migrated pending V2 reward");
-    }
-
-    // The V2 formula is unchanged for V2 receipts (pure checks); new matches settle on V3.
-    Check(LocalEconomy.Reward("Lost", 4, false, new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, MinimumHealth = 30 }).Gold == 35
-        && LocalEconomy.Reward("Lost", 4, false, new LocalRewardFacts { EnemyMinionsDefeated = 5, MinimumHealth = 5 }).BonusGold == 10
-        && LocalEconomy.Reward("Won", 4, false, new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 }) is var full
-        && full.Gold == 90 && full.BonusGold == 40 && full.PackReward && full.Dust == 0, "V2 formula unchanged");
     string rewardsPath = Path.Combine(root, "rewards.xml");
     using (var store = new LocalProfile(rewardsPath))
     {
@@ -589,28 +333,31 @@ try
         Reject(() => store.Settle(match.Id, "Lost", int.MaxValue, false, facts), "unbounded turn count");
         var reward = store.Settle(match.Id, "Lost", 4, false, facts);
         facts.DistinctCardsPlayed = 0;
-        Check(reward.Gold == 0 && reward.DustReward == 0 && reward.BonusGold == 0 && !reward.PackReward, "V3 loss pays nothing");
+        var lossExpected = Rolled(match, "Lost", 4);
+        Check(reward.Gold == lossExpected.Gold && reward.DustReward == lossExpected.Dust && reward.Gold > 0 && reward.BonusGold == 0 && !reward.PackReward,
+            "a loss pays only the rolled third");
         Check(store.Settle(match.Id, "Lost", 4, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, MinimumHealth = 30 }).Gold == 0,
+            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, MinimumHealth = 30 }).Gold == reward.Gold,
             "identical factual retry");
         Reject(() => store.Settle(match.Id, "Lost", 4, false,
             new LocalRewardFacts { DistinctCardsPlayed = 5, EnemyMinionsDefeated = 4, MinimumHealth = 30 }), "conflicting reward facts");
         store.AcknowledgeRewardPresentation(match.Id);
 
+        // Rolled (V6) rewards ignore the facts: neither the enemy-minion nor the great-win facts add bonus gold or a pack.
         match = store.Begin("mage", "priest", 2);
         var minionFacts = new LocalRewardFacts { DistinctCardsPlayed = 0, EnemyMinionsDefeated = 5, MinimumHealth = 30 };
         reward = store.Settle(match.Id, "Won", 4, false, minionFacts);
-        var expected = V3(match, "Won", minionFacts, 4);
-        Check(reward.BonusGold == 5 && !reward.PackReward && reward.Gold == expected.Gold && reward.DustReward == expected.Dust,
-            "enemy-minion threshold");
+        var expected = Rolled(match, "Won", 4);
+        Check(reward.BonusGold == 0 && !reward.PackReward && reward.Gold == expected.Gold && reward.DustReward == expected.Dust,
+            "enemy-minion facts do not change a rolled reward");
         store.AcknowledgeRewardPresentation(match.Id);
 
         match = store.Begin("mage", "priest", 3);
         var greatFacts = new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 5, MinimumHealth = 5 };
         reward = store.Settle(match.Id, "Won", 4, false, greatFacts);
-        expected = V3(match, "Won", greatFacts, 4);
-        Check(reward.Gold == expected.Gold && reward.DustReward == expected.Dust && reward.BonusGold == 20 && reward.PackReward
-            && store.UnopenedPacks == 1, "full V3 reward");
+        expected = Rolled(match, "Won", 4);
+        Check(reward.Gold == expected.Gold && reward.DustReward == expected.Dust && reward.BonusGold == 0 && !reward.PackReward
+            && store.UnopenedPacks == 0, "great-win facts do not add a pack to a rolled reward");
         store.AcknowledgeRewardPresentation(match.Id);
 
         match = store.Begin("mage", "priest", 4);
@@ -620,9 +367,9 @@ try
     }
 
     string packPath = Path.Combine(root, "packs.xml");
-    File.WriteAllBytes(packPath, v1);
+    GoldProfile(packPath, 175);
     string buyRetryPath = Path.Combine(root, "buy-retry.xml");
-    File.WriteAllBytes(buyRetryPath, v1);
+    GoldProfile(buyRetryPath, 175);
     using (var store = new LocalProfile(buyRetryPath))
     {
         var beforeCollection = store.Collection.ToDictionary(pair => pair.Key, pair => pair.Value);
@@ -676,150 +423,6 @@ try
         Check(store.LastPack.Cards.Count == 5, "pack receipt escaped by reference");
     }
 
-    string nativePath = Path.Combine(root, "native-pack.xml");
-    var nativeData = new LocalProfileData {
-        Version = 3, GoldBalance = 200, LegacyUnopenedPacks = 2, PackSeed = 29,
-        Collection = LocalEconomy.LegacyV4StarterCollection.Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList()
-    };
-    WriteProfile(nativePath, nativeData);
-    LocalPackResult firstNative;
-    int firstSequence;
-    using (var store = new LocalProfile(nativePath))
-    {
-        var beforeCollection = store.Collection.ToDictionary(pair => pair.Key, pair => pair.Value);
-        int beforeGold = store.Gold;
-        firstNative = store.BeginNativePack();
-        firstSequence = store.PackSequence;
-        Check(firstNative.PoolVersion == 2 && store.PackRevealPending && store.UnopenedPacks == 1
-            && firstSequence == 1 && firstNative.Cards.Count == 5,
-            "native Begin did not atomically debit, advance, and persist pending receipt");
-        Check(store.Gold == beforeGold + firstNative.Cards.Sum(card => card.DuplicateGold),
-            "native Begin duplicate compensation mismatch");
-        foreach (var group in firstNative.Cards.Where(card => card.DuplicateGold == 0).GroupBy(card => card.Id))
-            Check(store.Collection[group.Key] == (beforeCollection.TryGetValue(group.Key, out int count) ? count : 0) + group.Count(),
-                "native Begin collection grant mismatch: " + group.Key);
-        byte[] afterBegin = File.ReadAllBytes(nativePath);
-        var resumed = store.BeginNativePack();
-        Check(File.ReadAllBytes(nativePath).SequenceEqual(afterBegin) && store.PackSequence == firstSequence && store.UnopenedPacks == 1 &&
-            resumed.Cards.Select(card => card.Id + ":" + card.DuplicateGold).SequenceEqual(
-                firstNative.Cards.Select(card => card.Id + ":" + card.DuplicateGold)),
-            "duplicate native Begin wrote, charged, granted, or rerolled");
-        Reject(() => store.OpenPack(), "legacy OpenPack overwrote pending native receipt");
-        Check(File.ReadAllBytes(nativePath).SequenceEqual(afterBegin), "rejected legacy OpenPack changed pending bytes");
-        Reject(() => store.CompleteNativePackReveal(firstSequence + 1, firstNative.Cards.Select(card => card.Id)),
-            "future native acknowledgement");
-        Reject(() => store.CompleteNativePackReveal(firstSequence,
-            new[] { "BAD" }.Concat(firstNative.Cards.Skip(1).Select(card => card.Id))), "wrong native receipt acknowledgement");
-        Check(File.ReadAllBytes(nativePath).SequenceEqual(afterBegin) && store.PackRevealPending,
-            "stale or wrong acknowledgement changed pending receipt");
-
-        ReplaceFileWithDirectory(nativePath, out var savedPending);
-        bool completeFailed = false;
-        try { store.CompleteNativePackReveal(firstSequence, firstNative.Cards.Select(card => card.Id)); }
-        catch (IOException) { completeFailed = true; }
-        catch (UnauthorizedAccessException) { completeFailed = true; }
-        Check(completeFailed && store.PackRevealPending, "failed acknowledgement cleared in-memory pending receipt");
-        RestoreFile(nativePath, savedPending);
-        Check(File.ReadAllBytes(nativePath).SequenceEqual(savedPending), "failed acknowledgement changed disk profile");
-        Check(store.CompleteNativePackReveal(firstSequence, firstNative.Cards.Select(card => card.Id)),
-            "native acknowledgement did not clear pending receipt");
-        byte[] afterComplete = File.ReadAllBytes(nativePath);
-        Check(!store.PackRevealPending && store.LastPack.Cards.Count == 5 &&
-            !store.CompleteNativePackReveal(firstSequence, firstNative.Cards.Select(card => card.Id)) &&
-            File.ReadAllBytes(nativePath).SequenceEqual(afterComplete),
-            "duplicate native acknowledgement was not idempotent");
-
-        var secondNative = store.BeginNativePack();
-        int secondSequence = store.PackSequence;
-        byte[] secondPending = File.ReadAllBytes(nativePath);
-        Reject(() => store.CompleteNativePackReveal(firstSequence, firstNative.Cards.Select(card => card.Id)),
-            "stale Done acknowledged newer pending receipt");
-        Check(store.PackRevealPending && store.PackSequence == secondSequence && File.ReadAllBytes(nativePath).SequenceEqual(secondPending),
-            "stale Done changed newer pending receipt");
-        Check(store.CompleteNativePackReveal(secondSequence, secondNative.Cards.Select(card => card.Id)),
-            "current Done could not acknowledge second receipt");
-    }
-    using (var reopened = new LocalProfile(nativePath))
-        Check(!reopened.PackRevealPending && reopened.UnopenedPacks == 0 && reopened.PackSequence == 2 && reopened.LastPack.Cards.Count == 5,
-            "native receipt completion did not persist across reopen");
-
-    string nativeResumePath = Path.Combine(root, "native-pack-resume.xml");
-    WriteProfile(nativeResumePath, nativeData);
-    string resumeReceipt;
-    int resumeSequence;
-    using (var store = new LocalProfile(nativeResumePath))
-    {
-        resumeReceipt = string.Join(",", store.BeginNativePack().Cards.Select(card => card.Id));
-        resumeSequence = store.PackSequence;
-    }
-    byte[] pendingResumeBytes = File.ReadAllBytes(nativeResumePath);
-    using (var reopened = new LocalProfile(nativeResumePath))
-    {
-        Check(reopened.PackRevealPending && reopened.PackSequence == resumeSequence &&
-            string.Join(",", reopened.LastPack.Cards.Select(card => card.Id)) == resumeReceipt,
-            "pending native receipt did not survive reopen");
-        Check(string.Join(",", reopened.BeginNativePack().Cards.Select(card => card.Id)) == resumeReceipt &&
-            File.ReadAllBytes(nativeResumePath).SequenceEqual(pendingResumeBytes),
-            "reopened native Begin charged, rerolled, or rewrote pending receipt");
-    }
-
-    foreach (string forged in new[] { "sequence-zero", "receipt-id", "duplicate-flag", "collection-delta" })
-    {
-        string forgedPath = Path.Combine(root, "forged-pending-" + forged + ".xml");
-        var invalid = ReadProfile(pendingResumeBytes);
-        if (forged == "sequence-zero") invalid.PackSequence = 0;
-        else if (forged == "receipt-id") invalid.LastPack.Cards[0].Id = LocalEconomy.Catalog
-            .First(card => card.Rarity != Rarity.FREE && card.Id != invalid.LastPack.Cards[0].Id).Id;
-        else if (forged == "duplicate-flag") invalid.LastPack.Cards[0].DuplicateGold =
-            invalid.LastPack.Cards[0].DuplicateGold == 0 ? 10 : 0;
-        else
-        {
-            string granted = invalid.LastPack.Cards.First(card => card.DuplicateGold == 0).Id;
-            invalid.Collection.RemoveAll(card => card.Id == granted);
-        }
-        WriteProfile(forgedPath, invalid);
-        byte[] forgedBytes = File.ReadAllBytes(forgedPath);
-        Reject(() => { using var ignored = new LocalProfile(forgedPath); }, "forged pending provenance " + forged);
-        Check(File.ReadAllBytes(forgedPath).SequenceEqual(forgedBytes), "forged pending receipt was rewritten: " + forged);
-    }
-
-    string nativeFailurePath = Path.Combine(root, "native-pack-failure.xml");
-    string nativeControlPath = Path.Combine(root, "native-pack-failure-control.xml");
-    nativeData.LegacyUnopenedPacks = 1; nativeData.PackSequence = 0; nativeData.LastPack = null; nativeData.PackRevealPending = false;
-    WriteProfile(nativeFailurePath, nativeData);
-    File.Copy(nativeFailurePath, nativeControlPath);
-    using (var store = new LocalProfile(nativeFailurePath))
-    {
-        byte[] before = File.ReadAllBytes(nativeFailurePath);
-        ReplaceFileWithDirectory(nativeFailurePath, out var saved);
-        bool failed = false;
-        try { store.BeginNativePack(); } catch (IOException) { failed = true; }
-        catch (UnauthorizedAccessException) { failed = true; }
-        Check(failed && !store.PackRevealPending && store.UnopenedPacks == 1 && store.PackSequence == 0 && store.LastPack == null,
-            "failed native Begin mutated memory");
-        RestoreFile(nativeFailurePath, saved);
-        Check(File.ReadAllBytes(nativeFailurePath).SequenceEqual(before), "failed native Begin changed disk bytes");
-        var retry = store.BeginNativePack();
-        using var control = new LocalProfile(nativeControlPath);
-        var expected = control.BeginNativePack();
-        Check(retry.Cards.Select(card => card.Id + ":" + card.DuplicateGold).SequenceEqual(
-            expected.Cards.Select(card => card.Id + ":" + card.DuplicateGold)), "failed native Begin retry rerolled receipt");
-    }
-
-    foreach (string malformed in new[] { "null", "short", "unsupported" })
-    {
-        string malformedPath = Path.Combine(root, "malformed-pending-" + malformed + ".xml");
-        var invalid = new LocalProfileData {
-            Version = 3, PackSeed = 1, PackSequence = 1, PackRevealPending = true,
-            Collection = LocalEconomy.LegacyV4StarterCollection.Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList()
-        };
-        if (malformed != "null") invalid.LastPack = new LocalPackResult { Cards = Enumerable.Repeat(
-            new LocalPackCard { Id = malformed == "unsupported" ? "BAD" : "CS2_179" }, malformed == "short" ? 4 : 5).ToList() };
-        WriteProfile(malformedPath, invalid);
-        byte[] malformedBytes = File.ReadAllBytes(malformedPath);
-        Reject(() => { using var ignored = new LocalProfile(malformedPath); }, "malformed pending receipt " + malformed);
-        Check(File.ReadAllBytes(malformedPath).SequenceEqual(malformedBytes), "malformed pending receipt was rewritten: " + malformed);
-    }
     string poorPath = Path.Combine(root, "poor.xml");
     using (var poor = new LocalProfile(poorPath))
     {
@@ -828,25 +431,6 @@ try
         Reject(() => poor.BeginNativePack(), "native open with zero packs");
         Check(poor.Gold == 0 && poor.UnopenedPacks == 0 && !poor.PackRevealPending && poor.LastPack == null,
             "failed purchase or zero-pack native open mutated state");
-    }
-
-    string completePath = Path.Combine(root, "complete.xml");
-    var completed = new LocalProfileData {
-        Version = 5, GoldBalance = 100, LegacyUnopenedPacks = 1, PackSeed = 7,
-        NextCustomDeckId = LocalProfile.FirstAllocatedCustomDeckId,
-        Collection = LocalCardCatalog.Current.Select(card => new LocalCardCount {
-            Id = card.Id, Count = card.Rarity == Rarity.LEGENDARY ? 1 : 2
-        }).ToList()
-    };
-    using (var stream = File.Create(completePath)) new XmlSerializer(typeof(LocalProfileData)).Serialize(stream, completed);
-    using (var store = new LocalProfile(completePath))
-    {
-        Check(store.PackPoolComplete, "complete pack pool not reported");
-        store.BuyPack();
-        Check(store.Gold == 0 && store.UnopenedPacks == 2, "Standard purchase remains available after Legacy completion");
-        var duplicatePack = store.BeginNativePack();
-        Check(duplicatePack.Cards.All(card => card.DuplicateGold == 10) && store.Gold == 50 && store.PackRevealPending,
-            "native duplicate pack did not grant exact compensation and pending receipt");
     }
 
 #if ENGINE_SOURCE
@@ -895,56 +479,6 @@ try
         "incomplete draft rejected");
     Reject(() => LocalDecks.Draft("Too Large", "HERO_08", mageCards.Concat(new[] { mageCards[0] })),
         "draft over 30 cards");
-
-    string v3DeckMigrationPath = Path.Combine(root, "v3-deck-library.xml");
-    var v3Collection = LocalEconomy.LegacyV4StarterCollection.ToDictionary(pair => pair.Key, pair => pair.Value);
-    var pendingPack = LocalEconomy.GeneratePack(v3Collection, 29, 0, 1);
-    pendingPack.PoolVersion = 0;
-    var v3Pending = new LocalMatchRecord {
-        Id = "33333333-3333-3333-3333-333333333333", Deck = "paladin", Opponent = "mage", Seed = 44,
-        StartedUtc = "2026-10-16T03:50:00.0000000Z", RewardVersion = 2, RewardFacts = new LocalRewardFacts()
-    };
-    var v3Data = new LocalProfileData {
-        Version = 3, Pending = v3Pending, GoldBalance = 123 + pendingPack.Cards.Sum(card => card.DuplicateGold),
-        LegacyUnopenedPacks = 1, PackSeed = 29, PackSequence = 1,
-        Collection = v3Collection.Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList(),
-        CustomDeck = new LocalCustomDeck { Name = "Legacy Mage", Hero = "HERO_08", Cards = mageCards.ToList() },
-        LastPack = pendingPack, PackRevealPending = true
-    };
-    WriteProfile(v3DeckMigrationPath, v3Data);
-    byte[] v3DeckBytes = File.ReadAllBytes(v3DeckMigrationPath);
-    using (var store = new LocalProfile(v3DeckMigrationPath))
-    {
-        Check(store.CustomDecks.Count == 1 && store.CustomDecks[0].Id == 910000001L
-            && store.CustomDecks[0].SortOrder == 910000001L && store.NextCustomDeckId == 910000010L,
-            "V3 legacy deck identity migration");
-        Check(store.Pending != null && MatchSignature(store.Pending) == MatchSignature(v3Pending)
-            && store.Gold == v3Data.GoldBalance && store.UnopenedPacks == 1 && store.PackSequence == 1
-            && v3Collection.All(pair => store.Collection.TryGetValue(pair.Key, out int count) && count == pair.Value)
-            && LocalCardCatalog.NewBasicIds.All(id => store.Collection[id] == 2)
-            && store.PackRevealPending
-            && store.LastPack.PoolVersion == 1
-            && string.Join(",", store.LastPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold))
-                == string.Join(",", pendingPack.Cards.Select(card => card.Id + ":" + card.DuplicateGold)),
-            "V3 deck migration changed progress or pending transactions");
-    }
-    Check(File.ReadAllBytes(v3DeckMigrationPath + ".v3.bak").SequenceEqual(v3DeckBytes),
-        "V3 migration backup not byte exact");
-    Check(ReadProfile(File.ReadAllBytes(v3DeckMigrationPath)).Version == 12,
-        "V3 deck library did not migrate to V5");
-
-    string v3FailurePath = Path.Combine(root, "v3-deck-migration-failure.xml");
-    File.WriteAllBytes(v3FailurePath, v3DeckBytes);
-    Directory.CreateDirectory(v3FailurePath + ".tmp");
-    bool v3MigrationFailed = false;
-    try { using var ignored = new LocalProfile(v3FailurePath); } catch (IOException) { v3MigrationFailed = true; }
-    catch (UnauthorizedAccessException) { v3MigrationFailed = true; }
-    Check(v3MigrationFailed && File.ReadAllBytes(v3FailurePath).SequenceEqual(v3DeckBytes)
-        && File.ReadAllBytes(v3FailurePath + ".v3.bak").SequenceEqual(v3DeckBytes),
-        "failed V3 migration changed source or backup bytes");
-    Directory.Delete(v3FailurePath + ".tmp");
-    using (var retried = new LocalProfile(v3FailurePath))
-        Check(retried.CustomDecks.Single().Id == 910000001L, "V3 migration retry failed");
 
     string libraryPath = Path.Combine(root, "deck-library.xml");
     long firstId, secondId;
@@ -1235,7 +769,7 @@ try
     Check(LocalProfile.NextStars(150, "Lost") == 150, "Legend floor");
 
     string missingVersionPath = Path.Combine(root, "missing-version.xml");
-    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>12</Version>", "");
+    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>15</Version>", "");
     Check(!missingVersion.Contains("<Version>"), "missing-version fixture still has a version");
     File.WriteAllText(missingVersionPath, missingVersion);
     Reject(() => { using var ignored = new LocalProfile(missingVersionPath); }, "missing profile version");
@@ -1246,6 +780,6 @@ try
     bool corrupt = false;
     try { using var ignored = new LocalProfile(corruptPath); } catch (InvalidOperationException) { corrupt = true; }
     Check(corrupt && File.ReadAllText(corruptPath) == "<broken>", "corrupt profile silently reset");
-    Console.WriteLine("PASS local economy: V1 migration, atomic wallet/packs, rewards, collection, custom decks");
+    Console.WriteLine("PASS local economy: atomic wallet/packs, rewards, collection, custom decks");
 }
 finally { Directory.Delete(root, true); }

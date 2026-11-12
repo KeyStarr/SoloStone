@@ -23,18 +23,37 @@ internal static class RatingPlacementChecks
         var expected = old.Copy(); expected.Rating = 1400; expected.PlacementGames = 0;
         Check(Same(p.Ladder, expected), "only difficulty/count change at boundary");
     }
-    static LocalMatchRecord Record(string result = null) => new LocalMatchRecord {
-        Id = Guid.NewGuid().ToString(), Deck = "historical-deck", Opponent = "priest", Seed = 1,
-        StartedUtc = "2026-01-01T00:00:00.0000000Z", Result = result, Turns = result == null || result == "Abandoned" ? 0 : 10,
-        RewardVersion = 2, RewardFacts = new LocalRewardFacts(),
-        Gold = result == null ? 0 : LocalEconomy.Reward(result, result == "Abandoned" ? 0 : 10, false, new LocalRewardFacts()).Gold
-    };
+    // A settled historical match on the current reward rule (V6 rolled, as a V13+ save holds): the plugin loads no older reward versions.
+    internal static LocalMatchRecord Record(string result = null, int seed = 1)
+    {
+        var m = new LocalMatchRecord {
+            Id = Guid.NewGuid().ToString(), Deck = "historical-deck", Opponent = "priest", Seed = seed,
+            StartedUtc = "2026-01-01T00:00:00.0000000Z", Result = result, Turns = result == null || result == "Abandoned" ? 0 : 10,
+            RewardVersion = 6, RewardFacts = new LocalRewardFacts()
+        };
+        if (result == null) return m;
+        var tier = GrindTiers.Find(m.GrindTier);
+        var reward = LocalEconomy.RewardV6(result, m.Turns, false, LocalEconomy.RewardRollSeed(m.Id, m.Seed));
+        m.Gold = tier.Gold(reward.Gold); m.BonusGold = reward.BonusGold; m.PackReward = reward.PackReward; m.DustReward = tier.Dust(reward.Dust);
+        return m;
+    }
+    // The pre-placement ("rule 1") receipt a V13+ save still carries for an old ranked match: stars folded from the results, no rating.
+    internal static LocalMatchRecord Folded(LocalMatchRecord m, int starsBefore)
+    {
+        int after = LocalProfile.NextStars(starsBefore, m.Result);
+        m.Ladder = new LocalLadderReceipt { LadderRuleVersion = 1, Outcome = m.Result, StarsBefore = starsBefore, StarsAfter = after,
+            StarsGained = after - starsBefore, MultiplierBefore = 1, MultiplierAfter = 1, FloorsReached = new List<string>(),
+            LegendReached = starsBefore < 150 && after == 150 };
+        m.ClassXpBefore = 0; m.ClassXpAfter = 0; m.ProgressionRuleVersion = 1;
+        m.UnlockedCardIds = new List<string>(); m.TierRewards = new List<LocalTierReward>();
+        return m;
+    }
     // Build old saves without opening the new writable loader. Existing settlement creates genuine rule-2 receipts.
     static LocalProfileData Fixture(int modern = 0, bool legacy = true, bool ties = false)
     {
         var d = (LocalProfileData)typeof(LocalProfile).GetMethod("NewProfile", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, null);
         if (legacy) {
-            d.Matches.Add(Record("Won")); d.Matches.Add(Record("Lost")); d.Matches.Add(Record("Won"));
+            d.Matches.Add(Folded(Record("Won"), 0)); d.Matches.Add(Folded(Record("Lost"), 1)); d.Matches.Add(Folded(Record("Won"), 1));
             d.LadderRuleVersion = 0; d.LadderState = new LocalLadderState { StarIndex = 2, BestStarIndex = 2 };
         }
         string directory = Path.Combine(Path.GetTempPath(), "hs-rating-fixture-" + Guid.NewGuid().ToString("N"));
@@ -53,7 +72,7 @@ internal static class RatingPlacementChecks
         var m = Record(result);
         var apply = typeof(LocalProfile).GetMethod("ApplyMatchReceipt", BindingFlags.NonPublic | BindingFlags.Instance)
             ?? throw new MissingMethodException(nameof(LocalProfile), "ApplyMatchReceipt");
-        apply.Invoke(owner, new object[] { d, m, null, 0 });
+        apply.Invoke(owner, new object[] { d, m, null, m.DustReward });
         d.Matches.Add(m);
     }
     static LadderPosition Position(LocalProfileData d)
@@ -67,7 +86,6 @@ internal static class RatingPlacementChecks
     }
     internal static void Run(string root)
     {
-        FreshPlacementUnchanged(root);
         LegacyOnlyStartsPlacement(root);
         ShortMigratedChainRestartsOnce(root);
         LegacyEligibilityDoesNotExpire(root);

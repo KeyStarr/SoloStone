@@ -27,6 +27,19 @@ internal static class LadderLedgerChecks
         && r.MultiplierAfter == after.Multiplier && r.StreakAfter == after.StreakWins && r.PlacementAfter == after.PlacementGames
         && r.RatingAfter == after.Rating;
 
+    // Old ranked history as a V13+ save holds it: current V6 rewards, each match with a folded rule-1 ladder receipt.
+    static List<LocalMatchRecord> FoldedChain(string[] results, LocalMatchRecord template, out int stars)
+    {
+        int fold = 0;
+        var list = results.Select((result, i) => {
+            var m = RatingPlacementChecks.Folded(RatingPlacementChecks.Record(result, i), fold);
+            fold = m.Ladder.StarsAfter; m.Deck = template.Deck; m.DeckHero = template.DeckHero; m.StartedUtc = template.StartedUtc;
+            return m;
+        }).ToList();
+        stars = fold;
+        return list;
+    }
+
     internal static void RunCurrent(string root) => Run(root, false);
     internal static void Run(string root) => Run(root, true);
 
@@ -185,25 +198,13 @@ internal static class LadderLedgerChecks
             return;
         }
 
-        // Shop-era V10 save: folded rule-1 receipts lifted best above Silver 5, then the index fell below it (old floors).
+        // Shop-era ranked history (V13+ saves still carry it): folded rule-1 receipts lifted best above Silver 5, then the index fell below it (old floors).
         string shopEraPath = Path.Combine(root, "ladder-shop-era.xml");
         var era = LocalProfile.Clone(firstProfile); var tmpl = era.Matches[0];
         string[] eraResults = Enumerable.Repeat("Won", 44).Concat(new[] { "Won", "Lost", "Lost" }).ToArray();
-        int fold = 0;
-        era.Matches = eraResults.Select((result, i) => {
-            int before = fold; fold = LocalProfile.NextStars(fold, result);
-            var m = new LocalMatchRecord { Id = Guid.NewGuid().ToString(), Deck = tmpl.Deck, Opponent = tmpl.Opponent, Seed = i, StartedUtc = tmpl.StartedUtc,
-                Result = result, Turns = 10, RewardVersion = 2, RewardFacts = new LocalRewardFacts(),
-                Gold = LocalEconomy.Reward(result, 10, false, new LocalRewardFacts()).Gold };
-            if (i >= 44) {
-                m.Ladder = new LocalLadderReceipt { StarsBefore = before, StarsAfter = fold, StarsGained = fold - before, MultiplierBefore = 1,
-                    MultiplierAfter = 1, LadderRuleVersion = 1 };
-                m.ClassXpBefore = 0; m.ClassXpAfter = 0; m.UnlockedCardIds = new List<string>();
-                m.ProgressionRuleVersion = LocalCoreProgression.ScheduleVersion; m.TierRewards = new List<LocalTierReward>();
-            }
-            return m;
-        }).ToList();
-        era.GoldBalance = era.Matches.Sum(m => m.Gold); era.PendingRewardPresentationId = null; era.Pending = null;
+        int fold;
+        era.Matches = FoldedChain(eraResults, tmpl, out fold);
+        era.GoldBalance = era.Matches.Sum(m => m.Gold); era.DustBalance = era.Matches.Sum(m => m.DustReward); era.PendingRewardPresentationId = null; era.Pending = null;
         era.LadderRuleVersion = 0; era.LadderState = new LocalLadderState { StarIndex = 43, BestStarIndex = 45 };
         Check(fold == 43, "shop-era fixture fold " + fold);
         Write(shopEraPath, era);
@@ -218,40 +219,34 @@ internal static class LadderLedgerChecks
         }
         using (var p = new LocalProfile(shopEraPath)) Check(p.History.Count(m => m.Ladder?.LadderRuleVersion == LadderRules.RuleVersion) == 2, "shop-era restart");
 
-        // V9 -> V10: the folded star index is kept unchanged; the first new settlement starts the receipts.
-        string v9Path = Path.Combine(root, "ladder-v9.xml");
+        // Old folded history: the folded star index is kept unchanged; the first new settlement starts the receipts.
+        string v9Path = Path.Combine(root, "ladder-folded-history.xml");
         var v9 = LocalProfile.Clone(firstProfile);
-        v9.Version = 9; v9.LegacyUnopenedPacks = 0; v9.LadderState = null; v9.LadderRuleVersion = 0;
-        v9.Matches.ForEach(match => match.Ladder = null);
-        // A long V9 history with Silver-5 demotions the new floors would have prevented.
+        v9.LegacyUnopenedPacks = 0; v9.LadderState = null; v9.LadderRuleVersion = 0;
+        // A long history with Silver-5 demotions the new floors would have prevented.
         var template = v9.Matches[0];
         string[] results = Enumerable.Repeat("Won", 47).Concat(new[] { "Lost", "Lost", "Lost", "Won", "Lost", "Tied" }).ToArray();
-        v9.Matches = results.Select((result, i) => new LocalMatchRecord { Id = Guid.NewGuid().ToString(), Deck = template.Deck, DeckHero = template.DeckHero,
-            Opponent = template.Opponent, Seed = i, StartedUtc = template.StartedUtc, Result = result, Turns = 10, RewardVersion = 2,
-            RewardFacts = new LocalRewardFacts(), Gold = LocalEconomy.Reward(result, 10, false, new LocalRewardFacts()).Gold }).ToList();
-        v9.GoldBalance = v9.Matches.Sum(m => m.Gold);
+        v9.Matches = FoldedChain(results, template, out int folded);
+        v9.GoldBalance = v9.Matches.Sum(m => m.Gold); v9.DustBalance = v9.Matches.Sum(m => m.DustReward);
         v9.ClassXp.ForEach(xp => xp.Xp = 0);
         v9.PendingRewardPresentationId = null;
         Write(v9Path, v9);
-        byte[] v9Bytes = File.ReadAllBytes(v9Path);
-        int folded = v9.Matches.Aggregate(0, (stars, match) => LocalProfile.NextStars(stars, match.Result));
         Check(folded == 44, "fixture folds below Silver 5 under the old floors: " + folded);
         using (var p = new LocalProfile(v9Path))
         {
-            Check(File.ReadAllBytes(v9Path + ".v9.bak").SequenceEqual(v9Bytes), "byte-exact V9 backup");
             var migrated = Read(v9Path);
-            Check(migrated.Version == 12 && migrated.LadderRuleVersion == LadderRules.RuleVersion && migrated.LadderState.StarIndex == folded
+            Check(migrated.LadderRuleVersion == LadderRules.RuleVersion && migrated.LadderState.StarIndex == folded
                 && migrated.LadderCalibration?.Version == 1 && migrated.LadderCalibration.MatchCount == results.Length
-                && migrated.Matches.All(m => m.Ladder == null), "migration keeps the folded index and starts calibration");
+                && migrated.Matches.All(m => m.Ladder.LadderRuleVersion == 1), "calibration keeps the folded index and starts the new rule");
             var seeded = p.Ladder;
             Check(p.Stars == folded && seeded.StarIndex == folded && seeded.PlacementGames == 0 && seeded.Rating == LadderRules.StartRating
-                && seeded.StreakWins == 0 && seeded.Multiplier == LadderRules.Seed(folded, folded, results.Select(LadderRules.Outcome).ToArray()).Multiplier,
-                "calibration preserves the historical position and multiplier");
+                && seeded.StreakWins == 0 && seeded.Multiplier == LadderRules.Seed(folded, v9.Matches.Max(m => m.Ladder.StarsAfter), results.Select(LadderRules.Outcome).ToArray()).Multiplier,
+                "calibration preserves the historical position and multiplier (best = running maximum over the folded receipts)");
             var next = Play(p, "Lost", 99).Ladder;
             Check(next.StarsBefore == folded && next.StarsAfter == folded - 1 && next.PlacementBefore == 0
-                && Read(v9Path).LadderRuleVersion == LadderRules.RuleVersion && p.History.Count(m => m.Ladder != null) == 1, "first V10 settlement");
+                && Read(v9Path).LadderRuleVersion == LadderRules.RuleVersion && p.History.Count(m => m.Ladder?.LadderRuleVersion == LadderRules.RuleVersion) == 1, "first settlement under the new rule");
         }
         using (var p = new LocalProfile(v9Path)) Check(p.Stars == folded - 1, "migrated restart");
-        Console.WriteLine("PASS ladder ledger: atomic settle/recovery, idempotent replay, abandon once, tamper rejection, V9 migration, medal");
+        Console.WriteLine("PASS ladder ledger: atomic settle/recovery, idempotent replay, abandon once, tamper rejection, old folded history, medal");
     }
 }
