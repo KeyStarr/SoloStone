@@ -1,0 +1,446 @@
+{
+  "Version": 1,
+  "Source": "docs/superpowers/specs/2026-10-25-shop-cosmetics-curation.md",
+  "HeroSkins": {
+    "HERO_01": {
+      "Primary": [
+        "HERO_01a",
+        "HERO_01c",
+        "HERO_01aa",
+        "HERO_01aw",
+        "HERO_01bb"
+      ],
+      "Alternates": [
+        "HERO_01bd",
+        "HERO_01cb"
+      ]
+    },
+    "HERO_02": {
+      "Primary": [
+        "HERO_02a",
+        "HERO_02b",
+        "HERO_02am",
+        "HERO_02e",
+        "HERO_02m"
+      ],
+      "Alternates": [
+        "HERO_02bu",
+        "HERO_02az"
+      ]
+    },
+    "HERO_03": {
+      "Primary": [
+        "HERO_03a",
+        "HERO_03m",
+        "HERO_03s",
+        "HERO_03ak_Patches",
+        "HERO_03ay"
+      ],
+      "Alternates": [
+        "HERO_03bm",
+        "HERO_03bg"
+      ]
+    },
+    "HERO_04": {
+      "Primary": [
+        "HERO_04a",
+        "HERO_04b",
+        "HERO_04u",
+        "HERO_04ay",
+        "HERO_04bk"
+      ],
+      "Alternates": [
+        "HERO_04c",
+        "HERO_04l"
+      ]
+    },
+    "HERO_05": {
+      "Primary": [
+        "HERO_05a",
+        "HERO_05c",
+        "HERO_05y",
+        "HERO_05am_KingKrush_h",
+        "HERO_05as"
+      ],
+      "Alternates": [
+        "HERO_05k",
+        "HERO_05ba"
+      ]
+    },
+    "HERO_06": {
+      "Primary": [
+        "HERO_06a",
+        "HERO_06b",
+        "HERO_06ah",
+        "HERO_06aw",
+        "HERO_06bw"
+      ],
+      "Alternates": [
+        "HERO_06f",
+        "HERO_06bg"
+      ]
+    },
+    "HERO_07": {
+      "Primary": [
+        "HERO_07a",
+        "HERO_07b",
+        "HERO_07d",
+        "HERO_07ae",
+        "HERO_07ag"
+      ],
+      "Alternates": [
+        "HERO_07z",
+        "HERO_07am_Godfrey"
+      ]
+    },
+    "HERO_08": {
+      "Primary": [
+        "HERO_08a",
+        "HERO_08b",
+        "HERO_08e",
+        "HERO_08x",
+        "HERO_08aa"
+      ],
+      "Alternates": [
+        "HERO_08bc",
+        "HERO_08ck"
+      ]
+    },
+    "HERO_09": {
+      "Primary": [
+        "HERO_09a",
+        "HERO_09b",
+        "HERO_09ar",
+        "HERO_09y",
+        "HERO_09at"
+      ],
+      "Alternates": [
+        "HERO_09bd",
+        "HERO_09bn"
+      ]
+    },
+    "HERO_10": {
+      "Primary": [
+        "HERO_10bk",
+        "HERO_10b",
+        "HERO_10z",
+        "HERO_10am",
+        "HERO_10bc"
+      ],
+      "Alternates": [
+        "HERO_10bg",
+        "HERO_10cb"
+      ]
+    },
+    "HERO_11": {
+      "Primary": [
+        "HERO_11b",
+        "HERO_11c",
+        "HERO_11l",
+        "HERO_11z",
+        "HERO_11ag"
+      ],
+      "Alternates": [
+        "HERO_11ax",
+        "HERO_11bl"
+      ]
+    }
+  },
+  "CardBacks": [
+    1,
+    2,
+    6,
+    8,
+    18,
+    19,
+    21,
+    56,
+    99,
+    351,
+    11,
+    15,
+    31,
+    36,
+    45,
+    67,
+    70,
+    122,
+    143,
+    190,
+    207,
+    177,
+    226,
+    239,
+    427,
+    61,
+    373,
+    482,
+    503,
+    513,
+    325,
+    3,
+    4,
+    9,
+    23,
+    46,
+    162,
+    7,
+    10,
+    97,
+    129,
+    163,
+    215,
+    343,
+    438,
+    469,
+    490
+  ],
+  "Coins": [
+    87,
+    93,
+    89,
+    75,
+    41,
+    26,
+    84,
+    100,
+    74,
+    78,
+    81,
+    62,
+    59,
+    54,
+    51,
+    46,
+    48,
+    39,
+    34,
+    25,
+    24,
+    27,
+    7,
+    2,
+    5,
+    10,
+    57,
+    28,
+    88,
+    79
+  ],
+  "PriceTiers": {
+    "HeroSkin": [
+      {
+        "Name": "Classic",
+        "Price": 1000,
+        "Items": [
+          "HERO_01a",
+          "HERO_01c",
+          "HERO_01aa",
+          "HERO_01aw",
+          "HERO_02a",
+          "HERO_02b",
+          "HERO_02am",
+          "HERO_02e",
+          "HERO_02m",
+          "HERO_02az",
+          "HERO_03a",
+          "HERO_03m",
+          "HERO_03s",
+          "HERO_03ak_Patches",
+          "HERO_03ay",
+          "HERO_04a",
+          "HERO_04b",
+          "HERO_04u",
+          "HERO_04c",
+          "HERO_04l",
+          "HERO_05a",
+          "HERO_05c",
+          "HERO_05y",
+          "HERO_05am_KingKrush_h",
+          "HERO_05as",
+          "HERO_05k",
+          "HERO_06a",
+          "HERO_06b",
+          "HERO_06aw",
+          "HERO_06f",
+          "HERO_06bg",
+          "HERO_07a",
+          "HERO_07b",
+          "HERO_07d",
+          "HERO_07ae",
+          "HERO_07ag",
+          "HERO_07z",
+          "HERO_07am_Godfrey",
+          "HERO_08a",
+          "HERO_08b",
+          "HERO_08e",
+          "HERO_08x",
+          "HERO_08aa",
+          "HERO_08ck",
+          "HERO_09a",
+          "HERO_09b",
+          "HERO_09y",
+          "HERO_09at",
+          "HERO_09bn",
+          "HERO_10bk",
+          "HERO_10b",
+          "HERO_10z",
+          "HERO_10bc",
+          "HERO_10bg",
+          "HERO_10cb",
+          "HERO_11b",
+          "HERO_11c",
+          "HERO_11l",
+          "HERO_11ag",
+          "HERO_11ax",
+          "HERO_11bl"
+        ]
+      },
+      {
+        "Name": "Diamond",
+        "Price": 1800,
+        "Items": [
+          "HERO_01bd",
+          "HERO_01cb",
+          "HERO_02bu",
+          "HERO_03bm",
+          "HERO_03bg",
+          "HERO_04ay",
+          "HERO_05ba",
+          "HERO_08bc",
+          "HERO_09ar",
+          "HERO_09bd",
+          "HERO_10am",
+          "HERO_11z"
+        ]
+      },
+      {
+        "Name": "Legendary",
+        "Price": 2500,
+        "Items": [
+          "HERO_01bb",
+          "HERO_04bk",
+          "HERO_06ah",
+          "HERO_06bw"
+        ]
+      }
+    ],
+    "CardBack": [
+      {
+        "Name": "Classic",
+        "Price": 300,
+        "Items": [
+          1,
+          2,
+          6,
+          8,
+          19,
+          11,
+          15,
+          36,
+          67,
+          3,
+          4,
+          9,
+          23,
+          162
+        ]
+      },
+      {
+        "Name": "Ornate",
+        "Price": 500,
+        "Items": [
+          21,
+          31,
+          70,
+          122,
+          143,
+          190,
+          207,
+          177,
+          226,
+          61,
+          373,
+          482,
+          325,
+          46,
+          7,
+          10,
+          97,
+          129,
+          163,
+          343,
+          469
+        ]
+      },
+      {
+        "Name": "Legendary",
+        "Price": 800,
+        "Items": [
+          18,
+          56,
+          99,
+          351,
+          45,
+          239,
+          427,
+          503,
+          513,
+          215,
+          438,
+          490
+        ]
+      }
+    ],
+    "Coin": [
+      {
+        "Name": "Classic",
+        "Price": 250,
+        "Items": [
+          25,
+          24,
+          27,
+          7,
+          2,
+          5,
+          10,
+          57,
+          28,
+          88,
+          79
+        ]
+      },
+      {
+        "Name": "Ornate",
+        "Price": 400,
+        "Items": [
+          84,
+          100,
+          74,
+          78,
+          81,
+          62,
+          59,
+          54,
+          51,
+          46,
+          48,
+          39,
+          34
+        ]
+      },
+      {
+        "Name": "Legendary",
+        "Price": 600,
+        "Items": [
+          87,
+          93,
+          89,
+          75,
+          41,
+          26
+        ]
+      }
+    ]
+  }
+}

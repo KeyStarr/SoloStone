@@ -24,6 +24,7 @@ For the `ci` tier you need no Hearthstone files.
 | .NET SDK | **10.0.402**. `global.json` pins it and refuses any other version. |
 | Python | 3.10 or newer, on your `PATH` as `python3` (or `python` on Windows). The runner uses only the standard library. |
 | Git | The installer build tools read the source revision, so use a Git checkout. |
+| Mono | Only for the `fx-harmony` suite, which patches under Mono as the game does: `mono` on your `PATH` (Linux and macOS; on Windows the suite runs without it). Without it the suite is skipped, and CI fails on a skip. |
 | Internet | Once, to restore NuGet packages. |
 
 ```text
@@ -31,7 +32,7 @@ python3 tests/run.py
 ```
 
 It builds every suite in Release mode (the engine is built from `engine/`, never from a prebuilt DLL), runs it, and
-prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about 14
+prints one PASS or FAIL line per suite. The exit code is 0 only if everything passed. A first run takes about 15 to 20
 minutes on a fast Mac (`engine-proof`, 5 to 6 minutes, and `launcher`, about 5 including its package restore, are the longest).
 
 | Option | What it does |
@@ -48,6 +49,10 @@ maintainer starts it by hand ([tests.yml](../.github/workflows/tests.yml)). With
 tier out and **a skipped suite fails the run**, so a whole suite cannot silently stop running in CI. (A suite can still
 skip single checks inside itself, as `launcher` does without a client; those show in its own output.)
 
+Three checks in the `ci` tier read your client's own library, so they skip on a machine without one and run on a machine
+with one (see "The client tier"): the pinned section-loader code of the native shop (`shop`), the pinned sideboard tag
+(`recipe-picker`) and the pinned sub-spell hooks (`fx-harmony`). Their `SKIP` line says what is missing.
+
 ### The client tier
 
 ```text
@@ -61,8 +66,13 @@ after your client changes. Use the client version named in `installer/tested-cli
 in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
-(built locally from your client and never committed) is missing. The summary line counts every skip, for example
-`16 of 17 suites passed, 1 skipped (installer-python)`. A skip is not a pass: look at the reason.
+(built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary line counts every skip, for example
+`27 of 30 suites passed, 3 skipped (progression-standard-batches, engine-proof-client, standard-native-client)` on a
+machine without a client. A skip is not a pass: look at the reason.
+
+With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
+compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
+[BUILDING.md](BUILDING.md)); if they are missing, `fx-harmony` fails instead of skipping the check.
 
 | Option | What it does |
 |---|---|
@@ -82,6 +92,15 @@ A `client` suite is **skipped, with the reason printed**, when `references/game`
 | `ai-golden` | Opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks |
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
+| `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
+| `projection` | How menu and match state is projected onto the native screens |
+| `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
+| `recipe-picker` | The recipe picker and recipe guide of the native shop |
+| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
+| `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
+| `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
+| `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
+| `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools). Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
@@ -119,9 +138,11 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world`, `engine-proof` |
 | Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
-| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes` |
+| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder` |
+| Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
-| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation` |
+| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
@@ -175,13 +196,15 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 
 Some test suites are not in this repository.
 
-- **Suites that need your own Hearthstone client** (the `client` tier above). They load the game's own libraries to
-  check the plugin's native screens, hooks and message handling: the engine proofs per card, native match and shop
-  flows, profile, progression, ladder and pack screens, and the checks that every client call the plugin binds to still
-  exists. The runner already supports them (`--client`); the suites themselves are added in a later change. This
-  repository ships no client file, and CI cannot run them.
-- **The tests for the plugin's game profile and offline guard.** They spell out the paths of the maintainer's test
-  machine, so they stay private for now. Part of them (achievements and rewards) could move out into a public suite later.
+- **The native match, binding and transport suites.** They load the game's own libraries to check the plugin's native
+  match flows, hooks and message handling, and that every client call the plugin binds to still exists. The runner
+  already supports them (`--client`); the suites themselves are added in a later change. The `client` suites that are
+  here (`engine-proof-client`, `standard-native-client`, `progression-standard-batches`) run with `--client` and the
+  card export. This repository ships no client file, and CI cannot run them.
+- **The offline guard and save-flow tests.** They spell out the paths of the maintainer's test machine, so they stay
+  private. The profile, rewards and achievements logic is in the `progression` suite above.
+- **Checks against maintainer-only files.** A few checks in `progression` and `projection` compare the plugin with the
+  maintainer's lab scripts and notes. Without those files they print `SKIP ... maintainer-only` and the suite still passes.
 - **Live tests.** These drive a real game on a real test machine: clicks, drags, matches and installs. They need that
   machine and are not in this repository.
 - **Generator tests.** The tools that make the card file and the pack tables from the game's own data are private,

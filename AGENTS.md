@@ -4,9 +4,9 @@ For people and coding agents alike. Be direct and brief.
 
 ## Build and test
 
-- Build and test with one command: `python3 tests/run.py`. CI runs the same suites with `--ci`. It needs the .NET SDK that `global.json` names and Python 3.10 or newer, and no Hearthstone file.
-- `python3 tests/run.py --client <your Hearthstone folder>` is for the suites that need your own client (none yet; see
-  [docs/TESTING.md](docs/TESTING.md)). A suite that cannot run is skipped with a printed reason and counted; CI treats
+- Build and test with one command: `python3 tests/run.py`. CI runs the same suites with `--ci`. It needs the .NET SDK that `global.json` names and Python 3.10 or newer, and no Hearthstone file (the `fx-harmony` suite also needs `mono` on `PATH`).
+- `python3 tests/run.py --client <your Hearthstone folder>` is for the suites and checks that need your own client (no suite yet, three checks inside `shop`,
+  `recipe-picker` and `fx-harmony`; see [docs/TESTING.md](docs/TESTING.md)). A suite that cannot run is skipped with a printed reason and counted; CI treats
   a skip as a failure.
 - [docs/TESTING.md](docs/TESTING.md) says what each suite covers and which to run for which change.
   [docs/BUILDING.md](docs/BUILDING.md) builds the plugin, the launcher and the installer.
