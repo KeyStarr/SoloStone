@@ -50,6 +50,22 @@ internal static class LocalizedCardText
         return hash.ToString("x8", System.Globalization.CultureInfo.InvariantCulture);
     }
 
+    // The English with the client's layout marks undone: a leading [x], `_` (non-breaking space), `&` (optional line break) and
+    // newlines. Some card modules set Card.Text in the client's raw form; the card file has the same words with the marks resolved.
+    // tools/gen_card_facts.py without_layout does the same.
+    internal static string WithoutLayout(string english)
+    {
+        string text = Canonical(english);
+        if (text == null) return null;
+        if (text.StartsWith("[x]", StringComparison.Ordinal)) text = text.Substring(3);
+        text = text.Replace('_', '\u00a0').Replace("&", "").Replace('\n', ' ');
+        while (text.Contains("  ")) text = text.Replace("  ", " ");
+        return text.Trim(' ', '\t', '\r', '\n');
+    }
+
+    // True while the engine plays the English a translation was made from: the same text, or the same words in raw layout.
+    internal static bool SameEnglish(string key, string engineText) => key == Key(engineText) || key == Key(WithoutLayout(engineText));
+
     // Which language the card text follows, given what the client reports and what Options > Language started it with.
     // `cacheable` is false while the two disagree about English: the client can report enUS before its language is set up.
     internal static string Resolve(string clientLocale, string runningLocale, out bool cacheable)
@@ -72,7 +88,7 @@ internal static class LocalizedCardText
         if (texts == null) return Status.NoFile;
         if (!texts.TryGetValue(engineId, out Entry entry) || string.IsNullOrEmpty(entry.Text)) return Status.NoEntry;
         // The engine rewrites some cards after load (Configure hooks); a translation of the old text would say something else.
-        if (entry.Key != Key(engineText)) return Status.Stale;
+        if (!SameEnglish(entry.Key, engineText)) return Status.Stale;
         raw = entry.Text;
         return Status.Localized;
     }

@@ -48,6 +48,10 @@ static partial class Program
             Check(LocalizedCardText.Key("")=="811c9dc5" && LocalizedCardText.Key("a")=="e40c292c" && LocalizedCardText.Key(" \ta\n ")==LocalizedCardText.Key("a"),"the key trims whitespace at both ends");
             Check(LocalizedCardText.Key("Deal $8 damage. @spelldmg")==LocalizedCardText.Key("Deal $8 damage.") && LocalizedCardText.Key("a b")!=LocalizedCardText.Key("a  b") && LocalizedCardText.Key("\u00fc")!=LocalizedCardText.Key("u"),"the engine's spell damage suffix is not part of the text; inner spaces and UTF-8 are");
 
+            string resolved="Whenever this minion takes damage, draw a\u00a0card.", key=LocalizedCardText.Key(resolved);
+            Check(LocalizedCardText.SameEnglish(key,"Whenever this minion takes damage,& draw a_card.") && LocalizedCardText.SameEnglish(key,"[x]Whenever this minion\ntakes damage,& draw a_card.") && LocalizedCardText.SameEnglish(key,resolved),"raw layout marks ([x], _, &, newlines) do not make the same words stale");
+            Check(!LocalizedCardText.SameEnglish(key,"Whenever this minion takes damage, draw 2 cards.") && !LocalizedCardText.SameEnglish(key,"Whenever this minion takes damage, draw a card."),"other words, or a plain space for a non-breaking one in resolved text, are stale");
+
             // The reader: escapes, unknown header keys skipped, nothing accepted loosely.
             string good="{\"schemaVersion\":2,\"meta\":\"violet-hold-2026-09\",\"locale\":\"deDE\",\"excluded\":[\"A\",[1,{\"k\":null}]],\"n\":-3.5e2,\"text\":{\n\"X\":[\"0000abcd\",\"a\\n\\\"q\\\" \\u00fc \\/ \\\\ \\t\"],\n\"Y\":[\"00000001\",\"\u00fc\u65e5\"]}}\n";
             var read=LocalizedCardText.Read(new MemoryStream(Encoding.UTF8.GetBytes(good)),"deDE");
@@ -88,12 +92,12 @@ static partial class Program
                 var card=SabberStoneCore.Model.Cards.FromId(pair.Key);
                 if(card==null) continue;
                 compared++;
-                if(pair.Value.Key!=LocalizedCardText.Key(card.Text)) rewritten.Add(pair.Key);
+                if(!LocalizedCardText.SameEnglish(pair.Value.Key,card.Text)) rewritten.Add(pair.Key);
             }
             Check(compared>9000,"the engine has the cards the locale files translate");
             Check(rewritten.SequenceEqual(EngineRewrittenText.OrderBy(i=>i,StringComparer.Ordinal)),"ids whose engine text differs from the card file's English must be exactly the known list; new drift fails. Now: "+string.Join(",",rewritten));
             foreach(string locale in locales) {
-                var drift=all[locale].Where(p=>{ var card=SabberStoneCore.Model.Cards.FromId(p.Key); return card!=null && p.Value.Key!=LocalizedCardText.Key(card.Text); }).Select(p=>p.Key).ToList();
+                var drift=all[locale].Where(p=>{ var card=SabberStoneCore.Model.Cards.FromId(p.Key); return card!=null && !LocalizedCardText.SameEnglish(p.Value.Key,card.Text); }).Select(p=>p.Key).ToList();
                 Check(drift.All(rewritten.Contains),"no locale has drift the others do not: "+locale);
                 foreach(string id in drift) Check(LocalizedCardText.Lookup(locale,id,SabberStoneCore.Model.Cards.FromId(id).Text,out string never)==LocalizedCardText.Status.Stale && never==null,"a rewritten card falls back to English: "+locale+" "+id);
             }
