@@ -6,8 +6,12 @@ internal static class TransportDebtProof
 {
     internal static void Run(string only = null)
     {
+        string[] replays = { "helper-accepted", "runtime", "rewind-actor" };
+        // A name that matches nothing would run no check and still pass.
+        if (only != null && only != "shapes" && !replays.Contains(only))
+            throw new ArgumentException("unknown transport debt check: " + only + " (shapes, " + string.Join(", ", replays) + ")");
         if (only == "shapes") HistoryShapeProof.DebtShapes();
-        foreach (string name in new[] { "helper-accepted", "runtime", "rewind-actor" })
+        foreach (string name in replays)
         {
             if (only != null && name != only) continue;
             var replay = JsonSerializer.Deserialize<TransportReplay>(File.ReadAllText(
