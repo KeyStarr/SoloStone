@@ -68,7 +68,7 @@ in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary
-line counts every skip, for example `31 of 37 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
+line counts every skip, for example `32 of 38 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
 standard-native-client, native-bindings, native-match, transport-invariants)` on a machine without a client. A skip is
 not a pass: look at the reason.
 
@@ -131,6 +131,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
+| `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
@@ -219,8 +220,50 @@ dotnet /tmp/hssim/bin/HsSim/release/HsSim.dll goldens check tests/goldens/modern
 ```
 
 **Only re-record a golden when you meant to change the rules.** Look at every game that changed first, and say in your
-change why each one changes. Re-recording just to make the test pass hides the bug it found. The commands that made the
-current files are:
+change why each one changes. Re-recording just to make the test pass hides the bug it found.
+
+To absorb an intended engine change, use `rerecord`:
+
+```text
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --dry-run
+HsSim.dll goldens rerecord tests/goldens/core-2026.json
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --only <game-id> [<game-id>...]
+```
+
+It replays every game (or just the `--only` ones) and re-records only the games that no longer match. Each one is run
+again as the same case (suite, deck pair, seed, policy). Games that still match stay byte-identical, and games are never
+added or removed. A record pins the card pool and the deck's id, not the deck's cards, so a changed deck list or card
+shows up as a changed game, not as a quiet success.
+
+Every re-recorded game is classified and printed:
+
+- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history hash moved.
+  Accepted without a flag.
+- `STATE`: as above, but the final state hash moved. The legal-move hashes cover the options offered, not the board
+  numbers, so a rules change that alters stats or tags without changing any offered option (most likely on the last
+  turn) looks exactly like this, and a regression can hide in it. These are refused (exit 1, nothing written) unless
+  you pass `--allow-state-change` (or `--allow-behaviour-change`, which implies it), which prints a warning per game.
+  To review one, replay the game before and after (old engine/golden against the new build) and compare the final board:
+  every minion's and hero's stats, tags and health must differ only where your change says they should.
+- `BEHAVIOUR`: the game itself changed (different actions or legal moves, turns, winner, or a pool/Dark Gift version
+  field). The line shows how many actions changed and where they first differ. These are refused (exit 1, nothing
+  written) unless you pass `--allow-behaviour-change`, which prints a warning per game. A behaviour change needs a
+  reviewer's eye on each listed game: say in your change why it changed.
+
+`--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
+re-recorded, a behaviour or state change without its flag, a re-recorded game that still does not match, or a file not in the
+form `goldens record` writes); nothing is written then. 2 is a usage error.
+
+Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card pool their record pins. Schema 2 files
+(`classic-source`, `modern`, `core-reprints`) record no pool, so their games are re-run unpinned, under the current
+pool and Dark Gift rules, and stored in the schema 2 form. They replay under the legacy rules, so the re-check is what
+guards them: a re-recorded game is replayed from the text that would be written, and nothing is written if any one still
+mismatches. Rerecord also refuses a case that can no longer be built or whose identity (id, decks, seed, policy)
+changed. It prints `N re-recorded (S shape only, T state, B behaviour), M unchanged, all K match`.
+
+`goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
+and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine
+change. The commands that made the current files are:
 
 ```text
 HsSim.dll goldens record tests/goldens/classic-source.json --suite classic --seeds 0..4 --policy random
@@ -230,8 +273,8 @@ HsSim.dll goldens record tests/goldens/core-2026.json --suite core-2026 --seeds 
 HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite offline-standard-pools-v1 --seeds 1..3 --policy random
 ```
 
-`HsSim.dll` is the file built above. Recording replaces the file. It also saves the card pool it used in
-`tests/goldens/pools/` (the `.xml` and its `.xml.sha256`); commit both with the golden.
+`HsSim.dll` is the file built above. Recording also saves the card pool it used in `tests/goldens/pools/` (the `.xml`
+and its `.xml.sha256`); commit both with the golden. `rerecord` never adds a pool.
 
 ## Not here yet
 
