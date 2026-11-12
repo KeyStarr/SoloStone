@@ -16,6 +16,10 @@ internal static class LocalNativeText
         "EX1_411e", "EX1_414e", "CS1_129e", "CS2_236e", "CS2_087e", "CS2_092e",
         "EX1_360e", "EX1_382e", "EX1_619e", "EX1_366e", "EX1_355e"
     };
+    // Quarantined cards and the tokens they make are shown through another card's native identity, so they keep its text.
+    // Keep it above TextByNativeId: static fields initialize in order, and the loop's catch would hide a null set.
+    private static readonly HashSet<string> KeepNativeText = new HashSet<string>(
+        LocalCardCatalog.QuarantinedIds.Concat(new[] { "EX1_614t", "EX1_finkle" }), StringComparer.Ordinal);
     private static readonly Dictionary<string, string> TextByNativeId = BuildTextByNativeId();
 
     internal static IReadOnlyCollection<string> SupportedIds => TextByNativeId.Keys;
@@ -77,7 +81,8 @@ internal static class LocalNativeText
         {
             try
             {
-                if (card.Implemented && !result.ContainsKey(card.Id) && NativeMatch.TransportCardId(card.Id) == card.Id)
+                if (card.Implemented && !result.ContainsKey(card.Id) && !KeepNativeText.Contains(card.Id)
+                    && NativeMatch.TransportCardId(card.Id) == card.Id)
                     result[card.Id] = card.Text;
             }
             catch { }

@@ -780,7 +780,24 @@ internal static partial class Program
         expectedIds.UnionWith(LocalDecks.TestLoaners.SelectMany(deck => deck.CardIds).Select(NativeMatch.TransportCardId));
         expectedIds.UnionWith(new[] { "TIME_609t1", "TIME_609t2" });
         expectedIds.UnionWith(LocalCardCatalog.CardStateGeneratedIds.Select(NativeMatch.TransportCardId));
-        Check(expectedIds.SetEquals(LocalNativeText.SupportedIds), "native text supported-ID scope widened or narrowed");
+        string missing = expectedIds.FirstOrDefault(id => !LocalNativeText.SupportedIds.Contains(id));
+        Check(missing == null, "native text supported-ID scope narrowed: " + missing);
+        // #24: beyond the lists above, only an implemented engine card that the transport plays under its own ID gets its
+        // engine text (tokens, generated cards, enchantments), and every such card does.
+        var quarantined = new HashSet<string>(LocalCardCatalog.QuarantinedIds.Concat(new[] { "EX1_614t", "EX1_finkle" }), StringComparer.Ordinal);
+        bool OwnEngineId(SabberStoneCore.Model.Card card)
+        {
+            try { return card.Implemented && !quarantined.Contains(card.Id) && NativeMatch.TransportCardId(card.Id) == card.Id; }
+            catch { return false; }
+        }
+        var engineIds = new HashSet<string>(Cards.All.Where(OwnEngineId).Select(card => card.Id), StringComparer.Ordinal);
+        string stray = LocalNativeText.SupportedIds.FirstOrDefault(id => !expectedIds.Contains(id) && !engineIds.Contains(id));
+        Check(stray == null, "native text supported-ID scope widened past implemented engine cards: " + stray);
+        string uncovered = engineIds.FirstOrDefault(id => !LocalNativeText.SupportedIds.Contains(id));
+        Check(uncovered == null, "implemented engine card missing from native text scope: " + uncovered);
+        foreach (string id in new[] { "CAP_405t1", "CAP_405t5", "DINO_410t2", "DINO_410t3" })
+            Check(engineIds.Contains(id) && LocalNativeText.TryGetOverride(true, id, value => value, out text)
+                && text == LocalNativeText.NormalizeRawText(Cards.FromId(id).Text), "#24 generated card keeps engine text: " + id);
         foreach (string id in new[] { "EX1_577", "EX1_614", "EX1_614t", "EX1_finkle" })
             Check(!LocalNativeText.SupportedIds.Contains(id)
                 && !LocalNativeText.TryGetOverride(true, id, value => value, out text),
