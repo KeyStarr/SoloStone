@@ -1,0 +1,13 @@
+id	class	reason	inventory	name
+BE_852	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Ammunae
+BE_852e	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Life Constructed
+EDR_818	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Nythendra
+EDR_818t	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Nythendric Beetle
+JAIL_432	G	played opponent copy while held	existing	Mind Sweeper
+JAIL_433	G	played opponent copy while held	existing	Unshackle Soul
+JAIL_434	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Enthralled Shade
+JAIL_430	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Azalina Soulsever
+BE_731	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Primal Rockfang
+BE_731e	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Pack Mentality
+EDR_491	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Archdruid of Thorns
+EDR_491e	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Devoured Soul

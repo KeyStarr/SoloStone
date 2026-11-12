@@ -5,6 +5,9 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+if (args.Contains("--ai-frontier-only")) { AiFrontierProof.Run(); return; }
+if (args.Contains("--canonical-policy-only")) { CanonicalPolicyChecks.Run(); return; }
+if (args.Contains("--shadow-trial-only")) { ShadowTrialProof.Run(); return; }
 if (args.Contains("--card-facts-only")) { CardFactsProof.Run(); return; }
 if (args.Contains("--attack-trigger-cards-only")) { AttackTriggerSweepProof.PositiveControls(); return; }
 if (args.Contains("--attack-trigger-inventory-only")) { AttackTriggerSweepProof.Inventory(); return; }
@@ -646,5 +649,8 @@ PrepareProof.Run();
 OutcastProof.Run();
 StateTaskListDeterminismProof.Run();
 HistoryFactsProof.Run();
+CanonicalPolicyChecks.Run();
+ShadowTrialProof.Run();
+AiFrontierProof.Run();
 ClientExport.PrintSkips();
 Console.WriteLine("engine-proof: PASS");

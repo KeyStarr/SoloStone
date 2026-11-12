@@ -1,0 +1,7 @@
+id	class	reason	inventory	name
+BE_566	N	unconditional hand selection	existing	Wormriddled Wriggler
+CATA_131	G	four Mana spent during this hand residence	existing	Felwood Treant
+EDR_421	N	not a play effect: attack-scaling Deathrattle	existing	Omen
+JAIL_721	N	not a play effect: summon trigger	existing	Tras'tath, Soul Parasite
+JAIL_721e	N	enchantment with no pre-play condition	existing	Stolen Soul
+TIME_022	N	not a play effect: scaling cost	existing	Perennial Serpent

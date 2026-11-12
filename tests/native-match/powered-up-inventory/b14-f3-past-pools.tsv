@@ -1,0 +1,46 @@
+id	class	reason	inventory	name
+AT_020	N	qualified historical definition or fixed dependency	legacy	Fearsome Doomguard
+AT_037	N	qualified historical definition or fixed dependency	legacy	Living Roots
+BE_588	G	friendly Mech Battlecry	existing	Mimiron
+BOT_257	N	qualified historical definition or fixed dependency	legacy	Luna's Pocket Galaxy
+BOT_257e	N	qualified historical definition or fixed dependency	legacy	Starstruck
+BOT_453	N	qualified historical definition or fixed dependency	legacy	Shooting Star
+BOT_906	N	qualified historical definition or fixed dependency	legacy	Glow-Tron
+BRM_024	N	qualified historical definition or fixed dependency	legacy	Drakonid Crusher
+BRM_024e	N	qualified historical definition or fixed dependency	legacy	Large Talons
+BRM_025	N	qualified historical definition or fixed dependency	legacy	Volcanic Drake
+CS2_039	N	qualified historical definition or fixed dependency	legacy	Windfury
+CS2_041	N	qualified historical definition or fixed dependency	legacy	Ancestral Healing
+CS2_041e	N	qualified historical definition or fixed dependency	legacy	Ancestral Infusion
+CS2_064	N	qualified historical definition or fixed dependency	legacy	Dread Infernal
+DRG_069	N	qualified historical definition or fixed dependency	legacy	Platebreaker
+END_027	N	unconditional Dark Gift Discover	existing	Wings of Eternity
+EX1_183	N	qualified historical definition or fixed dependency	legacy	Gift of the Wild
+EX1_183e	N	qualified historical definition or fixed dependency	legacy	Gift of the Wild
+EX1_245	N	qualified historical definition or fixed dependency	legacy	Earth Shock
+EX1_310	N	qualified historical definition or fixed dependency	legacy	Doomguard
+GVG_005	N	qualified historical definition or fixed dependency	legacy	Echo of Medivh
+GVG_033	N	qualified historical definition or fixed dependency	legacy	Tree of Life
+GVG_058	N	qualified historical definition or fixed dependency	legacy	Shielded Minibot
+GVG_062	N	qualified historical definition or fixed dependency	legacy	Cobalt Guardian
+KAR_300	N	qualified historical definition or fixed dependency	legacy	Enchanted Raven
+OG_047	N	qualified historical definition or fixed dependency	legacy	Feral Rage
+OG_195	N	qualified historical definition or fixed dependency	legacy	Wisps of the Old Gods
+OG_195a	N	qualified historical fixed dependency	legacy	Many Wisps
+OG_195b	N	qualified historical fixed dependency	legacy	Big Wisps
+OG_195c	N	qualified historical fixed dependency	legacy	Wisp
+OG_195e	N	qualified historical fixed dependency	legacy	Enormous
+OG_254	N	qualified historical definition or fixed dependency	legacy	Eater of Secrets
+OG_254e	N	qualified historical definition or fixed dependency	legacy	Secretly Sated
+TIME_013	N	after-cast board trigger	existing	Farseer Wo
+TIME_016	N	unconditional Discover and buff	existing	Neon Innovation
+TIME_016e	N	enchantment	existing	Neon Sign
+TIME_444	N	weapon Deathrattle	existing	Time-Lost Glaive
+TIME_446	N	location activation; next-minion condition checked on use	existing	The Eternal Hold
+TIME_446e	N	player enchantment	existing	Jailbreak
+TIME_704	N	unconditional Battlecry	existing	Highborne Mentor
+TIME_704t	N	stored spell Battlecry	existing	Highborne Pupil
+TIME_707	N	unconditional replacement	existing	Alternate Reality
+TIME_711	C	generic Combo	existing	Flashback
+TIME_711e	N	enchantment	existing	Memories
+TIME_857	N	unconditional sequential Discover	existing	Alter Time

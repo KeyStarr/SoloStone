@@ -13,7 +13,8 @@ from the repository root.
 | `client` | **Your own Hearthstone client**: the suite loads its libraries, and some also need data built locally from it | Your machine only. GitHub cannot run it, and this repository ships no client file |
 
 `python3 tests/run.py --list` shows each suite with its tier. A plain `python3 tests/run.py` runs the `ci` tier, and
-also the `client` tier when your client is set up (below). Every suite listed under "The suites" is in the `ci` tier.
+also the `client` tier when your client is set up (below). "The suites" lists the `ci` tier; "The client suites" lists the
+`client` tier.
 
 ## Run them
 
@@ -66,9 +67,29 @@ after your client changes. Use the client version named in `installer/tested-cli
 in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
-(built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary line counts every skip, for example
-`31 of 34 suites passed, 3 skipped (progression-standard-batches, engine-proof-client, standard-native-client)` on a
-machine without a client. A skip is not a pass: look at the reason.
+(built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary
+line counts every skip, for example `31 of 37 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
+standard-native-client, native-bindings, native-match, transport-invariants)` on a machine without a client. A skip is
+not a pass: look at the reason.
+
+Besides the client libraries, some suites need local files that git ignores:
+
+- `references/bepinex/BepInEx.dll` and `0Harmony.dll` (step 1 of [BUILDING.md](BUILDING.md)) for `native-match` and
+  `native-bindings`; `native-match` also builds the plugin, which needs them.
+
+#### Data built locally
+
+These suites read data that is exported from a Hearthstone client and so is never committed (git ignores these paths):
+
+| File | Read by |
+|---|---|
+| `data/carddb/37.0.0.254477/cards.json.gz` (the client's card export) | `engine-proof-client`, `native-match`, `transport-invariants`, `progression-standard-batches`; optional for `engine-proof` |
+| `data/carddb/37.0.0.254477/set-overrides.json` | `engine-proof-client`, `progression-standard-batches` |
+| `data/fx/empty-playeffect-37.0.0.254477.tsv` | `native-match` |
+
+The tools that export these files from a client are not in this repository yet. Until they are, those suites are
+**skipped on any machine that does not already have the files**, and the runner prints which file is missing. A skip is
+not a pass: a change that touches what such a suite covers still needs the maintainer's run (see "Not here yet").
 
 With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
 compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
@@ -96,7 +117,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
 | `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
-| `projection` | How menu and match state is projected onto the native screens |
+| `projection` | How menu and match state is projected onto the native screens, and which zero-tag differences between the engine and the client count as equal |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
 | `ladder-extended` | The older ladder-program checks, in the same program under `--extended`: the economy, pack and deck-library checks. The ledger, milestone-ledger and rating-placement checks run in `ladder`. Fixtures for saves no build wrote (rule-0 or rule-1 ranked history) are deleted |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
@@ -107,12 +128,27 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools). Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
+
+## The client suites
+
+These suites compile or load your client's libraries. Run one with `python3 tests/run.py --suite NAME`.
+`engine-proof-client` and `standard-native-client`, the client halves of two `ci` suites, are in the next section.
+
+| Suite | What it covers |
+|---|---|
+| `native-bindings` | The plugin's bindings: every client method it patches exists in your client libraries |
+| `native-match` | The native match: plugin match logic on recorded games, and the recipe editor of the built plugin |
+| `transport-invariants` | Engine-to-client transport: invariants over recorded and random games. It is the longest suite (about 45 minutes) |
+
+Apart from the data built locally (above), what they read is in the repository: `tests/fixtures/playtest/` (recorded
+matches), `research/`, and the card, pool, shop, progression and ladder files under `data/`. `transport-invariants` writes
+its packet logs to `sim/out/transport/` (git ignores it).
 
 ## Engine proofs and native flow checks
 
@@ -146,6 +182,7 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `progression-extended`, `shop`, `ladder`, `ladder-extended` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
+| Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | With a client: `native-bindings`, `native-match`, `transport-invariants` |
 | Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder`, `ladder-extended` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
@@ -198,13 +235,9 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 
 ## Not here yet
 
-Some test suites are not in this repository.
+Some test suites are not in this repository. The `client` tier runs on your machine only; GitHub cannot run it, and this
+repository ships no client file.
 
-- **The native match, binding and transport suites.** They load the game's own libraries to check the plugin's native
-  match flows, hooks and message handling, and that every client call the plugin binds to still exists. The runner
-  already supports them (`--client`); the suites themselves are added in a later change. The `client` suites that are
-  here (`engine-proof-client`, `standard-native-client`, `progression-standard-batches`) run with `--client` and the
-  card export. This repository ships no client file, and CI cannot run them.
 - **The offline guard and save-flow tests.** They spell out the paths of the maintainer's test machine, so they stay
   private. The profile, rewards and achievements logic is in the `progression` suite above.
 - **Checks against maintainer-only files.** A few checks in `progression` and `projection` compare the plugin with the

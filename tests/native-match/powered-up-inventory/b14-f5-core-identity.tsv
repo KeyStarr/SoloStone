@@ -1,0 +1,35 @@
+id	class	reason	inventory	name
+AT_037a	N	unconditional effect, keyword or Choose One branch	existing	Grasping Roots
+AT_037b	N	unconditional effect, keyword or Choose One branch	existing	One, Two, Trees!
+AT_037t	N	unconditional effect, keyword or Choose One branch	existing	Sapling
+BT_035e	N	unconditional effect, keyword or Choose One branch	existing	Chaos Strike
+CORE_AT_037	N	unconditional effect, keyword or Choose One branch	existing	Living Roots
+CORE_BT_035	N	unconditional effect, keyword or Choose One branch	existing	Chaos Strike
+CORE_BT_156	N	unconditional effect, keyword or Choose One branch	existing	Imprisoned Vilefiend
+CORE_EX1_154	N	unconditional effect, keyword or Choose One branch	existing	Wrath
+CORE_EX1_160	N	unconditional effect, keyword or Choose One branch	existing	Power of the Wild
+CORE_OG_047	N	unconditional effect, keyword or Choose One branch	existing	Feral Rage
+CORE_ONY_018	N	unconditional effect, keyword or Choose One branch	existing	Boomkin
+CORE_TSC_650	N	unconditional effect, keyword or Choose One branch	existing	Flipper Friends
+Core_LOE_115	N	unconditional effect, keyword or Choose One branch	existing	Raven Idol
+Core_UNG_072	N	unconditional effect, keyword or Choose One branch	existing	Stonehill Defender
+EDR_001	N	unconditional effect, keyword or Choose One branch	existing	Hopeful Dryad
+EX1_154a	N	unconditional effect, keyword or Choose One branch	existing	Solar Wrath
+EX1_154b	N	unconditional effect, keyword or Choose One branch	existing	Nature's Wrath
+EX1_160a	N	unconditional effect, keyword or Choose One branch	existing	Summon a Panther
+EX1_160b	N	unconditional effect, keyword or Choose One branch	existing	Leader of the Pack
+EX1_160be	N	unconditional effect, keyword or Choose One branch	existing	Leader of the Pack
+EX1_160t	N	unconditional effect, keyword or Choose One branch	existing	Panther
+LOE_115a	N	unconditional effect, keyword or Choose One branch	existing	Break Free
+LOE_115b	N	unconditional effect, keyword or Choose One branch	existing	Awakened
+OG_047a	N	unconditional effect, keyword or Choose One branch	existing	Evolve Spines
+OG_047b	N	unconditional effect, keyword or Choose One branch	existing	Evolve Scales
+OG_047e	N	unconditional effect, keyword or Choose One branch	existing	Spines
+ONY_018t	N	unconditional effect, keyword or Choose One branch	existing	Eyes of the Moon
+ONY_018t2	N	unconditional effect, keyword or Choose One branch	existing	Heart of the Sun
+RLK_048	N	unconditional effect, keyword or Choose One branch	existing	Anti-Magic Shell
+RLK_048e	N	unconditional effect, keyword or Choose One branch	existing	Anti-Magic Shell
+TSC_650a	N	unconditional effect, keyword or Choose One branch	existing	Order the Orca
+TSC_650d	N	unconditional effect, keyword or Choose One branch	existing	Romp of Otters
+TSC_650t	N	unconditional effect, keyword or Choose One branch	existing	Orca
+TSC_650t4	N	unconditional effect, keyword or Choose One branch	existing	Otter

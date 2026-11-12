@@ -1,0 +1,19 @@
+id	class	reason	inventory	name
+CATA_470	G	another Dragon in hand	existing	Victor Nefarius
+CATA_470t1	N	empty template; generated definitions evaluate component conditions	existing	Nefarian's Creation
+CFM_621_m4	N	unconditional generated-card effect	existing	Kabal Demon
+CFM_621e	N	unconditional generated-card effect	existing	Goldthorn
+CFM_621t10	N	unconditional generated-card effect	existing	Netherbloom
+CFM_621t2	N	unconditional generated-card effect	existing	Heart of Fire
+CFM_621t3	N	unconditional generated-card effect	existing	Stonescale Oil
+CFM_621t37	N	unconditional generated-card effect	existing	Ichor of Undeath
+CFM_621t4	N	unconditional generated-card effect	existing	Felbloom
+CFM_621t5	N	unconditional generated-card effect	existing	Icecap
+CFM_621t6	N	unconditional generated-card effect	existing	Goldthorn
+CFM_621t8	N	unconditional generated-card effect	existing	Kingsblood
+CFM_621t9	N	unconditional generated-card effect	existing	Shadow Oil
+JAIL_504	N	unconditional generated-card effect	existing	Aya, Lotus Kingpin
+JAIL_504t	N	unconditional generated-card effect	existing	Jade Coin
+JAIL_504t2	N	unconditional generated-card effect	existing	Grimy Coin
+JAIL_504t3	N	unconditional generated-card effect	existing	Kabal Coin
+JAIL_504t3p	N	unconditional generated-card effect	existing	Kazakus Potion

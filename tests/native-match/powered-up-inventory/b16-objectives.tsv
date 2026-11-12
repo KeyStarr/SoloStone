@@ -1,0 +1,32 @@
+id	class	reason	inventory	name
+BE_005	N	unconditional objective or component	existing	Ritual of Excess
+BE_085	N	unconditional objective or component	existing	Ritual of Summoning
+BE_085t	N	unconditional objective or component	existing	C'thrax Brute
+BE_090	G	completed Ritual condition	existing	Kith'ix
+BE_090e1	N	unconditional objective or component	existing	Conquest
+BE_090e2	N	unconditional objective or component	existing	Cost of War
+BE_090t1	N	unconditional objective or component	existing	Ritual of Famine
+BE_090t2	N	unconditional objective or component	existing	Ritual of Subjugation
+BE_090t3	N	unconditional objective or component	existing	Ritual of Conquest
+BE_726	N	unconditional objective or component	existing	Ritual of C'Thun
+CAP_405	N	unconditional objective or component	existing	Godfather Kazakus
+CAP_405t1	N	unconditional objective or component	existing	Detained for Destruction
+CAP_405t2	N	unconditional objective or component	existing	Convicted for Conspiracy
+CAP_405t3	N	unconditional objective or component	existing	Sentenced for Smuggling
+CAP_405t4	N	unconditional objective or component	existing	Crate of Contraband
+CAP_405t5	N	unconditional objective or component	existing	Spurious Shiv
+CAP_405t5e	N	unconditional objective or component	existing	Dubious Daggers
+CAP_405t6	N	unconditional objective or component	existing	Criminal Contract
+CAP_405t7	N	unconditional objective or component	existing	Potion of Perjury
+CAP_405t7e	N	unconditional objective or component	existing	Perjurer
+CAP_405t8	N	unconditional objective or component	existing	Swill of Suggestibility
+CAP_405t9	N	unconditional objective or component	existing	Tonic of Tyranny
+CAP_405tb1	N	unconditional objective or component	existing	Rushed Trial
+CAP_405tb1b	N	unconditional objective or component	existing	Rushed Trial
+CAP_405tb2	N	unconditional objective or component	existing	Grueling Trial
+CAP_405tb2b	N	unconditional objective or component	existing	Grueling Trial
+CAP_405tb3	N	unconditional objective or component	existing	Unending Trial
+CAP_405tb3b	N	unconditional objective or component	existing	Unending Trial
+DINO_405	N	unconditional objective or component	existing	Hatching Ceremony
+DINO_405e	N	unconditional objective or component	existing	Hatched
+TLC_466	N	unconditional objective or component	existing	Story of Lakkari

@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+CATA_477	N	automatic effect, location activation, or fixed token	existing	Chamber of Aspects
+CATA_477e	N	automatic effect, location activation, or fixed token	existing	Aspects' Blessing
+CATA_527	N	automatic effect, location activation, or fixed token	existing	Nespirah, Enthralled
+CATA_527t2	N	automatic effect, location activation, or fixed token	existing	Nespirah, Unshackled
+EDR_031	N	automatic effect, location activation, or fixed token	existing	Ohn'ahra
+FIR_907	N	automatic effect, location activation, or fixed token	existing	Amirdrassil
+JAIL_500	N	automatic effect, location activation, or fixed token	existing	Slice and Dice
+JAIL_887	N	automatic effect, location activation, or fixed token	existing	Zuramat's Prison
+JAIL_887t2	N	automatic effect, location activation, or fixed token	existing	Zuramat the Obliterator
+JAIL_887t3	N	automatic effect, location activation, or fixed token	existing	Whisper of the Void
+TIME_436	N	automatic effect, location activation, or fixed token	existing	Past Conflux
+TIME_436t1	N	automatic effect, location activation, or fixed token	existing	Present Conflux
+TIME_436t2	N	automatic effect, location activation, or fixed token	existing	Future Conflux
+TLC_433	N	automatic effect, location activation, or fixed token	existing	Reanimate the Terror
+TLC_433t	N	automatic effect, location activation, or fixed token	existing	Tyrax, Bone Terror
+TLC_433t2	N	automatic effect, location activation, or fixed token	existing	Terror's Grave

@@ -1,0 +1,13 @@
+id	class	reason	inventory	name
+BE_784e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Titan Bane
+CATA_487	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Raincaller
+CATA_487e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Building Storm
+CATA_487e1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Building Storm
+CATA_613	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Survivalist
+END_022	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Time-Twisted Seer
+END_022e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Time-Twisted
+END_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flames of Infinity
+JAIL_459	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arachnathid
+JAIL_459e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arachnathid's Venom
+TIME_021	O	Outcast	existing	Doomsday Prepper
+TLC_482	K	Kindred	existing	Slagclaw

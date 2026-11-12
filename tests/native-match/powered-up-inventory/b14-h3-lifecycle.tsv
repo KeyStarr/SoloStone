@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+CATA_190h	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Deathwing, Worldbreaker
+CATA_190p	N	enchantment/token	existing	Ruthless
+CATA_190pe	N	enchantment/token	existing	Ruthless
+CATA_190t10	N	enchantment/token	existing	Dragon's Reign
+CATA_190t11	N	enchantment/token	existing	Topple
+CATA_190t12	N	enchantment/token	existing	Raze
+CATA_190t13	N	enchantment/token	existing	Enthrall
+CATA_190t14	N	enchantment/token	existing	Progeny of Deathwing
+DINO_430	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Beast Speaker Taka
+DINO_430e	N	enchantment/token	existing	Legendary Mount
+EDR_804	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Divination
+END_006	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Chronikar
+END_006e	N	enchantment/token	existing	Eon Fragments
+TIME_049	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Dangerous Variant
+TIME_055	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Unknown Voyager
+TIME_103	N	unconditional trigger or Battlecry; scaling/target restriction is not a glow condition	existing	Chromie

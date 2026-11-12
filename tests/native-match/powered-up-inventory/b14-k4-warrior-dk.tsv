@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+BE_561	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Forge of Origination
+BE_561e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Extra Steel
+CATA_586	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Destructive Blaze
+CORE_CATA_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Consumption
+EDR_455	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Succumb to Madness
+FIR_951	G	10+ available Corpses	existing	Volcoross
+FIR_951e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Voracious Appetite
+FIR_951t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tail Smash
+FIR_951t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fiery Chomp
+FIR_951t4	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lava Wave
+JAIL_444	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sawbones
+TIME_850	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lo'Gosh, Blood Fighter
+TIME_850e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crimson Blood
+TIME_850t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Broll, Blood Fighter
+TIME_850t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Valeera, Blood Fighter
+TLC_624	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nablya, the Watcher
