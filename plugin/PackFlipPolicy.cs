@@ -5,7 +5,7 @@ using System.Collections.Generic;
 // OnCardRevealed, native Done after the last). Retail has no single-pack reveal-all (Space reveals one random card with
 // QuickOpen); many packs go through native mass opening, whose highlights screen has its own Reveal All. Nothing here
 // touches the save: the pack was committed before the animation (BeginNativePack) and native Done still acknowledges it
-// (CompleteNativePackReveal). Pure sequencing and text, so tests/test-control runs it on the Mac.
+// (CompleteNativePackReveal). Pure sequencing and text: no Unity or client types, so no client references are needed to compile it. No test suite compiles it yet.
 internal static class PackFlipText
 {
     internal const string ButtonLabel = "Flip All", ButtonObject = "SoloStoneFlipAllButton", ButtonId = "pack.flip-all";
