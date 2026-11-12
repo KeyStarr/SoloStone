@@ -88,12 +88,16 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `recipes` | The shipped shop deck recipes validate and follow the recipe rules |
 | `npc-world` | Opponent decks, skills, personalities, matchmaking and the opponent population |
 | `ai` | Opponent AI fairness: it may not see hidden information |
+| `npc-world-distribution` | The mistake distribution of the opponent skill tiers: 200 seeded trials per tier on six fixtures stay inside their priced bounds (the `--passivity-distribution` run of the `npc-world` program, about a minute; the default `npc-world` run leaves it out) |
+| `ai-audit` | The dated AI audit reproduction of 2026-10-31 that `ai` does not reach (`--audit C1`; the second audit case runs in `ai`) |
 | `ai-golden` | Opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks |
+| `ai-golden-audit` | The dated AI audit reproductions of 2026-10-31 for planning, replies, lethal and mulligan (the `ai-golden` program under `--audit`) |
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
 | `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
 | `projection` | How menu and match state is projected onto the native screens |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
+| `ladder-extended` | The older ladder fixtures, in the same program under `--extended`: legacy rating placement, the milestone ledger, ranked history from before the placement rule, the economy, pack and deck-library checks. Each check runs in this suite or in `ladder`, apart from the current half of the ledger checks, which both run |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
 | `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
@@ -104,7 +108,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
-| `launcher` | The launcher and installer logic. Some checks skip without a Hearthstone client |
+| `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
 ## You changed X, run Y
@@ -113,13 +117,13 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 |---|---|
 | A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
-| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world` |
+| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-audit`, `ai-golden`, `ai-golden-audit`, `npc-world`, `npc-world-distribution` |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
-| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `progression-extended`, `shop`, `ladder`, `ladder-extended` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
-| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
+| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder`, `ladder-extended` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
@@ -185,6 +189,19 @@ Some test suites are not in this repository.
   machine and are not in this repository.
 - **Generator tests.** The tools that make the card file and the pack tables from the game's own data are private,
   and so are their tests.
+
+- **Checks you switch on by hand.** Three checks stay out of the runner on purpose. `GOLDEN_CALIBRATE=1` makes the `ai-golden`
+  program play the headless calibration games of every opponent profile and fail if a
+  turn's 95th-percentile think time passes 1.5 seconds, so its verdict depends on the speed of the machine.
+  `NPC_ENGINE_NETSTANDARD_OUTPUT=<path of a netstandard2.1 build of the engine>` adds one check that the client's engine
+  build carries the same source stamp; it needs a second engine build. The `ai-golden` program's `--lethal-benchmark`,
+  and the report and renew options of `npc-world` and `ladder-rules`, are measuring tools with no pass or fail.
+- **Replay fixtures for the maintainer's AI tool.** The ten position files and ten match journals in `tests/ai/` are
+  inputs to `tools/hs ai hard-fixture`, which is not in this repository; nothing here reads them. Each position
+  file holds the public state, the seed and an `expect` block (allowed, forbidden and required moves), so a runner for
+  them would be a real check: it is not written yet.
+- **`tests/goldens/standard-spike1.json`**, when it arrives with the Standard engine proofs, is replayed inside
+  `engine-proof` and is on purpose not in the `goldens` suite.
 
 A change you make here is checked by the suites above, but not by those. The maintainer runs them before a release.
 If your change touches the plugin's native code, say so in your pull request.
