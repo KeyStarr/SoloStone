@@ -40,7 +40,9 @@ public static class Program
             if (args.Length == 0) throw new ArgumentException("usage: hs build|check|sim|goldens|fuzz|replay (see sim/README.md)");
             if (args[0] == "goldens")
             {
-                if (args.Length < 3) throw new ArgumentException("goldens record|check <file>");
+                if (args.Length < 3 && args.Length == 2 && args[1] == "rerecord") throw new UsageException(RerecordUsage);
+                if (args.Length < 3) throw new ArgumentException("goldens record|check|rerecord <file>");
+                if (args[1] == "rerecord") return Rerecord(args[2], args[3..]);
                 if (args[1] == "record")
                 {
                     var options = Options(args[3..], "suite", "seeds", "policy", "pool-snapshot");
@@ -68,19 +70,14 @@ public static class Program
                 {
                     Options(args[3..]);
                     GoldenSuite data = Load<GoldenSuite>(args[2]);
-                    if (data.Schema is not (2 or 3) || data.Games == null || data.Games.Count == 0) throw new ArgumentException("empty or unsupported golden suite (requires schema 2 or 3)");
-                    foreach (var record in data.Games)
-                    {
-                        if (data.Schema == 2 && record.ReplaySchema == null) record.ReplaySchema = 2;
-                        if (record.ReplaySchema != data.Schema) throw new ArgumentException("golden suite/replay schema mismatch");
-                    }
+                    ValidateSuite(data);
                     var watch = Stopwatch.StartNew();
                     int matched = 0;
                     foreach (GameRecord record in data.Games) if (Check(record, false)) matched++;
                     Console.Error.WriteLine($"goldens: {matched}/{data.Games.Count} match; mismatches={data.Games.Count - matched}; wall={watch.Elapsed.TotalSeconds:F3}s");
                     return matched == data.Games.Count ? 0 : 1;
                 }
-                throw new ArgumentException("goldens record|check <file>");
+                throw new ArgumentException("goldens record|check|rerecord <file>");
             }
             if (args[0] == "sim")
             {
@@ -110,12 +107,119 @@ public static class Program
             }
             throw new ArgumentException("unknown command: " + args[0]);
         }
+        catch (UsageException error)
+        {
+            Console.Error.WriteLine("usage: " + error.Message);
+            return 2;
+        }
         catch (Exception error)
         {
             Console.Error.WriteLine($"{error.GetType().Name}: {error.Message}");
             return 1;
         }
     }
+
+    private sealed class UsageException(string message) : ArgumentException(message);
+
+    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run]";
+
+    private static void ValidateSuite(GoldenSuite data)
+    {
+        if (data.Schema is not (2 or 3) || data.Games == null || data.Games.Count == 0) throw new ArgumentException("empty or unsupported golden suite (requires schema 2 or 3)");
+        foreach (var record in data.Games)
+        {
+            if (data.Schema == 2 && record.ReplaySchema == null) record.ReplaySchema = 2;
+            if (record.ReplaySchema != data.Schema) throw new ArgumentException("golden suite/replay schema mismatch");
+        }
+    }
+
+    // Replays every game (or the --only ones) and re-records just the mismatching ones, each with the pool snapshot
+    // pinned in its own record, so one intended engine change cannot drag the rest of the file along with it.
+    private static int Rerecord(string path, string[] rest)
+    {
+        var only = new List<string>();
+        bool dryRun = false;
+        for (int i = 0; i < rest.Length; i++)
+        {
+            if (rest[i] == "--dry-run") dryRun = true;
+            else if (rest[i] == "--only")
+            {
+                int first = i + 1;
+                while (i + 1 < rest.Length && !rest[i + 1].StartsWith("--", StringComparison.Ordinal)) only.Add(rest[++i]);
+                if (i + 1 == first) throw new UsageException(RerecordUsage);
+            }
+            else throw new UsageException(RerecordUsage);
+        }
+#if SOURCE_ENGINE
+        string text = File.ReadAllText(path);
+        GoldenSuite data = Deserialize<GoldenSuite>(text);
+        ValidateSuite(data);
+        string[] unknown = only.Where(id => data.Games.All(record => record.Id != id)).ToArray();
+        if (unknown.Length > 0) throw new UsageException("no such game in the file: " + string.Join(", ", unknown));
+        var watch = Stopwatch.StartNew();
+        var replaced = new Dictionary<int, GameRecord>();
+        int inScope = 0, failed = 0;
+        for (int i = 0; i < data.Games.Count; i++)
+        {
+            GameRecord old = data.Games[i];
+            if (only.Count > 0 && !only.Contains(old.Id)) continue;
+            inScope++;
+            if (Check(old, false)) continue;
+            try
+            {
+                GameRecord fresh = Recreate(old);
+                replaced[i] = fresh;
+                Console.WriteLine($"changed {old.Id}: winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}");
+            }
+            catch (Exception error)
+            {
+                failed++;
+                Console.Error.WriteLine($"cannot re-record {old.Id}: {error.Message}");
+            }
+        }
+        if (failed > 0)
+        {
+            Console.WriteLine($"{replaced.Count} of {inScope} games re-recorded; {failed} could not be; nothing written");
+            return 1;
+        }
+        if (replaced.Count > 0 && !dryRun)
+        {
+            // Rewrite only if the file round-trips, so every game we did not touch stays byte-identical.
+            GoldenSuite output = Deserialize<GoldenSuite>(text);
+            if ((JsonSerializer.Serialize(output, Json) + "\n").ReplaceLineEndings("\n") != text.ReplaceLineEndings("\n"))
+                throw new InvalidDataException("golden file is not in the form `goldens record` writes; refusing to rewrite it");
+            foreach (var (index, fresh) in replaced) output.Games[index] = fresh;
+            output.EngineSha = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location)));
+            Save(path, output);
+        }
+        Console.WriteLine($"{replaced.Count} of {inScope} games re-recorded" + (dryRun ? "; dry run, nothing written" : "")
+            + $" ({watch.Elapsed.TotalSeconds:F3}s)");
+        return 0;
+#else
+        throw new ArgumentException("goldens rerecord needs the source engine build (-p:EngineSource=true)");
+#endif
+    }
+
+#if SOURCE_ENGINE
+    // The same case again (suite, decks, seed, policy) on the pool snapshot the old record names.
+    private static GameRecord Recreate(GameRecord old)
+    {
+        if (old.ReplaySchema != 3)
+            throw new InvalidOperationException("schema 2 record has no pinned pool; make a new suite with `goldens record`");
+        string[] decks = Simulation.DeckIds(old.Suite);
+        if (!decks.Contains(old.Player) || !decks.Contains(old.Opponent))
+            throw new InvalidOperationException($"deck {old.Player} or {old.Opponent} is no longer in suite {old.Suite}");
+        string[] missing = Simulation.Missing(Simulation.Deck(old.Player)).Concat(Simulation.Missing(Simulation.Deck(old.Opponent))).Distinct().ToArray();
+        if (missing.Length > 0) throw new InvalidOperationException("missing cards: " + string.Join(",", missing));
+        var fresh = new GameRecord { Id = old.Id, Suite = old.Suite, Player = old.Player, Opponent = old.Opponent,
+            Seed = old.Seed, Policy = old.Policy, ClonePoints = old.ClonePoints };
+        OfflinePoolManifest pools = PoolSnapshots.ForReplay(old.PoolManifestHash);
+        Simulation.Finish(fresh, Simulation.Run(fresh, pools: pools));
+        if (fresh.PoolManifestHash != old.PoolManifestHash) throw new InvalidOperationException("pool snapshot was not used");
+        Validate(fresh);
+        return fresh;
+    }
+#endif
 
     private static string Policy(Dictionary<string, string> options)
     {
@@ -296,7 +400,8 @@ public static class Program
         Console.Error.WriteLine("trace: " + path);
     }
 
-    private static T Load<T>(string path) => JsonSerializer.Deserialize<T>(File.ReadAllText(path), Json)
+    private static T Load<T>(string path) => Deserialize<T>(File.ReadAllText(path));
+    private static T Deserialize<T>(string text) => JsonSerializer.Deserialize<T>(text, Json)
         ?? throw new ArgumentException("null JSON");
     private static void Save<T>(string path, T value)
     {
