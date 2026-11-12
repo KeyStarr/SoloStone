@@ -9,7 +9,7 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static ReplyTests;
 
-// Proof-only regressions. AUDIT=1 selects these instead of the normal green suite.
+// Proof-only regressions. --audit selects these instead of the normal green suite.
 public static class AuditReproTests
 {
     private static readonly DeckPlanEvaluator Warrior = new DeckPlanEvaluator(DeckPlans.DragonWarrior);
