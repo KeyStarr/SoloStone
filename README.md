@@ -138,8 +138,9 @@ Chat: [Discord](https://discord.gg/e45QgKHmC2)
 ### Not there yet
 
 - **Only part of the test suite is published.** The card, rules, opponent AI, pack, ladder and launcher tests are here
-  and run on GitHub ([TESTING.md](docs/TESTING.md)). The tests that need your own Hearthstone client, and the live
-  tests on a real test machine, stay private for now, so a change you make here is not checked by them.
+  and run on GitHub ([TESTING.md](docs/TESTING.md)). The tests that need your own Hearthstone client are here too, as
+  a `client` tier you run yourself, but some of them need card data exported with tools that are not published yet.
+  The live tests on a real test machine stay private, so a change you make here is not checked by them.
 - **There is no mod API or developer mode yet.** If there is demand, it gets designed properly. Until then, a mod is
   a set of patches on top of ours in your own fork.
 
