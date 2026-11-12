@@ -67,6 +67,7 @@ internal static class ResultSettlementObserverProof
         {
             definition.Power.PowerTask = prior;
             LocalProfile.CommitFaultHook = null;
+            LadderBinding.ClearMatch();
             Directory.Delete(root, true);
         }
     }

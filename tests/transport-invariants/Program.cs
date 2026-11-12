@@ -154,6 +154,7 @@ internal static class Program
                 DeathrattleReplayProof.Run();
                 AutoCastProof.Run();
                 CenariusProof.Run();
+                ResultSettlementObserverProof.Run();
                 RewindTransportProof.Run();
                 PlayerDecisionProof.Run();
                 CopyInitializationProof.Run();
