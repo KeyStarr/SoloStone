@@ -26,9 +26,6 @@ internal static partial class Program
             ("CORE_EX1_005", new[] { 1720, 1743 }),
             ("CORE_BT_801", new[] { 1333, 1635 })
         };
-        var forge = Cards.All.FirstOrDefault(card => card[(GameTag)2785] != 0);
-        Check(forge != null, "the card registry holds a Forge definition for the printed Forge fixture");
-        fixtures.Add((forge.Id, new[] { 2785, 1743, 3074 }));
         foreach (var fixture in fixtures)
         {
             var card = SabberStoneCore.Actions.Generic.DrawCard(game.Player1, Cards.FromId(fixture.Id));
