@@ -1,0 +1,40 @@
+internal static class CorePriestPaladinProofs
+{
+    internal static void Run()
+    {
+        Unpinned_CaliaMenethilProof.Run();
+        CoreLegacy.IvoryKnightProof.Run();
+        CoreLegacy.SilvermoonPortalProof.Run();
+        CoreLegacy.FlashHealProof.Run();
+        CoreLegacy.GreaterHealingPotionProof.Run();
+        CoreLegacy.GrimestreetOutfitterProof.Run();
+        CoreLegacy.HolyNovaProof.Run();
+        CoreLegacy.HolySmiteProof.Run();
+        CoreLegacy.PowerWordShieldProof.Run();
+        CoreLegacy.ConsecrationProof.Run();
+        CoreLegacy.HammerofWrathProof.Run();
+        CoreLegacy.ArgentProtectorProof.Run();
+        CoreLegacy.TirionFordringProof.Run();
+        CoreLegacy.EqualityProof.Run();
+        CoreLegacy.CoghammerProof.Run();
+        CoreLegacy.MusterforBattleProof.Run();
+        CoreLegacy.RighteousProtectorProof.Run();
+        CoreLegacy.ShadowAscendantProof.Run();
+        CoreLegacy.ObsidianStatueProof.Run();
+        CoreLegacy.FlashofLightProof.Run();
+        CoreLegacy.SpikeridgedSteedProof.Run();
+        BattleVicarProof.Run();
+        LightshowerElementalProof.Run();
+        DevouringPlagueProof.Run();
+        VoidShardProof.Run();
+        PsychicConjurerProof.Run();
+        ShadowWordRuinProof.Run();
+        NatalieSelineProof.Run();
+        CrystalsmithCultistProof.Run();
+        InitiationProof.Run();
+        HandOfAdalProof.Run();
+        ImmortalizedInStoneProof.Run();
+        VeteranWarmedicProof.Run();
+        HighlordFordragonProof.Run();
+    }
+}
