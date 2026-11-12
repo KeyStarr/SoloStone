@@ -590,10 +590,14 @@ public static class AutoCastProof
                 && start.PowerStart.Target == engine.Target, $"{name}: {engine.Source} flag/target {start.PowerStart.ForceShowBigCard}/{start.PowerStart.Target} vs {engine.ForceShowBigCard}/{engine.Target}");
             var source = game.IdEntityDic[engine.Source];
             // An installed opponent Secret stays hidden; one that fizzles (duplicate, full zone) is revealed by design.
-            bool hidden = source.Controller.PlayerId == 2 && source.Card.IsSecret && !source.Card.IsQuest && source.Zone == source.Controller.SecretZone;
+            bool opponentSecret = source.Controller.PlayerId == 2 && source.Card.IsSecret && !source.Card.IsQuest;
+            bool hidden = opponentSecret && source.Zone == source.Controller.SecretZone;
             int named = wire.FindIndex(e => (e.HasShowEntity || e.HasFullEntity) && (e.HasShowEntity ? e.ShowEntity : e.FullEntity).Entity == engine.Source
                 && (e.HasShowEntity ? e.ShowEntity : e.FullEntity).Name.Length > 0);
-            Check(hidden ? named < 0 : named >= 0 && named < at, $"{name}: {source.Card.Id} named before its PLAY ({named}/{at}, hidden={hidden})");
+            // A Secret cast on the other player's turn (Faceless Enigma's pick for the opponent) is live at once (#32, 7f5de0c), so a
+            // later action of this scripted turn can trigger it; it is named when it triggers, after its PLAY.
+            bool namedWhenTriggered = opponentSecret && source.Zone == source.Controller.GraveyardZone && named > at;
+            Check(hidden ? named < 0 : namedWhenTriggered || named >= 0 && named < at, $"{name}: {source.Card.Id} named before its PLAY ({named}/{at}, hidden={hidden})");
         }
         var violations = Invariants.ActorIdentity(game, session.Client).ToArray();
         Check(violations.Length == 0, name + ": " + string.Join("; ", violations.Select(v => v.ToString())));
