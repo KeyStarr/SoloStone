@@ -61,7 +61,7 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild_in_tree_with_client=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild_in_tree_with_client=(), release_launcher=False):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -75,6 +75,8 @@ class Suite:
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
         # mono: projects to build first into their own bin/ (the suite reads plugin/bin/...), only when a client is set up
         self.prebuild_in_tree_with_client = list(prebuild_in_tree_with_client)
+        # dotnet: build the release launcher into <artifacts>/out/app first; the suite finds it by walking up from its program
+        self.release_launcher = release_launcher
 
     @property
     def tier(self):
@@ -131,7 +133,7 @@ SUITES = [
     Suite('fuzz', 'hssim', '200 random games: no crash, same result twice, no broken invariant',
           commands=[['fuzz', '--games', '200', '--seed', '1']]),
     Suite('launcher', 'dotnet', 'the launcher and installer logic (some checks skip without a Hearthstone client)',
-          'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher'),
+          'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher', release_launcher=True),
     Suite('installer-python', 'python', 'the installer build tools (stage and loader checks; not on Windows)', folder='installer',
           unix_only=True),
 ]
@@ -268,6 +270,11 @@ class Runner:
             if not self.ensure_hssim(log):
                 return False
             props.append(f'-p:SabberStoneCorePath={self.engine_dll()}')
+        if self.build and suite.release_launcher and not self.step(
+                log, [self.dotnet, 'build', 'installer/SoloStone.Launcher/SoloStone.Launcher.csproj', '-c', 'Release', '-p:NuGetAudit=false',
+                      '--artifacts-path', artifacts / 'release-launcher', '--output', artifacts / 'out' / 'app', '--nologo', '-v', 'quiet', '-m:1'],
+                'build release launcher'):
+            return False
         if self.build and not self.build_project(log, suite.project, artifacts, props):
             return False
         program = artifacts / 'bin' / suite.assembly / 'release' / (suite.assembly + '.dll')
