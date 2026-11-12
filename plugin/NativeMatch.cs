@@ -317,6 +317,9 @@ public sealed class NativeMatch
     private readonly HashSet<int> pendingTriggerReveals = new HashSet<int>();
     private readonly HashSet<int> startOfGameSources = new HashSet<int>();
     private readonly HashSet<int> presentedStartOfGameSources = new HashSet<int>();
+    // The Start of Game source whose effect block is being projected: its own sub-spells (Godfrey's StartOfGame_FX) are public,
+    // since the reveal block just showed it to both players.
+    private int presentingStartOfGame;
     private bool startOfGameClosed, startOfGameMainBegin, startOfGameBarrier;
     // CardDef.m_TriggerEffectDefs slots (data/fx/start-of-game-trigger-slots-37.0.0.254477.tsv). Retail calibration:
     // the reveal uses index = trigger count (out of range, no VFX) and the 968 effect the first StartOfGameSpell slot.
@@ -3101,6 +3104,7 @@ public sealed class NativeMatch
             {
                 AppendStartOfGameBarrier(packet);
                 startOfGameSource = sog.Source;
+                presentingStartOfGame = sog.Source;
                 startOfGameIdentity = sogIdentity;
                 startOfGameRevealed = AppendStartOfGameReveal(packet, sogSource, sogIdentity);
                 var effect = ToNativeHistory(sog);
@@ -3131,6 +3135,7 @@ public sealed class NativeMatch
                     startOfGameEffect.EffectIndex = StartOfGameSlots(Game.IdEntityDic[startOfGameSource], startOfGameIdentity.Name).Effect;
                     AppendStartOfGameEnd(packet, startOfGameSource, startOfGameRevealed, startOfGameBody);
                     startOfGameSource = 0;
+                    presentingStartOfGame = 0;
                 }
                 // DONE has reached the client, but its animations have not. Arm native mulliganBusy inside its scope.
                 else if (!startOfGameClosed && StartOfGameMulligansDone()
@@ -5554,6 +5559,7 @@ public sealed class NativeMatch
             // Other zero-target recipes may infer their causal definition, so still require a public origin.
             if (subSpell.Targets.Count == 0 && subSpell.SpellPrefabGuid != SabberStoneCore.Kettle.PowerHistory.GeneratedShufflePrefab)
                 visible &= publicOrigin;
+            if (presentingStartOfGame != 0 && subSpell.Source == presentingStartOfGame && subSpell.Targets.Count == 0) visible = true;
             // SpawnToDeckSpell accepts anonymous DECK FULLs: INVALID definitions select Card_Hidden.
             // Keep the scope for both viewers; snapshot projection still owns identity privacy.
             visibleSubSpells.Push(visible);
