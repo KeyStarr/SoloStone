@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
-"""Pre-export release scanner (plan S4). Private tool: run it before every export, publish nothing if it reports.
+"""Release and contribution scanner. CI runs it on every pull request (.github/workflows/scan.yml), the maintainer's local
+commit and push hooks run it with the private denylist, and the maintainer runs it on each release build. Publish nothing if it reports.
 
-    release_scan.py --source EXPORT_DIR [--binaries BUILD_DIR] [--client-reference CLIENT_DIR]
+    release_scan.py --source TREE [--binaries BUILD_DIR] [--client-reference CLIENT_DIR]
 
 Exits 0 when clean, 1 on any hit, 2 on a usage or config error. Hits print as `path:LOCATION rule`, never the matched
 private text. LOCATION is a line number in text, `@0xOFFSET` in a binary, 0 for a whole file.
 
-Source tree (the future export folder) fails on Blizzard files (CardDefs.xml and ClientOverlay.xml by name and hash,
+Source tree (the repository, or a clean copy of it) fails on Blizzard files (CardDefs.xml and ClientOverlay.xml by name and hash,
 game DLLs, asset bundles), media outside the allowlist, decompiled code and IL, encoded blobs, oversized or unreadable
 files, every privacy_scan.py rule, lab paths, e-mail addresses outside the allowlist, and banned phrases (free cards,
 private server, donations, payment links) in player-facing text. Card IDs, names, text and per-meta files pass.
@@ -23,11 +24,11 @@ that text on the hit's own source line and no other hit of the rule there; `scan
 waiver i absorbed).
 
 Public rules (--public-rules, tools/release_scan.public.json) hold what is not private: the one public identity
-(`allowed_emails`), the reviewed waivers and size allowances of the export, the scanner's own planted phrases and
+(`allowed_emails`), the reviewed waivers and size allowances of the repository, the scanner's own planted phrases and
 `forbidden_paths` (globs that may never be tracked). They merge with the private config, so CI can run them alone with
 --allow-no-private-config and a local run adds the denylist.
 
-Git modes, for the commit and push hooks (tools/guard_rails): `--staged` scans the blobs in the index, `--commits RANGE`
+Git modes, for commit and push hooks: `--staged` scans the blobs in the index, `--commits RANGE`
 scans the messages, identities and blobs of the commits `git rev-list RANGE` lists (blobs as each commit introduced
 them, so a later commit cannot hide an earlier hit), `--message FILE` scans one commit message. `--require-identity
 'Name <email>'` makes any other author or committer a hit; without it only private literals in identities are hits. The git
@@ -157,7 +158,7 @@ UNWAIVABLE_PUBLIC = re.compile(r'^(?:privacy-|path-|commit-|binary-|blizzard-|gi
 # These hide content from the scan, so a public waiver for them must be narrow: one exact path (no glob) and a stated count.
 NARROW_PUBLIC = re.compile(r'^(?:unscannable$|archive$|encoded-blob$|byte-array$|opaque-file$|binary-in-source$|payment-link$)')
 # Keys of the public rules that loosen the scan. In the git modes only the private config may set them (and the rules file
-# itself is hash-pinned by the guard), so a merge cannot widen what the hooks let through.
+# itself is hash-pinned by the maintainer's local hooks), so a merge cannot widen what the hooks let through.
 STRICT_IGNORED_PUBLIC = ('media_allow', 'large_allow', 'card_data', 'allowed_emails')
 LIST_KEYS = ('blizzard_sha256', 'blizzard_names', 'lab_path_patterns', 'binary_markers', 'allowed_emails', 'media_allow',
              'large_allow', 'phrases', 'waivers', 'forbidden_paths', 'card_data')
@@ -1241,7 +1242,7 @@ def printable(text):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument('--source', type=Path, help='Source tree to scan (the export folder)')
+    parser.add_argument('--source', type=Path, help='Source tree to scan (the repository, or a clean copy of it)')
     parser.add_argument('--binaries', type=Path, help='Folder of built binaries and payload to scan')
     parser.add_argument('--config', type=Path, help='Private config (default: HS_LAB_CONFIG or ~/.config/solostone/lab.json)')
     parser.add_argument('--client-reference', type=Path, help='A Hearthstone client folder: identical files are Blizzard files')
