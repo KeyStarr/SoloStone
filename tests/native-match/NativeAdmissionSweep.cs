@@ -1,3 +1,4 @@
+extern alias TransportFixtures;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,7 +15,7 @@ internal static partial class Program
         InventoryEmptyTriggers(family, card, seat, sent, game);
         var faults = NativeAdmission.ValidatePackets(sent.Select(p => (IReadOnlyList<PowerHistoryData>)p.List));
         faults.AddRange(ControllerAdmissionInvariant.Faults(game));
-        faults.AddRange(TransportInvariants.BoardActorInvariant.Validate(sent)
+        faults.AddRange(TransportFixtures::TransportInvariants.BoardActorInvariant.Validate(sent)
             .Select(detail => new NativeAdmission.Fault("R6", -1, 0, 0, detail)));
         admissionResults.Add(new(family, card, seat, faults));
         foreach (var fault in faults) Console.WriteLine($"ADMISSION FAIL {family}/{card}/seat{seat}: {fault}");
@@ -34,7 +35,7 @@ internal static partial class Program
     }
 
     private static void AutomaticAdmissionFixtures(string onlyCard = null)
-        => TransportInvariants.AutoCastProof.Coverage((id, owner, rows, game) => AdmitFixture("automatic", id, owner, rows, game), onlyCard);
+        => TransportFixtures::TransportInvariants.AutoCastProof.Coverage((id, owner, rows, game) => AdmitFixture("automatic", id, owner, rows, game), onlyCard);
 
     private static void FinishAdmissionSweep()
     {

@@ -1,3 +1,4 @@
+extern alias TransportFixtures;
 using System;
 using System.Linq;
 using SabberStoneCore.Actions;
@@ -150,7 +151,7 @@ internal static partial class Program
                 + prefix + "DeckTop=CS2_182,CS2_200,CS2_179,CS2_029,CS2_024\n" + prefix + "Mana=10").Apply(game);
             game.MainBegin();
             SogSendHistory(match, game.PowerHistory.Last); game.PowerHistory.Last.Clear();
-            var oracle = new TransportInvariants.ZoneStateOracle();
+            var oracle = new TransportFixtures::TransportInvariants.ZoneStateOracle();
             int cursor = 0;
             void Verify(string step)
             {
