@@ -1,6 +1,6 @@
 """`HsSim goldens rerecord`: replays a golden file and re-records only the games that no longer match.
 
-Run through tests/run.py (suite goldens-rerecord), which builds HsSim and sets HSSIM_DLL and DOTNET.
+Run through tests/run.py (suite goldens-rerecord), which builds HsSim and sets HSSIM_DLL and DOTNET_PATH.
 """
 import os
 import re
