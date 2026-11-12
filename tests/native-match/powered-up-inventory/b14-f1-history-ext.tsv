@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+BAR_313e	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Sun's Strength
+BE_287	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	G'huun
+BE_287e	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Boon of G'huun
+BE_287e2	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Curse of G'huun
+BE_997	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Proto-Pandaren
+CAP_806	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Raith Van Geist
+CATA_130	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Crystalspine Cub
+CATA_130e	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Crystallized
+CATA_493	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Duke of Below
+CATA_493e	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Binding Nightmare
+CORE_BAR_313	G	restored Health this turn	existing	Priest of An'she
+CORE_ETC_523	N	conditional payment resource	existing	Death Metal Knight
+CORE_RLK_116	G	friendly Undead died after previous turn	existing	Necrotic Mortician
+DINO_137	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Skittish Saucier
+EDR_781	N	no pre-play condition (unconditional, scaling or triggered effect)	existing	Harbinger of the Blighted
+TIME_600	G	exact center of odd hand	existing	Precise Shot

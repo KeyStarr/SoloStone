@@ -1,0 +1,208 @@
+{
+  "schema": 1,
+  "id": "attack-allocation-903",
+  "category": "plan",
+  "title": "Cheap Taunt access preserves Sawbones",
+  "why": "Mined game 903 step 42: weapon clears the one-health Taunt; Sawbones can then remove Hornswog and discount Remnant. Sacrificing Sawbones temporarily lowers static value, so its continuation must survive frontier pruning.",
+  "source": "combat-frontier-retention 903:42, public board and hand; histories/deck order simplified.",
+  "deckId": "npc-unholy-death-knight",
+  "seed": 20261102,
+  "turn": 13,
+  "bot": {
+    "class": "DEATHKNIGHT",
+    "mana": 6,
+    "hero": {
+      "damage": 3
+    },
+    "hand": [
+      {
+        "card": "END_004",
+        "tag": "hand0",
+        "attack": 5,
+        "health": 4,
+        "cost": 7
+      },
+      {
+        "card": "END_004",
+        "tag": "hand1",
+        "attack": 5,
+        "health": 4,
+        "cost": 7
+      },
+      {
+        "card": "JAIL_450",
+        "tag": "hand2",
+        "attack": 1,
+        "cost": 2
+      },
+      {
+        "card": "DINO_417",
+        "tag": "hand3",
+        "attack": 0,
+        "cost": 1
+      }
+    ],
+    "board": [
+      {
+        "card": "JAIL_444",
+        "tag": "sawbones",
+        "attack": 7,
+        "health": 3,
+        "exhausted": false,
+        "cost": 5,
+        "taunt": false
+      }
+    ],
+    "baseMana": 6
+  },
+  "enemy": {
+    "class": "SHAMAN",
+    "mana": 0,
+    "hero": {
+      "damage": 11
+    },
+    "board": [
+      {
+        "card": "END_030",
+        "tag": "enemy0",
+        "attack": 4,
+        "health": 6,
+        "exhausted": true,
+        "cost": 6,
+        "taunt": true
+      },
+      {
+        "card": "DINO_412",
+        "tag": "enemy1",
+        "attack": 0,
+        "health": 3,
+        "exhausted": false,
+        "cost": 1,
+        "taunt": false
+      },
+      {
+        "card": "EDR_230",
+        "tag": "enemy2",
+        "attack": 4,
+        "health": 4,
+        "exhausted": true,
+        "cost": 5,
+        "taunt": false
+      },
+      {
+        "card": "CORE_DMF_511",
+        "tag": "enemy3",
+        "attack": 3,
+        "health": 2,
+        "exhausted": true,
+        "cost": 2,
+        "taunt": false
+      },
+      {
+        "card": "CORE_EX1_100",
+        "tag": "enemy4",
+        "attack": 0,
+        "health": 4,
+        "exhausted": true,
+        "cost": 2,
+        "taunt": false
+      },
+      {
+        "card": "CORE_GIL_531",
+        "tag": "enemy5",
+        "attack": 0,
+        "health": 1,
+        "exhausted": true,
+        "cost": 0,
+        "taunt": true
+      },
+      {
+        "card": "EX1_604",
+        "tag": "enemy6",
+        "attack": 2,
+        "health": 4,
+        "exhausted": true,
+        "cost": 3,
+        "taunt": false
+      }
+    ],
+    "hidden": {
+      "hand": 4,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71
+        },
+        {
+          "hand": [
+            "CS2_029",
+            "CS2_029",
+            "CS2_029",
+            "CS2_029"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 99
+        }
+      ]
+    },
+    "baseMana": 6
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "dead",
+        "tag": "enemy0",
+        "side": "enemy"
+      }
+    ]
+  }
+}

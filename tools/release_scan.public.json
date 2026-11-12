@@ -1,0 +1,140 @@
+{
+  "_comment": [
+    "Public rules for tools/release_scan.py (--public-rules). Nothing private: the one public identity, the reviewed waivers and size allowances of the export, the scanner's own planted phrases, and the paths that may never be tracked.",
+    "Paths are relative to the public repository root. The private denylist, lab path patterns and extra waivers stay in ~/.config/solostone/lab.json (HS_LAB_CONFIG) and merge in after these.",
+    "CI: release_scan.py --public-rules tools/release_scan.public.json --allow-no-private-config --source . --skip-git, and --commits origin/main..HEAD for the identity-free commit checks.",
+    "Waivers 1-5 are carried over from tools/release_export.json (same owner rulings). The `text` form only covers a hit whose own source line holds that text.",
+    "In the git modes (hooks) the guard ignores media_allow, large_allow, card_data and allowed_emails from this file, and waivers of privacy, path, Blizzard, lab-path, IL, decompiler, game-dll, asset-bundle, forbidden-path and git rules: those come from the private lab config. The hooks also refuse unless the sha256 of this file, release_scan.py, privacy_scan.py and installer/stage.py match the pins in private/guard_rails.json (guard_rails.py repin, after review).",
+    "Spelled with \\u0020 / \\u0040 escapes where a banned phrase or e-mail address appears, so this file passes its own scan; JSON readers see the plain text. A waiver's count caps it at that many hits per file."
+  ],
+  "allowed_emails": [
+    "KirillLoves\u0040proton.me"
+  ],
+  "forbidden_paths": [
+    "private/**",
+    "references/**",
+    "evidence/**",
+    "data/carddb/**"
+  ],
+  "large_allow": [
+    "tests/goldens/classic-source.json"
+  ],
+  "waivers": [
+    {
+      "path": "docs/images/banner.jpg",
+      "rule": "media",
+      "reason": "Original SoloStone art (docs/community/branding/banner.jpg, 2026-10-25): logo and mascot for the README.",
+      "count": 1
+    },
+    {
+      "path": "installer/assets/installer.ico",
+      "rule": "media",
+      "reason": "Original SoloStone art made 2026-11-07 from the docs/community/branding mascot.",
+      "count": 1
+    },
+    {
+      "path": "installer/assets/launcher.ico",
+      "rule": "media",
+      "reason": "Original SoloStone art made 2026-11-07 from the docs/community/branding mascot.",
+      "count": 1
+    },
+    {
+      "path": "plugin/NativeProfileSelector.cs",
+      "rule": "phrase-all-cards",
+      "text": "\"All\u0020cards owned\"",
+      "reason": "Owner ruling 2026-11-06: the 'All\u0020cards owned' cheat-toggle label stays. It is a profile option, not an advertisement.",
+      "count": 1
+    },
+    {
+      "path": "engine/SabberStoneCore/src/Model/Utils.cs",
+      "rule": "email-address",
+      "text": "vigna\u0040acm.org",
+      "reason": "Owner ruling 2026-11-06: the two addresses in the inherited public-domain xoroshiro128+ notice stay (Blackman and Vigna, CC0).",
+      "count": 2
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-free-cards",
+      "reason": "Self-waiver (text form): the module docstring names the banned phrase it scans for.",
+      "text": "free\u0020cards",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-private-server",
+      "reason": "Self-waiver (text form): the module docstring names the banned phrase it scans for.",
+      "text": "private\u0020server",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-donat\u0069on",
+      "text": "donat\u0069ons",
+      "reason": "Self-waiver (text form): the docstring and the PHRASES table name the banned phrase they scan for.",
+      "count": 1
+    },
+    {
+      "path": "tools/release_scan.py",
+      "rule": "phrase-donat\u0069on",
+      "text": "phrase-donat\u0069on",
+      "reason": "Self-waiver (text form): the docstring and the PHRASES table name the banned phrase they scan for.",
+      "count": 1
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/batch14-CORE_ETC_523.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Detached CORE_ETC_523 definition emitted by the batch-14 engine (a73b4fd6) via SnapshotCodec.EncodeDefinition; read by the definition-compat proof.",
+      "sha256": "93f5f4ccd6449e89e2a1d3ab06b6e4a95c12bf3bc2b78459bf06ce1ea3e83702"
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/batch14-TIME_103.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Detached TIME_103 definition from the same engine snapshot; v3 board-history displays.",
+      "sha256": "77d94d5a5b44b228883edac1e497f5286c0c9420709aa78608f54bb9b2ea961c"
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/batch14-CORE_WON_096.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Detached CORE_WON_096 definition (v0 registered Discover recipe), our codec.",
+      "sha256": "0a62d9d054e784cee51a38b802973eceb0ba178d67674534764dc33ffc1ffd47"
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/batch14-LOOT_415t6.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Detached LOOT_415t6 definition (v0 MoveToGraveYard task), our codec.",
+      "sha256": "ed7add2c19584652e94a456f5119cd29ecc306ec3dd9a625c36ca0317a291797"
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/batch14-pool-filter.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Detached CORE_WON_096 clone carrying an inline OfflinePoolFilter task graph; our codec.",
+      "sha256": "9f0d440ac3b592983b570ea650b8ec7723ba1f3a3afc88f9d32f2704dba09352"
+    },
+    {
+      "path": "tests/engine-proof/definition-fixtures/attack-trigger-v0-JAIL_453.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Historical JAIL_453 definition with triggers, captured from our own engine's replay (881beba4); additive-field layout guard.",
+      "sha256": "3811d62892b401390904c4691c1acd2e90e09dceab2873a9265124e1454dabd4"
+    },
+    {
+      "path": "tests/engine-proof/Sets/TIME_TRAVEL/Fixtures/pre-s1-composed-definition.b64",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Pre-S1 composed definition (CS2_182 Zombeast) from our own SnapshotCodec; paired with pre-s1-definition-types.txt.",
+      "sha256": "e9a9a465b27872ed71efe9d7b6af1217ed174f5792334517d9c60cb6210296f8"
+    },
+    {
+      "path": "tests/engine-proof/B14F1HistoryDefinitionProof.cs",
+      "rule": "encoded-blob",
+      "count": 1,
+      "reason": "Batch13Ritual constant: detached EDR_461 definition emitted by the batch-13 codec (77d1080f), kept verbatim from review.",
+      "line_sha256": "b8d0d73066be89e5aee13a2e8c92a35b6713cbe51b065697cec176d2f1c904e1"
+    }
+  ]
+}

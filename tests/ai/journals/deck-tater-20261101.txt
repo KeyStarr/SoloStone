@@ -1,0 +1,515 @@
+journal=deck-tater-20261101.jsonl
+match=6e7f472a-ece7-462f-8bb0-ba1deb1f7a9a npc=tater96 seed=1349051867
+#1 turn=? seat=2 mulligan [] fingerprint=ff51260c3b0c3a830c88f253201ecf26bca9f13a5b06c55fae0c357262909ce8
+  after: turn=1 seat=2 rng=1:-2308596321168742469:-4999655769022075540:63
+  human hero=HERO_11:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=5 deck=26 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=3[CATA_131,MEND_046,TLC_232] deck=27 secrets=0[] board=[]
+#2 turn=1 seat=1 mulligan CHOOSE:0:0:0:-1:15,29 fingerprint=a015b25ff122b5ef40db4d1505532b9138d94602501c30f793a644f27f42653b
+  after: turn=1 seat=2 rng=1:2214019507502558177:-1711533201558926642:65
+  human hero=HERO_11:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=5 deck=26 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=3[CATA_131,MEND_046,TLC_232] deck=27 secrets=0[] board=[]
+#3 turn=? seat=- main-begin  fingerprint=7c3aac745fa73f3168f2a44252a99129326bdd24a7cac5b432683df997411109
+  after: turn=1 seat=2 rng=1:2214019507502558177:-1711533201558926642:65
+  human hero=HERO_11:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=5 deck=26 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/1 temp=0 overload=0/0 hand=4[CATA_131,MEND_046,TLC_232,TIME_701] deck=26 secrets=0[] board=[]
+#4 turn=1 seat=2 decision PLAY_CARD:50:0:-1:-1: fingerprint=dca45d8b948b03ab901e2388825ec94c222c7021565507a941b4531722436271
+  after: turn=1 seat=2 rng=1:9136432327249348460:4176334776518089250:71
+  human hero=HERO_11:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=5 deck=26 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=3[CATA_131,MEND_046,TLC_232] deck=26 secrets=0[] board=[]
+  search: planNodeCap=7000 searchBudgetMs=26905.5 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=398 nodes=583
+  candidates=PLAY_CARD:50:0:-1:-1:=-80.1256078905922, END_TURN:0:0:0:-1:=-84.3256078905922
+#5 turn=1 seat=2 decision CHOOSE:0:0:0:-1:73 fingerprint=6816cfb80a8ba2931ec2c3d97e3aac429e931695905a83d616792a26d0b7721e
+  after: turn=1 seat=2 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=0/0 temp=0 overload=0/0 hand=5 deck=26 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=4[CATA_131,MEND_046,TLC_232,CATA_210] deck=25 secrets=0[] board=[]
+  search: planNodeCap=7000 searchBudgetMs=29015.4472934473 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=softmax stop=Exhausted thinkMs=797 nodes=969
+  candidates=CHOOSE:0:0:0:-1:73=-84.3256078905922
+#6 turn=1 seat=2 decision END_TURN:0:0:0:-1: fingerprint=b27e7992141cc01599638acab45bb9cba8f07594d5f89a8240e4fe3412c88113
+  after: turn=2 seat=1 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=0/1 temp=0 overload=0/0 hand=6 deck=25 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=4[CATA_131,MEND_046,TLC_232,CATA_210] deck=25 secrets=0[] board=[]
+  search: planNodeCap=7000 searchBudgetMs=25675.1357789424 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=138 nodes=194
+  candidates=END_TURN:0:0:0:-1:=-84.3256078905922
+#7 turn=2 seat=1 human-action PLAY_CARD:9:0:-1:0: fingerprint=40ebef0fd344a396eb583517e167e64dd78686775ff97d9db2607b7b4184bb3a
+  after: turn=2 seat=1 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=5 deck=25 secrets=0[] board=[RLK_503#9 1/3 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=4[CATA_131,MEND_046,TLC_232,CATA_210] deck=25 secrets=0[] board=[]
+#8 turn=2 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=ea2887fe7b3609af569481d1b81f2942c9725717c103de69e93005c62b0a8382
+  after: turn=3 seat=2 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=5 deck=25 secrets=0[] board=[RLK_503#9 1/3 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/2 temp=0 overload=0/0 hand=5[CATA_131,MEND_046,TLC_232,CATA_210,TLC_603] deck=24 secrets=0[] board=[]
+#9 turn=3 seat=2 decision PLAY_CARD:53:0:-1:0: fingerprint=76b50a7e1ceda64327dfdd29062b70468a2c206533245e620409479da0b6ac17
+  after: turn=3 seat=2 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=5 deck=25 secrets=0[] board=[RLK_503#9 1/3 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=1 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_603] deck=24 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=30231.5187526338 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1655 nodes=1790
+  candidates=PLAY_CARD:53:0:-1:0:=-66.782713520462, PLAY_CARD:47:0:-1:0:=-68.982713520462, HERO_POWER:7:0:0:-1:=-88.882713520462
+#10 turn=3 seat=2 decision PLAY_CARD:47:0:-1:1: fingerprint=1b61893bb45e167fbffaa20dbd488eb0438d2554a2407c8eb3734a801789efac
+  after: turn=3 seat=2 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=1/1 temp=0 overload=0/0 hand=5 deck=25 secrets=0[] board=[RLK_503#9 1/3 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_233] deck=23 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack,TLC_603#47 1/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=30384.5683453237 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1356 nodes=1836
+  candidates=PLAY_CARD:47:0:-1:1:=-76.182713520462, END_TURN:0:0:0:-1:=-91.1009310110316
+#11 turn=3 seat=2 decision END_TURN:0:0:0:-1: fingerprint=81a8f2534b4eb0cbac76eaee62a0d187441ccfdaea72bb08ea3faf4494109e19
+  after: turn=4 seat=1 rng=1:5208941867550129363:5053033850029566953:73
+  human hero=HERO_11:30+0 weapon=- mana=0/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[RLK_503#9 1/3 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_233] deck=23 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack,TLC_603#47 1/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=28918.2 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=445 nodes=619
+  candidates=END_TURN:0:0:0:-1:=-70.982713520462
+emote seat=2 Greetings
+#12 turn=4 seat=1 human-action PLAY_CARD:15:0:-1:0: fingerprint=22ad2d014345f90b2c4c1ecad2552dfbb2b6a67762a90027b1dbe0c4fdbf8566
+  after: turn=4 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=5 deck=24 secrets=0[] board=[CORE_RLK_066#15 2/3 exhausted|cannot-attack,RLK_503#9 1/3 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_233] deck=23 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack,TLC_603#47 1/2 exhausted|cannot-attack]
+#13 turn=4 seat=1 human-action CHOOSE:0:0:0:-1:78 fingerprint=0ed18df4076664e403e971706104e7d2fea11c4174e8c4dbb7b7c078e651b06c
+  after: turn=4 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[CORE_RLK_066#15 2/3 exhausted|cannot-attack,RLK_503#9 1/3 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_233] deck=23 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack,TLC_603#47 1/2 exhausted|cannot-attack]
+#14 turn=4 seat=1 human-action MINION_ATTACK:9:47:0:-1: fingerprint=d6ec9cc3b5a8e845bcc4fc8dff77e399408017dc0c09a002de33dd7ff189a038
+  after: turn=4 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[CORE_RLK_066#15 2/3 exhausted|cannot-attack,RLK_503#9 1/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,TLC_233] deck=23 secrets=0[] board=[CATA_131#53 2/2 exhausted|cannot-attack,TLC_603#47 1/1 exhausted|cannot-attack]
+#15 turn=4 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=9b71850998da94e046a5dd9eef4cd7cdfefbc42f88a2edc980b627799ce72a8c
+  after: turn=5 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[CORE_RLK_066#15 2/3 exhausted|cannot-attack,RLK_503#9 1/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/3 temp=0 overload=0/0 hand=5[MEND_046,TLC_232,CATA_210,TLC_233,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 2/2 can-attack,TLC_603#47 1/1 can-attack]
+#16 turn=5 seat=2 decision PLAY_CARD:63:0:-1:2: fingerprint=b863c0b0695661c18fbd73dbdf82a80bbac8b2457f989dadb9ed001824c5086c
+  after: turn=5 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[CORE_RLK_066#15 2/3 exhausted|cannot-attack,RLK_503#9 1/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 3/3 taunt|can-attack,TLC_603#47 2/2 taunt|can-attack,TLC_233#63 2/3 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=32973.934868842 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=2783 nodes=3219
+  candidates=PLAY_CARD:63:0:-1:2:=-54.9144870538289, MINION_ATTACK:47:4:0:-1:=-75.8890059684701
+#17 turn=5 seat=2 decision MINION_ATTACK:53:15:0:-1: fingerprint=d7f66535b8f837f1bd1d52ede787cfda15ae6555fbd680bd89a23683ab339550
+  after: turn=5 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[RLK_503#9 1/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/2 taunt|can-attack,TLC_233#63 2/3 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=32896.2869814766 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=softmax stop=Exhausted thinkMs=3857 nodes=5219
+  candidates=MINION_ATTACK:53:15:0:-1:=-54.9144870538289
+#18 turn=5 seat=2 decision MINION_ATTACK:47:9:0:-1: fingerprint=ab50e0b9c8a62b64aab25afa2e16514301e83407360d635cae7b3e16a1d64cd9
+  after: turn=5 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=2/2 temp=0 overload=0/0 hand=6 deck=24 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/3 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=28850.5278100325 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1317 nodes=1569
+  candidates=MINION_ATTACK:47:9:0:-1:=-50.714487053829, MINION_ATTACK:47:4:0:-1:=-61.1494147499043, END_TURN:0:0:0:-1:=-63.1016764581114
+#19 turn=5 seat=2 decision END_TURN:0:0:0:-1: fingerprint=ea35f58c3027d7b4f6f89871b4e7907c6906e622296561661283d74cc3cc4423
+  after: turn=6 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=0/3 temp=0 overload=0/0 hand=7 deck=23 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/3 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=26518.439640941 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=405 nodes=433
+  candidates=END_TURN:0:0:0:-1:=-56.314487053829
+#20 turn=6 seat=1 human-action PLAY_CARD:19:0:-1:0: fingerprint=926893ef977c0347451b1f919a4df87af0bc71cb4304b72ed89ff734a913ff21
+  after: turn=6 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=7 deck=22 secrets=0[] board=[RLK_708#19 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_210,CATA_131] deck=22 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/3 exhausted|cannot-attack]
+#21 turn=6 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=ea422ef41b13a6c8cfcb32256316d9b25e3a57388250695177df34372d846120
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:30+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=7 deck=22 secrets=0[] board=[RLK_708#19 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/4 temp=0 overload=0/0 hand=5[MEND_046,TLC_232,CATA_210,CATA_131,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 2/1 taunt|can-attack,TLC_233#63 2/3 can-attack]
+#22 turn=7 seat=2 decision MINION_ATTACK:47:4:0:-1: fingerprint=05081a9b14a4e14fd470a914229923fb55b8bf26302c94543dc78ad80d4a5676
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:28+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=7 deck=22 secrets=0[] board=[RLK_708#19 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/4 temp=0 overload=0/0 hand=5[MEND_046,TLC_232,CATA_210,CATA_131,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/3 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=35170.6872736294 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=2825 nodes=3050
+  candidates=MINION_ATTACK:47:4:0:-1:=-37.1622165944846, HERO_POWER:7:0:0:-1:=-39.0490240121295, MINION_ATTACK:53:4:0:-1:=-49.2678815984657
+#23 turn=7 seat=2 decision MINION_ATTACK:53:4:0:-1: fingerprint=ee4e56c96b99b6441640011fce73c51173bce484a5124b8dfe56db13d1e50ff0
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=7 deck=22 secrets=0[] board=[RLK_708#19 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/4 temp=0 overload=0/0 hand=5[MEND_046,TLC_232,CATA_210,CATA_131,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/3 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=33537.3483635754 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=2434 nodes=2780
+  candidates=MINION_ATTACK:53:4:0:-1:=-38.5622165944846, HERO_POWER:7:0:0:-1:=-40.4490240121295
+#24 turn=7 seat=2 decision MINION_ATTACK:63:19:0:-1: fingerprint=278d28ea99a23dee7f872f8737c4bf2706a89881ebc66ccc30592fe2b3984478
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=8 deck=21 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/4 temp=0 overload=0/0 hand=5[MEND_046,TLC_232,CATA_210,CATA_131,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=31330.9918759232 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=2140 nodes=2571
+  candidates=MINION_ATTACK:63:19:0:-1:=-39.9622165944846, HERO_POWER:7:0:0:-1:=-41.8490240121295, MINION_ATTACK:63:4:0:-1:=-52.0678815984657
+#25 turn=7 seat=2 decision PLAY_CARD:49:0:-1:3: fingerprint=48b993c91060f9851e3a48094fd7f5d6910238bdab72ed1e86efb68df6243484
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=8 deck=21 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=1/4 temp=0 overload=0/0 hand=4[MEND_046,TLC_232,CATA_131,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=29259.4365866738 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1377 nodes=1343
+  candidates=PLAY_CARD:49:0:-1:3:=-37.1622165944846, HERO_POWER:7:0:0:-1:=-41.2503230468856
+#26 turn=7 seat=2 decision PLAY_CARD:54:0:-1:4: fingerprint=6502d9ff589facfaeda4db7762c29cf726b4b84845537ed8ae3e28766509d236
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=8 deck=21 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=3/5 temp=0 overload=0/0 hand=3[MEND_046,TLC_232,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack,CATA_131#54 2/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=26628.3443910553 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1242 nodes=1205
+  candidates=PLAY_CARD:54:0:-1:4:=-20.155119195873, HERO_POWER:7:0:0:-1:=-44.2344266764524
+#27 turn=7 seat=2 decision PLAY_CARD:59:0:-1:-1: fingerprint=7c658f3cea3af25ff34b8befe76676e741287588e7855cc72d744466a6fa6685
+  after: turn=7 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=3/3 temp=0 overload=0/0 hand=8 deck=21 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack,CATA_131#54 2/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=24380.0810942843 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1092 nodes=1179
+  candidates=PLAY_CARD:59:0:-1:-1:=-21.555119195873, PREPARE_CARD:71:0:0:-1:=-38.5622165944846, HERO_POWER:7:0:0:-1:=-40.4490240121295
+#28 turn=7 seat=2 decision END_TURN:0:0:0:-1: fingerprint=72c7fa50d3ac90761c11e1eb1f587816b5b2f29d55e1ff6d2005541ada1c3d6c
+  after: turn=8 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=0/4 temp=0 overload=0/0 hand=9 deck=20 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack,CATA_131#54 2/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=22552.2811440853 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=372 nodes=392
+  candidates=END_TURN:0:0:0:-1:=-14.555119195873
+emote seat=2 Threaten
+#29 turn=8 seat=1 human-action PLAY_CARD:10:0:-1:0: fingerprint=18c5073ba609e8189c53a44b2728050b10e4c6f80d2f77ef0b2536512967f641
+  after: turn=8 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=2/4 temp=0 overload=0/0 hand=8 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack,CATA_131#54 2/2 exhausted|cannot-attack]
+#30 turn=8 seat=1 human-action PLAY_CARD:11:0:-1:1: fingerprint=fe3d72d15862fff69d9c9c369e04e74d0da8893530d782bc191335512577db3d
+  after: turn=8 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=21 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 2/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 exhausted|cannot-attack,CATA_131#54 2/2 exhausted|cannot-attack]
+#31 turn=8 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=1eedae61cb47a47d6008aeb0be959ca8d91047cf1e91d78b2e31306d896a061a
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack,RLK_061t#83 1/3 taunt|exhausted|cannot-attack,RLK_061t#84 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/6 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,CATA_138] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 2/1 taunt|can-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/2 can-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#32 turn=9 seat=2 decision PLAY_CARD:61:47:-1:-1: fingerprint=37d7aa04dd4b449a75aa4a743f6f877c977da3447d25ea960076ded30405795a
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack,RLK_061t#83 1/3 taunt|exhausted|cannot-attack,RLK_061t#84 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=3/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 9/8 taunt|can-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/2 can-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=36061.0045901461 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=5732 nodes=5761
+  candidates=PLAY_CARD:61:47:-1:-1:=-28.4285142286443, PLAY_CARD:61:53:-1:-1:=-34.4544305267139, MINION_ATTACK:54:83:0:-1:=-91.0346934581794
+#33 turn=9 seat=2 decision HERO_POWER:7:0:0:-1: fingerprint=ae768b5f59a83fcbbe19bd2cfeff84f0564b827d58699634c199e5016d49b334
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack,RLK_061t#83 1/3 taunt|exhausted|cannot-attack,RLK_061t#84 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+1 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 9/8 taunt|can-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/2 can-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=29089.5304029145 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4524 nodes=4710
+  candidates=HERO_POWER:7:0:0:-1:=-31.2285142286443, MINION_ATTACK:47:83:0:-1:=-43.5428546642752
+#34 turn=9 seat=2 decision HERO_ATTACK:6:83:0:-1: fingerprint=e6743a1baf98d96e263d838869f44a165e141ced27b89755aefab6acb315c066
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack,RLK_061t#83 1/2 taunt|exhausted|cannot-attack,RLK_061t#84 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 9/8 taunt|can-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/2 can-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=25649.2515496862 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4244 nodes=4689
+  candidates=HERO_ATTACK:6:83:0:-1:=-29.8285142286443
+#35 turn=9 seat=2 decision MINION_ATTACK:47:84:0:-1: fingerprint=eeebdcc30ebb040be9464c4ca8d0595a89e60f5b3373618c7b3dd5e712cb7c45
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack,RLK_061t#83 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/2 can-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=22358.2005028284 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3835 nodes=4105
+  candidates=MINION_ATTACK:47:84:0:-1:=-29.8285142286443, MINION_ATTACK:53:84:0:-1:=-32.1611542442841
+#36 turn=9 seat=2 decision MINION_ATTACK:54:83:0:-1: fingerprint=547f6d4190fe294150aaaa21b30ec181b408e595ca5fc12d4b1df58be2901e8f
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:25+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|can-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=17811.3131771227 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3270 nodes=3709
+  candidates=MINION_ATTACK:54:83:0:-1:=-28.4285142286443
+#37 turn=9 seat=2 decision MINION_ATTACK:53:4:0:-1: fingerprint=4c1c834344c912251f9e63b7e9fe8c91fa58b7df508618cfff2fa9461ae6b25c
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=6524 searchBudgetMs=14576.5552752024 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3180 nodes=3565
+  candidates=MINION_ATTACK:53:4:0:-1:=-28.4285142286443
+#38 turn=9 seat=2 decision MINION_ATTACK:63:4:0:-1: fingerprint=709496d79954e074a96aab66370cf70ee0c0252a3cce79d78abac642994872e1
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:20+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=2963 searchBudgetMs=11249.1448120156 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=913 nodes=946
+  candidates=MINION_ATTACK:63:4:0:-1:=-31.2285142286443
+#39 turn=9 seat=2 decision PREPARE_CARD:71:0:0:-1: fingerprint=bffc0bd869cd98a1bb39a7865f91b8a31271267174b90364987ed0fe9a562c5d
+  after: turn=9 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:20+0 weapon=- mana=4/4 temp=0 overload=0/0 hand=7 deck=20 secrets=0[] board=[RLK_061#10 2/2 exhausted|cannot-attack,RLK_061#11 2/2 exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=2021 searchBudgetMs=9392.63284366577 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1003 nodes=916
+  candidates=PREPARE_CARD:71:0:0:-1:=-29.8285142286443
+#40 turn=9 seat=2 decision END_TURN:0:0:0:-1: fingerprint=0b1c0973219527b8a9d7a7474215141a21958082abfeb71bc117f567e38d4467
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:20+0 weapon=- mana=0/5 temp=0 overload=0/0 hand=8 deck=19 secrets=0[] board=[RLK_061#10 2/2 can-attack,RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+  search: planNodeCap=1107 searchBudgetMs=8121.35913422881 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=36 nodes=5
+  candidates=END_TURN:0:0:0:-1:=18.1595002696473
+#41 turn=10 seat=1 human-action PLAY_CARD:72:0:-1:-1: fingerprint=2e7cbaf60d9b8c74375801e11d96a1b2612ff903af45073d3de32bce5b6cad39
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:20+0 weapon=- mana=0/5 temp=1 overload=0/0 hand=7 deck=19 secrets=0[] board=[RLK_061#10 2/2 can-attack,RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/7 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#42 turn=10 seat=1 human-action PLAY_CARD:29:47:-1:-1: fingerprint=b5f8b06b389229bc35ef1426a21496920d733661ea27b49393748c85260ea98d
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=3/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#10 2/2 can-attack,RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#43 turn=10 seat=1 human-action HERO_POWER:5:0:0:-1: fingerprint=dfd6c50ad2752447d14b4c50dde9638895a8385907de327804212cb48fcca7ed
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#10 2/2 can-attack,RLK_061#11 2/2 can-attack,HERO_11bpt#91 1/1 charge|dies-at-end-of-turn|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_603#47 9/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#44 turn=10 seat=1 human-action MINION_ATTACK:91:47:0:-1: fingerprint=2f8918bbfe590cb4d923ec7b25dc1578c6fc0124dc2cfb82e8cb40abd6f7cff0
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#10 2/2 can-attack,RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[CATA_131#53 3/1 taunt|exhausted|cannot-attack,TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#45 turn=10 seat=1 human-action MINION_ATTACK:10:53:0:-1: fingerprint=8265d287cee37962aae343a478fe337302accf7c42a0954108f6d15939f65eff
+  after: turn=10 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=2[MEND_046,JAIL_407] deck=20 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#85 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 exhausted|cannot-attack]
+#46 turn=10 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=42c137637fe578f326d608ebf0c4b3861cec2aadf9611eb26b0417166b7350e9
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack,RLK_061t#94 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 can-attack,TLC_237t#85 2/1 can-attack,TLC_237t#86 2/1 can-attack]
+#47 turn=11 seat=2 decision HERO_POWER:7:0:0:-1: fingerprint=52f9f70a42d254f7e252cb1421f153493ae3ff2adcd371f45c13b0693a582193
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack,RLK_061t#94 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+1 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 can-attack,TLC_237t#85 2/1 can-attack,TLC_237t#86 2/1 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=36442.4632449808 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=5922 nodes=5190
+  candidates=HERO_POWER:7:0:0:-1:=-71.7927666107833, MINION_ATTACK:85:94:0:-1:=-71.9890404634858, PLAY_CARD:70:0:-1:5:=-78.3245306539669
+#48 turn=11 seat=2 decision HERO_ATTACK:6:94:0:-1: fingerprint=4add35dcb8ebde69f0268bd2ab36ef34e0d18f521f027147cff34acb95e0efbb
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack,RLK_061t#94 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 can-attack,TLC_237t#85 2/1 can-attack,TLC_237t#86 2/1 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=31246.8913973752 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4509 nodes=4817
+  candidates=HERO_ATTACK:6:94:0:-1:=-59.129923147248
+#49 turn=11 seat=2 decision MINION_ATTACK:85:94:0:-1: fingerprint=aa60715e54cd46a5ab1e70874cfccd31ef50ff7028010c336edfb884d110f508
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:26+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 can-attack,TLC_237t#86 2/1 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=27527.2666837782 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4697 nodes=4621
+  candidates=MINION_ATTACK:85:94:0:-1:=-60.5299231472479
+#50 turn=11 seat=2 decision MINION_ATTACK:54:4:0:-1: fingerprint=7fddb7fb34cddb831ef85a2614e4fda96f85d89678d254a646c20b253af50987
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:24+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=22630.4365982745 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3823 nodes=3921
+  candidates=MINION_ATTACK:54:4:0:-1:=-57.729923147248
+#51 turn=11 seat=2 decision MINION_ATTACK:63:4:0:-1: fingerprint=6926fef03456e06724480959ee3a56335c76448f4e0a1e8bfb030985cce2cffc
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[RLK_061#11 2/2 can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,TLC_237t#86 2/1 can-attack]
+  search: planNodeCap=7000 searchBudgetMs=18780.8659181107 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3853 nodes=3740
+  candidates=MINION_ATTACK:63:4:0:-1:=-61.929923147248
+#52 turn=11 seat=2 decision MINION_ATTACK:86:11:0:-1: fingerprint=fa0841c86bfae7c53fc2b4169b3dc61baaf0cbf87a69f8355cd42bedf1d83e18
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=2/7 temp=0 overload=0/0 hand=3[MEND_046,JAIL_407,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=14930.3832664114 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3821 nodes=3625
+  candidates=MINION_ATTACK:86:11:0:-1:=-61.929923147248, MINION_ATTACK:86:4:0:-1:=-74.5927666107833
+#53 turn=11 seat=2 decision PLAY_CARD:71:0:-1:3: fingerprint=2aba653981ff38e1906ae7fb179dfb6c6f59a85aac729d14ca9176aa5c4994f6
+  after: turn=11 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=5/5 temp=0 overload=0/0 hand=6 deck=19 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=2[MEND_046,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,JAIL_407#71 4/3 exhausted|cannot-attack]
+  search: planNodeCap=3590 searchBudgetMs=11172.9712730087 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=840 nodes=742
+  candidates=PLAY_CARD:71:0:-1:3:=-56.329923147248
+#54 turn=11 seat=2 decision END_TURN:0:0:0:-1: fingerprint=3ad068f3271da0ee34cbab604f9bb0f5b2106f77407aebf613dcd3aeaa54b6a5
+  after: turn=12 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=0/6 temp=0 overload=0/0 hand=7 deck=18 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=2[MEND_046,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,JAIL_407#71 4/3 exhausted|cannot-attack]
+  search: planNodeCap=2851 searchBudgetMs=10081.1630828151 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=907 nodes=734
+  candidates=END_TURN:0:0:0:-1:=-60.5299231472479
+#55 turn=12 seat=1 human-action PLAY_CARD:25:0:-1:0: fingerprint=6bd742838bd6ab6b13d4c967ab4f28b505509b4579f066e8909b636d3a6dbf5e
+  after: turn=12 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=4/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#25 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=2[MEND_046,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,JAIL_407#71 4/3 exhausted|cannot-attack]
+#56 turn=12 seat=1 human-action HERO_POWER:5:0:0:-1: fingerprint=1040ae8c3b7e9d24e2098f1cdef082268e95adb8e225cc0b0b38d578e59151eb
+  after: turn=12 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#25 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack,HERO_11bpt#98 1/1 charge|dies-at-end-of-turn|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=2[MEND_046,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,CATA_131#54 2/1 exhausted|cannot-attack,JAIL_407#71 4/3 exhausted|cannot-attack]
+#57 turn=12 seat=1 human-action MINION_ATTACK:98:54:0:-1: fingerprint=c6f6060ea5e806b9781dfee51dd69d8a7f9f70214c0e0fdc430c532ce4318876
+  after: turn=12 seat=1 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#25 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=2[MEND_046,DINO_130] deck=19 secrets=0[] board=[TLC_233#63 2/1 exhausted|cannot-attack,CATA_210#49 0/2 cannot-attack,JAIL_407#71 4/3 exhausted|cannot-attack]
+#58 turn=12 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=b9071c0e125f18b59c8b7b727f98b5a548ae4b836cf59a8335550eac715a85e4
+  after: turn=13 seat=2 rng=1:7487878601448941109:5000115152197774010:76
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#25 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/8 temp=0 overload=0/0 hand=3[MEND_046,DINO_130,CORE_AT_037] deck=18 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,JAIL_407#71 4/3 can-attack]
+#59 turn=13 seat=2 decision PLAY_CARD:57:0:-1:3: fingerprint=d31b86894900e0c9ec063bd9543dfb6eeb1c4cbf0125dd305b6d28a7f5f09589
+  after: turn=13 seat=2 rng=1:6111261988942545660:-6525494917670945419:77
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#25 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/8 temp=0 overload=0/0 hand=3[MEND_046,CORE_AT_037,CATA_470] deck=18 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,JAIL_407#71 4/3 can-attack,DINO_130#57 0/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=37193.3288318704 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=6297 nodes=4993
+  candidates=PLAY_CARD:57:0:-1:3:=12.1322880684415, PLAY_CARD:70:0:-1:3:=9.3053555491514
+#60 turn=13 seat=2 decision MINION_ATTACK:71:25:0:-1: fingerprint=889f72981e86f9ee28c5cf61400c5e364263acd8a4eba4af67ec569e301fc5e0
+  after: turn=13 seat=2 rng=1:6111261988942545660:-6525494917670945419:77
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=2/8 temp=0 overload=0/0 hand=3[MEND_046,CORE_AT_037,CATA_470] deck=18 secrets=0[] board=[TLC_233#63 2/1 can-attack,CATA_210#49 0/2 cannot-attack,JAIL_407#71 4/2 exhausted|cannot-attack,DINO_130#57 0/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=31503.3395164551 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=5754 nodes=4759
+  candidates=MINION_ATTACK:71:25:0:-1:=19.3344173902147, PLAY_CARD:43:49:1:-1:=3.21651672465208, HERO_POWER:7:0:0:-1:=-85.8571213553597
+#61 turn=13 seat=2 decision PLAY_CARD:43:57:1:-1: fingerprint=cde50c92ce26522c7a69b0482504d7d9b6ed78f7391ae14ce5913c6d012aec96
+  after: turn=13 seat=2 rng=1:6462716504923954632:5619358322327390532:78
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=3/8 temp=0 overload=0/0 hand=3[MEND_046,CATA_470,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/2 can-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=25658.6540176029 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4997 nodes=4131
+  candidates=PLAY_CARD:43:57:1:-1:=13.3466438739464, HERO_POWER:7:0:0:-1:=-88.6571213553597
+#62 turn=13 seat=2 decision HERO_POWER:7:0:0:-1: fingerprint=aff7b3298902f34f51658ec87175ffcc3808d237e709b8958d159ea5eea92c93
+  after: turn=13 seat=2 rng=1:6462716504923954632:5619358322327390532:78
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/3 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+1 weapon=- mana=5/8 temp=0 overload=0/0 hand=3[MEND_046,CATA_470,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/2 can-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=21390.3499586663 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4376 nodes=3716
+  candidates=HERO_POWER:7:0:0:-1:=8.44296645408095, MINION_ATTACK:63:96:0:-1:=8.04296645408096
+#63 turn=13 seat=2 decision HERO_ATTACK:6:96:0:-1: fingerprint=18dc550703270cc717f5160dcc7cbe33d47c5ea6124027b552562020107af044
+  after: turn=13 seat=2 rng=1:6462716504923954632:5619358322327390532:78
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/2 taunt|exhausted|cannot-attack,CORE_RLK_062#97 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/8 temp=0 overload=0/0 hand=3[MEND_046,CATA_470,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/2 can-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=14408.9754305302 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3748 nodes=3349
+  candidates=HERO_ATTACK:6:96:0:-1:=5.11241435888641, HERO_ATTACK:6:97:0:-1:=-7.12745969241811, PLAY_CARD:99:0:-1:4:=-7.99423492162639
+#64 turn=13 seat=2 decision MINION_ATTACK:63:97:0:-1: fingerprint=0f7ecb0b2739f6aa8401eb80d93ddcf326f25cd8525e75ee2382b4ef5a9d8b9b
+  after: turn=13 seat=2 rng=1:6462716504923954632:5619358322327390532:78
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=5/8 temp=0 overload=0/0 hand=3[MEND_046,CATA_470,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack]
+  search: planNodeCap=6850 searchBudgetMs=10945.5057879261 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3383 nodes=3241
+  candidates=MINION_ATTACK:63:97:0:-1:=-22.0633072982353, MINION_ATTACK:63:96:0:-1:=-22.2506068532959
+#65 turn=13 seat=2 decision PLAY_CARD:99:0:-1:4: fingerprint=793a866c3f6a72dcfc15ec240ca36cbdaae818d15cc8aa8eac7f77cd088fb2d3
+  after: turn=13 seat=2 rng=1:2684361550120566991:6635408923296991276:81
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=2[MEND_046,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+  search: planNodeCap=4101 searchBudgetMs=6689.86582259084 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1804 nodes=1570
+  candidates=PLAY_CARD:99:0:-1:4:=-23.4633072982353, END_TURN:0:0:0:-1:=-56.2529828275848
+#66 turn=13 seat=2 decision CHOOSE:0:0:0:-1:107 fingerprint=20b1fdd2b318b4e2951de411408b8899a69b776f938f9035cb0e4b7e24ab7d5f
+  after: turn=13 seat=2 rng=1:2827315889256793362:-8849496160671003193:84
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=2[MEND_046,CORE_SCH_181] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+  search: planNodeCap=2124 searchBudgetMs=4051.17397170865 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1033 nodes=812
+  candidates=CHOOSE:0:0:0:-1:107=-24.8633072982353
+#67 turn=13 seat=2 decision CHOOSE:0:0:0:-1:110 fingerprint=fb830950756f39a3680c1abc836fcc31a774549ff0aafdd7bf7cbe15b2e22fe0
+  after: turn=13 seat=2 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/2 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/3 can-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+  search: planNodeCap=147 searchBudgetMs=300 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Clock thinkMs=202 nodes=48
+  candidates=CHOOSE:0:0:0:-1:110=45.7112390776678, CHOOSE:0:0:0:-1:112=45.1001279665567, CHOOSE:0:0:0:-1:111=42.9112390776678
+#68 turn=13 seat=2 decision MINION_ATTACK:49:96:0:-1: fingerprint=4cb827269e80b7aeaaab50fa6067bf8ed38338411e53a78574c7097e8a4ac380
+  after: turn=13 seat=2 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=6/6 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[CORE_RLK_062#96 1/1 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+  search: planNodeCap=154 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=softmax stop=Exhausted thinkMs=86 nodes=22
+  candidates=MINION_ATTACK:49:96:0:-1:=33.5112390776678
+#69 turn=13 seat=2 decision END_TURN:0:0:0:-1: fingerprint=a70fff2f631ad27494743488a586f0243439f3e6b1223ba05da149399c8da69d
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=0/7 temp=0 overload=0/0 hand=7 deck=17 secrets=0[] board=[CORE_RLK_062#96 1/1 taunt|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+  search: planNodeCap=154 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=71 nodes=5
+  candidates=END_TURN:0:0:0:-1:=33.5112390776678
+#70 turn=14 seat=1 human-action PLAY_CARD:30:0:-1:-1: fingerprint=d1e73eb8ffb918d31985500212969c70b79710cb292579ea60111a4a1ccd8225
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=5/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[CORE_RLK_062#96 1/1 taunt|can-attack,RLK_008t#115 2/2 rush|can-attack,RLK_008t#116 2/2 rush|can-attack,RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[TLC_233#63 3/1 exhausted|cannot-attack,CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#71 turn=14 seat=1 human-action MINION_ATTACK:96:63:0:-1: fingerprint=31e49bd4f8ade508cac2ef7ec1d99510e826d824e4223a5d86db02ba74fc00da
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=5/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#115 2/2 rush|can-attack,RLK_008t#116 2/2 rush|can-attack,RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#72 turn=14 seat=1 human-action HERO_POWER:5:0:0:-1: fingerprint=585d38118bb728e4093c1c26bb66140f6934cfee1c08e9a89d635ac0250f42d1
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#115 2/2 rush|can-attack,RLK_008t#116 2/2 rush|can-attack,RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack,HERO_11bpt#120 1/1 charge|dies-at-end-of-turn|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/3 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#73 turn=14 seat=1 human-action MINION_ATTACK:120:71:0:-1: fingerprint=1de2d19820e03cfc8420f4ac4b21d2fe1276ef2ffb11567e14297d555a9f1da4
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#115 2/2 rush|can-attack,RLK_008t#116 2/2 rush|can-attack,RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,JAIL_407#71 5/2 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#74 turn=14 seat=1 human-action MINION_ATTACK:115:71:0:-1: fingerprint=329f10c1191191a86e1695cdc04b69ef235a1938555b81753c0441fbbda05101
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#116 2/2 rush|can-attack,RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,DINO_130t#100 4/4 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#75 turn=14 seat=1 human-action MINION_ATTACK:116:100:0:-1: fingerprint=f2879f1bb86bcc7a9e7e568e4b6f9fec9b6e85bac552f31a3bde24c5aea19a87
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#117 2/2 rush|can-attack,RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,DINO_130t#100 4/2 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#76 turn=14 seat=1 human-action MINION_ATTACK:117:100:0:-1: fingerprint=4997e099c3032fe693dc28f0a2a0592efdc5afbeecb49106b9df674dedae11d9
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#118 2/2 rush|can-attack,RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,CATA_470#99 4/4 exhausted|cannot-attack]
+#77 turn=14 seat=1 human-action MINION_ATTACK:118:99:0:-1: fingerprint=03f9123e2f253c4aee66399a197a46c04745a96c225adba1611518af32799ffb
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[RLK_008t#119 2/2 rush|can-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,CATA_470#99 4/2 exhausted|cannot-attack]
+#78 turn=14 seat=1 human-action MINION_ATTACK:119:99:0:-1: fingerprint=670ff03f82b18c7efa2b91b9117c2c73debcb916d97c859752e59389f3df5f76
+  after: turn=14 seat=1 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=7/8 temp=0 overload=0/0 hand=4[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525] deck=18 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack]
+#79 turn=14 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=c7145dda17f84492f2a0cd16e92103520e000855a0447a657f3de419d1acb285
+  after: turn=15 seat=2 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:22+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/9 temp=0 overload=0/0 hand=5[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525,END_011] deck=17 secrets=0[] board=[CATA_210#49 1/2 can-attack]
+#80 turn=15 seat=2 decision MINION_ATTACK:49:4:0:-1: fingerprint=a92490004506ff316afb0dc9995f6c37db2189e5b4343de4e91711bd0bea75c2
+  after: turn=15 seat=2 rng=1:1415210689063007447:-8081554113079398614:85
+  human hero=HERO_11:21+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=0/9 temp=0 overload=0/0 hand=5[MEND_046,CORE_SCH_181,CATA_470t1,CATA_525,END_011] deck=17 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=37078.5257185895 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3791 nodes=2922
+  candidates=MINION_ATTACK:49:4:0:-1:=-51.0291225855849, HERO_POWER:7:0:0:-1:=-65.9957794694346
+#81 turn=15 seat=2 decision PLAY_CARD:70:0:-1:1: fingerprint=acdaa71ef5020e884c8867494828ecd6226d4b3a8f54aa38b4c4e184d2c858cc
+  after: turn=15 seat=2 rng=1:2379003304598252583:3610127518393547864:86
+  human hero=HERO_11:21+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=7/9 temp=0 overload=0/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,MEND_046t,MEND_046t] deck=17 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,MEND_046#70 4/4 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=33200.1319934003 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=4126 nodes=2910
+  candidates=PLAY_CARD:70:0:-1:1:=-41.9806734589941
+#82 turn=15 seat=2 decision PLAY_CARD:121:0:-1:2: fingerprint=cae34fc14dbd01e611342126326c669c6410f20a3eaf5538ee024bb6c2047075
+  after: turn=15 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=8/9 temp=0 overload=0/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,MEND_046t,CATA_210] deck=16 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,MEND_046#70 4/4 exhausted|cannot-attack,MEND_046t#121 2/2 exhausted|cannot-attack]
+  search: planNodeCap=7000 searchBudgetMs=29667.9708701098 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=3287 nodes=2368
+  candidates=PLAY_CARD:121:0:-1:2:=-54.4291225855849, HERO_POWER:7:0:0:-1:=-56.7317191737328
+#83 turn=15 seat=2 decision PLAY_CARD:123:0:-1:3: fingerprint=f259dc8c57068f8d7d29095744ee56026631cd0bf97ebed559b0509d29da9bfb
+  after: turn=15 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=7/7 temp=0 overload=0/0 hand=6 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=9/9 temp=0 overload=0/1 hand=6[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210] deck=16 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,MEND_046#70 4/4 exhausted|cannot-attack,MEND_046t#121 2/2 exhausted|cannot-attack,MEND_046t#123 2/2 exhausted|cannot-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=7000 searchBudgetMs=25259.8651502935 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=2968 nodes=2153
+  candidates=PLAY_CARD:123:0:-1:3:=-55.2291225855849, PLAY_CARD:125:0:-1:3:=-55.2291225855849, END_TURN:0:0:0:-1:=-62.0281767201194
+#84 turn=15 seat=2 decision END_TURN:0:0:0:-1: fingerprint=7f5055bd18d08a67a784bbd805dcdc680813ea476b8c4c1d09504d79ca49a44f
+  after: turn=16 seat=1 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=0/8 temp=0 overload=0/0 hand=7 deck=16 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=9/9 temp=0 overload=0/1 hand=6[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210] deck=16 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,MEND_046#70 4/4 exhausted|cannot-attack,MEND_046t#121 2/2 exhausted|cannot-attack,MEND_046t#123 2/2 exhausted|cannot-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=7000 searchBudgetMs=20830.9834973911 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=1264 nodes=705
+  candidates=END_TURN:0:0:0:-1:=-39.4112661386671
+#85 turn=16 seat=1 human-action PLAY_CARD:37:0:-1:0: fingerprint=7ad1ef0e5ab5df7d9166ba6f93efd0b7c261ddc7831ff12f2b4a3822ef69ab7a
+  after: turn=16 seat=1 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/8 taunt|exhausted|cannot-attack,RLK_061t#134 1/3 taunt|exhausted|cannot-attack,RLK_061t#135 1/3 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=9/9 temp=0 overload=0/1 hand=6[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210] deck=16 secrets=0[] board=[CATA_210#49 1/2 exhausted|cannot-attack,MEND_046#70 4/4 exhausted|cannot-attack,MEND_046t#121 2/2 exhausted|cannot-attack,MEND_046t#123 2/2 exhausted|cannot-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+#86 turn=16 seat=1 human-action END_TURN:0:0:0:-1: fingerprint=6d6991043fab7d57460c0d3677e60ad2a891fe448a250abebf8f3a91276ff507
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/8 taunt|exhausted|cannot-attack,RLK_061t#134 1/3 taunt|exhausted|cannot-attack,RLK_061t#135 1/3 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210#49 1/2 can-attack,MEND_046#70 4/4 can-attack,MEND_046t#121 2/2 can-attack,MEND_046t#123 2/2 can-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+#87 turn=17 seat=2 decision MINION_ATTACK:49:37:0:-1: fingerprint=54bc9a60733223401304c4c5be5ec598cc73526990347a9a759d74637fcf7eb0
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#134 1/3 taunt|exhausted|cannot-attack,RLK_061t#135 1/3 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/4 can-attack,MEND_046t#121 2/2 can-attack,MEND_046t#123 2/2 can-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=7000 searchBudgetMs=37080.8997020262 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Nodes thinkMs=11612 nodes=6684
+  candidates=MINION_ATTACK:49:37:0:-1:=-59.0538954567879
+#88 turn=17 seat=2 decision MINION_ATTACK:121:134:0:-1: fingerprint=a245ec5ecbeb512a0ac12ebaf1b0ad5a6475e6db09f02196dc6dbe07749085db
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#134 1/1 taunt|exhausted|cannot-attack,RLK_061t#135 1/3 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/4 can-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/2 can-attack,BOT_102t#132 1/1 rush|can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=7000 searchBudgetMs=25470.5783983429 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Nodes thinkMs=10999 nodes=6531
+  candidates=MINION_ATTACK:121:134:0:-1:=-84.4738039127855, MINION_ATTACK:132:134:0:-1:=-86.3224350948016
+#89 turn=17 seat=2 decision MINION_ATTACK:132:134:0:-1: fingerprint=261a9cfe1a5f22f6e517560384ebe5838eed3e297d2f8e85e5f2b33017c3a32c
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#135 1/3 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/4 can-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/2 can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=6992 searchBudgetMs=15699.2946990536 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Nodes thinkMs=11459 nodes=7245
+  candidates=MINION_ATTACK:132:134:0:-1:=-64.0725375660549, MINION_ATTACK:123:134:0:-1:=-85.027971433933
+#90 turn=17 seat=2 decision MINION_ATTACK:70:135:0:-1: fingerprint=465e2e53cd8e6c3b530e233978a1bd3c6635bc730aab0ab7204810a416a7bfc2
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#136 1/3 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/3 exhausted|cannot-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/2 can-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=1971 searchBudgetMs=5160.5260303735 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Nodes thinkMs=2360 nodes=1418
+  candidates=MINION_ATTACK:70:135:0:-1:=-94.1743006885449
+#91 turn=17 seat=2 decision MINION_ATTACK:123:136:0:-1: fingerprint=ddd8bb9e9846155c1c4ed20b788393a03c20642a86e7d1c02e2bb989f732e527
+  after: turn=17 seat=2 rng=1:-1438861733547848066:8705751091588796245:93
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#136 1/1 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=0/10 temp=0 overload=1/0 hand=7[CORE_SCH_181,CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=15 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/3 exhausted|cannot-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/1 exhausted|cannot-attack,BOT_102t#133 1/1 rush|can-attack]
+  search: planNodeCap=616 searchBudgetMs=2434.63047599396 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Nodes thinkMs=2076 nodes=633
+  candidates=MINION_ATTACK:123:136:0:-1:=25.64, MINION_ATTACK:133:136:0:-1:=22.64, PLAY_CARD:105:0:-1:5:=21.44, HERO_POWER:7:0:0:-1:=21.24, PLAY_CARD:113:0:-1:5:=16.64
+#92 turn=17 seat=2 decision PLAY_CARD:105:0:-1:5: fingerprint=7ac9b26e4d28b5404ef831836f34037192505ebeef0cbf9b6202b095e9347995
+  after: turn=17 seat=2 rng=1:-2195300901490033652:9100669534088628709:94
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack,RLK_061t#136 1/1 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=6/10 temp=0 overload=1/0 hand=6[CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210,CORE_AT_037] deck=14 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/3 exhausted|cannot-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/1 exhausted|cannot-attack,BOT_102t#133 1/1 rush|can-attack,CORE_SCH_181#105 5/5 exhausted|cannot-attack,EDR_856#66 4/4 exhausted|cannot-attack]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Clock thinkMs=206 nodes=33
+  candidates=PLAY_CARD:105:0:-1:5:=20.64, PLAY_CARD:113:0:-1:5:=10.64, PLAY_CARD:40:0:2:-1:=-0.160000000000025, PLAY_CARD:125:0:-1:5:=-2.76000000000003, PLAY_CARD:48:0:-1:5:=-5.36000000000004
+#93 turn=17 seat=2 decision PLAY_CARD:40:136:1:-1: fingerprint=008c7953b4329af18338c7ffeff7d9bf946d07ad6ada32e5c0a13e4757481977
+  after: turn=17 seat=2 rng=1:-2195300901490033652:9100669534088628709:94
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/7 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/10 temp=0 overload=1/0 hand=5[CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210] deck=14 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/3 exhausted|cannot-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/1 exhausted|cannot-attack,BOT_102t#133 1/1 rush|can-attack,CORE_SCH_181#105 5/5 exhausted|cannot-attack,EDR_856#66 4/4 exhausted|cannot-attack]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=True reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Clock thinkMs=203 nodes=53
+  candidates=PLAY_CARD:40:136:1:-1:=26.24, MINION_ATTACK:133:136:0:-1:=22.64, PLAY_CARD:40:4:1:-1:=21.44, HERO_POWER:7:0:0:-1:=21.24, END_TURN:0:0:0:-1:=20.64
+#94 turn=17 seat=2 decision MINION_ATTACK:133:37:0:-1: fingerprint=f4de9a26f0fd38e587749c784358282c9d978b49a1eafe0cccc45df087e21e85
+  after: turn=17 seat=2 rng=1:-2195300901490033652:9100669534088628709:94
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=16 secrets=0[] board=[CORE_RLK_506#37 8/6 taunt|exhausted|cannot-attack]
+  npc hero=HERO_06:30+0 weapon=- mana=7/10 temp=0 overload=1/0 hand=5[CATA_470t1,CATA_525,END_011,MEND_046t,CATA_210] deck=14 secrets=0[] board=[CATA_210t#139 7/6 exhausted|cannot-attack,MEND_046#70 4/3 exhausted|cannot-attack,MEND_046t#121 2/1 exhausted|cannot-attack,MEND_046t#123 2/1 exhausted|cannot-attack,CORE_SCH_181#105 5/5 exhausted|cannot-attack,EDR_856#66 4/4 exhausted|cannot-attack]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=173 nodes=47
+  candidates=MINION_ATTACK:133:37:0:-1:=27.04, HERO_POWER:7:0:0:-1:=26.24, END_TURN:0:0:0:-1:=25.64, PLAY_CARD:52:0:-1:-1:=20.84
+#95 turn=17 seat=2 decision PLAY_CARD:125:0:-1:6: fingerprint=b2705ec50fa0fe6a88ebb3645868843770f46727cdb5f9b4d38e39ec54d1046b
+  after: turn=17 seat=2 rng=1:6106812575600869091:-1418293613163234208:110
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=8/10 temp=0 overload=1/0 hand=4[CATA_470t1,CATA_525,END_011,CATA_210] deck=20 secrets=0[] board=[]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=139 nodes=24
+  candidates=PLAY_CARD:125:0:-1:6:=27.04, PLAY_CARD:48:0:-1:6:=24.44, HERO_POWER:7:0:0:-1:=20.84, END_TURN:0:0:0:-1:=20.24, PLAY_CARD:52:0:-1:-1:=15.44
+#96 turn=17 seat=2 decision PLAY_CARD:48:0:-1:0: fingerprint=2d3b12517600fcd6f305a30de916c2962a76b1441566d63d95d03a724d27013d
+  after: turn=17 seat=2 rng=1:6106812575600869091:-1418293613163234208:110
+  human hero=HERO_11:21+0 weapon=- mana=8/8 temp=0 overload=0/0 hand=6 deck=18 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=9/10 temp=0 overload=1/0 hand=3[CATA_470t1,CATA_525,END_011] deck=20 secrets=0[] board=[CATA_210#48 0/2 exhausted|cannot-attack]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=121 nodes=9
+  candidates=PLAY_CARD:48:0:-1:0:=-54.76, END_TURN:0:0:0:-1:=-58.96
+#97 turn=17 seat=2 decision END_TURN:0:0:0:-1: fingerprint=756644dca701b8032d734abe57332b12d918e1b8e7c1e23392e799778f4f0ebc
+  after: turn=18 seat=1 rng=1:6106812575600869091:-1418293613163234208:110
+  human hero=HERO_11:21+0 weapon=- mana=0/9 temp=0 overload=0/0 hand=7 deck=17 secrets=0[] board=[]
+  npc hero=HERO_06:30+0 weapon=- mana=9/10 temp=0 overload=1/0 hand=3[CATA_470t1,CATA_525,END_011] deck=20 secrets=0[] board=[CATA_210#48 0/2 exhausted|cannot-attack]
+  search: planNodeCap=100 searchBudgetMs=300 searchInterrupted=False reuse=False validationNodeCap=0 validationNodes=0 unscheduledNodes=0 validationCompared=False validationDeadline=False validationFallback=False mistakeKind=none stop=Exhausted thinkMs=111 nodes=5
+  candidates=END_TURN:0:0:0:-1:=-54.76
+INCOMPLETE: no result (match running, interrupted, or recording stopped)

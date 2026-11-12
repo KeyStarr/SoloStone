@@ -1,0 +1,27 @@
+id	class	reason	inventory	name
+TLC_229	N	no conditional hand play effect	existing	Spirit of the Mountain
+TLC_229t14	N	no conditional hand play effect	existing	Ashalon, Ridge Guardian
+TLC_229t14e	N	no conditional hand play effect	existing	Perfect Evolution
+TLC_602	N	no conditional hand play effect	existing	Enter the Lost City
+TLC_602t	N	no conditional hand play effect	existing	Latorvius, Gaze of the City
+TLC_817	N	no conditional hand play effect	existing	Reach Equilibrium
+TLC_817t	N	no conditional hand play effect	existing	Cleanse the Shadow
+TLC_817t2	N	no conditional hand play effect	existing	Corrupt the Light
+TLC_817t3	N	no conditional hand play effect	existing	Sol'etos, Life's Breath
+TLC_817t4	N	no conditional hand play effect	existing	Sol'etos, Death's Touch
+TLC_817t5	N	no conditional hand play effect	existing	Sol'etos, Cycle's Rebirth
+UNG_999t4	N	fixed Adapt option	existing	Rocky Carapace
+UNG_028t	N	quest reward or fixed dependency	existing	Time Warp
+UNG_067t1	N	quest reward or fixed dependency	existing	Crystal Core
+UNG_067t1e	N	quest reward or fixed dependency	existing	Crystallized
+UNG_067t1e2	N	quest reward or fixed dependency	existing	Crystallized
+UNG_920t1	N	quest reward or fixed dependency	existing	Queen Carnassa
+UNG_934t1	N	quest reward or fixed dependency	existing	Sulfuras
+UNG_829t1	N	quest reward or fixed dependency	existing	Nether Portal
+UNG_829t2	N	quest reward or fixed dependency	existing	Nether Portal
+UNG_829t3	N	quest reward or fixed dependency	existing	Nether Imp
+UNG_954t1	N	quest reward or fixed dependency	existing	Galvadon
+UNG_942t	N	quest reward or fixed dependency	existing	Megafin
+TLC_446	N	no conditional hand play effect	existing	Escape the Underfel
+TLC_446t	N	no conditional hand play effect	existing	Underfel Rift
+TLC_446t1	N	no conditional hand play effect	existing	Underfel Rift

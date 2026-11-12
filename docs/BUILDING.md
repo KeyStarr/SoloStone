@@ -8,7 +8,10 @@ command from the repository root.
 The repository contains no Hearthstone program files, art or sound. To compile the plugin you need **your own Hearthstone client** as
 reference libraries (step 1). Without one you can still build and test the launcher (step 3).
 
-The card and rules test suites are not published yet. What is here are the launcher tests and the build checks below.
+The public test suites (cards, rules, opponent AI, packs, ladder, launcher) are in this repository and need no Hearthstone
+files: see [TESTING.md](TESTING.md). The tests that need your own client are the `client` tier, run with `--client`; some
+of them also need card data exported from your client, and the tools for that are not in this repository yet. Step 3
+below runs only the launcher tests.
 
 ## What you need
 
@@ -134,6 +137,7 @@ published hashes.
 
 ## Known gaps
 
-- Tests for cards and rules are not in this repository yet.
+- The tools that export card data from your client are not in this repository yet, so the client suites that read it
+  skip unless you already have that data ([TESTING.md](TESTING.md)).
 - The release hashes cannot be reproduced without the same reference client files.
 - Signing a release (the update signature) is done by the maintainer with a private key that is not in any build.

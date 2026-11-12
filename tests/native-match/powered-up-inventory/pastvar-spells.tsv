@@ -1,0 +1,55 @@
+id	class	reason	inventory	name
+AT_004	N	qualified historical recipe or fixed dependency	legacy	Arcane Blast
+AT_005	N	qualified historical recipe or fixed dependency	legacy	Polymorph: Boar
+AT_005t	N	qualified historical recipe or fixed dependency	legacy	Boar
+AT_051	N	qualified historical recipe or fixed dependency	legacy	Elemental Destruction
+CFM_623	N	qualified historical recipe or fixed dependency	legacy	Greater Arcane Missiles
+CS2_045	N	qualified historical recipe or fixed dependency	legacy	Rockbiter Weapon
+CS2_045e	N	qualified historical recipe or fixed dependency	legacy	Rockbiter Weapon
+DAL_256	N	qualified historical recipe or fixed dependency	legacy	The Forest's Aid
+DAL_256t2	N	qualified historical recipe or fixed dependency	legacy	Treant
+DAL_256ts	N	qualified historical recipe or fixed dependency	legacy	The Forest's Aid
+DRG_219	G	holding Dragon	legacy	Lightning Breath
+EX1_155	N	qualified historical recipe or fixed dependency	legacy	Mark of Nature
+EX1_155a	N	qualified historical recipe or fixed dependency	legacy	Tiger's Fury
+EX1_155ae	N	qualified historical recipe or fixed dependency	legacy	Mark of Nature
+EX1_155b	N	qualified historical recipe or fixed dependency	legacy	Thick Hide
+EX1_155be	N	qualified historical recipe or fixed dependency	legacy	Mark of Nature
+EX1_164	N	qualified historical recipe or fixed dependency	legacy	Nourish
+EX1_164a	N	qualified historical recipe or fixed dependency	legacy	Rampant Growth
+EX1_164b	N	qualified historical recipe or fixed dependency	legacy	Enrich
+EX1_165	N	qualified historical recipe or fixed dependency	legacy	Druid of the Claw
+EX1_165a	N	qualified historical recipe or fixed dependency	legacy	Cat Form
+EX1_165b	N	qualified historical recipe or fixed dependency	legacy	Bear Form
+EX1_165t1	N	qualified historical recipe or fixed dependency	legacy	Druid of the Claw
+EX1_165t2	N	qualified historical recipe or fixed dependency	legacy	Druid of the Claw
+EX1_166	N	qualified historical recipe or fixed dependency	legacy	Keeper of the Grove
+EX1_166a	N	qualified historical recipe or fixed dependency	legacy	Moonfire
+EX1_166b	N	qualified historical recipe or fixed dependency	legacy	Dispel
+EX1_178	N	qualified historical recipe or fixed dependency	legacy	Ancient of War
+EX1_178a	N	qualified historical recipe or fixed dependency	legacy	Rooted
+EX1_178ae	N	qualified historical recipe or fixed dependency	legacy	Rooted
+EX1_178b	N	qualified historical recipe or fixed dependency	legacy	Uproot
+EX1_178be	N	qualified historical recipe or fixed dependency	legacy	Uprooted
+EX1_248	N	qualified historical recipe or fixed dependency	legacy	Feral Spirit
+EX1_251	N	qualified historical recipe or fixed dependency	legacy	Forked Lightning
+EX1_573	N	qualified historical recipe or fixed dependency	legacy	Cenarius
+EX1_573a	N	qualified historical recipe or fixed dependency	legacy	Demigod's Favor
+EX1_573ae	N	qualified historical recipe or fixed dependency	legacy	Demigod's Favor
+EX1_573b	N	qualified historical recipe or fixed dependency	legacy	Shan'do's Lesson
+EX1_573t	N	qualified historical recipe or fixed dependency	legacy	Treant
+FP1_018	N	qualified historical recipe or fixed dependency	legacy	Duplicate
+ICC_085	N	qualified historical recipe or fixed dependency	legacy	Ultimate Infestation
+ICC_085t	N	qualified historical recipe or fixed dependency	legacy	Ghoul Infestor
+NEW1_007	N	qualified historical recipe or fixed dependency	legacy	Starfall
+NEW1_007a	N	qualified historical recipe or fixed dependency	legacy	Stellar Drift
+NEW1_007b	N	qualified historical recipe or fixed dependency	legacy	Starlord
+NEW1_008	N	qualified historical recipe or fixed dependency	legacy	Ancient of Lore
+NEW1_008a	N	qualified historical recipe or fixed dependency	legacy	Ancient Teachings
+NEW1_008b	N	qualified historical recipe or fixed dependency	legacy	Ancient Secrets
+OG_044a	N	qualified historical recipe or fixed dependency	legacy	Druid of the Claw
+OG_206	N	qualified historical recipe or fixed dependency	legacy	Stormcrack
+ULD_181	N	qualified historical recipe or fixed dependency	legacy	Earthquake
+ULD_273	N	qualified historical recipe or fixed dependency	legacy	Overflow
+UNG_024	N	qualified historical recipe or fixed dependency	legacy	Mana Bind
+UNG_817	N	qualified historical recipe or fixed dependency	legacy	Tidal Surge

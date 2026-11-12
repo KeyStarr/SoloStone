@@ -1,0 +1,489 @@
+{
+  "engineSeed": 614161004,
+  "poolHash": "0ffc85941d64bce909a63c255ea1ec85567d8d18593aab291eff421f838186cf",
+  "humanDeck": {
+    "id": "player-core-rogue",
+    "hero": "HERO_03",
+    "style": "Tempo",
+    "cards": [
+      "CORE_CS2_072",
+      "CORE_CS2_072",
+      "CORE_CS2_074",
+      "CORE_CS2_074",
+      "CORE_BT_701",
+      "CORE_BT_701",
+      "CORE_WON_351",
+      "CORE_WON_351",
+      "CORE_DMF_511",
+      "CORE_DMF_511",
+      "CORE_EX1_131",
+      "CORE_EX1_131",
+      "CORE_EX1_129",
+      "CORE_EX1_129",
+      "CORE_NEW1_018",
+      "CORE_NEW1_018",
+      "CS3_022",
+      "CS3_022",
+      "CORE_EX1_134",
+      "CORE_EX1_134",
+      "CORE_CS2_076",
+      "CORE_CS2_076",
+      "CORE_DAL_720",
+      "CORE_DAL_720",
+      "CORE_ULD_280",
+      "CORE_ULD_280",
+      "CORE_BOT_576",
+      "CORE_BOT_576",
+      "CORE_EX1_145",
+      "CORE_CFM_781"
+    ],
+    "sideboards": {},
+    "hash": "e186ae4ffbb6982ea3a926d323a39c915562d5181c027e2503a823f92fe19394"
+  },
+  "npcDeck": {
+    "id": "npc-recipe-deathrattle-herald-demon-hunter",
+    "hero": "HERO_10",
+    "style": "Value",
+    "cards": [
+      "CATA_528",
+      "CATA_528",
+      "CATA_526",
+      "CATA_530",
+      "CATA_530",
+      "CORE_BT_491",
+      "CORE_BT_491",
+      "TLC_902",
+      "TLC_902",
+      "CATA_525",
+      "CATA_525",
+      "CORE_BT_801",
+      "EDR_820",
+      "TIME_003",
+      "TIME_003",
+      "TLC_833",
+      "EDR_260",
+      "EDR_260",
+      "EDR_856",
+      "FIR_958",
+      "TLC_100",
+      "CATA_722",
+      "EDR_891",
+      "EDR_891",
+      "CATA_497",
+      "EDR_892",
+      "EDR_892",
+      "CATA_151",
+      "TLC_480",
+      "CATA_190h"
+    ],
+    "sideboards": {},
+    "hash": "c1ee4713737d5d99c25d6a6afed5657485bbb98e84e1ca9881fde54c330305e0"
+  },
+  "actions": [
+    {
+      "type": "mulligan",
+      "seat": 2,
+      "keeps": [],
+      "fingerprint": "62100f28638c8886ad1f176063250525414c948ef124628d6ae513bfa9ee9d89",
+      "rngState": "1:-2610151810573996644:4870647016535120654:64",
+      "sequence": 1
+    },
+    {
+      "type": "mulligan",
+      "seat": 1,
+      "action": "CHOOSE:0:0:0:-1:19,27",
+      "keeps": [
+        19,
+        27
+      ],
+      "choices": [
+        19,
+        27
+      ],
+      "fingerprint": "152e1bfcb9d60f4b837383d996a31fc2d1f56742999c956dbf64318415f80a8d",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 2
+    },
+    {
+      "type": "main-begin",
+      "fingerprint": "7be9973c6915081e9570f20eada4da9566abc1cafc0b234b2ca7f5a8ca27aed0",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 3
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "ec421e4b57d7cb83bf6fa8689923cb3f23b84494ed7217ac836467936bced203",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 4
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:39:0:-1:-1:",
+      "fingerprint": "8e82d02d1154e4626224c9b7f2aa0d98610884af465951d553f3d422e5b70829",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 5
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "08533a3a02b04f994bcd3eb6f98c07a89483210fb7c351ad2e2fac41cc17374b",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 6
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "HERO_POWER:5:0:0:-1:",
+      "choices": [],
+      "fingerprint": "5c05f351d4d6646a0fa4eecc402fb64f9b75423aef9ec3db3daaee27e210d7fd",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 7
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "HERO_ATTACK:4:6:0:-1:",
+      "choices": [],
+      "fingerprint": "5bff8c56d27c355c045e600b6122a063c62b95790c33cae545703c44d1de487f",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 8
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "c49d5dbf0b5543cb8c4a9e42c14297ea1dfb548c6e0fbf4fabf381f485784a40",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 9
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:70:0:-1:-1:",
+      "fingerprint": "5b1f5f7ac71e5d1a7f5a8821fc312acb9f04be56cab7d564be760c748b7d8dc1",
+      "rngState": "1:-1231015870678940444:6920740879446455907:65",
+      "sequence": 10
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:54:0:-1:1:",
+      "fingerprint": "c964872168c35ce188c21bbdf3b27cf5e9a48df8ccdfef8d23bb4821194be237",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 11
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "CHOOSE:0:0:0:-1:75",
+      "fingerprint": "732f4c6964f9968ba4e1f7523f0b0e2d61259dc8d92715de79451b189670995b",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 12
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "f9c7a37eac9ba5aea7559f9871b26687809b7ea06b402e99e2a675ffde1dc116",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 13
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:23:0:-1:0:",
+      "choices": [],
+      "fingerprint": "b24bb3b8da2801f21f0e04c99a31338b5359adb6dc43742a9fbb4a47dc2749c0",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 14
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "5ccb4457851d2c86e6eb9203990ad27a94202aa875f82f44c42adf7b09f09266",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 15
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "HERO_POWER:7:0:0:-1:",
+      "fingerprint": "15c861b9023ee29b26170abece1358686c4f5104ef9d458a986ecba2a0f9627d",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 16
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "MINION_ATTACK:54:4:0:-1:",
+      "fingerprint": "f30509cfac60d1028dcd258cb5a9e506482ddb667f67e1b5ca5620a6447b4e8a",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 17
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "MINION_ATTACK:72:4:0:-1:",
+      "fingerprint": "7ce6fc388f1932d7b4bdb4d93c0a4186cf52e784973047ceffa5957a060e3445",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 18
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "HERO_ATTACK:6:4:0:-1:",
+      "fingerprint": "263e61b385c238609c94cf72794e8607f9729f5de7765fe49cc9fa872ef534dc",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 19
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "5d85a7f3c37def141d00bae8d55e0eee649e91467faf544078d330185ca2e67c",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 20
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:11:0:-1:-1:",
+      "choices": [],
+      "fingerprint": "ea11d192646fab28ceed626d9cc691c4478700ee699a6efcb947834933987af7",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 21
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:27:72:-1:0:",
+      "choices": [],
+      "fingerprint": "d9145f574e20bb99222c1eb6318325126ff5555c32fb65e0e3ea9c343fa92101",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 22
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "MINION_ATTACK:23:54:0:-1:",
+      "choices": [],
+      "fingerprint": "34e35275f4690106660c06c61d9a088f2fb172b4ea95188bef9556e31d9ba110",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 23
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "889cc20f1388ec874675869900201c9de40e6a17a5a450706ff3f67d589702c7",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 24
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:56:0:-1:0:",
+      "fingerprint": "a1caba9054402bb0eded6f2f968f2aa6ed7d2a37a35c8e3031227ab7e05d6581",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 25
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "4e9cf525977f9fa19940b1cd9a4648d724e043c966c0ad4f6cedc99c46ff627f",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 26
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "HERO_ATTACK:4:56:0:-1:",
+      "choices": [],
+      "fingerprint": "d05904d9fa30f5c4e45749005980370618507df65fe764aa639dc9af9bc171e6",
+      "rngState": "1:-8810889877489837403:-1448144255320175617:66",
+      "sequence": 27
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "MINION_ATTACK:23:56:0:-1:",
+      "choices": [],
+      "fingerprint": "4ed7f49e35ba6de7b29d7623b6f0f5d5e6aa3225c3ed57d3c8c9b84d87508687",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 28
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:31:0:-1:-1:",
+      "choices": [],
+      "fingerprint": "86b89b145f2a09787b1d8112f2b20fe6b23d06b5ef732e76f40744b9b822873a",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 29
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "MINION_ATTACK:27:6:0:-1:",
+      "choices": [],
+      "fingerprint": "a86abb6032389cea88fa3b30e40ee5902022fa19d49dd9c5a2825726306e1bad",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 30
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "1b62d745cc462765b3b48d9afda7a95ce59ffb9a18f87634278ddaa81bc8f069",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 31
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:63:0:-1:0:",
+      "fingerprint": "6835c702fd7d522091a4b07650869a9b85fbee56205ad2a3a9a5bc0d6e87a9d0",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 32
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "3e21e1310915ef860bc6d4c4191913910c5c1e8660cdd48dbf43483a41c5d3de",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 33
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:19:0:-1:0:",
+      "choices": [],
+      "fingerprint": "4e61f8ec54f32e5db31a25c21374d04a3a1f9c6f418d3d85d8c5d49c8afb596f",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 34
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:26:63:-1:0:",
+      "choices": [],
+      "fingerprint": "4d0e84ef1b7cbe0f9e154ee699ee798b8b55a83ff3f7b3a9461778a62dfc6860",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 35
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "MINION_ATTACK:27:63:0:-1:",
+      "choices": [],
+      "fingerprint": "555e96a8fd5aa32ea1311831eb0dd7c4a93b884316238f10b2a0a3edbb9c27b3",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 36
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "be9d587e87ce5bcfb2818109a4ea838dd5ed3c18c0758b377f4205c7c56d3457",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 37
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "MINION_ATTACK:81:19:0:-1:",
+      "fingerprint": "908d98ddcd46a53e367236c3f9d56656357c39abc2e1d8d8ad06c36cad298207",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 38
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "MINION_ATTACK:82:26:0:-1:",
+      "fingerprint": "8903ef7e60ac40f9ba381f9403bce517161bcbacd46e159aad2da205cb670a7e",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 39
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:41:0:-1:-1:",
+      "fingerprint": "d98701d8ecaf46812239d648cec432663ff6a2173650d444ec91f0b85e3b13cf",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 40
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "PLAY_CARD:57:0:-1:0:",
+      "fingerprint": "fe9ccacd8f3f6e3af0b4c3a591528e33147b2af7d5bc99775951ccdb5d5f4294",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 41
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "HERO_ATTACK:6:4:0:-1:",
+      "fingerprint": "da526479aa035811950ade359965a8d63cbd84190c799b10cf007553288dcd6d",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 42
+    },
+    {
+      "type": "decision",
+      "seat": 2,
+      "action": "END_TURN:0:0:0:-1:",
+      "fingerprint": "e2b07641788778467dd302b8cd374094a0e741600bf4b2314bcdee129965c9cc",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 43
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:20:0:-1:-1:",
+      "choices": [],
+      "fingerprint": "241017193a564fbfbab07cbad5b43f632f87cda7322e707f14ff37dd9c6de0e5",
+      "rngState": "1:8266552845185777043:-2476369300128927991:68",
+      "sequence": 44
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:28:57:-1:-1:",
+      "choices": [],
+      "fingerprint": "e008d3a65a62e55fdc3013fbed1f647a9a545117593339ec9cc76e8683d163d7",
+      "rngState": "1:6501183356643863898:8913257116116418934:70",
+      "sequence": 45
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "PLAY_CARD:15:0:-1:0:",
+      "choices": [],
+      "fingerprint": "f6eec925e2afdde466bd6bddb71fcb333b1616becefb8da8f5b37b05d9adee82",
+      "rngState": "1:6501183356643863898:8913257116116418934:70",
+      "sequence": 46
+    },
+    {
+      "type": "human-action",
+      "seat": 1,
+      "action": "END_TURN:0:0:0:-1:",
+      "choices": [],
+      "fingerprint": "5f0ec0786599c16877cb57a9b1243b998f27ddf56322d25efb146090c0de6734",
+      "rngState": "1:6501183356643863898:8913257116116418934:70",
+      "sequence": 47
+    }
+  ]
+}

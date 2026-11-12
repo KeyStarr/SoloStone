@@ -1,0 +1,21 @@
+id	class	reason	inventory	name
+BE_302	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Flame Shock
+CATA_492	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Shrine of Twilight
+EDR_844	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Naralex, Herald of the Flights
+EDR_846	G	qualified while held	existing	Shaladrassil
+EDR_846t1	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Corrupted Nightmare
+EDR_846t1e	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Nightmare
+EDR_846t2	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Corrupted Dream
+EDR_846t3	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Corrupted Laughing Sister
+EDR_846t3e	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Laughing
+EDR_846t4	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Corrupted Awakening
+EDR_846t5	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Corrupted Drake
+EDR_846te2	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Eterenal Nightmare
+TIME_030	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Divergence
+TIME_030e1	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Divergent
+TIME_030e2	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Diverged
+TIME_036	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Royal Informant
+TIME_036e	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Threat Mitigation
+TIME_036t	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Mitigate Threat
+TIME_039	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Deja Vu
+TLC_106	N	no conditional pre-play bonus: aura, unconditional effect, token or enchantment	existing	Endbringer Umbra

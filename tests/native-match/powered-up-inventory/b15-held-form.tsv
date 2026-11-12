@@ -1,0 +1,11 @@
+id	class	reason	inventory	name
+BE_259	N	unconditional Battlecry summons	existing	Isiset
+BE_254	N	intrinsic frozen counter, not a bonus play effect	existing	Colossus of the Cold
+CATA_614	N	unconditional selected-class Discover	existing	Shadowed Informant
+CORE_RLK_567	N	hand transformation trigger	existing	Shadow of Demise
+RLK_567e2	N	recurring hand enchantment	existing	Shadow of Death
+DINO_407	N	recurring hand transformation	existing	Mirrex, the Crystalline
+DINO_407e	N	recurring hand enchantment	existing	Reflecting
+DINO_407e2	N	stat setter enchantment	existing	Crystalline
+TIME_876	N	recurring hand transformation	existing	Shapeshifter
+TIME_876e	N	recurring hand enchantment	existing	Shapeshifting

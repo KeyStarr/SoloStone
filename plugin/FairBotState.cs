@@ -493,6 +493,9 @@ public sealed class FairBotState
     public static FairBotState Create(EngineGame source, int owner, int artificialSeed, DeckStyle style, FairOptions options = null)
         => CreateCore(source, owner, artificialSeed, style, options, false);
     // Bound the optional public-hand reconstruction, never the ability to make a move.
+    // These are work bounds for the root-state scans, not a deadline. Past 8,192 history facts or 65,536 packet entries
+    // the opponent-hand reconstruction is skipped (the hand stays unknown); past 8,192 facts the Secret-coverage check
+    // also reports "incomplete" instead of certifying anything. The bot keeps searching and moving either way.
     internal const int RootHistoryLimit = 8192;
     internal const int RootPacketHistoryLimit = 65536;
 #if ENGINE_SOURCE

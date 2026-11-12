@@ -51,6 +51,7 @@
     <EmbeddedResource Include="..\..\facts\violet-hold-2026-09.json" LogicalName="SabberStoneCore.Resources.Facts.violet-hold-2026-09.json" />
     <InternalsVisibleTo Include="EngineProof" />
     <InternalsVisibleTo Include="HsSim" />
+    <!-- For the AI tuning harness (sim/AiHarness), which is not in this repository yet; it will be published. -->
     <InternalsVisibleTo Include="AiHarness" />
     <InternalsVisibleTo Include="TransportInvariants" />
     <EmbeddedResource Include="resources\Data\PlayErrors.xml">

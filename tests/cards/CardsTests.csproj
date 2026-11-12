@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <Compile Include="../../plugin/LocalEconomy.cs" Link="LocalEconomy.cs" />
+    <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
+    <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileCheats.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" />
+    <Compile Include="../../plugin/LocalClassRewards.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+  </ItemGroup>
+  <PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+  <ItemGroup><ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" Link="LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+    <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>

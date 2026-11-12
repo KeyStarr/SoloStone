@@ -78,7 +78,7 @@ internal sealed class BoardActorFaultTracker
             + (time - sinceTime).ToString("0.0", CultureInfo.InvariantCulture));
 }
 
-// No Unity/client types: this is also compiled by tests/test-control.
+// No Unity/client types: no suite compiles this file; the launcher tests (installer/SoloStone.Launcher.Tests) read it as text.
 internal static class TestControlProtocol
 {
     internal const int MaxLine = 64 * 1024, MaxQueue = 32, MaxResponse = 1024 * 1024, MaxLedger = 1024;

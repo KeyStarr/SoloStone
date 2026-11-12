@@ -1,0 +1,6 @@
+id	class	reason	inventory	name
+END_012	N	unconditional Battlecry	existing	Hand of Infinity
+END_012e	N	not a hand play effect: enchantment	existing	Infinite Sharpness
+TIME_024	N	unconditional delayed Battlecry	existing	Murozond, Unbounded
+TIME_024e	N	not a hand play effect: enchantment	existing	INFINITE POWER!
+TIME_024e2	N	not a hand play effect: enchantment	existing	Murozond, End of Time

@@ -82,6 +82,9 @@ namespace SabberStoneCore.Loader
 
 		internal static Card[] AddTo(Card[] xmlCards, Document overlay)
 		{
+			// The overlay holds card definitions generated from one exact client card export: client build
+			// 37.0.0.254477, identified by its SHA-256. Reject any other provenance, so definitions from a
+			// different build are not mixed in.
 			if (overlay.SchemaVersion != 1 || overlay.SourceBuild != "37.0.0.254477" ||
 				overlay.ExportSha256 == null || overlay.ExportSha256.Length != 64 ||
 				overlay.ExportSha256.Any(c => !Uri.IsHexDigit(c)) || overlay.Cards == null)

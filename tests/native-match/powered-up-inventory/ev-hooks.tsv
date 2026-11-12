@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+CATA_EVENT_110	N	unconditional effect or result-dependent choice	existing	Dragon Soul, Shattered
+CATA_EVENT_110t2	N	unconditional effect or result-dependent choice	existing	Red Aspect Essence
+CATA_EVENT_110t3	N	unconditional effect or result-dependent choice	existing	Blue Aspect Essence
+CATA_EVENT_110t4	N	unconditional effect or result-dependent choice	existing	Bronze Aspect Essence
+CATA_EVENT_110t5	N	unconditional effect or result-dependent choice	existing	Black Aspect Essence
+CATA_EVENT_110t6	N	unconditional effect or result-dependent choice	existing	Green Aspect Essence
+CATA_EVENT_110t6t	N	unconditional effect or result-dependent choice	existing	Searing Skystriker
+CATA_EVENT_110t7	N	unconditional effect or result-dependent choice	existing	Storm Aspect Essence
+JAIL_EVENT_100	N	unconditional effect or result-dependent choice	existing	Watfin
+JAIL_EVENT_100e	N	unconditional effect or result-dependent choice	existing	Esteemed Investigator
+JAIL_EVENT_100t	N	unconditional effect or result-dependent choice	existing	Mrgl...?
+JAIL_EVENT_101	G	active Hero Power is Collapsing Star	existing	Soul Immolation
+JAIL_EVENT_101hp	N	unconditional effect or result-dependent choice	existing	Collapsing Star
+TIME_EVENT_997	N	unconditional effect or result-dependent choice	existing	Welcome Home!
+TIME_EVENT_997e	N	unconditional effect or result-dependent choice	existing	New Resident
+TLC_EVENT_400	N	unconditional effect or result-dependent choice	existing	Storm the Gates

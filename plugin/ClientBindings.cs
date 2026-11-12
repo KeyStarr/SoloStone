@@ -24,7 +24,7 @@ internal sealed class NativeCardDrift
 }
 
 // V1 (release plan 2a.3): does the running client still have what this plugin binds to? The rows come from plugin/client-bindings.txt, built
-// from the compiled plugin by `tool bindings` and held to it by the client-bindings gate node. Unity-free, so tests run it on planted rows.
+// from the compiled plugin by `tool bindings` and spot-checked by the launcher suite. Unity-free, so tests run it on planted rows.
 // Row: kind, assembly (* when the plugin only knows a name), type, member, signature. Kinds: A assembly, T type, M method, C constructor,
 // F field, P property, E iterator a transpiler patches. Signature: * for any, (params), return(params), or a field's type.
 internal static class ClientBindings

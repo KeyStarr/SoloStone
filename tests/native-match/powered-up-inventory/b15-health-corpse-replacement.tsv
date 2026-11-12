@@ -1,0 +1,14 @@
+id	class	reason	inventory	name
+CATA_155	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arisen Onyxia
+CATA_155e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Black Scales
+CATA_155e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Onyxia's Blood
+CATA_155t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Onyxia's Wing
+CATA_155t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Onyxia's Wing
+CORE_EDR_003	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Falric
+EDR_489	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Agamaggan
+EDR_489e1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Corrupted Thorns
+EDR_489e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Corrupted Thorns
+EDR_813	G	2+ Corpses and a legal minion target	existing	Morbid Swarm
+EDR_813a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Contaminated Colony
+EDR_813at	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ant Husk
+EDR_813b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bug Bites

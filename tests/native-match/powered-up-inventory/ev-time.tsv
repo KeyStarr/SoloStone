@@ -1,0 +1,8 @@
+id	class	reason	inventory	name
+TIME_EVENT_998	N	unconditional Battlecry	existing	Runi, Temporal Guardian
+TIME_EVENT_998e1	N	scheduled return enchantment	existing	Temporal Traversal
+TIME_EVENT_998e2	N	stat enchantment	existing	When Am I?
+CATA_EVENT_001	N	chosen hand target, no powered-up condition	existing	Destructive Phoenix
+CATA_EVENT_001e	N	hand countdown enchantment	existing	Destructive Phoenix Rising
+TIME_EVENT_999	N	Rewind choice, no powered-up condition	existing	Sands of Time
+TIME_EVENT_999t	N	unconditional Discover	existing	Sands of Time

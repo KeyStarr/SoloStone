@@ -87,6 +87,8 @@ function GetRoot(Param: String): String;
 begin
   Result := ExtractFileDir(ExpandConstant('{app}'));
 end;
+// Exit codes come from SoloStone.exe's Program.Main (3 busy, 4 occupied, 5 unreadable folder, anything else = unsafe).
+// Uninstall also reads 6 = firewall prompt cancelled.
 function PrepareToInstall(var NeedsRestart: Boolean): String;
 var Code: Integer;
 begin

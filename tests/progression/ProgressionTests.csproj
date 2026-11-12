@@ -1,0 +1,58 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+  <PropertyGroup><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants></PropertyGroup>
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/UnityStandIns.cs" Link="UnityStandIns.cs" />
+    <Compile Include="../shared/RepoRoot.cs" Link="RepoRoot.cs" />
+    <Compile Include="../../plugin/TurnTimerSettings.cs" />
+    <Compile Include="../../plugin/FpsCounterSettings.cs" />
+    <Compile Include="../../plugin/DeckInferenceSettings.cs" />
+    <Compile Include="../shared/BepInExStandIns.cs" Link="BepInExStandIns.cs" />
+    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
+    <Compile Include="../shared/StandardBatchData.cs" Link="StandardBatchData.cs" />
+    <Compile Include="../../plugin/LocalProfile.cs" />
+    <Compile Include="../../plugin/LocalDeckRecord.cs" />
+    <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileCheats.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" />
+    <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" />
+    <Compile Include="../../plugin/ClientBindings.cs" />
+    <Compile Include="../../plugin/SelectedProfile.cs" />
+    <Compile Include="../../plugin/LocalClassRewards.cs" />
+    <Compile Include="../../plugin/LocalEconomy.cs" />
+    <Compile Include="../../plugin/StableSeed.cs" />
+    <Compile Include="../../plugin/LocalCrafting.cs" />
+    <Compile Include="../../plugin/LocalCraftingLedger.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" />
+    <Compile Include="../../plugin/LocalRewardPresentation.cs" />
+    <Compile Include="../../plugin/NativeUIProjection.cs" />
+    <Compile Include="../../plugin/LocalCollectionUI.cs" Link="LocalCollectionUI.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
+    <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" Link="LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+    <Compile Include="../../plugin/LocalAchievementFeats.cs" />
+    <Compile Include="../../plugin/LocalResultsFlow.cs" Link="LocalResultsFlow.cs" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+  </ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+</Project>

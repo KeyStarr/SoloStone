@@ -7,6 +7,10 @@ using HarmonyLib;
 using MiniJSON;
 using UnityEngine;
 
+// Backstop for a freeze found in play on 2026-11-01: a Ragnaros hero-skin match hung because the transported skin hero kept
+// the base hero's attack tags (now projected from HeroSkinData), so AttackSpellController took the moving-hero path and waited
+// forever. After 30 s with no task progress this releases only an audited controller (a stationary hero attack with no card
+// tween in flight); moving attacks, Reset/Rewind, swaps, subspells and unknown controllers are observe-only.
 // Native completion callbacks release presentation ownership; never discard queued engine history.
 internal static partial class NativeSpellWatchdog
 {

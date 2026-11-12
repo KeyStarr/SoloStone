@@ -20,9 +20,16 @@ version (SPDX: AGPL-3.0-or-later). The text is in LICENSE and LICENSES/AGPL-3.0-
 For our own files only, there is an additional permission under section 7 of that licence. It is in
 LICENSE-ADDITIONAL-PERMISSION.md. It does not apply to files in section 2.
 
-Our documentation (README.md, docs/INSTALL.md, docs/BUILDING.md, .github/SECURITY.md,
-.github/CONTRIBUTING.md and this file) and our own data files are licensed under CC BY 4.0
+Our documentation (README.md, AGENTS.md, docs/INSTALL.md, docs/BUILDING.md, docs/TESTING.md, docs/GIT.md,
+.github/SECURITY.md, .github/CONTRIBUTING.md and this file) and our own data files are licensed under CC BY 4.0
 (LICENSES/CC-BY-4.0.txt). The card data files (section 5) are not.
+
+
+One file inside our own tests is not ours: tests/shared/MiniJSON.cs is MiniJSON, a JSON reader and writer by Calvin
+Rien (2013, MIT licence), based on a parser by Patrick van Bergen. The licence text is in that file's header; the
+same wording is in LICENSES/MIT.txt, with "2013 Calvin Rien" as the copyright line. The tests use it in place of the
+copy of this library that Hearthstone ships, so they need no Hearthstone file. We changed it so that it behaves like
+the copy the plugin uses in the game (it returns JsonNode and JsonList objects, among other things).
 
 
 2. SabberStone rules engine

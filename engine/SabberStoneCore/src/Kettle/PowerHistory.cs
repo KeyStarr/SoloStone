@@ -158,7 +158,9 @@ namespace SabberStoneCore.Kettle
                     tags[GameTag.ATK] = character.AttackDamage;
                     tags[GameTag.HEALTH] = character.BaseHealth;
                     tags[GameTag.DAMAGE] = character.Damage;
-                    tags[GameTag.ARMOR] = character.Armor;
+                    // Armor counts only gained Armor; a hero card that isn't its controller's hero shows its printed Armor (as NativeMatch.VisibleStats).
+                    tags[GameTag.ARMOR] = character is Hero armorHero && !ReferenceEquals(armorHero, armorHero.Controller?.Hero)
+                        ? armorHero[GameTag.ARMOR] : character.Armor;
                 }
                 if (playable is Minion minion) tags[GameTag.SPELLPOWER] = minion.SpellPower;
                 if (playable is Weapon weapon)

@@ -6,6 +6,8 @@ using UnityEngine;
 
 internal static partial class NativeMatchmaking
 {
+    // "<prefab>:<guid>" is the client's own AssetReference form; the guid is that prefab's asset id in the pinned client build
+    // and has to match it exactly. It is not a name we choose (the other prefab constants in plugin/ follow the same form).
     private const string Prefab = "MatchingPopup3D.prefab:4f4a40d14d907e94da1b81d97c18a44f";
     private static ManualLogSource log;
     private static MethodInfo showPopup, loadPopup;
@@ -118,6 +120,7 @@ internal static partial class NativeMatchmaking
             active = false;
             return;
         }
+        // 45 s watchdog: if the native popup never finishes, fall back to the old overlay and warn; the local match stays pending.
         if (Time.realtimeSinceStartup - shownAt >= 45)
         {
             Fallback("native popup timed out; local match remains pending");
@@ -139,6 +142,7 @@ internal static partial class NativeMatchmaking
     }
 
     private static bool Owns(TransitionPopup instance) => active && popup != null && instance == popup;
+    // Held at least 4 s from Show even if the local game loads instantly, and at least 3.5 s after the scene is ready.
     private static bool CanHide() => readyAt >= 0
         && Time.realtimeSinceStartup >= Math.Max(shownAt + 4, readyAt + 3.5f);
 

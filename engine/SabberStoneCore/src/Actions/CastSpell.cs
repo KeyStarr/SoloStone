@@ -98,6 +98,7 @@ namespace SabberStoneCore.Actions
 
         internal static void RetireResolvedSpell(Controller owner, Spell spell)
         {
+            if (SigilRules.Install(owner, spell)) return;
             if (SupplierActive(spell))
             {
                 if (spell.Zone != null) spell.Zone.Remove(spell);
@@ -200,7 +201,9 @@ namespace SabberStoneCore.Actions
 			    {
 				    spell.Power.Trigger?.Activate(spell);
 				    c.SecretZone.Add(spell);
-				    spell.IsExhausted = true;
+				    // A secret is live on the opponent's turn. Cast on its owner's turn, it waits for that turn to end;
+				    // cast on the opponent's turn (Faceless Enigma), it is live at once, as with a secret put into play from the deck.
+				    if (c == game.CurrentPlayer) spell.IsExhausted = true;
                     if (revealFromHiddenZone && game.History) game.PowerHistory.Add(PowerHistoryBuilder.ShowEntity(spell));
 			    }
 			    else

@@ -401,7 +401,8 @@ namespace SabberStoneCore.CardSets
 					new IncludeTask(EntityType.OP_DECK),
 					new FilterStackTask(SelfCondition.IsMinion),
 					new RandomTask(1, EntityType.STACK),
-					new SummonStackTask())
+					// The minion leaves the opponent's deck, as with every other summon from a deck.
+					new SummonStackTask(true))
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

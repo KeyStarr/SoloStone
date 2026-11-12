@@ -109,6 +109,10 @@ internal sealed class OwnDeckLedger
                     currentPlay = plays[block.Source].Skip(index).FirstOrDefault();
                     playCounts[block.Source] = index + 1;
                 }
+                // dbf 116495 is EDR_873, Envoy of the Glade: its Battlecry turns the Neutral cards in its player's deck
+                // into Druid cards in place, without revealing which. The ledger can no longer track those entries by
+                // identity, so it keeps a "?druid" slot and later matches a departing card only against the Druid pool
+                // for this dbf.
                 // Observe activation, not CHANGE_ENTITY targets/definitions or an unsuccessful play.
                 if (block.BlockType == BlockType.POWER && currentPlay != null && block.Source == currentPlay.EntityId
                     && currentPlay.DefinitionKnown && currentPlay.DbfId == 116495) transforms.Add(currentPlay.Sequence);

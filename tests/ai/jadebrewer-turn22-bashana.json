@@ -1,0 +1,166 @@
+{
+  "schema": 1,
+  "id": "jadebrewer-turn22-bashana",
+  "category": "plan",
+  "title": "Bashana with a carve the plan did not roll",
+  "why": "Live Deck match ead250ca, NPC jadebrewer, elite, turn 22: Bashana priced 111.8 over Twilight Timereaver 78.0, then plan reuse played Treant #180 although the real carved spells were not the plan's (the reuse key held the payload's entity id only).",
+  "source": "Coordinator's public state from the Deck log, cross-checked with journal ead250ca #95 (hand, mana, deck count); the journal stays owner data; enemy hand and deck are hidden vanilla variants; live mana was 12 (Ysera), the position builder caps at 10, which the reuse-key check does not read; turn 21 because the builder seats the bot first (live: turn 22, second seat)",
+  "deckId": "npc-druid-azshara",
+  "seed": 20261105,
+  "turn": 21,
+  "bot": {
+    "class": "DRUID",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 15,
+      "armor": 7
+    },
+    "hand": [
+      {
+        "card": "EDR_846",
+        "tag": "h0"
+      },
+      {
+        "card": "END_010",
+        "tag": "h1"
+      },
+      {
+        "card": "END_011",
+        "tag": "h2"
+      },
+      {
+        "card": "MEND_046",
+        "tag": "bashana"
+      },
+      {
+        "card": "EDR_000",
+        "tag": "h4"
+      },
+      {
+        "card": "TLC_100",
+        "tag": "h5"
+      },
+      {
+        "card": "EDR_272",
+        "tag": "h6"
+      },
+      {
+        "card": "END_011",
+        "tag": "h7"
+      },
+      {
+        "card": "EDR_856",
+        "tag": "h8"
+      }
+    ],
+    "board": [
+      {
+        "card": "END_010",
+        "tag": "timereaver",
+        "attack": 5,
+        "health": 5,
+        "exhausted": false
+      }
+    ],
+    "deck": [
+      {
+        "card": "CORE_RLK_657",
+        "tag": "d0"
+      },
+      {
+        "card": "CORE_RLK_657",
+        "tag": "d1"
+      },
+      {
+        "card": "TIME_702",
+        "tag": "d2"
+      },
+      {
+        "card": "CATA_131",
+        "tag": "d3"
+      }
+    ]
+  },
+  "enemy": {
+    "class": "DRUID",
+    "mana": 10,
+    "baseMana": 10,
+    "hero": {
+      "damage": 25
+    },
+    "hand": [],
+    "board": [
+      {
+        "card": "JAIL_912",
+        "tag": "soothsayer",
+        "attack": 9,
+        "health": 6,
+        "exhausted": true
+      },
+      {
+        "card": "CORE_EX1_198",
+        "tag": "natalie",
+        "attack": 7,
+        "health": 3,
+        "exhausted": true
+      }
+    ],
+    "hidden": {
+      "hand": 5,
+      "variants": [
+        {
+          "hand": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "deck": [
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182",
+            "CS2_182"
+          ],
+          "rngSeed": 71
+        },
+        {
+          "hand": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "deck": [
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120",
+            "CS2_120"
+          ],
+          "rngSeed": 99
+        }
+      ]
+    }
+  },
+  "expect": {
+    "mode": "turn",
+    "assert": [
+      {
+        "kind": "hero-life",
+        "side": "bot",
+        "op": ">",
+        "n": 0
+      }
+    ]
+  }
+}

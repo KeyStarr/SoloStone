@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+  <Target Name="ValidateCandidatePath" BeforeTargets="ResolveReferences">
+    <Error Condition="'$(SabberStoneCorePath)' == ''" Text="SabberStoneCorePath must be an explicit absolute candidate DLL path." />
+    <Error Condition="'$([System.IO.Path]::IsPathFullyQualified($(SabberStoneCorePath)))' != 'True'" Text="SabberStoneCorePath must be absolute." />
+    <Error Condition="!Exists('$(SabberStoneCorePath)')" Text="SabberStoneCorePath does not exist: $(SabberStoneCorePath)" />
+  </Target>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>SabberStoneCorePath</_Parameter1>
+      <_Parameter2>$(SabberStoneCorePath)</_Parameter2>
+    </AssemblyAttribute>
+    <Compile Include="../../research/standard-proof/ProofDecks.cs" Link="ProofDecks.cs" />
+    <Reference Include="SabberStoneCore">
+      <HintPath>$(SabberStoneCorePath)</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

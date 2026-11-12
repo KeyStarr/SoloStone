@@ -33,6 +33,8 @@ public sealed class NativeMatch
     private const int BotPlayerId = 2;
     private const int MaxBotActions = 128;
     private const int CurrentSpellPowerBaseTag = 291;
+    // Engine-side Temporary tag. The client's TagVisualConfiguration reads GHOSTLY (785) for the Temporary hand look, not 3630,
+    // so transport projects Temporary onto GHOSTLY; an Echo card's own GHOSTLY stays independent of it.
     private const GameTag TemporaryCardTag = (GameTag)3630;
     // Keep raw causes separate: removing Temporary must not remove an existing Echo visual.
     private readonly Dictionary<int, (int Temporary, int Ghostly)> historicalTemporaryVisuals = new Dictionary<int, (int, int)>();
@@ -69,7 +71,7 @@ public sealed class NativeMatch
         (GameTag)340, // COUNTER: EntityBase.HasCounter and keyword help.
         (GameTag)363, // POISONOUS: EntityBase.IsPoisonous enables poison presentation.
         GameTag.AFFECTED_BY_SPELL_POWER, // EntityBase.IsAffectedBySpellPower controls text scaling.
-        (GameTag)4128, // Fyrakk: direct Fire-spell immunity, never global IMMUNE.
+        (GameTag)4128, // Unnamed card-data tag (Fyrakk, Captain Crowley and others), mirrored as is. Not fire immunity.
         GameTag.IMMUNE_WHILE_ATTACKING, // AttackSpellController controls attack/death visuals.
         GameTag.HERO_POWER, // Card.CreateCardsInTooltip selects the hero power preview.
         GameTag.FORGETFUL, // Entity.GetPrioritizedBaubleSpellType and target arrows.
@@ -315,6 +317,9 @@ public sealed class NativeMatch
     private readonly HashSet<int> pendingTriggerReveals = new HashSet<int>();
     private readonly HashSet<int> startOfGameSources = new HashSet<int>();
     private readonly HashSet<int> presentedStartOfGameSources = new HashSet<int>();
+    // The Start of Game source whose effect block is being projected: its own sub-spells (Godfrey's StartOfGame_FX) are public,
+    // since the reveal block just showed it to both players.
+    private int presentingStartOfGame;
     private bool startOfGameClosed, startOfGameMainBegin, startOfGameBarrier;
     // CardDef.m_TriggerEffectDefs slots (data/fx/start-of-game-trigger-slots-37.0.0.254477.tsv). Retail calibration:
     // the reveal uses index = trigger count (out of range, no VFX) and the 968 effect the first StartOfGameSpell slot.
@@ -541,7 +546,17 @@ public sealed class NativeMatch
     {
         if (DebugScenario == null || DebugScenarioApplied != null) return;
         string status = "applied";
-        try { DebugScenarioApplied = DebugScenario.Apply(Game); }   // validates first: it fails before it changes anything
+        try
+        {
+            DebugScenarioApplied = DebugScenario.Apply(Game);   // validates first: it fails before it changes anything
+            // humanHandMods premium finishes: owned presentation, resolved when the hand entities are sent after main-begin.
+            // Resolved against the card like every other premium (Diamond -> Signature -> Golden by what the card defines).
+            foreach (var staged in DebugScenario.StagedPremiums)
+            {
+                int resolved = ResolvePremium(staged.Value, Game.IdEntityDic[staged.Key].Card);
+                if (resolved != 0) entityPremiums[staged.Key] = resolved;
+            }
+        }
         catch (Exception error) { status = "aborted"; DebugScenarioApplied = "FAILED " + error.GetType().Name + ": " + error.Message; }
         global::DebugScenario.RecordOutcome(status, DebugScenarioApplied, DebugScenario.BoundRunId ?? global::DebugScenario.RunId);
         try { DebugScenarioLog?.Invoke("DEBUG_SCENARIO " + status + " " + DebugScenarioApplied); } catch (Exception) { }
@@ -923,6 +938,16 @@ public sealed class NativeMatch
             ApplyDebugScenario();
 #endif
             Game.MainBegin();
+#if ENGINE_SOURCE
+            try
+            {
+                // A failed or dropped scenario writes nothing (DebugScenarioApplied is "FAILED ..." or the scenario was cleared).
+                string raw = DebugScenario != null && DebugScenarioApplied != null && !DebugScenarioApplied.StartsWith("FAILED")
+                    ? DebugScenario.ApplyAfterMainBegin(Game) : null;
+                if (raw != null) DebugScenarioLog?.Invoke("DEBUG_SCENARIO after main-begin " + raw);
+            }
+            catch (Exception error) { DebugScenarioLog?.Invoke("DEBUG_SCENARIO after main-begin FAILED " + error.Message); }
+#endif
             RecordedAction("main-begin");
         }
 
@@ -3079,6 +3104,7 @@ public sealed class NativeMatch
             {
                 AppendStartOfGameBarrier(packet);
                 startOfGameSource = sog.Source;
+                presentingStartOfGame = sog.Source;
                 startOfGameIdentity = sogIdentity;
                 startOfGameRevealed = AppendStartOfGameReveal(packet, sogSource, sogIdentity);
                 var effect = ToNativeHistory(sog);
@@ -3109,6 +3135,7 @@ public sealed class NativeMatch
                     startOfGameEffect.EffectIndex = StartOfGameSlots(Game.IdEntityDic[startOfGameSource], startOfGameIdentity.Name).Effect;
                     AppendStartOfGameEnd(packet, startOfGameSource, startOfGameRevealed, startOfGameBody);
                     startOfGameSource = 0;
+                    presentingStartOfGame = 0;
                 }
                 // DONE has reached the client, but its animations have not. Arm native mulliganBusy inside its scope.
                 else if (!startOfGameClosed && StartOfGameMulligansDone()
@@ -3738,6 +3765,9 @@ public sealed class NativeMatch
         }
         // Hand cost resets can be filtered before an opponent's move to PLAY becomes public.
         yield return new KeyValuePair<GameTag, int>(GameTag.COST, entity.Cost);
+        // 2837 is CARD_ALTERNATE_COST, the client's payment-display selector (Mana, Health, Armor, Corpses, ...), taken
+        // from the engine's payment kind. A complete snapshot that omits it must send 0 when the client previously held
+        // a nonzero value.
 #if ENGINE_SOURCE
         yield return new KeyValuePair<GameTag, int>((GameTag)2837, (int)SabberStoneCore.Actions.CostRules.PaymentKind(entity));
 #else
@@ -3748,7 +3778,10 @@ public sealed class NativeMatch
             yield return new KeyValuePair<GameTag, int>(GameTag.ATK, character.AttackDamage);
             yield return new KeyValuePair<GameTag, int>(GameTag.HEALTH, character.BaseHealth);
             yield return new KeyValuePair<GameTag, int>(GameTag.DAMAGE, character.Damage);
-            yield return new KeyValuePair<GameTag, int>(GameTag.ARMOR, character.Armor);
+            // Character.Armor reads only gained Armor. A hero card that is not the player's hero (in hand or deck) has
+            // gained none, so it shows its printed Armor, like Deathwing, Worldbreaker's 12.
+            yield return new KeyValuePair<GameTag, int>(GameTag.ARMOR, character is Hero armorHero && armorHero != armorHero.Controller?.Hero
+                ? armorHero[GameTag.ARMOR] : character.Armor);
             yield return new KeyValuePair<GameTag, int>(GameTag.TAUNT, character.HasTaunt ? 1 : 0);
             yield return new KeyValuePair<GameTag, int>(GameTag.DIVINE_SHIELD, character[GameTag.DIVINE_SHIELD] > 0 ? 1 : 0);
             // MEGA_WINDFURY is a separate tag; preserve WINDFURY's own value on minions.
@@ -5526,6 +5559,7 @@ public sealed class NativeMatch
             // Other zero-target recipes may infer their causal definition, so still require a public origin.
             if (subSpell.Targets.Count == 0 && subSpell.SpellPrefabGuid != SabberStoneCore.Kettle.PowerHistory.GeneratedShufflePrefab)
                 visible &= publicOrigin;
+            if (presentingStartOfGame != 0 && subSpell.Source == presentingStartOfGame && subSpell.Targets.Count == 0) visible = true;
             // SpawnToDeckSpell accepts anonymous DECK FULLs: INVALID definitions select Card_Hidden.
             // Keep the scope for both viewers; snapshot projection still owns identity privacy.
             visibleSubSpells.Push(visible);
@@ -5661,6 +5695,8 @@ public sealed class NativeMatch
         if (petLikes != null)
             foreach (var shown in petLikes.ShownTags()) yield return shown;
     }
+    // PET_TREATS_FED and PET_TREATS_GENERATED: the counters retail answers the feed/generate packets with. Feeding is capped by
+    // the number generated (see ReceiveNativePetTreat).
     internal const int PetTreatsFedTag = 4280, PetTreatsGeneratedTag = 4281;
 
     // Client packets 68 (GeneratePetTreat) and 67 (FeedPet) are empty; retail answers with standalone tag changes on the pet.

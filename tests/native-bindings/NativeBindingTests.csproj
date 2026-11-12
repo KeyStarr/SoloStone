@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../plugin/OfflineProbe.csproj" ReferenceOutputAssembly="false" AdditionalProperties="EngineSource=true"
+      Condition="'$(SkipPluginBuild)' != 'true'" />
+    <Compile Include="../shared/IlCalls.cs" Link="IlCalls.cs" />
+  </ItemGroup>
+</Project>

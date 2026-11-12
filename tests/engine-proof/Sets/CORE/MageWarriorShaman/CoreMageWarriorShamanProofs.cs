@@ -1,0 +1,48 @@
+internal static class CoreMageWarriorShamanProofs
+{
+    internal static void Run()
+    {
+        WarmaulChallengerProof.Run();
+        KragwatheFrogProof.Run();
+        CoreLegacy.VoltaicBurstProof.Run();
+        CoreLegacy.FireElementalProof.Run();
+        CoreLegacy.FarSightProof.Run();
+        CoreLegacy.LightningBoltProof.Run();
+        CoreLegacy.HexProof.Run();
+        CoreLegacy.LightningStormProof.Run();
+        CoreLegacy.ArchmageAntonidasProof.Run();
+        CoreLegacy.WitchsApprenticeProof.Run();
+        CoreLegacy.BlazingInvocationProof.Run();
+        CoreLegacy.BladedGauntletProof.Run();
+        CoreLegacy.ExplosiveRunesProof.Run();
+        CoreLegacy.RavagingGhoulProof.Run();
+        CoreLegacy.HammerOfTwilightProof.Run();
+        CoreLegacy.ShieldBlockProof.Run();
+        CoreLegacy.FrothingBerserkerProof.Run();
+        CoreLegacy.SlamProof.Run();
+        CoreLegacy.IceBarrierProof.Run();
+        CoreLegacy.CounterspellProof.Run();
+        CoreLegacy.ExecuteProof.Run();
+        CoreLegacy.FlamestrikeProof.Run();
+        CoreLegacy.FireballProof.Run();
+        CoreLegacy.BlizzardProof.Run();
+        CoreLegacy.FrostboltProof.Run();
+        CoreLegacy.BashProof.Run();
+        IKnowAGuyProof.Run();
+        BabblingBookcaseProof.Run();
+        SkyRaiderProof.Run();
+        RunedOrbProof.Run();
+        GlaciateProof.Run();
+        IronforgePortalProof.Run();
+        OasisAllyProof.Run();
+        DeepFreezeProof.Run();
+        VioletSpellwingProof.Run();
+        FirstFlameProof.Run();
+        Hookfist3000Proof.Run();
+        DetonationJuggernautProof.Run();
+        TotemGolemProof.Run();
+        EarthElementalProof.Run();
+        WailingVaporProof.Run();
+        NoviceZapperProof.Run();
+    }
+}

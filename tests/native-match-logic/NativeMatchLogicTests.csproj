@@ -1,0 +1,63 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../data/packs/FairPackResources.props" />
+  <!-- The checks of the native match that need no client: opponent runner, presentation, memory and rematch logic, and
+       fair-view privacy on the engine. The rest of the native match is the client suite native-match. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <EngineSource>true</EngineSource>
+    <DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" />
+    <Compile Include="../shared/ControllerAdmissionInvariant.cs" Link="ControllerAdmissionInvariant.cs" />
+    <Compile Include="../shared/AdmissionFault.cs" Link="AdmissionFault.cs" />
+    <Compile Include="../shared/QuestFixture.cs" Link="QuestFixture.cs" />
+    <Compile Include="../shared/FairViewFixture.cs" Link="FairViewFixture.cs" />
+    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
+    <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
+    <Compile Include="../../plugin/TestControlRules.cs" Link="TestControlRules.cs" />
+    <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/NpcPetSeats.cs" Link="NpcPetSeats.cs" />
+    <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
+    <Compile Include="../../plugin/LocalDecks.cs" Link="LocalDecks.cs" />
+    <Compile Include="../../plugin/LocalDeckCards.cs" Link="LocalDeckCards.cs" />
+    <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
+    <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
+    <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
+    <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
+    <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
+    <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
+    <Compile Include="../../plugin/LocalRematch.cs" Link="LocalRematch.cs" />
+    <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />
+    <Compile Include="../../plugin/LocalProfileAchievements.cs" Link="LocalProfileAchievements.cs" />
+    <Compile Include="../../plugin/LocalAchievementCollector.cs" Link="LocalAchievementCollector.cs" />
+    <Compile Include="../../plugin/LocalProfileCheats.cs" />
+    <Compile Include="../../plugin/ProfileCatalog.cs" />
+    <Compile Include="../../plugin/OfflineGuard.cs" />
+    <Compile Include="../../plugin/LocalClassRewards.cs" />
+    <Compile Include="../../plugin/LocalEconomy.cs" Link="LocalEconomy.cs" />
+    <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
+    <None Include="../../data/npc/*.json" LinkBase="data/npc" CopyToOutputDirectory="PreserveNewest" />
+    <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
+    <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />
+    <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
+    <Compile Include="../../plugin/LocalProfileLadder.cs" Link="LocalProfileLadder.cs" />
+    <Compile Include="../../plugin/LocalLadderMilestones.cs" Link="LocalLadderMilestones.cs" />
+    <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
+    <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
+    <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
+    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
+    <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
+    <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
+    <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
+    <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+  </ItemGroup>
+</Project>

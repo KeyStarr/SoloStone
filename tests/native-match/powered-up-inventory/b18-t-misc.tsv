@@ -1,0 +1,60 @@
+id	class	reason	inventory	name
+BE_004	N	unconditional effect	existing	Rajh
+BE_004p	N	not a hand play effect: hero_power	existing	Sun's Radiance
+BE_044e	N	not a hand play effect: enchantment	existing	Assembled
+END_018	N	unconditional effect	existing	Acolyte of Infinity
+END_018e	N	not a hand play effect: enchantment	existing	Infinite Delay
+END_018e2	N	not a hand play effect: enchantment	existing	Preserved Essence
+TIME_432	N	unconditional effect	existing	Intertwined Fate
+TLC_452	N	unconditional effect	existing	Titanographer Osk
+TLC_452t1	N	unconditional effect	existing	Titanographer Osk
+TLC_452t13	N	unconditional effect	existing	Titanographer Osk
+TLC_452t14	N	unconditional effect	existing	Titanographer Osk
+TLC_452t15	N	unconditional effect	existing	Titanographer Osk
+TLC_452t16	N	unconditional effect	existing	Titanographer Osk
+TLC_452t17	N	unconditional effect	existing	Titanographer Osk
+TLC_452t18	N	unconditional effect	existing	Titanographer Osk
+TLC_452t19	N	unconditional effect	existing	Titanographer Osk
+TLC_452t2	N	unconditional effect	existing	Titanographer Osk
+TLC_452t20	N	unconditional effect	existing	Titanographer Osk
+TLC_452t21	N	unconditional effect	existing	Titanographer Osk
+TLC_452t22	N	unconditional effect	existing	Titanographer Osk
+TLC_452t23	N	unconditional effect	existing	Titanographer Osk
+TLC_452t24	N	unconditional effect	existing	Titanographer Osk
+TLC_452t26	N	unconditional effect	existing	Titanographer Osk
+TLC_452t27	N	unconditional effect	existing	Titanographer Osk
+TLC_452t28	N	unconditional effect	existing	Titanographer Osk
+TLC_452t29	N	unconditional effect	existing	Titanographer Osk
+TLC_452t3	N	unconditional effect	existing	Titanographer Osk
+TLC_452t30	N	unconditional effect	existing	Titanographer Osk
+TLC_452t31	N	unconditional effect	existing	Titanographer Osk
+TLC_452t32	N	unconditional effect	existing	Titanographer Osk
+TLC_452t33	N	unconditional effect	existing	Titanographer Osk
+TLC_452t34	N	unconditional effect	existing	Titanographer Osk
+TLC_452t35	N	unconditional effect	existing	Titanographer Osk
+TLC_452t4	N	unconditional effect	existing	Titanographer Osk
+TLC_452t5	N	unconditional effect	existing	Titanographer Osk
+TLC_452t6	N	unconditional effect	existing	Titanographer Osk
+TLC_452t7	N	unconditional effect	existing	Titanographer Osk
+TLC_452t8	N	unconditional effect	existing	Titanographer Osk
+TLC_452t9	N	unconditional effect	existing	Titanographer Osk
+TTN_075t2e	N	not a hand play effect: enchantment	existing	Ancient Knowledge
+TTN_415t2e	N	not a hand play effect: enchantment	existing	Warforged
+TTN_415t2e2	N	not a hand play effect: enchantment	existing	Battle Hardened
+TTN_415te	N	not a hand play effect: enchantment	existing	Titanforged
+TTN_429e	N	not a hand play effect: enchantment	existing	Power of the Highfather
+TTN_721t1e	N	not a hand play effect: enchantment	existing	Plating Reinforced!
+TTN_721t2e2	N	not a hand play effect: enchantment	existing	Sneak Attack!
+TTN_721te	N	not a hand play effect: enchantment	existing	Cannons Armed!
+TTN_737e	N	not a hand play effect: enchantment	existing	Chill of Death
+TTN_737t2	N	unconditional effect	existing	Servant of the Primus
+TTN_737te	N	not a hand play effect: enchantment	existing	Blood of the Primus
+TTN_858t1e	N	not a hand play effect: enchantment	existing	Reinforcing
+TTN_858t1e1	N	not a hand play effect: enchantment	existing	Reshaped
+TTN_858t2e1	N	not a hand play effect: enchantment	existing	Washed Over
+TTN_858t3e	N	not a hand play effect: enchantment	existing	Pacified
+TTN_862t1e	N	not a hand play effect: enchantment	existing	From the Earth
+TTN_862t3e	N	not a hand play effect: enchantment	existing	Blessed by Argus
+TTN_862t4	N	unconditional effect	existing	Crystal Elemental
+TTN_960t5	N	unconditional effect	existing	Felblaze Infernal
+YOG_514	N	unconditional effect	existing	Chaotic Tendril
