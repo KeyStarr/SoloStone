@@ -541,7 +541,17 @@ public sealed class NativeMatch
     {
         if (DebugScenario == null || DebugScenarioApplied != null) return;
         string status = "applied";
-        try { DebugScenarioApplied = DebugScenario.Apply(Game); }   // validates first: it fails before it changes anything
+        try
+        {
+            DebugScenarioApplied = DebugScenario.Apply(Game);   // validates first: it fails before it changes anything
+            // humanHandMods premium finishes: owned presentation, resolved when the hand entities are sent after main-begin.
+            // Resolved against the card like every other premium (Diamond -> Signature -> Golden by what the card defines).
+            foreach (var staged in DebugScenario.StagedPremiums)
+            {
+                int resolved = ResolvePremium(staged.Value, Game.IdEntityDic[staged.Key].Card);
+                if (resolved != 0) entityPremiums[staged.Key] = resolved;
+            }
+        }
         catch (Exception error) { status = "aborted"; DebugScenarioApplied = "FAILED " + error.GetType().Name + ": " + error.Message; }
         global::DebugScenario.RecordOutcome(status, DebugScenarioApplied, DebugScenario.BoundRunId ?? global::DebugScenario.RunId);
         try { DebugScenarioLog?.Invoke("DEBUG_SCENARIO " + status + " " + DebugScenarioApplied); } catch (Exception) { }
@@ -923,6 +933,16 @@ public sealed class NativeMatch
             ApplyDebugScenario();
 #endif
             Game.MainBegin();
+#if ENGINE_SOURCE
+            try
+            {
+                // A failed or dropped scenario writes nothing (DebugScenarioApplied is "FAILED ..." or the scenario was cleared).
+                string raw = DebugScenario != null && DebugScenarioApplied != null && !DebugScenarioApplied.StartsWith("FAILED")
+                    ? DebugScenario.ApplyAfterMainBegin(Game) : null;
+                if (raw != null) DebugScenarioLog?.Invoke("DEBUG_SCENARIO after main-begin " + raw);
+            }
+            catch (Exception error) { DebugScenarioLog?.Invoke("DEBUG_SCENARIO after main-begin FAILED " + error.Message); }
+#endif
             RecordedAction("main-begin");
         }
 

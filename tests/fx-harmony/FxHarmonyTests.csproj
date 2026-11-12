@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net48</TargetFramework><LangVersion>latest</LangVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- HarmonyX 2.9.0 is the version BepInEx ships (the suite asserts it) and its net35 build binds these exact versions.
+         A PackageReference would resolve the net452 graph (Cecil 0.11.4), so download the packages and reference their
+         net35 assemblies directly. -->
+    <PackageDownload Include="MonoMod.RuntimeDetour" Version="[22.1.29.1]" />
+    <PackageDownload Include="MonoMod.Utils" Version="[22.1.29.1]" />
+    <PackageDownload Include="Mono.Cecil" Version="[0.10.4]" />
+    <PackageDownload Include="HarmonyX" Version="[2.9.0]" />
+    <Reference Include="0Harmony"><HintPath>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))harmonyx/2.9.0/lib/net35/0Harmony.dll</HintPath></Reference>
+    <Reference Include="Mono.Cecil"><HintPath>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))mono.cecil/0.10.4/lib/net35/Mono.Cecil.dll</HintPath></Reference>
+    <Reference Include="MonoMod.Utils"><HintPath>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))monomod.utils/22.1.29.1/lib/net35/MonoMod.Utils.dll</HintPath></Reference>
+    <Reference Include="MonoMod.RuntimeDetour"><HintPath>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))monomod.runtimedetour/22.1.29.1/lib/net35/MonoMod.RuntimeDetour.dll</HintPath></Reference>
+  </ItemGroup>
+  <Target Name="ExtractTelemetryHooks" BeforeTargets="CoreCompile">
+    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_hooks.py&quot; &quot;$(IntermediateOutputPath)FxHooks.g.cs&quot;" />
+    <ItemGroup><Compile Include="$(IntermediateOutputPath)FxHooks.g.cs" /></ItemGroup>
+  </Target>
+</Project>
