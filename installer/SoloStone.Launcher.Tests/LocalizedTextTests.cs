@@ -182,6 +182,17 @@ static partial class Program
         Check(ask("enUS",null)==(null,1) && ask("enGB","enUS")==(null,1),"English with no other language started is remembered");
         Check(ask("enUS","ruRU")==(null,2),"English from the client while Options started Russian is asked again, not remembered");
         Check(ask(null,"deDE")==("deDE",2),"no answer from the client: the Options language, asked again");
-        reset.Invoke(null,null);
+
+        // Before Options sets its hook (plugin startup): nothing is remembered, so the language is right once the hook is set.
+        reset.Invoke(null,null); int early=0; Func<string> saysEnglish=()=>{ early++; return "enUS"; };
+        Check((string)clientLocale.Invoke(null,new object[]{saysEnglish,null})==null && (string)clientLocale.Invoke(null,new object[]{saysEnglish,null})==null && early==2,"no hook yet: the client's English is not remembered");
+        Check((string)clientLocale.Invoke(null,new object[]{saysEnglish,(Func<string>)(()=>"ruRU")})==null && early==3,"hook set to Russian while the client still says English: asked again, not remembered");
+        var hook=type.GetField("RunningLocale",any); var before=hook.GetValue(null);
+        try {
+            reset.Invoke(null,null); hook.SetValue(null,null);
+            Check(type.GetMethod("ClientLocale",any,null,Type.EmptyTypes,null).Invoke(null,null)==null,"ClientLocale() before the hook: English (no client in the tests)");
+            hook.SetValue(null,(Func<string>)(()=>"ruRU"));
+            Check((string)type.GetMethod("ClientLocale",any,null,Type.EmptyTypes,null).Invoke(null,null)=="ruRU","ClientLocale() after Options sets the hook: its language, not an earlier English");
+        } finally { hook.SetValue(null,before); reset.Invoke(null,null); }
     }
 }
