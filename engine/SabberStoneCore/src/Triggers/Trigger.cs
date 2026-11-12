@@ -409,7 +409,7 @@ namespace SabberStoneCore.Triggers
             if (Actions.SigilRules.IsActive(_owner))
             {
                 keyword = (int)Actions.SigilRules.Sigil;
-                if (RemoveAfterTriggered) task = ComplexTask.Create(SingleTask, Actions.SigilRules.Retire);
+                if (RemoveAfterTriggered) task = Actions.SigilRules.FireThenRetire(SingleTask);
             }
 			if (FastExecution || _triggerType == TriggerType.DARK_GIFT_GIVEN)
 			    Game.TaskQueue.Execute(task, _owner.Controller, _owner,

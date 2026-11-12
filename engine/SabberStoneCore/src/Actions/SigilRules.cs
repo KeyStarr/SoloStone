@@ -1,4 +1,5 @@
 using SabberStoneCore.Enums;
+using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
@@ -35,5 +36,26 @@ namespace SabberStoneCore.Actions
             spell[GameTag.ZONE_POSITION] = 0;
             spell.Controller.GraveyardZone.Add(spell);
         });
+
+        /// <summary>The Sigil's effect, then Retire whatever the effect returned. A task chain stops at the first task that
+        /// doesn't complete, and a summon onto a full board stops, so a chained Retire would leave the Sigil in SECRET.
+        /// No Sigil's effect suspends (Discover, choices); one that did would need to retire after it resumes.</summary>
+        internal static ISimpleTask FireThenRetire(ISimpleTask effect) => new FireThenRetireTask(effect);
+
+        private sealed class FireThenRetireTask : SimpleTask
+        {
+            private readonly ISimpleTask _effect;
+
+            internal FireThenRetireTask(ISimpleTask effect) => _effect = effect;
+
+            public override TaskState Process(in Game game, in Controller controller, in IEntity source, in IPlayable target,
+                in TaskStack stack = null)
+            {
+                TaskStack shared = stack ?? new TaskStack();
+                _effect.Process(in game, in controller, in source, in target, in shared);
+                Retire.Process(in game, in controller, in source, in target, in shared);
+                return TaskState.COMPLETE;
+            }
+        }
     }
 }

@@ -16,8 +16,10 @@ internal static class SigilOfTheSeasProof
         End(g); var naga = p.BoardZone.Single();
         Core2026Proof.Check(naga.Card.Id == "CATA_528t" && naga.Card.Implemented && naga.AttackDamage == 3 && naga.Health == 3 && naga.HasTaunt && naga.Card.IsRace((Race)92), "exact 3/3 Taunt Naga");
         End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 1, "one shot only");
-        ClearBoard(g, p); for (int i = 0; i < 7; i++) Summon(p, "CS2_182"); Play(g, p, id); End(g); End(g);
+        ClearBoard(g, p); for (int i = 0; i < 7; i++) Summon(p, "CS2_182"); var blocked = Play(g, p, id);
+        Core2026Proof.Check(SigilRules.IsActive(blocked), "pending Sigil waits in SECRET"); End(g); End(g);
         Core2026Proof.Check(p.BoardZone.Count == 7 && p.BoardZone.All(m => m.Card.Id != "CATA_528t"), "full board loses summon");
+        Core2026Proof.Check(blocked.Zone.Type == Zone.GRAVEYARD && !SigilRules.IsActive(blocked), "Sigil with no room still leaves SECRET");
         Kill(g, p.BoardZone[0]); End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 6, "blocked summon does not retry");
     });
 }

@@ -12,15 +12,18 @@ internal static class SigilofHatchingProof
     internal static void Run() => StandardSetsProof.Case("BE_873", (g, p, id) => {
         var spell = Play(g, p, id); Core2026Proof.Check(p.BoardZone.Count == 0, "summon delayed");
         var restored = Game.LoadSnapshot(g.SaveSnapshot()); End(restored); End(restored);
-        Core2026Proof.Check(restored.Player1.BoardZone.Count == 3 && spell.Zone.Type == Zone.GRAVEYARD && p.BoardZone.Count == 0, "pending graveyard sigil survives snapshot without affecting original");
+        Core2026Proof.Check(restored.Player1.BoardZone.Count == 3 && SigilRules.IsActive(spell) && p.BoardZone.Count == 0
+            && restored.IdEntityDic[spell.Id].Zone.Type == Zone.GRAVEYARD, "pending Sigil waits in SECRET, survives snapshot without affecting original, retires once fired");
         var clone = g.Clone(); End(clone); Core2026Proof.Check(clone.Player1.BoardZone.Count == 0, "opponent start excluded"); End(clone);
         Core2026Proof.Check(clone.Player1.BoardZone.Count == 3 && p.BoardZone.Count == 0 && spell.ActivatedTrigger != null, "one-shot spell trigger clone isolated");
         End(g); Core2026Proof.Check(p.BoardZone.Count == 0, "opponent turn no summon"); End(g);
         var tokens = p.BoardZone.ToArray(); Core2026Proof.Check(tokens.Length == 3 && tokens.All(m => m.Card.Id == "BE_873t" && m.AttackDamage == 3 && m.Health == 1 && m.IsRush && m.IsRace(Race.BEAST) && m.Card.Implemented) && tokens.Select(m => m.Id).SequenceEqual(tokens.Select(m => m.Id).Order()), "three exact printed Rush Shredclaws in creation order");
         End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 3 && spell.ActivatedTrigger == null, "one shot never repeats");
-        ClearBoard(g, p); for (int i = 0; i < 6; i++) Summon(p, "CS2_182"); Play(g, p, id); End(g); End(g);
+        ClearBoard(g, p); for (int i = 0; i < 6; i++) Summon(p, "CS2_182"); var partial = Play(g, p, id); End(g); End(g);
         Core2026Proof.Check(p.BoardZone.Count == 7 && p.BoardZone.Last().Card.Id == "BE_873t", "partial board fills one slot at right");
-        Play(g, p, id); End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 7, "full board no overflow");
+        Core2026Proof.Check(partial.Zone.Type == Zone.GRAVEYARD && !SigilRules.IsActive(partial), "summon cut short by a full board still retires the Sigil");
+        var blocked = Play(g, p, id); End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 7, "full board no overflow");
+        Core2026Proof.Check(blocked.Zone.Type == Zone.GRAVEYARD && !SigilRules.IsActive(blocked), "Sigil with no room still leaves SECRET");
         Kill(g, p.BoardZone[0]); End(g); End(g); Core2026Proof.Check(p.BoardZone.Count == 6, "full-board one-shot consumed");
         ClearBoard(g, p);
         var doubled = Add(p, id); RepeatRules.Mark(doubled, p.Hero, "JAIL_123e"); PlayEntity(g, p, doubled);
