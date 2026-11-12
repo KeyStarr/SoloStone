@@ -1,5 +1,5 @@
-"""Checks for loader_inputs.py: unittest, no network. Run from hearthstone-native-ui-prototype/:
-    /usr/bin/python3 -I installer/test_loader_inputs.py
+"""Checks for loader_inputs.py: unittest, no network. Run from the repository root:
+    python3 -I installer/test_loader_inputs.py
 """
 import hashlib
 import json

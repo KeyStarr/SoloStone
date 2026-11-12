@@ -1,7 +1,6 @@
-"""Checks for stage.py and the build files it stages: unittest, no network, no dotnet. Run from the product folder
-(the repository root in a public export):
-    /usr/bin/python3 -I installer/test_stage.py
-They run in a public export too: a build from the export must need nothing outside it (plan K2p).
+"""Checks for stage.py and the build files it stages: unittest, no network, no dotnet. Run from the repository root:
+    python3 -I installer/test_stage.py
+A build from a clean checkout must need nothing outside it.
 """
 import re
 import subprocess
