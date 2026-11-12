@@ -5701,6 +5701,11 @@ public sealed class NativeMatch
             {
                 Controller controller = player.PlayerId == Game.Player1.PlayerId ? Game.Player1 : Game.Player2;
                 NativeEntity entity = ToNativeEntity(player.PowerEntity);
+                // A mission's game entity reads the AI player's HERO_ENTITY from CreateGame itself (retail sends it there) and
+                // throws without it (GenericDungeonMissionEntity.GetOpposingHeroCardID). Only staged missions add it.
+                if (player.PlayerId == BotPlayerId && (DebugScenario?.MissionId ?? 0) != 0 && controller.Hero != null
+                    && !entity.Tags.Any(tag => tag.Name == (int)GameTag.HERO_ENTITY))
+                    entity.Tags.Add(new NativeTag { Name = (int)GameTag.HERO_ENTITY, Value = WireReturnId(controller.Hero.Id) });
                 var mana = (Used: TagValue(player.PowerEntity.Tags, GameTag.RESOURCES_USED),
                     Locked: TagValue(player.PowerEntity.Tags, GameTag.OVERLOAD_LOCKED));
                 historicalMana[entity.Id] = mana;
