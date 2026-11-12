@@ -68,7 +68,7 @@ in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary
-line counts every skip, for example `28 of 34 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
+line counts every skip, for example `29 of 35 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
 standard-native-client, native-bindings, native-match, transport-invariants)` on a machine without a client. A skip is
 not a pass: look at the reason.
 
@@ -122,10 +122,11 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
 | `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
 | `native-match-logic` | The native match checks that need no client: the opponent turn runner, presentation and memory, rematch, the quest bot, 36 showcase games, fair-view privacy, coin-flip control, debug scenario lane paths and files, the match event log budget, NPC pet seats and the controller admission invariant. Slices: `--npc-runner-only`, `--npc-presentation-only`, `--rematch-only`, `--quests-only`, `--showcase-only`, `--npc-pets-only`, `--coin-flip-only`, `--debug-scenario-only`, `--fair-view-only`, `--match-event-log-only`, `--controller-admission-only`; any other argument fails |
+| `native-bindings-logic` | Plugin logic that needs no client: the crafting, matchmaking, rank, home, strings and status-routine hooks (built from extracts of the plugin sources), and the plugin source-text pins (achievement toast, reward UI and format lock code must contain, or must not contain, given text) |
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/history/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
@@ -139,7 +140,7 @@ These suites compile or load your client's libraries. Run one with `python3 test
 
 | Suite | What it covers |
 |---|---|
-| `native-bindings` | The plugin's bindings: every client method it patches exists in your client libraries |
+| `native-bindings` | The plugin's bindings: every client method it patches exists in your client libraries, the built plugin's references, and the pack hook IL. Its client-free checks are in `native-bindings-logic` |
 | `native-match` | The native match: plugin match logic on recorded games, and the recipe editor of the built plugin. Its checks that need no client run in `native-match-logic` |
 | `transport-invariants` | Engine-to-client transport: invariants over recorded and random games. It is the longest suite (about 45 minutes) |
 
@@ -176,10 +177,10 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden`, `native-match-logic` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
-| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder`, `native-match-logic` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder`, `native-match-logic`, `native-bindings-logic` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
-| Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | With a client: `native-bindings`, `native-match`, `transport-invariants` |
+| Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-bindings-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |
 | Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
