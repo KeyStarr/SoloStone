@@ -9,11 +9,17 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Triggers;
 
+// Born from a live bug: Wrathspike Brute animated on every friendly attack and (reported) never dealt its damage. Its
+// AFTER_ATTACK listener fired for all attacks and checked the defender inside the task, which left an empty TRIGGER
+// that the client still animated, and a "not dead" guard that blocked retaliation when the Brute took lethal damage.
+// A sweep of every card with an attack-event trigger found 3 broken (Brute, SI:7 Supplier, Rehgar). Every such card
+// now gets a negative control here: an unrelated attack must change no effect state.
 internal static class AttackTriggerSweepProof
 {
     internal static IEnumerable<Trigger> Triggers(Trigger trigger) => trigger is MultiTrigger multi
         ? multi.SelectMany(Triggers) : trigger == null ? Enumerable.Empty<Trigger>() : new[] { trigger };
 
+    // Cards the trigger-member scan below cannot find, added by hand so the negative control still covers them.
     private static readonly string[] EventGuardCards = {
         "EDR_487", "TLC_821", "TIME_217", "TIME_214", "TTN_737e", "TLC_229", "TLC_830", "TLC_EVENT_400", "END_026",
         "TLC_435e", "TLC_442e", "TLC_824e", "TLC_900e", "TLC_836", "EDR_781", "TID_712"

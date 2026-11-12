@@ -13,6 +13,12 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // Live soft-lock (fixed 2026-10-22): after Spectral Sight or Chillfallen Baron's Deathrattle drew a card, the
+    // native power processor stayed blocked and the drawn card never reached the hand. Without an explicit TARGET the
+    // client inferred the not-yet-revealed deck card as the effect's target; its type was still invalid, so the impact
+    // animation never finished. Both effects now name their source as the target, and drawn cards are revealed straight
+    // into HAND as in retail. This matrix covers both cards, every draw identity (minion, spell, weapon, gift, copied)
+    // and the hand/deck edge cases for both seats.
     private static void DrawSpellHistory()
     {
         DrawEntryHistory();
@@ -155,6 +161,10 @@ internal static partial class Program
                 failures.Add(name + ": impact target " + target + " has no supported logical CARDTYPE before draw SHOW; FSM cannot reach SpellFinishAction");
     }
 
+    // Playtest 2026-10-29: the opponent's "summoned when drawn" cards (Illusory Greenwing's token, Tortollan Ninja)
+    // went hand -> setaside -> play without a name and ended up as bodyless, untargetable placeholders. The client
+    // binds an actor when the zone move is processed, so the card must be named before it moves into a public zone. A
+    // full board is included for the Ninja and the Illusion, because the summon fails there.
     private static void DrawEntryHistory()
     {
         var failures = new List<string>();

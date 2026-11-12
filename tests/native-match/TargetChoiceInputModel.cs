@@ -9,6 +9,10 @@ using SabberStoneCore.Enums;
 
 internal static partial class Program
 {
+    // A TARGET choice whose source entity had to be substituted used to be observe-only: the player could not click an
+    // offered hand card and the match could hang until Concede. The fix names the owning hero as source and sets
+    // CAN_TARGET_CARDS_IN_HAND (1508) natively. This pins the shipped client methods that path depends on;
+    // TargetChoiceInputModel below replays the click path.
     private static void PinnedTargetInputContract()
     {
         using var pe = new PEReader(File.OpenRead("references/game/Assembly-CSharp.dll"));

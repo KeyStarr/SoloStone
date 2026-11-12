@@ -10,6 +10,9 @@ namespace TransportInvariants;
 using Game = SabberStoneCore.Model.Game;
 using Entity = SabberStoneCore.Model.Entities.Entity;
 
+// Regression: SummonCopyTask copied the source's native tags, so a copy of a minion that had already attacked
+// (Specter Specialist copying Broodmother) showed EXHAUSTED=1 on the client while the engine copy was ready (Rush).
+// The engine state was right and only the client view was wrong, so the proof compares both.
 internal static class SummonCopyReadinessProof
 {
     internal static void Run()

@@ -14,6 +14,7 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // The prefab of the client's "spawn to deck" effect; a generated-shuffle scope must carry it, with no targets.
     private const string GeneratedShufflePrefab = "ReuseFX_Generic_SpawnToDeck_NoFX_CardFromScript_Super:cc0ba21e3e5306140870277e116b2c4b";
     private static int parentPlagueReplacementCalls;
 
@@ -22,6 +23,11 @@ internal static partial class Program
             .Select(p => (IReadOnlyList<PowerHistoryData>)p.List)).Any(f => f.Rule == "R1"),
             "generated shuffle respects effect-specific admission");
 
+    // Cards generated and shuffled into a deck must reach the client in the shape its spawn-to-deck effect targets: an
+    // anonymous FULL_ENTITY already in DECK, then SHOW/HIDE/TARGET, inside one spawn scope. A playtest (fixed
+    // 2026-10-22) showed no shuffle animation for Cosmic Manifestations' Outcast shuffles because the older shape
+    // (INVALID FULL + HIDE) is never picked up by that effect. Later cases cover batching several insertions into one
+    // scope.
     private static void GeneratedShuffleHistory()
     {
         BatchedStoryShuffle();

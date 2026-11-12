@@ -10,6 +10,12 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Chillmaw (both card ids) dying without a Dragon in its player's hand used to send an empty trigger block that
+    // still selected its card effect (index 0), so the client played the frost-breath spell with no damage. A failed
+    // condition must send no effect selection; a successful one keeps the effect and both damage tasks. Retail's exact
+    // packet for the failed case is not pinned, so "no effect selected" is our chosen presentation, not a copy. Both
+    // players are covered, a summon (played or by an effect) must send no Chillmaw block, and the held card stays
+    // hidden.
     [GroupProof("conditional-deathrattle", ProofKind.Native)]
     private static void ConditionalDeathrattlePresentation()
     {

@@ -4,6 +4,9 @@ using SabberStoneCore.Model;
 using EngineGame = SabberStoneCore.Model.Game;
 
 // Seeded identity fixtures share the accepted golden pool; card definitions remain live.
+// Hash is the pool snapshot the golden replays were recorded with. Proofs that assert exact seeded picks use it, so
+// admitting new cards to the live pool does not break them; behaviour changes still do, because definitions come from
+// the current engine.
 internal static class PinnedPoolFixture
 {
     internal const string Hash = "29ea592977fe61745aacb70dfe5f511ab240e9b051df570bdb2495b7b704b4d0";

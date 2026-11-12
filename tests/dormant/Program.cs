@@ -10,6 +10,9 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static class Program
 {
+    // Raw client tag ids, so the tests pin which tag carries the sleeping state. 1518 is the client's DORMANT tag (the
+    // one the native client animates from). 1090 is DORMANT_VISUAL (the old engine called it DORMANT): it is still
+    // mirrored at runtime, but no client animation is known to read it.
     private static readonly GameTag Dormant = (GameTag)1518;
     private static readonly GameTag Visual = (GameTag)1090;
     private static int passed, failed;

@@ -11,6 +11,9 @@ using SabberStoneCore.Actions;
 
 internal static partial class Program
 {
+    // A game can end between the two choices of a multi-choice spell (Branching Paths, fatigue lethal). The pending
+    // choice must be cancelled, the PLAY/POWER blocks closed and the spell moved to the graveyard exactly once, or
+    // the client is left waiting inside an open block.
     private static void TerminalDiscoverSpellLifecycle()
     {
         var capture = new Capture();
@@ -60,6 +63,10 @@ internal static partial class Program
         Console.WriteLine("PASS terminal Discover lifecycle: fatigue lethal closes wire PLAY/POWER");
     }
 
+    // A Discover spell used to move to the graveyard and close its PLAY block before the choice was shown, so it sat in
+    // the graveyard while still resolving (seen in a live test with Nightmare Fuel). Retail keeps the spell in PLAY
+    // through the choice and moves it after the answer. This runs the cases for plain, Combo/Dark Gift and recast
+    // (Electra) Discover spells and checks the wire order.
     private static void DiscoverSpellLifecycle(string filter = null, bool recast = false, bool scheduledRepeat = false)
     {
         foreach (var (id, heroClass, combo) in new[] {
@@ -159,6 +166,9 @@ internal static partial class Program
         }
     }
 
+    // Seen in a live test (fixed 2026-10-22): after Agent of the Old Ones turned a chosen hand card into The Coin, the
+    // client's Coin still showed the old card's attack, health and rarity. The client merges tags from CHANGE_ENTITY
+    // instead of replacing them, so the change must send explicit zeros for the old card's tags.
     private static void AgentOfTheOldOnesClearsPreviousIdentity()
     {
         foreach (string previousId in new[] { "EX1_608", "CS2_106", "CS2_029" })

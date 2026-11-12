@@ -10,6 +10,9 @@ using static ReplyTests;
 
 public static class ReuseLethalTests
 {
+    // Live miss in a playtest match, turn 19 (Warrior NPC against a Rogue): the turn-start plan was made while a Taunt
+    // stood, the lethal search stopped early, and later steps reused that plan without looking for lethal again, so a
+    // 20/10 minion hit a 7/7 instead of the face for exact lethal.
     // Public turn-19 combat state only. Private hands/decks/history are deliberately not fixtures.
     private static Game Incident(bool taunt = false)
     {

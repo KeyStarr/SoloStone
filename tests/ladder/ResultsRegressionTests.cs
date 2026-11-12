@@ -2,6 +2,10 @@ using System;
 using System.IO;
 using System.Linq;
 
+// The tests up to RankSummarySurvivesFallback each pin one finding from review of the post-match results flow, where a
+// save or native-UI failure could strand the player on the results screen or lose or repeat a reward acknowledgement:
+// the save-retry watchdog, acknowledging only after CONTINUE, a native readiness timeout staying local, late rank-star
+// loads being destroyed, and the rank line surviving the fallback path.
 internal static class ResultsRegressionTests
 {
     private static void Check(bool value, string message) { if (!value) throw new Exception(message); }

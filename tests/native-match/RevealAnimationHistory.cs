@@ -42,6 +42,10 @@ internal static partial class Program
         return (match, capture);
     }
 
+    // Playtest 2026-10-21: the opponent's Willful Watcher (TLC_621) Deathrattle burned three deck cards with no
+    // animation. The client's mill path needs a card definition, so each destroyed deck card must be revealed
+    // (SHOW_ENTITY with its identity and the GRAVEYARD destination) inside the resolving effect. No other hidden deck
+    // or hand card may be revealed.
     private static void WatcherBurnHistory()
     {
         foreach (bool bot in new[] { true, false })
@@ -103,6 +107,9 @@ internal static partial class Program
     private static bool IsZone(PowerHistoryData entry, int entity, EngineZone zone) => entry.HasTagChange &&
         entry.TagChange.Entity == entity && entry.TagChange.Tag == (int)GameTag.ZONE && entry.TagChange.Value == (int)zone;
 
+    // Same playtest: the opponent's Rock token (WW_001t) played no projectile. Retail marks a targeted spell with
+    // META_DATA TARGET and each resolved hit with META_DATA DAMAGE, so the history now carries both, in the order
+    // checked below.
     private static void SpellAnimationHistory()
     {
         var (match, capture) = AnimationMatch(botTurn: true);

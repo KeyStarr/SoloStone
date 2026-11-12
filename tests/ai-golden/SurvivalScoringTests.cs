@@ -6,6 +6,10 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static ReplyTests;
 
+// survival-scoring: when the best static line leaves the NPC facing a large visible attack, keep one defensive line
+// among the finalists that get an opponent-reply search. "Mined N:M" below means game N, decision M of the 2026-10-31
+// blunder-mining run (NPC-vs-NPC games whose decisions were judged by an LLM, each proposed better line verified in the
+// engine); the boards here are reduced versions of those positions.
 public static class SurvivalScoringTests
 {
     public static void TestPassLeaderRetainsBestStaticContinuation()

@@ -12,6 +12,11 @@ using Game = SabberStoneCore.Model.Game;
 using Entity = SabberStoneCore.Model.Entities.Entity;
 using Zone = SabberStoneCore.Enums.Zone;
 
+// Godfrey the Betrayer burns cards that overdraw the hand and later returns them. A burned card must not be linkable
+// to the card that comes back, so each return reaches the client under a fresh anonymous id (an alias) while the
+// engine keeps the real id. Past failures here were mostly in the proofs (engine data indexed by the alias, a damage
+// hook keyed by engine id, checks against a retired actor). Hand-built cases come first, then the ten pinned
+// replays; drifted replays are listed together.
 internal static class PrivateReturnProof
 {
     internal static void Run()
@@ -19,6 +24,9 @@ internal static class PrivateReturnProof
         RetiredResetPrivacy();
         foreach (string fault in new[] { "none", "damage-tag", "damage-amount", "damage-target" }) Combat(fault);
         var drifted = new List<string>();
+        // Every game here contains Godfrey (JAIL_509). The seed-N and reset-* files are strict-corpus games that failed
+        // while alias handling was incomplete: TARGET metadata sources that kept their engine id, and card references resent
+        // across a Rewind reset.
         foreach (string path in Directory.GetFiles("tests/transport-invariants/replays/private-return", "*.json").Order(StringComparer.Ordinal))
         {
             var replay = JsonSerializer.Deserialize<TransportReplay>(File.ReadAllText(path), Program.Json);

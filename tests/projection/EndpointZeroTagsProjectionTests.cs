@@ -1,6 +1,10 @@
 using SabberStoneCore.Enums;
 
 // Moved from tests/transport-invariants/RewindTransportProof.cs: pure NativeUIProjection table, no client.
+// The test-control audit compares the native client's tags with the engine's. A live soak latched false settlement
+// faults because the client held enchantment DAMAGE as 0 where the engine had no tag. Hiding an entity writes printed
+// ATK/HEALTH/COST and DAMAGE 0, so on enchantments only that zero-versus-absent case counts as equal; every nonzero
+// mismatch, and every other card type or tag, stays a failure.
 internal static class EndpointZeroTagsProjectionTests
 {
     private static void Check(bool condition, string message) { if (!condition) throw new InvalidOperationException(message); }

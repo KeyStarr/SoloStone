@@ -3,6 +3,10 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using static Core2026Proof;
 
+// After-attack effects fire before death is processed, so an attacker that dies in this very combat still triggers
+// them. SI:7 Supplier (CAP_003) and Rehgar (CORE_CATA_004) wrongly required the attacker to survive (found in the
+// attack-trigger sweep, see AttackTriggerSweepProof); the other cards here are the same lethal-attack case already
+// working. JAIL_030 and FIR_953 are the exceptions: their text requires survival, so they must NOT fire.
 internal static class AttackLethalTriggerProof
 {
     [GroupProof("attack-lethal-triggers")]

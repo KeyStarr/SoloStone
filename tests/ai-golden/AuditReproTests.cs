@@ -9,6 +9,12 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static ReplyTests;
 
+// Regression proofs from a read-only audit of the NPC AI on 2026-10-31 (the Audit20261031_ prefix). One test per
+// finding, each asserting the correct behaviour. They were committed failing as proof of the defects, then the fixes
+// landed in later rounds. Groups: A = evaluator values (life thresholds, mana debt/overload, threat from attackers
+// that cannot attack, weapon swing, armed Secret), B = search/plan interruption (stale cached trades, lucky
+// random-damage "lethal", capped beam dropping attacks, clock cut dropping the defensive line, placement pruning),
+// C = Secret-aware lethal and public hand knowledge (C1 and C4 live in tests/ai).
 // Proof-only regressions. --audit selects these instead of the normal green suite.
 public static class AuditReproTests
 {

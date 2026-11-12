@@ -11,6 +11,10 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // The engine marks Temporary cards with its own tag 3630, which the pinned client does not know. The client's
+    // Temporary hand look and ghost discard (Card.GetBestNullZoneSpell) key off GHOSTLY (785), so transport projects
+    // Temporary to GHOSTLY and keeps it through the end-of-turn discard. Echo's GHOSTLY stays independent, and an
+    // opponent's hidden hand stays private.
     private static void TemporaryVisualHistory(string onlySource = null)
     {
         foreach (bool opponent in new[] { false, true })

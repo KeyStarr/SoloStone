@@ -52,6 +52,10 @@ static class Program
         }
     }
 
+    // The targets are the retail average drop rates per pack: Legendary 5.4738% (guaranteed within 40 packs) and Epic 21.7663%
+    // (guaranteed within 10). Per-card rarity weights are not published, so the weights in FairPackRules are calibrated until
+    // the average, including the hard pity, matches. This check redoes the calibration by bisection on the per-pack hazard and
+    // requires the shipped per-slot weights to agree within 1 of the 1e9 total.
     static void Calibration()
     {
         foreach (var target in new[] { (rate: .054738, pity: 40, weight: FairPackRules.LegendaryWeight),

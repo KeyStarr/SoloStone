@@ -8,6 +8,10 @@ using HarmonyLib;
 
 internal static partial class PoweredUpGlowTests
 {
+    // Replace Cards in the native deck editor restyles incomplete (ghost) tiles through a postfix on
+    // CollectionDeckTileActor.UpdateAllComponents, which runs on every native actor refresh. A throw there would break
+    // the client's refresh, so the postfix must never throw. This test loads the built plugin and runs it with no scene
+    // available (headless), which makes the scene lookup fail, and expects a quiet no-op.
     private static void RecipeGhostFailure()
     {
         // Load the built plugin: the headless test assembly does not compile NativeDeckEditor.cs.

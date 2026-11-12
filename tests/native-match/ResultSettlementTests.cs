@@ -10,6 +10,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // If a player action throws mid-resolution the task queue is left stranded. A human concession afterwards must
+    // still record a real terminal outcome (a loss, no replay of the interrupted queue) so the match settles exactly
+    // once. The test injects a failing Fireball (CS2_029) task to reproduce the stranded queue. The same file covers
+    // atomic save failure/retry and achievement evidence invalidated by a failed Rewind validation.
     private static void ResultSettlementTests()
     {
         var (match, capture) = SogStart(new[] { "JAIL_509" }, new[] { "JAIL_509" });

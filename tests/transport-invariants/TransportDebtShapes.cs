@@ -8,6 +8,12 @@ namespace TransportInvariants;
 
 internal static partial class HistoryShapeProof
 {
+    // Three history shapes the strict corpus flagged that turned out legitimate, accepted only under typed conditions:
+    //  - Onyxia: the hero takes 5 damage, 2 absorbed by Armor and the other 3 replaced by +3 Health, while the DAMAGE metadata
+    //    keeps the full 5;
+    //  - Genn: a held card transforms and its earlier +2/+2 layer is restored (not a fresh buff);
+    //  - Rewind: FATIGUE going back to 0 inside a GAME_RESET block is restoration, not a fatigue draw.
+    // Each has a negative control (wrong amount, no reset block, ordinary buff) so the exemptions cannot hide real corruption.
     internal static void DebtShapes()
     {
         ExemptionConditionStreams();

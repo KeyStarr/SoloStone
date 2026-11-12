@@ -1,6 +1,10 @@
 using System.Xml.Serialization;
 using SabberStoneCore.Model;
 
+// Regressions found in review of the Core unlock system: (1) Classic and Core printings of a card share copy limits (the
+// client's counterpart tag), so a mixed draft over the combined cap must stay stored and unplayable instead of failing the
+// whole profile; (2) a changed unlock schedule never revokes a Core card already earned; (3) Core originals without the CORE_
+// prefix (for example CS3_038) are granted, owned and validated as Core, never stored as Classic ownership or opened from packs.
 internal static class ReviewRegressions
 {
     static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }

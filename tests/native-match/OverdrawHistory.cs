@@ -12,6 +12,10 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // An opponent Godfrey overdraw burn froze the client: the retained burn actor was revealed, moved to GRAVEYARD and then
+    // hidden to SETASIDE, leaving the native "mill" flag set so ZoneChangeList waited forever. Retail shows a burn, discard
+    // or mill as one SHOW straight into the destination zone (no extra move, no HIDE afterwards). Also checks that HIDE
+    // clears REVEALED, so a card revealed earlier and drawn later is not shown face-up.
     private static void OverdrawHistory()
     {
         HiddenCardShapeHistory();

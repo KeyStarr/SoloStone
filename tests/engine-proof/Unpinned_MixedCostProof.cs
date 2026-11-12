@@ -6,6 +6,10 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Costs;
 using SabberStoneCore.Model.Entities;
 
+// When two different "costs X instead of Mana" replacements (Armor, Health, Corpses) apply to one card, the newest one
+// decides what is paid. This used to throw. "Unpinned" means the rule has no retail trace: newest-wins is a design
+// assumption, not verified behaviour, so these proofs document it and should be revisited if a retail trace shows
+// otherwise.
 internal static class Unpinned_MixedCostProof
 {
     [GroupProof("mixed-cost")]

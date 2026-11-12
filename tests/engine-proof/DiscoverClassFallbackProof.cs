@@ -10,6 +10,10 @@ using SabberStoneCore.Model.Snapshots;
 using SabberStoneCore.Tasks.SimpleTasks;
 using static Core2026Proof;
 
+// Regression test. A Rogue's Illidari Studies offered nothing, because Rogue plus neutral has no Outcast cards. A normal
+// Discover keeps its hero-class-plus-neutral pool; only when that pool is truly empty does it fall back to the printed
+// class(es) of the card doing the Discovering. Random/OtherClass/Exact filters are unchanged. The fallback comes from
+// community reports with no retail trace (an unpinned assumption).
 internal static class DiscoverClassFallbackProof
 {
     [GroupProof("discover-class-fallback")]

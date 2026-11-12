@@ -8,6 +8,11 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static ReplyTests;
 
+// attack-allocation: the combat search used to prune a better complete attack line (a trade, a weapon swing and a hand
+// play together) before it was scored or before it got an opponent-reply slot; positions from the blunder-mining run
+// are in tests/ai (attack-allocation-*.json). These tests are the review findings: which frontier slots survive
+// pruning, hand copies grouped by what they commit, enchantments that change a card in search, masked draws, and that
+// the extra replies stay inside the node budget and the clock.
 public static class AttackAllocationReviewTests
 {
     private const BindingFlags Fields = BindingFlags.Instance | BindingFlags.NonPublic;

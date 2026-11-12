@@ -274,6 +274,9 @@ static partial class Program
     {
         var policy = typeof(StandardProofNative).GetMethod("AllowNativePlayability", BindingFlags.Static | BindingFlags.NonPublic);
         Check(policy != null, "audited isolated proof cards need native playability policy");
+        // "exact20" in this file's messages: these 20 Core proof cards are the only ones allowed native playability, and
+        // only in the one context state (active, isolated, not auditing, passed, not failed). Every other id, hero, token,
+        // null or malformed id must stay rejected.
         var admitted = new[] {
             "CORE_EX1_011", "CORE_CS2_189", "CORE_EX1_096", "CORE_GVG_085", "CORE_LOOT_413",
             "CORE_EX1_007", "CORE_CS2_179", "CORE_SW_066", "Core_CS2_200", "CORE_CS2_222",
@@ -432,6 +435,9 @@ static partial class Program
         }
         int Referenced(string id,int tag) => Cards.FromId(StandardProofNative.EngineId(id)).RefTags.TryGetValue((GameTag)tag,out int v)?v:0;
         StandardProofNative.AuditDefinitions(Dbid,CardSet,_ => throw new Exception("Static timing lookup bypassed nonzero semantic set"),Direct,Referenced,records.Add);
+        // "exact27": the audited proof set is exactly 27 definitions: the 20 playable cards plus two heroes, two hero
+        // powers, the Coin and two enchantments. Each must be read through the dedicated original-set reader, never the raw
+        // set tag 183.
         Check(seen.Count == 27 && seen.Contains("Core_CS2_200") && seen.Contains("HERO_08bp") && seen.Contains("CS2_222o"),"audit skipped closure");
         Check(rawSetReads == 0 && setReads.SetEquals(StandardProofNative.DefinitionIds)
             && records.Count(row => row.Contains("\tcard-set\t183\t")) == 27, "integer183 did not use dedicated original set reader for exact27");

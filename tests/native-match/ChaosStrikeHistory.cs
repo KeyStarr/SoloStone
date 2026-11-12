@@ -8,6 +8,12 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Guards the freeze first seen with Chaos Strike: the client infers an effect's targets from the entities in its
+    // task list, and if one of them is a hidden card that is still being drawn (no card type yet) the impact animation
+    // never finishes and the whole client queue stops. The transport now adds an explicit TARGET for such effects
+    // instead of patching one card at a time; the eight draw identities below stand in for that card class.
+    // 32 = both seats x 8 identities x the two modes (normal, full hand) where the repair applies. Each case removes
+    // the TARGET again and requires the admission validator to flag it.
     private static void ChaosStrikeHistory()
     {
         var failures = new List<string>();

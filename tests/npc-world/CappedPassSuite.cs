@@ -12,6 +12,12 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Decisions;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+// Replays a recorded playtest game (fixtures/magmaw-capped-pass.json: a Mage deck against the Hunter "Magmaw" NPC deck,
+// regular skill tier, turn 22). After its hero power the NPC ended the turn with a 5/9 Taunt still standing. Cause: a
+// search stopped by the live clock/node cap left an unfinished line, the planner completed it with a synthetic
+// END_TURN, and later decisions that turn reused the cached pass. Fixed by never completing an unfinished line with
+// END_TURN and by validating a capped pass with an independent 7,000-node search (ValidationNodeCap, checked below).
+// The real cap was not logged: 1572 is the own-beam node count that reproduces the recorded line, a witness only.
 internal static class CappedPassSuite
 {
     private static string fixture = Path.Combine(AppContext.BaseDirectory, "fixtures", "magmaw-capped-pass.json");

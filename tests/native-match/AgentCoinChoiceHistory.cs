@@ -12,6 +12,12 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Reproduces a client freeze from a live game (fixed 2026-11-02). Cultist Map's bonus Discover (after the Map-drawn
+    // Agent resolved) was sourced by its watcher enchantment, which the native client had already removed; the choice
+    // UI dereferenced the missing source and never showed the offers. Choice packets now name the enchantment's printed
+    // creator (the Map) instead. The "watchdog" and "pre-focus"/"pre-pause" variants cover the fallback that
+    // auto-answers a settled human choice whose actors are still missing after 15 s, and the cases where that timer
+    // must not run (focus or pause lost, sleep gaps).
     [GroupProof("agent-coin-choice-native", ProofKind.Native)]
     private static void AgentCoinChoiceHistory()
     {

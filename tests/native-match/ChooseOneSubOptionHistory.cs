@@ -9,6 +9,11 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Before 2026-10-24 every Choose One play was sent with sub-option 0, so the client played no per-option effect,
+    // the history tile always showed option 1, and Timereaver (END_010), which has no effect of its own, changed stats
+    // silently. PLAY and the parent POWER block now carry the chosen option (Choose Both keeps 0 on PLAY, and each of
+    // its POWER activations carries its own index). The prefab id below is the retail one for Timereaver's group heal
+    // (applied to all enchanted minions); Secret Ingredient's Attack option has its own in SecretIngredientSubOptionHistory.
     private static void ChooseOneSubOptionHistory()
     {
         const string prefab = "ReuseFX_Holy_AE_HealingWave_Centered_BothSides_Super:c468a26646b575b45ae00505fea3c00f";

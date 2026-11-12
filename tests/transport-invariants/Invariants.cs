@@ -92,6 +92,7 @@ internal static class Invariants
             foreach (var tag in owner.NativeTags.Keys.Except(ControllerAuraTags))
             {
                 // LAST_CARD_DISCARDED is engine-only pet evidence (ae49c26f): NativeMatch never publishes it.
+                // 4327 is the engine-only Herald count (HeraldRules.Progress); its native meaning is unpinned, so it is never sent.
                 if (IsPrivateRuleTag(tag) || (int)tag == 4327 || tag == GameTag.LAST_CARD_DISCARDED) continue;
                 int value = client.Entities[client.WireId(owner.Id)].Get(tag), expected = tag == GameTag.RESOURCES_USED ? owner.UsedMana + owner.OverloadLocked : owner[tag];
                 // Historical card references use public aliases; private retained burns must remain unlinkable.

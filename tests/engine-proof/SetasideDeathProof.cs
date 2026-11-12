@@ -5,6 +5,10 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using static Core2026Proof;
 
+// Regression test for a crash found by the AI harness. A turn-change trigger (Nythendra's Beetles merging) moved
+// minions that Doomsayer had also marked for destruction to SETASIDE. Death creation still processed them, credited
+// corpses, and sent them to the history recorder from SETASIDE, which throws; in a real match the turn would break.
+// Victims no longer on their controller's board are now dropped before death capture.
 internal static class SetasideDeathProof
 {
     [GroupProof("setaside-death")]

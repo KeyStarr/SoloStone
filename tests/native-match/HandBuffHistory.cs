@@ -9,6 +9,9 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Playtest (fixed 2026-10-21): Blood Tap buffed minions in hand correctly but the client showed no buff animation
+    // on them. Retail sends a hand-targeted SUB_SPELL (this prefab) for Attack/Health buffs to cards in hand; the stat
+    // changes alone only change numbers. Opponent hand cards must get no SUB_SPELL and no identity leak.
     private const string HandBuffPrefab = "ReuseFX_Generic_HandBuff_ScaleUp_OpponentAE_Gold_Super:2fb243a4d1ef3324fa09d018ce3f4418";
 
     private static void HandBuffHistory()

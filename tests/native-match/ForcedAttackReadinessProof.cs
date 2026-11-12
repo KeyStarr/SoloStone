@@ -9,6 +9,9 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static partial class Program
 {
+    // A spell that forces a minion to attack must not spend that minion's own attack allowance. The engine used to bump
+    // NumAttacksThisTurn and set EXHAUSTED for forced combat, which would show the client a minion that could no longer
+    // attack. So this checks the tags on the wire, not only the engine state.
     private static void ForcedAttackReadinessIsPublished()
     {
         foreach (bool windfury in new[] { false, true })

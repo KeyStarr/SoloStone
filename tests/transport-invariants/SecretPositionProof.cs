@@ -9,6 +9,10 @@ using SabberStoneCore.Tasks.PlayerTasks;
 namespace TransportInvariants;
 using Game = SabberStoneCore.Model.Game;
 
+// Regression: secrets created straight into the secret zone (Desperate Measures DAL_141 and its twinspell DAL_141ts)
+// never went through a positioning zone, so the client kept ZONE_POSITION=0 while the engine said 1
+// (strict-transport violations on EX1_136 and DAL_570 in the stress-deck corpus). Checks engine value, client value,
+// cast order, clone, snapshot.
 internal static class SecretPositionProof
 {
     internal static void Run()

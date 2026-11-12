@@ -12,6 +12,10 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // Start of Game effects used to apply silently (the engine resolves them in the opening draw with an anonymous
+    // source), so the client showed no reveal or history tile. They are now replayed after both mulligans, before
+    // STEP=MAIN_READY (retail timing), as a source reveal plus a TRIGGER with keyword 968. A playtest showed the reveal
+    // playing over flying mulligan cards, so the NEXT_STEP=MAIN_READY barrier follows the final mulligan DONE.
     [GroupProof("start-of-game-reveal", ProofKind.Native)]
     private static void StartOfGameRevealHistory()
     {

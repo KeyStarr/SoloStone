@@ -100,6 +100,8 @@ internal static class RatingPlacementChecks
     }
     static void FreshHistoryNeverCalibrates(string root)
     {
+        // 9, 10 and 35 recorded games: one below the placement length (10), exactly at it, and well past it. A fresh-origin
+        // profile never gets the one-time legacy calibration whatever its history length, so none of them may reset.
         foreach (int count in new[] { 9, 10, 35 }) foreach (bool ties in new[] { false, true }) {
             string path = Path.Combine(root, $"placement-age-{count}-{ties}.xml"); var d = Fixture(count, ties); Write(path, d);
             var old = Position(d); string history = Xml(d.Matches);

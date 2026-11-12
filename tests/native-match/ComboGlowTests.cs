@@ -7,6 +7,11 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+// The client draws the Combo glow on a hand card only from the COMBO tag (220) the server sends; it never reads the
+// card definition. Combo cards such as Nightmare Fuel never glowed because we sent the tag only on the printed
+// card, not on revealed snapshots. Revealed snapshots now carry the printed value and COMBO_ACTIVE (266) is set
+// on the player after a play and cleared at end of turn, as in retail. Hidden opponent cards must leak neither
+// identity nor COMBO, and an identity change (CHANGE_ENTITY) must reset COMBO.
 internal static class ComboGlowTests
 {
     private static void Check(bool value, string message)

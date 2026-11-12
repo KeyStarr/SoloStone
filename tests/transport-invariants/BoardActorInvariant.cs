@@ -8,6 +8,10 @@ using SabberStoneCore.Enums;
 namespace TransportInvariants;
 
 // Packet-local oracle: no endpoint engine state can repair an earlier anonymous/hidden board actor.
+// Playtest 2026-11-01: an Illusion (EDR_260t, from Illusory Greenwing) drawn on the opponent's turn left an empty board
+// slot although engine and client entity lists both held a 4/5 Taunt there. Drawn and summoned in one packet it goes
+// HAND -> SETASIDE -> PLAY; the client treats SETASIDE as a null zone and keeps the actor hidden after the move to
+// PLAY. So this checks, per packet, that every PLAY minion/location is named and not hidden.
 public static class BoardActorInvariant
 {
     public static IReadOnlyList<string> Validate(IEnumerable<PowerHistory> packets, bool repairNullToPlayActors = true)

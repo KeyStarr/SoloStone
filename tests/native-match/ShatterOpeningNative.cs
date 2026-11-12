@@ -16,6 +16,10 @@ internal static partial class Program
         public override IReadOnlyList<int> Keep(MulliganView view) => Recorded ?? view.Offered.Where(c => c.CardId != "GAME_005").Select(c => c.EntityId).ToArray();
     }
 
+    // Playtest 2026-11-02: an opening-hand Shatter card (Arcane Flow) kept in slot 0 split at the start of the game,
+    // but the two halves landed next to each other and recombined at once. The second half must go to the far right
+    // hand edge on every entry route (shuffled deal and the humanOpeningHand/npcOpeningHand debug scenario). The
+    // optional `record` journal replays a recorded game; it is caller-owned evidence and is not stored in this repo.
     private static void ShatterOpeningNative(string record = null)
     {
         var previousDecks = LocalDecks.ExternalDecks;

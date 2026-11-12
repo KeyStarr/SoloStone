@@ -1,6 +1,9 @@
 using SabberStoneCore.Tasks.SimpleTasks;
 using static Core2026Proof;
 
+// Regression test. DamageWeaponTask used to clamp its configured amount in place when a weapon had little durability
+// left. The task object belongs to the card and is shared across games, clones and replays, so one short weapon
+// permanently lowered the damage of every later use. This showed up as a fuzz replay divergence with stress decks.
 internal static class DamageWeaponTaskProof
 {
     internal static void Run()

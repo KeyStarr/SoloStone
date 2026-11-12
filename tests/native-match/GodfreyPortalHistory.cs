@@ -9,6 +9,10 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // Godfrey's overdraw "portal" runs on native tags taken from the client's prefabs: hero tag 4717 turns the deck portal on,
+    // and a burned display card carries 4722=319 on its move to the graveyard. The deck tooltip reads the backlog count from
+    // the JAIL_509e enchantment's TAG_SCRIPT_DATA_NUM_2, which nothing used to write. The burn display must also carry
+    // ENTITY_ID: without it the client registered both displays as entity 0 and left a ghost card in DECK (client 28, engine 27).
     [GroupProof("godfrey-portal", ProofKind.Native)]
     private static void GodfreyPortalHistory()
     {
