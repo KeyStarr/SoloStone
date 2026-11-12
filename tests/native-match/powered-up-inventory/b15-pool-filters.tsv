@@ -1,0 +1,18 @@
+id	class	reason	inventory	name
+BE_298	N	no pre-play condition: unconditional effect, trigger or token	existing	Scion of Insight
+CATA_567	N	no pre-play condition: unconditional effect, trigger or token	existing	Ascendance
+CATA_567e	N	no pre-play condition: unconditional effect, trigger or token	existing	Ascended
+CATA_621	N	no pre-play condition: unconditional effect, trigger or token	existing	Gelbin's Triumph
+CORE_WW_374	G	available Corpses	existing	Corpse Farm
+DINO_427	G	Combo active	existing	Costume Merchant
+EDR_888	G	four Imbues	existing	Malorne the Waywatcher
+FIR_920	N	no pre-play condition: unconditional effect, trigger or token	existing	Smoke Bomb
+JAIL_730	N	no pre-play condition: unconditional effect, trigger or token	existing	Stardust Scythe
+JAIL_732	N	no pre-play condition: unconditional effect, trigger or token	existing	Void Soul
+JAIL_733	N	no pre-play condition: unconditional effect, trigger or token	existing	Vicious Voidscale
+JAIL_891	N	no pre-play condition: unconditional effect, trigger or token	existing	Void Blast
+MEND_100	N	no pre-play condition: unconditional effect, trigger or token	existing	Cultivating Sprite
+MEND_100t	N	no pre-play condition: unconditional effect, trigger or token	existing	Blooming Bulb
+TLC_824	N	no pre-play condition: unconditional effect, trigger or token	existing	Odd Map
+TLC_824e	N	no pre-play condition: unconditional effect, trigger or token	existing	Odd Map Player Enchant
+BE_703	N	no pre-play condition: Deathrattle tutor or fixed random fallback	existing	Drest'agath

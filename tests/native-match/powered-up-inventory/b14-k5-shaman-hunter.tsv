@@ -1,0 +1,13 @@
+id	class	reason	inventory	name
+CATA_553	N	hand transformation	existing	Ebyssian
+CATA_553t	N	unconditional Battlecry	existing	Ebyssian
+CATA_553e	N	player aura	existing	Ebyssian's Blessing
+CATA_553e2	N	aura keyword	existing	Ebyssian's Blessing
+CATA_563	N	mandatory hand selection	existing	Crackling Cloudstrider
+CATA_563e2	N	captured Deathrattle	existing	Overcast
+TIME_810	N	location activation	existing	Past Silvermoon
+TIME_810t1	N	location activation	existing	Present Silvermoon
+TIME_810t2	N	location activation	existing	Future Silvermoon
+TIME_217	N	passive damage replacement	existing	Stormrook
+TLC_223	K	printed Kindred	existing	Volcanic Thrasher
+TLC_223e	N	spell-local bonus	existing	Volcanic

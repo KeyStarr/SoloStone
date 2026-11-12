@@ -1,0 +1,1945 @@
+id	class	reason	inventory	name
+AT_101	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Pit Fighter
+AV_337t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mountain Cub
+BAR_035t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Swift Hyena
+BAR_878t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Battlefield Medic
+BE_000	N	unconditional two-player Lifesteal	existing	Lightcaller
+BE_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Waterstrider
+BE_008	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Mogu Warmaster
+BE_008e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	War Shout
+BE_012	G	two owner Shadow spells cast in current hand residence	existing	Dark Deacon
+BE_013t1	N	fixed external ability option	existing	Wrath of C'Thun
+BE_013t2	N	fixed external ability option	existing	Domain of C'Thun
+BE_013t2e1	N	named stat enchantment	existing	Abhorrent
+BE_013t3	N	fixed external ability option	existing	Glare of C'Thun
+BE_013t4	N	fixed external ability option	existing	Servants of C'Thun
+BE_013t5	N	unconditional Taunt token	existing	Faceless Fanatic
+BE_014	G	C'Thun started in own deck	existing	Spawn of C'Thun
+BE_036	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	M.O.T.H.E.R.
+BE_036e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	M.O.T.H.E.R.'s Love
+BE_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Anvil of Reshaping
+BE_042e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Reshaped Steel
+BE_071	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadow Dance
+BE_086	G	highest effective Cost card in hand (ties qualify)	existing	Blasphemy
+BE_094	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Floating Lessons
+BE_094e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Flying
+BE_142	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	March to War
+BE_142t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Vanir Soldier
+BE_152	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sundancer
+BE_152e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sun's Blessing
+BE_152t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sun's Blessing
+BE_153	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sun's Reckoning
+BE_153t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Final Reckoning
+BE_154	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Humble Judgment
+BE_154e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Humbled
+BE_169	G	weapon equipped	existing	Mantid Precursor
+BE_169e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ride to Battle!
+BE_171	G	two different spell schools played while holding this	existing	Primus of Power
+BE_183	N	unconditional split damage and 8-Cost summon	existing	Halls of Origination
+BE_193	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bloatray
+BE_196	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Befuddled Summoner
+BE_201	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Foreboding Freeze
+BE_204	N	unconditional ability Battlecry and printed Taunt	existing	Gargantuan Slitherer
+BE_207	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unstable Prototype
+BE_207e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Power Up
+BE_208	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Titan Sized
+BE_208e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Titanic
+BE_220	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Entropic Rift
+BE_221	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Elder Word: Foresight
+BE_221e	N	not a hand play effect: enchantment or token	existing	Foresight Essence
+BE_221e1	N	not a hand play effect: enchantment or token	existing	Essence
+BE_221e2	N	not a hand play effect: enchantment or token	existing	Aberrant Power
+BE_222	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Elder Word: Manifest
+BE_222e	N	not a hand play effect: enchantment or token	existing	Manifest Essence
+BE_222t	N	not a hand play effect: enchantment or token	existing	Voidwing
+BE_223	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Elder Word: Flay
+BE_223e	N	not a hand play effect: enchantment or token	existing	Flay Essence
+BE_227	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Blade of The Black Empire
+BE_228	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Servant of Zuramat
+BE_251	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cosmic Springs
+BE_252	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Constellar's Calling
+BE_255	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Primordial Wyrm
+BE_255e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Gorged
+BE_256	N	unconditional Battlecry and Deathrattle	existing	Astral Mediator
+BE_258	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Astral Rain
+BE_264	O	generic printed Outcast	existing	Blind Harrower
+BE_265	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Encircle
+BE_270	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Icebelt Magi
+BE_283	G	1+ available Corpse (spend up to 4)	existing	Bloodfiend
+BE_284	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Cold Dark Void
+BE_285	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grafted Knight
+BE_303	G	two different spell schools played while holding this	existing	Scorchfist Scholar
+BE_325	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Malicious Presence
+BE_337	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Therazane the Earthmother
+BE_337e	N	not a hand play effect: enchantment or token	existing	Casts Twice
+BE_337e2	N	not a hand play effect: enchantment or token	existing	Spells of a Schools Cast Twice
+BE_349	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eyemaul
+BE_349t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tremoring Elemental
+BE_541	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Agent of N'Zoth
+BE_550	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tank Regiment
+BE_552	N	not a conditional play effect: trigger, deathrattle or aura	existing	Flamespitter
+BE_553e	N	not a hand play effect: enchantment	existing	Burning Out
+BE_553t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Overdrive
+BE_554	G	control another non-Dormant Mech	existing	Bombardment
+BE_555	N	no pre-play condition (unconditional selection effect)	existing	Reload
+BE_555e	N	not a hand play effect: enchantment	existing	Reload
+BE_557	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Setesh
+BE_557e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Setesh Tracker
+BE_558	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Stone Gauntlet
+BE_559	G	gained Armor this turn	existing	Show of Force
+BE_560	G	hero has 10+ Armor	existing	Brassknuckle Brawler
+BE_560e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Brawlin'
+BE_561t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Steel Golem
+BE_564	G	a friendly minion died this turn	existing	Terror of the Wastes
+BE_565	G	5 friendly minions died this turn (Ready)	existing	Broodqueen Sha'kar
+BE_565e	N	not a hand play effect: enchantment	existing	Sha'kar's Rage
+BE_565e2	N	not a hand play effect: enchantment	existing	Charge
+BE_572	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tol'vir Vanguard
+BE_600	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Animator of Iron
+BE_701	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	OC91 Chariot
+BE_720	N	unconditional roster replacement or fixed Larva generation	existing	Broodchamber Tunneler
+BE_720t1	C	client Combo glow	existing	Pale Larva
+BE_720t10	C	client Combo glow	existing	Neon Larva
+BE_720t11	C	client Combo glow	existing	Dark Larva
+BE_720t2	C	client Combo glow	existing	Blue Larva
+BE_720t3	C	client Combo glow	existing	Black Larva
+BE_720t4	C	client Combo glow	existing	Yellow Larva
+BE_720t5	C	client Combo glow	existing	Green Larva
+BE_720t6	C	client Combo glow	existing	Brown Larva
+BE_720t7	C	client Combo glow	existing	Purple Larva
+BE_720t8	C	client Combo glow	existing	Cyan Larva
+BE_720t9	C	client Combo glow	existing	Red Larva
+BE_721	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aqir Goliath
+BE_722	N	unconditional roster replacement or fixed Larva generation	existing	Aqir Swarmer
+BE_723	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wandering Seeker
+BE_724	N	unconditional roster replacement or fixed Larva generation	existing	Incubate
+BE_725	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Unknowable One
+BE_725e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Unknown Power
+BE_728	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Zakajz the Corruptor
+BE_729	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mawman Cultist
+BE_730	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Clockwork Boars
+BE_730t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Clockwork Boar
+BE_732	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Kronn the Impaler
+BE_733	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Titanic Thrasher
+BE_734	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Assimilating Ooze
+BE_749	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Xel'noth Behemoth
+BE_749e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Behemoth Flesh
+BE_771	N	after-attack trigger, no conditional hand play effect	existing	Tentacle Lash
+BE_778	N	unconditional sequential ability choices	existing	Watch Over
+BE_790	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Zer'Ontu
+BE_790e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Three Four Five!
+BE_801	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Efflorescence
+BE_801e	N	not a hand play effect: enchantment or token	existing	Blooming
+BE_802	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Deathblossom
+BE_802t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Carnivorous Plant
+BE_842	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unnatural Cold
+BE_850	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twisted Grimlynx
+BE_850t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Curious Grimlynx
+BE_854	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aetherial Kindling
+BE_855	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Primordial Bear
+BE_855e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Primordial
+BE_856	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Freya, Emerald Architect
+BE_856e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Enriched
+BE_859	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Foraging Slyvern
+BE_861	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crystalline Golem
+BE_870	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Elemental of Madness
+BE_870e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Madness
+BE_873	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sigil of Hatching
+BE_873t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shredclaw
+BE_877	G	cost condition: a friendly minion died this turn	existing	Hungering Cavern
+BE_900	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Mechacycle
+BE_993	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Shadewing
+BE_994	N	outcome or target decides	existing	Stone Trogg
+BE_994e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Prank Successful
+BE_996	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Frontline Ironborn
+BE_996e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ironborn
+BE_998	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Seeker of Prey
+BOT_102t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Spark
+BOT_576e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Overcharged
+BT_292e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Hand of A'dal
+BT_351e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Felheartened
+BT_416e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Felscream
+CAP_000	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	SI:7 Slayer
+CAP_000e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Slayer
+CAP_001	N	outcome or target decides	existing	Silent Strike
+CAP_001e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Silent
+CAP_003	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	SI:7 Supplier
+CAP_005	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Mathias Shaw
+CAP_005e4	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Stealth 100
+CAP_006	G	a Stealthed minion attacked while holding this	existing	Tricks of the Trade
+CAP_102	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Land Ho!
+CAP_103	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Hand Cannon
+CAP_105	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hook n' Heave
+CAP_106	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Captain Crowley
+CAP_107	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cannonmaster
+CAP_107t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cannoneer
+CAP_400	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Kabal Conspirator
+CAP_400t2t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Imp-formant
+CAP_401	G	enemy deck contains an Imp-formant	existing	Corrupt Constable
+CAP_401e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tipped Off
+CAP_403	N	no pre-play condition (unconditional selection effect)	existing	Frame Job
+CAP_404	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Harsh Sentence
+CAP_404e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Harshing My Vibe
+CAP_406	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Kabal Mastermind
+CAP_406e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Imp-roved Imp-formants
+CAP_406e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Imp-bedded
+CAP_407	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wanted Poster
+CAP_407e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Wanted!
+CAP_801	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Haunt
+CAP_801e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Haunted
+CAP_803	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lingering Spirit
+CAP_804	N	outcome or target decides	existing	Specter Specialist
+CAP_805	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Slime 'em!
+CAP_805e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	I've Been Slimed
+CAP_805t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ectoplasm
+CATA_111	G	holding another Dragon	existing	Darkscale Broodmother
+CATA_132	G	spent 8 Mana while holding this (Ready)	existing	Broodwatcher
+CATA_132t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Emerald Whelp
+CATA_133	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Iridescent Flitterwing
+CATA_133e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Iridescent Glow
+CATA_134	N	not a conditional play effect: trigger, deathrattle or aura	existing	Wildwood Circle
+CATA_134e	N	not a hand play effect: enchantment	existing	Wildwood Aura
+CATA_134t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wildwood Circle
+CATA_134t2	N	not a conditional play effect: trigger, deathrattle or aura	existing	Wildwood Circle
+CATA_134t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Treant
+CATA_135	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mossbinding
+CATA_135e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Moss Shaped
+CATA_135t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Moss Golem
+CATA_136	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Azshara's Triumph
+CATA_136e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Azshara's Triumph
+CATA_138	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Forest's Gift
+CATA_138e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tree Hugged
+CATA_150	N	not a conditional play effect: trigger, deathrattle or aura	existing	Ragnaros, the Great Fire
+CATA_150t	N	not a conditional play effect: trigger, deathrattle or aura	existing	Hand of Ragnaros
+CATA_150t1	N	not a conditional play effect: trigger, deathrattle or aura	existing	Hand of Ragnaros
+CATA_153	N	unconditional Battlecry scales generated minion Cost from Attack	existing	Al'Akir, Lord of Storms
+CATA_153t	N	not a conditional play effect: trigger, deathrattle or aura	existing	Charged Hand of Al'Akir
+CATA_153t1	N	not a conditional play effect: trigger, deathrattle or aura	existing	Charged Hand of Al'Akir
+CATA_154	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sinestra
+CATA_154e	N	not a hand play effect: enchantment or token	existing	Sinestra's Song
+CATA_154t	N	not a hand play effect: enchantment or token	existing	Sinestra's Wing
+CATA_154t1	N	not a hand play effect: enchantment or token	existing	Sinestra's Wing
+CATA_156	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Experimental Animation
+CATA_158	N	not a conditional play effect: trigger, deathrattle or aura	existing	Maniacal Follower
+CATA_158t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Sinestra
+CATA_160	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scorching Ravager
+CATA_180	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	War'loc
+CATA_180e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Doom!
+CATA_186	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stickybomb Saboteur
+CATA_186t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sabotage!
+CATA_186te	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sabotaged
+CATA_200	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Agent of the Old Ones
+CATA_201	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Mistress
+CATA_203	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Garona's Last Stand
+CATA_206	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Twisted Monstrosity
+CATA_208	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Selfless Protector
+CATA_209	N	target-limited hand spell selection	existing	Battlefield Blaster
+CATA_209e	N	enchantment, not a hand play effect	existing	Battlefield Channeler Spellpower
+CATA_210	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Egg
+CATA_210t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Accelerated Whelp
+CATA_213	G	starting minion printed Costs total exactly 100	existing	Vyranoth
+CATA_213e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stormcharged
+CATA_213e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stormcharged
+CATA_216	N	unconditional permanent healing grant	existing	Cleansing Cleric
+CATA_216e	N	enchantment, not a hand play effect	existing	Free From Corruption
+CATA_300	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Black Blood
+CATA_300t1	N	not a conditional play effect: trigger, deathrattle or aura	existing	Black Blood's Body
+CATA_300t2	N	not a conditional play effect: trigger, deathrattle or aura	existing	Black Blood's Body
+CATA_300t3	N	not a conditional play effect: trigger, deathrattle or aura	existing	Black Blood's Body
+CATA_301	N	location activation, no conditional play bonus	existing	Ruby Sanctum
+CATA_301e	N	enchantment, not a hand play effect	existing	Lifebind
+CATA_302	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mend
+CATA_303	N	outcome or target decides	existing	Purifying Breath
+CATA_304	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Injured Attendant
+CATA_305	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Incensed Matriarch
+CATA_305e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Incensed
+CATA_306	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Schism
+CATA_306e	N	not a hand play effect: enchantment	existing	Dark Influence
+CATA_306t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Schism
+CATA_306t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Schism
+CATA_308	G	cost condition: control a Legendary card	existing	Medivh's Triumph
+CATA_432	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Chromatus
+CATA_432t1	N	not a conditional play effect: trigger, deathrattle or aura	existing	Green Head of Chromatus
+CATA_432t2	N	not a conditional play effect: trigger, deathrattle or aura	existing	Red Head of Chromatus
+CATA_432t3	N	not a conditional play effect: trigger, deathrattle or aura	existing	Blue Head of Chromatus
+CATA_432t4	N	not a conditional play effect: trigger, deathrattle or aura	existing	Bronze Head of Chromatus
+CATA_452	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spellweaver's Brilliance
+CATA_452t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Azure Warden
+CATA_465	G	8+ available Corpses	existing	Chow Down
+CATA_465t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hungry Drake
+CATA_467	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Command Claw
+CATA_467e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	The Clawww
+CATA_469	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Chromatic Broodmother
+CATA_471	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Talanji's Last Stand
+CATA_471e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Talanji's Last Wish
+CATA_473	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nozdormu, Bronze Aspect
+CATA_473e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Nozdormu's Nimbus
+CATA_474	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Spearheart Sentry
+CATA_475	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scalebreaker Bulwark
+CATA_476	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bronze Keeper
+CATA_476t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sandscale Dragon
+CATA_478	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bronze Redeemer
+CATA_478t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bronze Brute
+CATA_479	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flight Maneuvers
+CATA_479e	N	not a hand play effect: enchantment	existing	Courageous
+CATA_479t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flight Maneuvers
+CATA_479t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flight Maneuvers
+CATA_479t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sky Drake
+CATA_481	N	target-limited or unconditional payload effect; no pre-play condition	existing	Iso'rath
+CATA_481e	N	not a conditional hand play: token, enchantment or trigger	existing	Watch and Wait
+CATA_483	G	dealt damage with a spell this turn	existing	Unstable Spellcaster
+CATA_484	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Winterspring Whelp
+CATA_485	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sleet Storm
+CATA_488	N	not a conditional play effect: trigger, deathrattle or aura	existing	Vulcanos
+CATA_488t	N	not a conditional play effect: trigger, deathrattle or aura	existing	Plume of Vulcanos
+CATA_488t2	N	not a conditional play effect: trigger, deathrattle or aura	existing	Plume of Vulcanos
+CATA_489	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Flow
+CATA_489t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Flow
+CATA_489t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Flow
+CATA_490	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ocular Occultist
+CATA_491	N	unconditional repeat damage	existing	Eldritch Tentacles
+CATA_494	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Maloriak
+CATA_498	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rafaams' Last Stand
+CATA_499	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Disposable Acolytes
+CATA_525	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Armored Bloodletter
+CATA_525t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Azshara
+CATA_526	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Broxigar's Last Stand
+CATA_528	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sigil of the Seas
+CATA_528t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Naga Monstrosity
+CATA_529	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Ravenous Felfisher
+CATA_530	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Fel Infusion
+CATA_530e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Lifesteal this turn
+CATA_533	O	generic printed Outcast	existing	Flash Flood
+CATA_551	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stonetalon Striker
+CATA_551t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stonetalon Striker
+CATA_552	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ebonscale Scout
+CATA_552t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ebonscale Scout
+CATA_554	G	holding another Dragon	existing	Earthen Roar
+CATA_554e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Intimidated
+CATA_556	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Carrier Whelp
+CATA_557	G	played another copy of this	existing	Sylvanas's Triumph
+CATA_558	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Reinforcement Rallier
+CATA_560	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Confront the Tol'vir
+CATA_561	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ritual of Power
+CATA_561t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Breezling
+CATA_565	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Skywall Sentinel
+CATA_565t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Al'Akir
+CATA_566	N	target-limited or unconditional payload effect; no pre-play condition	existing	Tol'vir Carver
+CATA_566e	N	not a conditional hand play: token, enchantment or trigger	existing	Carving
+CATA_568	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Muradin's Last Stand
+CATA_569	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ceremonial Clash
+CATA_570	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Morchok
+CATA_580	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cataclysmic War Axe
+CATA_580t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Ragnaros
+CATA_581	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Decimation
+CATA_582	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Searing Fissure
+CATA_582e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Flamebound
+CATA_584	N	location activation checks Fire spell history, not a hand play effect	existing	Erupting Volcano
+CATA_585	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Torch
+CATA_591	N	no pre-play condition (unconditional selection effect)	existing	Commander Geddon
+CATA_591e	N	not a hand play effect: enchantment	existing	Barren
+CATA_591e2	N	not a hand play effect: enchantment	existing	Overheat
+CATA_610	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lo'Gosh's Last Stand
+CATA_610e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Holding On
+CATA_612	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frostbitten Imp
+CATA_616	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gronn Giant
+CATA_697	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Malevolent Mutant
+CATA_699	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dread Leviathan
+CATA_699e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Drained
+CATA_699e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Crackin'
+CATA_720	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Warmaster Blackhorn
+CATA_721	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sheltered Survivor
+CATA_722	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Envoy of the End
+CATA_723	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Drakeadon Mongrel
+CATA_724	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Stormbinder
+CATA_725	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadowsworn Disciple
+CATA_725t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Cho'gall
+CATA_780	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Obsessive Technician
+CATA_780t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of Onyxia
+CATA_785	C	client Combo glow	existing	Rite of Twilight
+CATA_820	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Supply Run
+CATA_820e	N	not a hand play effect: enchantment	existing	Brick by Brick
+CATA_820t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Supply Run
+CATA_820t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Supply Run
+CATA_897	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gemstone Hoarder
+CATA_897e3	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Hoarded Gemstone
+CATA_978	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sindragosa's Triumph
+CATA_978e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Triumphant
+CATA_999	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Earthen Drake
+CFM_753e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Smuggling
+CFM_940e	N	not a hand play effect: enchantment	existing	Knows Another Guy
+CORE_AT_052	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Totem Golem
+CORE_AT_055	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flash Heal
+CORE_AT_062	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ball of Spiders
+CORE_AT_064	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bash
+CORE_AT_123	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Chillmaw
+CORE_AV_107	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Glaciate
+CORE_AV_337	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mountain Bear
+CORE_BAR_310	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightshower Elemental
+CORE_BAR_311	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Devouring Plague
+CORE_BAR_541	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Runed Orb
+CORE_BAR_801	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wound Prey
+CORE_BAR_812	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Oasis Ally
+CORE_BAR_878	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Veteran Warmedic
+CORE_BOT_222	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spirit Bomb
+CORE_BOT_256	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Astromancer
+CORE_BOT_451	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Voltaic Burst
+CORE_BOT_576	C	client Combo	existing	Crazed Chemist
+CORE_BRM_013	G	no other cards in hand	existing	Quick Shot
+CORE_BT_072	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Deep Freeze
+CORE_BT_120	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Warmaul Challenger
+CORE_BT_201	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Augmented Porcupine
+CORE_BT_292	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hand of A'dal
+CORE_BT_321	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Netherwalker
+CORE_BT_351	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Battlefiend
+CORE_BT_416	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Raging Felscreamer
+CORE_BT_480	O	generic Outcast	existing	Crimson Sigil Runner
+CORE_BT_491	O	generic Outcast	existing	Spectral Sight
+CORE_BT_493	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Priestess of Fury
+CORE_BT_510	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wrathspike Brute
+CORE_BT_701	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spymistress
+CORE_BT_801	O	generic Outcast	existing	Eye Beam
+CORE_BT_921	N	Lifesteal weapon; no conditional play bonus	existing	Aldrachi Warblades
+CORE_CATA_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tichondrius
+CORE_CATA_001e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Demonic Summoning
+CORE_CATA_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Calia Menethil
+CORE_CATA_006	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ulfar
+CORE_CATA_006e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Thornspeakers' Spirit
+CORE_CATA_009	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Death's Advance
+CORE_CFM_344	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Finja, the Flying Star
+CORE_CFM_604	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Greater Healing Potion
+CORE_CFM_670	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mayor Noggenfogger
+CORE_CFM_753	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grimestreet Outfitter
+CORE_CFM_781	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shaku, the Collector
+CORE_CFM_790	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dirty Rat
+CORE_CS1_112	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Holy Nova
+CORE_CS1_130	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Holy Smite
+CORE_CS2_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Power Word: Shield
+CORE_CS2_009	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mark of the Wild
+CORE_CS2_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Intellect
+CORE_CS2_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frostbolt
+CORE_CS2_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blizzard
+CORE_CS2_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Fireball
+CORE_CS2_032	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flamestrike
+CORE_CS2_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fire Elemental
+CORE_CS2_053	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Far Sight
+CORE_CS2_062	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hellfire
+CORE_CS2_072	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Backstab
+CORE_CS2_074	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Deadly Poison
+CORE_CS2_076	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Assassinate
+CORE_CS2_093	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Consecration
+CORE_CS2_094	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hammer of Wrath
+CORE_CS2_108	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Execute
+CORE_CS2_122	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Raid Leader
+CORE_CS2_179	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sen'jin Shieldmasta
+CORE_CS2_188	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Abusive Sergeant
+CORE_CS2_189	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Elven Archer
+CORE_CS2_222	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Stormwind Champion
+CORE_DAL_575	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Khadgar
+CORE_DAL_720	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Waggle Pick
+CORE_DMF_067	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Prize Vendor
+CORE_DMF_511	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Foxy Fraud
+CORE_DRG_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sky Raider
+CORE_DRG_079	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Evasive Wyrm
+CORE_DRG_107	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Violet Spellwing
+CORE_DRG_256	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dragonbane
+CORE_DRG_403	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Blowtorch Saboteur
+CORE_DS1_184	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tracking
+CORE_DS1_185	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Shot
+CORE_EDR_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Babbling Bookcase
+CORE_EDR_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Poison Breath
+CORE_EDR_002e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Deathly Poison
+CORE_EDR_004	K	generic printed Kindred	existing	Raptor Herald
+CORE_EDR_004_2026	K	generic printed Kindred	existing	Raptor Herald
+CORE_EX1_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Black Knight
+CORE_EX1_005	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Big Game Hunter
+CORE_EX1_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Acolyte of Pain
+CORE_EX1_010	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Worgen Infiltrator
+CORE_EX1_011	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Voodoo Doctor
+CORE_EX1_012	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bloodmage Thalnos
+CORE_EX1_014	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	King Mukla
+CORE_EX1_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stranglethorn Tiger
+CORE_EX1_043	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Drake
+CORE_EX1_058	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sunfury Protector
+CORE_EX1_059	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crazed Alchemist
+CORE_EX1_082	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mad Bomber
+CORE_EX1_096	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Loot Hoarder
+CORE_EX1_100	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lorewalker Cho
+CORE_EX1_103	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Coldlight Seer
+CORE_EX1_110	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cairne Bloodhoof
+CORE_EX1_129	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fan of Knives
+CORE_EX1_131	C	client Combo	existing	Defias Ringleader
+CORE_EX1_134	C	client Combo	existing	SI:7 Agent
+CORE_EX1_145	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Preparation
+CORE_EX1_162	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dire Wolf Alpha
+CORE_EX1_169	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Innervate
+CORE_EX1_189	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Brightwing
+CORE_EX1_193	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Psychic Conjurer
+CORE_EX1_197	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadow Word: Ruin
+CORE_EX1_198	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Natalie Seline
+CORE_EX1_238	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightning Bolt
+CORE_EX1_246	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hex
+CORE_EX1_250	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Earth Elemental
+CORE_EX1_259	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightning Storm
+CORE_EX1_278	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shiv
+CORE_EX1_287	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Counterspell
+CORE_EX1_289	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ice Barrier
+CORE_EX1_302	N	outcome or target decides	existing	Mortal Coil
+CORE_EX1_309	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siphon Soul
+CORE_EX1_310	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Doomguard
+CORE_EX1_312	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twisting Nether
+CORE_EX1_319	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flame Imp
+CORE_EX1_323	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lord Jaraxxus
+CORE_EX1_362	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Argent Protector
+CORE_EX1_383	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tirion Fordring
+CORE_EX1_391	N	outcome or target decides	legacy	Slam
+CORE_EX1_414	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Grommash Hellscream
+CORE_EX1_506	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Murloc Tidehunter
+CORE_EX1_507	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Murloc Warleader
+CORE_EX1_509	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Murloc Tidecaller
+CORE_EX1_559	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Archmage Antonidas
+CORE_EX1_604	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frothing Berserker
+CORE_EX1_606	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shield Block
+CORE_EX1_610	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Explosive Trap
+CORE_EX1_611	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Freezing Trap
+CORE_EX1_619	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Equality
+CORE_FP1_011	N	not a hand play effect: deathrattle	existing	Webspinner
+CORE_GIL_531	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Witch's Apprentice
+CORE_GIL_534	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hench-Clan Thug
+CORE_GIL_558	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Swamp Leech
+CORE_GIL_577	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rat Trap
+CORE_GIL_622	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lifedrinker
+CORE_GIL_623	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Witchwood Grizzly
+CORE_GIL_836	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Blazing Invocation
+CORE_GVG_059	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Coghammer
+CORE_GVG_061	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Muster for Battle
+CORE_GVG_085	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Annoy-o-Tron
+CORE_GVG_103	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Micro Machine
+CORE_GVG_114	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sneed's Old Shredder
+CORE_ICC_038	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Righteous Protector
+CORE_ICC_055	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Drain Soul
+CORE_ICC_210	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadow Ascendant
+CORE_ICC_214	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Obsidian Statue
+CORE_ICC_407	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gnomeferatu
+CORE_KAR_057	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ivory Knight
+CORE_KAR_061	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Curator
+CORE_KAR_062	G	holding another Dragon	existing	Netherspite Historian
+CORE_KAR_069	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Swashburglar
+CORE_KAR_077	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Silvermoon Portal
+CORE_LOE_039	G	control another Mech	existing	Gorillabot A-3
+CORE_LOOT_013	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Vulgar Homunculus
+CORE_LOOT_044	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Bladed Gauntlet
+CORE_LOOT_101	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Explosive Runes
+CORE_LOOT_137	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sleepy Dragon
+CORE_LOOT_309	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Oaken Summons
+CORE_LOOT_368	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Voidlord
+CORE_LOOT_373	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Healing Rain
+CORE_LOOT_413	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Plated Beetle
+CORE_NEW1_018	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bloodsail Raider
+CORE_NEW1_020	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wild Pyromancer
+CORE_NEW1_021	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Doomsayer
+CORE_NEW1_022	N	continuous scaling cost, no conditional threshold	existing	Dread Corsair
+CORE_NEW1_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Faerie Dragon
+CORE_NEW1_027	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Southsea Captain
+CORE_NEW1_031	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Animal Companion
+CORE_NX2_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hookfist-3000
+CORE_OG_031	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Hammer of Twilight
+CORE_OG_044	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Fandral Staghelm
+CORE_OG_149	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ravaging Ghoul
+CORE_OG_211	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Call of the Wild
+CORE_OG_218	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Bloodhoof Brave
+CORE_ONY_022	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Battle Vicar
+CORE_REV_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Demolition Renovator
+CORE_REV_308	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Maze Guide
+CORE_REV_990	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sanguine Depths
+CORE_RLK_062	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nerubian Swarmguard
+CORE_RLK_063	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frostwyrm's Fury
+CORE_RLK_066	G	1+ Corpse	existing	Hematurge
+CORE_RLK_083	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Deathchiller
+CORE_RLK_087	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Asphyxiate
+CORE_RLK_118	G	4+ available Corpses	existing	Tomb Guardians
+CORE_RLK_121	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Acolyte of Death
+CORE_RLK_505	G	1+ Corpse (lean: "up to 5"; unpinned)	existing	Marrow Manipulator
+CORE_RLK_506	G	1+ available Corpse and space after Commander enters	existing	Boneguard Commander
+CORE_RLK_657	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Underking
+CORE_RLK_706	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Alexandros Mograine
+CORE_RLK_712	G	2+ Corpses	existing	Blood Tap
+CORE_RLK_745	N	end-of-turn Corpse spend, not a conditional hand play effect	existing	Malignant Horror
+CORE_RLK_814	G	holding a Shadow spell	existing	Crystalsmith Cultist
+CORE_SCH_181	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Archwitch Willow
+CORE_SCH_512	N	outcome or target decides	existing	Initiation
+CORE_SCH_713	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cult Neophyte
+CORE_SW_047	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Highlord Fordragon
+CORE_SW_066	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Royal Librarian
+CORE_SW_068	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mo'arg Forgefiend
+CORE_SW_072	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rustrot Viper
+CORE_SW_088	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Demonic Assault
+CORE_SW_108	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	First Flame
+CORE_SW_429	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Best in Shell
+CORE_SW_439	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Vibrant Squirrel
+CORE_SW_442	N	unconditional targeted Lifesteal damage	existing	Void Shard
+CORE_TID_931	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jackpot!
+CORE_TRL_111	G	control a Beast	existing	Headhunter's Hatchet
+CORE_TRL_240	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Savage Striker
+CORE_TRL_307	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flash of Light
+CORE_TRL_345	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Krag'wa, the Frog
+CORE_TRL_900	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Halazzi, the Lynx
+CORE_TSC_076	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Immortalized in Stone
+CORE_TTN_843	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eredar Deceptor
+CORE_TTN_866	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Mythical Terror
+CORE_ULD_133	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crystal Merchant
+CORE_ULD_152	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Pressure Plate
+CORE_ULD_165	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Riftcleaver
+CORE_ULD_178	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siamat
+CORE_ULD_191	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Beaming Sidekick
+CORE_ULD_271	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Injured Tol'vir
+CORE_ULD_280	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sahket Sapper
+CORE_ULD_723	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Murmy
+CORE_UNG_084	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fire Plume Phoenix
+CORE_UNG_205	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Glacial Shard
+CORE_UNG_809	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fire Fly
+CORE_UNG_848	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Primordial Drake
+CORE_UNG_912	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jeweled Macaw
+CORE_UNG_928	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Tar Creeper
+CORE_UNG_952	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Spikeridged Steed
+CORE_WC_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wailing Vapor
+CORE_WC_701	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Felrattler
+CORE_WON_096	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dark Peddler
+CORE_WON_141	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Menagerie Mug
+CORE_WON_337	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ironforge Portal
+CORE_WON_350	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	I Know a Guy
+CORE_WON_351	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Small-Time Buccaneer
+CORE_WW_329	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Detonation Juggernaut
+CORE_YOP_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Illidari Studies
+CORE_YOP_034	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Runaway Blackwing
+CS1_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Goldshire Footman
+CS1_069	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Fen Creeper
+CS1_112	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Holy Nova
+CS1_113	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mind Control
+CS1_129	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Inner Fire
+CS1_130	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Holy Smite
+CS2_003	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mind Vision
+CS2_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Power Word: Shield
+CS2_004e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Power Word: Shield
+CS2_009e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mark of the Wild
+CS2_022	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Polymorph
+CS2_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Intellect
+CS2_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frostbolt
+CS2_025	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Explosion
+CS2_026	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frost Nova
+CS2_027	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mirror Image
+CS2_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blizzard
+CS2_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Fireball
+CS2_031	N	outcome or target decides	legacy	Ice Lance
+CS2_032	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Flamestrike
+CS2_033	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Water Elemental
+CS2_053e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Far Sight
+CS2_065	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Voidwalker
+CS2_074e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Deadly Poison
+CS2_082	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wicked Knife
+CS2_087	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blessing of Might
+CS2_088	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Guardian of Kings
+CS2_089	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Holy Light
+CS2_091	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Light's Justice
+CS2_092	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blessing of Kings
+CS2_093	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Consecration
+CS2_094	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Hammer of Wrath
+CS2_097	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Truesilver Champion
+CS2_101t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Silver Hand Recruit
+CS2_103	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Charge
+CS2_103e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Charge
+CS2_104	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Rampage
+CS2_104e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Rampage
+CS2_105	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Heroic Strike
+CS2_105e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Heroic Strike
+CS2_106	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Fiery War Axe
+CS2_108	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Execute
+CS2_112	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcanite Reaper
+CS2_114	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cleave
+CS2_117	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Earthen Ring Farseer
+CS2_118	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Magma Rager
+CS2_119	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Oasis Snapjaw
+CS2_120	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	River Crocolisk
+CS2_121	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frostwolf Grunt
+CS2_122	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Raid Leader
+CS2_122e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enhanced
+CS2_124	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Wolfrider
+CS2_125	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ironfur Grizzly
+CS2_127	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Silverback Patriarch
+CS2_131	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stormwind Knight
+CS2_141	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ironforge Rifleman
+CS2_142	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Kobold Geomancer
+CS2_146	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Southsea Deckhand
+CS2_147	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Gnomish Inventor
+CS2_150	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stormpike Commando
+CS2_151	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Silver Hand Knight
+CS2_152	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Squire
+CS2_155	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Archmage
+CS2_161	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ravenholdt Assassin
+CS2_162	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lord of the Arena
+CS2_168	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Murloc Raider
+CS2_169	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Young Dragonhawk
+CS2_171	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stonetusk Boar
+CS2_172	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bloodfen Raptor
+CS2_173	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bluegill Warrior
+CS2_179	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sen'jin Shieldmasta
+CS2_181	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Injured Blademaster
+CS2_182	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Chillwind Yeti
+CS2_186	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	War Golem
+CS2_187	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Booty Bay Bodyguard
+CS2_188	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Abusive Sergeant
+CS2_188o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	'Inspired'
+CS2_189	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Elven Archer
+CS2_196	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Razorfen Hunter
+CS2_197	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ogre Magi
+CS2_200	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Boulderfist Ogre
+CS2_201	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Core Hound
+CS2_203	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ironbeak Owl
+CS2_213	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Reckless Rocketeer
+CS2_221	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Spiteful Smith
+CS2_221e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Sharp!
+CS2_222	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Stormwind Champion
+CS2_226	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frostwolf Warlord
+CS2_226e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Frostwolf Banner
+CS2_227	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Venture Co. Mercenary
+CS2_231	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Wisp
+CS2_234	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shadow Word: Pain
+CS2_235	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Northshire Cleric
+CS2_236	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Divine Spirit
+CS2_boar	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Boar
+CS2_mirror	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mirror Image
+CS2_tk1	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sheep
+CS3_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Novice Zapper
+CS3_020	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Illidari Inquisitor
+CS3_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Taelan Fordring
+CS3_025	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Overlord Runthak
+CS3_025e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Rallying Cry
+CS3_038	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Redgill Razorjaw
+Core_CS2_200	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Boulderfist Ogre
+DINO_130	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Longneck Egg
+DINO_130e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Long Neck
+DINO_130t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Little Longneck
+DINO_131	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Possessed Animancer
+DINO_132	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Asphyxiodon
+DINO_138	K	generic Kindred	existing	Diabolus Rex
+DINO_400	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Barricade Basher
+DINO_400e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bashful
+DINO_403	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Devilsaur Mask
+DINO_403e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Devilsaur Mask
+DINO_404	K	generic printed Kindred	existing	Firegill
+DINO_406	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fire Breath
+DINO_406e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fire Breather
+DINO_408	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crystal Tusk
+DINO_409	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Techysaurus
+DINO_410	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Egg of Khelos
+DINO_410t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Khelos
+DINO_410t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Egg of Khelos
+DINO_410t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Egg of Khelos
+DINO_410t4	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Egg of Khelos
+DINO_410t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Egg of Khelos
+DINO_411	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Holy Eggbearer
+DINO_412	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Tortotem
+DINO_413	K	generic Kindred	existing	Chillspine Stegodon
+DINO_415	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Story of Umbra
+DINO_416	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Hollow Direhorn
+DINO_417	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soulrest Ceremony
+DINO_417e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Soulrest
+DINO_419	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Herbivore Assistant
+DINO_419e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Making Progress
+DINO_421	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Seismopod
+DINO_421e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Seismic
+DINO_422	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Ankylodon
+DINO_424	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hero's Welcome
+DINO_424e	N	not a hand play effect: enchantment	existing	Hero's Celebration
+DINO_426	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ritual of Life
+DINO_426e	N	not a hand play effect: enchantment	existing	Lasting Life
+DINO_428	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Behemoth Mask
+DINO_428e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Behemoth Mask
+DINO_429	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sheep Mask
+DINO_429e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sheep Mask
+DINO_431	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Atlasaurus
+DINO_432	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Panther Mask
+DINO_432e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Panther Mask
+DINO_433	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Guard Duty
+DINO_434	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Raptor-Nest Nurse
+DINO_435	K	generic Kindred	existing	Crater Experiment
+DMF_511e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Enabling
+DREAM_01	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Laughing Sister
+DREAM_02	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ysera Awakens
+DREAM_03	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Emerald Drake
+DREAM_04	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Dream
+DREAM_05	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Nightmare
+DREAM_05e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Nightmare
+DRG_403e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Hot Hot Hot!
+DS1_055	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Darkscale Healer
+EDR_014	G	this costs (3) or less	existing	Verdant Dreamsaber
+EDR_060	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ward of Earth
+EDR_100t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Waking Terror
+EDR_100t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Well Rested
+EDR_100t13	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Harpy's Talons
+EDR_100t13e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Harpy's Talons
+EDR_100t1e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Well Rested
+EDR_100t2	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Short Claws
+EDR_100t2e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Short Claws
+EDR_100t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bundled Up
+EDR_100t3e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bundled Up
+EDR_100t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Nightmare
+EDR_100t5e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Living Nightmare
+EDR_100t5e5	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Living Nightmare
+EDR_100t6	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sleepwalker
+EDR_100t6e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sneaky Sleepwalking
+EDR_100t7	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rude Awakening
+EDR_100t7e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Rude Awakening
+EDR_100t8	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Sweet Dreams
+EDR_100t8e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sweet Dreams
+EDR_100t9	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Persisting Horror
+EDR_100t9e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Persisting Horror
+EDR_100te	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Waking Terror
+EDR_102	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Treacherous Tormentor
+EDR_102t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dark Gift
+EDR_105	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Creature of Madness
+EDR_110	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sporegnasher
+EDR_209	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Forest Lord Cenarius
+EDR_209a	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Growth of Dreams
+EDR_209b	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ancients of the Dream
+EDR_209e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Guidance of the Forest
+EDR_209t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ancient
+EDR_226	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Exotic Houndmaster
+EDR_227	N	not a conditional play effect: trigger, deathrattle or aura	existing	Umbraclaw
+EDR_230	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Beanstalk Brute
+EDR_230e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Enchanted
+EDR_231	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aspect's Embrace
+EDR_232	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Typhoon
+EDR_238	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Merithra
+EDR_251	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dragonscale Armaments
+EDR_252	N	outcome or target decides	existing	Mark of Ursol
+EDR_252e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Mark of Ursol
+EDR_252e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Might of Ursol
+EDR_253	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ursine Maul
+EDR_254	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Animated Moonwell
+EDR_254e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Overflowing
+EDR_255	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Renewing Flames
+EDR_257	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightmender
+EDR_257a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Holy Bond
+EDR_257ae	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Holy Bonded
+EDR_257b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Embrace of the Light
+EDR_257be	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Light's Embrace
+EDR_261	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Amphibian's Spirit
+EDR_261e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Amphibian's Spirit
+EDR_271	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grove Shaper
+EDR_271t	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Treant of Life
+EDR_272	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Evergreen Stag
+EDR_273	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Symbiosis
+EDR_416	N	not a conditional play effect: trigger, deathrattle or aura	existing	Shepherd's Crook
+EDR_416t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sleepy Sheep
+EDR_416te	N	not a hand play effect: enchantment	existing	Sleepy
+EDR_430	G	20 friendly minions died this game (Ready)	existing	Aessina
+EDR_448p	N	not a hand play effect: hero power	existing	Blessing of the Wind
+EDR_449	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lunarwing Messenger
+EDR_449p	N	not a hand play effect: hero power	existing	Blessing of the Moon
+EDR_454	N	target-limited or unconditional payload effect; no pre-play condition	existing	Clutch of Corruption
+EDR_454t	N	not a conditional hand play: token, enchantment or trigger	existing	Horrible Egg
+EDR_456	G	holding another Dragon	existing	Darkrider
+EDR_457	G	holding another Dragon	existing	Brood Keeper
+EDR_457t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nightmare Slicer
+EDR_459	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Afflicted Devastator
+EDR_460	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wish of the New Moon
+EDR_460t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wish of the Full Moon
+EDR_461	N	hand progress transforms identity; base and upgraded powers are unconditional	existing	Ritual of the New Moon
+EDR_461t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ritual of the Full Moon
+EDR_462	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Selenic Drake
+EDR_463	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Influence
+EDR_463a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Constricting Thorns
+EDR_463b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Controlling Vines
+EDR_464	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tyrande
+EDR_464e2	N	not a hand play effect: enchantment or token	existing	Pull of the Moon
+EDR_465	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Ysondre
+EDR_468	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eggbasher
+EDR_468e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Scrambled Attack
+EDR_470	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Barkshield Sentinel
+EDR_470e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Alert
+EDR_471	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tortolla
+EDR_471e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tortolla's Rage
+EDR_472	G	holding a spell costing (5)+	existing	Weaver of the Cycle
+EDR_476	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Moonwell
+EDR_477	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Glowroot Lure
+EDR_481	G	this has 4+ Attack	existing	Mythical Runebear
+EDR_482	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rotten Apple
+EDR_482e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fracture
+EDR_483	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fractured Power
+EDR_483e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Delayed Mana
+EDR_485	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rotheart Dryad
+EDR_486	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scorching Observer
+EDR_487	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wallow, the Wretched
+EDR_488	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Avant-Gardening
+EDR_490	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sleep Paralysis
+EDR_490a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Figure in the Dark
+EDR_490b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wit's End
+EDR_490t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Night Terror
+EDR_492	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mother Duck
+EDR_492t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Duckling
+EDR_493	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Alara'shi
+EDR_493e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Demon Cost
+EDR_493e2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Demon Form
+EDR_494	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hungering Ancient
+EDR_494e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Feed Me!
+EDR_495	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twisted Treant
+EDR_495e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Twisted
+EDR_517	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Q'onzu
+EDR_517A	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tranquil Breeze
+EDR_517B	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Winds of Change
+EDR_518	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Garden
+EDR_519	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wisprider
+EDR_521	N	target-limited or unconditional payload effect; no pre-play condition	existing	Tricky Satyr
+EDR_522	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mimicry
+EDR_523	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Web of Deception
+EDR_523t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Skittering Spiderling
+EDR_524	G	holding another card with an identity in the enemy hand	existing	Shadowcloaked Assailant
+EDR_525	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Barbed Thorn
+EDR_525A	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Extra Eyes
+EDR_525B	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Extra Thorns
+EDR_525e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Barbed Upgrade
+EDR_525e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Corrupted Toxins
+EDR_527	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ashamane
+EDR_528	C	client Combo	existing	Nightmare Fuel
+EDR_530	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Daydreaming Pixie
+EDR_531	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siphoning Growth
+EDR_540	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twisted Webweaver
+EDR_570	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ominous Nightmares
+EDR_570A	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nightmarish Burst
+EDR_570B	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unstable Power
+EDR_570e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Terror of the Night
+EDR_571	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fae Trickster
+EDR_572	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tormented Dreadwing
+EDR_598	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dream Rager
+EDR_654	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Overgrown Horror
+EDR_800	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flutterwing Guardian
+EDR_810	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hideous Husk
+EDR_810e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Blood Sucker
+EDR_810e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Blood Soaked
+EDR_810t	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Bloated Leech
+EDR_811	G	2+ available Corpses	existing	Rite of Atrocity
+EDR_812	G	last card played had an Unholy or a Blood rune	existing	Grotesque Runeblade
+EDR_812e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Unholy Corruption
+EDR_812e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bloody Corruption
+EDR_814	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Infested Breath
+EDR_815	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Corpse Flower
+EDR_816	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Monstrous Mosquito
+EDR_816e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Shared Blood
+EDR_817	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sanguine Infestation
+EDR_820	N	Choose One between unconditional summon and damage; no conditional play bonus	existing	Wyvern's Slumber
+EDR_820a	N	Choose One option: unconditional Dormant Dreadseed summons	existing	Encroaching Fear
+EDR_820b	N	Choose One option: unconditional damage to all minions	existing	Awoken Darkness
+EDR_840	N	unconditional draw and Dormant Dreadseed summon	existing	Grim Harvest
+EDR_840t	N	Dormant/awakening trigger, not a conditional hand play effect	existing	Hound Dreadseed
+EDR_840t1	N	Dormant/Elusive body, not a conditional hand play effect	existing	Crow Dreadseed
+EDR_840t1e	N	Dormant countdown enchantment, not a hand play effect	existing	Dreaming Hound
+EDR_840t1e1	N	Dormant countdown enchantment, not a hand play effect	existing	Dreaming Crow
+EDR_840t2	N	Dormant/Taunt/Lifesteal body, not a conditional hand play effect	existing	Serpent Dreadseed
+EDR_840t2e1	N	Dormant countdown enchantment, not a hand play effect	existing	Dreaming Serpent
+EDR_840te	N	temporary hero Attack enchantment, not a hand play effect	existing	Hound's Fangs
+EDR_841	N	unconditional Battlecry and Deathrattle Dreadseed summons	existing	Dreadsoul Corrupter
+EDR_842	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Defiled Spear
+EDR_843	N	hand progress transforms identity; base Choose One and upgraded draw are unconditional	existing	Reforestation
+EDR_843a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aid of the Forest
+EDR_843b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fertilize
+EDR_843t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Reforestation
+EDR_847	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dreambound Disciple
+EDR_847e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Dreambound
+EDR_847p	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Blessing of the Golem
+EDR_847pt2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Plant Golem
+EDR_848	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Photosynthesis
+EDR_849	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Dreambound Raptor
+EDR_850p	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Blessing of the Wolf
+EDR_850pe	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Playful Pup
+EDR_850pe1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Goldrinn's Courage
+EDR_850pe5	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Great Wolf's Howl
+EDR_851p	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Blessing of the Wisp
+EDR_851t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wisp
+EDR_852	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bitterbloom Knight
+EDR_853	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Broll Bearmantle
+EDR_856	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nightmare Lord Xavius
+EDR_861	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tranquil Treant
+EDR_871	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spirit Gatherer
+EDR_872	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spark of Life
+EDR_872A	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gift of Fire
+EDR_872B	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gift of Nature
+EDR_873	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Envoy of the Glade
+EDR_882	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jumpscare!
+EDR_889	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Petal Peddler
+EDR_889e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Flowery
+EDR_890	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Nightmare Dragonkin
+EDR_891	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ravenous Felhunter
+EDR_892	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ferocious Felbat
+EDR_895	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aviana, Elune's Chosen
+EDR_895e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Full Moon
+EDR_895t	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Moon Cycle
+EDR_940	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Merry Moonkin
+EDR_941	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Starsurge
+EDR_942	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Curious Cumulus
+EDR_970	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Kaldorei Priestess
+EDR_970e	N	not a hand play effect: enchantment	existing	Pacified
+EDR_971	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Critter Caretaker
+EDR_978	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Meadowstrider
+EDR_979	N	Dormant/end-of-turn trigger, not a conditional hand play effect	existing	Ancient of Yore
+EDR_979e	N	not a hand play effect: enchantment	existing	Ancient Slumber
+EDR_979e2	N	not a hand play effect: enchantment	existing	Ancient Draw
+EDR_999	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gnawing Greenfin
+END_000	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eventuality
+END_000e	N	not a hand play effect: enchantment	existing	Dimensionally Shifted
+END_000p	N	not a hand play effect: hero power	existing	Blessing of the Bronze
+END_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jagged Edge of Time
+END_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wicked Blightspawn
+END_002e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Wicked
+END_003	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Finality
+END_003p	N	not a hand play effect: hero power	existing	Blessing of the Infinite
+END_003pe	N	not a hand play effect: enchantment	existing	The End is Nigh
+END_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Remnant of Rage
+END_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Press the Advantage
+END_007e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Claws of Fury
+END_008	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Enduring Roach
+END_009	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Splintered Reality
+END_009e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Splintered
+END_009t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Treant
+END_010	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Timereaver
+END_010a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Finite Will
+END_010ae	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Finite Will
+END_010b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Finite Resolve
+END_010be	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Finite Resolve
+END_013	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Brutish Endmaw
+END_014	N	outcome or target decides	existing	Synchronized Spark
+END_014e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	In Sync
+END_015	K	generic printed Kindred	existing	Triennium Rex
+END_016	N	not a conditional play effect: trigger, deathrattle or aura	existing	Chronoclaws
+END_017	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Battle at the End Time
+END_017t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tick and Tock
+END_019	G	hero took damage this turn	existing	Endtime Survivor
+END_019e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Alone in Time
+END_020	N	damage outcome decides draw or summon; no pre-play condition	existing	Eternal Toil
+END_021	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dimensional Weaponsmith
+END_021e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Cutting Edge
+END_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bitter End
+END_025	N	outcome or target decides	existing	Eternal Firebolt
+END_025e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Eternal Firebolt
+END_026	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fragment of Nothing
+END_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	For All Time
+END_029	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Voodoo Totem
+END_030	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Haywire Hornswog
+END_031	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shade of the End Time
+END_032	C	client Combo	existing	Winged Aberration
+END_032e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Aberrant
+END_033	G	cost condition: holding another Dragon	existing	Prescient Slitherdrake
+END_035	G	deck is empty	existing	Omen of the End
+END_036	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Morchie
+END_036e	N	not a hand play effect: enchantment	existing	Multiversal Singularity
+END_037	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Endtime Murozond
+EX1_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lightwarden
+EX1_001e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Warded
+EX1_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	The Black Knight
+EX1_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Young Priestess
+EX1_004e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Elune's Grace
+EX1_005	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Big Game Hunter
+EX1_006	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Alarm-o-Bot
+EX1_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Acolyte of Pain
+EX1_008	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Argent Squire
+EX1_009	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Angry Chicken
+EX1_009e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+EX1_010	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Worgen Infiltrator
+EX1_011	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Voodoo Doctor
+EX1_012	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bloodmage Thalnos
+EX1_014	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	King Mukla
+EX1_014t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bananas
+EX1_014te	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Bananas
+EX1_015	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Novice Engineer
+EX1_016	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Sylvanas Windrunner
+EX1_017	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Jungle Panther
+EX1_019	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shattered Sun Cleric
+EX1_020	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Scarlet Crusader
+EX1_021	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Thrallmar Farseer
+EX1_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Silvermoon Guardian
+EX1_025	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Dragonling Mechanic
+EX1_025t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mechanical Dragonling
+EX1_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stranglethorn Tiger
+EX1_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Leper Gnome
+EX1_032	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sunwalker
+EX1_033	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Windfury Harpy
+EX1_043	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Twilight Drake
+EX1_043e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Hour of Twilight
+EX1_044	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Questing Adventurer
+EX1_044e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Level Up!
+EX1_045	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ancient Watcher
+EX1_046	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Dark Iron Dwarf
+EX1_046e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Tempered
+EX1_048	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Spellbreaker
+EX1_049	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Youthful Brewmaster
+EX1_055	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mana Addict
+EX1_055o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Empowered
+EX1_057	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ancient Brewmaster
+EX1_058	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sunfury Protector
+EX1_059	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Crazed Alchemist
+EX1_059e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Experiments!
+EX1_066	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Acidic Swamp Ooze
+EX1_067	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Argent Commander
+EX1_076	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Pint-Sized Summoner
+EX1_080	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Secretkeeper
+EX1_080o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Keeping Secrets
+EX1_082	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mad Bomber
+EX1_083	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Tinkmaster Overspark
+EX1_084	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Warsong Commander
+EX1_084e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Charge
+EX1_085	G	opponent controls at least 4 non-untouchable minions	legacy	Mind Control Tech
+EX1_089	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Golem
+EX1_091	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cabal Shadow Priest
+EX1_093	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Defender of Argus
+EX1_093e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Hand of Argus
+EX1_095	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Gadgetzan Auctioneer
+EX1_096	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Loot Hoarder
+EX1_097	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Abomination
+EX1_100	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lorewalker Cho
+EX1_102	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Demolisher
+EX1_103	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Coldlight Seer
+EX1_103e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mrghlglhal
+EX1_105	N	continuous scaling cost, no conditional threshold	legacy	Mountain Giant
+EX1_110	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cairne Bloodhoof
+EX1_110t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Baine Bloodhoof
+EX1_116	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Leeroy Jenkins
+EX1_116t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Whelp
+EX1_130	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Noble Sacrifice
+EX1_130a	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Defender
+EX1_131t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Defias Bandit
+EX1_132	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Eye for an Eye
+EX1_136	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Redemption
+EX1_145o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Preparation
+EX1_162	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Dire Wolf Alpha
+EX1_162o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Strength of the Pack
+EX1_170	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Emperor Cobra
+EX1_179	N	outcome or target decides	legacy	Icicle
+EX1_184	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Righteousness
+EX1_186	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	SI:7 Infiltrator
+EX1_187	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Devourer
+EX1_187e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Arcane Gorged
+EX1_190	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	High Inquisitor Whitemane
+EX1_192	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Radiance
+EX1_198e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Forgotten Shadows
+EX1_249	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Baron Geddon
+EX1_274	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Ethereal Arcanist
+EX1_274e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Raw Power!
+EX1_275	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cone of Cold
+EX1_277	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arcane Missiles
+EX1_279	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Pyroblast
+EX1_283	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frost Elemental
+EX1_284	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Azure Drake
+EX1_287	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Counterspell
+EX1_289	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ice Barrier
+EX1_294	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mirror Entity
+EX1_298	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ragnaros the Firelord
+EX1_323w	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blood Fury
+EX1_332	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Silence
+EX1_334	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shadow Madness
+EX1_334e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Shadow Madness
+EX1_335	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lightspawn
+EX1_339	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Thoughtsteal
+EX1_341	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lightwell
+EX1_345	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mindgames
+EX1_350	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Prophet Velen
+EX1_354	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lay on Hands
+EX1_355	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blessed Champion
+EX1_360	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Humility
+EX1_362	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Argent Protector
+EX1_363	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Blessing of Wisdom
+EX1_363e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Blessing of Wisdom
+EX1_365	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Holy Wrath
+EX1_366	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Sword of Justice
+EX1_371	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Hand of Protection
+EX1_379	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Repentance
+EX1_379e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Repentance
+EX1_382	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Aldor Peacekeeper
+EX1_383	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Tirion Fordring
+EX1_383t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ashbringer
+EX1_384	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Avenging Wrath
+EX1_390	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Tauren Warrior
+EX1_390e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+EX1_391	N	outcome or target decides	legacy	Slam
+EX1_392	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Battle Rage
+EX1_393	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Amani Berserker
+EX1_393e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+EX1_396	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mogu'shan Warden
+EX1_398	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Arathi Weaponsmith
+EX1_398t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Battle Axe
+EX1_399	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Gurubashi Berserker
+EX1_399e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Berserking
+EX1_400	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Whirlwind
+EX1_402	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Armorsmith
+EX1_405	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shieldbearer
+EX1_407	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Brawl
+EX1_408	G	hero has 12 or less Health	legacy	Mortal Strike
+EX1_409	G	weapon equipped	legacy	Upgrade!
+EX1_409e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Upgraded
+EX1_409t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Heavy Axe
+EX1_410	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shield Slam
+EX1_411	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Gorehowl
+EX1_412	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Raging Worgen
+EX1_412e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+EX1_414	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Grommash Hellscream
+EX1_414e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+EX1_506	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Murloc Tidehunter
+EX1_506a	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Murloc Scout
+EX1_507	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Murloc Warleader
+EX1_507e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mrgglaargl!
+EX1_508	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Grimscale Oracle
+EX1_508o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mlarggragllabl!
+EX1_509	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Murloc Tidecaller
+EX1_509e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Blarghghl
+EX1_556	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Harvest Golem
+EX1_557	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Nat Pagle
+EX1_558	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Harrison Jones
+EX1_559	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Archmage Antonidas
+EX1_560	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Nozdormu
+EX1_561	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Alexstrasza
+EX1_562	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Onyxia
+EX1_563	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Malygos
+EX1_564	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Faceless Manipulator
+EX1_572	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Ysera
+EX1_582	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Dalaran Mage
+EX1_583	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Priestess of Elune
+EX1_584	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Ancient Mage
+EX1_584e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Teachings of the Kirin Tor
+EX1_586	N	continuous scaling cost, no conditional threshold	legacy	Sea Giant
+EX1_590	N	outcome or target decides	legacy	Blood Knight
+EX1_590e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Shadows of M'uru
+EX1_591	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Auchenai Soulpriest
+EX1_593	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Nightblade
+EX1_594	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Vaporize
+EX1_595	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cult Master
+EX1_597	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Imp Master
+EX1_598	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Imp
+EX1_603	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Cruel Taskmaster
+EX1_604	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frothing Berserker
+EX1_604o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Berserk
+EX1_606	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shield Block
+EX1_607	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Inner Rage
+EX1_607e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Inner Rage
+EX1_608	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Sorcerer's Apprentice
+EX1_612	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Kirin Tor Mage
+EX1_612o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Power of the Kirin Tor
+EX1_616	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mana Wraith
+EX1_619	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Equality
+EX1_619e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Equality
+EX1_621	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Circle of Healing
+EX1_622	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Shadow Word: Death
+EX1_623	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Temple Enforcer
+EX1_623e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Infusion
+EX1_624	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Holy Fire
+EX1_625	G	Hero Power is Mind Spike or Voidform	legacy	Shadowform
+EX1_625t	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mind Spike
+EX1_625t2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Mind Shatter
+EX1_626	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mass Dispel
+EX1_tk28	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Squirrel
+EX1_tk29	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Devilsaur
+EX1_tk33	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	INFERNO!
+EX1_tk34	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Infernal
+FIR_777	G	used Hero Power this turn	existing	Spirit of the Kaldorei
+FIR_777e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Amirdrassil's Agony
+FIR_778	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Avatar of Destruction
+FIR_900	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cremate
+FIR_901	G	holding a minion with a Dark Gift	existing	Frostburn Matriarch
+FIR_901t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frostburn Broodling
+FIR_902	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sigil of Cinder
+FIR_904	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Felfire Blaze
+FIR_906	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Overheat
+FIR_906e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Overheated
+FIR_908	G	used own Hero Power this turn	existing	Charred Chameleon
+FIR_908e3	N	not a hand play effect: enchantment	existing	Spreading Flames
+FIR_909	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bursting Shot
+FIR_910	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scorching Winds
+FIR_911	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Smoldering Grove
+FIR_913	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Inferno Herald
+FIR_914	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Smoldering Strength
+FIR_914e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Smoldering Strength
+FIR_916	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Smoldering Ascent
+FIR_918	N	hand progress transforms identity; base and upgraded powers are unconditional	existing	Light of the New Moon
+FIR_918e1	N	not a hand play effect: enchantment	existing	Elune's Light
+FIR_918t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Light of the Full Moon
+FIR_919	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Everburning Phoenix
+FIR_919e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Everburning
+FIR_922	G	holding a minion with a Dark Gift	existing	Cindersword
+FIR_922e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fiery
+FIR_923	G	holding another card costing (8)+	existing	Flames of the Firelord
+FIR_924	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadowflame Stalker
+FIR_928	N	target-limited or unconditional payload effect; no pre-play condition	existing	Keeper of Flame
+FIR_928e	N	not a conditional hand play: token, enchantment or trigger	existing	Blazing Strength
+FIR_928e3	N	not a conditional hand play: token, enchantment or trigger	existing	Burning Up
+FIR_929	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Flame
+FIR_939	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadowflame Suffusion
+FIR_940	G	every other card in hand has a different Cost	existing	Zaqali Flamemancer
+FIR_941	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Searing Reflection
+FIR_941e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Searing Reflection
+FIR_952	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scorchreaver
+FIR_953	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Magma Hound
+FIR_954	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Conflagrate
+FIR_955	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Emberroot Destroyer
+FIR_956	G	holding a minion with a Dark Gift	existing	Dragon Turtle
+FIR_956e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Turtle Maw
+FIR_958	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tindral Sageswift
+FIR_960	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tending Dragonkin
+FIR_961	G	holding a spell costing (5)+	existing	Ashleaf Pixie
+FP1_011	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Webspinner
+GAME_005	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Coin
+GBL_999e	N	not a hand play effect: enchantment	existing	Temporary
+GIL_534t	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Reinforced
+GIL_577t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Doom Rat
+GIL_623e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Grizzled
+GVG_070	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Salty Dog
+GVG_076a	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Pistons
+HERO_10	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Illidan Stormrage
+HERO_10bp	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Demon Claws
+HERO_10bpe	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Demon Claws
+HERO_11	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	The Lich King
+HERO_11bp	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Ghoul Charge
+HERO_11bpt	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Frail Ghoul
+ICC_210e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Ascended
+ICC_828e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Stitched
+ICC_828p	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Build-A-Beast
+ICC_828t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Zombeast
+ICC_828t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stubborn Gastropod
+ICC_828t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Giant Wasp
+ICC_828t4	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stoneskin Basilisk
+ICC_828t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Hunting Mastiff
+ICC_828t6	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Vilebrood Skitterer
+ICC_828t7	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Vicious Scalehide
+ICC_830p	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Voidform
+JAIL_007	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sewer Imp
+JAIL_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rioter
+JAIL_029e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	RIOT!
+JAIL_030	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Escape Artist
+JAIL_035	G	deck has no Neutral cards	existing	Vigilant Sentry
+JAIL_101	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Violet Punisher
+JAIL_101e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Always Punished
+JAIL_118	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	V'ama, Looming Death
+JAIL_122	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jailhouse Manastorm
+JAIL_122e5	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Manastorm Summoning
+JAIL_123	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Breakout Architect
+JAIL_123e	N	not a hand play effect: enchantment or token	existing	Breaking Out
+JAIL_125	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cold Snap
+JAIL_201	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Secret Ingredient
+JAIL_201a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	A Little of This
+JAIL_201ae1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	A Little of This
+JAIL_201b	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	A Dash of That
+JAIL_202	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Spiderling
+JAIL_202e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tiny Fangs
+JAIL_204	G	cost condition: no minions on the battlefield	existing	Solitary Prisoner
+JAIL_205	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Rat Burglar
+JAIL_206	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dark Bribe
+JAIL_225	N	outcome or target decides	existing	Nab
+JAIL_303	N	no pre-play condition (unconditional selection effect)	existing	Ancient Augur
+JAIL_303e	N	not a hand play effect: enchantment	existing	Eyes Without A Faceless
+JAIL_307	G	cost condition: deck has 25+ cards	existing	Crowd Control
+JAIL_311	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Scrappy Defender
+JAIL_312	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Contraband Wands
+JAIL_313	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bootleg Alchemist
+JAIL_313e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bootleg
+JAIL_321	G	completed own spell cast this turn, including effect casts	existing	Tricksy Improviser
+JAIL_326	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Judgment
+JAIL_326e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Judgment
+JAIL_328	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Scarlet Bruiser
+JAIL_329	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Truth Seeker
+JAIL_329e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fire of Truth
+JAIL_376	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ball and Chain
+JAIL_376e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Makeshift Weapon
+JAIL_377	N	outcome or target decides	existing	Holy Bola!
+JAIL_379	N	outcome or target decides	existing	Spire Security
+JAIL_380	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Smuggled Shovel
+JAIL_386	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scramble for Gear
+JAIL_386t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Found Gear!
+JAIL_387	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Release the Beasts
+JAIL_387e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Released
+JAIL_387e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Legendary Prisoner
+JAIL_395	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sewer Swimmer
+JAIL_399	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Imp Gang Stooge
+JAIL_399t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grandmother Imp
+JAIL_407	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Vanessa the Ringleader
+JAIL_435	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Rampaging Hound
+JAIL_436	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Widow's Bite
+JAIL_436e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Threads
+JAIL_436e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Webs
+JAIL_436e3	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fates
+JAIL_436t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Widow's Feast
+JAIL_436t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Widow's Banquet
+JAIL_440	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tower of Ghouls
+JAIL_441	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Drink Blood
+JAIL_445	G	a friendly minion died this turn	existing	Bone Flurry
+JAIL_447	N	not a conditional play effect: trigger, deathrattle or aura	existing	Reckless Detective
+JAIL_447e	N	not a hand play effect: enchantment	existing	Detective's Clothes
+JAIL_447t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Detective's Clothes
+JAIL_448	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Karov the Broken
+JAIL_448e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Under Her Spell
+JAIL_450	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Corpse Cannon
+JAIL_451	G	5+ available Corpses	existing	Blood Clone
+JAIL_453	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Jailbird
+JAIL_453e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Locked Down
+JAIL_454	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Emergency Surgery
+JAIL_454t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Necronurse
+JAIL_456	G	deck has 25+ cards	existing	P1CK-P0K3T
+JAIL_457	N	Prepare changes timing; Battlecry buff is unconditional	existing	Hijacked Securitybot
+JAIL_457e	N	not a hand play effect: enchantment	existing	Hijacked
+JAIL_460	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Concealing Confection
+JAIL_462	N	draw outcomes decide Charge; no pre-play condition	existing	Getaway Hogdriver
+JAIL_470	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lotus Troublemaker
+JAIL_501	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Picklock
+JAIL_503	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Blackpaw's Whip
+JAIL_507	G	10+ permanent maximum Mana Crystals	existing	Spiteful Chef
+JAIL_510	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Annihilation
+JAIL_511	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spire of Solitude
+JAIL_511t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shivarra Infiltrator
+JAIL_513	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Caged Cranium
+JAIL_513e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Uncaged
+JAIL_514	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Unseen Atlas
+JAIL_516	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scarlet Recruiter
+JAIL_516e	N	not a hand play effect: enchantment	existing	New Recruit
+JAIL_706	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Thief's Tools
+JAIL_718	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Black Market Auctioneer
+JAIL_719	N	target-limited or unconditional payload effect; no pre-play condition	existing	Irida Sinseeker
+JAIL_719e2	N	not a conditional hand play: token, enchantment or trigger	existing	The Void
+JAIL_720	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Lotus Bookie
+JAIL_734	G	empty own deck grants +4/+4	existing	Hellraiser
+JAIL_734e	N	not a hand play effect: enchantment	existing	Unchained
+JAIL_801	N	hand progress transforms spell into unconditional Battlecry minion	existing	Molten Gold
+JAIL_801t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Molten Gold Elemental
+JAIL_802	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gallagio Goon
+JAIL_802e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Wiseguy
+JAIL_803	N	hand progress transforms spell into unconditional Battlecry minion	existing	Frostshatter
+JAIL_803t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frostshatter Elemental
+JAIL_805	N	hand progress transforms spell into unconditional Battlecry minion	existing	Stormfury
+JAIL_805t	N	unconditional Lifesteal Battlecry damage	existing	Stormfury Elemental
+JAIL_806	G	deck started with no spells	existing	Hexmarshal
+JAIL_850	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Warden Maiev
+JAIL_850e	N	not a hand play effect: enchantment	existing	In the Slammer
+JAIL_850e2	N	not a hand play effect: enchantment	existing	Pushups
+JAIL_851	N	no pre-play condition (unconditional selection effect)	existing	Inspector Murloc Holmes
+JAIL_851e	N	not a hand play effect: enchantment	existing	An Investigation Player Enchant
+JAIL_866	G	10+ Mana	existing	Lethal Recipe
+JAIL_866e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Lethal
+JAIL_872	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spider Rider
+JAIL_876	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dig for Freedom
+JAIL_876e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	In the Tunnels
+JAIL_877	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Underbelly Network
+JAIL_877t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Snoot Hoarder
+JAIL_878	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Guard Dog
+JAIL_879	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Beast Tripwire
+JAIL_879t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tripped Beast Tripwire
+JAIL_880	N	not a conditional play effect: trigger, deathrattle or aura	existing	Black Market Overseer
+JAIL_880e	N	not a hand play effect: enchantment	existing	Overseen
+JAIL_881	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Tripwire
+JAIL_881t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tripped Arcane Tripwire
+JAIL_882	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	R4T-C4TCH3R
+JAIL_883	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Activated Golem
+JAIL_890	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Captive Nathrezim
+JAIL_892	O	generic Outcast	existing	Cosmic Manifestations
+JAIL_906	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Moragg
+JAIL_906e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Stolen Key
+JAIL_907e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Prepared
+JAIL_907e02	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Preparing
+JAIL_909	C	client Combo	existing	Defias Wannabe
+JAIL_909e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Gimme a Chance!
+JAIL_912	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soothsayer
+JAIL_913	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hold Them Off!
+JAIL_913e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Hold the Line!
+JAIL_940	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Undeath Sentence
+JAIL_941	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Holy Embrace
+JAIL_941t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dark Embrace
+JAIL_942	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Specter of Despair
+JAIL_974	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Captured Archmage
+JAIL_986	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frantic Forger
+JAIL_997	N	selected target ownership and Demon race decide alternate effect	existing	Demonic Confinement
+JAIL_997e1	N	not a hand play effect: enchantment	existing	Demon on the Loose!
+JAIL_997e3	N	not a hand play effect: enchantment	existing	Demonic Confinement
+JAIL_998	N	Prepare changes timing; Battlecry buff is unconditional	existing	Defias Smuggler
+JAIL_998e	N	not a hand play effect: enchantment	existing	Surprise Attack!
+KAR_077e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Silver Might
+MEND_041	G	did not play a minion on the previous own turn	existing	Wizened Wildspeaker
+MEND_042	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lifebloom
+MEND_043	G	no minion played on previous own turn	existing	Heartroot Stones
+MEND_045	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Seeding Dragon
+MEND_046	N	unconditional capacity-bound payload generation	existing	Bashana Runetotem
+MEND_046t	N	unconditional stored spell Battlecry	existing	Treant
+MEND_300	N	unconditional roster replacement or fixed Larva generation	existing	Tame Pet
+MEND_301	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spiritspeaker
+MEND_302	N	outcome or target decides	existing	Wasteland Vanguard
+MEND_303	N	unconditional roster replacement or fixed Larva generation	existing	Migrating Elekk
+MEND_305	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Nurturing Nature
+MEND_305e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	One with Nature
+MEND_307	N	unconditional roster replacement or fixed Larva generation	existing	Roam Free
+MEND_500	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bursting Leyline
+MEND_501	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ley Walker
+MEND_502	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crystallized Leyline
+MEND_503	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Surge Needle
+MEND_504	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Leyline Nexus
+MEND_504e	N	not a hand play effect: enchantment	existing	Nexus Power
+MEND_505	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Arcanomicon
+MEND_505t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Energize
+MEND_505t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unblock
+MEND_505t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Empower
+MEND_506	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mystic Runesaber
+MEND_800	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Brash Battlemaster
+MEND_800e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Recruit's Might
+MEND_800e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Might
+MEND_803	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Emboldening Blade
+MEND_803e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Emboldened
+MEND_803e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Emboldened
+MEND_804	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arator the Redeemer
+MEND_804e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	True Strength
+MEND_805	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Charity
+MEND_805e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Charity Case
+NEW1_011	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Kor'kron Elite
+NEW1_012	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Mana Wyrm
+NEW1_017	N	outcome or target decides	legacy	Hungry Crab
+NEW1_017e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Full Belly
+NEW1_018	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bloodsail Raider
+NEW1_018e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Treasure Crazed
+NEW1_019	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Knife Juggler
+NEW1_020	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Wild Pyromancer
+NEW1_021	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Doomsayer
+NEW1_022	N	continuous scaling cost, no conditional threshold	legacy	Dread Corsair
+NEW1_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Faerie Dragon
+NEW1_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Captain Greenskin
+NEW1_024o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Greenskin's Command
+NEW1_025	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Bloodsail Corsair
+NEW1_026	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Violet Teacher
+NEW1_026t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Violet Apprentice
+NEW1_027	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Southsea Captain
+NEW1_027e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Yarrr!
+NEW1_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Millhouse Manastorm
+NEW1_029t	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Kill Millhouse!
+NEW1_030	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Deathwing
+NEW1_032	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Misha
+NEW1_033	N	not a play effect: trigger, deathrattle, aura or scaling cost	legacy	Leokk
+NEW1_033o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Eye In The Sky
+NEW1_034	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Huffer
+NEW1_036	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Commanding Shout
+NEW1_036e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Commanding Shout
+NEW1_036e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Commanding Shout
+NEW1_037	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Master Swordsmith
+NEW1_037e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Equipped
+NEW1_038	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Gruul
+NEW1_038o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Growth
+NEW1_040	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Hogger
+NEW1_040t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Gnoll
+NEW1_041	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stampeding Kodo
+OG_031a	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Twilight Elemental
+OG_218e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Enraged
+REV_990e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sinfall Boon 
+RLK_008t	N	printed token keywords, no conditional play effect	existing	Risen Ghoul
+RLK_024	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Death Strike
+RLK_025	N	outcome or target decides	existing	Frost Strike
+RLK_060	G	1+ available Corpse and space for a raised Ghoul	existing	Army of the Dead
+RLK_061	N	owner end-turn trigger, no conditional hand play effect	existing	Battlefield Necromancer
+RLK_061t	N	printed token keywords, no conditional play effect	existing	Risen Footman
+RLK_063t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Frostwyrm
+RLK_067	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Corrupted Ashbringer
+RLK_118t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Menacing Zombie
+RLK_223	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Thassarian
+RLK_503	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Body Bagger
+RLK_511	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Harbinger of Winter
+RLK_706e3	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Mograine's Migraine
+RLK_707	G	5+ Corpses	existing	Grave Strength
+RLK_707e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Grave Mark
+RLK_707e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Grave Force
+RLK_708	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Chillfallen Baron
+RLK_709	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Remorseless Winter
+RLK_712e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tapped Blood
+RLK_720	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Gnome Muncher
+RLK_814e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Shadow Flow
+RLK_958	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Skeletal Sidekick
+RLK_958e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Thrown a Bone
+SCH_713e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Spoiled!
+SW_047e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Highlord's Blessing
+SW_108t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Second Flame
+SW_429t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Goldshell Turtle
+SW_439t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Acorn
+SW_439t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Satisfied Squirrel
+TIME_000	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Semi-Stable Portal
+TIME_000ta	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Keep Timeline
+TIME_000tb	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rewind Timeline
+TIME_001	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Chrono Daggers
+TIME_002	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aeon Wizard
+TIME_003	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Portal Vanguard
+TIME_003e	N	not a hand play effect: enchantment	existing	Guarding Time
+TIME_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Conflux Crasher
+TIME_006	G	holding a Dragon	existing	Mirror Dimension
+TIME_006t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mirrored Mage
+TIME_008	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bygone Doomspeaker
+TIME_014	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Instant Multiverse
+TIME_015	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hardlight Protector
+TIME_018	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mend the Timeline
+TIME_023	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Contingency
+TIME_025	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Twilight Timehopper
+TIME_025t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shred of Time
+TIME_026	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Entropic Continuity
+TIME_026e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ruptured Reality
+TIME_027	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tachyon Barrage
+TIME_028	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fatebreaker
+TIME_028e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fate Broken
+TIME_029	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ruinous Velocidrake
+TIME_031	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	RAFAAM LADDER!!
+TIME_033	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Druid of Regrowth
+TIME_034	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stadium Announcer
+TIME_034e	N	not a hand play effect: enchantment	existing	Upper Hand
+TIME_035	N	not a conditional play effect: trigger, deathrattle or aura	existing	Time Machine
+TIME_037	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Disciple of the Dove
+TIME_037e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Dove's Blessing
+TIME_038	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mister Clocksworth
+TIME_038t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mister Clocksworth
+TIME_038t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mister Clocksworth
+TIME_038t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mister Clocksworth
+TIME_040	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Fading Memory
+TIME_041	N	no pre-play condition (unconditional selection effect)	existing	Futuristic Forefather
+TIME_041e2	N	not a hand play effect: enchantment	existing	Infiltration
+TIME_043	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	PMM Infinitizer
+TIME_043e	N	not a hand play effect: enchantment	existing	Infinitized
+TIME_043e2	N	not a hand play effect: enchantment	existing	Pacifitized
+TIME_044	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Past Gnomeregan
+TIME_044e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Gnomish Strength
+TIME_044t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Present Gnomeregan
+TIME_044t1e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Leper Strength
+TIME_044t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Future Gnomeregan
+TIME_046	N	Dormant body, not a conditional hand play effect	existing	Cyborg Patriarch
+TIME_046e	N	not a hand play effect: enchantment	existing	Prime Ape
+TIME_047	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Devious Coyote
+TIME_048	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Clockwork Rager
+TIME_048e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Clockwork Rage
+TIME_050	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Sentient Hourglass
+TIME_050e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sand Flow
+TIME_051	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of the Infinite
+TIME_051e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Infinite Scales
+TIME_052	N	not a conditional play effect: trigger, deathrattle or aura	existing	Amber Warden
+TIME_053	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sandmaw
+TIME_054	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Time Skipper
+TIME_056	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Whelp of the Bronze
+TIME_057	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wizened Truthseeker
+TIME_057e	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	True Wisdom
+TIME_058	N	not a conditional play effect: trigger, deathrattle or aura	existing	Paltry Flutterwing
+TIME_058e	N	not a hand play effect: enchantment	existing	Consequences
+TIME_059	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Paradox
+TIME_060	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Quantum Destabilizer
+TIME_061	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Timeless Causality
+TIME_062	G	holding a Dragon	existing	Chronicle Keeper
+TIME_063	N	Dormant/awakening trigger, not a conditional hand play effect	existing	Timelord Nozdormu
+TIME_063e1	N	not a hand play effect: enchantment	existing	Lord of Time
+TIME_063e2	N	not a hand play effect: enchantment	existing	Nozdormu Play Enchant
+TIME_100	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hourglass Attendant
+TIME_100e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sandy Polish
+TIME_101	N	not a conditional play effect: trigger, deathrattle or aura	existing	Misplaced Pyromancer
+TIME_102	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Circadiamancer
+TIME_102e	N	not a hand play effect: enchantment	existing	Metaphysical
+TIME_212	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightning Rod
+TIME_213	G	cast a Nature spell while holding this	existing	Primordial Overseer
+TIME_214	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flux Revenant
+TIME_214e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Flux Overcapacity
+TIME_215	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Thunderquake
+TIME_216	N	outcome or target decides	existing	Nascent Bolt
+TIME_218	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Static Shock
+TIME_218e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Statically Charged
+TIME_427	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cleansing Lightspawn
+TIME_428	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Yesterloc
+TIME_428e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Mrrgls of Yore
+TIME_429	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Divine Augur
+TIME_429e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Light Intensity
+TIME_429e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Light Polarity
+TIME_431	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Amber Priestess
+TIME_433	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cease to Exist
+TIME_434	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Temporal Traveler
+TIME_434t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Temporal Shadow
+TIME_441	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Aeon Rend
+TIME_443	G	deck contains no minions	existing	Hounds of Fury
+TIME_443t	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Sargeran Felhound
+TIME_443t2	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Sargeran Felhound
+TIME_442	N	target-limited or unconditional payload effect; no pre-play condition	existing	Timeway Warden
+TIME_442e	N	not a conditional hand play: token, enchantment or trigger	existing	Eternal Imprisonment
+TIME_447	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Power Word: Barrier
+TIME_447e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Barrier
+TIME_448	G	deck has no minions	existing	Solitude
+TIME_449	G	deck has no minions	existing	Lasting Legacy
+TIME_449e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Broxigar's Honor
+TIME_449e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Broxigar's Legacy
+TIME_601	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arrow Retriever
+TIME_602	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wormhole
+TIME_603	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ticking Timebomb
+TIME_605	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Epoch Stalker
+TIME_606	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Quel'dorei Fletcher
+TIME_606e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fletching
+TIME_609	G	played Alleria or Vereesa this game	existing	Ranger General Sylvanas
+TIME_609t1	G	played Sylvanas or Vereesa this game	existing	Ranger Captain Alleria
+TIME_609t2	G	played Alleria or Sylvanas this game	existing	Ranger Initiate Vereesa
+TIME_609t2e	N	not a hand play effect: enchantment	existing	Windrunner's Allegiance
+TIME_610	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shadows of Yesterday
+TIME_610t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Anomalous Shade
+TIME_611	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Timestop
+TIME_612	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Blood Draw
+TIME_613	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Cryofrozen Champion
+TIME_614	G	hero's Health changed this turn	existing	Liferender
+TIME_615	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Forgotten Millennium
+TIME_615e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Forgotten
+TIME_616	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Memoriam Manifest
+TIME_701	N	no pre-play condition (unconditional selection effect)	existing	Waveshaping
+TIME_702	G	played a minion while holding this	existing	Ebb and Flow
+TIME_703	G	hero has 10 or less Health	existing	Endangered Dodo
+TIME_703e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Endangered
+TIME_705	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Krona, Keeper of Eons
+TIME_710	C	client Combo	existing	Troubled Double
+TIME_712	C	client Combo glow	existing	Dethrone
+TIME_713	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Time Adm'ral Hooktail
+TIME_713t	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Timeless Chest
+TIME_714	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Chrono-Lord Epoch
+TIME_715	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	For Glory!
+TIME_716	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Slow Motion
+TIME_716e3	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Slowed Down
+TIME_720	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Soldier of the Bronze
+TIME_720e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bronze Scales
+TIME_750	G	holding a minion costing (5)+	existing	Precursory Strike
+TIME_770	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fast Forward
+TIME_855	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Arcane Barrage
+TIME_856	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Algeth'ar Instructor
+TIME_858	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Temporal Construct
+TIME_860	N	unconditional saved Secret choice	existing	Faceless Enigma
+TIME_870	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gladiatorial Combat
+TIME_870t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Coliseum Tiger
+TIME_871	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Heir of Hereafter
+TIME_871e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Bloodthirsty
+TIME_872	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Undefeated Champion
+TIME_873	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unleash the Crocolisks
+TIME_873t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Coliseum Crocolisk
+TLC_102	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Torga
+TLC_109	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Relic Miner
+TLC_110	G	every minion in deck shares a minion type	existing	City Chief Esho
+TLC_110e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Kin
+TLC_220	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Windswept Pageturner
+TLC_221	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sizzling Swarm
+TLC_222	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flight of the Firehawk
+TLC_222e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ignited
+TLC_224	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Mechanized Magma
+TLC_224e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fanned Flame
+TLC_225	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cinderfin
+TLC_226	K	generic Kindred	existing	Conjured Bookkeeper
+TLC_227	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lava Flow
+TLC_230	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	TREEEES!!!
+TLC_230t	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	Treant
+TLC_231	N	outcome or target decides	existing	Story of Barnabus
+TLC_231e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Might of Barnabus
+TLC_232	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ravenous Flock
+TLC_232e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ravenous Flock Player Enchant
+TLC_233	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Hatchery Helper
+TLC_233e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Incubate
+TLC_234	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eternal Bloodpetal
+TLC_234t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Eternal Seedling
+TLC_235	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Life Cycle
+TLC_236	K	generic printed Kindred	existing	Hybridization
+TLC_237	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Skyscreamer Eggs
+TLC_237t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Skyscreamer Hatchling
+TLC_239	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Restore the Wild
+TLC_239e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Full Bloom
+TLC_239t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Everbloom
+TLC_240	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tyrannogill
+TLC_240t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dinoloc
+TLC_240t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dinoloc
+TLC_240t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dinoloc
+TLC_242	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ancient Stegodon
+TLC_243	K	generic Kindred	existing	Whirling Stormdrake
+TLC_243e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Storm Clouds
+TLC_244	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Curious Explorer
+TLC_245	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ancient Raptor
+TLC_246	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ancient Pterrordax
+TLC_247	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Primal Sabretooth
+TLC_248	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ultragigasaur
+TLC_249	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Sizzling Cinder
+TLC_253	N	Dormant/start-of-turn trigger, not a conditional hand play effect	existing	Petrified Ogre
+TLC_253e	N	not a hand play effect: enchantment	existing	Petrified
+TLC_253e1	N	not a hand play effect: enchantment	existing	Petrified Powerup
+TLC_253e2	N	not a hand play effect: enchantment	existing	Petrified Strength
+TLC_254	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Tortollan Storyteller
+TLC_254e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Immersed
+TLC_255	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crystal Tender
+TLC_256	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Marshland Thresher
+TLC_257	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Loh, the Living Legend
+TLC_257e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Living Legend
+TLC_334	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Relic of Kings
+TLC_364	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Story of the Waygate
+TLC_365	G	cost condition: Discovered this turn	existing	Storage Scuffle
+TLC_366	K	generic Kindred	existing	Pterrorwing Ravager
+TLC_401	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Bonechill Stegodon
+TLC_426	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Dive the Golakka Depths
+TLC_426e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Golakka Quest Player Enchant
+TLC_426e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sacred
+TLC_426t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	The Sacred Cave
+TLC_427	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rockskipper
+TLC_428	K	generic printed Kindred	existing	Hot Spring Glider
+TLC_428e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Weeeee!
+TLC_429	K	generic Kindred	existing	Steamfin Thief
+TLC_429t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Juvenile Steamfin
+TLC_430	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Creature of the Sacred Cave
+TLC_432	K	generic Kindred	existing	Dread Raptor
+TLC_434	G	5+ available Corpses (keep all Discover offers)	existing	Paleomancy
+TLC_435	N	unconditional Discover; later play of discovered card triggers follow-up	existing	Crypt Map
+TLC_435e	N	not a hand play effect: enchantment	existing	Crypt Map Player Enchant
+TLC_438	N	no pre-play condition (deck spell may be absent)	existing	Violet Treasuregill
+TLC_439	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Wave of Tar
+TLC_439e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Stuck
+TLC_440	K	generic printed Kindred	existing	Cryosleep
+TLC_441	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Ready the Fleet
+TLC_441e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Fleet Footed
+TLC_442	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Submerged Map
+TLC_442e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Submerged Map Player Enchant
+TLC_443	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Reluctant Wrangler
+TLC_443t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Reanimated Ossodon
+TLC_444	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Story of Galvadon
+TLC_446t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Felscreamer
+TLC_446t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Felraptor
+TLC_446t4	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Felhorn
+TLC_447	K	generic printed Kindred	existing	Caustic Fumes
+TLC_449	N	not a hand play effect: location	existing	Bloodpetal Biome
+TLC_450	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Spelunker
+TLC_450e	N	not a hand play effect: enchantment	existing	Spelunker Enchant Player
+TLC_454	K	generic printed Kindred	existing	Scalehide Kodo
+TLC_461	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Scrappy Scavenger
+TLC_462	G	completed own Discover this turn	existing	Unearthed Artifacts
+TLC_463	K	generic Kindred	existing	Razidir
+TLC_465	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Stranglevine
+TLC_465e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Twining Tendrils
+TLC_467	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Whispering Stone
+TLC_467e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	The Stone's Whispers
+TLC_468	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Blob of Tar
+TLC_468t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lanky Blob
+TLC_468t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Robust Blob
+TLC_469	N	not a conditional play effect: trigger, deathrattle or aura	existing	Tunnel Terror
+TLC_477	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Threshrider's Blessing
+TLC_477e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Thresher Saddle
+TLC_478	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Axe of the Forefathers
+TLC_479	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Deathrot Maw
+TLC_480	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Krog, Crater King
+TLC_480e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Kroginated
+TLC_513t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Tortollan Ninja
+TLC_514	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Merchant of Legend
+TLC_516	C	generic Combo	existing	Neferset Weaponsmith
+TLC_516e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Wicked Weaponry
+TLC_517	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Knockback
+TLC_518	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Interrogation
+TLC_519	K	generic printed Kindred	existing	Ambush Predators
+TLC_519t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Venomous Spitter
+TLC_520	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Underbrush Tracker
+TLC_600	K	generic Kindred	existing	Windpeak Wyrm
+TLC_601	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shellnado
+TLC_603	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Platysaur
+TLC_603e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Platysaur
+TLC_605	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Tar Tyrant
+TLC_606	N	outcome or target decides	existing	Latorvian Armorer
+TLC_620	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fortify
+TLC_621	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Willful Watcher
+TLC_622	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	City Defenses
+TLC_622e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Stand Strong
+TLC_622t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Steadfast Security
+TLC_623	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Stonecarver
+TLC_623e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tortollan Carving
+TLC_630	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Gorishi Wasp
+TLC_630t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gorishi Stinger
+TLC_631	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Unleash the Colossus
+TLC_631e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Gorishi's Favor
+TLC_631t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gorishi Colossus
+TLC_810	N	no pre-play condition (forced combat, trigger, Deathrattle or token)	existing	High Cultist Herenn
+TLC_811	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Archaios
+TLC_811e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Archaios' Aegis
+TLC_813	N	outcome or target decides	existing	Purifying Vines
+TLC_813e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Verdant Vines
+TLC_813e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Withering Vines
+TLC_814	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Twilight Mender
+TLC_815	K	generic printed Kindred	existing	Gravedawn Voidbulb
+TLC_815e	N	not a hand play effect: enchantment	existing	Void Touched
+TLC_816	K	generic printed Kindred	existing	Gravedawn Sunbloom
+TLC_818	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Resuscitate
+TLC_819	G	cost condition: cast a Holy and a Shadow spell this turn	existing	Gladesong Siren
+TLC_820	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Glade Ecologist
+TLC_821	N	heal-intent trigger, not a play effect	existing	Wilted Shadow
+TLC_822	N	not a play effect: trigger, deathrattle, aura or scaling cost	existing	Dinositter
+TLC_823	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cower in Fear
+TLC_823e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Cower in Fear Player Enchant
+TLC_825	K	generic printed Kindred	existing	Ravasaur Matriarch
+TLC_826	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Story of Carnassa
+TLC_827	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Grazing Stegodon
+TLC_827e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Nom nom nom
+TLC_828	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Supreme Dinomancy
+TLC_828e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Supremely Dinomanced
+TLC_829	K	generic Kindred	existing	Ravenous Devilsaur
+TLC_829te2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Ravenous
+TLC_831	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Pterrordax Egg
+TLC_831e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Pterrified
+TLC_831e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Pterrifying
+TLC_831t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Juvenile Pterrordax
+TLC_833	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Insect Claw
+TLC_835	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Story of Amara
+TLC_836	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Niri of the Crater
+TLC_836e	N	not a hand play effect: enchantment or token	existing	Endemic Fauna
+TLC_836e2	N	not a hand play effect: enchantment or token	existing	Niri of the Crater Player Ench
+TLC_840	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Gorishi Tunneler
+TLC_841	N	target-limited or unconditional payload effect; no pre-play condition	existing	Entomologist Toru
+TLC_841e	N	not a conditional hand play: token, enchantment or trigger	existing	Jarring
+TLC_841t	N	not a conditional hand play: token, enchantment or trigger	existing	Specimen Jar
+TLC_888	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Cloud Serpent
+TLC_900	N	unconditional Discover; later play of discovered card triggers follow-up	existing	Hive Map
+TLC_900e	N	not a hand play effect: enchantment	existing	Hive Map
+TLC_901	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Fumigate
+TLC_902	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Infestation
+TLC_903	K	generic Kindred	existing	Silithid Queen
+TLC_903e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Queen's Stinger
+TLC_903t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Silithid Grub
+TLC_987	G	played a Quest this game	existing	Questing Assistant
+TRL_111e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Headhunter's Hatchet
+TRL_348t	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Lynx
+TSC_076t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Worn Statue
+TSC_076t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Statue
+TSC_076t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Pristine Statue
+TTN_719e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e1	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e2	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e3	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e4	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e5	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e6	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_719e7	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sparkbot
+TTN_843t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Invading Felbat
+ULD_178a	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siamat's Wind
+ULD_178a2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siamat's Shield
+ULD_178a3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siamat's Heart
+ULD_178a4	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Siamat's Speed
+ULD_191e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Assisting!
+UNG_809t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Flame Elemental
+UNG_810	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Stegodon
+UNG_920t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Carnassa's Brood
+UNG_952e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	On a Stegodon
+UNG_999t10	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Shrouding Mist
+UNG_999t10e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Shrouding Mist
+UNG_999t13	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Poison Spit
+UNG_999t13e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Poison Spit
+UNG_999t14	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Volcanic Might
+UNG_999t14e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Volcanic Might
+UNG_999t2	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Living Spores
+UNG_999t2e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Living Spores
+UNG_999t2t1	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Plant
+UNG_999t3	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Flaming Claws
+UNG_999t3e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Flaming Claws
+UNG_999t5	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Liquid Membrane
+UNG_999t5e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Liquid Membrane
+UNG_999t6	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Massive
+UNG_999t6e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Massive
+UNG_999t7	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Lightning Speed
+UNG_999t7e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Lightning Speed
+UNG_999t8	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Crackling Shield
+UNG_999t8e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Crackling Shield
+WC_042e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Rising Gas
+WON_141e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Sip of Tea
+WW_001t	N	no pre-play condition (unconditional, scaling or target-limited effect)	existing	Rock
+WW_329e	N	not a hand play effect: enchantment, trigger, deathrattle or aura	existing	Tauntier Taunt
+YOP_001e	N	not a hand play effect: enchantment	existing	Loner
+hexfrog	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Frog
+skele21	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Damaged Golem
+tt_004	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Flesheating Ghoul
+tt_004o	N	not a hand play effect: enchantment, trigger, deathrattle or aura	legacy	Cannibalize
+tt_010	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Spellbender
+tt_010a	N	no pre-play condition (unconditional, scaling or target-limited effect)	legacy	Spellbender

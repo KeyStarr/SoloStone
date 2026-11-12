@@ -1,0 +1,24 @@
+id	class	reason	inventory	name
+BE_230	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Ravitz
+CAP_104	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Blastpowder Engineer
+CATA_151	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Azshara, Ocean Lord
+CATA_151e	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Azshara Windfury
+CATA_151t	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Azshara's Tentacle
+CATA_151t1	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Azshara's Tentacle
+CATA_151te	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Hero Blood of the Fel
+CATA_564	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Air Support
+CATA_564e	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Air Support
+CORE_BT_187	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Kayn Sunfury
+CORE_BT_781	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Bulwark of Azzinoth
+CORE_SCH_605	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Lake Thresher
+DINO_136	O	generic printed Outcast	existing	Horn of Feasting
+DINO_136e	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Feasting
+DINO_136t	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Ravenous Raptor
+EDR_480	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Goldrinn
+EDR_480e	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Greatwolf's Ferocity
+FIR_959	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Fyrakk the Blazing
+TIME_890	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Medivh the Hallowed
+TIME_890t	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Atiesh the Greatstaff
+TIME_890t2	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Karazhan the Sanctum
+TLC_107	K	generic printed Kindred	existing	Stormbrewer
+TLC_228	N	no pre-play condition (aura, keyword, unconditional effect or scaling cost)	existing	Bralma Searstone

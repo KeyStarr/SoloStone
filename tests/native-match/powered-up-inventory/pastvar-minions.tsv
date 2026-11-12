@@ -1,0 +1,44 @@
+id	class	reason	inventory	name
+AT_017	G	holding another Dragon	legacy	Twilight Guardian
+AT_017e	N	qualified historical minion or fixed dependency	legacy	Twilight's Embrace
+AT_023	N	qualified historical minion or fixed dependency	legacy	Void Crusher
+BOT_537	N	qualified historical minion or fixed dependency	legacy	Mechano-Egg
+BOT_537t	N	qualified historical minion or fixed dependency	legacy	Robosaur
+BRM_004	G	holding another Dragon	legacy	Twilight Whelp
+BRM_004e	N	qualified historical minion or fixed dependency	legacy	Twilight Endurance
+BRM_006	N	qualified historical minion or fixed dependency	legacy	Imp Gang Boss
+BRM_006t	N	qualified historical minion or fixed dependency	legacy	Imp
+BRM_031	N	qualified historical minion or fixed dependency	legacy	Chromaggus
+CFM_751	N	qualified historical minion or fixed dependency	legacy	Abyssal Enforcer
+DAL_185	N	qualified historical minion or fixed dependency	legacy	Aranasi Broodmother
+DRG_054	N	qualified historical minion or fixed dependency	legacy	Big Ol' Whelp
+DRG_225	N	qualified historical minion or fixed dependency	legacy	Sky Claw
+DRG_225e	N	qualified historical minion or fixed dependency	legacy	Mechanical Might
+DRG_225t	N	qualified historical minion or fixed dependency	legacy	Microcopter
+EX1_185	N	qualified historical minion or fixed dependency	legacy	Siegebreaker
+EX1_185e	N	qualified historical minion or fixed dependency	legacy	Siegebreaking
+EX1_301	N	qualified historical minion or fixed dependency	legacy	Felguard
+EX1_304	N	qualified historical minion or fixed dependency	legacy	Void Terror
+EX1_304e	N	qualified historical minion or fixed dependency	legacy	Consume
+EX1_313	N	qualified historical minion or fixed dependency	legacy	Pit Lord
+EX1_561e	N	qualified historical minion or fixed dependency	legacy	Alexstrasza's Fire
+FP1_001	N	qualified historical minion or fixed dependency	legacy	Zombie Chow
+GVG_021	N	qualified historical minion or fixed dependency	legacy	Mal'Ganis
+GVG_021e	N	qualified historical minion or fixed dependency	legacy	Grasp of Mal'Ganis
+GVG_082	N	qualified historical minion or fixed dependency	legacy	Clockwork Gnome
+GVG_100	N	qualified historical minion or fixed dependency	legacy	Floating Watcher
+GVG_100e	N	qualified historical minion or fixed dependency	legacy	Brow Furrow
+LOOT_137	N	qualified historical minion or fixed dependency	legacy	Sleepy Dragon
+PART_001	N	qualified historical minion or fixed dependency	legacy	Armor Plating
+PART_001e	N	qualified historical minion or fixed dependency	legacy	Armor Plating
+PART_002	N	qualified historical minion or fixed dependency	legacy	Time Rewinder
+PART_003	N	qualified historical minion or fixed dependency	legacy	Rusty Horn
+PART_004	N	qualified historical minion or fixed dependency	legacy	Finicky Cloakfield
+PART_004e	N	qualified historical minion or fixed dependency	legacy	Cloaked
+PART_005	N	qualified historical minion or fixed dependency	legacy	Emergency Coolant
+PART_006	N	qualified historical minion or fixed dependency	legacy	Reversing Switch
+PART_006a	N	qualified historical minion or fixed dependency	legacy	Switched
+PART_007	N	qualified historical minion or fixed dependency	legacy	Whirling Blades
+PART_007e	N	qualified historical minion or fixed dependency	legacy	Whirling Blades
+ULD_217	N	qualified historical minion or fixed dependency	legacy	Micro Mummy
+ULD_217e	N	qualified historical minion or fixed dependency	legacy	Microwrapped

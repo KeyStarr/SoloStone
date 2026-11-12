@@ -1,0 +1,56 @@
+id	class	reason	inventory	name
+TIME_005	G	nine distinct companions played	existing	Timethief Rafaam
+TIME_005t1	N	companion, passive, unconditional or private opponent condition	existing	Tiny Rafaam
+TIME_005t2	N	companion, passive, unconditional or private opponent condition	existing	Green Rafaam
+TIME_005t2e	N	companion, passive, unconditional or private opponent condition	existing	SUPREME GREENOLOGY!
+TIME_005t3	N	companion, passive, unconditional or private opponent condition	existing	Explorer Rafaam
+TIME_005t4	G	holding another Rafaam	existing	Warchief Rafaam
+TIME_005t5	G	holding another Rafaam	existing	Mindflayer R'faam
+TIME_005t6	N	companion, passive, unconditional or private opponent condition	existing	Calamitous Rafaam
+TIME_005t7	G	family plays reduce cost	existing	Giant Rafaam
+TIME_005t8	N	companion, passive, unconditional or private opponent condition	existing	Murloc Rafaam
+TIME_005t8e	N	companion, passive, unconditional or private opponent condition	existing	MRGLEERM MRGLOSLGY!!
+TIME_005t9	N	companion, passive, unconditional or private opponent condition	existing	Archmage Rafaam
+TIME_005t9t	N	companion, passive, unconditional or private opponent condition	existing	Baaaafam
+TIME_020	N	companion, passive, unconditional or private opponent condition	existing	Broxigar
+TIME_020t1	N	companion, passive, unconditional or private opponent condition	existing	Axe of Cenarius
+TIME_020t2	N	companion, passive, unconditional or private opponent condition	existing	First Portal to Argus
+TIME_020t2t	N	companion, passive, unconditional or private opponent condition	existing	Fleeing Ur'zul
+TIME_020t3	N	companion, passive, unconditional or private opponent condition	existing	Second Portal to Argus
+TIME_020t3t	N	companion, passive, unconditional or private opponent condition	existing	Fleeing Incubus
+TIME_020t4	N	companion, passive, unconditional or private opponent condition	existing	Third Portal to Argus
+TIME_020t4t	N	companion, passive, unconditional or private opponent condition	existing	Fleeing Wrathguard
+TIME_020t5	N	companion, passive, unconditional or private opponent condition	existing	Final Portal to Argus
+TIME_020t5t	N	companion, passive, unconditional or private opponent condition	existing	Fleeing Terrorguard
+TIME_209	N	companion, passive, unconditional or private opponent condition	existing	Muradin, High King
+TIME_209e	N	companion, passive, unconditional or private opponent condition	existing	Hammer of the High King
+TIME_209t	N	companion, passive, unconditional or private opponent condition	existing	High King's Hammer
+TIME_209t2	N	companion, passive, unconditional or private opponent condition	existing	Avatar Form
+TIME_209t2e	N	companion, passive, unconditional or private opponent condition	existing	Avatar Form
+TIME_211	N	companion, passive, unconditional or private opponent condition	existing	Lady Azshara
+TIME_211a	N	companion, passive, unconditional or private opponent condition	existing	Empower Zin-Azshari
+TIME_211b	N	companion, passive, unconditional or private opponent condition	existing	Empower the Well
+TIME_211t1	N	companion, passive, unconditional or private opponent condition	existing	The Well of Eternity
+TIME_211t1t	N	companion, passive, unconditional or private opponent condition	existing	The Well of Eternity
+TIME_211t1te	N	companion, passive, unconditional or private opponent condition	existing	Eternalized
+TIME_211t2	N	companion, passive, unconditional or private opponent condition	existing	Zin-Azshari
+TIME_211t2t	N	companion, passive, unconditional or private opponent condition	existing	Zin-Azshari
+TIME_211t2te	N	companion, passive, unconditional or private opponent condition	existing	The City's Strength
+TIME_619	N	companion, passive, unconditional or private opponent condition	existing	Talanji of the Graves
+TIME_619e	N	companion, passive, unconditional or private opponent condition	existing	Boon of Power Player Ench
+TIME_619e2	N	companion, passive, unconditional or private opponent condition	existing	Boon of Longevity Player Ench
+TIME_619e3	N	companion, passive, unconditional or private opponent condition	existing	Boon of Speed Player Ench
+TIME_619e4	N	companion, passive, unconditional or private opponent condition	existing	Pact for Power
+TIME_619e5	N	companion, passive, unconditional or private opponent condition	existing	Pact for Longevity
+TIME_619e6	N	companion, passive, unconditional or private opponent condition	existing	Pact for Speed
+TIME_619t	N	companion, passive, unconditional or private opponent condition	existing	Bwonsamdi
+TIME_619t2	N	companion, passive, unconditional or private opponent condition	existing	What Befell Zandalar
+TIME_619t3	N	companion, passive, unconditional or private opponent condition	existing	Boon of Power
+TIME_619t4	N	companion, passive, unconditional or private opponent condition	existing	Boon of Longevity
+TIME_619t5	N	companion, passive, unconditional or private opponent condition	existing	Boon of Speed
+TIME_852	N	companion, passive, unconditional or private opponent condition	existing	Azure Queen Sindragosa
+TIME_852t1	N	companion, passive, unconditional or private opponent condition	existing	Azure King Malygos
+TIME_852t3	N	companion, passive, unconditional or private opponent condition	existing	Azure Oathstone
+TIME_875	N	companion, passive, unconditional or private opponent condition	existing	Garona Halforcen
+TIME_875t	N	companion, passive, unconditional or private opponent condition	existing	King Llane
+TIME_875t1	N	companion, passive, unconditional or private opponent condition	existing	The Kingslayers

@@ -1,0 +1,36 @@
+id	class	reason	inventory	name
+TLC_100	G	starting deck distinct Costs	existing	Elise the Navigator
+TLC_100t1	N	fixed component or automatic effect	existing	Un'Goro Jungle
+TLC_100t11	N	fixed component or automatic effect	existing	Bursting Geyser
+TLC_100t12	N	fixed component or automatic effect	existing	Shining Moonlight
+TLC_100t12e	N	fixed component or automatic effect	existing	Shining Moonlight Enchant Player
+TLC_100t13	N	fixed component or automatic effect	existing	Runic Inscriptions
+TLC_100t14	N	fixed component or automatic effect	existing	Snapping Plants
+TLC_100t14e2	N	fixed component or automatic effect	existing	Snap!
+TLC_100t15	N	fixed component or automatic effect	existing	Nesting Grounds
+TLC_100t16	N	fixed component or automatic effect	existing	Lava Stream
+TLC_100t2	N	fixed component or automatic effect	existing	Terror Run
+TLC_100t21	N	fixed component or automatic effect	existing	Bursting Geyser
+TLC_100t22	N	fixed component or automatic effect	existing	Shining Moonlight
+TLC_100t22e	N	fixed component or automatic effect	existing	Shining Moonlight Enchant Player
+TLC_100t23	N	fixed component or automatic effect	existing	Runic Inscriptions
+TLC_100t24	N	fixed component or automatic effect	existing	Snapping Plants
+TLC_100t24e2	N	fixed component or automatic effect	existing	Snap!
+TLC_100t25	N	fixed component or automatic effect	existing	Nesting Grounds
+TLC_100t26	N	fixed component or automatic effect	existing	Lava Stream
+TLC_100t27	N	fixed component or automatic effect	existing	Radiant Crystals
+TLC_100t27e	N	fixed component or automatic effect	existing	Radiant Reflection
+TLC_100t3	N	fixed component or automatic effect	existing	Fire Plume Ridge
+TLC_100t31	N	fixed component or automatic effect	existing	Bursting Geyser
+TLC_100t32	N	fixed component or automatic effect	existing	Shining Moonlight
+TLC_100t32e	N	fixed component or automatic effect	existing	Shining Moonlight Enchant Player
+TLC_100t33	N	fixed component or automatic effect	existing	Runic Inscriptions
+TLC_100t34	N	fixed component or automatic effect	existing	Snapping Plants
+TLC_100t34e2	N	fixed component or automatic effect	existing	Snap!
+TLC_100t35	N	fixed component or automatic effect	existing	Nesting Grounds
+TLC_100t36	N	fixed component or automatic effect	existing	Lava Stream
+TLC_100t37	N	fixed component or automatic effect	existing	Radiant Crystals
+TLC_100t37e	N	fixed component or automatic effect	existing	Radiant Reflection
+TLC_101t	N	fixed component or automatic effect	existing	Nesting Raptor
+TLC_460	N	fixed component or automatic effect	existing	The Forbidden Sequence
+TLC_460t	N	fixed component or automatic effect	existing	The Origin Stone

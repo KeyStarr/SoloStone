@@ -1,0 +1,8 @@
+id	class	reason	inventory	name
+JAIL_509	N	start-of-game effect	existing	Godfrey the Betrayer
+JAIL_800	N	start-of-game effect	existing	Mug'Zee
+TLC_830	N	quest	existing	The Food Chain
+TLC_830t	N	unconditional Battlecry	existing	Shokk, Jungle Tyrant
+JAIL_800e	N	player effect	existing	Mean Mug
+JAIL_800hp1	N	passive Hero Power	existing	Mug's Magic
+JAIL_800hp2	N	passive Hero Power	existing	Zee's Might

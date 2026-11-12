@@ -1,0 +1,9 @@
+id	class	reason	inventory	name
+BE_009	N	once-per-game Battlecry, no bonus glow	existing	Mastermind Yogg-Saron
+BE_009t1	N	Old God ability	existing	Brain of Yogg-Saron
+BE_009t2	N	Old God ability	existing	Madness of Yogg-Saron
+BE_009t3	N	Old God ability	existing	Ascent of Yogg-Saron
+BE_009t4	N	Old God ability	existing	Domain of Yogg-Saron
+BE_009e2	N	controller enchantment	existing	Controlled
+BE_009t1e	N	spell repeat enchantment	existing	Brainy
+BE_009t3e	N	cost enchantment	existing	Reduced

@@ -1,0 +1,782 @@
+[
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "BE_550",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=TARGET+DAMAGE"
+    ],
+    "reason": "Tank Regiment: complete copy-summoning Battlecry POWER is followed by CORE_LOOT_101 killing source 84; its distinct Deathrattle TRIGGER (keyword 217) targets 37 and deals 3 damage. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-11-vs-standard-batch-1-1-s5-random@64."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "BE_732",
+    "shapes": [
+      "keyword-hit-in-POWER block=TRIGGER/ei-1 under=POWER meta=TARGET+DAMAGE"
+    ],
+    "reason": "Kronn the Impaler: its Battlecry POWER gives every friendly minion with Attack its own attribution TRIGGER (EffectIndex=-1, contributor source, enemy target) holding that contributor's TARGET and DAMAGE, without replaying the contributor's card trigger (KronntheImpaler.cs). When the contributor is Kronn itself, the attribution block has the Battlecry's source, so the wrapper-hit check sees same-source DAMAGE inside an attribution wrapper. Reviewed per-contributor attribution, not a split missile. Replay history-shape-kronn@0.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CATA_725",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=HEALING"
+    ],
+    "reason": "Shadowsworn Disciple: complete summon Battlecry POWER is followed by EDR_815 killing source 12; its distinct Deathrattle TRIGGER (keyword 217) heals hero 4 for 3. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-6-vs-standard-batch-1-16-s9-random@51."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_CS2_188",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Abusive Sergeant: Rude Awakening doubles the complete Battlecry; source 86 gives target 34 two separate +2 Attack enchantments (Attack 5/7/9). Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-28-vs-standard-batch-1-18-s2-random@30."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "GIL_152",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-TRIGGER under=POWER header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Blackhowl Gunspire: two separate damage waves from JAIL_307 each hit source 87 and fire a complete 3-damage response, first to minion 40 and then hero 6; intervening incoming damage starts the second activation. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-20-s2-random@77."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "JAIL_328",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-TRIGGER under=PLAY header=same meta=DAMAGE"
+    ],
+    "reason": "Scarlet Bruiser: Sewer Swimmer explicitly activates its printed and Sheep Mask-granted Deathrattles; the granted full 2-damage AoE kills source 25, whose natural death then activates a separate complete Deathrattle AoE against surviving 33. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-20-vs-standard-batch-1-14-s8-random@17."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "JAIL_379",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Spire Security: Rude Awakening doubles the complete Battlecry; first POWER reveals a spell costing less than 5 and does no damage, second reveals a qualifying spell and keeps all five 1-damage hits together. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-20-vs-standard-batch-1-16-s1-random@21."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "JAIL_998",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Defias Smuggler: Rude Awakening doubles the complete Battlecry; source 124 gives target 42 two distinct +2 Attack enchantments, each in its own TARGET POWER. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-3-vs-standard-batch-1-14-s9-random@73."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "RLK_223",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=TARGET+DAMAGE"
+    ],
+    "reason": "Thassarian: source 14 first resolves its complete 2-damage Battlecry POWER; TIME_603 then kills it, causing its distinct 2-damage Deathrattle TRIGGER (keyword 217), followed by Reborn entity 72. The checker compares the Deathrattle against the earlier same-source POWER under PLAY. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-19-vs-standard-batch-1-8-s6-random@15.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "RLK_708",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=TARGET"
+    ],
+    "reason": "Chillfallen Baron: source 53 completes its Battlecry POWER with self TARGET Data=0 and draw 50; Corpse Flower (EDR_815 source 43) then deals 3 damage in its own TRIGGER, killing Baron. After DEATHS moves 53 to GRAVEYARD, its distinct Deathrattle TRIGGER (keyword 217) has one self TARGET Data=0 and draw 73. No DAMAGE or HEALING belongs to either draw block. The checker compares the Deathrattle against the earlier same-source POWER under PLAY. Accepted distinct-activation ambiguity, matching RLK_223/CATA_725; battlecry self TARGET is supported by retail 176014_opponent_sideboard.power.log:7506-7516, without claiming a retail deathrattle trace. Replay standard-batch-1-standard-batch-1-16-vs-standard-batch-1-23-s2-random@57, packet 60."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TIME_004",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Conflux Crasher: Rude Awakening (EDR_100t7e on source 84) doubles the complete Battlecry; each sibling POWER selects one random enemy and deals the full 7 damage, first to 80 then to 72. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-18-vs-standard-batch-1-2-s9-random@46."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TIME_609",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Ranger General Sylvanas: Rude Awakening (EDR_100t7/EDR_100t7e seen on source 24 earlier in this replay) doubles the complete Battlecry; each sibling POWER keeps its full four-enemy 2-damage AoE together. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-25-vs-standard-batch-1-27-s4-random@49."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_600",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Windpeak Wyrm: Rude Awakening doubles the complete Battlecry; source 124 deals the full 5 damage to target 121 in each POWER (damage 0/5/10). Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-27-vs-standard-batch-1-15-s5-random@124."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_829",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Ravenous Devilsaur: Rude Awakening (EDR_100t7) explicitly doubles its complete Battlecry. PLAY source 86 has two sibling POWERs targeting entity 32, each running the destroy/Kindred body; these are separate invocations, not split hits. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-6-vs-standard-batch-1-7-s0-random@112.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_OG_149",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Ravaging Ghoul: Rude Awakening (EDR_100t7e entity 81 attached to source 76) doubles the complete Battlecry. PLAY 76 contains POWERs 16-31 and 32-46, each with TARGET [55,72,82] and all three 1-damage hits; neither invocation is split. Retail chaos/change_entity_null_id.power.log:3310-3385 supports one complete Ghoul AoE POWER with a full target list and all hits, but does not demonstrate the doubled invocation. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-1-vs-standard-batch-1-15-s9-random@14, packet 16.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_606",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Latorvian Armorer: Rude Awakening (EDR_100t7e entity 90 attached to source 83 in packet 31) doubles the complete Battlecry. PLAY 83 has two sibling POWERs targeting 70, each with one TARGET and the full 2 DAMAGE (damage 0/2/4); target has 6 Health and survives both, so neither invocation grants Armor. Card text permits two complete invocations, not a split 4-damage effect. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-15-vs-standard-batch-1-15-s0-random@37, packet 40.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "EDR_459",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE peer=TARGET+DAMAGE",
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Afflicted Devastator: two distinct reviewed cases. In standard-batch-1-standard-batch-1-16-vs-standard-batch-1-11-s1-random@61, packet 64, source 21 completes its Battlecry POWER (TARGET [30,73], 3 DAMAGE each), then Explosive Runes (CORE_LOOT_101 source 66) deals 6 damage to it; DEATHS moves 21 to GRAVEYARD before its separate keyword-217 Deathrattle TRIGGER deals 3 damage to enemy 46. The fixed-set deathrattle AoE has DAMAGE only; peer=TARGET+DAMAGE describes the earlier Battlecry. In standard-batch-1-standard-batch-1-17-vs-standard-batch-1-9-s2-random@161, packet 164, Rude Awakening (EDR_100t7e entity 190 attached to source 183) doubles the complete Battlecry: two POWERs each contain TARGET [64,51,205] and all three 3-damage hits. Accepted distinct-activation ambiguities, matching the printed Battlecry/Deathrattle and double-Battlecry gift; no direct retail trace found.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_EX1_059",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Crazed Alchemist: Rude Awakening (EDR_100t7e entity 140 attached to source 135 in packet 73) doubles the complete Battlecry. PLAY 135 has two sibling POWERs targeting 117; each contains one TARGET and creates its own EX1_059e swap enchantment (141 then 142). Target is 1/1, so repeated complete swaps leave its visible stats unchanged. Accepted distinct-activation ambiguity, supported by the printed swap Battlecry and double-Battlecry gift; no direct retail trace found. Replay standard-batch-1-standard-batch-1-17-vs-standard-batch-1-16-s5-random@70, packet 74.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_GIL_622",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE",
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE+HEALING"
+    ],
+    "reason": "Lifedrinker: Rude Awakening (EDR_100t7e attached to the source) doubles the complete Battlecry. In standard-batch-1-standard-batch-1-9-vs-standard-batch-1-26-s2-random@70, source 105 has two sibling POWERs: the first targets enemy hero 6 and consumes Divine Shield (DAMAGE Data=0), the second targets 6 and deals the full 3 damage; both also target already-healthy friendly hero 4, so neither emits HEALING. In standard-batch-1-standard-batch-1-10-vs-standard-batch-1-9-s2-random@56, source 89 has two complete POWERs, each dealing 3 to hero 4 and healing hero 6 for 3 (damage 11/8/5). Accepted distinct-activation ambiguity, not separate damage/heal fragments. Retail 34104_subspell.power.log:42284-42307 and 43308-43331 supports keeping damage and healing together in one Lifedrinker POWER per invocation; those are single invocations, not direct evidence of Rude Awakening doubling.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "EDR_468",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Eggbasher: Rude Awakening (EDR_100t7e entity 117 attached to source 110) doubles the complete Battlecry. Each sibling POWER targets 118, deals the full 1 damage, and creates its own +4 Attack EDR_468e1 enchantment (119, then 120); target damage 0/1/2 and Attack 6/10/14. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-6-vs-standard-batch-1-20-s9-random@100, history packet 102. The second occurrence standard-batch-1-standard-batch-1-16-vs-standard-batch-1-17-s1-random@39 repeats complete 1-damage/+4-Attack invocations from 95 to 49 (enchantments 106/107). No card-specific retail trace found; printed Eggbasher and Rude Awakening text supports the two complete invocations.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_EX1_002",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "The Black Knight: Rude Awakening (EDR_100t7e entity 109 attached to source 102) doubles the complete destroy Battlecry. Two sibling POWERs each have one TARGET 99; first marks 99 TO_BE_DESTROYED, second repeats the already-complete destroy invocation without another tag mutation. DEATHS follows both POWERs and moves 99 to GRAVEYARD. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-23-vs-standard-batch-1-19-s4-random@86, history packet 88. Retail friendly_player_id_is_1.power.log:4622-4632,4669-4674 identifies EX1_002 and shows its complete destroy POWER followed by DEATHS. That older trace has EffectIndex=-1 and no TARGET metadata, so it supports the destroy/death boundary only, not exact metadata or doubled-invocation parity.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_EX1_198",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Natalie Seline: Rude Awakening (EDR_100t7e entity 94 attached to source 89) doubles the complete destroy-and-gain-Health Battlecry. Both sibling POWERs target 35 and apply separate EX1_198e enchantments (97,98); the first marks 35 TO_BE_DESTROYED and gives 4 Health, the second gives another 4 Health before DEATHS processes 35 (source Health 1/5/9). Neither POWER is a continuation carrying only a fragment of the first effect. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-17-vs-standard-batch-1-10-s1-random@38, history packet 41. No card-specific retail trace found; acceptance concerns the two complete activation blocks, not independent certification of repeated-destroy gameplay semantics.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "DINO_419",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Herbivore Assistant: Rude Awakening (EDR_100t7e entity 145 attached to source 140) doubles the complete Battlecry. Two sibling POWERs each target friendly Beast 129 and apply a distinct DINO_419e enchantment (146,147), giving the full +2/+2 and Rush each time (Attack 3/5/7, Health 5/7/9). Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-27-vs-standard-batch-1-21-s1-random@145, history packet 147. No card-specific retail trace found; printed Assistant and Rude Awakening text supports two full buff invocations.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TIME_427",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET+DAMAGE"
+    ],
+    "reason": "Cleansing Lightspawn: Rude Awakening (EDR_100t7e entity 90 attached to source 11) doubles the complete Battlecry. Both sibling POWERs target 51 and contain one full 3-damage hit, matching source Health 3; each also contains its own Lifesteal TRIGGER/kw685 healing hero 4 for 3. Target damage 0/3/6, hero damage 25/22/19, followed by DEATHS moving 51 to GRAVEYARD. HEALING is inside the keyword child, so each POWER has immediate meta=TARGET+DAMAGE. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-26-vs-standard-batch-1-11-s4-random@71, history packet 74. No card-specific retail trace found; printed Lightspawn and Rude Awakening text supports complete repeated activations; this entry does not independently certify doubled lethal-target gameplay semantics.",
+    "kind": "accepted"
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "JAIL_501",
+    "kind": "accepted",
+    "reason": "Picklock: turn-start mana refresh changes intrinsic Mana-number Attack/Health from 1 to 10, not the existing EDR_100t5e Lifesteal gift (entity 110 attached to 103); plain stat/COST/script-data updates are independent of enchantment buff animation. Replay standard-batch-1-standard-batch-1-12-vs-standard-batch-1-23-s4-random@86, packet 89."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_SW_066",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Royal Librarian: Rude Awakening EDR_100t7e entity 146 on source 140 doubles the complete Silence Battlecry targeting 117; first POWER sets SILENCED, second repeats TARGET on the silenced minion. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-13-s7-random@149, packet 156."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_ULD_191",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Beaming Sidekick: Rude Awakening EDR_100t7e entity 91 on source 86 doubles the complete +2 Health Battlecry targeting 19; separate ULD_191e enchantments 92/93 raise Health 6/8/10 in two POWERs. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-20-vs-standard-batch-1-7-s1-random@46, packet 49."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TIME_442",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Timeway Warden: Rude Awakening EDR_100t7e entity 142 on source 135 doubles its complete targeted Battlecry; first POWER makes target 151 Dormant with TIME_442e entity 155, second repeats TARGET against that now-Dormant target and safely fizzles. Accepted distinct-activation ambiguity. Replay standard-batch-1-standard-batch-1-18-vs-standard-batch-1-28-s7-random@113, packet 115."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "JAIL_101",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Violet Punisher: Rude Awakening EDR_100t7e entity 104 attached to source 99 doubles the complete bonus-steal Battlecry targeting 20; both POWERs contain TARGET 20 and finish without mutations because the victim has no transferable bonus. Accepted distinct-activation ambiguity; no card-specific retail trace found. Replay standard-batch-1-standard-batch-1-22-vs-standard-batch-1-16-s5-random@69, packet 71."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_ICC_055",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=TARGET+DAMAGE"
+    ],
+    "reason": "Drain Soul: Zentimo TRL_085 entity 122 queues complete adjacent-target casts from source 54; three sibling POWERs each select one target (165,122,163), deal the full 3 damage and contain their own Lifesteal TRIGGER/kw685. This matches the accepted Zentimo/Fireball distinct-activation ambiguity, not fragmented damage; no card-specific adjacent-cast retail trace found. Replay standard-batch-1-standard-batch-1-32-vs-standard-batch-1-12-s8-random@170, packet 172."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CORE_BT_120",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-POWER under=PLAY header=same meta=TARGET"
+    ],
+    "reason": "Warmaul Challenger: Rude Awakening EDR_100t7e entity 85 attached to source 78 doubles the complete duel Battlecry targeting 40. First POWER contains both ATTACKs (Divine Shield then 1 damage to victim; retaliations deal 5+5 and kill source 78); DEATHS completes before the second POWER repeats TARGET and safely fizzles because the source is dead. Accepted distinct-activation ambiguity; no card-specific doubled retail trace found. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-19-s2-random@24, packet 28."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "CATA_190h",
+    "kind": "accepted",
+    "reason": "Approved Onyxia Health-loss replacement (b15-health-corpse-replacement): incoming combat DAMAGE metadata remains 7; hero 22 loses 5 Armor, then CATA_155 source 15 creates Black Scales CATA_155e and increases maximum/current Health by 2 to maximum 36. The damage-fact hook sees Armor loss only because Health loss was replaced. Existing damage-event/Lifesteal semantics intentionally retain the full resolved hit; this is not corrupt metadata. Exact retail packet order remains unpinned in the approved group note. Replay standard-batch-1-standard-batch-1-6-vs-standard-batch-1-23-s7-random@174, history packet 176."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "CORE_BT_493",
+    "kind": "accepted",
+    "reason": "Priestess of Fury source 69 hits Toreth EDR_258 entity 35 repeatedly. Packet entries 3/4 and 5/6 contain separate TARGET 35 and DAMAGE 0 pairs; only the latter consumes Divine Shield (entry 7), since Toreth preserves its shield on earlier hits. Entries 8/11/12 then contain TARGET 35, DAMAGE 1 and the health-damage tag. The hook correlates only changed shield tags, shifting the first nonzero hit onto an earlier zero; the wire has every required target and correct per-hit amount. Replay standard-batch-1-standard-batch-1-20-vs-standard-batch-1-10-s7-random@113, history packet 117."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "HERO_07",
+    "kind": "accepted",
+    "reason": "Approved Onyxia Health-loss replacement (b15-health-corpse-replacement): incoming combat DAMAGE metadata remains 7; hero 4 loses 6 Armor, then CATA_155 source 15 creates Black Scales CATA_155e and increases maximum/current Health by 1 to maximum 35. The damage-fact hook sees Armor loss only because Health loss was replaced. Existing damage-event/Lifesteal semantics intentionally retain the full resolved hit; this is not corrupt metadata. Exact retail packet order remains unpinned in the approved group note. Replay standard-batch-1-standard-batch-1-6-vs-standard-batch-1-7-s9-random@130, history packet 132. Batches16-18 also observes finite-infinity retaliation: actual source TIME_024 deals metadata 2147483647 while an already-damaged hero counter saturates; recorder health delta is smaller. This is the same accepted counter saturation described for TIME_024, not a changed damage amount."
+  },
+  {
+    "rule": "FATIGUE_BLOCK",
+    "card": "TIME_033",
+    "kind": "accepted",
+    "reason": "Druid of Regrowth Rewind: packet starts REWIND block type 11/source 29, ResetGame and full entity restoration. Hero 4 FATIGUE=0 at entry 112 restores the snapshot, alongside DAMAGE=20 at entry 113; it is not an empty-deck draw or fatigue tick. The block then closes and replayed Druid Battlecry casts BE_802 and CORE_EX1_238 normally. Replay standard-batch-1-standard-batch-1-32-vs-standard-batch-1-15-s0-random@92, history packet 93."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_785",
+    "kind": "accepted",
+    "reason": "Genn Cursed King: another card leaving/changing the hand satisfies parity and transforms entity 12 to CATA_615t; its base 6/5 is followed by replay of the already attached +2/+2 layer to 8/7. These are same-entity definition/retained-layer updates in GennCursedKing.Refresh, not a new buff from the enclosing card. Both Attack and Health observations belong to that transform. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-34-s4-random@60, history packet 62."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_979",
+    "kind": "accepted",
+    "reason": "Genn Cursed King: another card leaving/changing the hand satisfies parity and transforms entity 12 to CATA_615t; its base 6/5 is followed by replay of the already attached +2/+2 layer to 8/7. These are same-entity definition/retained-layer updates in GennCursedKing.Refresh, not a new buff from the enclosing card. Both Attack and Health observations belong to that transform. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-35-s0-random@101, history packet 103."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_AT_052",
+    "kind": "accepted",
+    "reason": "Genn Cursed King: another card leaving/changing the hand satisfies parity and transforms entity 12 to CATA_615t; its base 6/5 is followed by replay of the already attached +2/+2 layer to 8/7. These are same-entity definition/retained-layer updates in GennCursedKing.Refresh, not a new buff from the enclosing card. Both Attack and Health observations belong to that transform. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-23-s4-random@67, history packet 69."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_AT_123",
+    "kind": "accepted",
+    "reason": "Genn Cursed King: another card leaving/changing the hand satisfies parity and transforms entity 12 to CATA_615t; its base 6/5 is followed by replay of the already attached +2/+2 layer to 8/7. These are same-entity definition/retained-layer updates in GennCursedKing.Refresh, not a new buff from the enclosing card. Both Attack and Health observations belong to that transform. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-17-s3-random@78, history packet 80."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_WON_337",
+    "kind": "accepted",
+    "reason": "Genn Cursed King: another card leaving/changing the hand satisfies parity and transforms entity 12 to CATA_615t; its base 6/5 is followed by replay of the already attached +2/+2 layer to 8/7. These are same-entity definition/retained-layer updates in GennCursedKing.Refresh, not a new buff from the enclosing card. Both Attack and Health observations belong to that transform. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-5-s6-random@120, history packet 122."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "DINO_407e",
+    "kind": "accepted",
+    "reason": "Mirrex recurring held transform: actor 89 retains entity 14 while ResetHeldModifiers removes the old 3/4 layer and rebases Health to 7 before CHANGE_ENTITY BE_204; DINO_407e2 then sets the copied form back to 3/4. The temporary intrinsic stat reset is not a new enchantment buff. Actual upward AddEnchantmentBlock changes still use HandBuffScope targets. Replay standard-batch-1-standard-batch-1-19-vs-standard-batch-1-1-s3-random@57, history packet 59."
+  },
+  {
+    "rule": "TRIGGER_HIT_TARGET",
+    "card": "CORE_BT_493",
+    "kind": "accepted",
+    "reason": "Priestess of Fury source 69 hits Toreth EDR_258 entity 35 repeatedly. Packet entries 3/4 and 5/6 contain separate TARGET 35 and DAMAGE 0 pairs; only the latter consumes Divine Shield (entry 7), since Toreth preserves its shield on earlier hits. Entries 8/11/12 then contain TARGET 35, DAMAGE 1 and the health-damage tag. The hook correlates only changed shield tags, shifting the first nonzero hit onto an earlier zero; the wire has every required target and correct per-hit amount. Replay standard-batch-1-standard-batch-1-20-vs-standard-batch-1-10-s7-random@113, history packet 117."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "CATA_491",
+    "kind": "accepted",
+    "reason": "Descending Cataclysm source 34 hits Toreth EDR_258 entity 65 repeatedly. Packet entries 54 and 131 emit DAMAGE 0; only the second removes Divine Shield at entry 132, because Toreth retains the shield through the first hit. TARGET lists precede both waves. Entries 184-187 then emit predamage 3, DAMAGE 3 and damage tag 3. The hook correlates only changed shield tags and shifts this real hit onto an earlier zero; ordered wire amounts are correct. Replay standard-batch-1-standard-batch-1-7-vs-standard-batch-1-20-s0-random@74, history packet 76."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "CORE_RLK_505",
+    "kind": "accepted",
+    "reason": "Marrow Manipulator source 27 targets Toreth EDR_258 entity 67 at entries 16-17 and 28-30: two complete TARGET/DAMAGE 0 pairs, with shield removal only at entry 30. Entries 31-35 then carry TARGET 67, predamage 2, DAMAGE 2 and damage tag 2. Toreth retains Divine Shield through the earlier hit; the hook correlates changed shield tags and assigns the later nonzero hit to an earlier zero. Replay standard-batch-1-standard-batch-1-16-vs-standard-batch-1-20-s9-random@92, history packet 94."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_612",
+    "kind": "accepted",
+    "reason": "Playing CATA_612 satisfies Genn parity: CHANGE_ENTITY at entry 10 transforms held entity 12 into CATA_615t with base 6/5; entries 24-25 reapply its existing +2/+2 layer to 8/7. Same-entity transform/retained-layer reconciliation, not a new hand enchantment from CATA_612. Replay standard-batch-1-standard-batch-1-9-vs-standard-batch-1-20-s1-random@83, history packet 85."
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "EDR_102",
+    "kind": "accepted",
+    "reason": "Nightmare Lord Xavius creates Genn with the +4 Health/Taunt Dark Gift EDR_100t3e while entity 83 is SETASIDE (entries 2-8). After hand entry at 9, Genn changes into CATA_615t at 11 with base 6/5, then reapplies that existing +4 Health at 16. The gift was attached before hand entry; the visible change is retained-layer reconciliation after transformation, not a newly applied hand buff. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-31-s3-random@35, history packet 38."
+  },
+  {
+    "rule": "TARGET_META",
+    "card": "BE_302",
+    "kind": "accepted",
+    "reason": "Flame Shock spans history packets 113-115. Original target TIME_036 entity 62 dies to pre-cast trigger source 96 (packet 113 entries 51-83). POWER source 32/target 62 opens at 84 and emits explicit TARGET 62 at 85. Resumed selections emit TARGET 6 in packet 114 and TARGET 55 in packet 115 before their DAMAGE 2. The close check sees the last target list after suspended selections, losing the earlier explicit header TARGET; the wire already contains it. This accepts the history-shape correlation only, not a new retail rule for target reselection. Replay standard-batch-1-standard-batch-1-2-vs-standard-batch-1-32-s1-random@115, history packet 115."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "BE_153",
+    "kind": "accepted",
+    "reason": "Rune of Revelation: Casts When Drawn TRIGGER encloses the complete automatic spell POWER; entries 122/123 start the wrappers, 124 TARGET and 127 DAMAGE resolve its single hit, followed by shuffle and graveyard movement. The nesting represents a complete automatic cast, not per-hit fragmentation. Replay standard-batch-1-standard-batch-1-1-vs-standard-batch-1-1-s0-random@126, history packet 128 (entry indexes zero-based).",
+    "shapes": [
+      "nested-in-TRIGGER under=TRIGGER header=differs meta=TARGET+DAMAGE"
+    ],
+    "conditions": [
+      "AutomaticDrawCast"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "TIME_024",
+    "kind": "accepted",
+    "reason": "Approved finite-infinity damage: wire DAMAGE=2147483647 is the complete resolved hit; the victim already has damage, so its signed-32-bit DAMAGE counter saturates at 2147483647. The recorder reports only the smaller representable health delta (plus armor), producing resolved damage=2147483646; meta=2147483647. Native metadata preserves the hit rather than the clipped counter delta; no damage packet is missing. Replay standard-batch-1-standard-batch-1-3-vs-standard-batch-1-22-s9-random@106, history packet 108 (entry indexes zero-based).",
+    "conditions": [
+      "FiniteInfinitySaturation"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "BE_153t",
+    "kind": "accepted",
+    "reason": "Rune of Obliteration: Casts When Drawn TRIGGER at entry 56 encloses complete spell POWER at 58; TARGET 59 precedes all four 3-damage hits (62/67/71/75), followed by its Lifesteal wrapper. One automatic cast contains all missiles. Replay standard-batch-1-standard-batch-1-1-vs-standard-batch-1-4-s3-random@48, history packet 50 (entry indexes zero-based).",
+    "shapes": [
+      "nested-in-TRIGGER under=TRIGGER header=differs meta=TARGET+DAMAGE"
+    ],
+    "conditions": [
+      "AutomaticDrawCast"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_721",
+    "kind": "accepted",
+    "reason": "Genn parity transform: CHANGE_ENTITY entry 11 changes held entity 8 to CATA_615t at base 6/5; entries 21/22 restore its existing +2/+2 layer to 8/7. Same-entity definition and retained-layer reconciliation, not a new hand buff from the enclosing source; same accepted ambiguity as CATA_979. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-6-s3-random@49, history packet 51 (entry indexes zero-based).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_724",
+    "kind": "accepted",
+    "reason": "Genn parity transform: CHANGE_ENTITY entry 8 changes held entity 8 to CATA_615t at base 6/5; entries 24/25 restore its existing +2/+2 layer to 8/7. Same-entity definition and retained-layer reconciliation, not a new hand buff from the enclosing source; same accepted ambiguity as CATA_979. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-2-s3-random@48, history packet 50 (entry indexes zero-based).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "BE_283",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 120 receives complete TARGET/DAMAGE 0 pairs at entries 36/58/80; only entry 81 clears its shield. Entries 106/107 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-2-vs-standard-batch-1-10-s0-random@64, history packet 66 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CATA_470t1",
+    "kind": "accepted",
+    "reason": "Generated Creation has component identities in MODULAR_ENTITY_PART_1/2. Sibling case: CATA_999 + CORE_EX1_012, with active Sandfury Aura CATA_480, resolves two complete end-turn 4-damage triggers at 6-9 and 10-13 (Armor 9/5/1); replay standard-batch-1-standard-batch-1-3-vs-standard-batch-1-8-s2-random@83, history packet 85 (entry indexes zero-based). Nested case standard-batch-1-standard-batch-1-8-vs-standard-batch-1-13-s8-random@120: TIME_713 + EDR_815 summons enemy Chest 138 in its Battlecry POWER; the independent Corpse Flower response then targets 138 and deals 3. Both are distinct complete activations sharing the generated entity identity. Second sibling case standard-batch-1-standard-batch-1-8-vs-standard-batch-1-16-s3-random@118, history packet 120: Creations 97 and its Kindred copy 106 (CATA_999 + DINO_435) under active Sandfury 18 each resolve two complete end-turn TRIGGERs (38-43/44-49, 50-55/56-61), each 4 damage to hero 6. ModularSandfury requires a CATA_999 + CORE_EX1_012 or CATA_999 + DINO_435 Creation (neither partner has its own damage trigger), active CATA_480 and game STEP=MAIN_END (gate-green follow-up, 2026-10-25-combined-landing.md). Fresh source 16-vs-8-s2@76, history packet 80: component tags 471/472 identify TIME_004 + RLK_708 (reviewed generated-composition feature da4b36c96). Source 77 POWER 20-32 finishes both component Battlecries (7 damage to CORE_ICC_214 entity 20, then self draw). Statue Deathrattle 41-43 marks 77 destroyed, DEATHS 44-56 moves it to GRAVEYARD, and independent TRIGGER/keyword 217 at 57-63 draws through Baron. New shape requires exactly those components, an actual Deathrattle marker and the retired source; existing modular conditions remain unchanged.",
+    "shapes": [
+      "nested-in-POWER under=POWER header=differs meta=TARGET+DAMAGE",
+      "sibling-TRIGGER under=TRIGGER/ei-1 header=same meta=DAMAGE",
+      "sibling-POWER under=PLAY header=differs meta=TARGET peer=TARGET+DAMAGE"
+    ],
+    "conditions": [
+      "ModularSandfury",
+      "ModularCorpseFlower",
+      "ModularBattlecryDeathrattle"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "TLC_601",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 40 receives complete TARGET/DAMAGE 0 pairs at entries 27/43; only entry 44 clears its shield. Entries 65/66 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-42-s5-random@39, history packet 42 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_723",
+    "kind": "accepted",
+    "reason": "Genn parity transform: CHANGE_ENTITY entry 7 changes held entity 8 to CATA_615t at base 6/5; entries 22/23 restore its existing +2/+2 layer to 8/7. Same-entity definition and retained-layer reconciliation, not a new hand buff from the enclosing source; same accepted ambiguity as CATA_979. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-19-s6-random@185, history packet 187 (entry indexes zero-based).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "EDR_255",
+    "kind": "accepted",
+    "reason": "Genn parity transform: CHANGE_ENTITY entry 7 changes held entity 42 to CATA_615t at base 6/5; entries 72/73 restore its existing +2/+2 layer to 8/7. Same-entity definition and retained-layer reconciliation, not a new hand buff from the enclosing source; same accepted ambiguity as CATA_979. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-10-s0-random@154, history packet 157 (entry indexes zero-based).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "JAIL_395",
+    "kind": "accepted",
+    "reason": "Genn parity transform: CHANGE_ENTITY entry 12 changes held entity 8 to CATA_615t at base 6/5; entries 42/43 restore its existing +2/+2 layer to 8/7. Same-entity definition and retained-layer reconciliation, not a new hand buff from the enclosing source; same accepted ambiguity as CATA_979. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-12-s3-random@57, history packet 59 (entry indexes zero-based).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "BE_013t1",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 40 receives complete TARGET/DAMAGE 0 pairs at entries 6/13; only entry 14 clears its shield. Entries 18/19 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-2-s5-random@58, history packet 61 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "BE_258",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 70 receives complete TARGET/DAMAGE 0 pairs at entries 17/19; only entry 20 clears its shield. Entries 24/25 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-2-vs-standard-batch-1-21-s7-random@80, history packet 82 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "CATA_470t1",
+    "kind": "accepted",
+    "reason": "Approved finite-infinity damage: wire DAMAGE=2147483647 is the complete resolved hit; the victim already has damage, so its signed-32-bit DAMAGE counter saturates at 2147483647. The recorder reports only the smaller representable health delta (plus armor), producing resolved damage=2147483625; meta=2147483647. Native metadata preserves the hit rather than the clipped counter delta; no damage packet is missing. Replay standard-batch-1-standard-batch-1-14-vs-standard-batch-1-17-s3-random@81, history packet 83 (entry indexes zero-based).",
+    "conditions": [
+      "FiniteInfinitySaturation"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "FIR_902",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 37 receives complete TARGET/DAMAGE 0 pairs at entries 77/79; only entry 80 clears its shield. Entries 84/85 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-27-s8-random@129, history packet 132 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "HERO_01",
+    "kind": "accepted",
+    "reason": "Approved finite-infinity damage: wire DAMAGE=2147483647 is the complete resolved hit; the victim already has damage, so its signed-32-bit DAMAGE counter saturates at 2147483647. The recorder reports only the smaller representable health delta (plus armor), producing resolved damage=2147483633; meta=2147483647. Native metadata preserves the hit rather than the clipped counter delta; no damage packet is missing. Replay standard-batch-1-standard-batch-1-15-vs-standard-batch-1-27-s9-random@76, history packet 78 (entry indexes zero-based). Onyxia also replaces three Health loss with +3 maximum/current Health after two Armor loss, preserving full DAMAGE=5; standard-batch-1-standard-batch-1-29-vs-standard-batch-1-6-s6-random@75, packet 77.",
+    "conditions": [
+      "FiniteInfinitySaturation",
+      "HealthLossReplacement"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "JAIL_881",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 40 receives complete TARGET/DAMAGE 0 pairs at entries 18/22; only entry 23 clears its shield. Entries 36/37 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-32-s5-random@55, history packet 58 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "POWER_HIT_TARGET",
+    "card": "BE_013t1",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 40 receives complete TARGET/DAMAGE 0 pairs at entries 6/13; only entry 14 clears its shield. Entries 18/19 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-2-s5-random@58, history packet 61 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "POWER_HIT_TARGET",
+    "card": "BE_258",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 70 receives complete TARGET/DAMAGE 0 pairs at entries 17/19; only entry 20 clears its shield. Entries 24/25 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-2-vs-standard-batch-1-21-s7-random@80, history packet 82 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "POWER_HIT_TARGET",
+    "card": "JAIL_881",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 40 receives complete TARGET/DAMAGE 0 pairs at entries 18/22; only entry 23 clears its shield. Entries 36/37 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-32-s5-random@55, history packet 58 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_100t1",
+    "kind": "accepted",
+    "reason": "Composite location finishes its +1 Attack activation, consumes its final durability (DAMAGE 2), and enters DEATHS before its separate Deathrattle TRIGGER/kw217 at entry 25 deals the configured 1 damage to both enemies (28/33). Independent activation and exhaustion Deathrattle, not a split hit. Replay standard-batch-1-standard-batch-1-23-vs-standard-batch-1-38-s2-random@52, history packet 55 (entry indexes zero-based).",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE"
+    ],
+    "conditions": [
+      "ExhaustionDeathrattle"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_100t3",
+    "kind": "accepted",
+    "reason": "Composite location finishes its targeted summon activation, consumes its final durability and enters DEATHS; its separate Deathrattle TRIGGER/kw217 at entry 33 deals the configured 5 damage to hero 4 at 36/37. Independent activation and exhaustion Deathrattle, not a split hit. Replay standard-batch-1-standard-batch-1-41-vs-standard-batch-1-21-s9-random@196, history packet 197 (entry indexes zero-based). Untargeted summon variant: replay standard-batch-1-standard-batch-1-38-vs-standard-batch-1-23-s5-random@96, packet 98, POWER 1-5 summons 135; durability tag 6 exhausts 122, DEATHS 9-18 retires it, separate TRIGGER/kw217 at 19 deals 5 to hero 4 at 22/24. Same exhaustion condition; see meta-pre-be-shape-evidence.md.",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE peer=TARGET",
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE"
+    ],
+    "conditions": [
+      "ExhaustionDeathrattle"
+    ]
+  },
+  {
+    "rule": "TRIGGER_HIT_TARGET",
+    "card": "FIR_902",
+    "kind": "accepted",
+    "reason": "Toreth-preserved Divine Shield: victim 37 receives complete TARGET/DAMAGE 0 pairs at entries 77/79; only entry 80 clears its shield. Entries 84/85 carry the subsequent real damage metadata/tag. The hook records changed shield tags only, shifting a later nonzero hit onto an earlier zero. Wire amounts and per-hit TARGETs are present; same reviewed correlation limit as CORE_BT_493/CATA_491. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-27-s8-random@129, history packet 132 (entry indexes zero-based).",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_BT_416",
+    "kind": "accepted",
+    "reason": "Genn retained-layer reconciliation: CHANGE_ENTITY 8 changes held entity 95 to CATA_615t at base 6/5; tags 32/33 restore its existing +4/+5 to 10/10. Replay standard-batch-1-standard-batch-1-11-vs-standard-batch-1-15-s7-random@101, packet 104. Same definition/retained-layer ambiguity as CATA_721; no new buff. See meta-pre-be-shape-evidence.md (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "EDR_226",
+    "kind": "accepted",
+    "reason": "Genn retained-layer reconciliation: CHANGE_ENTITY 7 changes held entity 114 to CATA_615t at base 6/5; tag 30 restores existing +4 Health to 9. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-22-s3-random@75, packet 79. Same definition/retained-layer ambiguity as CATA_721; no new buff. See meta-pre-be-shape-evidence.md (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "TIME_704",
+    "kind": "accepted",
+    "reason": "Genn retained-layer reconciliation: CHANGE_ENTITY 8 changes held entity 109 to CATA_615t at base 6/5; tag 28 restores existing +2 Health to 7. Replay standard-batch-1-standard-batch-1-37-vs-standard-batch-1-24-s9-random@66, packet 68. Same definition/retained-layer ambiguity as CATA_721; no new buff. See meta-pre-be-shape-evidence.md (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_999",
+    "kind": "accepted",
+    "reason": "Genn retained-layer reconciliation: playing CATA_999 satisfies Genn parity; CHANGE_ENTITY 10 changes held entity 8 to CATA_615t at base 6/5; tags 22/23 restore its existing CATA_820e +2/+2 (entity 133, attached earlier) to 8/7. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-24-s4-random@101, history packet 103. Same definition/retained-layer ambiguity as CATA_721; no new buff. See 2026-10-25-combined-landing.md gate-green follow-up (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "JAIL_327",
+    "kind": "accepted",
+    "reason": "Genn retained-layer reconciliation: playing JAIL_327 satisfies Genn parity; CHANGE_ENTITY 9 changes held entity 8 to CATA_615t at base 6/5; tags 23/24 restore its existing CATA_820e +2/+2 (entity 129, attached earlier) to 8/7. Replay standard-batch-1-standard-batch-1-10-vs-standard-batch-1-1-s9-random@109, history packet 111. Same definition/retained-layer ambiguity as CATA_721; no new buff. See 2026-10-25-combined-landing.md gate-green follow-up (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_100t2",
+    "kind": "accepted",
+    "reason": "Composite location finishes its friendly-Attack activation POWER 1-26 (no damage), consumes its final durability (DAMAGE 2, TO_BE_DESTROYED at 27/28) and DEATHS 29-39 retires it to GRAVEYARD; its separate Deathrattle TRIGGER/kw217 at 40 deals the configured 3 damage to each enemy (43-55), and a second Deathrattle TRIGGER at 58 summons. Independent activation and exhaustion Deathrattle, not a split hit; same reviewed shape as TLC_100t1. Replay standard-batch-1-standard-batch-1-21-vs-standard-batch-1-39-s0-random@130, history packet 131 (entry indexes zero-based). Fresh source variant 7-vs-42-s6@117 adds preceding TARGET metadata to the independent exhausted activation; the Deathrattle still begins only after GRAVEYARD movement. Same reviewed 93020503 exhaustion boundary; acceptance still requires ExhaustionDeathrattle.",
+    "shapes": [
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE",
+      "sibling-POWER under=PLAY header=differs meta=DAMAGE peer=TARGET"
+    ],
+    "conditions": [
+      "ExhaustionDeathrattle"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_722",
+    "kind": "accepted",
+    "reason": "Genn parity transform restores existing +2/+2 on the same held CATA_615t (6/5 to 8/7), rather than applying a new buff; standard-batch-1-standard-batch-1-10-vs-standard-batch-1-38-s5-random@37.",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CATA_EVENT_400",
+    "kind": "accepted",
+    "reason": "Genn parity transform restores existing +2/+2 on the same held CATA_615t (6/5 to 8/7), rather than applying a new buff; standard-batch-1-standard-batch-1-10-vs-standard-batch-1-18-s5-random@62.",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_AV_107",
+    "kind": "accepted",
+    "reason": "Genn parity transform restores existing +2/+2 on the same held CATA_615t (6/5 to 8/7), rather than applying a new buff; standard-batch-1-standard-batch-1-11-vs-standard-batch-1-1-s8-random@161.",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "FATIGUE_BLOCK",
+    "card": "TIME_004",
+    "kind": "accepted",
+    "reason": "Conflux Crasher Rewind restores hero 4 FATIGUE=0 inside GAME_RESET/SourceIsRewind, rather than drawing from an empty deck; standard-batch-1-standard-batch-1-5-vs-standard-batch-1-34-s5-random@153, packet 154 entry 186.",
+    "conditions": [
+      "RewindRestoration"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "CORE_BT_156",
+    "kind": "accepted",
+    "reason": "Renewed pre-BE replay after lethal Wrathspike Brute retaliation: playing CORE_BT_156 satisfies Genn parity; CHANGE_ENTITY entry 5 changes held entity 97 to CATA_615t at base 6/5, then tags 31/32 restore its retained +4/+5 layer to 10/10. Same definition/retained-layer reconciliation as CORE_BT_416; no new hand buff. Replay standard-batch-1-standard-batch-1-11-vs-standard-batch-1-15-s7-random@92, history packet 94 (zero-based entries).",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "CATA_153",
+    "kind": "accepted",
+    "shapes": [
+      "sibling-TRIGGER under=PLAY header=differs meta=TARGET"
+    ],
+    "reason": "Al'Akir, Lord of Storms: reviewed 205cdba9b declares a Colossal summon activation separately from its complete card-generation Battlecry. Fresh source replay standard-batch-1-standard-batch-1-1-vs-standard-batch-1-6-s8-random@46, history packet 51 (wire packet 87): PLAY source 65 contains TRIGGER rows 22-36 summoning appendages 113/114, followed by POWER rows 37-46 generating two cards; TARGET 116 identifies the publicly burned second generated card. These are separate complete abilities, not queued hit fragments. Accept only this observed sibling-TRIGGER TARGET shape."
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "TLC_466",
+    "kind": "accepted",
+    "shapes": [
+      "nested-in-TRIGGER under=TRIGGER header=same meta=TARGET"
+    ],
+    "reason": "Story of Lakkari: reviewed 8dfe0137d ObjectiveRules.Tick records the objective clock/progress in its outer TURN_END TRIGGER, then executes the complete declared discard-and-summon effect in a distinct historyTrigger TRIGGER. Fresh source replay standard-batch-1-standard-batch-1-1-vs-standard-batch-1-42-s7-random@57, history packet 60 (wire packet 96): source 49 outer TRIGGER rows 2-40 updates progress; child rows 5-39 resolves the whole effect and TARGET lists all seven summoned Imps 112-118 once. The next tick repeats a complete effect for two free slots. This is the intentional objective clock/effect boundary, not per-target splitting. Accept only this observed nested-TRIGGER TARGET shape."
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "TIME_027",
+    "kind": "accepted",
+    "reason": "Tachyon Barrage: reviewed Toreth behavior 8328c54c9 and typed correlation guard d797c9726. Fresh 22-vs-12-s6@37, history packet 39 (wire 68): source 82 gives victim 19 a TARGET before every hit; zero DAMAGE pairs at 13-18 preserve its shield until tag 194=0 at 19, then TARGET/DAMAGE 1 pairs at 20/23,25/28,30/33 accompany health-damage 1/2/3. No native target or amount is missing; changed-shield-only hook alignment consumes earlier zero metadata. Accept only TorethShieldCorrelation, not ordinary wrong amounts or missing TARGETs.",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "POWER_HIT_TARGET",
+    "card": "TIME_027",
+    "kind": "accepted",
+    "reason": "Tachyon Barrage: reviewed Toreth behavior 8328c54c9 and typed correlation guard d797c9726. Fresh 22-vs-12-s6@37, history packet 39 (wire 68): source 82 gives victim 19 a TARGET before every hit; zero DAMAGE pairs at 13-18 preserve its shield until tag 194=0 at 19, then TARGET/DAMAGE 1 pairs at 20/23,25/28,30/33 accompany health-damage 1/2/3. No native target or amount is missing; changed-shield-only hook alignment consumes earlier zero metadata. Accept only TorethShieldCorrelation, not ordinary wrong amounts or missing TARGETs.",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "DAMAGE_META_AMOUNT",
+    "card": "JAIL_881t",
+    "kind": "accepted",
+    "reason": "Tripped Arcane Tripwire: same reviewed Toreth behavior 8328c54c9 and typed hook-correlation guard d797c9726. Fresh 22-vs-32-s8@65, history packet 67 (wire 114): source 103 has TARGET 19/DAMAGE 0 at 55/56 and 57/58; only 59 clears the shield, then TARGET 19 at 60 precedes DAMAGE 1 at 63. TARGET 85/DAMAGE 0 follows at 65/66. Every native missile target and amount is present; hook correlation shifts the later nonzero hit onto an earlier zero. Accept only TorethShieldCorrelation.",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "TRIGGER_HIT_TARGET",
+    "card": "JAIL_881t",
+    "kind": "accepted",
+    "reason": "Tripped Arcane Tripwire: same reviewed Toreth behavior 8328c54c9 and typed hook-correlation guard d797c9726. Fresh 22-vs-32-s8@65, history packet 67 (wire 114): source 103 has TARGET 19/DAMAGE 0 at 55/56 and 57/58; only 59 clears the shield, then TARGET 19 at 60 precedes DAMAGE 1 at 63. TARGET 85/DAMAGE 0 follows at 65/66. Every native missile target and amount is present; hook correlation shifts the later nonzero hit onto an earlier zero. Accept only TorethShieldCorrelation.",
+    "conditions": [
+      "TorethShieldCorrelation"
+    ]
+  },
+  {
+    "rule": "HAND_BUFF_FX",
+    "card": "EDR_231",
+    "kind": "accepted",
+    "reason": "Aspect's Embrace leaving the hand satisfies Genn parity under reviewed Genn lifecycle d61a85e2b; same typed retained-transform guard d797c9726. Fresh 21-vs-15-s4@25, history packet 27 (wire 45): CHANGE_ENTITY 10 changes held 79 to CATA_615t base 6/5; 11/12 republish Attack 6/Health 5. This is retained definition reconciliation before the spell POWER at 19, not a new hand buff. Accept only RetainedHandTransform.",
+    "conditions": [
+      "RetainedHandTransform"
+    ]
+  },
+  {
+    "rule": "SPLIT_EFFECT_BLOCK",
+    "card": "JAIL_913",
+    "kind": "accepted",
+    "reason": "Hold Them Off!: reviewed Prepare implementation cb0c84181 automatically casts the prepared card when drawn. Fresh 1-vs-32-s3@83, history packet 85 (wire 139): source 141 TRIGGER 13 encloses its one complete spell POWER 14-22, TARGET 14 at 15 precedes the full +5/+5 and Lifesteal effect, then the consumed card enters GRAVEYARD. Same complete automatic-draw wrapper as BE_153/BE_153t, not fragmented activation. Accept only AutomaticDrawCast.",
+    "shapes": [
+      "nested-in-TRIGGER under=TRIGGER header=differs meta=TARGET"
+    ],
+    "conditions": [
+      "AutomaticDrawCast"
+    ]
+  }
+]

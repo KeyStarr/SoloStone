@@ -1,0 +1,16 @@
+id	class	reason	inventory	name
+BE_151	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Vaultkeeper
+BE_151e	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Vault Protection
+CATA_185	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Faceless Replicator
+CATA_464	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Blackwing Experiment
+CATA_464t	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Dragon Breath
+CORE_CATA_004	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Rehgar Earthfury
+CORE_RLK_086	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Frostmourne
+CORE_YOD_026	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Fiendish Servant
+DINO_401	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	The Great Dracorex
+EDR_258	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Toreth the Unbreaking
+EDR_453	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Briarspawn Drake
+EDR_484	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Scavenging Flytrap
+EDR_484e	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Scavenging
+EDR_819	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Ursoc
+JAIL_315	N	no pre-play condition (unconditional effect, trigger or scaling payload)	existing	Mystic Misdirection

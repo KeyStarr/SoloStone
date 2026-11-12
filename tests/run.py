@@ -22,7 +22,8 @@ Two tiers (docs/TESTING.md):
 
 Builds are Release builds with -p:EngineSource=true: the rules engine is built from engine/, never from a prebuilt
 DLL. Build output goes to a temporary folder (or --artifacts) and nothing is written inside the repository except
-the usual obj/ folders of the projects and, for fx-harmony with a client set up, plugin/bin/ and engine/SabberStoneCore/bin and obj (git ignores all of them).
+the usual obj/ folders of the projects, for the client suite transport-invariants sim/out/, and, for fx-harmony with a client
+set up, plugin/bin/ and engine/SabberStoneCore/bin and obj (git ignores all of them).
 With --no-build, fx-harmony uses whatever plugin/bin holds. With a client set up it fails, rather than skips, its pinned check
 when references/bepinex is missing (the plugin cannot be built) or, with --no-build, plugin/bin holds no built plugin.
 
@@ -61,7 +62,7 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild_in_tree_with_client=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild=(), prebuild_in_tree_with_client=()):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -73,6 +74,7 @@ class Suite:
         self.unix_only = unix_only      # skipped, with a note, on Windows
         self.needs_client = needs_client  # client tier: needs references/game (see --client); skipped without it
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
+        self.prebuild = list(prebuild)  # dotnet: projects to build first into the shared artifacts (the suite loads their output)
         # mono: projects to build first into their own bin/ (the suite reads plugin/bin/...), only when a client is set up
         self.prebuild_in_tree_with_client = list(prebuild_in_tree_with_client)
 
@@ -121,7 +123,7 @@ SUITES = [
     Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred-proof/KindredProofTests.csproj', needs_engine=True),
     Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn-proof/RebornProofTests.csproj', needs_engine=True),
     Suite('engine-proof', 'dotnet', 'card-by-card engine proofs: effects, resolution, snapshots and definitions, and the engine rule proofs '
-          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools); the full run, about 5 minutes',
+          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools), canonical hashes, and the planner on a recorded turn; the full run, about 5 minutes',
           'tests/engine-proof/EngineProof.csproj', args=['--full']),
     Suite('standard-native', 'dotnet', 'native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, '
           'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
@@ -139,7 +141,7 @@ SUITES = [
 SUITES += [
     Suite('deck-ui', 'dotnet', 'deck layout geometry, button chrome and handheld rules of the native screens',
           'tests/deck-ui/DeckUiTests.csproj'),
-    Suite('projection', 'dotnet', 'how menu and match state is projected onto the native screens',
+    Suite('projection', 'dotnet', 'how menu and match state is projected onto the native screens (and the zero-tag equivalence table)',
           'tests/projection/ProjectionTests.csproj'),
     Suite('ladder', 'dotnet', 'the ranked ladder profile code: results, rewards, milestones, ledger, placement and casual mode',
           'tests/ladder/LadderTests.csproj'),
@@ -157,9 +159,11 @@ SUITES += [
     Suite('fx-harmony', 'mono', 'the effect patches applied by the real Harmony library under Mono (the sub-spell pin needs a client)',
           'tests/fx-harmony/FxHarmonyTests.csproj', prebuild_in_tree_with_client=['plugin/OfflineProbe.csproj']),
 ]
-# Client tier: the halves of engine-proof and standard-native that need your own client (references/game; docs/BUILDING.md step 1).
-# The same sources build a second time with -p:ClientTransport=true, which adds the client's libraries and the native match,
-# and each client suite runs only what needs them. The card export they read is built locally from a client (needs_local).
+# The client tier: suites that compile or load your own client's libraries (references/game; BepInEx in references/bepinex,
+# docs/BUILDING.md step 1). engine-proof and standard-native build a second time with -p:ClientTransport=true, which adds the
+# client's libraries and the native match, and each client half runs only what needs them. The data they read is in the
+# repository, except what is built locally from a client (needs_local).
+# Card and shop data exported from your own client with maintainer tools (docs/TESTING.md, "Data built locally"). Never committed.
 CARDDB = 'data/carddb/37.0.0.254477/cards.json.gz'
 SUITES += [
     Suite('engine-proof-client', 'dotnet', 'engine proofs that compare the engine with your client (card definitions file, hero powers, '
@@ -169,6 +173,13 @@ SUITES += [
     Suite('standard-native-client', 'dotnet', 'native match flow checks on Standard-format games: packets, Trade, live snapshots, location projection',
           'tests/standard-native/StandardNativeTests.csproj', props=['-p:ClientTransport=true'], artifacts='standard-native-client',
           needs_client=True),
+    Suite('native-bindings', 'dotnet', 'the plugin\'s bindings: every client method it patches exists in your client libraries',
+          'tests/native-bindings/NativeBindingTests.csproj', needs_client=True, needs_local=PLUGIN_REFERENCES),
+    Suite('native-match', 'dotnet', 'the native match: plugin match logic on recorded games, and the recipe editor of the built plugin',
+          'tests/native-match/NativeMatchTests.csproj', needs_client=True, prebuild=['plugin/OfflineProbe.csproj'],
+          needs_local=PLUGIN_REFERENCES + (CARDDB, 'data/fx/empty-playeffect-37.0.0.254477.tsv')),
+    Suite('transport-invariants', 'dotnet', 'engine-to-client transport: invariants over recorded and random games (long)',
+          'tests/transport-invariants/TransportInvariants.csproj', args=['--strict'], needs_client=True, needs_local=(CARDDB,)),
 ]
 BY_NAME = {suite.name: suite for suite in SUITES}
 
@@ -278,8 +289,12 @@ class Runner:
             if not self.ensure_hssim(log):
                 return False
             props.append(f'-p:SabberStoneCorePath={self.engine_dll()}')
-        if self.build and not self.build_project(log, suite.project, artifacts, props):
-            return False
+        if self.build:
+            for project in suite.prebuild:
+                if not self.build_project(log, project, artifacts):
+                    return False
+            if not self.build_project(log, suite.project, artifacts, props):
+                return False
         program = artifacts / 'bin' / suite.assembly / 'release' / (suite.assembly + '.dll')
         if not program.is_file():
             Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())

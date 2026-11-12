@@ -1448,6 +1448,7 @@ Check(!NativeUIProjection.TryGetOnboardingOption(false, "HAS_SEEN_COLLECTIONMANA
     && !NativeUIProjection.TryGetOnboardingOption(true, "SOUND", out _)
     && !NativeUIProjection.TryGetOnboardingOption(true, null, out _),
     "onboarding projection preserves inactive, gameplay, unrelated and unknown options");
+EndpointZeroTagsProjectionTests.Run();
 Console.WriteLine("PROJECTION TESTS PASS");
 class Publisher { private void OnNetCacheObjReceived<T>(T value) {} }
 class NoPublisher {}

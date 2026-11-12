@@ -1,0 +1,20 @@
+id	class	reason	inventory	name
+BE_146	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Oathbinder's Aura
+CATA_480	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Sandfury Aura
+EDR_256	G	nonoriginal card in own deck	existing	Dreamwarden
+EDR_256e	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Portalmancy
+EDR_259	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Ursol
+EDR_259e1	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Ursol's Aura
+END_011	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Acceleration Aura
+JAIL_327	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Reinforcement Aura
+MEND_802	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Convalescence
+TIME_009	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Gelbin of Tomorrow
+TIME_009t1	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Gnomish Aura
+TIME_009t2	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Mekkatorque's Aura
+TIME_009t2e	N	no pre-play condition: timed Aura, unconditional effect or token	existing	For Gnomeregan!
+TIME_017	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Tankgineer
+TIME_019	G	own active Aura	existing	Manifested Timeways
+TIME_700	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Chronological Aura
+TIME_700t	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Chronological Drake
+TTN_851	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Resistance Aura
+TTN_851e	N	no pre-play condition: timed Aura, unconditional effect or token	existing	Resistance
