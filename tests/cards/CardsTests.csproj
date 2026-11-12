@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup><EngineSource>true</EngineSource></PropertyGroup>
   <Import Project="../../data/packs/FairPackResources.props" />
   <PropertyGroup>
     <OutputType>Exe</OutputType>

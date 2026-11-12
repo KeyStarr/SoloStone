@@ -10,7 +10,6 @@ internal static class TestLoanerChecks
         Check(LocalDecks.NextOpponent(new[] { "mage", "test-cenarius" }).Id == LocalDecks.NextOpponent(new[] { "mage" }).Id
             && LocalDecks.NextOpponent(new[] { "test-cenarius" }).Id == LocalDecks.NextOpponent(new string[0]).Id,
             "unknown or test opponents in history are ignored by rotation");
-#if ENGINE_SOURCE
         LocalDeck loaner = LocalDecks.Get(LocalDecks.TestDecisionsId), opponent = LocalDecks.Get(LocalDecks.TestCenariusId);
         Check(loaner.Build().Count == 30 && opponent.Build().Count == 30, "test loaner and test opponent build");
         Check(LocalDecks.All.All(deck => !deck.Id.StartsWith("test-", StringComparison.Ordinal)),
@@ -53,11 +52,5 @@ internal static class TestLoanerChecks
         }
         using (var reopened = new LocalProfile(path))
             Check(reopened.Pending?.Opponent == LocalDecks.TestCenariusId, "pending test match survives a profile reload");
-#else
-        Check(LocalDecks.PlayerHeroes.Count == 9 && !LocalDecks.PlayerHeroes.Contains("HERO_10")
-            && !LocalDecks.PlayerHeroes.Contains("HERO_11"), "vendor supports nine player classes without Demon Hunter or Death Knight");
-        Check(NativeUIProjection.ProjectedLoanerKeys(0).Count == 8, "vendor projects eight loaners");
-        Check(LocalDecks.TestLoaners.Count == 0 && LocalDecks.TestOpponents.Count == 0, "vendor build has no test loaner");
-#endif
     }
 }
