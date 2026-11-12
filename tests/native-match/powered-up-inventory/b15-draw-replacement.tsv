@@ -1,0 +1,14 @@
+id	class	reason	inventory	name
+BE_250	N	unconditional deck reorder and persistent choice	existing	Discs of Norgannon
+BE_250e	N	persistent player enchantment	existing	Shift the Discs
+BE_250t	N	direction option	existing	Leave the Discs
+BE_250t2	N	direction option	existing	Shift the Discs
+CORE_SCH_717	N	passive opponent draw trigger	existing	Keymaster Alabaster
+JAIL_398	N	Deathrattle including qualified offboard causes	existing	IMPFERNAL!
+TIME_032	N	unconditional Battlecry	existing	Chronogor
+TIME_617	N	passive normal draw suppression	existing	Chronochiller
+TLC_513	N	Quest progress is not a conditional hand bonus	existing	Lie in Wait
+TLC_513t	N	unconditional hero Battlecry	existing	Master Dusk
+TLC_513hp	N	unconditional Hero Power	existing	Way of the Shell
+TLC_513e2	N	persistent player enchantment	existing	Master Dusk Reshuffle Player Enchant
+JAIL_509e	N	shared retained-overdraw player enchantment	existing	Godfrey's Atlas

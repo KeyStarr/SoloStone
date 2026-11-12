@@ -1,0 +1,9 @@
+id	class	reason	inventory	name
+BE_150	N	no conditional play effect	existing	Coilbearer
+CATA_979	N	no conditional play effect	existing	Conjuration Specialist
+EDR_520	N	no conditional play effect	existing	Forbidden Shrine
+EDR_874	N	no conditional play effect	existing	Stellar Balance
+JAIL_735	G	three other player spell casts this turn	existing	Code Violet
+TIME_859	N	no conditional play effect	existing	Anomalize
+EDR_874e	N	named enchantment	existing	Stellar Balance
+TIME_859e	N	named enchantment	existing	Anomalized

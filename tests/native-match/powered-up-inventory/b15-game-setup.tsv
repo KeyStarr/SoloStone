@@ -1,0 +1,13 @@
+id	class	reason	inventory	name
+CORE_ETC_111	N	unconditional effect or start-of-game check	existing	Merch Seller
+CORE_REV_946	N	unconditional effect or start-of-game check	existing	Steamcleaner
+EDR_000	N	unconditional effect or start-of-game check	existing	Ysera, Emerald Aspect
+EDR_260	N	unconditional effect or start-of-game check	existing	Illusory Greenwing
+EDR_845	N	unconditional effect or start-of-game check	existing	Hamuul Runetotem
+JAIL_384	N	unconditional effect or start-of-game check	existing	Chainbreaker Hogger
+JAIL_443	N	unconditional effect or start-of-game check	existing	The Living Plague
+TIME_730	N	unconditional effect or start-of-game check	existing	Kaldorei Cultivator
+EDR_260t	N	Summoned When Drawn, no conditional hand glow	existing	Illusion
+EDR_845e1	N	controller progression enchantment	existing	Runetotem's Favor
+JAIL_443t	N	Casts When Drawn, no conditional hand glow	existing	Blight
+TIME_730e	N	stat enchantment	existing	Nurtured

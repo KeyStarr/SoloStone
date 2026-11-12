@@ -1,0 +1,17 @@
+id	class	reason	inventory	name
+CAP_004	N	unconditional side placement effect	existing	Disguised Operator
+CAP_004a	N	side option	existing	Detected!
+CAP_004b	N	side option	existing	Disguised!
+JAIL_442	N	unconditional side placement effect	existing	Disguised Doctor
+JAIL_442a	N	side option	existing	Detected!
+JAIL_442b	N	side option	existing	Disguised!
+JAIL_452	N	unconditional side placement effect	existing	Disguised Detective
+JAIL_452a	N	side option	existing	Detected!
+JAIL_452b	N	side option	existing	Disguised!
+JAIL_455	N	unconditional side placement effect	existing	Disguised Watchman
+JAIL_455a	N	side option	existing	Detected!
+JAIL_455b	N	side option	existing	Disguised!
+JAIL_461	N	unconditional side placement effect	existing	Disguised Executioner
+JAIL_461a	N	side option	existing	Detected!
+JAIL_461b	N	side option	existing	Disguised!
+TLC_522	C	printed Combo	existing	Opu the Unseen

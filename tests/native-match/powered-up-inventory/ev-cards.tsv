@@ -1,0 +1,13 @@
+id	class	reason	inventory	name
+TLC_EVENT_402	N	weapon Deathrattle	existing	Staff of the Endbringer
+EDR_950	N	unconditional draw and private preview	existing	Sharp-Eyed Lookout
+EDR_950e	N	temporary cost enchantment	existing	Newly Discovered!
+CATA_EVENT_401	N	Prepare action; static Spell Damage	existing	Tunneling Geomancer
+CATA_EVENT_402	C	generic Combo Coin grant	existing	Deadly Bribe
+TIME_EVENT_301	N	unconditional Battlecry	existing	Disciple of Demise
+CATA_EVENT_000	N	unconditional historical generation	existing	Primordial Lord
+CATA_EVENT_000e	N	unused exported annotation	existing	Primordial
+CATA_EVENT_002	G	controller Fire spell played this turn	existing	Baleful Blazer
+TIME_EVENT_300	N	Deathrattle	existing	Dark Iron Harbinger
+CATA_EVENT_400	N	Prepare action; unconditional Battlecry	existing	Commissary Crook
+JAIL_EVENT_102	N	unconditional summon and transformation	existing	Desperate Bribe

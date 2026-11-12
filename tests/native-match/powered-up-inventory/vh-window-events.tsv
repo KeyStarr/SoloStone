@@ -1,0 +1,6 @@
+id	class	reason	inventory	name
+BE_EVENT_100	N	unconditional tutor refresh and player restriction	existing	Arrival of the Old Gods
+BE_EVENT_100e	N	player restriction enchantment	existing	Old Gods' Watch
+BE_EVENT_101	N	unconditional tutor refresh and player restriction	existing	Arrival of the Titans
+BE_EVENT_101e	N	player restriction enchantment	existing	Titan's Watch
+BE_EVENT_102	N	unconditional targeted damage	existing	Dark Terraforming
