@@ -23,6 +23,12 @@ internal static class MetaPreBeProof
                         && f.Detail == "sibling-POWER under=PLAY header=differs meta=DAMAGE"
                         && f.Conditions?.Contains(HistoryShapeCondition.ExhaustionDeathrattle) == true),
                         name + " retains the original exhaustion Deathrattle regression witness");
+                if (name == "TIME_876e")
+                    // The original regression: a held Shapeshifter (entity 17) turns into TIME_858 at step 99 (a definition reset, not a buff),
+                    // and the classifier must not call it a hand buff. A re-record that drops the transform cannot pass.
+                    SelfChecks.Check(runner.ChangeLog.Any(c => c.Step == 99 && c.Entity == 17 && c.Card == "TIME_858")
+                        && !shape.Findings.Any(f => f.Rule == "HAND_BUFF_FX"),
+                        name + " retains the original Shapeshifter transform witness (CHANGE_ENTITY 17 to TIME_858 at step 99, no HAND_BUFF_FX)");
                 SelfChecks.Check(runner.Failures == 0 && runner.ViolationCount == 0, name + " transport clean");
                 Console.WriteLine("PASS meta-pre-be replay " + name);
             }

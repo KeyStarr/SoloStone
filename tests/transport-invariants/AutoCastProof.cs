@@ -596,7 +596,12 @@ public static class AutoCastProof
                 && (e.HasShowEntity ? e.ShowEntity : e.FullEntity).Name.Length > 0);
             // A Secret cast on the other player's turn (Faceless Enigma's pick for the opponent) is live at once (#32, 7f5de0c), so a
             // later action of this scripted turn can trigger it; it is named when it triggers, after its PLAY.
-            bool namedWhenTriggered = opponentSecret && source.Zone == source.Controller.GraveyardZone && named > at;
+            // A fizzled Secret (duplicate, full zone) never reaches the Secret zone or triggers, and must still be named before its PLAY.
+            // A late name therefore needs both: the Secret entered the Secret zone after its PLAY, and its own TRIGGER block follows the reveal.
+            int installed = wire.FindIndex(at + 1, e => e.HasTagChange && e.TagChange.Entity == engine.Source && e.TagChange.Tag == (int)GameTag.ZONE
+                && e.TagChange.Value == (int)Zone.SECRET);
+            int triggered = named < 0 ? -1 : wire.FindIndex(named, e => e.HasPowerStart && (int)e.PowerStart.Type == (int)BlockType.TRIGGER && e.PowerStart.Source == engine.Source);
+            bool namedWhenTriggered = opponentSecret && source.Zone == source.Controller.GraveyardZone && installed > at && named > installed && triggered > named;
             Check(hidden ? named < 0 : namedWhenTriggered || named >= 0 && named < at, $"{name}: {source.Card.Id} named before its PLAY ({named}/{at}, hidden={hidden})");
         }
         var violations = Invariants.ActorIdentity(game, session.Client).ToArray();

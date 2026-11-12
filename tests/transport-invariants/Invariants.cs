@@ -224,7 +224,7 @@ internal static class Invariants
                     // Character.Armor counts only gained Armor. A hero card that is not its controller's hero (in hand or deck)
                     // has gained none and shows its printed Armor, like Deathwing, Worldbreaker's 12 (#27).
                     expected[GameTag.ARMOR] = character is Hero heroCard && heroCard != heroCard.Controller?.Hero
-                        ? heroCard[GameTag.ARMOR] : character.Armor;
+                        ? heroCard.Card[GameTag.ARMOR] : character.Armor;
                     expected[GameTag.TAUNT] = character.HasTaunt ? 1 : 0;
                     expected[GameTag.DIVINE_SHIELD] = character.HasDivineShield ? 1 : 0;
                     expected[GameTag.STEALTH] = character.HasStealth ? 1 : 0;

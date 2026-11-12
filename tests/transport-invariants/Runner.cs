@@ -46,6 +46,8 @@ internal sealed class Runner
     internal int RewindOffers, RewindKeeps, Rewinds, FuzzRewindOffers, FuzzRewindKeeps, FuzzRewinds;
     internal bool LightspawnPlayed;
     internal readonly HashSet<string> CardsPlayed = new(StringComparer.Ordinal);
+    // CHANGE_ENTITY packets by the step whose action produced them: (step, entity, new card).
+    internal readonly List<(int Step, int Entity, string Card)> ChangeLog = new();
     internal readonly HashSet<string> StandardBatchPlayed = new(StringComparer.Ordinal);
     internal readonly HashSet<string> ReprintsPlayed = new(StringComparer.Ordinal);
     internal readonly HashSet<string> ReprintsTraded = new(StringComparer.Ordinal);
@@ -190,8 +192,10 @@ internal sealed class Runner
                 if (rewind) { Rewinds++; if (record.Suite == "fuzz") FuzzRewinds++; }
                 else { RewindKeeps++; if (record.Suite == "fuzz") FuzzRewindKeeps++; }
             }
+            int changedBefore = session.Changed.Count;
             try { session.Process(task); }
             catch (Exception error) { throw new InvalidOperationException($"transport action failed: {record.Id} step={step} task={Simulation.TaskKey(task)}", error); }
+            for (int c = changedBefore; c < session.Changed.Count; c++) ChangeLog.Add((step, session.Changed[c].Entity, session.Changed[c].Card));
             if (game.Rewind?.Stage == SabberStoneCore.Model.Rewind.RewindStage.Offered && game.Rewind.OfferChoiceId != lastRewindOffer)
             {
                 lastRewindOffer = game.Rewind.OfferChoiceId;

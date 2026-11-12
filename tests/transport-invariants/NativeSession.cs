@@ -14,6 +14,8 @@ internal sealed class NativeSession(NativeMatch match)
     internal HistoryShape History => history ??= new(match.Game, match.WireReturnId, match.EngineReturnId);
     internal ClientModel Client = new() { WireId = match.WireReturnId, EngineId = match.EngineReturnId };
     internal readonly List<WirePacket> Packets = new();
+    // Every CHANGE_ENTITY the wire carried, in order (a regression witness can name the transform it needs).
+    internal readonly List<(int Entity, string Card)> Changed = new();
     private PowerEntityChoices pendingChoice;
     private HashSet<int> rewindKnownDeckOffers, rewindPrivateBurns;
     private readonly HashSet<int> retainedOverdraws = new();
@@ -37,6 +39,7 @@ internal sealed class NativeSession(NativeMatch match)
             var received = new PegasusGame.PowerHistory();
             received.Deserialize(stream);
             if (stream.Position != stream.Length) throw new InvalidOperationException("Native history did not consume its wire bytes");
+            foreach (var entry in received.List) if (entry.HasChangeEntity) Changed.Add((entry.ChangeEntity.Entity, entry.ChangeEntity.Name));
             Client.Apply(received);
             var boardFaults = BoardActorInvariant.Inspect(Client).ToArray();
             SelfChecks.Check(boardFaults.Length == 0, "packet board actors: " + string.Join("; ", boardFaults));

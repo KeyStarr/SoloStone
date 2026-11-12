@@ -12,14 +12,15 @@ internal static class DeathrattleReplayProof
             && !string.IsNullOrEmpty(replay.EngineFingerprint), "Felhunter replay pins decks and engine state/history/RNG");
         var runner = new Runner();
         var history = runner.Run(replay, verify: true);
-        SelfChecks.Check(runner.ViolationCount == 0 && runner.Completed.Values.Sum() == 1 && Unreviewed(history).Length == 0,
+        SelfChecks.Check(runner.ViolationCount == 0 && runner.Completed.Values.Sum() == 1 && ExpectedFindingsOnly(history),
             "Felhunter empty Deathrattle, granted Deathrattle and Lifesteal retain distinct keyword boundaries: "
             + string.Join("; ", history.Findings.Select(f => $"{f.Rule}@{f.Step}: {f.Card}/{f.BlockCard} {f.Detail}")));
         Console.WriteLine("PASS Felhunter exact replay: legal hashes/actions, state/history/RNG fingerprint, transport parity and history shape");
     }
-    // Findings the history-shape baseline has not reviewed (a reviewed, accepted shape is not a failure here).
-    private static HistoryShapeBucket[] Unreviewed(HistoryShape history) =>
-        HistoryShapeReport.Classify(history.Findings.Where(f => f.Severity == "error").GroupBy(f => (f.Rule, f.Card))
-            .Select(group => HistoryShapeReport.Bucket(group, group.Key.Rule, group.Key.Card)).ToArray(),
-            HistoryShapeReport.LoadBaseline(), fullCorpus: false).Fresh;
+    // The re-recorded game (the old one stopped matching after the Bloated Leech fix) produces exactly one history-shape finding, an
+    // exhaustion Deathrattle of a composite location, which the baseline accepts. Anything else, info findings included, fails.
+    private static bool ExpectedFindingsOnly(HistoryShape history) =>
+        history.Findings.Count == 1 && history.Findings[0] is { Rule: "SPLIT_EFFECT_BLOCK", Severity: "error", Card: "TLC_100t1" } finding
+            && finding.Detail == "sibling-POWER under=PLAY header=differs meta=DAMAGE"
+            && finding.Conditions?.SequenceEqual(new[] { HistoryShapeCondition.ExhaustionDeathrattle }) == true;
 }
