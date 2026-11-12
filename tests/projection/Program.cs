@@ -503,14 +503,17 @@ Check(NativeUIProjection.TestLoanerGroupPath == documentedSelectorPath,
     "bootstrap selector stays inside disposable client reports");
 static string ProjectionSourceDirectory([System.Runtime.CompilerServices.CallerFilePath] string file = "") => Path.GetDirectoryName(file)!;
 // The coordinator's verification note is private; where it is absent the check is skipped.
-string verificationDocPath = Path.Combine(ProjectionSourceDirectory(), "../../docs/roadmap/2026-10-19-standard-live-verification.md");
-if (File.Exists(verificationDocPath))
+// It sits in the private tree, or under private/ once the private add-on is inside a public checkout.
+string verificationDocPath = new[] { "../../docs/roadmap", "../../private/docs/roadmap" }
+    .Select(folder => Path.Combine(ProjectionSourceDirectory(), folder, "2026-10-19-standard-live-verification.md"))
+    .FirstOrDefault(File.Exists) ?? "";
+if (verificationDocPath != "")
 {
     var selectorDocLines = File.ReadAllText(verificationDocPath).Split('\n').Where(line => line.Contains("test-loaner-group.txt")).ToArray();
     Check(selectorDocLines.Length >= 2 && selectorDocLines.All(line => line.Contains(NativeUIProjection.TestLoanerGroupPath)),
         "documented selector path and coordinator command match plugin path");
 }
-else Console.WriteLine("SKIP documented selector path: docs/roadmap is not in this checkout");
+else Console.WriteLine("SKIP documented selector path: maintainer-only (docs/roadmap is not in this checkout)");
 NativeUIProjection.TestLoanerGroupPath = @"C:\hs-native-ui-"+@"prototype\lanes\2\client\reports\test-loaner-group.txt";
 Check(NativeUIProjection.TestLoanerGroupPath.Contains(@"\lanes\2\"), "caller configures lane selector independently");
 NativeUIProjection.TestLoanerGroupPath = documentedSelectorPath;

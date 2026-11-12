@@ -175,8 +175,10 @@ Some test suites are not in this repository.
   check the plugin's native screens, hooks and message handling: the engine proofs per card, native match flows, and
   the checks that every client call the plugin binds to still exists. The runner already supports them (`--client`);
   the suites themselves are added in a later change. This repository ships no client file, and CI cannot run them.
-- **The tests for the plugin's game profile and offline guard.** They spell out the paths of the maintainer's test
-  machine, so they stay private for now. Part of them (achievements and rewards) could move out into a public suite later.
+- **The offline guard and save-flow tests.** They spell out the paths of the maintainer's test machine, so they stay
+  private. The profile, rewards and achievements logic is in the `progression` suite above.
+- **Checks against maintainer-only files.** A few checks in `progression` and `projection` compare the plugin with the
+  maintainer's lab scripts and notes. Without those files they print `SKIP ... maintainer-only` and the suite still passes.
 - **Live tests.** These drive a real game on a real test machine: clicks, drags, matches and installs. They need that
   machine and are not in this repository.
 - **Generator tests.** The tools that make the card file and the pack tables from the game's own data are private,

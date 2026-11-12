@@ -18,6 +18,19 @@ internal static class RepoRoot
         return null;
     }
 
+    // A file only the maintainer's checkout has (lab scripts, private docs): at `relative` in the private tree, or under
+    // private/ once the private add-on sits inside a public checkout. Null in a public checkout; the check that reads it
+    // then skips with a printed reason.
+    internal static string FindMaintainerFile(string relative)
+    {
+        foreach (string candidate in new[] { relative, "private/" + relative })
+        {
+            string root = Find(candidate);
+            if (root != null) return Path.Combine(root, candidate);
+        }
+        return null;
+    }
+
     private static bool Has(string root, string relative)
     {
         string path = Path.Combine(root, relative);

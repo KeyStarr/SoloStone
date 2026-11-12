@@ -833,9 +833,9 @@ internal static class ProfileCatalogChecks
         PickerDeleteGate(Path.Combine(root, "picker-gate"));
         // These two read private lab scripts and notes; a checkout without them skips them.
         if (HasRepoFile("windows/Runtime-Manifest.Common.ps1") && HasRepoFile("tools/remote/deck/deck-remote.sh")) OptionsFieldsMatchTheScripts(Path.Combine(root, "script-fields"));
-        else Console.WriteLine("SKIP script option-field validators: windows/ and tools/remote/ are not in this checkout");
+        else Console.WriteLine("SKIP script option-field validators: maintainer-only (windows/ and tools/remote/ are not in this checkout)");
         if (HasRepoFile("docs/agent-workflows/live-test-hooks.md")) PaceHoursMatchTheRecipes();
-        else Console.WriteLine("SKIP pace hours against the live-test recipes: docs/agent-workflows is not in this checkout");
+        else Console.WriteLine("SKIP pace hours against the live-test recipes: maintainer-only (docs/agent-workflows is not in this checkout)");
         ReconcileBothWays(Path.Combine(root, "reconcile"));
         ReconcileRefusesToGuess(Path.Combine(root, "reconcile-safe"));
         PurgeOldest(Path.Combine(root, "purge"));
@@ -1008,14 +1008,15 @@ internal static class ProfileCatalogChecks
         Check(ProfileCatalog.DeleteFromPicker(legacy, c.Id, null, false, null, false).Outcome == "refused-bound", "a missing log never breaks the refusal");
     }
 
+    // These read maintainer-only files (lab scripts, private docs), which a public checkout does not have.
     private static bool HasRepoFile(string relative)
     {
-        return RepoRoot.Find(relative) != null;
+        return RepoRoot.FindMaintainerFile(relative) != null;
     }
 
     private static string RepoFile(string relative)
     {
-        return File.ReadAllText(Path.Combine(RepoRoot.Find(relative) ?? throw new Exception("repo file missing: " + relative), relative));
+        return File.ReadAllText(RepoRoot.FindMaintainerFile(relative) ?? throw new Exception("maintainer file missing: " + relative));
     }
 
     // Both script validators hold a literal field list: every element order the game can write must pass them. Pwsh is not on the Mac, so the lists are read, not run.

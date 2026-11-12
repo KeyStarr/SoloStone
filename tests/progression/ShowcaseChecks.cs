@@ -7,8 +7,9 @@ internal static class ShowcaseChecks
     {
 #if ENGINE_SOURCE
         void Check(bool ok, string message) { if (!ok) throw new Exception(message); }
-        if (!File.Exists("docs/decks/showcase-decks.md")) { Console.WriteLine("SKIP showcase deck notes: docs/decks is not in this checkout"); return; }
-        var document = File.ReadAllText("docs/decks/showcase-decks.md");
+        string notes = RepoRoot.FindMaintainerFile("docs/decks/showcase-decks.md");
+        if (notes == null) { Console.WriteLine("SKIP showcase deck notes: maintainer-only (docs/decks is not in this checkout)"); return; }
+        var document = File.ReadAllText(notes);
         var sections = Regex.Matches(document, @"(?ms)^## (showcase-[^\r\n]+)\r?\n(.*?)(?=^## |\z)");
         var players = new List<string>();
         var opponents = new List<string>();
