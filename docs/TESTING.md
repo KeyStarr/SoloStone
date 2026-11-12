@@ -114,7 +114,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
 | `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
-| `projection` | How menu and match state is projected onto the native screens |
+| `projection` | How menu and match state is projected onto the native screens, and which zero-tag differences between the engine and the client count as equal |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
 | `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
@@ -124,7 +124,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools). Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |

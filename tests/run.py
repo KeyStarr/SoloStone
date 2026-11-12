@@ -123,7 +123,7 @@ SUITES = [
     Suite('kindred', 'dotnet', 'engine rules for Kindred cards', 'tests/kindred-proof/KindredProofTests.csproj', needs_engine=True),
     Suite('reborn', 'dotnet', 'engine rules for Reborn cards', 'tests/reborn-proof/RebornProofTests.csproj', needs_engine=True),
     Suite('engine-proof', 'dotnet', 'card-by-card engine proofs: effects, resolution, snapshots and definitions, and the engine rule proofs '
-          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools); the full run, about 5 minutes',
+          '(Imbue, Dormant, Rewind, History, Location, Decision, snapshots, pools), canonical hashes, and the planner on a recorded turn; the full run, about 5 minutes',
           'tests/engine-proof/EngineProof.csproj', args=['--full']),
     Suite('standard-native', 'dotnet', 'native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, '
           'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
@@ -141,7 +141,7 @@ SUITES = [
 SUITES += [
     Suite('deck-ui', 'dotnet', 'deck layout geometry, button chrome and handheld rules of the native screens',
           'tests/deck-ui/DeckUiTests.csproj'),
-    Suite('projection', 'dotnet', 'how menu and match state is projected onto the native screens',
+    Suite('projection', 'dotnet', 'how menu and match state is projected onto the native screens (and the zero-tag equivalence table)',
           'tests/projection/ProjectionTests.csproj'),
     Suite('ladder', 'dotnet', 'the ranked ladder profile code: results, rewards, milestones, ledger, placement and casual mode',
           'tests/ladder/LadderTests.csproj'),
