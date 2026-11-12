@@ -47,7 +47,10 @@ internal static class ClientTier
             // Transport tails inside card proofs.
             KnockbackProof.Run, StarsurgeProof.Run, LotusTroublemakerProof.Run,
             LightoftheNewMoonProof.Run, RitualoftheNewMoonProof.Run, ReforestationProof.Run, StormfuryProof.Run,
-            SplinteredRealityProof.Run, ClockworkRagerProof.Run });
+            SplinteredRealityProof.Run, ClockworkRagerProof.Run,
+            // Both reach StarsurgeProof.Hidden's transport tail: Merry Moonkin from EmeraldDreamProofs, the three Smoldering cards
+            // from the smoldering-cards group; neither runs from this list otherwise (the group runs only in engine-proof).
+            MerryMoonkinProof.Run, SmolderingTimerProof.CardScenarios });
         Console.WriteLine("engine-proof-client: PASS");
     }
 
