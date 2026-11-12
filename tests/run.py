@@ -111,6 +111,8 @@ SUITES = [
     Suite('recipes', 'dotnet', 'the shipped shop deck recipes validate and follow the recipe rules', 'tests/recipes/RecipeTests.csproj'),
     Suite('npc-world', 'dotnet', 'opponent decks, skills, personalities, matchmaking and the opponent population',
           'tests/npc-world/NpcWorldTests.csproj'),
+    Suite('npc-world-distribution', 'dotnet', 'opponent mistake distribution: 200 seeded trials per skill tier on six fixtures stay inside the priced bounds (about a minute)',
+          'tests/npc-world/NpcWorldTests.csproj', args=['--passivity-distribution']),
     Suite('ai', 'dotnet', 'opponent AI fairness: it may not see hidden information', 'tests/ai/AiTests.csproj'),
     Suite('ai-audit', 'dotnet', 'the dated AI audit reproduction of 2026-10-31 that the fairness suite does not reach (C1; C4 runs there already)',
           'tests/ai/AiTests.csproj', args=['--audit', 'C1']),
