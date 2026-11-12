@@ -86,6 +86,7 @@ internal static partial class NativeCrafting
                 "grant-only native upgrade refused before mutation: " + id);
         }
         RunUpgradeHooks();
+        RunTokenHooks();
         var bulkLedger = ResetHooks();
         bulkLedger.Counts["TEST_CARD"] = 5;
         Assert(HasMassExtras(), "mass extras use authoritative ownership");
@@ -571,6 +572,67 @@ internal static partial class NativeCrafting
             "deck refresh failure preserves commit, clears pending and reports refresh error");
     }
 
+    // #74: a held craft token makes one Normal copy for 0 dust; native shows it free, allows it without dust and never
+    // offers a second token-priced copy in the same card view. Golden and other premium views keep their prices.
+    private static void RunTokenHooks()
+    {
+        var ledger = ResetHooks(); var manager = CraftingManager.Get(); manager.Shown = new EntityDef();
+        ledger.Tokens.Add("TEST_CARD"); ledger.DustBalance = 0;
+        var record = new CardValueDbfRecord(); NetCache.CardValue value = null;
+        Assert(!Price("TEST_CARD", TAG_PREMIUM.NORMAL, ref record, ref value) && value.BaseBuyValue == 0 && value.BaseSellValue == 20,
+            "token-paid Normal craft is priced 0; its sell value stays ordinary");
+        NativeUIProbe.RewardProfile.Premium[("TEST_CARD", 1)] = 1;
+        Price("TEST_CARD", TAG_PREMIUM.GOLDEN, ref record, ref value);
+        Assert(value.BaseSellValue == 200, "premium price untouched by a held token");
+        NativeUIProbe.RewardProfile.Premium.Clear();
+        Price("PROFILE_ONLY", TAG_PREMIUM.NORMAL, ref record, ref value);
+        Assert(value.BaseBuyValue == 40, "a token for another card's rarity leaves its price");
+        var craft = CraftingManager.CanCraftCardResult.NotEnoughDust;
+        Assert(CanCraft(new EntityDef(), TAG_PREMIUM.NORMAL, ref craft), "token craft goes to native's own check (0 cost, any dust)");
+
+        var ui = new CraftingUI(); ui.m_buttonCreate.SetEnabled(true); ui.m_craftValue.Text = "-0";
+        ShowTokenCraft(ui);
+        Assert(ui.m_craftValue.Text == TokenCraftLabel && ui.m_buttonCreate.Enabled && ui.CreateCostBar, "token craft reads Free");
+        Assert(BeforeCreate(false) && BeforeUpgradeEvent("CODE_CREATE") && Popups.Count == 0, "first token copy may be created");
+        manager.m_pendingClientTransaction.NormalCreateCount = 1;
+        Assert(!BeforeCreate(false) && !BeforeUpgradeEvent("CODE_CREATE") && Popups.Count == 2 && Popups.All(text => text == TokenOneCopy)
+            && manager.DustAdjustment == -80 && ledger.Commits == 0, "second token-priced copy refused before native mutation");
+        ui.m_craftValue.Text = "-0";
+        ShowTokenCraft(ui);
+        Assert(!ui.m_buttonCreate.Enabled && !ui.CreateCostBar, "pending token copy disables Create; Undo stays on Disenchant");
+        Assert(BeforeDisenchant(), "Undo of the token copy passes");
+
+        ui = new CraftingUI(); ui.m_buttonCreate.SetEnabled(true);
+        manager.m_pendingClientTransaction = new CraftingPendingTransaction { NormalDisenchantCount = 1 };
+        ui.m_craftValue.Text = "-20";
+        ShowTokenCraft(ui);
+        Assert(ui.m_craftValue.Text == "-20" && ui.m_buttonCreate.Enabled, "Create Undo of a sale keeps its native sell value");
+        manager.m_pendingClientTransaction = new CraftingPendingTransaction();
+        manager.ShownPremium = TAG_PREMIUM.GOLDEN; ui.m_craftValue.Text = "-0";
+        ShowTokenCraft(ui);
+        Assert(ui.m_craftValue.Text == "-0" && ui.m_buttonCreate.Enabled, "Golden view never reads free");
+        manager.ShownPremium = TAG_PREMIUM.NORMAL; ledger.Tokens.Clear(); ui.m_craftValue.Text = "-40";
+        ShowTokenCraft(ui);
+        manager.m_pendingClientTransaction.NormalCreateCount = 1;
+        Assert(ui.m_craftValue.Text == "-40" && BeforeCreate(false) && Popups.Count == 2, "no token: native price and repeated crafts unchanged");
+
+        ledger = ResetHooks(); manager = CraftingManager.Get(); manager.Shown = new EntityDef();
+        ledger.Tokens.Add("TEST_CARD"); ledger.DustBalance = 0;
+        var pending = new CraftingPendingTransaction { NormalCreateCount = 1 };
+        manager.m_pendingClientTransaction = pending;
+        BeforeClose();
+        CommitBatch(pending, 0, 0, 0, 0);
+        AfterClose(manager);
+        Assert(ledger.Commits == 1 && ledger.Counts["TEST_CARD"] == 1 && ledger.DustBalance == 0 && ledger.Tokens.Count == 0
+            && PublishedDust == 0 && manager.Clean && manager.Notifications == 1 && Popups.Count == 0,
+            "token craft commits on close with insufficient dust; displayed dust is the unchanged saved balance");
+
+        NativeUIProbe.Active = false;
+        ui = new CraftingUI(); ui.m_craftValue.Text = "-0";
+        ShowTokenCraft(ui);
+        Assert(ui.m_craftValue.Text == "-0", "disabled hook leaves native text");
+    }
+
     private static Exception InvokeCloseFailed(Exception original)
     {
         var method = typeof(NativeCrafting).GetMethod("CloseFailed", BindingFlags.NonPublic | BindingFlags.Static);
@@ -587,13 +649,19 @@ internal sealed class FakeCraftingLedger : ICraftingLedger
     internal int Commits;
     internal bool Refuse;
     internal int SnapshotReads, SingleReads;
+    internal readonly HashSet<string> Tokens = new();
+    public bool CraftsWithToken(string id) => Tokens.Contains(id);
     public IReadOnlyDictionary<string, int> OwnedCounts() { SnapshotReads++; return new Dictionary<string, int>(Counts); }
     public int OwnedCount(string id) { SingleReads++; return Counts.GetValueOrDefault(id); }
     public CraftPlan CommitBatch(string id, CraftDirection direction, int count, int expected)
     {
         if (Refuse || OwnedCount(id) != expected) return new() { Error = "refused" };
         int delta = direction == CraftDirection.Craft ? count : -count;
-        long dust = direction == CraftDirection.Craft ? -40L * count : 20L * count;
+        bool token = direction == CraftDirection.Craft && Tokens.Contains(id);
+        if (token && count != 1) return new() { Error = "refused" };
+        long dust = token ? 0 : direction == CraftDirection.Craft ? -40L * count : 20L * count;
+        if (DustBalance + dust < 0) return new() { Error = "refused" };
+        if (token) Tokens.Remove(id);
         Counts[id] = OwnedCount(id) + delta; DustBalance += dust; Commits++;
         return new() { Ok = true, DustDelta = dust, Cards = new() { new() { CardId = id } } };
     }
@@ -710,6 +778,9 @@ internal sealed class CraftingManager
     internal void UpdateBankText() => NativeCrafting.Boundary("bank");
     internal CraftingPendingTransaction m_pendingClientTransaction = new(), m_pendingServerTransaction = new();
     internal long DustAdjustment = -80;
+    // Native nets the shown quality's pending crafts against its sales.
+    internal int GetNumClientTransactions() => m_pendingClientTransaction == null ? 0
+        : m_pendingClientTransaction.NormalCreateCount - m_pendingClientTransaction.NormalDisenchantCount;
     internal bool IsInCraftingMode { get; set; } = true;
     internal int Notifications;
     internal bool Clean => m_pendingClientTransaction == null && m_pendingServerTransaction == null && DustAdjustment == 0;
@@ -768,8 +839,14 @@ internal sealed class TestButton {
     internal void SetEnabled(bool enabled) => Enabled = enabled;
     internal void DisableButton() => Enabled = false;
 }
+public enum LocalTokenRarity { Common, Rare, Epic, Legendary }
+public sealed class LocalCardTokens { public int Common, Rare, Epic, Legendary; }
 internal sealed class CraftingUI
 {
+    internal readonly TestButton m_buttonCreate = new();
+    internal readonly UberText m_craftValue = new(); // NativeHomeTests' UberText
+    internal bool CreateCostBar = true;
+    private void SetCreateCostBarActive(bool active) => CreateCostBar = active;
     internal readonly TestButton m_buttonDisenchant = new();
     internal bool DisenchantCostBar = true;
     private void SetDisenchantCostBarActive(bool active) => DisenchantCostBar = active;

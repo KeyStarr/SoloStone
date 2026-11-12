@@ -549,6 +549,9 @@ public sealed partial class LocalProfile : IDisposable
     public long HighestNumericPurchaseRequestId => data.Purchases.Select(r =>
         long.TryParse(r.RequestId, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var id) ? id : 0L).DefaultIfEmpty(0).Max();
     public bool PackRevealPending => data.PackRevealPending;
+    // Ranked milestone craft tokens (#74). The count query does not copy: native price lookups run it per card.
+    internal LocalCardTokens CardTokens => Copy(data.CardTokens);
+    internal int CardTokenCount(LocalTokenRarity rarity) => LocalCrafting.TokenCount(data.CardTokens, rarity);
     public LocalMatchRecord PendingRewardPresentation => data.PendingRewardPresentationId == null ? null
         : Copy(data.Matches.SingleOrDefault(match => match.Id == data.PendingRewardPresentationId));
     public int Stars => Ladder.StarIndex;

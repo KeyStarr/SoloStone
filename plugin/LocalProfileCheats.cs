@@ -72,6 +72,25 @@ public sealed partial class LocalProfile
         return reward;
     }
 
+#if !SOLOSTONE_RELEASE
+    // Test control only (craft-token-grant, lab builds): add ranked craft tokens to this save, as a milestone grant does.
+    internal void GrantCardTokensForTest(LocalTokenRarity rarity, int count)
+    {
+        if (count < 1 || count > 4 || !Enum.IsDefined(typeof(LocalTokenRarity), rarity)) throw new ArgumentOutOfRangeException(nameof(count));
+        CommitChange(next => {
+            if (next.Pending != null || next.PackRevealPending) throw new InvalidOperationException("Finish the pending match or pack reveal first.");
+            switch (rarity)
+            {
+                case LocalTokenRarity.Common: next.CardTokens.Common = checked(next.CardTokens.Common + count); break;
+                case LocalTokenRarity.Rare: next.CardTokens.Rare = checked(next.CardTokens.Rare + count); break;
+                case LocalTokenRarity.Epic: next.CardTokens.Epic = checked(next.CardTokens.Epic + count); break;
+                case LocalTokenRarity.Legendary: next.CardTokens.Legendary = checked(next.CardTokens.Legendary + count); break;
+            }
+            return true;
+        });
+    }
+#endif
+
     internal void PersistNewProfile(ProfileOptions options)
     {
         if (FileExists()) throw new InvalidOperationException("Creation cheats apply only to a new save.");

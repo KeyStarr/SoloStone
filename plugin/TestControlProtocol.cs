@@ -223,9 +223,12 @@ internal sealed class ControlRequest
     internal readonly JsonNode Fields;
     internal readonly DateTime ReceivedUtc = DateTime.UtcNow;
     internal bool Mutation => Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
-        || Command == "squelch" || Command == "unsquelch" || Command == "emote" || Command == "npc-emote" || Command == "npc-concede" || Command == "human-defeat" || Command == "premium-unlock-prepare" || Command == "ui-hover" || Command == "ui-unhover" || Command == "ui-escape" || Command == "choice-click" || Command == "entity-drag" || Command == "ui-drag" || Command == "ui-scroll" || Command == "open-packs" || Command == "achievement-prime" || Command == "turn-timer-debug" || Command == "spell-stall-arm";
+        || Command == "squelch" || Command == "unsquelch" || Command == "emote" || Command == "npc-emote" || Command == "npc-concede" || Command == "human-defeat" || Command == "premium-unlock-prepare" || Command == "ui-hover" || Command == "ui-unhover" || Command == "ui-escape" || Command == "choice-click" || Command == "entity-drag" || Command == "ui-drag" || Command == "ui-scroll" || Command == "open-packs" || Command == "achievement-prime" || Command == "turn-timer-debug" || Command == "spell-stall-arm"
+        || Command == "craft-token-grant" || Command == "collection-jump";
     // Human emotes the native emote menu offers (EmoteType names); test-control plays them through the native option.
     internal static readonly string[] HumanEmotes = { "GREETINGS", "WELL_PLAYED", "THANKS", "WOW", "OOPS", "THREATEN" };
+    // LocalTokenRarity names, accepted by craft-token-grant.
+    internal static readonly string[] CraftTokenRarities = { "Common", "Rare", "Epic", "Legendary" };
     internal ControlRequest(JsonNode fields)
     {
         Fields = fields;
@@ -244,6 +247,14 @@ internal sealed class ControlRequest
             case "cosmetic-check-status": extras = "runId"; Text("runId"); break;
             case "crafting-state": extras = "cardIds"; if (Has("cardIds")) CardIds(); break;
             case "open-packs": extras = "count"; Integer("count", 1, TestControlPacks.MaxCount); break;
+            // Lab builds only: add ranked craft tokens to the disposable save (#74), as a milestone would.
+            case "craft-token-grant":
+                extras = "rarity count";
+                if (Array.IndexOf(CraftTokenRarities, Text("rarity")) < 0) throw new FormatException("Invalid token rarity");
+                Integer("count", 1, 4);
+                break;
+            // Native Collection page flip to one card (CollectionPageManager.JumpToPageWithCard); no click.
+            case "collection-jump": extras = "cardId"; if (UiRules.CollectionCardId(Text("cardId")) == null) throw new FormatException("Invalid card ID"); break;
             case "shop-purchase":
                 extras = "productId quantity kitId";
                 ShopId("productId");
@@ -782,6 +793,10 @@ internal static class UiRules
     internal const string CraftingCreate = "crafting.create", CraftingDisenchant = "crafting.disenchant", CraftingClose = "crafting.close";
     internal static string DeckHelperChoiceId(string cardId) => PlainWord(cardId, 64) ? "deckhelper.choice." + cardId : null;
     private const string CardBackTile = "collection.cardback.", HeroSkinTile = "collection.heroskin.", HeroClassTile = "collection.heroclass.", CoinTile = "collection.coin.";
+    // Normal card tiles on the Cards pages: right-click opens the native crafting view (CollectionCardVisual.OnRightClick).
+    private const string CardTile = "collection.card.";
+    internal const string CollectionCraftingMode = "collection.craftingmode";
+    internal static string CollectionCardId(string cardId) => PlainWord(cardId, 64) ? CardTile + cardId : null;
     internal static string CollectionCoinId(int coinId) => coinId >= 1 ? CoinTile + coinId : null;
     internal static string CollectionCardBackId(int cardBackId) => cardBackId >= 0 ? CardBackTile + cardBackId : null;
     // Card ids and class names are plain ASCII words; anything else keeps its path id (and no right-click).
@@ -798,6 +813,7 @@ internal static class UiRules
             return int.TryParse(id.Substring(CoinTile.Length), NumberStyles.None, CultureInfo.InvariantCulture, out int coin) && id == CollectionCoinId(coin);
         if (id.StartsWith(CardBackTile, StringComparison.Ordinal))
             return int.TryParse(id.Substring(CardBackTile.Length), NumberStyles.None, CultureInfo.InvariantCulture, out int back) && id == CollectionCardBackId(back);
+        if (id.StartsWith(CardTile, StringComparison.Ordinal)) return id == CollectionCardId(id.Substring(CardTile.Length));
         return id.StartsWith(HeroSkinTile, StringComparison.Ordinal) && id == CollectionHeroSkinId(id.Substring(HeroSkinTile.Length));
     }
     // Coin gestures connect a canonical collection tile and the native deck coin socket.

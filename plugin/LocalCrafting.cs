@@ -21,6 +21,8 @@ public sealed class CraftPlan
     public bool Ok;
     public string Error;
     public long DustDelta;
+    // Set when a ranked craft token pays for this Normal craft (#74): DustDelta is then 0 and one token of it is spent.
+    public LocalTokenRarity? TokenRarity;
     public List<CraftCardDelta> Cards = new List<CraftCardDelta>();
 }
 public sealed class CraftLedgerView
@@ -29,6 +31,8 @@ public sealed class CraftLedgerView
     public IReadOnlyDictionary<string, int> Counts;
     public IReadOnlyDictionary<string, int> Acquired;
     public bool PackRevealPending;
+    // Craft tokens a Normal craft may spend; null spends none (an infinite-dust profile never spends them).
+    public LocalCardTokens Tokens;
 }
 public static class LocalCrafting
 {
@@ -79,6 +83,53 @@ public static class LocalCrafting
         }
         disenchantValue = craftCost / 2;
         return true;
+    }
+
+    // Ranked milestone craft tokens (#74, owner 2026-11-13): a Normal craft of a card whose rarity matches a held token
+    // costs no dust and spends one token of that rarity, automatically. One token makes one copy: a Normal batch of more
+    // than one copy is refused while such a token is held (the card view allows one copy per close, see NativeCrafting).
+    // Premium crafts and upgrades never use tokens. The token-made copy disenchants like any other copy.
+    public static bool TryGetTokenRarity(string cardId, out LocalTokenRarity rarity)
+    {
+        rarity = LocalTokenRarity.Common;
+        if (!TryGetPrice(cardId, out _, out _)) return false;
+        switch (Definitions[cardId].Rarity)
+        {
+            case Rarity.COMMON: rarity = LocalTokenRarity.Common; return true;
+            case Rarity.RARE: rarity = LocalTokenRarity.Rare; return true;
+            case Rarity.EPIC: rarity = LocalTokenRarity.Epic; return true;
+            case Rarity.LEGENDARY: rarity = LocalTokenRarity.Legendary; return true;
+            default: return false;
+        }
+    }
+
+    public static int TokenCount(LocalCardTokens tokens, LocalTokenRarity rarity)
+    {
+        if (tokens == null) return 0;
+        switch (rarity)
+        {
+            case LocalTokenRarity.Common: return tokens.Common;
+            case LocalTokenRarity.Rare: return tokens.Rare;
+            case LocalTokenRarity.Epic: return tokens.Epic;
+            case LocalTokenRarity.Legendary: return tokens.Legendary;
+            default: return 0;
+        }
+    }
+
+    /// <summary>True when a Normal craft of this card would be paid by a held token.</summary>
+    public static bool CraftsWithToken(LocalCardTokens tokens, string cardId) =>
+        TryGetTokenRarity(cardId, out var rarity) && TokenCount(tokens, rarity) > 0;
+
+    internal static void SpendToken(LocalCardTokens tokens, LocalTokenRarity rarity)
+    {
+        if (TokenCount(tokens, rarity) < 1) throw new InvalidOperationException("No craft token of this rarity is held.");
+        switch (rarity)
+        {
+            case LocalTokenRarity.Common: tokens.Common--; break;
+            case LocalTokenRarity.Rare: tokens.Rare--; break;
+            case LocalTokenRarity.Epic: tokens.Epic--; break;
+            case LocalTokenRarity.Legendary: tokens.Legendary--; break;
+        }
     }
 
     // Placeholder #52: all premium qualities use half the retail Golden craft cost.
@@ -317,10 +368,17 @@ public static class LocalCrafting
             int after = checked(before + delta);
             if (after < 0) return Refuse("Not enough owned copies.");
             if (direction == CraftDirection.Craft && after > Playset(cardId)) return Refuse("Craft limit reached.");
-            long dustDelta = direction == CraftDirection.Craft ? checked(-(long)count * craftCost)
+            var tokens = view.Tokens;
+            if (tokens != null && (tokens.Common < 0 || tokens.Rare < 0 || tokens.Epic < 0 || tokens.Legendary < 0))
+                return Refuse("Invalid craft tokens.");
+            bool token = direction == CraftDirection.Craft && premium == 0 && CraftsWithToken(tokens, cardId);
+            if (token && count != 1) return Refuse("A craft token makes one copy. Craft one, close the card, then craft the next.");
+            long dustDelta = token ? 0 : direction == CraftDirection.Craft ? checked(-(long)count * craftCost)
                 : checked((long)count * disenchantValue);
             if (checked(view.Dust + dustDelta) < 0) return Refuse("Not enough dust.");
-            return new CraftPlan { Ok = true, DustDelta = dustDelta, Cards = new List<CraftCardDelta> {
+            LocalTokenRarity? rarity = null;
+            if (token && TryGetTokenRarity(cardId, out var held)) rarity = held;
+            return new CraftPlan { Ok = true, DustDelta = dustDelta, TokenRarity = rarity, Cards = new List<CraftCardDelta> {
                 new CraftCardDelta { CardId = cardId, Premium = premium, CountDelta = delta, CountBefore = before,
                     AcquiredBefore = acquired, AcquiredAfter = direction == CraftDirection.Craft
                         ? checked((int)Math.Min(Playset(cardId), checked((long)acquired + count))) : acquired }

@@ -130,6 +130,12 @@ site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager.Run
 row M CraftingManager GetCardValue # Prefix(...) with a byref parameter list the scanner cannot read: CraftingManager.GetCardValue(string, premium, CardValueDbfRecord&)
 site NativeCrafting.Prefix | Method | (unknown type) # the rows above cover the one call that passes MakeByRefType parameters; the other Prefix calls are plain typeof and name literals the scanner reads
 
+# NativeCrafting.SetUiText
+site NativeCrafting.SetUiText | Property | (unknown type) # UberText.Text on CraftingUI.m_craftValue (a compiled row); UberText is outside references/game; a miss throws in the token craft cost label (#74)
+
+# NativeCrafting.UiText
+site NativeCrafting.UiText | Property | (unknown type) # UberText.Text on CraftingUI.m_craftValue/m_disenchantValue (compiled rows); UberText is outside references/game; a miss reads null and the cost label stays native
+
 # NativeFxTelemetry.InstallHooks
 row P Network+HistSubSpellStart SpellPrefabGUID # SubSpellInstance.SubSpellStartTask.FieldType.GetProperty; FX journal
 row P Network+HistSubSpellStart SourceEntityID # SubSpellInstance.SubSpellStartTask.FieldType.GetProperty; FX journal

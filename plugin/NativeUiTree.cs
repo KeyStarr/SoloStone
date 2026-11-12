@@ -365,6 +365,8 @@ internal static class NativeUiTree
             }
             if (mode == CollectionUtils.ViewMode.COINS)
                 return UiRules.CollectionCoinId(CosmeticCoinManager.Get().GetCoinIdFromCoinCard(visual.CardId));
+            if (mode == CollectionUtils.ViewMode.CARDS)
+                return visual.Premium == TAG_PREMIUM.NORMAL ? UiRules.CollectionCardId(visual.CardId) : null;
             return mode == CollectionUtils.ViewMode.HERO_SKINS ? UiRules.CollectionHeroSkinId(visual.CardId) : null;
         }
         // Hero Skins landing page: one class button per class (label "Paladin 2/8"), owned by the collection picker.

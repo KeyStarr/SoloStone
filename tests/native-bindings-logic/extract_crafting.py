@@ -20,7 +20,7 @@ names = ["TryReadBatch", "CanCraft", "Price", "CraftingEvent", "Permission", "Be
          "CloseFailed", "CommitMass", "MassResponse", "MassUnblocked", "SafeStep", "TryMassTotals",
          "PreviewMass", "MassCompleted", "Synchronize", "RefreshDust", "RefreshPage", "ShowError",
          "FinishClose", "HasMassExtras", "LedgerPreviewCard", "WarnMassRefresh", "ShowRefreshError", "SettlementDust",
-         "FeaturedCardSet", "CoreCardSet", "ShownCardIsCore"]
+         "FeaturedCardSet", "CoreCardSet", "ShownCardIsCore", "AllowTokenCraft", "ShowTokenCraft", "UiLabel", "UiText", "SetUiText"]
 ledger = (Path(__file__).parents[2] / "plugin/LocalCraftingLedger.cs").read_text()
 parts = [block(r"internal interface ICraftingLedger", ledger), block(r"internal static class CraftingLedgerRegistry", ledger)]
 body = [block(r"    private sealed class BatchCompletion")]
@@ -31,6 +31,8 @@ body.append(re.search(r"    private static bool Eligible\([^;]+;", source).group
 body.append(re.search(r"    private static bool Disenchantable\([^;]+;", source).group())
 body.append(re.search(r"    private static bool PresentationEligible\([^;]+;", source).group())
 body.append(re.search(r"    private static bool PremiumSaleAvailable\([^;]+;", source).group())
+for name in ["TokenOneCopy", "TokenCraftLabel"]:
+    body.append(re.search(r"    internal const string " + name + r" = [^;]+;", source).group())
 plans = (Path(__file__).parents[2] / "plugin/LocalCrafting.cs").read_text()
 for name in ["CraftPlan", "CraftCardDelta", "CraftLedgerView"]:
     match = re.search(r"public sealed class " + name + r"\s*\{[^}]+\}", plans)
