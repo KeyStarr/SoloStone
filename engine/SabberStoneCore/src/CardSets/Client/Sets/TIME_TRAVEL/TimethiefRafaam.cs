@@ -67,7 +67,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             PoweredUp.Register(card,HoldingOther);
-            card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=>c.Hero.Armor+=HoldingOther((IPlayable)s)?10:5) };
+            card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
+                using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.Armor,(IPlayable)s,c.Hero) : null)
+                    c.Hero.Armor+=HoldingOther((IPlayable)s)?10:5;
+            }) };
         }
         [StandardCard("TIME_005t5",119444)]
         internal static void Mindflayer(Card card)
@@ -83,8 +86,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
-                foreach(var victim in c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray())
-                    victim.TakeDamage((IPlayable)s,6);
+                using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.DamageGroup,(IPlayable)s) : null)
+                    foreach(var victim in c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray())
+                        victim.TakeDamage((IPlayable)s,6);
             }) };
         }
         [StandardCard("TIME_005t7",119446)]
