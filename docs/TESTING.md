@@ -153,15 +153,21 @@ shows up as a changed game, not as a quiet success.
 
 Every re-recorded game is classified and printed:
 
-- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history/state hashes
-  moved. This is what an intended engine change that does not alter play looks like.
+- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history hash moved.
+  Accepted without a flag.
+- `STATE`: as above, but the final state hash moved. The legal-move hashes cover the options offered, not the board
+  numbers, so a rules change that alters stats or tags without changing any offered option (most likely on the last
+  turn) looks exactly like this, and a regression can hide in it. These are refused (exit 1, nothing written) unless
+  you pass `--allow-state-change` (or `--allow-behaviour-change`, which implies it), which prints a warning per game.
+  To review one, replay the game before and after (old engine/golden against the new build) and compare the final board:
+  every minion's and hero's stats, tags and health must differ only where your change says they should.
 - `BEHAVIOUR`: the game itself changed (different actions or legal moves, turns, winner, or a pool/Dark Gift version
   field). The line shows how many actions changed and where they first differ. These are refused (exit 1, nothing
   written) unless you pass `--allow-behaviour-change`, which prints a warning per game. A behaviour change needs a
   reviewer's eye on each listed game: say in your change why it changed.
 
 `--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
-re-recorded, a behaviour change without the flag, a re-recorded game that still does not match, or a file not in the
+re-recorded, a behaviour or state change without its flag, a re-recorded game that still does not match, or a file not in the
 form `goldens record` writes); nothing is written then. 2 is a usage error.
 
 Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card pool their record pins. Schema 2 files
@@ -169,7 +175,7 @@ Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card
 pool and Dark Gift rules, and stored in the schema 2 form. They replay under the legacy rules, so the re-check is what
 guards them: a re-recorded game is replayed from the text that would be written, and nothing is written if any one still
 mismatches. Rerecord also refuses a case that can no longer be built or whose identity (id, decks, seed, policy)
-changed. It prints `N re-recorded (S shape only, B behaviour), M unchanged, all K match`.
+changed. It prints `N re-recorded (S shape only, T state, B behaviour), M unchanged, all K match`.
 
 `goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
 and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine

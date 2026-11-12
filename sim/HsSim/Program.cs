@@ -123,7 +123,7 @@ public static class Program
 
     private sealed class UsageException(string message) : ArgumentException(message);
 
-    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run] [--allow-behaviour-change]";
+    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run] [--allow-state-change] [--allow-behaviour-change]";
 
     private static void ValidateSuite(GoldenSuite data)
     {
@@ -140,11 +140,12 @@ public static class Program
     private static int Rerecord(string path, string[] rest)
     {
         var only = new List<string>();
-        bool dryRun = false, allowBehaviour = false;
+        bool dryRun = false, allowBehaviour = false, allowState = false;
         for (int i = 0; i < rest.Length; i++)
         {
             if (rest[i] == "--dry-run") dryRun = true;
             else if (rest[i] == "--allow-behaviour-change") allowBehaviour = true;
+            else if (rest[i] == "--allow-state-change") allowState = true;
             else if (rest[i] == "--only")
             {
                 int first = i + 1;
@@ -163,6 +164,7 @@ public static class Program
         var replaced = new Dictionary<int, GameRecord>();
         var scope = new List<int>();
         var behavioural = new List<string>();
+        var stateOnly = new List<string>();
         int failed = 0;
         for (int i = 0; i < data.Games.Count; i++)
         {
@@ -174,8 +176,9 @@ public static class Program
             {
                 GameRecord fresh = Recreate(old, data.Schema);
                 replaced[i] = fresh;
-                string line = Classify(old, fresh, out bool behaviour);
+                string line = Classify(old, fresh, out bool behaviour, out bool stateMoved);
                 if (behaviour) behavioural.Add(old.Id);
+                else if (stateMoved) stateOnly.Add(old.Id);
                 Console.WriteLine($"changed {old.Id}: {line}");
             }
             catch (Exception error)
@@ -202,6 +205,20 @@ public static class Program
             foreach (string id in behavioural)
                 Console.Error.WriteLine($"WARNING {id}: BEHAVIOUR change re-recorded on request; review this game before committing");
         }
+        if (stateOnly.Count > 0)
+        {
+            // The legal-move hashes cover the options offered, not the board numbers, so a rules change that alters stats or
+            // tags without changing any offered option moves only stateSha. That cannot be told from a harmless change by
+            // the hashes alone, so it needs a reviewer too. --allow-behaviour-change covers it (a superset).
+            if (!allowState && !allowBehaviour)
+            {
+                Console.Error.WriteLine("refusing STATE changes without --allow-state-change: " + string.Join(", ", stateOnly));
+                Console.WriteLine($"{replaced.Count} could be re-recorded ({stateOnly.Count} state); nothing written");
+                return 1;
+            }
+            foreach (string id in stateOnly)
+                Console.Error.WriteLine($"WARNING {id}: STATE change re-recorded on request; replay it and compare the final board before committing");
+        }
         if (replaced.Count > 0)
         {
             // Rewrite only if the file round-trips, so every game we did not touch stays byte-identical.
@@ -225,7 +242,7 @@ public static class Program
             if (!dryRun) Save(path, output);
         }
         string all = only.Count > 0 ? $"all {scope.Count} in scope" : $"all {scope.Count}";
-        Console.WriteLine($"{replaced.Count} re-recorded ({replaced.Count - behavioural.Count} shape only, {behavioural.Count} behaviour), {scope.Count - replaced.Count} unchanged, {all} match"
+        Console.WriteLine($"{replaced.Count} re-recorded ({replaced.Count - behavioural.Count - stateOnly.Count} shape only, {stateOnly.Count} state, {behavioural.Count} behaviour), {scope.Count - replaced.Count} unchanged, {all} match"
             + (dryRun ? "; dry run, nothing written" : "") + $" ({watch.Elapsed.TotalSeconds:F3}s)");
         return 0;
 #else
@@ -235,8 +252,9 @@ public static class Program
 
 #if SOURCE_ENGINE
     // One line saying how a re-recorded game differs. SHAPE: same actions and legal moves (so same turns and winner), only
-    // the history/state hashes moved. BEHAVIOUR: anything else, including a changed rules/pool version field.
-    private static string Classify(GameRecord old, GameRecord fresh, out bool behaviour)
+    // the history hash moved. STATE: same, but the final state hash moved: the board numbers or tags changed without
+    // changing any offered option, which the other hashes cannot see. BEHAVIOUR: anything else, including a changed rules/pool version field.
+    private static string Classify(GameRecord old, GameRecord fresh, out bool behaviour, out bool stateMoved)
     {
         static int Differing<T>(List<T> a, List<T> b) =>
             Enumerable.Range(0, Math.Max(a.Count, b.Count)).Count(i => i >= a.Count || i >= b.Count || !EqualityComparer<T>.Default.Equals(a[i], b[i]));
@@ -248,11 +266,13 @@ public static class Program
         if (old.Failure != null) others.Add("recorded failure dropped");
         int actions = Differing(old.Actions, fresh.Actions), legal = Differing(old.LegalShas, fresh.LegalShas);
         behaviour = actions > 0 || legal > 0 || old.Turns != fresh.Turns || old.Winner != fresh.Winner || others.Count > 0;
+        stateMoved = !behaviour && old.StateSha != fresh.StateSha;
+        if (stateMoved)
+            return $"STATE final state moved ({(old.HistorySha != fresh.HistorySha ? "history and state" : "state only")}); actions, turns and winner unchanged; replay it and compare the final board";
         if (!behaviour)
         {
             var moved = new List<string>();
             if (old.HistorySha != fresh.HistorySha) moved.Add("history");
-            if (old.StateSha != fresh.StateSha) moved.Add("state");
             return $"shape only ({(moved.Count > 0 ? string.Join(", ", moved) : "no hash")} moved), 0 actions changed";
         }
         string text = $"BEHAVIOUR winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}, actions {old.Actions.Count}->{fresh.Actions.Count} ({actions} changed"
