@@ -25,6 +25,7 @@ For the `ci` tier you need no Hearthstone files.
 | .NET SDK | **10.0.402**. `global.json` pins it and refuses any other version. |
 | Python | 3.10 or newer, on your `PATH` as `python3` (or `python` on Windows). The runner uses only the standard library. |
 | Git | The installer build tools read the source revision, so use a Git checkout. |
+| Mono | Only for the `fx-harmony` suite, which patches under Mono as the game does: `mono` on your `PATH` (Linux and macOS; on Windows the suite runs without it). Without it the suite is skipped, and CI fails on a skip. |
 | Internet | Once, to restore NuGet packages. |
 
 ```text
@@ -49,6 +50,10 @@ maintainer starts it by hand ([tests.yml](../.github/workflows/tests.yml)). With
 tier out and **a skipped suite fails the run**, so a whole suite cannot silently stop running in CI. (A suite can still
 skip single checks inside itself, as `launcher` does without a client; those show in its own output.)
 
+Three checks in the `ci` tier read your client's own library, so they skip on a machine without one and run on a machine
+with one (see "The client tier"): the pinned section-loader code of the native shop (`shop`), the pinned sideboard tag
+(`recipe-picker`) and the pinned sub-spell hooks (`fx-harmony`). Their `SKIP` line says what is missing.
+
 ### The client tier
 
 ```text
@@ -62,8 +67,8 @@ after your client changes. Use the client version named in `installer/tested-cli
 in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
-(built locally from your client and never committed) is missing. The summary line counts every skip, for example
-`19 of 20 suites passed, 1 skipped (native-match)`. A skip is not a pass: look at the reason.
+(built locally from your client and never committed) is missing. The summary line counts every skip and names the
+skipped suites. A skip is not a pass: look at the reason.
 
 Besides the client libraries, some suites need local files that git ignores:
 
@@ -72,16 +77,21 @@ Besides the client libraries, some suites need local files that git ignores:
 
 #### Data built locally
 
-Two suites read data that is exported from a Hearthstone client and so is never committed (git ignores these paths):
+These suites read data that is exported from a Hearthstone client and so is never committed (git ignores these paths):
 
 | File | Read by |
 |---|---|
-| `data/carddb/37.0.0.254477/cards.json.gz` (the client's card export) | `native-match`, `transport-invariants` |
+| `data/carddb/37.0.0.254477/cards.json.gz` (the client's card export) | `native-match`, `transport-invariants`, `progression-standard-batches` |
+| `data/carddb/37.0.0.254477/set-overrides.json` | `progression-standard-batches` |
 | `data/fx/empty-playeffect-37.0.0.254477.tsv` | `native-match` |
 
 The tools that export these files from a client are not in this repository yet. Until they are, those suites are
 **skipped on any machine that does not already have the files**, and the runner prints which file is missing. A skip is
 not a pass: a change that touches what such a suite covers still needs the maintainer's run (see "Not here yet").
+
+With a client set up, `fx-harmony` also builds the plugin (into `plugin/bin/`, and the engine into `engine/SabberStoneCore/bin` and `obj`; git ignores them) so that it can check the
+compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` and `0Harmony.dll` too (step 1 of
+[BUILDING.md](BUILDING.md)); if they are missing, `fx-harmony` fails instead of skipping the check.
 
 | Option | What it does |
 |---|---|
@@ -101,6 +111,15 @@ not a pass: a change that touches what such a suite covers still needs the maint
 | `ai-golden` | Opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks |
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
+| `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
+| `projection` | How menu and match state is projected onto the native screens |
+| `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
+| `recipe-picker` | The recipe picker and recipe guide of the native shop |
+| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
+| `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
+| `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
+| `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
+| `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
@@ -130,10 +149,12 @@ its packet logs to `sim/out/transport/` (git ignores it).
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
 | Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world` |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden` |
-| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes` |
+| Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder` |
+| Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
 | Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | With a client: `native-bindings`, `native-match`, `transport-invariants` |
-| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation` |
+| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
@@ -188,8 +209,10 @@ HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite of
 Some test suites are not in this repository. The `client` tier runs on your machine only; GitHub cannot run it, and this
 repository ships no client file.
 
-- **The tests for the plugin's game profile and offline guard.** They spell out the paths of the maintainer's test
-  machine, so they stay private for now. Part of them (achievements and rewards) could move out into a public suite later.
+- **The offline guard and save-flow tests.** They spell out the paths of the maintainer's test machine, so they stay
+  private. The profile, rewards and achievements logic is in the `progression` suite above.
+- **Checks against maintainer-only files.** A few checks in `progression` and `projection` compare the plugin with the
+  maintainer's lab scripts and notes. Without those files they print `SKIP ... maintainer-only` and the suite still passes.
 - **Live tests.** These drive a real game on a real test machine: clicks, drags, matches and installs. They need that
   machine and are not in this repository.
 - **Generator tests.** The tools that make the card file and the pack tables from the game's own data are private,
