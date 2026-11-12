@@ -29,10 +29,8 @@ for (int seed = 0; seed < 10000; seed++)
 }
 Check(seenBoards.SetEquals(allBoards) && seenSubset.SetEquals(new[] { 2, 4, 7 }),
     "seeds zero through 9999 cover every eligible board, skipping missing boards");
-#if ENGINE_SOURCE
 HandCardStateProjectionTests.Run();
 PackFabledProjectionTests.Run();
-#endif
 CraftingProjectionTests.Run();
 PremiumProjectionTests.Run();
 CosmeticsProjectionTests.Run();
@@ -40,9 +38,7 @@ MedalProjectionTests.Run();
 var type = Assembly.GetExecutingAssembly().GetType("NativeUIProjection");
 Check(type != null, "native projection is implemented");
 var supported=(IEnumerable<string>)type!.GetField("Supported",BindingFlags.Static|BindingFlags.NonPublic)!.GetValue(null)!;
-#if ENGINE_SOURCE
 CardStateProjectionTests.Run();
-#endif
 Check(LocalCardCatalog.Current.Count == 252
     && supported.Count() == 252 + LocalCoreProgression.AvailableCards.Count
     && new HashSet<string>(supported, StringComparer.Ordinal).SetEquals(
@@ -97,12 +93,8 @@ Check(!(bool)Call("CanCreateDraft",false,true,true,true,0,L(0)),"unsupported dec
 Check(!(bool)Call("CanCreateDraft",true,true,false,true,0,L(0)),"unsupported hero blocks native create");
 Check(!(bool)Call("CanCreateDraft",true,true,true,false,0,L(0)),"non-Standard format blocks native create");
 int loanerCount = NativeUIProjection.ProjectedLoanerKeys(0).Count;
-#if ENGINE_SOURCE
 Check(loanerCount == 11 && NativeUIProjection.ProjectedLoanerKeys(0, "default").Count == 26,
     "release projects eleven Core starter loaners; explicit harness selector enables tests");
-#else
-Check(loanerCount == 8, "vendor projects eight loaners");
-#endif
 int creationCap = NativeUIProjection.MaximumPersonalDecks;
 Check(creationCap == LocalProfile.MaximumCustomDecks && creationCap + NativeUIProjection.PlayerLoanerCapacity == NativeUIProjection.NativeDeckLimit
     && loanerCount <= NativeUIProjection.PlayerLoanerCapacity
@@ -427,7 +419,6 @@ Check(fullRanks.Count == NativeUIProjection.MaximumPersonalDecks + fullLoanerCou
 Reject("ExpectedNativeSortOrders", new object[] { Enumerable.Range(0,NativeUIProjection.MaximumPersonalDecks + 1).Select(i => new KeyValuePair<long,long>(910000010L + i, i)).ToArray(), null! });
 string[] starters = { "mage", "warrior", "priest", "mage-frost", "warrior-control", "priest-combo", "paladin", "paladin-control" };
 string[] testPriority = {
-#if ENGINE_SOURCE
     "test-showcase-deathknight", "test-decisions", "test-standard-batch-1", "test-standard-batch-2-warrior", "test-standard-batch-2-priest",
     "test-standard-batch-2-mage", "test-standard-batch-2-paladin", "test-standard-batch-2-druid", "test-standard-batch-2-rogue",
     "test-standard-batch-2-warlock", "test-standard-batch-2-hunter", "test-standard-batch-2-shaman", "test-standard-batch-2-demonhunter",
@@ -452,16 +443,11 @@ string[] testPriority = {
     "test-standard-b11-warrior", "test-standard-b11-priest", "test-standard-b11-mage", "test-standard-b11-paladin",
     "test-standard-b11-druid", "test-standard-b11-rogue", "test-standard-b11-warlock", "test-standard-b11-hunter",
     "test-standard-b11-shaman", "test-standard-azalina-priest"
-#endif
 };
 foreach (var (personalCount, sourceTests) in new[] { (0,18), (1,17), (2,16), (3,15), (4,14), (5,13), (6,12), (7,11), (17,1), (18,0), (19,0) })
 {
     var projected = NativeUIProjection.ProjectedLoanerKeys(personalCount, "default");
-#if ENGINE_SOURCE
     int expectedTests = sourceTests;
-#else
-    int expectedTests = 0;
-#endif
     Check(projected.SequenceEqual(starters.Concat(testPriority.Take(expectedTests))),
         "starters pinned, test loaners dropped last-first at personal count " + personalCount);
     var personals = Enumerable.Range(0, personalCount).Select(i => new KeyValuePair<long,long>(910000010L + i, 99 - i)).ToArray();
@@ -578,7 +564,6 @@ finally { Directory.Delete(selectorRoot, true); }
 Check(NativeUIProjection.ProjectedLoanerKeys(1, "unknown")
     .SequenceEqual(NativeUIProjection.ProjectedLoanerKeys(1, "11")),
     "unknown group cannot block tray projection");
-#if ENGINE_SOURCE
 Check(NativeUIProjection.ShowcaseLoanerKeys.SequenceEqual(new[] { "test-showcase-deathknight" })
     && NativeUIProjection.DeckId("test-showcase-deathknight") == 900000048L, "DK showcase leads every group with id 900000048");
 Check(NativeUIProjection.TestLoanerGroups[9].SequenceEqual(new[] {
@@ -632,12 +617,6 @@ for (int personalCount = 0; personalCount <= 3; personalCount++)
     Check(projected.Select((key, i) => frozenRanks[NativeUIProjection.DeckId(key)] == NativeUIProjection.MaximumPersonalDecks + i).All(matches => matches)
         && frozenRanks.Count <= 27, "extra group stays frozen through session create at P=" + personalCount);
 }
-#else
-Check(NativeUIProjection.TestLoanerGroups.Count == 11 && NativeUIProjection.TestLoanerGroups.All(group => group.Count == 0),
-    "vendor has eleven empty test loaner groups");
-Check(NativeUIProjection.ProjectedLoanerKeys(3, "extra").SequenceEqual(starters) && NativeUIProjection.ShowcaseLoanerKeys.Count == 0,
-    "vendor ignores extra priority and has no showcase when no test loaners exist");
-#endif
 Check(NativeUIProjection.ProjectedLoanerKeys(NativeUIProjection.MaximumPersonalDecks + 1).SequenceEqual(NativeUIProjection.ProjectedLoanerKeys(NativeUIProjection.MaximumPersonalDecks))
     && NativeUIProjection.ProjectedLoanerKeys(int.MaxValue).SequenceEqual(NativeUIProjection.ProjectedLoanerKeys(NativeUIProjection.MaximumPersonalDecks)),
     "overflow visible personal counts clamp to the personal cap");
@@ -675,7 +654,6 @@ try
         && persistedRanks.Count == NativeUIProjection.MaximumPersonalDecks + fullLoanerCount, "a full visible personal library from one extra stored draft projects within capacity");
     Check(saved.All(personal => personal.Name != "Restored") && beforeReload.SequenceEqual(File.ReadAllBytes(path)),
         "capacity projection preserves every stored draft byte, including restored overflow");
-#if ENGINE_SOURCE
     const string absentLoaner = "test-standard-batch-2-demonhunter";
     var match = reopened.Begin(absentLoaner, LocalDecks.OpponentFor(absentLoaner, Array.Empty<string>()).Id, 123);
     reopened.Settle(match.Id, "Lost", 0, true);
@@ -683,10 +661,8 @@ try
     using var withHistory = new LocalProfile(path);
     Check(withHistory.History.Last().Deck == absentLoaner && withHistory.History.Last().DeckHero == "HERO_10"
         && withHistory.CustomDecks.Count == NativeUIProjection.MaximumPersonalDecks, "history for an absent test loaner survives restart at full personal capacity");
-#endif
 }
 finally { Directory.Delete(capacityRoot, true); }
-#if ENGINE_SOURCE
 string[] addedClasses = { "druid", "rogue", "warlock", "hunter", "shaman", "demonhunter" };
 for (int i = 0; i < addedClasses.Length; i++)
 {
@@ -695,7 +671,6 @@ for (int i = 0; i < addedClasses.Length; i++)
     Check((long)Call("DeckId", key) == id && (bool)Call("IsLoanerId", id)
         && !(bool)Call("IsPersonalId", id) && NativeUIProjection.ExpectedNativeSortOrders(Array.Empty<KeyValuePair<long,long>>(), NativeUIProjection.ProjectedLoanerKeys(0, "default"))[id] == NativeUIProjection.MaximumPersonalDecks + 15 + i, "explicit added loaner identity and rank " + key);
 }
-#endif
 Reject("ValidateCustomSelection",910000010L,"HERO_99",savedThirty,"HERO_99",savedThirty,owned);
 var bridgePersonal=LocalDecks.Custom("Bridge",deck.Hero,savedThirty);
 Call("ValidateMatchDeckBinding","custom:910000010",bridgePersonal);
@@ -1074,7 +1049,6 @@ Reject("ProjectedPackStacks", new[] { (FairPackRules.Standard, -1) }, null, 0, f
 Reject("ProjectedPackStacks", Array.Empty<(string, int)>(), null, 1, false);
 Reject("ProjectedPackStacks", Array.Empty<(string, int)>(), "UNKNOWN", 1, false);
 Reject("ProjectedPackStacks", Array.Empty<(string, int)>(), null, -1, false);
-#if ENGINE_SOURCE
 var expansionReceipt = new[] { "EDR_001", "EDR_001", "EDR_001", "EDR_001", "EDR_001" };
 Check(LocalProfile.KnownLedgerCard("EDR_001") && !supported.Contains("EDR_001"),
     "expansion receipt fixture belongs to typed ledger outside legacy projection pool");
@@ -1088,7 +1062,6 @@ var expansionGrants = (IReadOnlyDictionary<string,int>)Call("NewGrantCounts", ne
 } });
 Check(expansionGrants.Count == 1 && expansionGrants["EDR_001"] == 2,
     "typed expansion ownership grants reach native collection");
-#endif
 var grants = (IReadOnlyDictionary<string,int>)Call("NewGrantCounts", new object[] { new[] {
     new LocalPackCard { Id = "CS2_179", DuplicateGold = 0 },
     new LocalPackCard { Id = "CS2_179", DuplicateGold = 0 },

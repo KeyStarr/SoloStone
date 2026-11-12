@@ -15,10 +15,6 @@ internal static class HeroDraftChecks
             using var stream = File.OpenRead(path);
             return (LocalProfileData)serializer.Deserialize(stream);
         }
-        void Write(LocalProfileData saved) {
-            using var stream = File.Create(path);
-            serializer.Serialize(stream, saved);
-        }
         if (create)
         {
             using (var profile = new LocalProfile(path)) {
