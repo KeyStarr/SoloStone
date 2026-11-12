@@ -75,7 +75,7 @@ namespace SabberStoneCore.Model.Zones
 
         public override void MoveTo(Spell entity, int zonePosition = -1)
         {
-            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity))
+            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity) || Actions.SigilRules.IsSigil(entity))
             {
                 if (entity.Controller != Controller || entity.Zone != null && entity.Zone != this)
                     throw new ZoneException("Aura must be detached and owned by this controller.");
@@ -119,7 +119,7 @@ namespace SabberStoneCore.Model.Zones
 
 		public override void Add(Spell entity, int zonePosition = -1)
 		{
-            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity)) { MoveTo(entity, zonePosition); return; }
+            if (entity.IsAura || Actions.ObjectiveRules.IsObjective(entity) || Actions.SigilRules.IsSigil(entity)) { MoveTo(entity, zonePosition); return; }
 			if (entity.Card.IsQuest && QuestDefinition.TryGet(entity.Card.AssetId, out _))
             {
                 if (!Actions.QuestRules.CanInstall(Controller, entity.Card))
