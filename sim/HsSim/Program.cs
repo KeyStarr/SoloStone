@@ -158,16 +158,17 @@ public static class Program
         if (unknown.Length > 0) throw new UsageException("no such game in the file: " + string.Join(", ", unknown));
         var watch = Stopwatch.StartNew();
         var replaced = new Dictionary<int, GameRecord>();
-        int inScope = 0, failed = 0;
+        var scope = new List<int>();
+        int failed = 0;
         for (int i = 0; i < data.Games.Count; i++)
         {
             GameRecord old = data.Games[i];
             if (only.Count > 0 && !only.Contains(old.Id)) continue;
-            inScope++;
+            scope.Add(i);
             if (Check(old, false)) continue;
             try
             {
-                GameRecord fresh = Recreate(old);
+                GameRecord fresh = Recreate(old, data.Schema);
                 replaced[i] = fresh;
                 Console.WriteLine($"changed {old.Id}: winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}");
             }
@@ -179,10 +180,10 @@ public static class Program
         }
         if (failed > 0)
         {
-            Console.WriteLine($"{replaced.Count} of {inScope} games re-recorded; {failed} could not be; nothing written");
+            Console.WriteLine($"{replaced.Count} re-recorded, {failed} could not be; nothing written");
             return 1;
         }
-        if (replaced.Count > 0 && !dryRun)
+        if (replaced.Count > 0)
         {
             // Rewrite only if the file round-trips, so every game we did not touch stays byte-identical.
             GoldenSuite output = Deserialize<GoldenSuite>(text);
@@ -190,10 +191,22 @@ public static class Program
                 throw new InvalidDataException("golden file is not in the form `goldens record` writes; refusing to rewrite it");
             foreach (var (index, fresh) in replaced) output.Games[index] = fresh;
             output.EngineSha = Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location)));
-            Save(path, output);
+            // Re-check exactly what would be written, loaded back from its own text, before touching the file.
+            string result = JsonSerializer.Serialize(output, Json) + "\n";
+            GoldenSuite reloaded = Deserialize<GoldenSuite>(result);
+            ValidateSuite(reloaded);
+            string[] still = scope.Where(index => !Check(reloaded.Games[index], false)).Select(index => reloaded.Games[index].Id).ToArray();
+            if (still.Length > 0)
+            {
+                Console.Error.WriteLine("still mismatching after re-recording: " + string.Join(", ", still));
+                Console.WriteLine($"{replaced.Count} re-recorded, {still.Length} still mismatch; nothing written");
+                return 1;
+            }
+            if (!dryRun) Save(path, output);
         }
-        Console.WriteLine($"{replaced.Count} of {inScope} games re-recorded" + (dryRun ? "; dry run, nothing written" : "")
-            + $" ({watch.Elapsed.TotalSeconds:F3}s)");
+        string all = only.Count > 0 ? $"all {scope.Count} in scope" : $"all {scope.Count}";
+        Console.WriteLine($"{replaced.Count} re-recorded, {scope.Count - replaced.Count} unchanged, {all} match"
+            + (dryRun ? "; dry run, nothing written" : "") + $" ({watch.Elapsed.TotalSeconds:F3}s)");
         return 0;
 #else
         throw new ArgumentException("goldens rerecord needs the source engine build (-p:EngineSource=true)");
@@ -201,21 +214,31 @@ public static class Program
     }
 
 #if SOURCE_ENGINE
-    // The same case again (suite, decks, seed, policy) on the pool snapshot the old record names.
-    private static GameRecord Recreate(GameRecord old)
+    // The same case again (suite, decks, seed, policy), made the way `goldens record` makes it. Schema 3 runs on the pool
+    // snapshot the old record names; schema 2 records no pool, so it runs unpinned and is stored without pool fields.
+    private static GameRecord Recreate(GameRecord old, int schema)
     {
-        if (old.ReplaySchema != 3)
-            throw new InvalidOperationException("schema 2 record has no pinned pool; make a new suite with `goldens record`");
-        string[] decks = Simulation.DeckIds(old.Suite);
-        if (!decks.Contains(old.Player) || !decks.Contains(old.Opponent))
-            throw new InvalidOperationException($"deck {old.Player} or {old.Opponent} is no longer in suite {old.Suite}");
-        string[] missing = Simulation.Missing(Simulation.Deck(old.Player)).Concat(Simulation.Missing(Simulation.Deck(old.Opponent))).Distinct().ToArray();
-        if (missing.Length > 0) throw new InvalidOperationException("missing cards: " + string.Join(",", missing));
-        var fresh = new GameRecord { Id = old.Id, Suite = old.Suite, Player = old.Player, Opponent = old.Opponent,
-            Seed = old.Seed, Policy = old.Policy, ClonePoints = old.ClonePoints };
-        OfflinePoolManifest pools = PoolSnapshots.ForReplay(old.PoolManifestHash);
+        GameRecord fresh = Cases(old.Suite, (old.Seed, old.Seed), old.Policy)
+            .FirstOrDefault(c => c.Player == old.Player && c.Opponent == old.Opponent)
+            ?? throw new InvalidOperationException($"case {old.Player} vs {old.Opponent} can no longer be built in suite {old.Suite}");
+        if (fresh.Id != old.Id || fresh.Suite != old.Suite || fresh.Player != old.Player || fresh.Opponent != old.Opponent
+            || fresh.Seed != old.Seed || fresh.Policy != old.Policy)
+            throw new InvalidOperationException($"rebuilt case {fresh.Id} differs from the record {old.Id}");
+        fresh.ClonePoints = old.ClonePoints;
+        OfflinePoolManifest pools = schema == 3 ? PoolSnapshots.ForReplay(old.PoolManifestHash) : null;
         Simulation.Finish(fresh, Simulation.Run(fresh, pools: pools));
-        if (fresh.PoolManifestHash != old.PoolManifestHash) throw new InvalidOperationException("pool snapshot was not used");
+        if (schema == 3)
+        {
+            if (fresh.PoolManifestHash != old.PoolManifestHash) throw new InvalidOperationException("pool snapshot was not used");
+        }
+        else
+        {
+            // A schema-2 file stores no replay schema, pool or Dark Gift fields.
+            fresh.ReplaySchema = null;
+            fresh.PoolPolicyVersion = null;
+            fresh.PoolManifestHash = null;
+            fresh.DarkGiftPolicyVersion = null;
+        }
         Validate(fresh);
         return fresh;
     }

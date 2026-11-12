@@ -11,7 +11,6 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SOURCE = ROOT / 'tests' / 'goldens' / 'core-2026.json'
 DLL = os.environ.get('HSSIM_DLL')
 DOTNET = os.environ.get('DOTNET_PATH') or shutil.which('dotnet')
 ENGINE_SHA = re.compile(r'"engineSha":"[0-9a-f]+"')
@@ -22,15 +21,18 @@ def game_ids(text):
 
 
 def game_chunks(text):
-    """The file split into the header and one chunk per game, to compare games one by one."""
-    return re.split(r'(?=\{"replaySchema")', text)
+    """The file split into the header and one chunk per game, to compare games one by one.
+    A game starts with its replay schema (schema 3) or straight with its id (schema 2)."""
+    return re.split(r'(?=\{"(?:replaySchema|id)")', text)
 
 
-@unittest.skipUnless(DLL and DOTNET, 'run through tests/run.py --suite goldens-rerecord')
-class RerecordTests(unittest.TestCase):
+class RerecordTests:
+    """The checks, for one golden file (`golden`). The two subclasses below run them on a schema 3 and a schema 2 file."""
+    golden = None
+
     @classmethod
     def setUpClass(cls):
-        cls.original = SOURCE.read_text()
+        cls.original = (ROOT / 'tests' / 'goldens' / cls.golden).read_text()
         cls.chunks = game_chunks(cls.original)
         cls.ids = game_ids(cls.original)
         assert len(cls.ids) >= 3
@@ -66,7 +68,7 @@ class RerecordTests(unittest.TestCase):
     def test_no_change_leaves_the_file_byte_identical(self):
         result = self.rerecord()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn(f'0 of {len(self.ids)} games re-recorded', result.stdout)
+        self.assertIn(f'0 re-recorded, {len(self.ids)} unchanged, all {len(self.ids)} match', result.stdout)
         self.assertEqual(self.path.read_text(), self.original)
 
     def test_restores_only_the_corrupted_games(self):
@@ -77,7 +79,7 @@ class RerecordTests(unittest.TestCase):
         broken = self.path.read_text()
         result = self.rerecord()
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('2 of %d games re-recorded' % len(self.ids), result.stdout)
+        self.assertIn('2 re-recorded, %d unchanged, all %d match' % (len(self.ids) - 2, len(self.ids)), result.stdout)
         self.assertIn(f'changed {self.ids[0]}: winner', result.stdout)
         self.assertIn(f'changed {self.ids[2]}: winner', result.stdout)
         self.assertNotEqual(self.path.read_text(), broken)
@@ -91,7 +93,7 @@ class RerecordTests(unittest.TestCase):
         self.corrupt(2, self.history_sha(2), '0' * 64)
         result = self.rerecord('--only', self.ids[1])
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('1 of 1 games re-recorded', result.stdout)
+        self.assertIn('1 re-recorded, 0 unchanged, all 1 in scope match', result.stdout)
         games = self.games()
         self.assertEqual(games[2], self.expected_games()[2])
         self.assertIn('0' * 64, games[1])  # game 1 was out of scope and stays broken
@@ -101,7 +103,7 @@ class RerecordTests(unittest.TestCase):
         broken = self.path.read_text()
         result = self.rerecord('--dry-run')
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertIn('1 of %d games re-recorded' % len(self.ids), result.stdout)
+        self.assertIn('1 re-recorded, %d unchanged' % (len(self.ids) - 1), result.stdout)
         self.assertIn('dry run', result.stdout)
         self.assertEqual(self.path.read_text(), broken)
 
@@ -112,13 +114,34 @@ class RerecordTests(unittest.TestCase):
         self.assertEqual(self.path.read_text(), self.original)
 
     def test_a_game_that_cannot_be_rebuilt_fails_and_writes_nothing(self):
-        self.corrupt(1, '"player":"core-2026-1"', '"player":"no-such-deck"')
+        player = re.search(r'"player":"([^"]+)"', self.chunks[1]).group(1)
+        self.corrupt(1, f'"player":"{player}"', '"player":"no-such-deck"')
         # The id contains the deck name, so the edit above only changes the player field.
         broken = self.path.read_text()
         result = self.rerecord()
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn('cannot re-record', result.stderr)
         self.assertEqual(self.path.read_text(), broken)
+
+    def test_a_rebuilt_case_with_another_identity_fails_and_writes_nothing(self):
+        # The seed is part of the id, so a record whose seed was edited no longer matches the case rebuilt from it.
+        seed = re.search(r'"seed":(\d+)', self.chunks[1]).group(1)
+        self.corrupt(1, f'"seed":{seed},', f'"seed":{int(seed) + 100},')
+        broken = self.path.read_text()
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertIn('differs from the record', result.stderr)
+        self.assertEqual(self.path.read_text(), broken)
+
+
+@unittest.skipUnless(DLL and DOTNET, 'run through tests/run.py --suite goldens-rerecord')
+class Schema3Tests(RerecordTests, unittest.TestCase):
+    golden = 'core-2026.json'
+
+
+@unittest.skipUnless(DLL and DOTNET, 'run through tests/run.py --suite goldens-rerecord')
+class Schema2Tests(RerecordTests, unittest.TestCase):
+    golden = 'core-reprints.json'
 
 
 if __name__ == '__main__':

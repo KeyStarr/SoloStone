@@ -151,7 +151,10 @@ again as the same case (decks, seed, policy) on the card pool its own record nam
 since then cannot leak in. Games that still match stay byte-identical, and games are never added or removed. It prints
 the old and new winner and turn count of every changed game and a total; `--dry-run` prints the same and writes
 nothing. Exit code 0 is success, 1 means a game could not be re-recorded (nothing is written), 2 is a usage error.
-It only works on files that pin a card pool (schema 3: `core-2026` and `offline-standard-pools-v1`).
+Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card pool their record pins. Schema 2 files
+(`classic-source`, `modern`, `core-reprints`) record no pool, so their games are re-run as `goldens record` would run them
+and stored in the schema 2 form. It fails, writing nothing, if a case can no longer be built or its identity (id, decks,
+seed, policy) changed. Afterwards it re-checks the games it looked at and prints `N re-recorded, M unchanged, all K match`.
 
 `goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
 and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine
