@@ -141,8 +141,10 @@ namespace SabberStoneCore.Actions
             if (amount <= 0 || IsConvertedHeal(source)) return;
             if (source[LifestealDepth] > 0) { source[LifestealTotal] = DamageArithmetic.Add(source[LifestealTotal], amount); return; }
             var game = source.Game;
+            // Retail: EffectIndex -1 and no effect card. Left unset, EffectIndex went out as 0, so the client played the card's
+            // first trigger effect: Obsidian Statue shot its Deathrattle Shadow Bolt at its own hero on every Lifesteal heal.
             if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER,
-                source.Id, source.Card.Id, -1, 0, triggerKeyword: (int)GameTag.LIFESTEAL));
+                source.Id, "", -1, 0, effectIndex: -1, triggerKeyword: (int)GameTag.LIFESTEAL));
             try
             {
                 Heal(source, new[] { source.Controller.Hero }, amount);
