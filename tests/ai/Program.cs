@@ -4,9 +4,11 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
-if (Environment.GetEnvironmentVariable("AUDIT") == "1") { Environment.ExitCode = AuditReproTests.Run(args); return; }
+// --audit: the dated one-off audit reproductions (tests/run.py runs them as the `ai-audit` suite); the rest are name filters.
+if (args.Length > 0 && args[0] == "--audit") { Environment.ExitCode = AuditReproTests.Run(args.Skip(1).ToArray()); return; }
 
 if (args.Contains("--fairness-closure")) { FairnessClosureTests.Run(); return; }
+if (args.Length > 0) throw new ArgumentException("unknown arguments: " + string.Join(" ", args) + " (use no argument, --audit or --fairness-closure)");
 
 static void Check(bool value, string message) { if (!value) throw new Exception(message); }
 static Game Fixture(CardClass own = CardClass.MAGE)

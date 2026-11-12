@@ -68,7 +68,7 @@ in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
 (built locally from your client and never committed, such as the card export in `data/carddb/`) is missing. The summary
-line counts every skip, for example `29 of 35 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
+line counts every skip, for example `34 of 40 suites passed, 6 skipped (progression-standard-batches, engine-proof-client,
 standard-native-client, native-bindings, native-match, transport-invariants)` on a machine without a client. A skip is
 not a pass: look at the reason.
 
@@ -110,12 +110,16 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `recipes` | The shipped shop deck recipes validate and follow the recipe rules |
 | `npc-world` | Opponent decks, skills, personalities, matchmaking and the opponent population |
 | `ai` | Opponent AI fairness: it may not see hidden information |
+| `npc-world-distribution` | The mistake distribution of the opponent skill tiers: 200 seeded trials per tier on six fixtures stay inside their priced bounds (the `--passivity-distribution` run of the `npc-world` program, about a minute; the default `npc-world` run leaves it out) |
+| `ai-audit` | The dated AI audit reproduction of 2026-10-31 that `ai` does not reach (`--audit C1`; the second audit case runs in `ai`) |
 | `ai-golden` | Opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks |
+| `ai-golden-audit` | The dated AI audit reproductions of 2026-10-31 for planning, replies, lethal and mulligan (the `ai-golden` program under `--audit`) |
 | `parallel-groups` | The card lists behind each offline card pool, and the group proof checks |
 | `tier-presentation` | The rank tier reward screen steps (with stand-in game classes) |
 | `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
 | `projection` | How menu and match state is projected onto the native screens, and which zero-tag differences between the engine and the client count as equal |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
+| `ladder-extended` | The older ladder-program checks, in the same program under `--extended`: the economy, pack and deck-library checks. The ledger, milestone-ledger and rating-placement checks run in `ladder`. Fixtures for saves no build wrote (rule-0 or rule-1 ranked history) are deleted |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
 | `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
@@ -129,8 +133,9 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/history/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
+| `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
-| `launcher` | The launcher and installer logic. Some checks skip without a Hearthstone client |
+| `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
 ## The client suites
@@ -173,15 +178,15 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 |---|---|
 | A card script or any rule in `engine/` | `goldens`, `fuzz`, `cards`, `engine-proof`, `dormant`, `kindred`, `reborn`. The AI suites too, since opponents play on the engine: `ai`, `ai-golden`, `npc-world` |
 | `facts/` (the card file) or the card pools in `data/pools/` | Everything. It changes what the engine loads |
-| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-golden`, `npc-world`, `native-match-logic`, `engine-proof` |
+| Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-audit`, `ai-golden`, `ai-golden-audit`, `npc-world`, `npc-world-distribution`, `native-match-logic`, `engine-proof` |
 | Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden`, `native-match-logic` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
-| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `shop`, `ladder`, `native-match-logic`, `native-bindings-logic` |
+| The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `progression-extended`, `shop`, `ladder`, `ladder-extended`, `native-match-logic`, `native-bindings-logic` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
 | Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-bindings-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |
-| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder` |
+| Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder`, `ladder-extended` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
 
@@ -220,8 +225,50 @@ dotnet /tmp/hssim/bin/HsSim/release/HsSim.dll goldens check tests/goldens/modern
 ```
 
 **Only re-record a golden when you meant to change the rules.** Look at every game that changed first, and say in your
-change why each one changes. Re-recording just to make the test pass hides the bug it found. The commands that made the
-current files are:
+change why each one changes. Re-recording just to make the test pass hides the bug it found.
+
+To absorb an intended engine change, use `rerecord`:
+
+```text
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --dry-run
+HsSim.dll goldens rerecord tests/goldens/core-2026.json
+HsSim.dll goldens rerecord tests/goldens/core-2026.json --only <game-id> [<game-id>...]
+```
+
+It replays every game (or just the `--only` ones) and re-records only the games that no longer match. Each one is run
+again as the same case (suite, deck pair, seed, policy). Games that still match stay byte-identical, and games are never
+added or removed. A record pins the card pool and the deck's id, not the deck's cards, so a changed deck list or card
+shows up as a changed game, not as a quiet success.
+
+Every re-recorded game is classified and printed:
+
+- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history hash moved.
+  Accepted without a flag.
+- `STATE`: as above, but the final state hash moved. The legal-move hashes cover the options offered, not the board
+  numbers, so a rules change that alters stats or tags without changing any offered option (most likely on the last
+  turn) looks exactly like this, and a regression can hide in it. These are refused (exit 1, nothing written) unless
+  you pass `--allow-state-change` (or `--allow-behaviour-change`, which implies it), which prints a warning per game.
+  To review one, replay the game before and after (old engine/golden against the new build) and compare the final board:
+  every minion's and hero's stats, tags and health must differ only where your change says they should.
+- `BEHAVIOUR`: the game itself changed (different actions or legal moves, turns, winner, or a pool/Dark Gift version
+  field). The line shows how many actions changed and where they first differ. These are refused (exit 1, nothing
+  written) unless you pass `--allow-behaviour-change`, which prints a warning per game. A behaviour change needs a
+  reviewer's eye on each listed game: say in your change why it changed.
+
+`--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
+re-recorded, a behaviour or state change without its flag, a re-recorded game that still does not match, or a file not in the
+form `goldens record` writes); nothing is written then. 2 is a usage error.
+
+Schema 3 files (`core-2026`, `offline-standard-pools-v1`) are re-run on the card pool their record pins. Schema 2 files
+(`classic-source`, `modern`, `core-reprints`) record no pool, so their games are re-run unpinned, under the current
+pool and Dark Gift rules, and stored in the schema 2 form. They replay under the legacy rules, so the re-check is what
+guards them: a re-recorded game is replayed from the text that would be written, and nothing is written if any one still
+mismatches. Rerecord also refuses a case that can no longer be built or whose identity (id, decks, seed, policy)
+changed. It prints `N re-recorded (S shape only, T state, B behaviour), M unchanged, all K match`.
+
+`goldens record` is for **creating a new suite**. It regenerates the whole file from the current deck list and card pool
+and replaces it: every game can change and games for newly added decks appear. Do not use it to absorb one engine
+change. The commands that made the current files are:
 
 ```text
 HsSim.dll goldens record tests/goldens/classic-source.json --suite classic --seeds 0..4 --policy random
@@ -231,8 +278,8 @@ HsSim.dll goldens record tests/goldens/core-2026.json --suite core-2026 --seeds 
 HsSim.dll goldens record tests/goldens/offline-standard-pools-v1.json --suite offline-standard-pools-v1 --seeds 1..3 --policy random
 ```
 
-`HsSim.dll` is the file built above. Recording replaces the file. It also saves the card pool it used in
-`tests/goldens/pools/` (the `.xml` and its `.xml.sha256`); commit both with the golden.
+`HsSim.dll` is the file built above. Recording also saves the card pool it used in `tests/goldens/pools/` (the `.xml`
+and its `.xml.sha256`); commit both with the golden. `rerecord` never adds a pool.
 
 ## Not here yet
 
@@ -247,6 +294,19 @@ repository ships no client file.
   machine and are not in this repository.
 - **Generator tests.** The tools that make the card file and the pack tables from the game's own data are private,
   and so are their tests.
+
+- **Checks you switch on by hand.** Three checks stay out of the runner on purpose. `GOLDEN_CALIBRATE=1` makes the `ai-golden`
+  program play the headless calibration games of every opponent profile and fail if a
+  turn's 95th-percentile think time passes 1.5 seconds, so its verdict depends on the speed of the machine.
+  `NPC_ENGINE_NETSTANDARD_OUTPUT=<path of a netstandard2.1 build of the engine>` adds one check that the client's engine
+  build carries the same source stamp; it needs a second engine build. The `ai-golden` program's `--lethal-benchmark`,
+  and the report and renew options of `npc-world` and `ladder-rules`, are measuring tools with no pass or fail.
+- **Replay fixtures for the maintainer's AI tool.** The ten position files and ten match journals in `tests/ai/` are
+  inputs to `tools/hs ai hard-fixture`, which is not in this repository; nothing here reads them. Each position
+  file holds the public state, the seed and an `expect` block (allowed, forbidden and required moves), so a runner for
+  them would be a real check: it is not written yet.
+- **`tests/goldens/standard-spike1.json`**, when it arrives with the Standard engine proofs, is replayed inside
+  `engine-proof` and is on purpose not in the `goldens` suite.
 
 A change you make here is checked by the suites above, but not by those. The maintainer runs them before a release.
 If your change touches the plugin's native code, say so in your pull request.

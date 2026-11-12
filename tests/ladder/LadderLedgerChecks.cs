@@ -1,7 +1,7 @@
 using System.Xml.Serialization;
 
 // Ladder ledger: atomic settle with receipt, crash before commit, idempotent replay, abandonment exactly once,
-// V9 -> V10 migration keeping the folded star index, tamper rejection, medal projection from the ledger.
+// receipt-chain tamper rejection, medal projection from the ledger.
 internal static class LadderLedgerChecks
 {
     static void Check(bool value, string message) { if (!value) throw new Exception(message); }
@@ -27,10 +27,7 @@ internal static class LadderLedgerChecks
         && r.MultiplierAfter == after.Multiplier && r.StreakAfter == after.StreakWins && r.PlacementAfter == after.PlacementGames
         && r.RatingAfter == after.Rating;
 
-    internal static void RunCurrent(string root) => Run(root, false);
-    internal static void Run(string root) => Run(root, true);
-
-    private static void Run(string root, bool includeLegacy)
+    internal static void RunCurrent(string root)
     {
         var rows = Enumerable.Range(1, 51).Select(level => new LadderRankRow { StarLevel = level, Stars = level == 51 ? 0 : 3, Legend = level == 51 }).ToArray();
 
@@ -117,6 +114,7 @@ internal static class LadderLedgerChecks
             Check(p.History.Last().Result == "Abandoned" && abandoned.Outcome == "Loss" && abandoned.StreakAfter == 0
                 && abandoned.StarsAfter == Math.Max(LadderRules.FloorBelow(beforeAbandon.StarIndex), beforeAbandon.StarIndex - 1)
                 && abandoned.RatingAfter < abandoned.RatingBefore && Matches(abandoned, p.Ladder), "abandon applies a loss");
+            Check(abandoned.StarsGained < 0 && !p.LadderArrivedByWin, "after a star loss the medal shows the 0/3 form");
         }
         // History/LadderReceipt copies carry every receipt field (a field-by-field copy must not drop new fields).
         using (var p = new LocalProfile(path))
@@ -180,78 +178,6 @@ internal static class LadderLedgerChecks
         forged.LadderState.LegendReached = false; Write(forgedPath, forged);
         using (var p = new LocalProfile(forgedPath)) Check(p.Stars == first.StarsAfter, "control: the honest one-match profile loads");
 
-        if (!includeLegacy) {
-            Console.WriteLine("PASS current ladder ledger: atomic settle/recovery, idempotent replay, abandon once, receipt-chain/tamper rejection, medal");
-            return;
-        }
-
-        // Shop-era V10 save: folded rule-1 receipts lifted best above Silver 5, then the index fell below it (old floors).
-        string shopEraPath = Path.Combine(root, "ladder-shop-era.xml");
-        var era = LocalProfile.Clone(firstProfile); var tmpl = era.Matches[0];
-        string[] eraResults = Enumerable.Repeat("Won", 44).Concat(new[] { "Won", "Lost", "Lost" }).ToArray();
-        int fold = 0;
-        era.Matches = eraResults.Select((result, i) => {
-            int before = fold; fold = LocalProfile.NextStars(fold, result);
-            var m = new LocalMatchRecord { Id = Guid.NewGuid().ToString(), Deck = tmpl.Deck, Opponent = tmpl.Opponent, Seed = i, StartedUtc = tmpl.StartedUtc,
-                Result = result, Turns = 10, RewardVersion = 2, RewardFacts = new LocalRewardFacts(),
-                Gold = LocalEconomy.Reward(result, 10, false, new LocalRewardFacts()).Gold };
-            if (i >= 44) {
-                m.Ladder = new LocalLadderReceipt { StarsBefore = before, StarsAfter = fold, StarsGained = fold - before, MultiplierBefore = 1,
-                    MultiplierAfter = 1, LadderRuleVersion = 1 };
-                m.ClassXpBefore = 0; m.ClassXpAfter = 0; m.UnlockedCardIds = new List<string>();
-                m.ProgressionRuleVersion = LocalCoreProgression.ScheduleVersion; m.TierRewards = new List<LocalTierReward>();
-            }
-            return m;
-        }).ToList();
-        era.GoldBalance = era.Matches.Sum(m => m.Gold); era.PendingRewardPresentationId = null; era.Pending = null;
-        era.LadderRuleVersion = 0; era.LadderState = new LocalLadderState { StarIndex = 43, BestStarIndex = 45 };
-        Check(fold == 43, "shop-era fixture fold " + fold);
-        Write(shopEraPath, era);
-        using (var p = new LocalProfile(shopEraPath))
-        {
-            Check(p.Stars == 43 && p.Ladder.BestStarIndex == 45, "shop-era save loads with its legacy best");
-            var lossAfter = Play(p, "Lost", 200).Ladder;
-            Check(lossAfter.StarsBefore == 43 && lossAfter.StarsAfter == 42 && lossAfter.BestBefore == 45, "shop-era first ladder settlement");
-            Check(!p.LadderArrivedByWin, "after a star loss the medal shows the 0/3 form");
-            Play(p, "Won", 201);
-            Check(p.LadderArrivedByWin, "after a star gain the medal shows the 3/3 form");
-        }
-        using (var p = new LocalProfile(shopEraPath)) Check(p.History.Count(m => m.Ladder?.LadderRuleVersion == LadderRules.RuleVersion) == 2, "shop-era restart");
-
-        // V9 -> V10: the folded star index is kept unchanged; the first new settlement starts the receipts.
-        string v9Path = Path.Combine(root, "ladder-v9.xml");
-        var v9 = LocalProfile.Clone(firstProfile);
-        v9.Version = 9; v9.LegacyUnopenedPacks = 0; v9.LadderState = null; v9.LadderRuleVersion = 0;
-        v9.Matches.ForEach(match => match.Ladder = null);
-        // A long V9 history with Silver-5 demotions the new floors would have prevented.
-        var template = v9.Matches[0];
-        string[] results = Enumerable.Repeat("Won", 47).Concat(new[] { "Lost", "Lost", "Lost", "Won", "Lost", "Tied" }).ToArray();
-        v9.Matches = results.Select((result, i) => new LocalMatchRecord { Id = Guid.NewGuid().ToString(), Deck = template.Deck, DeckHero = template.DeckHero,
-            Opponent = template.Opponent, Seed = i, StartedUtc = template.StartedUtc, Result = result, Turns = 10, RewardVersion = 2,
-            RewardFacts = new LocalRewardFacts(), Gold = LocalEconomy.Reward(result, 10, false, new LocalRewardFacts()).Gold }).ToList();
-        v9.GoldBalance = v9.Matches.Sum(m => m.Gold);
-        v9.ClassXp.ForEach(xp => xp.Xp = 0);
-        v9.PendingRewardPresentationId = null;
-        Write(v9Path, v9);
-        byte[] v9Bytes = File.ReadAllBytes(v9Path);
-        int folded = v9.Matches.Aggregate(0, (stars, match) => LocalProfile.NextStars(stars, match.Result));
-        Check(folded == 44, "fixture folds below Silver 5 under the old floors: " + folded);
-        using (var p = new LocalProfile(v9Path))
-        {
-            Check(File.ReadAllBytes(v9Path + ".v9.bak").SequenceEqual(v9Bytes), "byte-exact V9 backup");
-            var migrated = Read(v9Path);
-            Check(migrated.Version == 12 && migrated.LadderRuleVersion == LadderRules.RuleVersion && migrated.LadderState.StarIndex == folded
-                && migrated.LadderCalibration?.Version == 1 && migrated.LadderCalibration.MatchCount == results.Length
-                && migrated.Matches.All(m => m.Ladder == null), "migration keeps the folded index and starts calibration");
-            var seeded = p.Ladder;
-            Check(p.Stars == folded && seeded.StarIndex == folded && seeded.PlacementGames == 0 && seeded.Rating == LadderRules.StartRating
-                && seeded.StreakWins == 0 && seeded.Multiplier == LadderRules.Seed(folded, folded, results.Select(LadderRules.Outcome).ToArray()).Multiplier,
-                "calibration preserves the historical position and multiplier");
-            var next = Play(p, "Lost", 99).Ladder;
-            Check(next.StarsBefore == folded && next.StarsAfter == folded - 1 && next.PlacementBefore == 0
-                && Read(v9Path).LadderRuleVersion == LadderRules.RuleVersion && p.History.Count(m => m.Ladder != null) == 1, "first V10 settlement");
-        }
-        using (var p = new LocalProfile(v9Path)) Check(p.Stars == folded - 1, "migrated restart");
-        Console.WriteLine("PASS ladder ledger: atomic settle/recovery, idempotent replay, abandon once, tamper rejection, V9 migration, medal");
+        Console.WriteLine("PASS current ladder ledger: atomic settle/recovery, idempotent replay, abandon once, receipt-chain/tamper rejection, medal");
     }
 }

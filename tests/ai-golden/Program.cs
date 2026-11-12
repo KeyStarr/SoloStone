@@ -8,7 +8,10 @@ internal static class Program
     {
         if (args.Length > 0 && args[0] == "--lethal-benchmark")
             return LethalBenchmarks.Run(args.Skip(1).ToArray());
-        bool audit = Environment.GetEnvironmentVariable("AUDIT") == "1";
+        // --audit: the dated one-off audit reproductions (tests/run.py runs them as the `ai-golden-audit` suite); the rest of
+        // the arguments are name filters.
+        bool audit = args.Length > 0 && args[0] == "--audit";
+        if (audit) args = args.Skip(1).ToArray();
         var tests = Assembly.GetExecutingAssembly().GetTypes()
             .Where(t => t.Name.EndsWith("Tests", StringComparison.Ordinal))
             .OrderBy(t => t.FullName, StringComparer.Ordinal)

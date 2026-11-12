@@ -62,7 +62,8 @@ class Suite:
     """One named group of checks. `kind` picks the steps: dotnet project, HsSim command or Python unittest folder."""
 
     def __init__(self, name, kind, what, project=None, args=(), props=(), commands=(), needs_engine=False, folder=None,
-                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), prebuild=(), prebuild_in_tree_with_client=()):
+                 artifacts=None, unix_only=False, needs_client=False, needs_local=(), needs_hssim=False, prebuild=(),
+                 prebuild_in_tree_with_client=(), release_launcher=False):
         self.name, self.kind, self.what = name, kind, what
         self.project = project          # dotnet: csproj, relative to the repository root
         self.args = list(args)          # dotnet: arguments for the built program
@@ -73,10 +74,13 @@ class Suite:
         self.artifacts = artifacts      # dotnet: own artifacts sub-folder (default: the shared one)
         self.unix_only = unix_only      # skipped, with a note, on Windows
         self.needs_client = needs_client  # client tier: needs references/game (see --client); skipped without it
+        self.needs_hssim = needs_hssim    # python: build HsSim first and hand its path over (HSSIM_DLL, DOTNET_PATH)
         self.needs_local = list(needs_local)  # client tier: files built locally (never committed), relative to the root
         self.prebuild = list(prebuild)  # dotnet: projects to build first into the shared artifacts (the suite loads their output)
         # mono: projects to build first into their own bin/ (the suite reads plugin/bin/...), only when a client is set up
         self.prebuild_in_tree_with_client = list(prebuild_in_tree_with_client)
+        # dotnet: build the release launcher into <artifacts>/out/app first; the suite finds it by walking up from its program
+        self.release_launcher = release_launcher
 
     @property
     def tier(self):
@@ -113,9 +117,15 @@ SUITES = [
     Suite('recipes', 'dotnet', 'the shipped shop deck recipes validate and follow the recipe rules', 'tests/recipes/RecipeTests.csproj'),
     Suite('npc-world', 'dotnet', 'opponent decks, skills, personalities, matchmaking and the opponent population',
           'tests/npc-world/NpcWorldTests.csproj'),
+    Suite('npc-world-distribution', 'dotnet', 'opponent mistake distribution: 200 seeded trials per skill tier on six fixtures stay inside the priced bounds (about a minute)',
+          'tests/npc-world/NpcWorldTests.csproj', args=['--passivity-distribution']),
     Suite('ai', 'dotnet', 'opponent AI fairness: it may not see hidden information', 'tests/ai/AiTests.csproj'),
+    Suite('ai-audit', 'dotnet', 'the dated AI audit reproduction of 2026-10-31 that the fairness suite does not reach (C1; C4 runs there already)',
+          'tests/ai/AiTests.csproj', args=['--audit', 'C1']),
     Suite('ai-golden', 'dotnet', 'opponent AI decisions on recorded positions (lethal, replies, planning, mulligan) and the three golden decks',
           'tests/ai-golden/GoldenTests.csproj'),
+    Suite('ai-golden-audit', 'dotnet', 'the dated AI audit reproductions of 2026-10-31 for planning, replies, lethal and mulligan',
+          'tests/ai-golden/GoldenTests.csproj', args=['--audit']),
     Suite('parallel-groups', 'dotnet', 'the card lists behind each offline card pool, and the group proof checks', 'tests/parallel-groups/ParallelGroupsTests.csproj'),
     Suite('tier-presentation', 'dotnet', 'the rank tier reward screen steps (with stand-in game classes)', 'tests/tier-presentation/TierPresentationTests.csproj'),
     Suite('fire-fx-scene', 'dotnet', 'the fire effect scene helper', 'tests/fire-fx-scene/FireFxSceneTests.csproj'),
@@ -129,10 +139,12 @@ SUITES = [
           'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
     Suite('goldens', 'hssim', 'recorded games replay to the same result on the current engine (5 golden files)',
           commands=[['goldens', 'check', f'tests/goldens/{name}.json'] for name in GOLDENS]),
+    Suite('goldens-rerecord', 'python', '`goldens rerecord` restores only the games that changed and leaves the rest of the file byte-identical',
+          folder='tests/goldens-rerecord', needs_hssim=True),
     Suite('fuzz', 'hssim', '200 random games: no crash, same result twice, no broken invariant',
           commands=[['fuzz', '--games', '200', '--seed', '1']]),
     Suite('launcher', 'dotnet', 'the launcher and installer logic (some checks skip without a Hearthstone client)',
-          'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher'),
+          'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher', release_launcher=True),
     Suite('installer-python', 'python', 'the installer build tools (stage and loader checks; not on Windows)', folder='installer',
           unix_only=True),
 ]
@@ -145,6 +157,8 @@ SUITES += [
           'tests/projection/ProjectionTests.csproj'),
     Suite('ladder', 'dotnet', 'the ranked ladder profile code: results, rewards, milestones, ledger, placement and casual mode',
           'tests/ladder/LadderTests.csproj'),
+    Suite('ladder-extended', 'dotnet', 'the older ladder-program checks: economy, packs and deck library',
+          'tests/ladder/LadderTests.csproj', args=['--extended']),
     Suite('recipe-picker', 'dotnet', 'the recipe picker and recipe guide of the native shop (one check reads the client library, if set up)',
           'tests/recipe-picker/RecipePickerTests.csproj'),
     Suite('progression', 'dotnet', 'profile, rewards, quests, achievements, ranks and settings logic behind the native screens',
@@ -248,19 +262,19 @@ class Runner:
     def hssim_dll(self):
         return self.shared() / 'bin' / 'HsSim' / 'release' / 'HsSim.dll'
 
-    def step(self, log, command, label):
+    def step(self, log, command, label, env=None):
         """Run one command from the repository root, appending its output to `log`. Returns True on exit 0."""
         with open(log, 'ab') as handle:
             handle.write(f'$ {" ".join(str(part) for part in command)}\n'.encode())
             handle.flush()
             if self.verbose:
-                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=self.env, stdout=subprocess.PIPE,
+                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=subprocess.PIPE,
                                         stderr=subprocess.STDOUT)
                 handle.write(result.stdout)
                 sys.stdout.buffer.write(result.stdout)
                 sys.stdout.flush()
             else:
-                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=self.env, stdout=handle,
+                result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=handle,
                                         stderr=subprocess.STDOUT)
             handle.write(f'[{label} exit {result.returncode}]\n'.encode())
         return result.returncode == 0
@@ -294,6 +308,11 @@ class Runner:
             if not self.ensure_hssim(log):
                 return False
             props.append(f'-p:SabberStoneCorePath={self.engine_dll()}')
+        if self.build and suite.release_launcher and not self.step(
+                log, [self.dotnet, 'build', 'installer/SoloStone.Launcher/SoloStone.Launcher.csproj', '-c', 'Release', '-p:NuGetAudit=false',
+                      '--artifacts-path', artifacts / 'release-launcher', '--output', artifacts / 'out' / 'app', '--nologo', '-v', 'quiet', '-m:1'],
+                'build release launcher'):
+            return False
         if self.build:
             for project in suite.prebuild:
                 if not self.build_project(log, project, artifacts):
@@ -350,7 +369,12 @@ class Runner:
         return ok
 
     def run_python(self, suite, log):
-        return self.step(log, [sys.executable, '-I', '-B', '-m', 'unittest', 'discover', '-s', suite.folder, '-p', 'test_*.py'], 'run')
+        env = None
+        if suite.needs_hssim:
+            if not self.ensure_hssim(log):
+                return False
+            env = dict(self.env, HSSIM_DLL=str(self.hssim_dll()), DOTNET_PATH=str(self.dotnet))
+        return self.step(log, [sys.executable, '-I', '-B', '-m', 'unittest', 'discover', '-s', suite.folder, '-p', 'test_*.py'], 'run', env)
 
 
 def parse(argv):
@@ -388,7 +412,7 @@ def main(argv=None):
         managed = find_managed(args.client) if args.client else None
         if args.no_build and not args.artifacts:
             raise Usage('--no-build needs --artifacts, the folder of an earlier run')
-        dotnet = find_dotnet(args.dotnet) if any(suite.kind != 'python' for suite in chosen) else None
+        dotnet = find_dotnet(args.dotnet) if any(suite.kind != 'python' or suite.needs_hssim for suite in chosen) else None
     except Usage as error:
         print('run.py: ' + str(error), file=sys.stderr)
         return 2

@@ -15,6 +15,7 @@ internal static class CurrentV14LadderChecks
             StartTrapChecks.Run(root);
             LadderLedgerChecks.RunCurrent(root);
             RatingPlacementChecks.RunCurrent(root);
+            MilestoneLedgerChecks.Run(root);
             NpcMilestoneChecks.Run(root);
             AchievementLadderChecks.Run(root);
             RivalResultsChecks.Run(root);

@@ -34,6 +34,7 @@ try {
     ProfileCopyTests.Run(Check);
     FavoriteCardBackTests.Run(Check, Reject, Fresh);
     V13FixtureMigrationTests.Run(Check, root);
+    V14BackupFailureTests.Run(Check, root);
     QuoteMemoTests.Run(Check, Reject, Fresh);
     ShopJsonTests.Run(Check, Reject);
     PendingCosmeticsTests.Run(root);
