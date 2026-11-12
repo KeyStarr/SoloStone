@@ -5,7 +5,15 @@ Rules audited against FairPackRules.cs, LocalCrafting.cs, LocalEconomy.cs,
 LocalProfile.cs, LocalCardCatalog.cs, LocalShop.cs, LocalLadderMilestones.cs and
 LocalAchievements.cs. Runtime reads data files only; no repo modules are imported.
 
+TODO (known gap, 2026-11-12): this models a player who puts every gold into packs and crafting. The expected player
+mostly buys shop decks (often buying a recipe, crafting some cards with dust and buying the discounted rest from the
+shop) and buys many cosmetics. Neither is simulated, so the hours below are not the expected player's pace: deck buys
+may finish a collection faster, cosmetics slow it down. Add a deck-buy strategy and a cosmetics spend before using
+these numbers to tune rewards.
+
 Assumptions (also printed and included in JSON):
+* KNOWN GAP: no shop deck or recipe purchases and no cosmetics spending are simulated (see the TODO above); the
+  results are a packs-and-crafting baseline, not the expected player's pace.
 * Use the policy's active meta and FairPackRules eligibility manifest. Target is
   craftable identities in its expansion/Standard pack union, at playset (2, or 1
   legendary), weighted by normal craft cost. Core, Free, starter, welcome-only,
