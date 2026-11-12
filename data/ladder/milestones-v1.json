@@ -1,0 +1,92 @@
+{
+  "version": 1,
+  "deckKitGoldCap": 3200,
+  "milestones": [
+    {
+      "id": "floor:bronze-5", "kind": "StarIndex", "threshold": 15, "isLeague": false,
+      "grants": [{"Kind": "Pack", "Ref": "STANDARD", "Count": 2}]
+    },
+    {
+      "id": "floor:silver-10", "kind": "StarIndex", "threshold": 30, "isLeague": true,
+      "grants": [
+        {"Kind": "Pack", "Ref": "STANDARD", "Count": 3},
+        {"Kind": "Token", "Ref": "EPIC", "Count": 1},
+        {"Kind": "CardBack", "Ref": "cardback:ladder-silver", "Count": 1},
+        {"Kind": "Recipe", "Ref": "opponent", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "floor:silver-5", "kind": "StarIndex", "threshold": 45, "isLeague": false,
+      "grants": [{"Kind": "Pack", "Ref": "STANDARD", "Count": 2}]
+    },
+    {
+      "id": "floor:gold-10", "kind": "StarIndex", "threshold": 60, "isLeague": true,
+      "grants": [
+        {"Kind": "Pack", "Ref": "STANDARD", "Count": 3},
+        {"Kind": "DeckKit", "Ref": "kit:ladder-gold", "Count": 1},
+        {"Kind": "CardBack", "Ref": "cardback:ladder-gold", "Count": 1},
+        {"Kind": "Recipe", "Ref": "opponent", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "floor:gold-5", "kind": "StarIndex", "threshold": 75, "isLeague": false,
+      "grants": [{"Kind": "Pack", "Ref": "STANDARD", "Count": 3}]
+    },
+    {
+      "id": "floor:platinum-10", "kind": "StarIndex", "threshold": 90, "isLeague": true,
+      "grants": [
+        {"Kind": "Pack", "Ref": "STANDARD", "Count": 4},
+        {"Kind": "Token", "Ref": "LEGENDARY", "Count": 1},
+        {"Kind": "CardBack", "Ref": "cardback:ladder-platinum", "Count": 1},
+        {"Kind": "Recipe", "Ref": "opponent", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "floor:platinum-5", "kind": "StarIndex", "threshold": 105, "isLeague": false,
+      "grants": [{"Kind": "Pack", "Ref": "STANDARD", "Count": 3}]
+    },
+    {
+      "id": "floor:diamond-10", "kind": "StarIndex", "threshold": 120, "isLeague": true,
+      "grants": [
+        {"Kind": "Pack", "Ref": "STANDARD", "Count": 4},
+        {"Kind": "Token", "Ref": "LEGENDARY", "Count": 1},
+        {"Kind": "CardBack", "Ref": "cardback:ladder-diamond", "Count": 1},
+        {"Kind": "Recipe", "Ref": "opponent", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "floor:diamond-5", "kind": "StarIndex", "threshold": 135, "isLeague": false,
+      "grants": [
+        {"Kind": "Pack", "Ref": "STANDARD", "Count": 2},
+        {"Kind": "Token", "Ref": "LEGENDARY", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "legend", "kind": "StarIndex", "threshold": 150, "isLeague": true,
+      "grants": [
+        {"Kind": "CardBack", "Ref": "cardback:ladder-legend", "Count": 1},
+        {"Kind": "Token", "Ref": "LEGENDARY", "Count": 1},
+        {"Kind": "Trophy", "Ref": "trophy:legend", "Count": 1},
+        {"Kind": "LegendDeck", "Ref": "Snapshot", "Count": 1},
+        {"Kind": "Recipe", "Ref": "opponent", "Count": 1},
+        {"Kind": "Challengers", "Ref": "band", "Count": 1}
+      ]
+    },
+    {
+      "id": "legend:top-100", "kind": "LegendNumber", "threshold": 100, "isLeague": false,
+      "grants": [{"Kind": "CardBack", "Ref": "cardback:ladder-elite", "Count": 1}]
+    },
+    {
+      "id": "legend:1", "kind": "LegendNumber", "threshold": 1, "isLeague": false,
+      "grants": [
+        {"Kind": "CardBack", "Ref": "cardback:ladder-champion", "Count": 1},
+        {"Kind": "Trophy", "Ref": "trophy:legend-1", "Count": 1}
+      ]
+    }
+  ]
+}

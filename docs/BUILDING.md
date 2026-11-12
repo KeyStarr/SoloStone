@@ -9,7 +9,7 @@ The repository contains no Hearthstone program files, art or sound. To compile t
 reference libraries (step 1). Without one you can still build and test the launcher (step 3).
 
 The public test suites (cards, rules, opponent AI, packs, ladder, launcher) are in this repository and need no Hearthstone
-files: see [TESTING.md](TESTING.md). The tests that need your own client are not published yet. Step 3 below runs only
+files: see [TESTING.md](TESTING.md). Most tests that need your own client are not published yet (three checks inside the `shop`, `recipe-picker` and `fx-harmony` suites are). Step 3 below runs only
 the launcher tests.
 
 ## What you need
@@ -136,6 +136,6 @@ published hashes.
 
 ## Known gaps
 
-- The tests that need your own Hearthstone client are not in this repository yet ([TESTING.md](TESTING.md)).
+- Most tests that need your own Hearthstone client are not in this repository yet ([TESTING.md](TESTING.md)).
 - The release hashes cannot be reproduced without the same reference client files.
 - Signing a release (the update signature) is done by the maintainer with a private key that is not in any build.
