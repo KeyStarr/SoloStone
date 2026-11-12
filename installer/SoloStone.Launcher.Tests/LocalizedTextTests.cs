@@ -95,6 +95,9 @@ static partial class Program
                 if(!LocalizedCardText.SameEnglish(pair.Value.Key,card.Text)) rewritten.Add(pair.Key);
             }
             Check(compared>9000,"the engine has the cards the locale files translate");
+            foreach(string id in new[]{"CORE_CS2_024","CORE_EX1_007","CORE_EX1_011","CORE_LOOT_413","TLC_226"})
+                foreach(string locale in locales)
+                    Check(LocalizedCardText.Lookup(locale,id,SabberStoneCore.Model.Cards.FromId(id).Text,out string _)==LocalizedCardText.Status.Localized,"a card module's raw-layout English still takes the translation: "+id+" "+locale);
             Check(rewritten.SequenceEqual(EngineRewrittenText.OrderBy(i=>i,StringComparer.Ordinal)),"ids whose engine text differs from the card file's English must be exactly the known list; new drift fails. Now: "+string.Join(",",rewritten));
             foreach(string locale in locales) {
                 var drift=all[locale].Where(p=>{ var card=SabberStoneCore.Model.Cards.FromId(p.Key); return card!=null && !LocalizedCardText.SameEnglish(p.Value.Key,card.Text); }).Select(p=>p.Key).ToList();
