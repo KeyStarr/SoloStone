@@ -123,7 +123,7 @@
       "type": "decision",
       "seat": 2,
       "action": "PLAY_CARD:39:0:-1:-1:",
-      "fingerprint": "8e82d02d1154e4626224c9b7f2aa0d98610884af465951d553f3d422e5b70829",
+      "fingerprint": "0d035ac30fe354758170079a2220c415dc64c87ebe8568e58c2c16a42f232b02",
       "rngState": "1:-1231015870678940444:6920740879446455907:65",
       "sequence": 5
     },
@@ -131,7 +131,7 @@
       "type": "decision",
       "seat": 2,
       "action": "END_TURN:0:0:0:-1:",
-      "fingerprint": "08533a3a02b04f994bcd3eb6f98c07a89483210fb7c351ad2e2fac41cc17374b",
+      "fingerprint": "968faba50dbb34d48e417dc54f384dced3490adc32ac3bb208d8fbe381c07d1a",
       "rngState": "1:-1231015870678940444:6920740879446455907:65",
       "sequence": 6
     },
@@ -140,7 +140,7 @@
       "seat": 1,
       "action": "HERO_POWER:5:0:0:-1:",
       "choices": [],
-      "fingerprint": "5c05f351d4d6646a0fa4eecc402fb64f9b75423aef9ec3db3daaee27e210d7fd",
+      "fingerprint": "ba7d46e57707d43e647ed6b890793d4222384818d9b6d5d176ba9492e4b3f35c",
       "rngState": "1:-1231015870678940444:6920740879446455907:65",
       "sequence": 7
     },
@@ -149,7 +149,7 @@
       "seat": 1,
       "action": "HERO_ATTACK:4:6:0:-1:",
       "choices": [],
-      "fingerprint": "5bff8c56d27c355c045e600b6122a063c62b95790c33cae545703c44d1de487f",
+      "fingerprint": "43d18ce439efe2da03df2712550222c61a5c1a126fec3f9d523a436287c22980",
       "rngState": "1:-1231015870678940444:6920740879446455907:65",
       "sequence": 8
     },
