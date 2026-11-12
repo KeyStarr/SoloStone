@@ -77,6 +77,9 @@ internal static partial class Program
 
     private static void RunSuite(string[] args)
     {
+        // These slices moved to native-match-logic; fail at once instead of running the default suite.
+        foreach (string moved in new[] { "--rematch-only", "--canonical-privacy-assertions-only" })
+            if (args.Contains(moved)) throw new ArgumentException(moved + " moved to the native-match-logic suite");
         ControllerAdmissionInvariant.Install();
         if (args.Contains("--match-event-log-review-only")) { NativeMatch.ClockFreeBot = true; MatchEventLogReview(); return; }
         if (args.Contains("--match-event-log-only")) { NativeMatch.ClockFreeBot = true; MatchEventLogNative(); return; }
@@ -175,14 +178,13 @@ internal static partial class Program
         if (args.Contains("--npc-settle-only")) { NpcPresentationTests.AnimationSettle(); return; }
         if (args.Contains("--npc-presentation-only")) { NpcPresentationTests.Run(); NpcWorldIntegrationTests.Run(); return; }
         if (args.Contains("--npc-world-only")) { NpcWorldIntegrationTests.Run(); return; }
-        if (args.Contains("--rematch-only")) { RematchTests.Run(); return; }
         DiscoverRealNative();
         if (args.Contains("--discover-real-only")) return;
         if (args.Contains("--cast-twice-only")) { CastTwiceMarkHistory(); return; }
         if (args.Contains("--companion-only")) { CompanionAndLarvaProjection(); return; }
         if (args.Contains("--overload-only")) { OverloadManaParity(); return; }
         if (args.Contains("--transform-history-only")) { TransformChangeClearsStaleDamage(); return; }
-        if (args.Contains("--quests-only")) { AutomaticQuestHistory(); QuestNativeProof.Run(); QuestBotProof.Run(); return; }
+        if (args.Contains("--quests-only")) { AutomaticQuestHistory(); QuestNativeProof.Run(); return; }
         if (args.Contains("--auto-cast-only")) { AutomaticQuestHistory(); AutomaticSecretHistory(); FacelessEnigmaHistory(); return; }
         if (args.Contains("--overdraw-only")) { OverdrawHistory(); return; }
         if (args.Contains("--draw-spell-only")) { DrawSpellHistory(); return; }
@@ -190,7 +192,7 @@ internal static partial class Program
         if (args.Contains("--spell-vfx-only")) { SpellVfxHistory(); return; }
         if (args.Contains("--defile-only")) { DefilePrivateTagsNeverReachWire(); return; }
         if (args.Contains("--powered-up-only")) { PoweredUpGlowTests.Run(); return; }
-        if (args.Contains("--showcase-only")) { FairViewHiddenOfferProof.Run(); ShowcasePlayProof.Run(); return; }
+        if (args.Contains("--showcase-only")) { FairViewHiddenOfferProof.Run(); return; }
         if (args.Contains("--keywords-only"))
         {
             TransformKeywordsReconcileFinalEngineState();
@@ -274,7 +276,6 @@ internal static partial class Program
         DeathKnightNativeChecks();
         AchievementToastQueue();
         QuestNativeProof.Run();
-        QuestBotProof.Run();
         FairViewHiddenOfferProof.Run();
         DeckDiscoverHandActor();
         ChoiceActorRetirement();
@@ -301,7 +302,6 @@ internal static partial class Program
         NpcTurnRunnerTests.Run();
         NpcPresentationTests.Run();
         NpcWorldIntegrationTests.Run();
-        RematchTests.Run();
         ConcedeFinishesThroughEngine();
         NpcConcedeForTestWinsThroughEngine();
         LoseForTestIsAPlainLoss();
@@ -316,7 +316,6 @@ internal static partial class Program
         UnregisteredDefinitionPreservesHistorySnapshots();
         PlayedHistoryCostPrecedesPlayStart();
         BotBattlecryControlChangeIsRevealedBeforePlay();
-        ShowcasePlayProof.Run();
         CatalogPairingsComplete();
         TestLoanerReachesDecisionPaths();
         StandardBatchLoanerTransport();

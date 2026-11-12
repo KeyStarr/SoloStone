@@ -6,6 +6,7 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
 
 if (args.Contains("--ai-frontier-only")) { AiFrontierProof.Run(); return; }
+if (args.Contains("--pinned-replays-only")) { PinnedReplayEngineProof.Run(); return; }
 if (args.Contains("--canonical-policy-only")) { CanonicalPolicyChecks.Run(); return; }
 if (args.Contains("--shadow-trial-only")) { ShadowTrialProof.Run(); return; }
 if (args.Contains("--card-facts-only")) { CardFactsProof.Run(); return; }
@@ -652,5 +653,6 @@ HistoryFactsProof.Run();
 CanonicalPolicyChecks.Run();
 ShadowTrialProof.Run();
 AiFrontierProof.Run();
+PinnedReplayEngineProof.Run();
 ClientExport.PrintSkips();
 Console.WriteLine("engine-proof: PASS");

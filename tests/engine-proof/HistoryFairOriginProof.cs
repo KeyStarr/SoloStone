@@ -248,7 +248,7 @@ internal static class HistoryFairOriginProof
         // Search copies carry fair origin beliefs (fix/ai-search-history): with no own-deck ledger every genuinely
         // hidden actor (masked deck slots, including the shuffled-in generated card, and the opposing hand) gets the
         // constant started-in-deck convention, so nothing about the hidden truth leaks. Independence from hidden
-        // state is twin-tested in tests/golden/HistorySearchTests.cs.
+        // state is twin-tested in tests/ai-golden/HistorySearchTests.cs.
         foreach (var hidden in copy.Player1.DeckZone.Concat(copy.Player2.DeckZone).Concat(copy.Player2.HandZone))
             Core2026Proof.Check(q.KnownOrigin(hidden.Id,hidden.Controller.Id) == true && q.StartedInDeck(hidden.Id,hidden.Controller.Id),
                 "history fair origin: genuinely hidden origin is the constant belief, not the truth");

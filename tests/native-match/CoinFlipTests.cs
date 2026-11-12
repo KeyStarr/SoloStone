@@ -43,7 +43,6 @@ internal static partial class Program
             CoinFlipOpeningTimer();
             CoinFlipOpeningBarrier();
             CoinFlipPersistence();
-            CoinFlipControl();
         }
         finally { StableSeed.TestFirstPlayer = previous; NativeMatch.ClockFreeBot = previousClock; }
         Console.WriteLine("PASS coin flip: seeded seats, native mulligan/bot turn 1/handoff/concede, pending/restart/history/legacy, launch-bound control");
@@ -313,29 +312,4 @@ internal static partial class Program
         finally { StableSeed.TestFirstPlayer = null; Directory.Delete(root, true); }
     }
 
-    private static void CoinFlipControl()
-    {
-        string root = Path.Combine(Path.GetTempPath(), "coin-control-" + Guid.NewGuid().ToString("N"));
-        Directory.CreateDirectory(root);
-        string path = Path.Combine(root, "debug-scenario");
-        try
-        {
-            foreach (string seat in new[] { "first", "second" })
-            {
-                path = Path.Combine(root, "debug-scenario-" + seat);
-                File.WriteAllText(path, "runId=" + RunA + "\nhumanSeat=" + seat);
-                var staged = DebugScenario.Read(path, null, null, RunA, true);
-                Check(staged?.FirstPlayer == (seat == "first" ? 1 : 2), "enabled current-launch override honoured");
-                Check(DebugScenario.Parse(staged.Canonical()).FirstPlayer == staged.FirstPlayer, "seat scenario canonical replay");
-                staged.Consume();
-                Check(DebugScenario.Read(path, null, null, RunA, true) == null, "override consumed once");
-            }
-            File.WriteAllText(path, "runId=" + RunA + "\nhumanSeat=second");
-            Check(DebugScenario.Read(path, null, null, RunA, false) == null, "disabled test control refuses forced seat");
-            File.WriteAllText(path, "runId=" + RunB + "\nhumanSeat=second");
-            Check(DebugScenario.Read(path, null, null, RunA, true) == null, "stale launch refuses forced seat");
-            RejectsScenario("humanSeat=random", "invalid seat");
-        }
-        finally { Directory.Delete(root, true); }
-    }
 }

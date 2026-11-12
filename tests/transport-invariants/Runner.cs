@@ -44,6 +44,7 @@ internal sealed class Runner
     internal int Checkpoints, Packets, Failures, CenariusPlayed, SuspendedAnswers, StandardBatchViolations;
     internal int LocationsPlayed, LocationActivations;
     internal int RewindOffers, RewindKeeps, Rewinds, FuzzRewindOffers, FuzzRewindKeeps, FuzzRewinds;
+    internal const string Output = "sim/out/transport";
     internal bool LightspawnPlayed;
     internal readonly HashSet<string> CardsPlayed = new(StringComparer.Ordinal);
     // CHANGE_ENTITY packets by the step whose action produced them: (step, entity, new card).
@@ -53,7 +54,6 @@ internal sealed class Runner
     internal readonly HashSet<string> ReprintsTraded = new(StringComparer.Ordinal);
     internal bool LightspawnDetected => Buckets.Values.Any(b => b.Card == "EX1_335" && b.Tag == "ATK");
     internal int ViolationCount => Buckets.Values.Sum(b => b.Occurrences);
-    internal const string Output = "sim/out/transport";
 
     internal HistoryShape Run(TransportReplay replay, bool verify = false, bool stopAfterForcedCard = false)
     {

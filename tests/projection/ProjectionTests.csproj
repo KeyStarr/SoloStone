@@ -19,7 +19,7 @@
     <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_crafting_projection.py&quot; &quot;$(IntermediateOutputPath)CraftingProjection.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)CraftingProjection.g.cs" /></ItemGroup>
   </Target>
-  <ItemGroup><Compile Include="../CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
     <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />

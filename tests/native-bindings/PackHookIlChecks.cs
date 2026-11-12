@@ -33,54 +33,15 @@ internal static class PackHookIlChecks
             && (fake.ImplAttributes & MethodImplAttributes.NoInlining) == 0
             && (ready.ImplAttributes & MethodImplAttributes.NoInlining) == 0,
             "pinned iterator factories are 14-byte inline candidates without NoInlining");
-        var calls = Calls(Il(open), metadata);
+        var calls = IlCalls.Calls(Il(open), metadata);
         int factory = calls.IndexOf("PackOpening.OnFakeBoosterOpened");
         check(calls.Count(call => call == "PackOpening.OnFakeBoosterOpened") == 1
             && factory >= 0 && calls[factory + 1] == "MonoBehaviour.StartCoroutine",
             "pinned OpenBooster has exactly one fake factory call immediately consumed by StartCoroutine");
-        var pageCalls = Calls(Il(moveNext), metadata);
+        var pageCalls = IlCalls.Calls(Il(moveNext), metadata);
         check(pageCalls.Count(call => call == "MassPackOpeningHiddenCards.AttachMassPackOpeningHighlightCards") == 1
             && pageCalls.Count(call => call == "HiddenCards.EnableReveal") == 1
             && pageCalls.IndexOf("MassPackOpeningHiddenCards.AttachMassPackOpeningHighlightCards") < pageCalls.IndexOf("HiddenCards.EnableReveal"),
             "pinned MoveNext exposes exact attach and post-delay readiness call sites");
-    }
-
-    internal static List<string> Calls(byte[] il, MetadataReader metadata)
-    {
-        var opcodes = typeof(OpCodes).GetFields(BindingFlags.Public | BindingFlags.Static)
-            .Where(field => field.FieldType == typeof(OpCode)).Select(field => (OpCode)field.GetValue(null))
-            .ToDictionary(op => unchecked((ushort)op.Value));
-        var calls = new List<string>();
-        for (int i = 0; i < il.Length;)
-        {
-            ushort code = il[i++];
-            if (code == 0xfe) code = (ushort)(0xfe00 | il[i++]);
-            var op = opcodes[code];
-            if (op == OpCodes.Call || op == OpCodes.Callvirt)
-            {
-                var handle = MetadataTokens.EntityHandle(BitConverter.ToInt32(il, i));
-                if (handle.Kind == HandleKind.MethodDefinition)
-                {
-                    var method = metadata.GetMethodDefinition((MethodDefinitionHandle)handle);
-                    calls.Add(metadata.GetString(metadata.GetTypeDefinition(method.GetDeclaringType()).Name) + "." + metadata.GetString(method.Name));
-                }
-                else if (handle.Kind == HandleKind.MemberReference)
-                {
-                    var member = metadata.GetMemberReference((MemberReferenceHandle)handle);
-                    string type = member.Parent.Kind == HandleKind.TypeReference
-                        ? metadata.GetString(metadata.GetTypeReference((TypeReferenceHandle)member.Parent).Name) : "generic";
-                    calls.Add(type + "." + metadata.GetString(member.Name));
-                }
-            }
-            i += op.OperandType switch {
-                OperandType.InlineNone => 0,
-                OperandType.ShortInlineBrTarget or OperandType.ShortInlineI or OperandType.ShortInlineVar => 1,
-                OperandType.InlineVar => 2,
-                OperandType.InlineI8 or OperandType.InlineR => 8,
-                OperandType.InlineSwitch => 4 + 4 * BitConverter.ToInt32(il, i),
-                _ => 4
-            };
-        }
-        return calls;
     }
 }

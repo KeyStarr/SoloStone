@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using HsSim;
 using PegasusGame;
 using SabberStoneCore.Actions;

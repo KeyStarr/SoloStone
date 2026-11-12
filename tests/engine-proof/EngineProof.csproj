@@ -13,7 +13,7 @@
   <ItemGroup>
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <Compile Include="../../plugin/NativeHeraldText.cs" Link="NativeHeraldText.cs" />
-    <Compile Include="../GroupProofs.cs" Link="GroupProofs.cs" />
+    <Compile Include="../shared/GroupProofs.cs" Link="GroupProofs.cs" />
     <EmbeddedResource Include="definition-fixtures/*.b64" LogicalName="DefinitionFixtures/%(Filename).b64" />
     <None Include="legacy-generation-v1.sha256" CopyToOutputDirectory="PreserveNewest" />
     <None Include="event-traces/*.txt" CopyToOutputDirectory="PreserveNewest" />
@@ -22,7 +22,7 @@
     <Compile Include="../../sim/HsSim/Canonical.cs" Link="Canonical.cs" />
     <Compile Include="../../sim/Shared/PoolSnapshots.cs" Link="PoolSnapshots.cs" />
     <Compile Include="../../sim/HsSim/Simulation.cs" Link="Simulation.cs" />
-    <Compile Include="../OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
+    <Compile Include="../shared/OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
     <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
@@ -46,6 +46,7 @@
     <Compile Include="../../research/modern-mechanics/ProofDecks.cs" Link="ProofDecks.cs" />
   </ItemGroup>
   <ItemGroup><Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../shared/PinnedPoolFixture.cs" Link="PinnedPoolFixture.cs" /></ItemGroup>
   <ItemGroup Condition="'$(ClientTransport)' != 'true'">
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
     <Compile Remove="PetTransportProof.cs" />

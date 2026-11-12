@@ -41,14 +41,14 @@
     <EmbeddedResource Include="../../data/npc/cosmetics-v1.json" LogicalName="SoloStone.Shop.npc-cosmetics-v1.json" />
     <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
     <None Include="../../data/shop/recipes-v1.json" Link="recipes-v1.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="../profile-saves/fixtures/*.xml" LinkBase="profile-fixtures" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../fixtures/profile-saves/*.xml" LinkBase="profile-fixtures" CopyToOutputDirectory="PreserveNewest" />
     <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
   </ItemGroup>
   <Target Name="ExtractTestControlShop" BeforeTargets="CoreCompile">
     <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_test_control_shop.py&quot; &quot;$(IntermediateOutputPath)TestControlShop.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)TestControlShop.g.cs" /></ItemGroup>
   </Target>
-  <ItemGroup><Compile Include="../CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
+  <ItemGroup><Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>
   <Target Name="ExtractNativeShop" BeforeTargets="CoreCompile">
     <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_native_shop.py&quot; &quot;$(IntermediateOutputPath)NativeShop.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)NativeShop.g.cs" /></ItemGroup>

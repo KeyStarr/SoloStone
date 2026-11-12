@@ -16,8 +16,8 @@
     <Compile Include="../../sim/Shared/PoolSnapshots.cs" Link="PoolSnapshots.cs" />
     <Compile Include="../../sim/HsSim/Simulation.cs" Link="Simulation.cs" />
     <Compile Include="../../sim/HsSim/Canonical.cs" Link="Canonical.cs" />
-    <Compile Include="../OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
-    <Compile Include="../engine-proof/PinnedPoolFixture.cs" Link="PinnedPoolFixture.cs" />
+    <Compile Include="../shared/OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
+    <Compile Include="../shared/PinnedPoolFixture.cs" Link="PinnedPoolFixture.cs" />
     <Compile Include="../../plugin/NativeMatch.cs" Link="NativeMatch.cs" />
     <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
     <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
