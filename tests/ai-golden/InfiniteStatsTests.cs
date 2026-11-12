@@ -7,6 +7,10 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static ReplyTests;
 
+// Crash found by the blunder-mining run (game 909): a board with an int.MaxValue-attack minion (Hand of Infinity copied
+// by Bloodsail Raider) made the elite reply search overflow in checked int arithmetic while ordering moves. The AI now
+// adds stats in long. These tests put an int.MaxValue giant on either side, with and without a +1 buff (the engine
+// itself saturates), through the planner and the live turn runner.
 public static class InfiniteStatsTests
 {
     public static void TestInfiniteAttackReplySearch()

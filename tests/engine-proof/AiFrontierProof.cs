@@ -7,6 +7,12 @@ using SabberStoneCore.Model.Decisions;
 using SabberStoneCore.Tasks.PlayerTasks;
 using EngineGame = SabberStoneCore.Model.Game;
 
+// Regression test for an opponent AI bug from a live playtest (fixed 2026-10-27): on turn 10 the AI ended its turn
+// early, never playing Nozdormu and skipping three free attacks on the enemy hero. The turn planner's beam kept only
+// near-copies of one plan, so the line that plays the card and then attacks was cut before it was scored. The fix (the
+// frontier selection in plugin/Npc/TurnPlanner.cs) keeps one line per distinct set of hand cards played. The test
+// replays tests/fixtures/playtest/ai-frontier-turn10.jsonl to the same position, searches within a fixed 30,502-node
+// budget, and requires Nozdormu, all three attacks, an end turn and a score above the early end the playtest recorded.
 internal static class AiFrontierProof
 {
     internal static void Run()

@@ -10,6 +10,10 @@ using SabberStoneCore.Model.Entities;
 
 internal static partial class Program
 {
+    // Playtest 2026-10-21: Vanessa the Ringleader (JAIL_407) showed no legendary crest or Prepare icon and Combo cards
+    // never glowed. Only instance tags were sent, but the native client reads printed keywords (frame, icons, glows,
+    // text) from the entity. These checks guard that the printed projection reaches the client without touching
+    // instance tags and without revealing the opponent's hidden cards.
     private static void PrintedCardTags()
     {
         var capture = new Capture();

@@ -342,10 +342,15 @@ namespace SoloStone
                 }
 #endif
             for(;;) {
+                // Metadata-only open: access 0 needs no read right, share 7 (read|write|delete) never blocks or is blocked by the game or a
+                // scanner, 3 = OPEN_EXISTING, 0x02000000 = FILE_FLAG_BACKUP_SEMANTICS, which Windows requires to open a directory at all.
+                // Errors 2 and 3 (not found) walk up to the nearest existing parent; any other error stops, because a path that cannot be
+                // resolved must not pass.
                 using(var handle=CreateFile(current,0,7,IntPtr.Zero,3,0x02000000,IntPtr.Zero)) {
                     if(!handle.IsInvalid) {
                         var final=new StringBuilder(32768);
                         // Volume GUIDs give one spelling for drive letters and short (8.3) names.
+                        // Flag 1 = VOLUME_NAME_GUID.
                         uint length=GetFinalPathNameByHandle(handle,final,(uint)final.Capacity,1);
                         if(length==0 || length>=final.Capacity) break;
                         string result=final.ToString().TrimEnd('\\');

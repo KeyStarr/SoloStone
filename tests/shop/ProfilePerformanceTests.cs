@@ -3,6 +3,11 @@ using System.Reflection;
 using System.Xml.Serialization;
 using SabberStoneCore.Model;
 
+// Guards the hot profile getters the hub status tick and native shop read often (Collection, Gold, Stars, custom decks,
+// crafting extras, Snapshot). On a large save the hub status tick took about 2.4 s before the card indexes were cached (now
+// about 5 ms). The fixture is a heavy but realistic save (150 matches, the maximum visible decks plus one, every non-Core
+// ledger card owned) so the cost shows. Budgets are deliberately loose (500 ms per 20 reads, 1,500 ms load) because the gate
+// runs on busy machines; they only catch a return to per-call linear scans. The "reference linear" timing is printed, not asserted.
 internal static class ProfilePerformanceTests
 {
     internal static void Run(string root)

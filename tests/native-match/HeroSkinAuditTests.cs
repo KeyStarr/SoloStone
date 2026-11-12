@@ -6,6 +6,9 @@ using SabberStoneCore.Model.Entities;
 
 internal static partial class Program
 {
+    // The plugin's test-control visible-state audit used its own copy of the hero-skin mapping and ignored scenario skins and
+    // per-seat skin powers, so an NPC with a scenario skin stalled mulligan settlement on "identity:6/7". The audit must
+    // accept exactly what NativeMatch projects; these cases keep the two from drifting apart.
     private static void CheckSkinAuditIdentity(NativeMatch match, Capture capture, IPlayable entity, string expected, string label)
     {
         var projected = capture.HistorySnapshots().SelectMany(history => history.List)

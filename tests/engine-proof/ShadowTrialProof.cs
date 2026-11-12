@@ -1,4 +1,7 @@
 // Moved from tests/transport-invariants/TransportDebtProof.cs: pure engine, no client.
+// Regression for a strict-corpus crash: a Shadow of Demise that turns into a Kazakus trial copied the card but not
+// its two chosen components, and the next objective tick dereferenced the missing component. The transformed card
+// must keep both components, in order. The full game that found it is replays/transport-debt/runtime.json.
 internal static class ShadowTrialProof
 {
     internal static void Run()

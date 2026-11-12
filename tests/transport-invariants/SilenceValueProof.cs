@@ -8,6 +8,9 @@ using SabberStoneCore.Tasks.PlayerTasks;
 namespace TransportInvariants;
 using Game = SabberStoneCore.Model.Game;
 
+// Regression: IsSilenced used to test whether the SILENCED key existed, not its value. Malignant Horror's end-turn
+// copy is created with an explicit SILENCED=0, so the engine treated it as silenced (lost triggers) while the client
+// saw 0. Silence now means SILENCED != 0. The test checks the zero-value copy and a real Silence side by side.
 internal static class SilenceValueProof
 {
     internal static void Run()

@@ -8,6 +8,10 @@ using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 using EngineGame = SabberStoneCore.Model.Game;
 
+// Mirror Entity (EX1_294, summon copy) and Faceless Manipulator (EX1_564, transform copy) are the two cards whose copy
+// tasks the engine finishes by copying internal attributes after the public snapshot is taken, so the native client saw
+// the new minion without its damage, buffs and mutable flags. These hooks capture the state when the copy task
+// completes and record it as a correction at that point in the packet.
 internal static class CopyTransportBridge
 {
     internal sealed class CopyTaskState
@@ -88,6 +92,7 @@ internal static class CopyTransportBridge
         if (activeMatch == null || !ReferenceEquals(activeGame, game) || !game.History
             || controller == null || !(source is IPlayable sourcePlayable))
             return null;
+        // Hooked only for the two cards above; any other source of the same task types is left untouched.
         string expectedCard = summon ? "EX1_294" : "EX1_564";
         if (!string.Equals(sourcePlayable.Card?.Id, expectedCard, StringComparison.Ordinal))
             return null;

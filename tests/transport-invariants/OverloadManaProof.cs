@@ -8,6 +8,11 @@ using SabberStoneCore.Model.Entities;
 namespace TransportInvariants;
 using Game = SabberStoneCore.Model.Game;
 
+// Regression for a playtest bug: with Overload locked mana, a Shaman deck showed 8 available mana in the native client
+// while the engine allowed 7. The client computes available mana as RESOURCES + TEMP_RESOURCES - RESOURCES_USED and
+// expects locked Overload to be inside RESOURCES_USED, but the engine keeps OVERLOAD_LOCKED separate. The transport now
+// projects spent plus locked mana into RESOURCES_USED. Checked for both seats, live updates, CreateGame snapshots,
+// Rewind and unlock.
 internal static class OverloadManaProof
 {
     internal static void Run()

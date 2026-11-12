@@ -11,6 +11,9 @@ using SabberStoneCore.Tasks.SimpleTasks;
 
 internal static partial class Program
 {
+    // A hero skin's cosmetic power name is captured per seat at match start and then follows each history entity, not the
+    // current engine power: upgrades, temporary powers, controller transfers and Rewind restores must keep the identity the
+    // client first saw for that entity. Mutating the engine after a snapshot must not change an earlier snapshot's name.
     private static void HeroSkinPowerHistory()
     {
         HeroSkinPowerTransfers();

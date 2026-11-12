@@ -26,6 +26,8 @@ internal sealed class FxTelemetryRecord
     };
     private static readonly string[] Columns = Header.Split('\t');
     internal Captured Capture(int sequence) => new Captured(Values(sequence));
+    // Column numbers index Header/Values above: 30-32 are the three Blocking* diagnostics columns, which get the larger
+    // BlockingDiagnostics.MaxLength; every other text column is cut to 256. Keep in step when columns are added or reordered.
     private static int Limit(int column) => column >= 30 && column <= 32 ? BlockingDiagnostics.MaxLength : 256;
     internal static string Bound(string text, int limit) => text.Length > limit ? text.Substring(0, limit - 1) + "…" : text;
     internal sealed class Captured
@@ -46,6 +48,9 @@ internal sealed class FxTelemetryRecord
             return row;
         }
     }
+    // Hovering a card in hand makes the client run its ProposeUsage preview spell with no task list behind it. Those idle
+    // previews can fire constantly and would push real gameplay records out of the 512-entry ring, so they are dropped
+    // (and only counted in HoverFiltered). A record with an error or a task list is never treated as hover.
     internal bool HoverOnly => Error == null && Result != false && SpellPresent != false && EffectPresent != false
         && TaskList == null && SubSpellId == null
         && (HasHoverName(Prefab) || HasHoverName(SpellName));

@@ -10,6 +10,8 @@ using NativeHistory = PegasusGame.PowerHistoryData;
 // Mapping and timing follow retail Power.log evidence (docs/pet-reactions.md); unproven events stay unprojected.
 internal sealed class NativePetReactions
 {
+    // PET_EVENT_ID: the client reads it from Card.OnTagChanged on the pet entity, which ignores zero, so Emit resets it
+    // to 0 after each event.
     internal const int EventTag = 4038;
     // A hand/board play; an automatic EffectPlay (Fyrakk's casts, autoplay) is presentation, never a card play.
     internal static bool IsCardPlay(PowerHistoryBlockStart start) => start.BlockType == BlockType.PLAY

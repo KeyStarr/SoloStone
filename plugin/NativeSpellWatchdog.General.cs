@@ -55,6 +55,10 @@ internal static partial class NativeSpellWatchdog
         foreach (var card in cards)
             progress += "|" + card.GetEntity()?.GetEntityId() + ":" + card.transform.position.ToString("F4", System.Globalization.CultureInfo.InvariantCulture)
                 + ":" + card.transform.rotation.ToString("F4", System.Globalization.CultureInfo.InvariantCulture) + ":" + card.IsActorReady() + ":" + card.IsActorLoading();
+        // 60 s of no progress at all (task, FSM state, card position or animation) before recovering. Added after a 2026-11-02
+        // freeze on an opponent's overdraw burn: the burned card was revealed, moved to the graveyard, then moved again, which
+        // waits on a client mill flag that never clears. No SpellController was involved, so the 30 s attack watchdog never
+        // saw it. Transport now shows such burns straight into the graveyard; this is the backstop for any similar stall.
         if (!generalClock.Observe(true, matchId, processor, task, progress, now, 60)) return;
         var header = task.GetBlockStart();
         var detail = new JsonNode {

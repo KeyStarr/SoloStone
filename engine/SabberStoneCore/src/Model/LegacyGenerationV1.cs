@@ -9,6 +9,10 @@ using SabberStoneCore.Enums;
 
 namespace SabberStoneCore.Model
 {
+    // Ordered card lists captured from the engine as it was before the offline pool system, pinned by
+    // hash in the tests. Older random effects draw from them, so registering or admitting new cards can
+    // never change what those effects draw (recorded games and golden traces depend on that). New random
+    // effects use OfflineCardPools instead.
     // Compatibility inputs only. Do not extend V1 when registering or admitting cards.
     internal static class LegacyGenerationV1
     {

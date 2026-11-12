@@ -10,6 +10,12 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Regression for a live bug: when a card generates a card into a hand the viewer cannot see (an NPC generating into
+    // its hidden hand), an earlier repair added a TARGET naming the source card, so Vanessa the Ringleader's
+    // spawn-to-hand effect animated Vanessa herself and shrank her (240 cards and 11 hero sub-spell anchors were
+    // affected). A source-as-target is now inserted only for the few effect families that need a typed impact target
+    // (Chaos Strike, Spectral Sight, Chillfallen Baron, Battlefiend); everything else keeps the native inference.
+    // The first loop plays a real Vanessa for both seats; the second checks that rule block by block.
     private static void NativeGeneratorTargetControls()
     {
         int cases = 0;

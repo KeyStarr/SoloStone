@@ -485,6 +485,9 @@ public sealed partial class LocalProfile : IDisposable
         var next = Snapshot(); next.SeenMassPackTooltip = true; Commit(next);
         return true;
     }
+    // Personal deck ids live in the 91000xxxx block, apart from the 90000xxxx block NativeUIProjection reserves for test and
+    // proof decks, so the two cannot collide in the client's deck list. LegacyCustomDeckId is the single deck of the
+    // pre-multi-deck save; decks created in the library allocate upward from FirstAllocatedCustomDeckId.
     public const long LegacyCustomDeckId = 910000001L;
     public const long FirstAllocatedCustomDeckId = 910000010L;
     private const long MaximumProfileBytes = 32L * 1024 * 1024;
@@ -1894,6 +1897,8 @@ public sealed partial class LocalProfile : IDisposable
             }
             catch
             {
+                // File.Replace can fail after it has already removed the live profile. If the save is gone but the freshly
+                // written temp file survived, move it into place so the player is never left with no save at all.
                 if (!File.Exists(path) && File.Exists(temporary))
                 {
                     preserveTemporary = true;
@@ -2950,6 +2955,7 @@ internal static class LocalProfileBackups
                     }
                     catch
                     {
+                        // Same recovery as Commit: a failed File.Replace may already have removed the live profile.
                         if (!File.Exists(profilePath) && File.Exists(temporary))
                         {
                             preserveTemporary = true;

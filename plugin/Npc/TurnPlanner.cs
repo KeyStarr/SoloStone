@@ -402,6 +402,8 @@ internal sealed class TurnBeam : INodeJob
     private long TurnFace(FairFacts f)
     {
         long lost = rootFriendlyMinions.Count - f.Own.Board.Count(c => rootFriendlyMinions.Contains(c.EntityId));
+        // A lost minion costs LostMinionPenalty and face damage is capped one below it, so no amount of face damage can ever
+        // justify losing a minion on a tie. Face damage counts only while the opponent has no Secret.
         long face = faceCounts ? Math.Min(LostMinionPenalty - 1, Math.Max(0, rootEnemyLife - f.Opponent.Hero.Health - f.Opponent.Hero.Armor)) : 0;
         return face - lost * LostMinionPenalty;
     }

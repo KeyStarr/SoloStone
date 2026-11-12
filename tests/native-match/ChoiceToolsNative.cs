@@ -15,6 +15,12 @@ using SabberStoneCore.Tasks.SimpleTasks;
 
 internal static partial class Program
 {
+    // Regression for a frozen live match: the engine opened a choice (a Discover-style offer or a target pick) whose
+    // source card and offered cards the client had never been sent, so the player saw no prompt and the match stuck.
+    // Recovery restores the missing entities, registers the choice with the client one frame later, and only then
+    // submits the pick. The "negative control" below shows why: with the old back-to-back send the client's
+    // acknowledgement arrives before the choice is registered and the choice stays stuck. Every recorded choice-open
+    // row must also say which source and offers the client lacked.
     private static void ChoiceToolsNative()
     {
         foreach (string card in new[] { "TLC_245", "CORE_DS1_184", "EX1_319" })

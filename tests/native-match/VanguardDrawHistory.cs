@@ -11,6 +11,10 @@ using SabberStoneCore.Tasks.SimpleTasks;
 
 internal static partial class Program
 {
+    // Garona's King Llane was moved into the opponent's deck by its Start of Game effect, with the engine Controller
+    // changed but the CONTROLLER tag left at the old player. When Portal Vanguard drew him, SHOW_ENTITY reassigned the
+    // actor to the other side and dropped the buff, so the drawn minion appeared on the wrong side. The `transferred`
+    // cases cover that.
     private static void VanguardDrawHistory()
     {
         foreach (bool bot in new[] { false, true })
@@ -92,6 +96,8 @@ internal static partial class Program
         Console.WriteLine("PASS Vanguard draw: debug scenario, both viewers, first resolution and Rewind replay");
     }
 
+    // Same stale-CONTROLLER class: a stolen final portal demon returned Broxigar (TIME_020) to the other player's hand
+    // with CONTROLLER unchanged. The engine Controller and the CONTROLLER tag must agree for every viewer.
     private static void BroxigarReturnHistory()
     {
         foreach (bool bot in new[] { false, true })

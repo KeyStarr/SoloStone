@@ -288,6 +288,9 @@ public sealed class GoldenDecisionJob : IGoldenDecisionJob, INpcThinkingCandidat
     private readonly GoldenPublicInputs inputs;
     private readonly LethalJob lethal, recheck;
     private readonly INodeJob serialLethal;
+    // Decision-local lethal probe with its own reserve, outside the lethal budget (fix "lethal-recheck"). Added after a live
+    // miss on 2026-11-02, turn 19: the parallel lethal search was cancelled within about 5 nodes when a cached plan step
+    // was reused, so a 20/10 attacked into a 7/7 while exact face lethal was available.
     internal const int LethalRecheckNodes = 128;
     private readonly ParallelLethalSearch parallel;
     private readonly BoundedFallbackJob minimum;
@@ -336,6 +339,9 @@ public sealed class GoldenDecisionJob : IGoldenDecisionJob, INpcThinkingCandidat
             accept ? best.Candidates : originalCandidates);
     }
     private bool interrupted;
+    // Why a pass from a capped search is re-checked: in a 2026-11-01 playtest a regular Hunter passed with six Magmaw tokens
+    // behind a 5/9 Taunt. The clock-capped search's unfinished line had been given a synthetic END_TURN, and later decisions
+    // reused it. A capped pass is therefore checked first by an independent continuation search of this many nodes.
     // Independent of the primary turn/cap/clock allocation. Same tier evaluator, width and reply strength.
     internal const int PassValidationNodes = 7000;
     private readonly DecisionSearchInfo searchInfo = new DecisionSearchInfo();

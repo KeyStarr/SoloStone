@@ -15,6 +15,12 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static partial class Program
 {
+    // Replays a real game (tests/native-match/fixtures/invisible-greenwing.json, 47 recorded actions, every fingerprint
+    // and RNG state checked) in which an opponent's Taunt minion was invisible on turn 14: the engine had the 4/5 body
+    // (entity 86, an Illusion token, EDR_260t) but its board slot looked empty. The token is drawn and summoned in one
+    // packet (deck -> hand -> setaside -> play). The client hides an actor that passes through "setaside" and never shows
+    // it again on play. Fix: board transit keeps the last real zone instead of the setaside hop. BoardIdentityHistory
+    // repeats this with staged boards for both seats and checks the invisible Taunt still blocks attacks.
     private static void GreenwingJournalReplay()
     {
         using var document = JsonDocument.Parse(File.ReadAllText("tests/native-match/fixtures/invisible-greenwing.json"));

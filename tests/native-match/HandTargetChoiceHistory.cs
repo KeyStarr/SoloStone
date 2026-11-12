@@ -17,6 +17,10 @@ internal static partial class Program
     private static void PublishHandChoice(NativeMatch match) => typeof(NativeMatch)
         .GetMethod("SendHumanChoice", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(match, null);
 
+    // Playtest: Fast Forward's "pick a drawn card" choice drew its arrow but clicks on hand cards did nothing until the turn
+    // timer ran out. The native GameState caches HasHandTarget when the choice is registered, before the drawn cards' actors
+    // reach the hand zone, so InputManager dropped the clicks. The fix re-checks that predicate for the active local TARGET
+    // choice. `journal` optionally replays a recorded game; that journal is not shipped in the repo.
     private static void HandTargetChoiceHistory(string journal = null)
     {
         PinnedTargetInputContract();

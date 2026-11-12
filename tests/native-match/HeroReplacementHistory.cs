@@ -111,6 +111,11 @@ internal static partial class Program
         Console.WriteLine("PASS hero slot: NPC seat, token, taken and transformed cards, position 0, Rewind");
     }
 
+    // Lord Jaraxxus: the client's JaraxxusHeroSpell only attaches if both new entities (the INFERNO! hero power and Blood
+    // Fury) are FULL_ENTITY rows inside the card's own POWER task list, each created in PLAY (its SetupCards reads the
+    // snapshot zone and never runs queued tag changes). Before, INFERNO! sat in the parent PLAY block, the spell never
+    // attached and the client's task list never finished. Sibling on-play triggers (Inspector Murloc Holmes' watch) between
+    // the two must not stop the rows being moved.
     private static void HeroReplacementHistory(bool dump = false)
     {
         HeroSlotAcrossRoutes();

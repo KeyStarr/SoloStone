@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+// Mistake pricing with a queued extra turn (ExtraTurn: NumTurnsLeft = 2). The planner used to rebuild released lines by
+// applying END_TURN, so with an extra turn queued the retained and released lines looked at different horizons and a 6.7-point
+// loss passed a bound of 5. END_TURN is now kept as a sentinel; retained and released scores must match, and the hold must
+// be rejected by its real loss.
 internal static class RoundThreeSuite
 {
     private static FairBotState ExtraTurn()

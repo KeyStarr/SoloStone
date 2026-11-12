@@ -7,6 +7,10 @@ using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 using static Core2026Proof;
 
+// Regression test for fuzz determinism. Card task recipes (StateTaskList) are shared by every game in a process, and
+// Process() used to write its running/complete status onto that shared object. A game that ran later could then see
+// different state and history than an identical earlier game, so replays diverged. The same game is played twice
+// here and must produce identical state.
 internal static class StateTaskListDeterminismProof
 {
     internal static void Run()

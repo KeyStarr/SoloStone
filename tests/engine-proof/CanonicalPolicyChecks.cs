@@ -9,6 +9,10 @@ using System.Text.Json;
 using Entity = SabberStoneCore.Model.Entities.Entity;
 using Game = SabberStoneCore.Model.Game;
 
+// Pins the encodings that recorded games depend on: the SplitMix64 policy RNG (reference vectors for seed 0), SHA-256
+// over UTF-8, and the canonical text for tags, history entries, choices and options (ordered, global ids normalized,
+// implicit zero tags equal to absent). If any of these change, stored goldens and replays stop matching without any
+// game rule having changed.
 internal static class CanonicalPolicyChecks
 {
     static void Assert(bool valid, string name)

@@ -7,6 +7,9 @@ using PegasusGame;
 
 internal static partial class Program
 {
+    // Optional census, off unless HS_EMPTY_TRIGGER_REPORT names an output file: lists every empty TRIGGER block in the
+    // admission sweep so a before/after count can be taken. It produced the 26,544 -> 157 figure from the fix that
+    // dropped empty trigger blocks; the remaining 157 are protected cases.
     private static void InventoryEmptyTriggers(string family, string fixture, int seat, PowerHistory[] packets, SabberStoneCore.Model.Game game)
     {
         string output = Environment.GetEnvironmentVariable("HS_EMPTY_TRIGGER_REPORT");

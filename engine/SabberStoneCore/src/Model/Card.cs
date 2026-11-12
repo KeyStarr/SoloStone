@@ -177,6 +177,7 @@ namespace SabberStoneCore.Model
 						case GameTag.SECRET:
 							IsSecret = true;
 							break;
+						// 1192 is the Sidequest tag.
 						case (GameTag)1192 when id == "TLC_EVENT_400":
 						case GameTag.QUEST:
 							IsQuest = true;

@@ -8,6 +8,10 @@ using Entity = SabberStoneCore.Model.Entities.Entity;
 using Game = SabberStoneCore.Model.Game;
 using Zone = SabberStoneCore.Enums.Zone;
 
+// Godfrey (JAIL_509) overdraw visuals are driven by tags the client reads from its prefabs: hero tag 4717 turns the
+// deck portal on and off, a burned card's display copy carries 4722=319, and the tooltip reads the backlog count from
+// TAG_SCRIPT_DATA_NUM_2 on the JAIL_509e enchantment. For the opponent a returned card stays anonymous, and two burns
+// must not let the viewer match a return to a burned card.
 internal static class GodfreyHistoryProof
 {
     internal static void Run()

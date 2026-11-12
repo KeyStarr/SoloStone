@@ -10,6 +10,9 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Locations have no Choose One sub-effects, so their activation POWER must use SubOption = -1 (the primary play effect).
+    // It was written as 0, which the client reads as a sub-effect: the play spell started by the human's targeting never got
+    // POWER and stayed lit. Same shape for both seats, copied or not.
     private static void LocationActivationHistory()
     {
         foreach (bool bot in new[] { false, true })

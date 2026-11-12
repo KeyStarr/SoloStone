@@ -8,6 +8,8 @@ using SabberStoneCore.Tasks.PlayerTasks;
 
 internal static class RoundTwoSuite
 {
+    // 1926 is a reduced live plan cap seen in real NPC journals. Below about 1,960 nodes the search has no reply finalists, so the
+    // tests that price mistakes use this cap to match what NPCs really ran with.
     internal static NpcProfile Profile(int width = 16, int cap = 1926)
     {
         var p = NpcCatalog.All[0];
@@ -161,6 +163,11 @@ internal static class RoundTwoSuite
             "hold price equals replayed completed turn loss: " + actualLoss);
         Console.WriteLine("PASS hold replay: decisions=" + decisions + " loss=" + actualLoss);
     }
+
+    // Position of a recorded NPC turn (owl828, Hunter, state turn 12). In that game a trade-target mistake aimed Roar at the wrong
+    // minion; the journal priced it at a loss of 3.15, but a real continuation search prices it far higher (above the casual
+    // tier's 8.5 bound). Owl() injects the misleading 3.15 and requires the continuation check to reject it. The wider beam
+    // (16 instead of 8) is needed to find the line that plays Roar and Cower on Manastorm, both quests and Sandmaw.
     internal static FairBotState OwlView()
     {
         // Owl828 turn 12 public position. Platysaur was summoned, so deliberately has no linked draw enchantment.

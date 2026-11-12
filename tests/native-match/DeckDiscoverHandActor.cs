@@ -14,6 +14,11 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 
 internal static partial class Program
 {
+    // Reproduces a playtest bug from 2026-10-24: after Xavius (and Tracking) the chosen card showed as an empty slot in
+    // the hand and could not be played. Discover-from-deck used to offer the real deck cards; the client loads a hand
+    // actor for every offered card, so the later draw reused that actor and then destroyed it. Offers are now
+    // chooser-private SETASIDE proxies linked to the hidden deck originals, and the answer maps back to the
+    // original, which is drawn normally. Opponent view: only nameless proxy ids may appear, never deck ids.
     private static void DeckDiscoverHandActor()
     {
         var failures = new List<string>();

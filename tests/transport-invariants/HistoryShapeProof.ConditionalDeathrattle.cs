@@ -9,6 +9,10 @@ namespace TransportInvariants;
 
 internal static partial class HistoryShapeProof
 {
+    // Regression for a transport bug: Chillmaw's Deathrattle with no Dragon in hand (condition fails) was sent as an
+    // empty TRIGGER block with EffectIndex 0, so the client still played its frost-breath spell and showed no damage. A
+    // failed condition must carry no effect selector (EffectIndex -1, no effect card); a passed one keeps slot 0. Runs
+    // both Chillmaw IDs, both seats, with and without the Dragon.
     private static void ConditionalDeathrattle()
     {
         foreach (string id in new[] { "AT_123", "CORE_AT_123" })

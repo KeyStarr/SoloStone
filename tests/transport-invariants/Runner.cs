@@ -275,6 +275,8 @@ internal sealed class Runner
         var random = new PolicyRandom(1);
         var ids = Simulation.FuzzDeckIds();
         for (int i = 0; i < 200; i++)
+            // The first 12 fuzz games start from a forced Rewind card (TIME_001 or TIME_038) so fuzz also offers, keeps and
+            // takes Rewind. Program.cs fails the strict run if fuzz never saw all three.
             yield return new() { Game = new() { Id = $"fuzz-1-{i:D4}", Suite = "fuzz", Player = i < 12 ? "standard-coverage-" + (i % 2 == 0 ? "TIME_001" : "TIME_038") : ids[random.Index(ids.Length)],
                 Opponent = ids[random.Index(ids.Length)], Seed = unchecked((int)random.Next()) } };
     }
@@ -287,6 +289,10 @@ internal sealed class Runner
                 Player = "standard-coverage-" + card, Opponent = "warrior", Seed = seed } };
     }
 
+    // The one hand-built game in the harness: a Priest holds Lightspawn at 10 mana on step 2 and plays it. The client
+    // once showed Lightspawn with 0 Attack (seen in a live game). Random corpus games rarely play it, so this case makes
+    // sure effective-attack publishing is exercised; LightspawnPlayed/LightspawnDetected check that it was played
+    // and no ATK mismatch is reported.
     internal static TransportReplay Focused() => new() { Focused = true, Game = new() {
         Id = "focused-lightspawn", Suite = "focused", Player = "priest", Opponent = "mage", Seed = 0
     } };

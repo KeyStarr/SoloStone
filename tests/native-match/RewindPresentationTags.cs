@@ -7,6 +7,10 @@ using SabberStoneCore.Model.Entities;
 
 internal static partial class Program
 {
+    // A Rewind replayed a rejected Smoldering offer (FIR_911/914/916) with the card definition's IMMOLATING /
+    // IMMOLATESTAGE defaults (tags 2505/2600). The client then started the Immolate hand visual and never got an off
+    // transition. A reset snapshot must carry live instance state only (including an explicit 0), never definition-only
+    // defaults.
     private static void RewindPresentationTags()
     {
         foreach (bool bot in new[] { false, true })

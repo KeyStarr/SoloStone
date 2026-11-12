@@ -16,6 +16,8 @@ namespace SabberStoneCore.Model.Rewind
     {
         public static long SkippedNonQuiescentBoundaries { get; private set; }
         private static readonly string[] Clocksworth = { "TIME_038", "TIME_038t1", "TIME_038t2", "TIME_038t3" };
+        // A Rewind card can be rewound once. Mister Clocksworth (TIME_038) can be rewound three times: the
+        // client data chains TIME_038 -> t1 -> t2 -> t3, and each Rewind changes the card into the next form.
         private static int Budget(string id) => Clocksworth.Contains(id) ? 3 : 1;
 
         private static bool HeroPowerLegal(Game game, IPlayable source, int targetId, int chooseOne)

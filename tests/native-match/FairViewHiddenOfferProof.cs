@@ -13,6 +13,10 @@ using static QuestNativeProof;
 using SabberStoneCore.Actions;
 
 // Fair search over own-deck offers (Dark Gift deck Discover, Tracking) and effects that read hidden cards.
+// Originally the fair view masked every deck card, including the chooser's own pending offers, so the search
+// rejected every simulated pick and the NPC fell back to its greedy policy; simulated draw-then-buff, copy and
+// pick-hidden effects also threw. The chooser's own offers now stay visible (the opponent's view still masks
+// them), and inside fair search a hidden card stays hidden. A search that falls back at all is now a failure.
 internal static partial class FairViewHiddenOfferProof
 {
 

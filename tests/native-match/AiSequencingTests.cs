@@ -10,6 +10,11 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Regression for NPC turn planning (2026-10-27): two orders of the same plays (spell then area effect, or the
+    // reverse) reached identical visible boards but not identical states, because one left a delayed "returns to hand
+    // at end of turn" effect and the other did not. Search keys that ignored it could merge the two and drop the better
+    // line. Search keys and the planner's frontier now keep distinct own delayed effects apart. The full-hand cases
+    // check that a return that cannot happen (hand full) earns no value.
     private static void AiSequencingTests()
     {
         foreach (bool bot in new[] { false, true }) foreach (bool reverseIds in new[] { false, true })

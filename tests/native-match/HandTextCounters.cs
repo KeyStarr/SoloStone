@@ -10,6 +10,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 internal static partial class Program
 {
+    // Playtest (fixed 2026-10-21): Clockwork Rager in hand on turn 5 read "(0 turns)" and Curious Grimlynx read "Summon
+    // a 0/0 Beast", although the effects themselves were right. The client builds in-hand text from
+    // TAG_SCRIPT_DATA_NUM_1/2 (and USE_ALTERNATE_CARD_TEXT), so the host must forward live values, with the card
+    // definition's defaults on first reveal. Hidden hand and deck cards must not carry them.
     private static void HandTextCounters()
     {
         CostMemoryChecks();

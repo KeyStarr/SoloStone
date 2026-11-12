@@ -13,6 +13,10 @@ namespace SabberStoneCore.Actions
     public static class AutonomousTurnRules
     {
         private const GameTag Used = (GameTag)33420, Turn = (GameTag)33421, Actions = (GameTag)33422;
+        // Mastermind Yogg-Saron's extra turn is played by the engine, not by a player. After this many actions in one
+        // controlled turn the engine ends it, so the turn is guaranteed to finish. Pending choices are still answered
+        // first. The optional Discover refresh (JAIL_319t) is never taken (see Run): it is the only offer that can
+        // cycle without making progress.
         public const int ActionLimit = 128;
         public static bool IsInternalTag(GameTag tag) => tag == Used || tag == Turn || tag == Actions;
         public static bool HasUsed(Controller owner) => owner[Used] != 0;
