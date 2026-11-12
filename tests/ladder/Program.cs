@@ -75,9 +75,6 @@ string root = Path.Combine(Path.GetTempPath(), "hs-ladder-tests-" + Guid.NewGuid
 Directory.CreateDirectory(root);
 try
 {
-    RatingPlacementChecks.Run(root);
-    MilestoneLedgerChecks.Run(root);
-    LadderLedgerChecks.Run(root);
     Check(LocalEconomy.PackPrice == 100, "pack price");
     Check(LocalDecks.All.Count == 8 && LocalDecks.All.Select(deck => deck.Id).SequenceEqual(new[] {
         "mage", "warrior", "priest", "mage-frost", "warrior-control", "priest-combo", "paladin", "paladin-control"

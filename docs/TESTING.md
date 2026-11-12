@@ -97,7 +97,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `deck-ui` | Deck layout geometry, button chrome and handheld rules of the native screens |
 | `projection` | How menu and match state is projected onto the native screens |
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
-| `ladder-extended` | The older ladder fixtures, in the same program under `--extended`: legacy rating placement, the milestone ledger, ranked history from before the placement rule, the economy, pack and deck-library checks. Each check runs in this suite or in `ladder`, apart from the current half of the ledger checks, which both run |
+| `ladder-extended` | The older ladder-program checks, in the same program under `--extended`: the economy, pack and deck-library checks. The ledger, milestone-ledger and rating-placement checks run in `ladder`. Fixtures for saves no build wrote (rule-0 or rule-1 ranked history) are deleted |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
 | `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |

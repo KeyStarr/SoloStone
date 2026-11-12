@@ -146,7 +146,7 @@ SUITES += [
           'tests/projection/ProjectionTests.csproj'),
     Suite('ladder', 'dotnet', 'the ranked ladder profile code: results, rewards, milestones, ledger, placement and casual mode',
           'tests/ladder/LadderTests.csproj'),
-    Suite('ladder-extended', 'dotnet', 'the older ladder fixtures: legacy rating placement, milestone ledger, ledger migrations, economy and deck library',
+    Suite('ladder-extended', 'dotnet', 'the older ladder-program checks: economy, packs and deck library',
           'tests/ladder/LadderTests.csproj', args=['--extended']),
     Suite('recipe-picker', 'dotnet', 'the recipe picker and recipe guide of the native shop (one check reads the client library, if set up)',
           'tests/recipe-picker/RecipePickerTests.csproj'),
