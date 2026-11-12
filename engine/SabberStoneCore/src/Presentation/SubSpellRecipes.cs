@@ -4,7 +4,7 @@ using SabberStoneCore.Kettle;
 
 namespace SabberStoneCore.Presentation
 {
-    internal enum VisualPhase { Damage, DamageGroup, Heal, BoardBuff, Draw, Create, Summon }
+    internal enum VisualPhase { Damage, DamageGroup, Heal, BoardBuff, Draw, Create, Summon, Armor }
     internal enum VisualSource { Hero, Effect, Inherit }
     internal enum VisualTargets { Resolved, None }
 
@@ -50,9 +50,9 @@ namespace SabberStoneCore.Presentation
             Add("TIME_218 EDR_262 JAIL_805 EDR_263a", VisualPhase.Damage, "ReuseFX_Lightning_Missile_Bolt_Small_Super_Simultaneous:4e176ec954bdc6f4bb7494e521d35c8a");
             Add("CATA_475 CATA_999", VisualPhase.Damage, "ReuseFX_Lightning_Missile_Bolt_Small_Super_Simultaneous:4e176ec954bdc6f4bb7494e521d35c8a", block: BlockType.TRIGGER, source: VisualSource.Effect);
             Add("TIME_750 TIME_600", VisualPhase.Damage, "ReuseFX_Generic_Missile_Arrow_Super_Simultaneous:bbd7f9a5ebabd8e45b0a22cb4446f1d9");
-            Add("EDR_851p EDR_941 CATA_978 TIME_441 CATA_489 EDR_476 MEND_500 BE_854 EDR_460t EDR_460 CATA_489t CATA_489t2 CATA_308", VisualPhase.Damage, "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de");
+            Add("EDR_851p EDR_941 CATA_978 TIME_441 CATA_489 EDR_476 MEND_500 BE_854 EDR_460t EDR_460 CATA_489t CATA_489t2", VisualPhase.Damage, "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de");
             Add("TIME_810 TIME_810t1 TIME_810t2", VisualPhase.Damage, "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de", source: VisualSource.Effect);
-            Add("EDR_814 TLC_901 TLC_630t EDR_813b", VisualPhase.Damage, "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1");
+            Add("EDR_814 TLC_901 EDR_813b", VisualPhase.Damage, "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1");
             Add("BE_559 WW_001t CAP_006 TLC_620", VisualPhase.Damage, "ReuseFX_Physical_Missile_Generic_Super_Simultaneous:6ff0a03c3b353254d887e154c0f94e33");
             Add("JAIL_445", VisualPhase.Damage, "ReuseFX_Necrotic_Missile_Bone_Small_Super:d25c28f8f4b12964d8ab765bac643495");
             // Collapsing Star (Soul Immolation's hero power): its CardDef, and Soul Immolation's, author no play spell, so the
@@ -91,7 +91,7 @@ namespace SabberStoneCore.Presentation
             Add("JAIL_881t", VisualPhase.Damage, "ReuseFX_Arcane_Missile_PurpleLightning_Super_Simultaneous:a40e6c32f4253314db432d7808a092de", block: BlockType.TRIGGER, subOption: 0);
             Add("JAIL_443t", VisualPhase.Damage, "ReuseFX_Physical_Impact_Slam_Super:4d1b99bee3bc05d489e03086bf27e295", block: BlockType.TRIGGER, subOption: 0);
             Add("TIME_025t JAIL_319", VisualPhase.Damage, "ReuseFX_Physical_Impact_Slam_Super:4d1b99bee3bc05d489e03086bf27e295");
-            Add("JAIL_441 JAIL_891 JAIL_892 CATA_557 CAP_001 CATA_156 CATA_581 CORE_CATA_007 BE_086 BE_071 JAIL_941t CORE_SW_088 CATA_498 JAIL_515 CATA_785 EDR_820b EDR_570A", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0");
+            Add("JAIL_441 JAIL_891 JAIL_892 CATA_557 CAP_001 CATA_156 CATA_581 CORE_CATA_007 BE_086 BE_071 JAIL_941t CATA_498 JAIL_515 CATA_785 EDR_820b EDR_570A", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0");
             Add("DINO_132", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0", block: BlockType.TRIGGER, source: VisualSource.Effect);
             Add("CAP_107t", VisualPhase.Damage, "ReuseFX_Generic_Missile_Cannon_Super_Quickest:ed9fdef57cbdcbb44bbfd9f06c1c8d24",
                 block: BlockType.TRIGGER, source: VisualSource.Effect);
@@ -124,6 +124,30 @@ namespace SabberStoneCore.Presentation
             Add("DINO_434", VisualPhase.Create, "ReuseFX_SpawnToHand_Arcane_Runes_Super:da3a6dbbfa826a14da891041cfa32a3b",
                 VisualTargets.None, block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             Add("TIME_018", VisualPhase.Create, "ReuseFX_Holy_SpawnToHand_Hero_Super:d469ef317c9243b49bbccdc5eeb0ac81", VisualTargets.None);
+            // Issue #26. Where the card's CardDef authors sub-spells (m_SubSpellEffectDefs), the recipe uses them: those are the
+            // prefabs retail names in its SUB_SPELL_START rows. Demonic Assault's fel missile and rune-circle summon replace the
+            // shadow-missile substitute; Nerubian Swarmguard's copies rise from the ground; Anti-Magic Shell's shell lands on each
+            // minion; Raze is Deathwing's half-board AE.
+            Add("CORE_SW_088", VisualPhase.Damage, "ReuseFX_Fel_Fire_Missile_Small_Super_Quick:c09acf66646f50c4f9396a863c1e8b90");
+            Add("CORE_SW_088", VisualPhase.Summon, "ReuseFX_Fel_Fire_OverrideSpawn_RuneCircle_Hop_Super_Random:b6770809cbf2a2b4a8a9e1bcbba84460", VisualTargets.None);
+            Add("CORE_RLK_062", VisualPhase.Summon, "ReuseFX_Necrotic_DeathKnight_OverrideSpawn_FromGround_Super_Random:42069975192ed4a4fb2d84d4925509b7", VisualTargets.None);
+            Add("RLK_048", VisualPhase.BoardBuff, "ReuseFX_Necrotic_DeathKnight_BuffImpact_AntiMagicShell_Super_WithIdle:c08f3d01cb170ce4d900696be4d8f13c");
+            Add("CATA_190h", VisualPhase.DamageGroup, "CATAFX_Deathwing_AE_HalfBoard_Super:6f6e7e32f2a0f2a4d906ef4aa79b185e",
+                VisualTargets.None, source: VisualSource.Effect, group: true);
+            // The Portals to Argus author no spell; Broxigar's CardDef authors the portal they summon through.
+            Add("TIME_020t2 TIME_020t3 TIME_020t4 TIME_020t5", VisualPhase.Summon, "TIME_020_Broxigar_Fab_OverrideSpawn_Super:3274770da35581d46b774f32fa26880d", VisualTargets.None);
+            // Flame Imp's CardDef keeps its Fireblast only as a deprecated trigger slot, which a Battlecry's POWER block never
+            // plays; the Fireblast hero power's own missile goes from the Imp to its hero.
+            Add("EX1_319 CORE_EX1_319", VisualPhase.Damage, "ReuseFX_Missile_Fire_Fireball_Small_Super:b8e7bb6e0944d204297efdc937967085", source: VisualSource.Effect);
+            // Gorishi Stinger is a Demon Hunter spell: a glaive throw, not the acid glob.
+            Add("TLC_630t", VisualPhase.Damage, "ReuseFX_Physical_DemonHunter_Missile_Glaive_Small_Super:636507efb4db26a4a9437ed0561e110e");
+            // No authored effect in the client for these; the closest shared prefab for what the card does.
+            Add("CATA_302", VisualPhase.Heal, "ReuseFX_Holy_BuffImpact_Heal_Small_Super:98a6ddb5b34da2a419a16dcab9a2ef2c");
+            Add("CATA_308", VisualPhase.Damage, "ReuseFX_Arcane_AE_Shockwave_Small_BothSides_Super:8e1bfdd78bbd7b3499685e8d9fd21417",
+                VisualTargets.None, source: VisualSource.Effect, group: true);
+            Add("TIME_005t6", VisualPhase.DamageGroup, "ReuseFX_Fire_AE_Flood_BothSides_Super:1d77444aaeef20d4494e2ad82c551341",
+                VisualTargets.None, source: VisualSource.Effect, group: true);
+            Add("TIME_005t4", VisualPhase.Armor, "ReuseFX_Physical_BuffImpact_Armor_Super_SourceHero:bf7e3e26888c9d94894b6d54a3ac6ba6");
             Add("JAIL_454", VisualPhase.Summon,
                 "ReuseFX_Necrotic_DeathKnight_OverrideSpawn_FromGround_Super:18936aca8a333214ba05320a8816a173", VisualTargets.None);
             return result;

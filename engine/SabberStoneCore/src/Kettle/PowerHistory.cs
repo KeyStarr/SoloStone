@@ -719,6 +719,8 @@ namespace SabberStoneCore.Kettle
                         && (tag.Tag == GameTag.ATK && tag.Value != _attack
                             || tag.Tag == GameTag.HEALTH && tag.Value != _health
                             || tag.Tag == GameTag.RUSH && tag.Value != _rush)
+                    || entry is PowerHistoryTagChange armor && armor.EntityId == _target && _phase == VisualPhase.Armor
+                        && armor.Tag == GameTag.ARMOR
                     || entry is PowerHistoryShowEntity show && show.Entity.Id == _target && _phase == VisualPhase.Summon
                         && show.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) && zone == (int)Zone.PLAY
                     || entry is PowerHistoryTagChange move && move.EntityId == _target && move.Tag == GameTag.ZONE
