@@ -1,0 +1,42 @@
+internal static class CoreNeutralAProofs
+{
+    internal static void Run()
+    {
+        CoreLegacy.ChillmawProof.Run();
+        CoreLegacy.FinjaTheFlyingStarProof.Run();
+        CoreLegacy.DirtyRatProof.Run();
+        CoreLegacy.RaidLeaderProof.Run();
+        CoreLegacy.AbusiveSergeantProof.Run();
+        CoreLegacy.TheBlackKnightProof.Run();
+        CoreLegacy.WorgenInfiltratorProof.Run();
+        CoreLegacy.BloodmageThalnosProof.Run();
+        CoreLegacy.KingMuklaProof.Run();
+        CoreLegacy.StranglethornTigerProof.Run();
+        CoreLegacy.TwilightDrakeProof.Run();
+        CoreLegacy.SunfuryProtectorProof.Run();
+        CoreLegacy.CrazedAlchemistProof.Run();
+        CoreLegacy.MadBomberProof.Run();
+        CoreLegacy.LorewalkerChoProof.Run();
+        CoreLegacy.ColdlightSeerProof.Run();
+        CoreLegacy.DireWolfAlphaProof.Run();
+        CoreLegacy.BrightwingProof.Run();
+        CoreLegacy.MurlocTidehunterProof.Run();
+        CoreLegacy.MurlocWarleaderProof.Run();
+        CoreLegacy.MurlocTidecallerProof.Run();
+        CoreLegacy.AnnoyOTronProof.Run();
+        CoreLegacy.CairneBloodhoofProof.Run();
+        CoreLegacy.LootHoarderProof.Run();
+        CoreLegacy.VoodooDoctorProof.Run();
+        CoreLegacy.AcolyteOfPainProof.Run();
+        CoreLegacy.BigGameHunterProof.Run();
+        CoreLegacy.StormwindChampionProof.Run();
+        CoreLegacy.ElvenArcherProof.Run();
+        CoreLegacy.SenjinShieldmastaProof.Run();
+        PrizeVendorProof.Run();
+        EvasiveWyrmProof.Run();
+        BlowtorchSaboteurProof.Run();
+        FaerieDragonProof.Run();
+        CultNeophyteProof.Run();
+        MoargForgefiendProof.Run();
+    }
+}

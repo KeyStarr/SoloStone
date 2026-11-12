@@ -1,0 +1,341 @@
+[
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69547,
+    "health": 1,
+    "id": "CORE_EX1_011",
+    "mechanics": [
+      "BATTLECRY"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69565,
+    "health": 1,
+    "id": "CORE_CS2_189",
+    "mechanics": [
+      "BATTLECRY"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 69665,
+    "health": 1,
+    "id": "CORE_EX1_096",
+    "mechanics": [
+      "DEATHRATTLE"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 69718,
+    "health": 2,
+    "id": "CORE_GVG_085",
+    "mechanics": [
+      "DIVINE_SHIELD",
+      "TAUNT"
+    ],
+    "race": "MECHANICAL",
+    "races": [
+      "MECHANICAL"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "techLevel": 2,
+    "type": "MINION"
+  },
+  {
+    "attack": 2,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76323,
+    "health": 3,
+    "id": "CORE_LOOT_413",
+    "mechanics": [
+      "DEATHRATTLE"
+    ],
+    "race": "BEAST",
+    "races": [
+      "BEAST"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 1,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 76316,
+    "health": 4,
+    "id": "CORE_EX1_007",
+    "mechanics": [
+      "TRIGGER_VISUAL"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 3,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 69542,
+    "health": 5,
+    "id": "CORE_CS2_179",
+    "mechanics": [
+      "TAUNT"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 4,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 102222,
+    "health": 4,
+    "id": "CORE_SW_066",
+    "mechanics": [
+      "BATTLECRY",
+      "TRADEABLE"
+    ],
+    "rarity": "COMMON",
+    "referencedTags": [
+      "SILENCE"
+    ],
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 6,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 6,
+    "dbfId": 112924,
+    "health": 7,
+    "id": "Core_CS2_200",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "attack": 7,
+    "cardClass": "NEUTRAL",
+    "collectible": true,
+    "cost": 7,
+    "dbfId": 69544,
+    "health": 7,
+    "id": "CORE_CS2_222",
+    "mechanics": [
+      "AURA"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 111365,
+    "id": "CORE_CS2_024",
+    "mechanics": [
+      "FREEZE"
+    ],
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "FROST",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 69500,
+    "id": "CORE_CS2_023",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "ARCANE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 4,
+    "dbfId": 69501,
+    "id": "CORE_CS2_029",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "spellSchool": "FIRE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 6,
+    "dbfId": 76273,
+    "id": "CORE_CS2_028",
+    "mechanics": [
+      "FREEZE"
+    ],
+    "rarity": "RARE",
+    "set": "CORE",
+    "spellSchool": "FROST",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "cost": 7,
+    "dbfId": 69502,
+    "id": "CORE_CS2_032",
+    "rarity": "EPIC",
+    "set": "CORE",
+    "spellSchool": "FIRE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69535,
+    "id": "CORE_CS2_108",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 1,
+    "dbfId": 69638,
+    "id": "CORE_EX1_391",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76304,
+    "id": "CORE_AT_064",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 2,
+    "dbfId": 76302,
+    "id": "CORE_EX1_606",
+    "rarity": "COMMON",
+    "set": "CORE",
+    "type": "SPELL"
+  },
+  {
+    "attack": 2,
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "cost": 3,
+    "dbfId": 69645,
+    "health": 4,
+    "id": "CORE_EX1_604",
+    "mechanics": [
+      "TRIGGER_VISUAL"
+    ],
+    "rarity": "RARE",
+    "set": "CORE",
+    "type": "MINION"
+  },
+  {
+    "cardClass": "MAGE",
+    "collectible": true,
+    "dbfId": 637,
+    "health": 30,
+    "heroPowerDbfId": 807,
+    "id": "HERO_08",
+    "rarity": "FREE",
+    "set": "HERO_SKINS",
+    "type": "HERO"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "collectible": true,
+    "dbfId": 7,
+    "health": 30,
+    "heroPowerDbfId": 725,
+    "id": "HERO_01",
+    "rarity": "FREE",
+    "set": "HERO_SKINS",
+    "type": "HERO"
+  },
+  {
+    "cardClass": "MAGE",
+    "cost": 2,
+    "dbfId": 807,
+    "id": "HERO_08bp",
+    "rarity": "FREE",
+    "set": "LEGACY",
+    "type": "HERO_POWER"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "cost": 2,
+    "dbfId": 725,
+    "id": "HERO_01bp",
+    "rarity": "FREE",
+    "set": "LEGACY",
+    "type": "HERO_POWER"
+  },
+  {
+    "cardClass": "NEUTRAL",
+    "cost": 0,
+    "dbfId": 1746,
+    "id": "GAME_005",
+    "set": "CORE",
+    "type": "SPELL"
+  },
+  {
+    "cardClass": "NEUTRAL",
+    "dbfId": 240,
+    "id": "CS2_222o",
+    "set": "LEGACY",
+    "type": "ENCHANTMENT"
+  },
+  {
+    "cardClass": "WARRIOR",
+    "dbfId": 1177,
+    "id": "EX1_604o",
+    "set": "EXPERT1",
+    "type": "ENCHANTMENT"
+  }
+]

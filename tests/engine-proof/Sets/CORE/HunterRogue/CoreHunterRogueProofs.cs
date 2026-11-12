@@ -1,0 +1,40 @@
+internal static class CoreHunterRogueProofs
+{
+    internal static void Run()
+    {
+        CoreLegacy.CoreWebspinnerProof.Run();
+        CoreLegacy.CoreBallOfSpidersProof.Run();
+        CoreLegacy.CoreCrazedChemistProof.Run();
+        CoreLegacy.CoreQuickShotProof.Run();
+        CoreLegacy.CoreShakuTheCollectorProof.Run();
+        CoreLegacy.CoreBackstabProof.Run();
+        CoreLegacy.CoreDeadlyPoisonProof.Run();
+        CoreLegacy.CoreAssassinateProof.Run();
+        CoreLegacy.CoreWagglePickProof.Run();
+        CoreLegacy.CoreTrackingProof.Run();
+        CoreLegacy.CoreArcaneShotProof.Run();
+        CoreLegacy.CoreFanOfKnivesProof.Run();
+        CoreLegacy.CoreDefiasRingleaderProof.Run();
+        CoreLegacy.CoreSI7AgentProof.Run();
+        CoreLegacy.CorePreparationProof.Run();
+        CoreLegacy.CoreShivProof.Run();
+        CoreLegacy.CoreExplosiveTrapProof.Run();
+        CoreLegacy.CoreFreezingTrapProof.Run();
+        CoreLegacy.CoreRatTrapProof.Run();
+        CoreLegacy.CoreSwashburglarProof.Run();
+        CoreLegacy.CoreAnimalCompanionProof.Run();
+        CoreLegacy.CoreCallOfTheWildProof.Run();
+        CoreLegacy.CoreHeadhuntersHatchetProof.Run();
+        CoreLegacy.CoreHalazziTheLynxProof.Run();
+        CoreLegacy.CoreJeweledMacawProof.Run();
+        JackpotProof.Run();
+        MountainBearProof.Run();
+        WoundPreyProof.Run();
+        AugmentedPorcupineProof.Run();
+        SpymistressProof.Run();
+        SahketSapperProof.Run();
+        DragonbaneProof.Run();
+        FoxyFraudProof.Run();
+        PressurePlateProof.Run();
+    }
+}
