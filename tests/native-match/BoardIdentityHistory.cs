@@ -1,4 +1,3 @@
-extern alias TransportFixtures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -81,7 +80,7 @@ internal static partial class Program
         Check(created.Name == "" && created.Tags.Any(t => t.Name == (int)GameTag.ZONE && t.Value == 2), "entity 86 created nameless in DECK on wire");
         Check(!transformed && rawZones.TakeLast(3).SequenceEqual(new[] { 3, 6, 1 }), "engine draw HAND/SETASIDE/PLAY, no transform");
         Check(traces.Any(t => t.StartsWith("BOARD_TRANSIT") && t.Contains("entity=86 ")), "exact entity transit logged");
-        Check(TransportFixtures::TransportInvariants.BoardActorInvariant.Validate(packets).Count == 0, "original journal board visibility");
+        Check(TransportInvariants.BoardActorInvariant.Validate(packets).Count == 0, "original journal board visibility");
         DumpDrawHistory("greenwing-live-journal", capture, 0);
         Console.WriteLine("PASS original Greenwing journal: 47 actions, fingerprints/RNG, entity 86 at turn 14 position 3");
     }
@@ -103,7 +102,7 @@ internal static partial class Program
             var bodies = owner.BoardZone.Where(m => m.Card.Id == "EDR_260t").ToArray();
             Check(bodies.Length == 2, "both chained Illusions summoned");
             DumpDrawHistory("greenwing-p" + owner.PlayerId, capture, 0);
-            var actorFaults = TransportFixtures::TransportInvariants.BoardActorInvariant.Validate(capture.HistorySnapshots());
+            var actorFaults = TransportInvariants.BoardActorInvariant.Validate(capture.HistorySnapshots());
             Check(actorFaults.Count == 0, "Illusion actors p" + owner.PlayerId + ": " + string.Join("; ", actorFaults));
             // Disable the native repair and reinsert the old parking hop: complete identity alone cannot show it.
             var mutated = capture.HistorySnapshots().ToArray();
@@ -114,7 +113,7 @@ internal static partial class Program
                 && e.TagChange.Tag == (int)GameTag.ZONE && e.TagChange.Value == (int)SabberStoneCore.Enums.Zone.PLAY);
             packet.List.Insert(move, new PowerHistoryData { TagChange = new() { Entity = bodyId, Tag = (int)GameTag.ZONE,
                 Value = (int)SabberStoneCore.Enums.Zone.SETASIDE } });
-            Check(TransportFixtures::TransportInvariants.BoardActorInvariant.Validate(mutated, repairNullToPlayActors: false).Any(f => f.Contains("hidden board actor")),
+            Check(TransportInvariants.BoardActorInvariant.Validate(mutated, repairNullToPlayActors: false).Any(f => f.Contains("hidden board actor")),
                 "old SETASIDE shape rejected despite complete identity");
             if (opponent)
             {

@@ -36,7 +36,7 @@ internal sealed class Bucket
     public Example Example { get; init; }
 }
 
-internal sealed class Runner
+internal sealed partial class Runner
 {
     internal readonly Dictionary<(string Card, string Tag, string Expected, string Shown), Bucket> Buckets = new();
     internal readonly Dictionary<string, int> EntryCounts = new();
@@ -53,7 +53,6 @@ internal sealed class Runner
     internal readonly HashSet<string> ReprintsTraded = new(StringComparer.Ordinal);
     internal bool LightspawnDetected => Buckets.Values.Any(b => b.Card == "EX1_335" && b.Tag == "ATK");
     internal int ViolationCount => Buckets.Values.Sum(b => b.Occurrences);
-    internal const string Output = "sim/out/transport";
 
     internal HistoryShape Run(TransportReplay replay, bool verify = false, bool stopAfterForcedCard = false)
     {

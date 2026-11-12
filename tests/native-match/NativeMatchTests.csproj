@@ -14,6 +14,20 @@
     <Compile Include="../shared/GroupProofs.cs" Link="GroupProofs.cs" />
     <Compile Include="../../plugin/TestControlRules.cs" Link="TestControlRules.cs" />
     <Compile Include="../shared/IlCalls.cs" Link="IlCalls.cs" />
+    <Compile Include="../../sim/Shared/PoolSnapshots.cs" Link="PoolSnapshots.cs" />
+    <Compile Include="../../sim/HsSim/Simulation.cs" Link="Simulation.cs" />
+    <Compile Include="../../sim/HsSim/Canonical.cs" Link="Canonical.cs" />
+    <Compile Include="../shared/OfflinePoolTestRecipes.cs" Link="OfflinePoolTestRecipes.cs" />
+    <Compile Include="../shared/AutoCastProof.cs" Link="AutoCastProof.cs" />
+    <Compile Include="../shared/BoardActorInvariant.cs" Link="BoardActorInvariant.cs" />
+    <Compile Include="../shared/ClientModel.cs" Link="ClientModel.cs" />
+    <Compile Include="../shared/Invariants.cs" Link="Invariants.cs" />
+    <Compile Include="../shared/NativeSession.cs" Link="NativeSession.cs" />
+    <Compile Include="../shared/ZoneStateOracle.cs" Link="ZoneStateOracle.cs" />
+    <Compile Include="../shared/CardStateChecks.cs" Link="CardStateChecks.cs" />
+    <Compile Include="../shared/HistoryShape.cs" Link="HistoryShape.cs" />
+    <Compile Include="../shared/HistoryShapeHooks.cs" Link="HistoryShapeHooks.cs" />
+    <Compile Include="../shared/TransportSelfCheck.cs" Link="TransportSelfCheck.cs" />
     <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
     <Compile Include="../../plugin/NativeDeckEditorSave.cs" Link="NativeDeckEditorSave.cs" />
     <Compile Include="../../plugin/NativeDeckRunes.cs" Link="NativeDeckRunes.cs" />
@@ -48,7 +62,6 @@
     <Compile Include="../../plugin/LocalEconomy.cs" Link="LocalEconomy.cs" />
     <Compile Include="../../plugin/LocalCardCatalog.cs" Link="LocalCardCatalog.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
-    <ProjectReference Include="../transport-invariants/TransportInvariants.csproj" Aliases="TransportFixtures" />
     <Reference Include="blizzard.bgsclient">
       <HintPath>$(GameReferences)/blizzard.bgsclient.dll</HintPath>
     </Reference>
