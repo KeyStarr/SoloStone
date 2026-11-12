@@ -40,6 +40,7 @@ internal static class Program
             if (args.Length == 1 && args[0] == "--passivity-r2") { PassivitySuite.RoundTwo(); return 0; }
             if (args.Length == 1 && args[0] == "--passivity-distribution") { PassivitySuite.Distribution(); return 0; }
             if (args.Length == 1 && args[0] == "--passivity") { PassivitySuite.Run(); return 0; }
+            if (args.Length > 0) throw new ArgumentException("unknown arguments: " + string.Join(" ", args));
             ReplacementLethalSuite.Run();
             CappedPassSuite.Run();
             PlanReuseMistakeSuite.Run();

@@ -5,7 +5,7 @@ using SabberStoneCore.Model.Decisions;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
-// AUDIT=1 runs each proof independently and returns nonzero when any correct-behavior assertion fails.
+// --audit runs each proof independently and returns nonzero when any correct-behavior assertion fails.
 internal static class AuditReproTests
 {
     internal static int Run(string[] filters)
