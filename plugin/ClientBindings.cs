@@ -52,7 +52,8 @@ internal static class ClientBindings
         if (stream == null) throw new InvalidOperationException("This SoloStone build is missing its client binding list.");
         using (var reader = new StreamReader(stream))
         {
-            var rows = reader.ReadToEnd().Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries).Where(line => line[0] != '#').ToArray();
+            // '\r' too: a checkout with Windows line endings embeds the list with CRLF, and no row may keep the '\r'.
+            var rows = reader.ReadToEnd().Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries).Where(line => line[0] != '#').ToArray();
             if (rows.Length == 0) throw new InvalidOperationException("This SoloStone build has an empty client binding list.");
             return rows;
         }
