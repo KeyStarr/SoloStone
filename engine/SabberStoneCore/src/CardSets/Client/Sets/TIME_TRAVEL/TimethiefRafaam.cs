@@ -86,8 +86,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
+                var victims=c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray();
+                using (g.History ? g.PowerHistory.DamageWave(victims.Length) : null)
                 using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.DamageGroup,(IPlayable)s) : null)
-                    foreach(var victim in c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray())
+                    foreach(var victim in victims)
                         victim.TakeDamage((IPlayable)s,6);
             }) };
         }

@@ -344,6 +344,7 @@ namespace SabberStoneCore.Model.Entities
 		public int TakeDamage(IPlayable source, int damage, bool combat = false, bool outgoingApplied = false)
 		{
 			Game game = Game;
+			using var damageHit = _history ? game.PowerHistory.DamageHit() : null;
 			var hero = this as Hero;
             bool lightcaller = combat && source is Hero attackingHero && attackingHero.Weapon?.Card.Id == "BE_000"
                 || source is Weapon weaponSource && weaponSource.Card.Id == "BE_000";

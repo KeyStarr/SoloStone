@@ -26,7 +26,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 TriggerSource = TriggerSource.FRIENDLY,
                 Condition = new SelfCondition(m => m.Card.IsRace(Race.MECHANICAL)),
                 SingleTask = new CustomTask((g,c,s,t,k) => {
-                    foreach (var enemy in c.Opponent.BoardZone.Where(m => !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray())
+                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
+                    using var wave = g.History ? g.PowerHistory.DamageWave(enemies.Length) : null;
+                    foreach (var enemy in enemies)
                         enemy.TakeDamage((IPlayable)s, 1);
                 }) } };
         }

@@ -1172,6 +1172,71 @@ internal static partial class HistoryShapeProof
         });
         Check(failures.Count == 0, string.Join("\n", failures));
     }
+    internal static void PoisonousOnly()
+    {
+        PoisonousWaves(); NestedTriggerDamageDuringCombat(); Synthetic(); HookBoundaries(); DisabledHistoryHooks();
+    }
+    private static void PoisonousWaves()
+    {
+        foreach (bool lifesteal in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, "CORE_NEW1_020");
+            new AddEnchantmentTask("CORE_EDR_002e", EntityType.TARGET).Process(f.Game, p, source, source);
+            source.HasLifeSteal = lifesteal; p.Hero.Damage = 10;
+            var friendly = f.Summon(p, "CS2_182");
+            var shield = f.Summon(p.Opponent, "CS2_200"); shield.HasDivineShield = true;
+            var lethal = f.Summon(p.Opponent, "CS2_231");
+            var coin = Generic.DrawCard(p, Cards.FromId("GAME_005"));
+            f.Ready("poisonous-wave-" + lifesteal); f.Session.Packets.Clear();
+            f.Act(PlayCardTask.Any(p, coin));
+            var rows = f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+                var history = new PegasusGame.PowerHistory();
+                using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+                history.Deserialize(stream); return history.List;
+            }).ToList();
+            int poison = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363);
+            var victims = new[] { source.Id, friendly.Id, lethal.Id };
+            Check(poison >= 0 && rows.Count(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) == 4
+                && rows.FindLastIndex(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) < poison
+                && rows.FindLastIndex(r => r.HasTagChange && r.TagChange.Tag == (int)GameTag.DAMAGE
+                    && r.TagChange.Value > 0 && victims.Contains(r.TagChange.Entity)) < poison,
+                "serialized wave has all damage before first poison");
+            Check(rows.Count(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363) == victims.Length,
+                "serialized wave has exactly one poison per eligible minion, none for shield");
+            for (int i = 0; i < victims.Length; i++)
+            {
+                var block = rows[poison + i * 5];
+                Check(block.HasPowerStart && block.PowerStart.Type == HistoryBlock.Type.TRIGGER
+                    && block.PowerStart.Source == source.Id && block.PowerStart.EffectIndex == -1
+                    && block.PowerStart.TriggerKeyword == 363
+                    && rows[poison + i * 5 + 1].MetaData.Info.SequenceEqual(new[] { victims[i] })
+                    && (int)rows[poison + i * 5 + 2].MetaData.Type == 22
+                    && rows[poison + i * 5 + 3].TagChange.Entity == victims[i]
+                    && rows[poison + i * 5 + 3].TagChange.Tag == (int)GameTag.TO_BE_DESTROYED
+                    && rows[poison + i * 5 + 3].TagChange.Value == 1
+                    && rows[poison + i * 5 + 4].HasPowerEnd,
+                    "serialized poison frames consecutive in victim order with unchanged content");
+            }
+            int deaths = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.Type == HistoryBlock.Type.DEATHS);
+            Check(deaths > poison + victims.Length * 5 && rows.Count(r => r.HasPowerStart && r.PowerStart.Type == HistoryBlock.Type.DEATHS) == 1,
+                "serialized wave shares one DEATHS pass after poison");
+            if (lifesteal)
+            {
+                int heal = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == (int)GameTag.LIFESTEAL);
+                Check(heal >= poison + victims.Length * 5 && heal < deaths && p.Hero.Damage == 7,
+                    "serialized collected Lifesteal follows poison before deaths");
+            }
+            Check(shield.Zone.Type == Zone.PLAY && shield.Damage == 0 && !shield.HasDivineShield
+                && new[] { source, friendly, lethal }.All(m => m.Zone.Type == Zone.GRAVEYARD), "serialized wave retains engine results");
+            f.Session.History.Finish();
+            Check(f.Session.History.Findings.All(f => f.Rule == "SPLIT_EFFECT_BLOCK"),
+                "Poisonous wave checker clean: " + string.Join(";", f.Session.History.Findings.Select(f => f.Rule + " " + f.Detail)));
+            HistoryShapeReport.Add(f.Session.History);
+        }
+        TriggerHitsAndPoisonous();
+        Console.WriteLine("PASS history-shape Poisonous waves: damage, consecutive poison, collected Lifesteal, one DEATHS; shield excluded");
+    }
     private static void TriggerHitsAndPoisonous()
     {
         var spore = new Fixture(); var source = spore.Summon(spore.Player, "EDR_110");
@@ -1690,5 +1755,5 @@ internal static partial class HistoryShapeProof
         }
     }
 
-    internal static void Run() { FullEntityRegistration(); ConditionalDeathrattle(); FutureFullMetadata(); DebtShapes(); NarrowBaselineExemptions(); SaturatedDamage(); B14Presentation(); SpellVfxTargets(); SplitKeywordBlocksAreIndependent(); SplitAcrossKeywordWrappers(); SplitBaselineShapes(); SplitDevouringPlagueRegression(); SplitDistinctActivations(); SplitEffectBlocks(); DisabledHistoryHooks(); DisabledRecorderDoesNotEnumerateTargets(); CustomResolvedHits(); TriggerHitsAndPoisonous(); NestedTriggerDamageDuringCombat(); HeroDamageProvenance(); ReviewerRegressions(); Synthetic(); HookBoundaries(); EmissionRanges(); Focused(); }
+    internal static void Run() { FullEntityRegistration(); ConditionalDeathrattle(); FutureFullMetadata(); DebtShapes(); NarrowBaselineExemptions(); SaturatedDamage(); B14Presentation(); SpellVfxTargets(); SplitKeywordBlocksAreIndependent(); SplitAcrossKeywordWrappers(); SplitBaselineShapes(); SplitDevouringPlagueRegression(); SplitDistinctActivations(); SplitEffectBlocks(); DisabledHistoryHooks(); DisabledRecorderDoesNotEnumerateTargets(); CustomResolvedHits(); PoisonousWaves(); NestedTriggerDamageDuringCombat(); HeroDamageProvenance(); ReviewerRegressions(); Synthetic(); HookBoundaries(); EmissionRanges(); Focused(); }
 }

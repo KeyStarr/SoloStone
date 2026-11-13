@@ -66,7 +66,7 @@ internal static class HistoryShapeHooks
         harmony.Patch(AccessTools.Method(typeof(HealingRules), nameof(HealingRules.Heal)),
             prefix: new(typeof(HistoryShapeHooks), nameof(BeforeHealing)), postfix: new(typeof(HistoryShapeHooks), nameof(AfterHealing)));
         harmony.Patch(AccessTools.Method(typeof(EngineHistory), nameof(EngineHistory.Add)),
-            prefix: new(typeof(HistoryShapeHooks), nameof(BeforeHistory)));
+            postfix: new(typeof(HistoryShapeHooks), nameof(AfterHistory)));
         harmony.Patch(AccessTools.Method(typeof(TaskQueue), nameof(TaskQueue.Process)),
             prefix: new(typeof(HistoryShapeHooks), nameof(BeforeTask)), postfix: new(typeof(HistoryShapeHooks), nameof(AfterTask)));
         harmony.Patch(AccessTools.Method(typeof(TaskQueue), nameof(TaskQueue.Execute)),
@@ -204,8 +204,10 @@ internal static class HistoryShapeHooks
             attack.Target = ((ICharacter)AccessTools.Field(__instance.GetType(), "_target").GetValue(__instance)).Id;
         }
     }
-    private static void BeforeHistory(EngineHistory __instance, IPowerHistoryEntry entry)
+    private static void AfterHistory(EngineHistory __instance, IPowerHistoryEntry entry)
     {
+        // Deferred keyword frames correlate when published, not while their immediate state mutation is captured.
+        if (__instance.Last.Count == 0 || !ReferenceEquals(__instance.Last[^1], entry)) return;
         if (!Histories.TryGetValue(__instance, out var shape)) return;
         if (entry is PowerHistoryBlockStart start)
         {

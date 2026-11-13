@@ -23,7 +23,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     int defender = g.CurrentEventData.EventTarget.Id;
                     g.DeathProcessingAndAuraUpdate();
                     int attack = s.Zone == c.BoardZone ? ((Minion)s).AttackDamage : s.Card.ATK;
-                    foreach (var victim in c.Opponent.BoardZone.Where(m => m.Id != defender && !m.Untouchable).ToArray())
+                    var victims = c.Opponent.BoardZone.Where(m => m.Id != defender && !m.Untouchable).ToArray();
+                    using var wave = g.History ? g.PowerHistory.DamageWave(victims.Length) : null;
+                    foreach (var victim in victims)
                         victim.TakeDamage((IPlayable)s, attack);
                 })
             } };

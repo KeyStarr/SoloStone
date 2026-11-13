@@ -418,14 +418,44 @@ namespace SabberStoneCore.Kettle
                 TargetRange(new[] { victim }, resolved: true);
         }
 
+        [NonSerialized] private int _damageDepth;
+        [NonSerialized] private (int Depth, List<IPowerHistoryEntry> Entries)? _damageWave;
+        [NonSerialized] private List<IPowerHistoryEntry> _poisonCapture;
+
+        internal IDisposable DamageWave(int targets)
+        {
+            if (!_enabled || targets < 2) return null;
+            var previous = _damageWave;
+            var entries = new List<IPowerHistoryEntry>();
+            _damageWave = (_damageDepth, entries);
+            return new EffectSourceScope(() => {
+                _damageWave = previous;
+                // hslog-tests/25770_inferrable_player.power.log:1542-1673: all hits, then poison, then collected Lifesteal.
+                foreach (var entry in entries) Add(entry);
+            });
+        }
+
+        internal IDisposable DamageHit()
+        {
+            if (!_damageWave.HasValue) return null;
+            _damageDepth++;
+            return new EffectSourceScope(() => _damageDepth--);
+        }
+
         internal IDisposable PoisonousSource(IPlayable source, ICharacter victim)
         {
+            // Nested damage callbacks/activations own their poison, even when they use the same source and block.
+            bool defer = _damageWave.HasValue && _damageWave.Value.Depth + 1 == _damageDepth;
+            if (defer) _poisonCapture = _damageWave.Value.Entries;
             // Native notes 5.2-5.3: keyword 363 selects actor spell 76; -1 suppresses the card's own trigger effect.
             Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, source.Id, "", -1, 0,
                 effectIndex: -1, triggerKeyword: (int)GameTag.POISONOUS));
             Add(new PowerHistoryMetaData { Type = MetaDataType.TARGET, Data = 0, Info = new List<int> { victim.Id } });
             Add(new PowerHistoryMetaData { Type = MetaDataType.POISONOUS, Data = 0, Info = new List<int> { victim.Id } });
-            return new EffectSourceScope(this);
+            return defer ? new EffectSourceScope(() => {
+                Add(PowerHistoryBuilder.BlockEnd());
+                _poisonCapture = null;
+            }) : new EffectSourceScope(this);
         }
 
         // Inline effects and Discover continuations can resolve without their own queued block.
@@ -462,8 +492,14 @@ namespace SabberStoneCore.Kettle
         private sealed class EffectSourceScope : IDisposable
         {
             private readonly PowerHistory _history;
+            [NonSerialized] private readonly Action _dispose;
             internal EffectSourceScope(PowerHistory history) { _history = history; }
-            public void Dispose() => _history.Add(PowerHistoryBuilder.BlockEnd());
+            internal EffectSourceScope(Action dispose) { _dispose = dispose; }
+            public void Dispose()
+            {
+                if (_dispose != null) _dispose();
+                else _history.Add(PowerHistoryBuilder.BlockEnd());
+            }
         }
 
         internal IDisposable HandBuff(IEntity target) => _enabled && target.Zone?.Type == Zone.HAND
@@ -906,6 +942,7 @@ namespace SabberStoneCore.Kettle
 
 		public void Add(IPowerHistoryEntry entry)
 		{
+            if (_poisonCapture != null) { _poisonCapture.Add(entry); return; }
             ObservePublicHand(entry);
 			if (!_enabled) return;
             if (_drawCounter != null) StampRandomDraws(entry);

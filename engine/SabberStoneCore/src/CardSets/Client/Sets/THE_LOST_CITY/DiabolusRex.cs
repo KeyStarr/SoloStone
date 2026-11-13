@@ -22,6 +22,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && (repeat == 0 || !m.IsDead)).ToArray();
                     if (enemies.Length == 0) return;
                     var targets = new[] { enemies.First(), enemies.Last() }.Distinct().ToArray();
+                    using var wave = g.History ? g.PowerHistory.DamageWave(targets.Length) : null;
                     foreach (var minion in targets)
                     {
                         if (g.History) g.PowerHistory.SelectResolvedTarget(minion);
