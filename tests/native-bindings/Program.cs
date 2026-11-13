@@ -92,6 +92,8 @@ var hooks = new[] {
     ("DeckRule_CountCopiesOfEachCard", "GetCopiesInDeck", "NativeUIProbe", "LocalDeckCopyCount"),
     ("BnetBarMenuButton", "UpdateHighlight", "NativeUIProbe", "HiddenMenuHighlight"),
     ("Options", "GetBoolImpl", "NativeUIProbe", "OnboardingOption"),
+    ("TutorialDeathKnightDeckBuilding", "HasSeenTutorial", "NativeUIProbe", "DeathKnightTipSeen"),
+    ("TutorialDeathKnightDeckBuilding", "SetTutorialSeen", "NativeUIProbe", "MarkDeathKnightTipSeen"),
     ("Options", "GetBoolImpl", "LaneMute", "MuteBool"),
     ("Options", "GetFloatImpl", "LaneMute", "MuteFloat"),
     ("BoxDressingManager", "GetCurrentBoxDressing", "HubTheme", "CurrentDressing"),

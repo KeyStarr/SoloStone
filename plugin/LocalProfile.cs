@@ -348,6 +348,8 @@ public sealed class LocalProfileData
     public bool ShouldSerializeHiddenLoaners() => HiddenLoaners != null && HiddenLoaners.Count != 0;
     public bool SeenMassPackTooltip;
     public bool ShouldSerializeSeenMassPackTooltip() => SeenMassPackTooltip;
+    public int SeenDeathKnightTips;
+    public bool ShouldSerializeSeenDeathKnightTips() => SeenDeathKnightTips != 0;
 }
 
 // #57 (owner 2026-10-28): what a new save's first commit granted. Seen only hides the popup; it never grants anything.
@@ -479,6 +481,18 @@ public sealed partial class LocalProfile : IDisposable
         return true;
     }
     public bool SeenMassPackTooltip => data.SeenMassPackTooltip;
+    public int SeenDeathKnightTips => data.SeenDeathKnightTips;
+    public bool SeenDeathKnightTip(int bit)
+    {
+        if (bit < 0 || bit > 3) throw new ArgumentOutOfRangeException(nameof(bit));
+        return (data.SeenDeathKnightTips & (1 << bit)) != 0;
+    }
+    public bool MarkDeathKnightTipSeen(int bit)
+    {
+        if (SeenDeathKnightTip(bit)) return false;
+        var next = Snapshot(); next.SeenDeathKnightTips |= 1 << bit; Commit(next);
+        return true;
+    }
     public bool MarkMassPackTooltipSeen()
     {
         if (data.SeenMassPackTooltip) return false;
@@ -1830,6 +1844,7 @@ public sealed partial class LocalProfile : IDisposable
         LegendDeck = Copy(data.LegendDeck), MilestoneCatchUp = Copy(data.MilestoneCatchUp), Welcome = Copy(data.Welcome),
         HiddenLoaners = (data.HiddenLoaners ?? new List<string>()).ToList(),
         SeenMassPackTooltip = data.SeenMassPackTooltip,
+        SeenDeathKnightTips = data.SeenDeathKnightTips,
         PurchaseSequence = data.PurchaseSequence, Purchases = data.Purchases.Select(Copy).ToList(),
         OwnedCoins = data.OwnedCoins.ToList(), FavoriteCoins = data.FavoriteCoins.ToList(),
         OwnedRecipes = data.OwnedRecipes.ToList(), OwnedCardBacks = data.OwnedCardBacks.ToList(),

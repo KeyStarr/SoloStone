@@ -172,6 +172,8 @@ internal static partial class NativeUIProbe
         NativePackFlip.Initialize(logger);
         NativeAchievements.Initialize(harmony, logger);
         Hook(harmony, typeof(Options), "GetBoolImpl", nameof(OnboardingOption), new[] { typeof(Option), typeof(bool).MakeByRefType() });
+        Hook(harmony, typeof(TutorialDeathKnightDeckBuilding), "HasSeenTutorial", nameof(DeathKnightTipSeen), new[] { typeof(GameSaveKeySubkeyId) });
+        Hook(harmony, typeof(TutorialDeathKnightDeckBuilding), "SetTutorialSeen", nameof(MarkDeathKnightTipSeen), new[] { typeof(GameSaveKeySubkeyId) });
         Hook(harmony, typeof(BnetBarMenuButton), "UpdateHighlight", nameof(HiddenMenuHighlight), Type.EmptyTypes);
         publisher = NativeUIProjection.ResolvePublisher(typeof(NetCache));
         InitializeCosmetics(harmony);
@@ -1991,9 +1993,40 @@ internal static partial class NativeUIProbe
         PublishBoosters();
         State("RevealComplete:ready for next pack");
     }
+    private static int onboardingReads, onboardingUnseen, dkReads;
+    private static string lastUnseen;
+    private static readonly List<string> dkShown = new List<string>();
+    internal static object TipsState() => new Dictionary<string, object>
+    {
+        ["onboardingReads"] = onboardingReads, ["onboardingUnseen"] = onboardingUnseen,
+        ["lastUnseen"] = lastUnseen, ["dkReads"] = dkReads, ["dkShown"] = dkShown.ToArray(), ["dkSeenMask"] = Profile?.SeenDeathKnightTips ?? 0
+    };
+    private static bool DeathKnightTipSeen(GameSaveKeySubkeyId __0, ref bool __result)
+    {
+        if (!IsolatedLaunch || Profile == null) return true;
+        string name = __0.ToString();
+        int bit = NativeUIProjection.DeathKnightTipBit(name);
+        if (bit < 0) return true;
+        dkReads++;
+        __result = Profile.SeenDeathKnightTip(bit);
+        if (!__result && !dkShown.Contains(name)) dkShown.Add(name);
+        return false;
+    }
+    private static bool MarkDeathKnightTipSeen(GameSaveKeySubkeyId __0)
+    {
+        if (!IsolatedLaunch || Profile == null) return true;
+        int bit = NativeUIProjection.DeathKnightTipBit(__0.ToString());
+        if (bit < 0) return true;
+        try { Profile.MarkDeathKnightTipSeen(bit); }
+        catch (Exception error) { log.LogWarning("NATIVE_UI DK tutorial flag not saved: " + error.Message); }
+        return false;
+    }
     private static bool OnboardingOption(Option option, ref bool val, ref bool __result)
     {
-        if (!NativeUIProjection.TryGetOnboardingOption(IsolatedLaunch, option.ToString(), out bool value)) return true;
+        string name = option.ToString();
+        if (!NativeUIProjection.TryGetOnboardingOption(IsolatedLaunch, name, out bool value)) return true;
+        onboardingReads++;
+        if (!value && name != "IN_RANKED_PLAY_MODE") { onboardingUnseen++; lastUnseen = name; }
         val = value;
         __result = true;
         return false;

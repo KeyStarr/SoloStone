@@ -2325,6 +2325,8 @@ M	Assembly-CSharp	TriggerSpellController	ActivateActorTriggerSpell	(System.Int32
 M	Assembly-CSharp	TriggerSpellController	ActivateTriggerSpell	(System.Int32)
 M	Assembly-CSharp	TriggerSpellController	InitEffect	(Card)
 M	Assembly-CSharp	TriggerSpellController	InitTriggerSpell	(CardEffect,Card)
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	HasSeenTutorial	System.Boolean(GameSaveKeySubkeyId)
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	SetTutorialSeen	System.Void(GameSaveKeySubkeyId)
 M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	ShowTutorial	System.Void(UIVoiceLinesManager+TriggerType)
 M	Assembly-CSharp	TutorialEntity	GetTextScale	UnityEngine.Vector3()
 M	Assembly-CSharp	UIBButton	Flip	System.Void(System.Boolean,System.Boolean)
