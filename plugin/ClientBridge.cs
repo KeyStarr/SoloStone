@@ -990,6 +990,13 @@ internal static class ClientBridge
             var profile = LocalLadder.Profile;
             selected = profile?.SelectedBoard ?? 0;
             board = BoardChoice.ForPlayer(match.Seed, present, forced, selected, profile?.OwnedBoards ?? new int[0]);
+            int mission = match.DebugScenario?.MissionId ?? 0;
+            int missionBoard = BoardChoice.ForMission(mission, present);
+            if (missionBoard > 0)
+            {
+                log.LogInfo("board: mission=" + mission + " board=" + missionBoard + " (cosmetic " + board + " not used)");
+                board = missionBoard;
+            }
         }
         catch (Exception error) { log.LogWarning("boards: fallback=1 " + error); }
         log.LogInfo("board: id=" + board + " seed=" + match.Seed + " forced=" + forced + " selected=" + selected);
