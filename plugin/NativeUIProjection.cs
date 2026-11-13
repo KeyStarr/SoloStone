@@ -814,6 +814,15 @@ internal static class NativeUIProjection
         && callback.Method == method && ReferenceEquals(callbackData, userData);
     internal static bool OwnsDeleteResponse(bool active, bool currentCollection, bool confirm) =>
         active && currentCollection && confirm;
+    // The class picker shows each class's favourite hero, and the client creates the new deck with the picked button's
+    // card, so a favourite skin arrives instead of the class hero. The deck is made for the class hero with no
+    // override, so it shows the favourite, as it does online. A card that is neither stays unsupported (null).
+    internal static string CreateRequestHero(string heroCardId, Func<string, string> skinClass)
+    {
+        if (heroCardId == null || LocalDecks.PlayerHeroes.Contains(heroCardId)) return heroCardId;
+        string hero = skinClass(heroCardId);
+        return hero != null && LocalDecks.PlayerHeroes.Contains(hero) ? hero : null;
+    }
     internal static bool OwnsCreateRequest(bool active, bool currentCollection, bool allowed, bool heroOverridden) =>
         active && currentCollection && allowed && !heroOverridden;
     internal static bool OwnsPersonalDeckEditor(bool active, bool currentCollection, bool currentManager,
