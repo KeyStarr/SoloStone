@@ -64,6 +64,7 @@ internal static class Program
             if (args is ["--shatter-state-only"]) { TransportHooks.Install(); HandCardStateChecks.Run(shatterOnly: true); return 0; }
             if (args is ["--hand-card-state-only"]) { TransportHooks.Install(); HandCardStateChecks.Run(); return 0; }
             if (args is ["--godfrey-only"]) { TransportHooks.Install(); GodfreyHistoryProof.Run(); return 0; }
+            if (args is ["--burned-card-only"]) { TransportHooks.Install(); HistoryShapeProof.BurnedCards(); return 0; }
             if (args is ["--pastvar-minions-only"])
             {
                 TransportHooks.Install();

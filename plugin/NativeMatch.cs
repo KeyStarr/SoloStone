@@ -5983,10 +5983,32 @@ public sealed class NativeMatch
         Add(new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
             Entity = display, Tag = (int)GameTag.ZONE, Value = (int)EngineZone.GRAVEYARD
         } });
+        if (visualBlockSources.Count == 0) AppendBurnedCard(packet, display);
         Add(new PowerHistoryData { PowerEnd = new PowerHistoryEnd() });
+        if (visualBlockSources.Count > 0) AppendBurnedCard(packet, display);
         // Disposable public actor stays in GRAVEYARD. Moving it again waits on the native mill
         // flag, which MillCardWithTiming never clears; retained engine identity is already separate.
         revealedEntities.Remove(display); // Presentation-only ID has no engine state to refresh.
+    }
+
+    private static void AppendBurnedCard(NativePowerHistory packet, int display)
+    {
+        // hslog-tests/34104_subspell.power.log:30226: group burns in the resolving block, after every public reveal.
+        PowerHistoryData burned = null;
+        for (int i = packet.List.Count - 1, depth = 0; i >= 0; i--)
+        {
+            var row = packet.List[i];
+            if (row.HasPowerEnd) { depth++; continue; }
+            if (row.HasPowerStart) { if (depth-- == 0) break; continue; }
+            if (depth == 0 && row.HasMetaData && (int)row.MetaData.Type == (int)MetaDataType.BURNED_CARD)
+            { burned = row; break; }
+        }
+        if (burned == null) burned = new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+            Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = new List<int>()
+        } };
+        else packet.List.Remove(burned);
+        burned.MetaData.Info.Add(display);
+        packet.List.Add(burned);
     }
 
     // Retail heads a printed trigger card's own activation with TriggerKeyword=TRIGGER_VISUAL: every non-keyword TRIGGER

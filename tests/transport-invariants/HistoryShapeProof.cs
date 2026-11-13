@@ -703,9 +703,38 @@ internal static partial class HistoryShapeProof
         var fatigue = new Fixture(); foreach (var c in fatigue.Player.DeckZone.ToArray()) fatigue.Player.SetasideZone.Add(fatigue.Player.DeckZone.Remove(c));
         fatigue.Ready("fatigue"); Generic.Draw(fatigue.Player); fatigue.Flush(); fatigue.Result("fatigue");
 
-        var overdraw = new Fixture(); while (overdraw.Player.HandZone.Count < 10) Generic.DrawCard(overdraw.Player, Cards.FromId("CS2_182"));
-        overdraw.Ready("overdraw"); Generic.Draw(overdraw.Player); overdraw.Flush(); overdraw.Result("overdraw");
+        BurnedCards();
         Console.WriteLine("PASS history-shape focused: bot Rock, Watcher mill, Kronn sources, Lifesteal attack/spell, healing power, minion attack, fatigue, overdraw");
+    }
+    internal static void BurnedCards()
+    {
+        foreach (bool bot in new[] { false, true })
+        foreach (bool retained in new[] { false, true })
+        foreach (int hand in new[] { 9, 10 })
+        {
+            var f = new Fixture(); var owner = bot ? f.Player.Opponent : f.Player;
+            while (owner.HandZone.Count < hand) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            if (retained) SabberStoneCore.Model.Entities.Enchantment.GetInstance(owner, owner.Hero, owner, Cards.FromId("JAIL_509e"));
+            f.Ready("overdraw"); f.Session.Packets.Clear();
+            f.Game.PowerHistory.Add(EH.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            for (int i = 0; i < 3; i++) Generic.Draw(owner);
+            f.Game.PowerHistory.Add(EH.BlockEnd()); f.Flush(); f.Result("overdraw");
+            var rows = f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+                var history = new PegasusGame.PowerHistory();
+                using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+                history.Deserialize(stream); return history.List;
+            }).ToList();
+            var burns = rows.Where(r => r.HasShowEntity && r.ShowEntity.Tags.Any(t =>
+                t.Name == (int)GameTag.ZONE && t.Value == (int)Zone.GRAVEYARD)).ToArray();
+            var meta = rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD);
+            int at = rows.IndexOf(meta);
+            Check(burns.Length == hand - 7 && meta.MetaData.Data == 0
+                && meta.MetaData.Info.SequenceEqual(burns.Select(r => r.ShowEntity.Entity))
+                && burns.All(r => rows.IndexOf(r) < at)
+                && rows.Take(at).Count(r => r.HasPowerStart) > rows.Take(at).Count(r => r.HasPowerEnd)
+                && rows.Skip(at + 1).Any(r => r.HasPowerEnd), $"serialized burn range seat={bot} retained={retained} hand={hand}");
+        }
+        Console.WriteLine("PASS history-shape burned cards: 8 serialized ranges; both seats, ordinary/Godfrey, draw three into nine/ten");
     }
     private static void HookBoundaries()
     {

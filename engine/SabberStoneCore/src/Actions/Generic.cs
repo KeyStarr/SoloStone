@@ -119,15 +119,17 @@ namespace SabberStoneCore.Actions
 		public static Func<Controller, IPlayable, bool> AddHandPhase
 			=> delegate (Controller c, IPlayable playable)
 			{
+				var entryKind = playable == null ? HistoryHandEntryKind.Other : c.Game.Facts.HandEntryKind(playable);
 				if (c.HandZone.IsFull)
 				{
 					c.Game.Log(LogLevel.INFO, BlockType.PLAY, "AddHandPhase", !c.Game.Logging ? "" : $"Hand ist full. Card {playable} drawn is burnt to graveyard.");
 					c.Game.Facts.CardBurned(playable);
 					c.GraveyardZone.Add(playable);
+					if (c.Game.History && (entryKind == HistoryHandEntryKind.Draw || entryKind == HistoryHandEntryKind.TurnStartDraw))
+						c.Game.PowerHistory.BurnedCard(playable.Id);
 					return false;
 				}
 
-				var entryKind = playable == null ? HistoryHandEntryKind.Other : c.Game.Facts.HandEntryKind(playable);
 				using var visual = c.Game.History && entryKind != HistoryHandEntryKind.Other
 					? c.Game.PowerHistory.Visual(c.Game, entryKind == HistoryHandEntryKind.Draw
 						? Presentation.VisualPhase.Draw : Presentation.VisualPhase.Create, target: playable) : null;

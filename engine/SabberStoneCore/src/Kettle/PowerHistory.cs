@@ -887,6 +887,23 @@ namespace SabberStoneCore.Kettle
             catch (Exception) { }
         }
 
+        internal void BurnedCard(int entity)
+        {
+            // hslog-tests/34104_subspell.power.log:30226,33325: one range after the last burn, in its enclosing block.
+            PowerHistoryMetaData burned = null;
+            for (int i = Last.Count - 1, depth = 0; i >= 0; i--)
+            {
+                if (Last[i] is PowerHistoryBlockEnd) { depth++; continue; }
+                if (Last[i] is PowerHistoryBlockStart) { if (depth-- == 0) break; continue; }
+                if (depth == 0 && Last[i] is PowerHistoryMetaData meta && meta.Type == MetaDataType.BURNED_CARD)
+                { burned = meta; break; }
+            }
+            if (burned == null) burned = new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = new List<int>() };
+            else { Full.Remove(burned); Last.Remove(burned); }
+            burned.Info.Add(entity);
+            Add(burned);
+        }
+
 		public void Add(IPowerHistoryEntry entry)
 		{
             ObservePublicHand(entry);
