@@ -137,8 +137,9 @@ SUITES = [
           'tests/engine-proof/EngineProof.csproj', args=['--full']),
     Suite('standard-native', 'dotnet', 'native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, '
           'definition audit, input trace binding', 'tests/standard-native/StandardNativeTests.csproj'),
-    Suite('goldens', 'hssim', 'recorded games replay to the same result on the current engine (5 golden files)',
-          commands=[['goldens', 'check', f'tests/goldens/{name}.json'] for name in GOLDENS]),
+    Suite('goldens', 'hssim', 'recorded games replay to the same result on the current engine, with a well-formed history (5 golden files)',
+          commands=[['goldens', 'check', f'tests/goldens/{name}.json'] for name in GOLDENS]
+          + [['goldens', 'history-selftest', 'tests/goldens/core-2026.json']]),
     Suite('goldens-rerecord', 'python', '`goldens rerecord` restores only the games that changed and leaves the rest of the file byte-identical',
           folder='tests/goldens-rerecord', needs_hssim=True),
     Suite('fuzz', 'hssim', '200 random games: no crash, same result twice, no broken invariant',
