@@ -102,6 +102,8 @@ internal static class LocalNativeText
     {
         text = null;
         if (!staged || string.IsNullOrEmpty(cardId) || defaultVariant == null) return false;
+        // The native modular builder owns each location's text; its raw template is only "{0} {1}".
+        if (cardId == "TLC_100t1" || cardId == "TLC_100t2" || cardId == "TLC_100t3") return false;
         try
         {
             string rawText = RawFor(cardId, locale);
