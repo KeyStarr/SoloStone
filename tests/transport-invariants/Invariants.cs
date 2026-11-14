@@ -262,6 +262,8 @@ internal static class Invariants
             foreach (var pair in expected)
             {
                 int value = shown.Get(pair.Key);
+                if (entity is Minion sleeper && Location(entity) == Zone.PLAY && sleeper.IsDormant
+                    && NativeMatch.IsDormantVisualTag(pair.Key) && value == 0) continue;
                 // Numeric UI values: an omitted tag and explicit zero both display zero (TagMap.GetTag).
                 if (!NativeUIProjection.TransportTagMatches(true, value, true, pair.Value))
                     yield return new(entity.Card.Id, entity.Id, pair.Key.ToString(), pair.Value.ToString(), value.ToString());

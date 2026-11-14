@@ -211,6 +211,7 @@ internal static class CardStateChecks
     }
     private static void DormantLifecycle()
     {
+        DormantKeywordVisuals();
         foreach (string cardId in new[] { "TIME_046", "CS2_182", "CORE_BT_156", "EDR_469" })
         foreach (bool bot in new[] { false, true })
         foreach (bool awake in new[] { true, false })
@@ -292,6 +293,185 @@ internal static class CardStateChecks
             Check(!Invariants.Compare(game, replayed).Any(), label + " complete packet replay parity");
         }
         Console.WriteLine("PASS DormantLifecycleTransport: Unpinned_DormantLifecycle Unpinned_DormantCounterProjection; asleep/awakened bounce/shuffle/transform/replay; both views; external modern sleep; missing-4606-zero fault");
+    }
+    private static List<PowerHistoryData> KeywordRows(NativeSession session, int cursor)
+    {
+        var rows = new List<PowerHistoryData>();
+        foreach (var packet in session.Packets.Skip(cursor).Where(p => p.Id == 19))
+        {
+            using var stream = new MemoryStream(Convert.FromBase64String(packet.Base64));
+            var history = new PegasusGame.PowerHistory(); history.Deserialize(stream); rows.AddRange(history.List);
+        }
+        return rows;
+    }
+    private static void KeywordWake(NativeSession session, Minion minion, int cursor, params GameTag[] restored)
+    {
+        var rows = KeywordRows(session, cursor);
+        int wake = rows.FindIndex(r => r.HasTagChange && r.TagChange.Entity == minion.Id
+            && r.TagChange.Tag == (int)GameTag.DORMANT && r.TagChange.Value == 0);
+        Check(wake >= 0, minion.Card.Id + " wake row exists");
+        var changes = rows.Skip(wake + 1).TakeWhile(r => r.HasTagChange && r.TagChange.Entity == minion.Id
+            && NativeMatch.IsDormantVisualTag((GameTag)r.TagChange.Tag)).ToArray();
+        Check(restored.All(tag => changes.Any(r => r.TagChange.Tag == (int)tag && r.TagChange.Value == minion[tag])),
+            minion.Card.Id + " keyword restores immediately after DORMANT=0 in same block");
+        Check(restored.All(tag => session.Client.Entities[minion.Id].Get(tag) == minion[tag]), minion.Card.Id + " awake keywords visible");
+    }
+    private static void DormantKeywordVisuals()
+    {
+        foreach (bool bot in new[] { false, true })
+        foreach (string source in new[] { "TIME_046", "EDR_840", "EDR_820a", "CORE_BT_156", "EDR_469", "JAIL_997" })
+        {
+            var game = OfflinePoolTestRecipes.NewGame(opponent: bot); var owner = game.CurrentPlayer;
+            NativeSession session = null;
+            var match = new NativeMatch((id, packet) => session.Receive(id, packet));
+            typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(match, game);
+            session = new(match); session.Flush(); game.PowerHistory.Last.Clear();
+            Minion minion = null;
+            if (source == "EDR_840" || source == "EDR_820a")
+            {
+                for (int attempt = 0; attempt < 20 && minion == null; attempt++)
+                {
+                    owner.UsedMana = 0;
+                    var spell = Generic.DrawCard(owner, Cards.FromId(source));
+                    session.Flush(); game.PowerHistory.Last.Clear();
+                    Check(game.Process(SabberStoneCore.Tasks.PlayerTasks.PlayCardTask.Any(owner, spell)), source + " generator played");
+                    minion = owner.BoardZone.FirstOrDefault(m => m.Card.Id == "EDR_840t2");
+                    foreach (var other in owner.BoardZone.Where(m => m != minion).ToArray()) other.ToBeDestroyed = true;
+                    game.DeathProcessingAndAuraUpdate();
+                }
+                Check(minion != null, source + " summons Serpent Dreadseed");
+            }
+            else
+            {
+                if (source == "JAIL_997")
+                {
+                    minion = (Minion)Entity.FromCard(owner, Cards.FromId("CS2_179"));
+                    Generic.SummonBlock(game, minion, -1, owner.Hero);
+                    var spell = Generic.DrawCard(owner, Cards.FromId(source));
+                    session.Flush(); game.PowerHistory.Last.Clear();
+                    Check(game.Process(SabberStoneCore.Tasks.PlayerTasks.PlayCardTask.Any(owner, spell, minion)), "Demonic Confinement played on Taunt");
+                }
+                else
+                {
+                    minion = (Minion)Generic.DrawCard(owner, Cards.FromId(source));
+                    session.Flush(); game.PowerHistory.Last.Clear();
+                    Check(game.Process(SabberStoneCore.Tasks.PlayerTasks.PlayCardTask.Any(owner, minion)), source + " sleeper played from hand");
+                }
+                // Legacy sleepers have no printed Taunt; a grant exercises the same wake path.
+                if (source == "CORE_BT_156" || source == "EDR_469") minion[GameTag.TAUNT] = 1;
+            }
+            session.Flush(); game.PowerHistory.Last.Clear();
+            var keywords = minion.Card.Id == "EDR_840t2" ? new[] { GameTag.TAUNT, GameTag.LIFESTEAL } : new[] { GameTag.TAUNT };
+            Check(session.Client.Entities.ContainsKey(minion.Id), source + "/" + bot + " sleeper published " + minion.Id + " wire=" + session.Client.WireId(minion.Id));
+            Check(minion.IsDormant && keywords.All(t => minion[t] == 1 && session.Client.Entities[minion.Id].Get(t) == 0), source + " sleeping keywords masked");
+            Check(keywords.All(t => match.SnapshotVisibleTransportTags(minion).GetValueOrDefault((int)t) == 0), source + " endpoint audit masked");
+            Check(!Invariants.Compare(game, session.Client).Any(), source + " sleeping strict parity");
+            var missing = session.Client.Copy(); int cursor = session.Packets.Count;
+            if (source == "EDR_469")
+            {
+                Check(game.Process(SabberStoneCore.Tasks.PlayerTasks.HeroPowerTask.Any(owner, bot ? null : owner.Opponent.Hero)), "legacy Sprite wakes on hero power");
+                session.Flush(); game.PowerHistory.Last.Clear();
+            }
+            for (int turn = 0; turn < 8 && minion.IsDormant; turn++)
+            {
+                Check(game.Process(SabberStoneCore.Tasks.PlayerTasks.EndTurnTask.Any(game.CurrentPlayer)), source + " natural turn progression");
+                session.Flush(); game.PowerHistory.Last.Clear();
+            }
+            Check(!minion.IsDormant, source + " natural wake");
+            KeywordWake(session, minion, cursor, keywords);
+            var wakeRows = KeywordRows(session, cursor);
+            wakeRows.RemoveAll(r => r.HasTagChange && r.TagChange.Entity == minion.Id && keywords.Contains((GameTag)r.TagChange.Tag) && r.TagChange.Value == 1);
+            missing.Apply(new PegasusGame.PowerHistory { List = wakeRows });
+            Check(Invariants.Compare(game, missing).Any(v => v.Entity == minion.Id && v.Tag == "TAUNT"), source + " removed restore fault rejected");
+            Check(!Invariants.Compare(game, session.Client).Any(), source + " awake strict parity");
+        }
+        foreach (bool bot in new[] { false, true })
+        {
+            var game = OfflinePoolTestRecipes.NewGame(opponent: bot); var owner = game.CurrentPlayer;
+            NativeSession session = null;
+            var match = new NativeMatch((id, packet) => session.Receive(id, packet));
+            typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(match, game);
+            session = new(match); session.Flush(); game.PowerHistory.Last.Clear();
+            var minion = (Minion)Entity.FromCard(owner, Cards.FromId("TIME_046"));
+            Generic.SummonBlock(game, minion, -1, owner.Hero);
+            var copy = (Minion)Generic.Copy(owner, owner.Hero, minion, Zone.PLAY, preserveBoardMinionState: true);
+            session.Flush(); game.PowerHistory.Last.Clear();
+            Check(copy.IsDormant && session.Client.Entities[copy.Id].Get(GameTag.TAUNT) == 0, "sleeping copy keyword masked");
+            // Keep the raw batches separate from today's getters: a later wake must not affect a historical sleep refresh.
+            minion[GameTag.TAUNT] = 0; minion[GameTag.LIFESTEAL] = 1;
+            var gained = game.PowerHistory.Last.ToList(); game.PowerHistory.Last.Clear();
+            DormantRules.Accelerate(minion, 3); var awakened = game.PowerHistory.Last.ToList(); game.PowerHistory.Last.Clear();
+            session.Invoke("SendHistory", gained);
+            Check(session.Client.Entities[minion.Id].Get(GameTag.TAUNT) == 0 && session.Client.Entities[minion.Id].Get(GameTag.LIFESTEAL) == 0,
+                "historical keyword gain/loss stays masked");
+            int cursor = session.Packets.Count; session.Invoke("SendHistory", awakened);
+            KeywordWake(session, minion, cursor, GameTag.LIFESTEAL);
+            Check(session.Client.Entities[minion.Id].Get(GameTag.TAUNT) == 0, "lost sleeping keyword never restored");
+            new SabberStoneCore.Tasks.SimpleTasks.ControlTask(SabberStoneCore.Tasks.SimpleTasks.EntityType.TARGET)
+                .Process(game, owner.Opponent, owner.Opponent.Hero, copy);
+            session.Flush(); game.PowerHistory.Last.Clear();
+            Check(copy.Controller == owner.Opponent && session.Client.Entities[copy.Id].Get(GameTag.TAUNT) == 0, "control transfer stays asleep");
+            cursor = session.Packets.Count; DormantRules.Accelerate(copy, 3); session.Flush(); game.PowerHistory.Last.Clear();
+            KeywordWake(session, copy, cursor, GameTag.TAUNT);
+            Check(Generic.ReturnToHandBlock(owner, minion), "awake return for resleep");
+            owner.HandZone.Remove(minion); Generic.SummonBlock(game, minion, -1, owner.Hero);
+            session.Flush(); game.PowerHistory.Last.Clear();
+            Check(session.Client.Entities[minion.Id].Get(GameTag.LIFESTEAL) == 0, "bounce clears old sleeping keyword");
+            Check(Generic.ReturnToHandBlock(owner, minion), "bounce while Dormant"); session.Flush(); game.PowerHistory.Last.Clear();
+            owner.HandZone.Remove(minion); Generic.SummonBlock(game, minion, -1, owner.Hero);
+            session.Flush(); game.PowerHistory.Last.Clear();
+            cursor = session.Packets.Count; DormantRules.Accelerate(minion, 3); session.Flush(); game.PowerHistory.Last.Clear();
+            KeywordWake(session, minion, cursor, GameTag.TAUNT);
+            Check(session.Client.Entities[minion.Id].Get(GameTag.LIFESTEAL) == 0, "bounce cannot restore old gained keyword");
+        }
+        DormantKeywordRows();
+        Console.WriteLine("PASS DormantKeywordVisuals: natural TIME_046/Dreadseeds/legacy; Confinement; both owners; sleeping copy; gain/loss; bounce; ordered wake; removed-restore fault");
+    }
+
+    private static void DormantKeywordRows()
+    {
+        var tags = new[] { GameTag.TAUNT, GameTag.LIFESTEAL, GameTag.DIVINE_SHIELD, GameTag.POISONOUS, GameTag.STEALTH,
+            GameTag.WINDFURY, GameTag.MEGA_WINDFURY, GameTag.REBORN, GameTag.DEATHRATTLE, GameTag.TRIGGER_VISUAL,
+            (GameTag)1211, GameTag.RUSH, GameTag.CHARGE, GameTag.AURA, GameTag.IMMUNE, GameTag.SPELLPOWER };
+        var game = OfflinePoolTestRecipes.NewGame();
+        NativeSession session = null;
+        var match = new NativeMatch((id, packet) => session.Receive(id, packet));
+        typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(match, game);
+        session = new(match); session.Flush(); game.PowerHistory.Last.Clear();
+        const int id = 9000;
+        string engine = HsSim.Canonical.Trace(game) + HsSim.Canonical.Value(game.Random.CaptureState());
+        PowerHistoryData Change(GameTag tag, int value) => new() { TagChange = new() { Entity = id, Tag = (int)tag, Value = value } };
+        PegasusGame.PowerHistoryEntity Snapshot(bool sleep) => new() { Entity = id, Name = "CS2_179", Tags = tags.Select(t => new PegasusGame.Tag { Name = (int)t, Value = 1 }).Concat(new[] {
+            new PegasusGame.Tag { Name = (int)GameTag.ENTITY_ID, Value = id },
+            new PegasusGame.Tag { Name = (int)GameTag.CARDTYPE, Value = 4 }, new PegasusGame.Tag { Name = (int)GameTag.ZONE, Value = (int)Zone.PLAY },
+            new PegasusGame.Tag { Name = (int)GameTag.CONTROLLER, Value = 1 }, new PegasusGame.Tag { Name = (int)GameTag.ZONE_POSITION, Value = 1 },
+            new PegasusGame.Tag { Name = (int)GameTag.DORMANT, Value = sleep ? 1 : 0 } }).ToList() };
+        void Send(params PowerHistoryData[] rows) => session.Invoke("SendPowerHistory", new PegasusGame.PowerHistory { List = rows.ToList() });
+        Send(new PowerHistoryData { FullEntity = Snapshot(true) });
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "every visual keyword masked in dormant FULL");
+        Send(new PowerHistoryData { ShowEntity = Snapshot(true) });
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "sleeping SHOW cannot resurrect printed keywords");
+        Send(new PowerHistoryData { ShowEntity = Snapshot(false) });
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 1), "awake SHOW restores all keywords");
+        Send(Change(GameTag.DORMANT, 1));
+        Send(Change(GameTag.CONTROLLER, 2), Change(GameTag.LIFESTEAL, 0), Change(GameTag.DORMANT, 0));
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == (t == GameTag.LIFESTEAL ? 0 : 1)), "transfer restores current logical values");
+        Send(Change(GameTag.DORMANT, 1));
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "external sleep clears previously visible keywords");
+        // Minion.Silence currently rejects Dormant targets; feed its ordered keyword clears at the transport boundary.
+        Send(tags.Select(t => Change(t, 0)).Append(Change(GameTag.SILENCED, 1)).Append(Change(GameTag.DORMANT, 0)).ToArray());
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "Silence clears while Dormant cannot restore keywords");
+        Send(new PowerHistoryData { ChangeEntity = Snapshot(true) });
+        Send(new() { ChangeEntity = new() { Entity = id, Name = "CS2_120", Tags = new() {
+            new() { Name = (int)GameTag.CARDTYPE, Value = 4 }, new() { Name = (int)GameTag.ZONE, Value = (int)Zone.PLAY },
+            new() { Name = (int)GameTag.DORMANT, Value = 0 } } } }, Change(GameTag.DORMANT, 0));
+        Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "transform discards sleeping keyword cache");
+        // No client reset side effects needed to check that the transport drops the abandoned sleep graph.
+        session.Invoke("NormalizeDormantVisuals", new PegasusGame.PowerHistory { List = new() { new() { FullEntity = Snapshot(true) } } });
+        var reset = new PegasusGame.PowerHistory { List = new() { new() { ResetGame = new() }, Change(GameTag.DORMANT, 0) } };
+        session.Invoke("NormalizeDormantVisuals", reset);
+        Check(reset.List.Count == 2, "reset discards sleeping keyword cache");
+        Check(engine == HsSim.Canonical.Trace(game) + HsSim.Canonical.Value(game.Random.CaptureState()), "keyword transport leaves engine state/history/RNG unchanged");
     }
     private static void TemporaryTransfer()
     {
