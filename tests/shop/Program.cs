@@ -26,6 +26,7 @@ try {
     CoinTests.Run(root, Check, Reject, Fresh);
     NativeShopLedgerTests.Run(Check, Reject, Fresh);
     NativeShopArtTests.Run(Check);
+    NativeShopOpenTests.Run(Check);
     DeckReceiptDriftTests.Run(Check, Reject, Fresh);
     AzalinaDeckPurchaseTests.Run(Check, Reject, Fresh);
     FabledOwnershipTests.Run(Check, Reject, Fresh);

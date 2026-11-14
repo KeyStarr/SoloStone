@@ -1118,6 +1118,17 @@ internal static class NativeUIProjection
         return (property, source.R * DisabledFormatBrightness, source.G * DisabledFormatBrightness,
             source.B * DisabledFormatBrightness, source.A);
     }
+    internal static int DeathKnightTipBit(string subkeyName)
+    {
+        switch (subkeyName)
+        {
+            case "HAS_SEEN_DK_DECK_BUILDING_INTRO_TUTORIAL": return 0;
+            case "HAS_SEEN_DK_DECK_BUILDING_TRIPLE_RUNES_POPUP": return 1;
+            case "HAS_SEEN_DK_DECK_BUILDING_RUNE_SLOT_AVAILABLE_POPUP": return 2;
+            case "HAS_SEEN_DK_DECK_BUILDING_CANNOT_ADD_RUNES_POPUP": return 3;
+            default: return -1;
+        }
+    }
     internal static bool TryGetOnboardingOption(bool isolated, string option, out bool value)
     {
         value = false;
@@ -1134,6 +1145,8 @@ internal static class NativeUIProjection
             case "HAS_SEEN_MULLIGAN":
             case "HAS_SEEN_THE_COIN":
             case "HAS_SEEN_STEALTH_TAUNTER":
+                value = true;
+                return true;
             case "IN_RANKED_PLAY_MODE":
                 value = !CasualPlayMode;
                 return true;

@@ -1365,23 +1365,28 @@ Check(!LocalRewardPresentation.SuppressRankedIntro(false, true, true)
     && !LocalRewardPresentation.SuppressRankedIntro(true, false, true)
     && !LocalRewardPresentation.SuppressRankedIntro(true, true, false),
     "ranked intro suppression preserves all other callers");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_COLLECTIONMANAGER", out bool collectionSeen)
-    && collectionSeen && NativeUIProjection.TryGetOnboardingOption(true, "HAS_STARTED_A_DECK", out bool deckStarted)
-    && deckStarted, "local collection does not welcome or teach deck editing again after a fresh bootstrap");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_OPENED_BOOSTER", out bool packOpened)
-    && packOpened, "local pack screen omits first-pack drag hints");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_PACK_OPENING", out bool packSeen)
-    && packSeen, "local pack entry reads as previously visited");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_COLLECTIONMANAGER_AFTER_PRACTICE", out bool collectionAfterPractice)
-    && collectionAfterPractice, "local collection entry omits post-practice onboarding highlight");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_SET_FILTER_TUTORIAL", out bool filterSeen)
-    && filterSeen, "local collection filter reads as already introduced");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_MULLIGAN", out bool mulliganSeen)
-    && mulliganSeen, "fresh local match does not replay the Innkeeper mulligan tutorial");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_THE_COIN", out bool coinSeen)
-    && coinSeen, "fresh local match does not replay the Coin introduction");
-Check(NativeUIProjection.TryGetOnboardingOption(true, "HAS_SEEN_STEALTH_TAUNTER", out bool stealthTaunterSeen)
-    && stealthTaunterSeen, "fresh local match does not replay the stealth and taunt introduction");
+bool originalCasualMode = NativeUIProjection.CasualPlayMode;
+try
+{
+    foreach (bool casual in new[] { false, true })
+    {
+        NativeUIProjection.CasualPlayMode = casual;
+        foreach (string option in new[] {
+            "HAS_SEEN_COLLECTIONMANAGER", "HAS_SEEN_COLLECTIONMANAGER_AFTER_PRACTICE", "HAS_STARTED_A_DECK",
+            "HAS_SEEN_PACK_OPENING", "HAS_OPENED_BOOSTER", "HAS_SEEN_SET_FILTER_TUTORIAL",
+            "HAS_SEEN_MULLIGAN", "HAS_SEEN_THE_COIN", "HAS_SEEN_STEALTH_TAUNTER"
+        })
+        {
+            Check(NativeUIProjection.TryGetOnboardingOption(true, option, out bool seen) && seen,
+                option + " reads seen in " + (casual ? "Casual" : "Ranked"));
+            Check(!NativeUIProjection.TryGetOnboardingOption(false, option, out _), option + " preserves non-isolated reads");
+        }
+        Check(NativeUIProjection.TryGetOnboardingOption(true, "IN_RANKED_PLAY_MODE", out bool ranked) && ranked == !casual
+            && !NativeUIProjection.TryGetOnboardingOption(false, "IN_RANKED_PLAY_MODE", out _),
+            "ranked option follows mode only in isolated launches");
+    }
+}
+finally { NativeUIProjection.CasualPlayMode = originalCasualMode; }
 Check(NativeUIProjection.FormatPickerMode(new[] { "WILD_BUTTON_CLICKED" }, new[] { "Button", "StandardRow" }) == "WILD"
     && NativeUIProjection.FormatPickerMode(new string[0], new[] { "Clickable", "CasualButton", "Buttons" }) == "CASUAL"
     && NativeUIProjection.FormatPickerMode(new[] { "STANDARD_BUTTON_CLICKED" }, new[] { "Clickable" }) == "STANDARD"
@@ -1400,13 +1405,6 @@ Check(dimmedColor.HasValue && dimmedColor.Value.Property == "_Color"
     && dimmedTint.HasValue && dimmedTint.Value.Property == "_TintColor" && dimmedTint.Value.R == 0.45f && dimmedTint.Value.A == 0.5f
     && NativeUIProjection.DisabledFormatTint(null, null) == null,
     "disabled format buttons dim their own material colour (alpha kept), never compounding");
-NativeUIProjection.CasualPlayMode = false;
-bool rankedRead = NativeUIProjection.TryGetOnboardingOption(true, "IN_RANKED_PLAY_MODE", out bool rankedMode) && rankedMode;
-NativeUIProjection.CasualPlayMode = true;
-bool casualRead = NativeUIProjection.TryGetOnboardingOption(true, "IN_RANKED_PLAY_MODE", out bool casualRanked) && !casualRanked;
-NativeUIProjection.CasualPlayMode = false;
-Check(rankedRead && casualRead && !NativeUIProjection.TryGetOnboardingOption(false, "IN_RANKED_PLAY_MODE", out _),
-    "isolated launch reads IN_RANKED_PLAY_MODE from the picker's Standard/Casual choice");
 // Review 2026-10-28: the deck picker's InitAssets forces SetInRankedPlayMode(true) on every load; only a picker switch may
 // change the mode, every other caller follows the remembered one.
 NativeUIProjection.CasualPlayMode = true;

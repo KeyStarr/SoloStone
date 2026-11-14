@@ -489,6 +489,7 @@ internal sealed partial class NativeTestControl
                         view.State["fpsCounter"] = NativeFpsCounter.State();
                         view.State["brandLabel"] = NativeBrandLabel.State();
                         view.State["deckInference"] = NativeDeckInferenceOption.State();
+                        view.State["tips"] = NativeUIProbe.TipsState();
                         view.State["language"] = NativeLanguageOption.State();
                         view.State["optionsPanels"] = NativeOptionsPanels.State();
                         view.State["deckGuide"] = NativeDeckPickerGuide.State();
@@ -1335,6 +1336,7 @@ internal sealed partial class NativeTestControl
         data["masteryProgress"] = NativeResultsUI.MasteryProgressState();
         data["premiumRewardPresentation"] = NativeResultsUI.PremiumRewards?.State;
         data["rewardPresentation"] = NativeRewardUI.Diagnostics;
+        data["packRevealPending"] = LocalLadder.Profile?.PackRevealPending ?? false;
         if (all) data["shopSubTabs"] = NativeShop.SubTabDiagnostics(); // Which object draws each sub-tab plate.
         if (all) data["shopRecipePrices"] = NativeShopTilePrices.Diagnostics(); // Deck tiles' recipe price plates.
         if (all) data["shopScroll"] = NativeShop.ScrollDiagnostics(); // Browser scroll height inputs.
