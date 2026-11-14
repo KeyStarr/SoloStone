@@ -1118,7 +1118,8 @@ internal static class NativeShop
             string reason = !Enabled ? "disabled" : !ready ? "not ready" : button == null ? "button unavailable"
                 : !SceneMgr.IsInitialized() || SceneMgr.Get().GetMode() != SceneMgr.Mode.HUB ? "outside home"
                 : SceneMgr.Get().IsTransitionNowOrPending() || box.IsBusy() || box.GetState() == Box.State.LOADING ? "home busy"
-                : Profile == null || Profile.Pending != null || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting" ? "match pending"
+                : Profile == null || Profile.Pending != null || Profile.HasPendingRewardPresentation
+                    || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting" ? "match pending"
                 : FriendChallengeMgr.Get()?.HasChallenge() == true ? "challenge active"
                 : RailroadDisablesStore(box) ? "railroad disabled"
                 : "ready";
@@ -2539,7 +2540,7 @@ internal static class NativeShop
             if (__instance.IsBusy() || __instance.GetState() == Box.State.LOADING || !SceneMgr.IsInitialized()
                 || SceneMgr.Get().GetMode() != SceneMgr.Mode.HUB || SceneMgr.Get().IsTransitionNowOrPending()
                 || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting" || Profile.Pending != null
-                || Profile.PendingRewardPresentation != null || Profile.PackRevealPending)
+                || Profile.PendingRewardPresentation != null)
             { Refuse("home busy or match pending"); return false; }
             if (FriendChallengeMgr.Get()?.HasChallenge() == true || __instance.m_StoreButton.IsVisualClosed())
             { Refuse("store button closed or challenge active"); return false; }
@@ -2549,6 +2550,17 @@ internal static class NativeShop
             if (prerequisite != null) { Refuse(prerequisite); return false; }
             var store = StoreManager.Get();
             if (store.IsShownOrWaitingToShow() || store.IsShopBeingDestroyed) { Refuse("store already open or closing"); return false; }
+            var blocker = NativeShopOpenText.OpenBlocker(Profile.PackRevealPending);
+            if (blocker.HasValue)
+            {
+                Refuse("pack reveal pending");
+                bool shown = DialogManager.Get()?.ShowUniquePopup(new AlertPopup.PopupInfo {
+                    m_id = NativeShopOpenText.PackRevealPopupId, m_headerText = blocker.Value.Header,
+                    m_text = blocker.Value.Text, m_showAlertIcon = false,
+                    m_responseDisplay = AlertPopup.ResponseDisplay.OK, m_okText = GameStrings.Get("GLOBAL_OKAY") }) == true;
+                if (!shown) log?.LogWarning("[NativeShop] unfinished pack popup not shown");
+                return false;
+            }
             __instance.FireButtonPressEvent(Box.ButtonType.STORE);
             FriendChallengeMgr.Get()?.OnStoreOpened();
             previousBoxState = __instance.GetState(); openingBox = __instance;

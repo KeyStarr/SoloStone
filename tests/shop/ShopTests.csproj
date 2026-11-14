@@ -5,6 +5,7 @@
   <PropertyGroup><EngineSource>true</EngineSource><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
   <ItemGroup>
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
+    <Compile Include="../../plugin/NativeShopOpenText.cs" Link="NativeShopOpenText.cs" />
     <Compile Include="../../plugin/LocalCrafting.cs" />
     <Compile Include="../../plugin/LocalCraftingLedger.cs" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />

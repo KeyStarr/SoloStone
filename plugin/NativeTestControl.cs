@@ -1336,6 +1336,7 @@ internal sealed partial class NativeTestControl
         data["masteryProgress"] = NativeResultsUI.MasteryProgressState();
         data["premiumRewardPresentation"] = NativeResultsUI.PremiumRewards?.State;
         data["rewardPresentation"] = NativeRewardUI.Diagnostics;
+        data["packRevealPending"] = LocalLadder.Profile?.PackRevealPending ?? false;
         if (all) data["shopSubTabs"] = NativeShop.SubTabDiagnostics(); // Which object draws each sub-tab plate.
         if (all) data["shopRecipePrices"] = NativeShopTilePrices.Diagnostics(); // Deck tiles' recipe price plates.
         if (all) data["shopScroll"] = NativeShop.ScrollDiagnostics(); // Browser scroll height inputs.

@@ -54,7 +54,19 @@ internal static class PluginSourcePins
         string formatLock = File.ReadAllText(Path.Combine(root, "plugin/NativeFormatLock.cs"));
         foreach (string required in new[] { "clickable.Active = false", "element.SetEnabled(true, true)", "renderer.SetPropertyBlock(greyBlock)" })
             if (!formatLock.Contains(required)) failures.Add("Format picker lock lost its native disabled state: " + required);
+        string shopSource = File.ReadAllText(Path.Combine(root, "plugin/NativeShop.cs"));
+        int openStart = shopSource.IndexOf("private static bool Open(Box __instance)", StringComparison.Ordinal);
+        int openEnd = shopSource.IndexOf("private static Action<ShopType> BoxListener", openStart, StringComparison.Ordinal);
+        string open = openStart < 0 || openEnd < 0 ? "" : shopSource.Substring(openStart, openEnd - openStart);
+        if (open.Length == 0) failures.Add("Shop Open method not found for its pins (renamed?)");
+        foreach (string required in new[] { "NativeShopOpenText.OpenBlocker(Profile.PackRevealPending)",
+            "m_id = NativeShopOpenText.PackRevealPopupId", "ShowUniquePopup(new AlertPopup.PopupInfo",
+            "Refuse(\"pack reveal pending\")" })
+            if (!open.Contains(required)) failures.Add("Shop Open must explain the unfinished reveal: " + required);
+        string uiTree = File.ReadAllText(Path.Combine(root, "plugin/NativeUiTree.cs"));
+        if (!uiTree.Contains("NativeShopOpenText.DialogButtonId(popupId, \"okay\")"))
+            failures.Add("Unfinished reveal OK must have its semantic control id");
         if (failures.Count != 0) throw new Exception(string.Join("\n", failures));
-        Console.WriteLine("PASS plugin source-text pins (achievement toast, reward UI, format lock)");
+        Console.WriteLine("PASS plugin source-text pins (achievement toast, reward UI, format lock, shop open)");
     }
 }
