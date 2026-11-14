@@ -22,6 +22,7 @@ internal static class NpcTurnRunnerTests
         HostFailuresAndChoices();
         NativePaths();
         RealGoldenMatches();
+        LotusTroublemakerKeepsNpcPlaying();
         Console.WriteLine("PASS NpcTurnRunner scheduling, native parity, recording, cancellation, timer and legacy isolation");
     }
 
@@ -120,6 +121,42 @@ internal static class NpcTurnRunnerTests
             Check(legacy.Match.NpcRunner == null && legacy.UserUi.Count == 0, "legacy opponent emitted NPC presentation");
         }
         finally { NpcPilots.Factory = previous; }
+    }
+
+    // #81: after the player played Lotus Troublemaker, the NPC ended every later turn without acting. The real native turn
+    // runner (sliced Golden pilot, fair view) must keep choosing plays.
+    internal static void LotusTroublemakerKeepsNpcPlaying()
+    {
+        foreach (int twoManaPlays in new[] { 0, 2 })
+        foreach (var profile in NpcCatalog.All.Take(4))
+        {
+            var rig = new NativeRig(profile.DeckId, false);
+            var game = rig.Match.Game; var human = game.Player1; var npc = game.Player2;
+            human.BaseMana = 10; human.UsedMana = 0;
+            var lotus = SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("JAIL_470"), zone: human.HandZone);
+            SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("JAIL_470"), zone: human.DeckZone);
+            for (int i = 0; i < twoManaPlays; i++)
+            {
+                var croc = SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("CS2_120"), zone: human.HandZone);
+                Invoke(rig.Match, "Process", human.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == croc.Id));
+            }
+            human.UsedMana = 0;
+            Invoke(rig.Match, "Process", human.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == lotus.Id));
+            for (int turn = 0; turn < 3 && game.State != State.COMPLETE; turn++)
+            {
+                int before = rig.Record.Actions.Count, logBefore = rig.Log.Count, fallbacks = rig.Match.BotFallbacks;
+                SabberStoneCore.Model.Entities.Entity.FromCard(npc, Cards.FromId("CS2_182"), zone: npc.HandZone);
+                rig.EndHumanTurn();
+                var acted = rig.Record.Actions.Skip(before).Where(a => !a.StartsWith("END_TURN", StringComparison.Ordinal)).ToArray();
+                var faults = rig.Log.Skip(logBefore).Where(l => l.Contains("fallback=") || l.Contains("rror")).ToArray();
+                Check(acted.Length > 0 && rig.Match.BotFallbacks == fallbacks,
+                    $"Lotus ({twoManaPlays} two-Mana plays) {profile.Id} turn {turn}: NPC passed; actions=[{string.Join(", ", rig.Record.Actions.Skip(before))}] "
+                    + $"fallbacks={rig.Match.BotFallbacks - fallbacks} log=[{string.Join(" | ", faults.Take(4))}]");
+                if (game.State == State.COMPLETE) break;
+                human.BaseMana = 10; human.UsedMana = 0;
+            }
+        }
+        Console.WriteLine("PASS Lotus Troublemaker: the NPC keeps playing after the player's Lotus (#81)");
     }
 
     private static object Invoke(NativeMatch match, string name, params object[] args) =>

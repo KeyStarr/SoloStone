@@ -36,6 +36,7 @@ if (args.Contains("--discover-real-cards-only")) { StandardSetsProof.Run(selecte
 
 if (args.Contains("--murozond-only")) { StandardSetsProof.Run(selectedProofs: new Action[] { Unpinned_EndtimeMurozondProof.Run }); return; }
 if (args.Contains("--turn-queue-only")) { TurnQueueProof.Run(); return; }
+if (args.Contains("--match-softlocks-only")) { MatchSoftlockProof.Run(); return; }
 if (args.Contains("--cast-twice-cards-only")) { StandardSetsProof.Run(selectedProofs: new Action[] { Unpinned_TyrandeProof.Run, Unpinned_TherazanetheEarthmotherProof.Run, Unpinned_EfflorescenceProof.Run, Unpinned_NirioftheCraterProof.Run, Unpinned_SinestraProof.Run, Unpinned_BreakoutArchitectProof.Run, Unpinned_ElderWordForesightProof.Run, Unpinned_ElderWordManifestProof.Run, Unpinned_ElderWordFlayProof.Run }); return; }
 if (args.Length == 2 && args[0] == "--pool-init-order-child") { PoolInitOrderProof.Child(args[1]); return; }
 if (args.Contains("--costmemory-cards-only")) { StandardSetsProof.Run(selectedProofs: new Action[] {
@@ -630,6 +631,7 @@ EffectFrameProof.Run();
 IndirectSpellProof.Run();
 DecisionSpellProof.Run();
 TurnQueueProof.Run();
+MatchSoftlockProof.Run();
 ForestLordCenariusProof.Run();
 PlayerDecisionProof.Run();
 EffectContextProof.Run(args.Contains("--full"));
