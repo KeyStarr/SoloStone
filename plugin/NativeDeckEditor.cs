@@ -55,14 +55,15 @@ internal static partial class NativeUIProbe
     {
         if (!active) return true;
         long candidateId = Profile.NextCustomDeckId;
+        string hero = NativeUIProjection.CreateRequestHero(heroCardID, LocalShop.Default.HeroSkinClass);
         bool allowed = NativeUIProjection.CanCreateDraft(deckType == DeckType.NORMAL_DECK,
             deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_NORMAL && pastedDeckHashString == null,
-            Heroes.Contains(heroCardID), Options.GetFormatType() == LocalDeckFormat,
+            hero != null && Heroes.Contains(hero), Options.GetFormatType() == LocalDeckFormat,
             Profile.CustomDecks.Count, SessionLoanerKeys().Count());
         if (!NativeUIProjection.OwnsCreateRequest(active, CurrentCollectionScene(), allowed, isHeroOverridden))
             throw new InvalidOperationException("Unsupported local deck creation request.");
 
-        if (!NativeUIProjection.TryCreateDraft(() => Profile.CreateDraft(name, heroCardID),
+        if (!NativeUIProjection.TryCreateDraft(() => Profile.CreateDraft(name, hero),
             error => ReportDeckError("create", candidateId, error), out LocalCustomDeck saved)) return false;
         try
         {

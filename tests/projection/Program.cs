@@ -140,6 +140,13 @@ Check((bool)Call("OwnsCreateRequest",true,true,true,false)
     && !(bool)Call("OwnsCreateRequest",true,true,false,false)
     && !(bool)Call("OwnsCreateRequest",true,true,true,true),
     "only active current Collection normal draft enters recoverable create boundary");
+Check(NativeUIProjection.CreateRequestHero("HERO_07", LocalShop.Default.HeroSkinClass) == "HERO_07"
+    && NativeUIProjection.CreateRequestHero("HERO_11l", LocalShop.Default.HeroSkinClass) == "HERO_11"
+    && LocalShop.Default.HeroSkinIds.All(skin => NativeUIProjection.CreateRequestHero(skin, LocalShop.Default.HeroSkinClass) == LocalShop.Default.HeroSkinClass(skin))
+    && NativeUIProjection.CreateRequestHero("EX1_561", LocalShop.Default.HeroSkinClass) == null
+    && NativeUIProjection.CreateRequestHero("HERO_99x", _ => "HERO_99") == null
+    && NativeUIProjection.CreateRequestHero(null, LocalShop.Default.HeroSkinClass) == null,
+    "a new deck picked through a favourite skin is created for its class hero");
 bool OwnsPersonalEditor(bool active = true, bool collection = true, bool manager = true,
     bool tray = true, bool mainContext = true, bool exactDeck = true,
     bool exactInstance = true, bool persisted = true) => (bool)Call("OwnsPersonalDeckEditor",
