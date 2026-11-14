@@ -114,8 +114,12 @@ namespace SabberStoneCore.Actions
         {
             foreach (var part in new[] { Part(s, GameTag.MODULAR_ENTITY_PART_1), Part(s, GameTag.MODULAR_ENTITY_PART_2) })
                 if (Kind(part) == 1)
-                    foreach (var enemy in c.Opponent.BoardZone.GetAll().Cast<ICharacter>().Append(c.Opponent.Hero).ToArray())
+                {
+                    var enemies = c.Opponent.BoardZone.GetAll().Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
+                    using var wave = g.History ? g.PowerHistory.DamageWave(enemies.Length) : null;
+                    foreach (var enemy in enemies)
                         Generic.DamageCharFunc((IPlayable)s, enemy, Tier(s.Card) * 2 - 1, false);
+                }
         }
     }
 }

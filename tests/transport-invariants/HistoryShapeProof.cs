@@ -703,9 +703,50 @@ internal static partial class HistoryShapeProof
         var fatigue = new Fixture(); foreach (var c in fatigue.Player.DeckZone.ToArray()) fatigue.Player.SetasideZone.Add(fatigue.Player.DeckZone.Remove(c));
         fatigue.Ready("fatigue"); Generic.Draw(fatigue.Player); fatigue.Flush(); fatigue.Result("fatigue");
 
-        var overdraw = new Fixture(); while (overdraw.Player.HandZone.Count < 10) Generic.DrawCard(overdraw.Player, Cards.FromId("CS2_182"));
-        overdraw.Ready("overdraw"); Generic.Draw(overdraw.Player); overdraw.Flush(); overdraw.Result("overdraw");
+        BurnedCards();
         Console.WriteLine("PASS history-shape focused: bot Rock, Watcher mill, Kronn sources, Lifesteal attack/spell, healing power, minion attack, fatigue, overdraw");
+    }
+    internal static void BurnedCards()
+    {
+        foreach (bool bot in new[] { false, true })
+        {
+            var f = new Fixture(); var owner = bot ? f.Player.Opponent : f.Player;
+            while (owner.HandZone.Count < 9) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            var parent = SabberStoneCore.Model.Entities.Entity.FromCard(owner, Cards.FromId("CATA_489"), zone: owner.DeckZone);
+            f.Ready("overdraw"); f.Session.Packets.Clear();
+            f.Game.PowerHistory.Add(EH.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner, parent); f.Game.PowerHistory.Add(EH.BlockEnd()); f.Flush(); f.Result("overdraw");
+            var rows = PacketRows(f);
+            var burned = f.Game.IdEntityDic.Values.Single(e => e.Card.Id == "CATA_489t2" && e.Zone == owner.GraveyardZone);
+            Check(rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).MetaData.Info.SequenceEqual(new[] { burned.Id }), "Shatter overflow metadata names right half");
+        }
+        foreach (bool bot in new[] { false, true })
+        foreach (bool retained in new[] { false, true })
+        foreach (int hand in new[] { 9, 10 })
+        {
+            var f = new Fixture(); var owner = bot ? f.Player.Opponent : f.Player;
+            while (owner.HandZone.Count < hand) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            if (retained) SabberStoneCore.Model.Entities.Enchantment.GetInstance(owner, owner.Hero, owner, Cards.FromId("JAIL_509e"));
+            f.Ready("overdraw"); f.Session.Packets.Clear();
+            f.Game.PowerHistory.Add(EH.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            for (int i = 0; i < 3; i++) Generic.Draw(owner);
+            f.Game.PowerHistory.Add(EH.BlockEnd()); f.Flush(); f.Result("overdraw");
+            var rows = f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+                var history = new PegasusGame.PowerHistory();
+                using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+                history.Deserialize(stream); return history.List;
+            }).ToList();
+            var burns = rows.Where(r => r.HasShowEntity && r.ShowEntity.Tags.Any(t =>
+                t.Name == (int)GameTag.ZONE && t.Value == (int)Zone.GRAVEYARD)).ToArray();
+            var meta = rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD);
+            int at = rows.IndexOf(meta);
+            Check(burns.Length == hand - 7 && meta.MetaData.Data == 0
+                && meta.MetaData.Info.SequenceEqual(burns.Select(r => r.ShowEntity.Entity))
+                && burns.All(r => rows.IndexOf(r) < at)
+                && rows.Take(at).Count(r => r.HasPowerStart) > rows.Take(at).Count(r => r.HasPowerEnd)
+                && rows.Skip(at + 1).Any(r => r.HasPowerEnd), $"serialized burn range seat={bot} retained={retained} hand={hand}");
+        }
+        Console.WriteLine("PASS history-shape burned cards: 8 serialized ranges; both seats, ordinary/Godfrey, draw three into nine/ten");
     }
     private static void HookBoundaries()
     {
@@ -1142,6 +1183,115 @@ internal static partial class HistoryShapeProof
                 "redirected combat provenance requires final defender's flags without rejecting valid retaliation");
         });
         Check(failures.Count == 0, string.Join("\n", failures));
+    }
+    internal static void PoisonousOnly()
+    {
+        PoisonousCombatAndReactions(); PoisonousWaves(); NestedTriggerDamageDuringCombat(); Synthetic(); HookBoundaries(); DisabledHistoryHooks();
+    }
+    private static List<PowerHistoryData> PacketRows(Fixture f) => f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+        var history = new PegasusGame.PowerHistory();
+        using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+        history.Deserialize(stream); return history.List;
+    }).ToList();
+
+    private static void PoisonousCombatAndReactions()
+    {
+        foreach (bool cleave in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, cleave ? "CORE_SCH_605" : "BE_193");
+            source.Poisonous = true; source.AttackDamage = 1;
+            var left = cleave ? f.Summon(p.Opponent, "CS2_200") : null;
+            var target = f.Summon(p.Opponent, "BE_193"); target.AttackDamage = 1;
+            var right = cleave ? f.Summon(p.Opponent, "CS2_200") : null;
+            f.Ready("poison-combat"); f.Session.Packets.Clear();
+            f.Act(MinionAttackTask.Any(p, source, target));
+            var rows = PacketRows(f);
+            int poison = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363);
+            Check(poison > rows.FindLastIndex(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE), "combat/cleave all hits before poison");
+            var victims = cleave ? new[] { target.Id, source.Id, left.Id, right.Id } : new[] { target.Id, source.Id };
+            Check(rows.Count(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) == victims.Length
+                && victims.Select((id, i) => rows[poison + i * 5 + 1].MetaData.Info.SequenceEqual(new[] { id })).All(v => v), "combat/cleave consecutive ordered poison");
+        }
+        foreach (bool bounce in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, "BE_193");
+            var target = f.Summon(p.Opponent, bounce ? "CS2_200" : "CORE_EX1_007");
+            f.Summon(p.Opponent, "CS2_200");
+            if (bounce) target.TakeDamageTrigger += _ => Generic.ReturnToHandBlock(p.Opponent, target);
+            f.Ready("poison-reaction"); f.Session.Packets.Clear();
+            new DamageTask(1, EntityType.OP_MINIONS).Process(f.Game, p, source, null); f.Flush();
+            var rows = PacketRows(f);
+            int poison = rows.FindIndex(r => r.HasMetaData && (int)r.MetaData.Type == 22 && r.MetaData.Info.Contains(target.Id));
+            int reaction = rows.FindIndex(r => bounce
+                ? r.HasTagChange && r.TagChange.Entity == target.Id && r.TagChange.Tag == (int)GameTag.ZONE && r.TagChange.Value == (int)Zone.HAND
+                : r.HasPowerStart && r.PowerStart.Source == target.Id);
+            Check(poison >= 0 && reaction > poison + 2 && !rows.Skip(reaction + 1).Any(r => r.HasTagChange
+                && r.TagChange.Entity == target.Id && r.TagChange.Tag == (int)GameTag.TO_BE_DESTROYED && r.TagChange.Value == 1), "poison before reaction, no stale destroy after bounce");
+        }
+        Console.WriteLine("PASS serialized Poisonous mutual combat, cleave, Acolyte draw and bounce ordering");
+    }
+    private static void PoisonousWaves()
+    {
+        foreach (bool lifesteal in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, "CORE_NEW1_020");
+            new AddEnchantmentTask("CORE_EDR_002e", EntityType.TARGET).Process(f.Game, p, source, source);
+            source.HasLifeSteal = lifesteal; p.Hero.Damage = 10;
+            var friendly = f.Summon(p, "CS2_182");
+            var shield = f.Summon(p.Opponent, "CS2_200"); shield.HasDivineShield = true;
+            var lethal = f.Summon(p.Opponent, "CS2_231");
+            var coin = Generic.DrawCard(p, Cards.FromId("GAME_005"));
+            f.Ready("poisonous-wave-" + lifesteal); f.Session.Packets.Clear();
+            f.Act(PlayCardTask.Any(p, coin));
+            var rows = f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+                var history = new PegasusGame.PowerHistory();
+                using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+                history.Deserialize(stream); return history.List;
+            }).ToList();
+            int poison = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363);
+            var victims = new[] { source.Id, friendly.Id, lethal.Id };
+            Check(poison >= 0 && rows.Count(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) == 4
+                && rows.FindLastIndex(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) < poison
+                && rows.FindLastIndex(r => r.HasTagChange && r.TagChange.Tag == (int)GameTag.DAMAGE
+                    && r.TagChange.Value > 0 && victims.Contains(r.TagChange.Entity)) < poison,
+                "serialized wave has all damage before first poison");
+            Check(rows.Count(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363) == victims.Length,
+                "serialized wave has exactly one poison per eligible minion, none for shield");
+            for (int i = 0; i < victims.Length; i++)
+            {
+                var block = rows[poison + i * 5];
+                Check(block.HasPowerStart && block.PowerStart.Type == HistoryBlock.Type.TRIGGER
+                    && block.PowerStart.Source == source.Id && block.PowerStart.EffectIndex == -1
+                    && block.PowerStart.TriggerKeyword == 363
+                    && rows[poison + i * 5 + 1].MetaData.Info.SequenceEqual(new[] { victims[i] })
+                    && (int)rows[poison + i * 5 + 2].MetaData.Type == 22
+                    && rows[poison + i * 5 + 3].TagChange.Entity == victims[i]
+                    && rows[poison + i * 5 + 3].TagChange.Tag == (int)GameTag.TO_BE_DESTROYED
+                    && rows[poison + i * 5 + 3].TagChange.Value == 1
+                    && rows[poison + i * 5 + 4].HasPowerEnd,
+                    "serialized poison frames consecutive in victim order with unchanged content");
+            }
+            int deaths = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.Type == HistoryBlock.Type.DEATHS);
+            Check(deaths > poison + victims.Length * 5 && rows.Count(r => r.HasPowerStart && r.PowerStart.Type == HistoryBlock.Type.DEATHS) == 1,
+                "serialized wave shares one DEATHS pass after poison");
+            if (lifesteal)
+            {
+                int heal = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == (int)GameTag.LIFESTEAL);
+                Check(heal >= poison + victims.Length * 5 && heal < deaths && p.Hero.Damage == 7,
+                    "serialized collected Lifesteal follows poison before deaths");
+            }
+            Check(shield.Zone.Type == Zone.PLAY && shield.Damage == 0 && !shield.HasDivineShield
+                && new[] { source, friendly, lethal }.All(m => m.Zone.Type == Zone.GRAVEYARD), "serialized wave retains engine results");
+            f.Session.History.Finish();
+            Check(f.Session.History.Findings.All(f => f.Rule == "SPLIT_EFFECT_BLOCK"),
+                "Poisonous wave checker clean: " + string.Join(";", f.Session.History.Findings.Select(f => f.Rule + " " + f.Detail)));
+            HistoryShapeReport.Add(f.Session.History);
+        }
+        TriggerHitsAndPoisonous();
+        Console.WriteLine("PASS history-shape Poisonous waves: damage, consecutive poison, collected Lifesteal, one DEATHS; shield excluded");
     }
     private static void TriggerHitsAndPoisonous()
     {
@@ -1661,5 +1811,5 @@ internal static partial class HistoryShapeProof
         }
     }
 
-    internal static void Run() { FullEntityRegistration(); ConditionalDeathrattle(); FutureFullMetadata(); DebtShapes(); NarrowBaselineExemptions(); SaturatedDamage(); B14Presentation(); SpellVfxTargets(); SplitKeywordBlocksAreIndependent(); SplitAcrossKeywordWrappers(); SplitBaselineShapes(); SplitDevouringPlagueRegression(); SplitDistinctActivations(); SplitEffectBlocks(); DisabledHistoryHooks(); DisabledRecorderDoesNotEnumerateTargets(); CustomResolvedHits(); TriggerHitsAndPoisonous(); NestedTriggerDamageDuringCombat(); HeroDamageProvenance(); ReviewerRegressions(); Synthetic(); HookBoundaries(); EmissionRanges(); Focused(); }
+    internal static void Run() { FullEntityRegistration(); ConditionalDeathrattle(); FutureFullMetadata(); DebtShapes(); NarrowBaselineExemptions(); SaturatedDamage(); B14Presentation(); SpellVfxTargets(); SplitKeywordBlocksAreIndependent(); SplitAcrossKeywordWrappers(); SplitBaselineShapes(); SplitDevouringPlagueRegression(); SplitDistinctActivations(); SplitEffectBlocks(); DisabledHistoryHooks(); DisabledRecorderDoesNotEnumerateTargets(); CustomResolvedHits(); PoisonousWaves(); NestedTriggerDamageDuringCombat(); HeroDamageProvenance(); ReviewerRegressions(); Synthetic(); HookBoundaries(); EmissionRanges(); Focused(); }
 }

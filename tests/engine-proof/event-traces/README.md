@@ -156,3 +156,12 @@ traces, exact RNG and per-history diffs remain under ignored
 | 19 | `5b43d10f5c2d` | `79615719c06b` |
 | 42 | `84f818c3a8b8` | `e8491c89b61c` |
 | 123 | `4c82b65ffcbf` | `07ece0a50150` |
+
+On 2026-11-14, the overdraw tile fix (#91) renewed only the seed 123 `history=`
+hash (`63155f472219` to `4015876433c6`). Its live game overdraws one card, and
+the only new history entry is retail's `META_DATA BURNED_CARD` (type 14) naming
+the burned card at the end of the burn's block, after the reveal. Canonical
+histories plus final states, dumped from `main` and from the change for all four
+games and their clones, are byte-identical except for that one added line.
+Seeds 1, 19 and 42 and all four clone histories are unchanged from `main`, all
+callback lines match, and the archived `clone=` hashes remain unchanged.

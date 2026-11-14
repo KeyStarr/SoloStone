@@ -353,6 +353,7 @@ namespace SabberStoneCore.Kettle
             internal PowerHistoryBlockStart Start;
             internal readonly List<int> Targets = new List<int>();
             internal readonly HashSet<int> SelectedTargets = new HashSet<int>();
+            internal readonly List<int> BurnedCards = new List<int>();
             internal bool HasEffects;
             internal bool Appendages;
         }
@@ -418,14 +419,66 @@ namespace SabberStoneCore.Kettle
                 TargetRange(new[] { victim }, resolved: true);
         }
 
+        [NonSerialized] private int _damageDepth;
+        [NonSerialized] private (int Depth, List<IPowerHistoryEntry> Entries)? _damageWave;
+        [NonSerialized] private List<IPowerHistoryEntry> _poisonCapture;
+
+        [NonSerialized] private int _damageReactionDepth;
+
+        internal IDisposable DamageReaction()
+        {
+            if (!_damageWave.HasValue) return null;
+            _damageReactionDepth++;
+            return new EffectSourceScope(() => _damageReactionDepth--);
+        }
+
+        private void FlushPoisonous()
+        {
+            if (!_damageWave.HasValue || _damageWave.Value.Entries.Count == 0) return;
+            var entries = _damageWave.Value.Entries.ToArray();
+            _damageWave.Value.Entries.Clear();
+            foreach (var entry in entries) Add(entry);
+        }
+
+        internal IDisposable DamageWave(int targets)
+        {
+            if (!_enabled || targets < 2) return null;
+            FlushPoisonous();
+            var previous = _damageWave;
+            // A wave opened inside a reaction batches its own hits; the outer reaction depth returns on close.
+            int outerReactions = _damageReactionDepth;
+            _damageReactionDepth = 0;
+            var entries = new List<IPowerHistoryEntry>();
+            _damageWave = (_damageDepth, entries);
+            return new EffectSourceScope(() => {
+                _damageWave = previous;
+                _damageReactionDepth = outerReactions;
+                // hslog-tests/25770_inferrable_player.power.log:1542-1673: all hits, then poison, then collected Lifesteal.
+                foreach (var entry in entries) Add(entry);
+            });
+        }
+
+        internal IDisposable DamageHit()
+        {
+            if (!_damageWave.HasValue) return null;
+            _damageDepth++;
+            return new EffectSourceScope(() => _damageDepth--);
+        }
+
         internal IDisposable PoisonousSource(IPlayable source, ICharacter victim)
         {
+            // Nested damage callbacks/activations own their poison, even when they use the same source and block.
+            bool defer = _damageWave.HasValue && _damageWave.Value.Depth + 1 == _damageDepth;
+            if (defer) _poisonCapture = _damageWave.Value.Entries;
             // Native notes 5.2-5.3: keyword 363 selects actor spell 76; -1 suppresses the card's own trigger effect.
             Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, source.Id, "", -1, 0,
                 effectIndex: -1, triggerKeyword: (int)GameTag.POISONOUS));
             Add(new PowerHistoryMetaData { Type = MetaDataType.TARGET, Data = 0, Info = new List<int> { victim.Id } });
             Add(new PowerHistoryMetaData { Type = MetaDataType.POISONOUS, Data = 0, Info = new List<int> { victim.Id } });
-            return new EffectSourceScope(this);
+            return defer ? new EffectSourceScope(() => {
+                Add(PowerHistoryBuilder.BlockEnd());
+                _poisonCapture = null;
+            }) : new EffectSourceScope(this);
         }
 
         // Inline effects and Discover continuations can resolve without their own queued block.
@@ -462,8 +515,14 @@ namespace SabberStoneCore.Kettle
         private sealed class EffectSourceScope : IDisposable
         {
             private readonly PowerHistory _history;
+            [NonSerialized] private readonly Action _dispose;
             internal EffectSourceScope(PowerHistory history) { _history = history; }
-            public void Dispose() => _history.Add(PowerHistoryBuilder.BlockEnd());
+            internal EffectSourceScope(Action dispose) { _dispose = dispose; }
+            public void Dispose()
+            {
+                if (_dispose != null) _dispose();
+                else _history.Add(PowerHistoryBuilder.BlockEnd());
+            }
         }
 
         internal IDisposable HandBuff(IEntity target) => _enabled && target.Zone?.Type == Zone.HAND
@@ -829,6 +888,7 @@ namespace SabberStoneCore.Kettle
                 } };
                 copy.Targets.AddRange(frame.Targets);
                 copy.SelectedTargets.UnionWith(frame.SelectedTargets);
+                copy.BurnedCards.AddRange(frame.BurnedCards);
                 _blocks.Push(copy);
             }
         }
@@ -887,10 +947,31 @@ namespace SabberStoneCore.Kettle
             catch (Exception) { }
         }
 
+        internal void BurnedCard(int entity)
+        {
+            if (!_enabled) return;
+            if (_blocks.Count == 0)
+                Add(new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = new List<int> { entity } });
+            else _blocks.Peek().BurnedCards.Add(entity);
+        }
+
+        public void FlushBurnedCards()
+        {
+            // hslog-tests/34104_subspell.power.log:30226,33325: one range inside its enclosing block.
+            // Ancestor ranges wait for their own end; appending here would attribute them to the child.
+            if (_blocks.Count == 0 || _blocks.Peek().BurnedCards.Count == 0) return;
+            var ids = _blocks.Peek().BurnedCards.ToList();
+            _blocks.Peek().BurnedCards.Clear();
+            Add(new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = ids });
+        }
+
 		public void Add(IPowerHistoryEntry entry)
 		{
+            if (_poisonCapture != null) { _poisonCapture.Add(entry); return; }
+            if (_damageWave.HasValue && (_damageReactionDepth > 0 || _damageDepth <= _damageWave.Value.Depth)) FlushPoisonous();
             ObservePublicHand(entry);
 			if (!_enabled) return;
+            if (entry is PowerHistoryBlockEnd) FlushBurnedCards();
             if (_drawCounter != null) StampRandomDraws(entry);
             if (entry is PowerHistoryBlockStart start)
             {
@@ -930,7 +1011,7 @@ namespace SabberStoneCore.Kettle
 			Last.Add(entry);
 		}
 
-        // The enclosing block's effect flag before a child opens (BlockFrame stays snapshot-layout stable).
+        // The enclosing block's effect flag before a child opens.
         internal bool CurrentBlockHasEffects => _blocks.Count > 0 && _blocks.Peek().HasEffects;
 
         // Withdraws the innermost block when nothing was recorded since its start, as if it had never opened.

@@ -202,7 +202,10 @@ internal static class ShatterRulesProof
                 p.DiscardedEntities.Count == discarded && draws == (mode == "generated" ? 0 : 1) &&
                 p.NumCardsDrawnThisTurn == drawn + (mode == "generated" ? 0 : 1),
                 "Unpinned_OneSlotBurn: ordinary overdraw has no hand/death/discard facts; one DRAW per deck draw, none for generated halves: " + mode);
+            g.PowerHistory.FlushBurnedCards();
             var history = g.PowerHistory.Last;
+            Check(history.OfType<PowerHistoryMetaData>().Single(m => m.Type == MetaDataType.BURNED_CARD).Info.SequenceEqual(new[] { burned.Id }),
+                "Shatter/ordinary overflow has one burned-card range: " + mode);
             int reveal = history.FindIndex(e => e is PowerHistoryShowEntity show && show.Entity.Id == burned.Id);
             Check(reveal >= 0 && history[reveal] is PowerHistoryShowEntity shown &&
                 shown.Entity.Name == burned.Card.Id && shown.Entity.Tags[GameTag.ZONE] == (int)Zone.DECK &&

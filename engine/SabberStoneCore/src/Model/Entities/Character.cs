@@ -344,6 +344,7 @@ namespace SabberStoneCore.Model.Entities
 		public int TakeDamage(IPlayable source, int damage, bool combat = false, bool outgoingApplied = false)
 		{
 			Game game = Game;
+			using var damageHit = _history ? game.PowerHistory.DamageHit() : null;
 			var hero = this as Hero;
             bool lightcaller = combat && source is Hero attackingHero && attackingHero.Weapon?.Card.Id == "BE_000"
                 || source is Weapon weaponSource && weaponSource.Card.Id == "BE_000";
@@ -395,6 +396,7 @@ namespace SabberStoneCore.Model.Entities
 			// Predamage triggers (e.g. Ice Block)
 			if (Events.HasSubscribers<PreDamageEvent>())
 			{
+                using var preReactionHistory = _history ? game.PowerHistory.DamageReaction() : null;
 				Events.Raise(new PreDamageEvent(this));
 				game.ProcessTasks();
 				amount = game.CurrentEventData.EventNumber;
@@ -482,6 +484,7 @@ namespace SabberStoneCore.Model.Entities
                     combat?HistoryDeathCause.Combat:HistoryDeathCause.SpellOrEffect,historyDamageSequence);
 			if (fatalCandidate) Actions.DeathContextRules.RecordFatal(minion, source, combat);
 
+            using var reactionHistory = _history ? game.PowerHistory.DamageReaction() : null;
             Actions.SwapRules.DamageResolved(this, dealt);
             Actions.NativeTailRules.DamageResolved(this, dealt);
             Actions.StatDamageRules.Resolved(source, dealt);

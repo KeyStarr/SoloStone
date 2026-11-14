@@ -258,6 +258,9 @@ namespace SabberStoneCore.Actions
 				var cleaveTargets = CombatRules.CleaveTargets(source, target);
                 int excess = DeathContextRules.AllocateExcess(source, target, sourceAttack);
 
+                // hslog-tests/139963_battlegrounds_perfect_game.power.log:99182-99240: both hits precede poison.
+                using (game.History ? game.PowerHistory.DamageWave(2 + cleaveTargets.Length) : null)
+                {
 				int targetRealDamage = target.TakeDamage(source, sourceAttack, combat: true);
 				bool targetDamaged = targetRealDamage > 0;
 
@@ -288,6 +291,7 @@ namespace SabberStoneCore.Actions
 
                 foreach (var neighbor in cleaveTargets)
                     neighbor.TakeDamage(source, sourceAttack);
+                }
 
 				if (minion != null && minion.HasStealth)
 				{

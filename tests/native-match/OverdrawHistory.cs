@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using PegasusGame;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enums;
@@ -18,7 +19,30 @@ internal static partial class Program
     // clears REVEALED, so a card revealed earlier and drawn later is not shown face-up.
     private static void OverdrawHistory()
     {
+        var openBurn = new PegasusGame.PowerHistory { List = new() {
+            new() { PowerStart = new() { Source = 1 } },
+            new() { MetaData = new() { Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Info = new() { 11 } } },
+            new() { PowerStart = new() { Source = 2 } }
+        } };
+        typeof(NativeMatch).GetMethod("NormalizeBurnedCards", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { openBurn });
+        Check(openBurn.List.Count == 3 && openBurn.List[1].HasMetaData && openBurn.List[2].PowerStart.Source == 2,
+            "packet flush keeps ancestor burn before unfinished child");
         HiddenCardShapeHistory();
+        foreach (bool bot in new[] { false, true })
+        {
+            var (match, capture) = AnimationMatch(bot); var owner = match.Game.CurrentPlayer;
+            while (owner.HandZone.Count < 9) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            var parent = EngineEntity.FromCard(owner, Cards.FromId("CATA_489"), zone: owner.DeckZone);
+            FlushFieldHistory(match); int cursor = capture.Packets.Count;
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner, parent);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd()); FlushFieldHistory(match);
+            var rows = History(capture, cursor);
+            var burned = match.Game.IdEntityDic.Values.Single(e => e.Card.Id == "CATA_489t2" && e.Zone == owner.GraveyardZone);
+            Check(rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).MetaData.Info.SequenceEqual(new[] { burned.Id }),
+                "Shatter overflow names burned right half seat=" + bot);
+            Check(owner.HandZone.Count == 10, "Shatter overflow preserves hand size");
+        }
         var failures = new List<string>();
         int cases = 0;
         foreach (bool bot in new[] { false, true })
@@ -38,6 +62,7 @@ internal static partial class Program
             FlushFieldHistory(match);
             var data = History(capture, cursor);
             string name = $"overdraw-{bot}-{retained}-{id}";
+            CheckBurnedCards(data, 1, name);
             DumpDrawHistory(name, capture, cursor);
             var show = data.FirstOrDefault(r => r.HasShowEntity && r.ShowEntity.Name == id
                 && (!retained || r.ShowEntity.Entity != card.Id));
@@ -58,6 +83,80 @@ internal static partial class Program
             }
             Check(owner.HandZone.Count == 10 && owner.DeckZone.Count == deck - 1
                 && (retained ? card.Zone == owner.SetasideZone : card.Zone == owner.GraveyardZone), name + " authoritative destination/counts");
+            capture.SerializeAll(); cases++;
+        }
+        foreach (bool bot in new[] { false, true })
+        foreach (bool retained in new[] { false, true })
+        foreach (int hand in new[] { 9, 10 })
+        {
+            var (match, capture) = AnimationMatch(bot);
+            var owner = match.Game.CurrentPlayer;
+            while (owner.HandZone.Count < hand) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            if (retained) SabberStoneCore.Model.Entities.Enchantment.GetInstance(owner, owner.Hero, owner, Cards.FromId("JAIL_509e"));
+            var cards = new[] { "CS2_182", "CS2_029", "CS2_106" }.Select(id =>
+                EngineEntity.FromCard(owner, Cards.FromId(id), zone: owner.DeckZone)).ToArray();
+            FlushFieldHistory(match);
+            int cursor = capture.Packets.Count;
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            foreach (var card in cards) Generic.Draw(owner, card);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            FlushFieldHistory(match);
+            var rows = History(capture, cursor);
+            string name = $"overdraw-three-{bot}-{retained}-{hand}";
+            CheckBurnedCards(rows, hand == 9 ? 2 : 3, name);
+            var burned = rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).MetaData.Info;
+            Check(retained ? !burned.Intersect(cards.Select(c => c.Id)).Any()
+                : burned.SequenceEqual(cards.Skip(10 - hand).Select(c => c.Id)), name + " metadata uses public burn IDs only");
+            Check(owner.HandZone.Count == 10 && cards.Skip(10 - hand).All(c =>
+                (retained ? c.Zone == owner.SetasideZone : c.Zone == owner.GraveyardZone)), name + " destinations unchanged");
+            capture.SerializeAll(); cases++;
+        }
+        foreach (bool bot in new[] { false, true })
+        foreach (bool retained in new[] { false, true })
+        {
+            var (match, capture) = AnimationMatch(bot);
+            var owner = match.Game.CurrentPlayer;
+            while (!owner.HandZone.IsFull) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            if (retained) SabberStoneCore.Model.Entities.Enchantment.GetInstance(owner, owner.Hero, owner, Cards.FromId("JAIL_509e"));
+            FlushFieldHistory(match);
+            int cursor = capture.Packets.Count;
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            Generic.Draw(owner);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            FlushFieldHistory(match);
+            var rows = History(capture, cursor);
+            var ids = rows.Where(r => r.HasShowEntity && SnapshotTag(r, GameTag.ZONE) == (int)EngineZone.GRAVEYARD)
+                .Select(r => r.ShowEntity.Entity).ToArray();
+            var ranges = rows.Where(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).ToArray();
+            Check(ids.Length == 4 && ranges.Length == 3 && ranges[0].MetaData.Info.SequenceEqual(new[] { ids[1] })
+                && ranges[1].MetaData.Info.SequenceEqual(new[] { ids[0], ids[2] })
+                && ranges[2].MetaData.Info.SequenceEqual(new[] { ids[3] }), $"burn ranges respect nested/sibling blocks seat={bot} retained={retained}");
+            capture.SerializeAll(); cases++;
+        }
+        foreach (bool bot in new[] { false, true })
+        foreach (string shape in new[] { "draw", "fatigue", "mill", "generated" })
+        {
+            var (match, capture) = AnimationMatch(bot);
+            var owner = match.Game.CurrentPlayer;
+            if (shape != "draw") while (!owner.HandZone.IsFull) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            if (shape == "fatigue") foreach (var c in owner.DeckZone.ToArray()) owner.SetasideZone.Add(owner.DeckZone.Remove(c));
+            FlushFieldHistory(match);
+            int cursor = capture.Packets.Count;
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            if (shape == "mill") owner.GraveyardZone.Add(owner.DeckZone.Remove(owner.DeckZone[0]));
+            else if (shape == "generated") Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            else Generic.Draw(owner);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            FlushFieldHistory(match);
+            Check(!History(capture, cursor).Any(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD),
+                shape + " is not overdraw metadata, seat=" + bot);
             capture.SerializeAll(); cases++;
         }
         foreach (bool bot in new[] { false, true })
@@ -84,7 +183,19 @@ internal static partial class Program
             cases++;
         }
         Check(failures.Count == 0, string.Join("\n", failures));
-        Console.WriteLine($"PASS overdraw/reveal history: {cases} cases; both players, ordinary/retained burns, minion/spell/weapon/offboard deathrattle, later private draw");
+        Console.WriteLine($"PASS overdraw/reveal history: {cases} cases; both players, ordinary/retained burns, grouped multi-burn metadata, draw/fatigue/mill/generated negatives, later private draw");
+    }
+    private static void CheckBurnedCards(List<PowerHistoryData> rows, int count, string name)
+    {
+        var burns = rows.Where(r => r.HasShowEntity && SnapshotTag(r, GameTag.ZONE) == (int)EngineZone.GRAVEYARD).ToArray();
+        var metadata = rows.Where(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).ToArray();
+        Check(burns.Length == count && metadata.Length == 1, name + " one metadata range per burn run");
+        var meta = metadata.Single(); int at = rows.IndexOf(meta);
+        Check(meta.MetaData.Data == 0 && meta.MetaData.Info.SequenceEqual(burns.Select(r => r.ShowEntity.Entity)),
+            name + " Data=0, Info names every public burned actor in order");
+        Check(burns.All(r => rows.IndexOf(r) < at)
+            && rows.Take(at).Count(r => r.HasPowerStart) > rows.Take(at).Count(r => r.HasPowerEnd)
+            && rows.Skip(at + 1).Any(r => r.HasPowerEnd), name + " metadata follows GRAVEYARD SHOWs inside resolving block");
     }
     private static void HiddenCardShapeHistory()
     {

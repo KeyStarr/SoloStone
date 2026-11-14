@@ -96,6 +96,10 @@ namespace SabberStoneCore.Actions
 
         internal static void CaptureTags(IPlayable source, Dictionary<GameTag, int> tags)
         {
+            // Retail zilliax_deluxe_3000_friendly.195635.hsreplay.xml:11741-11763,11808-11828 freezes parts in SHOW/FULL.
+            foreach (var tag in new[] { GameTag.MODULAR_ENTITY_PART_1, GameTag.MODULAR_ENTITY_PART_2,
+                AssembleRules.FirstHalf, AssembleRules.SecondHalf })
+                if (source.Card[tag] != 0 && !tags.ContainsKey(tag)) tags[tag] = source[tag];
             bool watfin = source.Game.IdEntityDic.TryGetValue(source[GameTag.CREATOR],out var creator) && creator.Card.Id == "JAIL_EVENT_100";
             if (!watfin && source.Card.Id != "CATA_470t1" && source.Card.Id != "JAIL_504t3p" && source.Card.Id != "ICC_828t" && source.Card.Id != "JAIL_EVENT_100t") return;
             if (!watfin && source.Card[GameTag.MODULAR_ENTITY_PART_1] == 0) return;

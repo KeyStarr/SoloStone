@@ -48,6 +48,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                             }
                             break;
                         case 2:
+                            using (g.History ? g.PowerHistory.DamageWave(c.Opponent.BoardZone.Count) : null)
                             using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.DamageGroup,(IPlayable)s) : null)
                                 foreach (var enemy in c.Opponent.BoardZone.GetAll()) enemy.TakeDamage((IPlayable)s,4);
                             break;

@@ -97,6 +97,10 @@ internal static class LocalNativeText
         return english;
     }
 
+    // A modular builder's own text is only its two part slots ("{0} {1}", "{0}\n{1}"); counters like Jade's "{0}/{1}" keep text.
+    private static bool IsBuilderTemplate(string text) => text != null
+        && System.Text.RegularExpressions.Regex.IsMatch(text.Trim(), @"^\{0\}\s+\{1\}$");
+
     internal static bool TryGetOverride(bool staged, string cardId, Func<string, string> defaultVariant,
         string locale, out string text)
     {
@@ -104,6 +108,12 @@ internal static class LocalNativeText
         if (!staged || string.IsNullOrEmpty(cardId) || defaultVariant == null) return false;
         try
         {
+            // Native modular builders compose text; base templates lack parts until assembly.
+            string engineId = EngineIdFor(cardId);
+            var definition = engineId == null ? null : Cards.FromId(engineId);
+            if (definition != null && (definition.Tags.ContainsKey(SabberStoneCore.Enums.GameTag.MODULAR_ENTITY_PART_1)
+                || definition.Tags.ContainsKey(SabberStoneCore.Enums.GameTag.MODULAR_ENTITY_PART_2)
+                || IsBuilderTemplate(definition.Text))) return false;
             string rawText = RawFor(cardId, locale);
             if (string.IsNullOrEmpty(rawText)) return false;
             text = NormalizeRawText(defaultVariant(rawText));

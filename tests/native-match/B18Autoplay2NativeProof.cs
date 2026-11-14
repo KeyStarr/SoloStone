@@ -14,7 +14,15 @@ internal static partial class Program
     [GroupProof("native-b18-t-autoplay2", ProofKind.Native)]
     private static void B18Autoplay2Native()
     {
+        foreach (string id in new[] { "ICC_828t", "CFM_621t", "CFM_621t14", "CFM_621t15", "LOOTA_BOSS_50t", "TLC_100t1", "TLC_100t2", "TLC_100t3" })
+        {
+            var definition = Cards.FromId(id);
+            Check(definition.Text.Contains("{0}") && definition.Text.Contains("{1}"), id + " defines modular text template");
+            Check(!LocalNativeText.TryGetOverride(true, id, text => text, out _), id + " client modular builder owns composed text");
+        }
         foreach (bool opponent in new[] { false, true })
+        foreach (int tier in new[] { 1, 2, 3 })
+        foreach (bool reverse in new[] { false, true })
         {
             var game = new SabberStoneCore.Model.Game(new GameConfig {
                 RandomSeed = 17, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
@@ -29,16 +37,30 @@ internal static partial class Program
             typeof(NativeMatch).GetProperty(nameof(NativeMatch.Game)).SetValue(match, game);
             void Flush() { FlushHistory(match); game.PowerHistory.Last.Clear(); }
             Flush();
-            var card = CompositeLocationRules.Compose(Cards.FromId("TLC_100t2"), Cards.FromId("TLC_100t23"), Cards.FromId("TLC_100t26"));
+            string body = "TLC_100t" + tier;
+            var first = Cards.FromId(body + (reverse ? "6" : "3"));
+            var second = Cards.FromId(body + (reverse ? "3" : "6"));
+            Check(!LocalNativeText.TryGetOverride(true, body, text => text, out _), "client builder owns composed location text");
+            var card = CompositeLocationRules.Compose(Cards.FromId(body), first, second);
             var location = (BoardObject)EngineEntity.FromCard(p, card, zone: p.HandZone);
             Flush();
+            var initial = NativeHistory(capture).Where(row => row.HasFullEntity && row.FullEntity.Entity == location.Id
+                || row.HasShowEntity && row.ShowEntity.Entity == location.Id).ToArray();
+            Check(initial.Length > 0, "crafted location has initial snapshot");
             if (opponent)
                 Check(NativeHistory(capture).SelectMany(row => new[] { row.FullEntity, row.ShowEntity, row.ChangeEntity })
                     .Where(e => e != null && e.Entity == location.Id).All(e => string.IsNullOrEmpty(e.Name)
                         && e.Tags.All(t => t.Name != (int)GameTag.MODULAR_ENTITY_PART_1 && t.Name != (int)GameTag.MODULAR_ENTITY_PART_2)), "opponent cannot inspect hidden recipe");
+            else
+                Check(SnapshotTag(initial[0], GameTag.MODULAR_ENTITY_PART_1) == first.AssetId
+                    && SnapshotTag(initial[0], GameTag.MODULAR_ENTITY_PART_2) == second.AssetId, "first hand snapshot freezes ordered parts");
             Check(game.Process(PlayCardTask.Any(p, location)), "play composed location"); Flush();
+            var revealed = NativeHistory(capture).First(row => row.HasShowEntity && row.ShowEntity.Entity == location.Id
+                && !string.IsNullOrEmpty(row.ShowEntity.Name));
+            Check(SnapshotTag(revealed, GameTag.MODULAR_ENTITY_PART_1) == first.AssetId
+                && SnapshotTag(revealed, GameTag.MODULAR_ENTITY_PART_2) == second.AssetId, "first play SHOW freezes ordered parts");
             var visible = match.SnapshotVisibleTransportTags(location);
-            Check(visible[(int)GameTag.MODULAR_ENTITY_PART_1] == 117780 && visible[(int)GameTag.MODULAR_ENTITY_PART_2] == 117808, "retail modular text receives ordered dbfIds");
+            Check(visible[(int)GameTag.MODULAR_ENTITY_PART_1] == first.AssetId && visible[(int)GameTag.MODULAR_ENTITY_PART_2] == second.AssetId, "retail modular text receives ordered dbfIds");
             var stone = (Weapon)EngineEntity.FromCard(p, Cards.FromId("TLC_460t"), zone: p.SetasideZone);
             AutoPlayRules.Play(stone, p.Hero);
             Check(game.Process(new ActivateLocationTask(p, location)), "Runic opens native choice");
@@ -46,7 +68,7 @@ internal static partial class Program
             var decision = game.GetPendingDecisions().Single();
             Check(game.TryAnswer(new DecisionAnswer(decision.Id, p.Id, new[] { offers[0] }), out var error), "native answer " + error);
             Flush();
-            Check(p.Choice == null && !game.Resolution.HasSuspendedEffect && location.Durability == 1 && p.Hero.Armor >= 6, "composite plus Stone decisions cannot stall");
+            Check(p.Choice == null && !game.Resolution.HasSuspendedEffect && location.Durability == 1 && p.Hero.Armor >= (tier == 1 ? 3 : tier == 2 ? 6 : 12), "composite plus Stone decisions cannot stall");
             var freshStone = (Weapon)EngineEntity.FromCard(p, Cards.FromId("TLC_460t"), zone: p.SetasideZone);
             AutoPlayRules.Play(freshStone, p.Hero);
             var source = EngineEntity.FromCard(p, Cards.FromId("CS2_023"), zone: p.SetasideZone);

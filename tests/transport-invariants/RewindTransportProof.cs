@@ -1009,6 +1009,9 @@ internal static class RewindTransportProof
         var source = Generic.DrawCard(player, Cards.FromId(card));
         game.Player1[HeraldRules.Profile] = (int)CardClass.WARRIOR;
         Generic.DrawCard(game.Player1, Cards.FromId("CATA_525"));
+        var sleeper = (SabberStoneCore.Model.Entities.Minion)Entity.FromCard(game.Player1, Cards.FromId("TIME_046"));
+        Generic.SummonBlock(game, sleeper, -1, null); sleeper.HasTaunt = true;
+        Check(sleeper.IsDormant, "reset fixture keeps dormant board actor");
         // This retained actor checks identity reversal and non-priority explicit-zero clears.
         Generic.SummonBlock(game, (SabberStoneCore.Model.Entities.Minion)Entity.FromCard(game.Player1, Cards.FromId("CS3_007")), -1, null);
         var retained = Generic.DrawCard(game.Player1, Cards.FromId("CS2_182"));
@@ -1131,7 +1134,9 @@ internal static class RewindTransportProof
                 int end = history.FindIndex(reset, e => e.HasPowerEnd);
                 var block = history.Skip(reset + 1).Take(end - reset - 1).ToArray();
                 Check(block.Count(e => e.HasFullEntity) == expected.IdEntityDic.Count, "all restored entities in reset");
-                Check(block.TakeWhile(e => e.HasFullEntity).Count() == expected.IdEntityDic.Count, "FULLs precede corrections");
+                Check(block.TakeWhile(e => e.HasFullEntity).Count() == expected.IdEntityDic.Count, "FULLs precede corrections, including dormant keyword snapshot");
+                Check(block.Single(e => e.HasFullEntity && e.FullEntity.Entity == sleeper.Id).FullEntity.Tags
+                    .Single(t => t.Name == (int)GameTag.TAUNT).Value == 0, "reset dormant FULL masks Taunt without extra rows");
                 Check(history.Skip(end + 1).Any(e => e.HasPowerStart && (int)e.PowerStart.Type == (int)BlockType.PLAY), "replay PLAY follows reset");
                 if (attempt == 0)
                 {

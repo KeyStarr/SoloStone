@@ -302,6 +302,20 @@ public sealed class NativeMatch
     private readonly Dictionary<int, int> historicalControllers = new Dictionary<int, int>();
     private readonly Dictionary<int, int> historicalPositions = new Dictionary<int, int>();
     private readonly Dictionary<int, EngineZone> historicalZones = new Dictionary<int, EngineZone>();
+    // Builder caches stay logical; only the final packet boundary masks sleeping actors.
+    private readonly Dictionary<int, Dictionary<int, int>> dormantVisualTags = new Dictionary<int, Dictionary<int, int>>();
+    internal static bool IsDormantVisualTag(GameTag tag) => tag == GameTag.TAUNT || tag == GameTag.LIFESTEAL
+        || tag == GameTag.DIVINE_SHIELD || tag == GameTag.POISONOUS || tag == GameTag.STEALTH
+        || tag == GameTag.WINDFURY || tag == GameTag.MEGA_WINDFURY || tag == GameTag.REBORN
+        || tag == GameTag.DEATHRATTLE || tag == GameTag.TRIGGER_VISUAL || (int)tag == 1211
+        || tag == GameTag.RUSH || tag == GameTag.CHARGE || tag == GameTag.AURA;
+    private static bool IsDormantTransportTag(int tag) => IsDormantVisualTag((GameTag)tag)
+        || tag == (int)GameTag.CARDTYPE || tag == (int)GameTag.ZONE || tag == (int)GameTag.CONTROLLER || tag == (int)GameTag.DORMANT;
+
+    private static bool DormantBoardTags(IReadOnlyDictionary<int, int> tags) =>
+        tags.TryGetValue((int)GameTag.CARDTYPE, out int type) && type == (int)CardType.MINION
+        && tags.TryGetValue((int)GameTag.ZONE, out int zone) && zone == (int)EngineZone.PLAY
+        && tags.TryGetValue((int)GameTag.DORMANT, out int dormant) && dormant != 0;
     // Transport-only IDs descend from the positive limit; engine IDs ascend from one.
     private int nextDeckChoiceId = int.MaxValue;
 #if ENGINE_SOURCE
@@ -5234,6 +5248,8 @@ public sealed class NativeMatch
     {
         if (!StandardProofNative.RequiresLiveTag(TransportCardId(entity.Card.Id), tag)) return true;
         var zone = entity.Zone?.Type ?? EngineZone.INVALID;
+        if (entity is Minion sleeper && zone == EngineZone.PLAY && sleeper.IsDormant && IsDormantVisualTag((GameTag)tag))
+            return nativePresent && nativeValue == 0;
         int expected;
         if (!(entity is SabberStoneCore.Model.Entities.Enchantment) && (zone == EngineZone.HAND || zone == EngineZone.PLAY))
             expected = entity[(GameTag)tag];
@@ -5297,6 +5313,8 @@ public sealed class NativeMatch
 
     private IReadOnlyDictionary<int, int> AuditReturnReferences(Dictionary<int, int> tags)
     {
+        if (DormantBoardTags(tags))
+            foreach (int tag in tags.Keys.Where(tag => IsDormantVisualTag((GameTag)tag)).ToArray()) tags[tag] = 0;
 #if ENGINE_SOURCE
         foreach (int tag in tags.Keys.Where(ReturnEntityTag).ToArray()) tags[tag] = WireReturnReference(tag, tags[tag]);
 #endif
@@ -5732,13 +5750,84 @@ public sealed class NativeMatch
         NormalizeBoardTransit(packet);
         NormalizePublicIdentity(packet);
         NormalizeBurnTransitions(packet);
+        NormalizeBurnedCards(packet);
         // PowerProcessor.BuildTaskList: END as a packet's last row falls out of its switch, enqueues the list twice and
         // replays the prefab. Blocks stay open across choices, so any recipe can reach this; zero SLUSH_TIME is inert.
         if (packet.List.Count > 0 && packet.List[packet.List.Count - 1].HasSubSpellEnd)
             packet.List.Add(new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
                 Type = HistoryMeta.Type.SLUSH_TIME, Data = 0 } });
 #endif
+        NormalizeDormantVisuals(packet);
         if (packet.List.Count > 0) send(19, packet);
+    }
+
+    private void NormalizeDormantVisuals(NativePowerHistory packet)
+    {
+        // Retail hslog-tests/49534_cached_tag_for_dormant_change.power.log:26724-26728,36502-36510:
+        // TAUNT/AURA go to zero during Dormant and return after DORMANT=0; DEATHRATTLE:2002-2004,5290-5296.
+        var rows = packet.List;
+        for (int index = 0; index < rows.Count; index++)
+        {
+            var row = rows[index];
+            if (row.HasCreateGame || row.HasResetGame) dormantVisualTags.Clear();
+            if (row.HasTagChange && !IsDormantTransportTag(row.TagChange.Tag)) continue;
+            var snapshot = row.FullEntity ?? row.ShowEntity ?? row.ChangeEntity;
+            int id = snapshot != null ? snapshot.Entity : row.HasTagChange ? row.TagChange.Entity
+                : row.HasHideEntity ? row.HideEntity.Entity : 0;
+            if (id == 0) continue;
+            if (!dormantVisualTags.TryGetValue(id, out var tags))
+                dormantVisualTags[id] = tags = new Dictionary<int, int>();
+            bool board = tags.TryGetValue((int)GameTag.ZONE, out int previousZone) && previousZone == (int)EngineZone.PLAY;
+            bool sleeping = DormantBoardTags(tags);
+            if (snapshot != null)
+            {
+                // CHANGE has definition deltas, so keep location/owner but discard the old identity's sleep/keywords.
+                if (row.HasFullEntity) tags.Clear();
+                else if (row.HasChangeEntity)
+                    foreach (int tag in tags.Keys.Where(t => IsDormantVisualTag((GameTag)t) || t == (int)GameTag.DORMANT).ToArray()) tags.Remove(tag);
+                foreach (var tag in snapshot.Tags.Where(t => IsDormantTransportTag(t.Name))) tags[tag.Name] = tag.Value;
+            }
+            else if (row.HasTagChange) tags[row.TagChange.Tag] = row.TagChange.Value;
+            else if (row.HasHideEntity) tags[(int)GameTag.ZONE] = row.HideEntity.Zone;
+            bool dormant = DormantBoardTags(tags);
+            bool snapshotWake = sleeping && !dormant && snapshot != null
+                && tags.TryGetValue((int)GameTag.ZONE, out int zone) && zone == (int)EngineZone.PLAY
+                && tags.TryGetValue((int)GameTag.DORMANT, out int sleep) && sleep == 0;
+            if (dormant || snapshotWake)
+            {
+                if (snapshot != null)
+                {
+                    // Rewind can reuse a snapshot for FULL and CHANGE; preserve its logical tags and definition metadata.
+                    snapshot = new PegasusGame.PowerHistoryEntity { Entity = id, Name = snapshot.Name, DefTags = snapshot.DefTags,
+                        Tags = snapshot.Tags.Select(t => new NativeTag { Name = t.Name, Value = t.Value }).ToList() };
+                    if (row.HasFullEntity) row.FullEntity = snapshot;
+                    else if (row.HasShowEntity) row.ShowEntity = snapshot;
+                    else row.ChangeEntity = snapshot;
+                    foreach (var tag in snapshot.Tags.Where(t => IsDormantVisualTag((GameTag)t.Name))) tag.Value = 0;
+                }
+                else if (row.HasTagChange && IsDormantVisualTag((GameTag)row.TagChange.Tag)) row.TagChange.Value = 0;
+            }
+            // Restore only on an actual wake; zone exits/transforms/control transfers cannot replay a saved sleep cache.
+            bool wake = sleeping && !dormant && row.HasTagChange && row.TagChange.Tag == (int)GameTag.DORMANT
+                && row.TagChange.Value == 0;
+            if (snapshotWake)
+                rows.Insert(++index, new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
+                    Entity = id, Tag = (int)GameTag.DORMANT, Value = 0 } });
+            bool entering = !sleeping && dormant && snapshot == null && row.HasTagChange;
+            int insert = entering && row.TagChange.Tag == (int)GameTag.DORMANT ? index : index + 1;
+            if (entering || wake || snapshotWake)
+                foreach (var tag in tags.Where(t => IsDormantVisualTag((GameTag)t.Key) && t.Value != 0).OrderBy(t => t.Key))
+                {
+                    rows.Insert(insert++, new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
+                        Entity = id, Tag = tag.Key, Value = dormant ? 0 : tag.Value } });
+                    index++;
+                }
+            if (row.HasHideEntity || board && tags.TryGetValue((int)GameTag.ZONE, out int destination) && destination != (int)EngineZone.PLAY)
+                dormantVisualTags.Remove(id);
+            else if (row.HasTagChange && row.TagChange.Tag == (int)GameTag.CONTROLLER)
+                // A transfer retains current logical keywords, never the values saved when sleep began.
+                dormantVisualTags[id] = new Dictionary<int, int>(tags);
+        }
     }
 
 #if ENGINE_SOURCE
@@ -5983,10 +6072,59 @@ public sealed class NativeMatch
         Add(new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
             Entity = display, Tag = (int)GameTag.ZONE, Value = (int)EngineZone.GRAVEYARD
         } });
+        if (visualBlockSources.Count == 0) AppendBurnedCard(packet, display);
         Add(new PowerHistoryData { PowerEnd = new PowerHistoryEnd() });
+        if (visualBlockSources.Count > 0) AppendBurnedCard(packet, display);
         // Disposable public actor stays in GRAVEYARD. Moving it again waits on the native mill
         // flag, which MillCardWithTiming never clears; retained engine identity is already separate.
         revealedEntities.Remove(display); // Presentation-only ID has no engine state to refresh.
+    }
+
+    private static void AppendBurnedCard(NativePowerHistory packet, int display)
+    {
+        packet.List.Add(new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+            Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = new List<int> { display }
+        } });
+    }
+
+    private static void NormalizeBurnedCards(NativePowerHistory packet)
+    {
+        // hslog-tests/34104_subspell.power.log:30226: emit each range once at its enclosing block's end.
+        if (!packet.List.Any(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD)) return;
+        var open = new Stack<PowerHistoryData>();
+        foreach (var row in packet.List)
+        {
+            if (row.HasPowerStart) open.Push(row);
+            else if (row.HasPowerEnd && open.Count > 0) open.Pop();
+        }
+        var unfinished = new HashSet<PowerHistoryData>(open);
+        var rows = new List<PowerHistoryData>();
+        var ranges = new Stack<List<int>>();
+        ranges.Push(new List<int>());
+        void Flush()
+        {
+            var ids = ranges.Peek();
+            if (ids.Count == 0) return;
+            rows.Add(new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+                Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = ids.ToList()
+            } });
+            ids.Clear();
+        }
+        foreach (var row in packet.List)
+        {
+            if (row.HasPowerStart)
+            {
+                // A child surviving this packet cannot receive its parent's pending range.
+                if (unfinished.Contains(row)) Flush();
+                ranges.Push(new List<int>());
+            }
+            if (row.HasMetaData && (int)row.MetaData.Type == (int)MetaDataType.BURNED_CARD)
+            { ranges.Peek().AddRange(row.MetaData.Info); continue; }
+            if (row.HasPowerEnd) { Flush(); if (ranges.Count > 1) ranges.Pop(); }
+            rows.Add(row);
+        }
+        while (ranges.Count > 0) { Flush(); ranges.Pop(); }
+        packet.List = rows;
     }
 
     // Retail heads a printed trigger card's own activation with TriggerKeyword=TRIGGER_VISUAL: every non-keyword TRIGGER

@@ -42,6 +42,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
             bool collectLifesteal = HealingRules.BeginDamage(source as IPlayable);
             try
             {
+            using var wave = game.History ? game.PowerHistory.DamageWave(entities.Count) : null;
             foreach (IPlayable p in entities)
 				Generic.DamageCharFunc.Invoke(source as IPlayable, p as ICharacter, stack.Number, SpellDmg);
 
