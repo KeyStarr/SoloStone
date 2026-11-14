@@ -14,6 +14,12 @@ internal static partial class Program
     [GroupProof("native-b18-t-autoplay2", ProofKind.Native)]
     private static void B18Autoplay2Native()
     {
+        foreach (string id in new[] { "ICC_828t", "CFM_621t", "CFM_621t14", "CFM_621t15", "LOOTA_BOSS_50t", "TLC_100t1", "TLC_100t2", "TLC_100t3" })
+        {
+            var definition = Cards.FromId(id);
+            Check(definition.Text.Contains("{0}") && definition.Text.Contains("{1}"), id + " defines modular text template");
+            Check(!LocalNativeText.TryGetOverride(true, id, text => text, out _), id + " client modular builder owns composed text");
+        }
         foreach (bool opponent in new[] { false, true })
         foreach (int tier in new[] { 1, 2, 3 })
         foreach (bool reverse in new[] { false, true })

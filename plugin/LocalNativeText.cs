@@ -102,10 +102,14 @@ internal static class LocalNativeText
     {
         text = null;
         if (!staged || string.IsNullOrEmpty(cardId) || defaultVariant == null) return false;
-        // The native modular builder owns each location's text; its raw template is only "{0} {1}".
-        if (cardId == "TLC_100t1" || cardId == "TLC_100t2" || cardId == "TLC_100t3") return false;
         try
         {
+            // Native modular builders compose text; base templates lack parts until assembly.
+            string engineId = EngineIdFor(cardId);
+            var definition = engineId == null ? null : Cards.FromId(engineId);
+            if (definition != null && (definition.Tags.ContainsKey(SabberStoneCore.Enums.GameTag.MODULAR_ENTITY_PART_1)
+                || definition.Tags.ContainsKey(SabberStoneCore.Enums.GameTag.MODULAR_ENTITY_PART_2)
+                || definition.Text.Contains("{0}") && definition.Text.Contains("{1}"))) return false;
             string rawText = RawFor(cardId, locale);
             if (string.IsNullOrEmpty(rawText)) return false;
             text = NormalizeRawText(defaultVariant(rawText));
