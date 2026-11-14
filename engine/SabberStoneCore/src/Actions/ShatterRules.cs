@@ -102,6 +102,7 @@ namespace SabberStoneCore.Actions
                         hand.Add(first, 0);
                         c.Game.Facts.CardBurned(second);
                         c.GraveyardZone.Add(second);
+                        if (c.Game.History) c.Game.PowerHistory.BurnedCard(second.Id);
                     }
                     else
                     {

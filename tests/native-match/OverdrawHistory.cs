@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using PegasusGame;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enums;
@@ -18,7 +19,30 @@ internal static partial class Program
     // clears REVEALED, so a card revealed earlier and drawn later is not shown face-up.
     private static void OverdrawHistory()
     {
+        var openBurn = new PegasusGame.PowerHistory { List = new() {
+            new() { PowerStart = new() { Source = 1 } },
+            new() { MetaData = new() { Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Info = new() { 11 } } },
+            new() { PowerStart = new() { Source = 2 } }
+        } };
+        typeof(NativeMatch).GetMethod("NormalizeBurnedCards", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, new object[] { openBurn });
+        Check(openBurn.List.Count == 3 && openBurn.List[1].HasMetaData && openBurn.List[2].PowerStart.Source == 2,
+            "packet flush keeps ancestor burn before unfinished child");
         HiddenCardShapeHistory();
+        foreach (bool bot in new[] { false, true })
+        {
+            var (match, capture) = AnimationMatch(bot); var owner = match.Game.CurrentPlayer;
+            while (owner.HandZone.Count < 9) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            var parent = EngineEntity.FromCard(owner, Cards.FromId("CATA_489"), zone: owner.DeckZone);
+            FlushFieldHistory(match); int cursor = capture.Packets.Count;
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner, parent);
+            match.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd()); FlushFieldHistory(match);
+            var rows = History(capture, cursor);
+            var burned = match.Game.IdEntityDic.Values.Single(e => e.Card.Id == "CATA_489t2" && e.Zone == owner.GraveyardZone);
+            Check(rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).MetaData.Info.SequenceEqual(new[] { burned.Id }),
+                "Shatter overflow names burned right half seat=" + bot);
+            Check(owner.HandZone.Count == 10, "Shatter overflow preserves hand size");
+        }
         var failures = new List<string>();
         int cases = 0;
         foreach (bool bot in new[] { false, true })

@@ -353,6 +353,7 @@ namespace SabberStoneCore.Kettle
             internal PowerHistoryBlockStart Start;
             internal readonly List<int> Targets = new List<int>();
             internal readonly HashSet<int> SelectedTargets = new HashSet<int>();
+            internal readonly List<int> BurnedCards = new List<int>();
             internal bool HasEffects;
             internal bool Appendages;
         }
@@ -865,6 +866,7 @@ namespace SabberStoneCore.Kettle
                 } };
                 copy.Targets.AddRange(frame.Targets);
                 copy.SelectedTargets.UnionWith(frame.SelectedTargets);
+                copy.BurnedCards.AddRange(frame.BurnedCards);
                 _blocks.Push(copy);
             }
         }
@@ -925,19 +927,20 @@ namespace SabberStoneCore.Kettle
 
         internal void BurnedCard(int entity)
         {
-            // hslog-tests/34104_subspell.power.log:30226,33325: one range after the last burn, in its enclosing block.
-            PowerHistoryMetaData burned = null;
-            for (int i = Last.Count - 1, depth = 0; i >= 0; i--)
-            {
-                if (Last[i] is PowerHistoryBlockEnd) { depth++; continue; }
-                if (Last[i] is PowerHistoryBlockStart) { if (depth-- == 0) break; continue; }
-                if (depth == 0 && Last[i] is PowerHistoryMetaData meta && meta.Type == MetaDataType.BURNED_CARD)
-                { burned = meta; break; }
-            }
-            if (burned == null) burned = new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = new List<int>() };
-            else { Full.Remove(burned); Last.Remove(burned); }
-            burned.Info.Add(entity);
-            Add(burned);
+            if (!_enabled) return;
+            if (_blocks.Count == 0)
+                Add(new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = new List<int> { entity } });
+            else _blocks.Peek().BurnedCards.Add(entity);
+        }
+
+        public void FlushBurnedCards()
+        {
+            // hslog-tests/34104_subspell.power.log:30226,33325: one range inside its enclosing block.
+            // Ancestor ranges wait for their own end; appending here would attribute them to the child.
+            if (_blocks.Count == 0 || _blocks.Peek().BurnedCards.Count == 0) return;
+            var ids = _blocks.Peek().BurnedCards.ToList();
+            _blocks.Peek().BurnedCards.Clear();
+            Add(new PowerHistoryMetaData { Type = MetaDataType.BURNED_CARD, Data = 0, Info = ids });
         }
 
 		public void Add(IPowerHistoryEntry entry)
@@ -945,6 +948,7 @@ namespace SabberStoneCore.Kettle
             if (_poisonCapture != null) { _poisonCapture.Add(entry); return; }
             ObservePublicHand(entry);
 			if (!_enabled) return;
+            if (entry is PowerHistoryBlockEnd) FlushBurnedCards();
             if (_drawCounter != null) StampRandomDraws(entry);
             if (entry is PowerHistoryBlockStart start)
             {
@@ -984,7 +988,7 @@ namespace SabberStoneCore.Kettle
 			Last.Add(entry);
 		}
 
-        // The enclosing block's effect flag before a child opens (BlockFrame stays snapshot-layout stable).
+        // The enclosing block's effect flag before a child opens.
         internal bool CurrentBlockHasEffects => _blocks.Count > 0 && _blocks.Peek().HasEffects;
 
         // Withdraws the innermost block when nothing was recorded since its start, as if it had never opened.
@@ -1003,6 +1007,7 @@ namespace SabberStoneCore.Kettle
 
 		public string Print(bool fullFlag = true)
 		{
+            FlushBurnedCards();
 			var str = new StringBuilder();
 			if (fullFlag)
 				Full.ForEach(p => str.Append(p.Print()));

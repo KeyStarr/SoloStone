@@ -709,6 +709,18 @@ internal static partial class HistoryShapeProof
     internal static void BurnedCards()
     {
         foreach (bool bot in new[] { false, true })
+        {
+            var f = new Fixture(); var owner = bot ? f.Player.Opponent : f.Player;
+            while (owner.HandZone.Count < 9) Generic.DrawCard(owner, Cards.FromId("CS2_182"));
+            var parent = SabberStoneCore.Model.Entities.Entity.FromCard(owner, Cards.FromId("CATA_489"), zone: owner.DeckZone);
+            f.Ready("overdraw"); f.Session.Packets.Clear();
+            f.Game.PowerHistory.Add(EH.BlockStart(BlockType.TRIGGER, owner.Id, "", -1, 0));
+            Generic.Draw(owner, parent); f.Game.PowerHistory.Add(EH.BlockEnd()); f.Flush(); f.Result("overdraw");
+            var rows = PacketRows(f);
+            var burned = f.Game.IdEntityDic.Values.Single(e => e.Card.Id == "CATA_489t2" && e.Zone == owner.GraveyardZone);
+            Check(rows.Single(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD).MetaData.Info.SequenceEqual(new[] { burned.Id }), "Shatter overflow metadata names right half");
+        }
+        foreach (bool bot in new[] { false, true })
         foreach (bool retained in new[] { false, true })
         foreach (int hand in new[] { 9, 10 })
         {

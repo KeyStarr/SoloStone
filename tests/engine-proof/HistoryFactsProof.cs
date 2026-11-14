@@ -1,4 +1,5 @@
 using HsSim;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Config;
 using SabberStoneCore.Enums;
@@ -24,10 +25,53 @@ internal static class HistoryFactsProof
         }
         return g;
     }
+    private static void BurnVisualScope()
+    {
+        var g = Fixture(); var p = g.Player1;
+        while (!p.HandZone.IsFull) Generic.DrawCard(p, Cards.FromId("CS2_182"));
+        var source = Entity.FromCard(p, Cards.FromId("CATA_485"), zone: p.SetasideZone);
+        var victim = Summon(p.Opponent, "CS2_200");
+        int cursor = g.PowerHistory.Full.Count;
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.POWER, source.Id, "", -1, 0));
+        Generic.Draw(p);
+        using (g.PowerHistory.Visual(g, SabberStoneCore.Presentation.VisualPhase.Damage, source, victim))
+        {
+            Generic.Draw(p);
+            victim.TakeDamage(source, 1);
+        }
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+        var rows = g.PowerHistory.Full.Skip(cursor).ToArray();
+        var meta = rows.OfType<PowerHistoryMetaData>().Single(m => m.Type == MetaDataType.BURNED_CARD);
+        Check(meta.Info.Count == 2 && rows[^2] == meta && rows[^1] is PowerHistoryBlockEnd,
+            "burn range emitted once at block end with live Visual scope");
+        int second = Array.FindIndex(rows, e => e is PowerHistoryShowEntity show && show.Entity.Id == meta.Info[1]);
+        Check(second > 0 && Array.FindIndex(rows, e => e is PowerHistorySubSpellStart) < second && victim.Damage == 1,
+            "live Visual scope still starts before second burn snapshot");
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, p.Id, "", -1, 0));
+        Generic.Draw(p);
+        foreach (var copy in new[] { g.CloneExact(history: true), Game.LoadSnapshot(g.SaveSnapshot()) })
+        {
+            copy.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            Check(copy.PowerHistory.Last[^2] is PowerHistoryMetaData { Type: MetaDataType.BURNED_CARD, Info.Count: 1 },
+                "pending burn range survives clone/snapshot inside open block");
+        }
+        g.PowerHistory.FlushBurnedCards();
+        Check(g.PowerHistory.Last[^1] is PowerHistoryMetaData { Type: MetaDataType.BURNED_CARD, Info.Count: 1 }, "open block burns flush once");
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, p.Id, "", -1, 0));
+        Generic.Draw(p);
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, victim.Id, "", -1, 0));
+        int before = g.PowerHistory.Full.Count; g.PowerHistory.FlushBurnedCards();
+        Check(g.PowerHistory.Full.Count == before, "flush cannot emit ancestor burns inside child block");
+        g.PowerHistory.Add(PowerHistoryBuilder.BlockEnd()); g.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+        Check(g.PowerHistory.Last[^2] is PowerHistoryMetaData { Type: MetaDataType.BURNED_CARD, Info.Count: 1 }, "ancestor burn emitted at its own block end");
+        Console.WriteLine("PASS burned-card live Visual scope and open-block flush");
+    }
     internal static void Run()
     {
         HistorySnapshotProof.Register();
         HistoryHandDisplayProof.Run();
+        BurnVisualScope();
         HistoryTargetingProof.Run();
         HistoryMaterializationProof.Run();
         HistoryFairOriginProof.Run();

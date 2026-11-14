@@ -3019,6 +3019,7 @@ public sealed class NativeMatch
         if (entries == null)
             return;
 #if ENGINE_SOURCE
+        Game.PowerHistory.FlushBurnedCards();
         ObserveMatchEvents(entries);
         identityBatch = entries;
         identityPosition = -1;
@@ -5751,6 +5752,7 @@ public sealed class NativeMatch
         NormalizeBoardTransit(packet);
         NormalizePublicIdentity(packet);
         NormalizeBurnTransitions(packet);
+        NormalizeBurnedCards(packet);
         // PowerProcessor.BuildTaskList: END as a packet's last row falls out of its switch, enqueues the list twice and
         // replays the prefab. Blocks stay open across choices, so any recipe can reach this; zero SLUSH_TIME is inert.
         if (packet.List.Count > 0 && packet.List[packet.List.Count - 1].HasSubSpellEnd)
@@ -6078,22 +6080,49 @@ public sealed class NativeMatch
 
     private static void AppendBurnedCard(NativePowerHistory packet, int display)
     {
-        // hslog-tests/34104_subspell.power.log:30226: group burns in the resolving block, after every public reveal.
-        PowerHistoryData burned = null;
-        for (int i = packet.List.Count - 1, depth = 0; i >= 0; i--)
+        packet.List.Add(new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+            Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = new List<int> { display }
+        } });
+    }
+
+    private static void NormalizeBurnedCards(NativePowerHistory packet)
+    {
+        // hslog-tests/34104_subspell.power.log:30226: emit each range once at its enclosing block's end.
+        if (!packet.List.Any(r => r.HasMetaData && (int)r.MetaData.Type == (int)MetaDataType.BURNED_CARD)) return;
+        var open = new Stack<PowerHistoryData>();
+        foreach (var row in packet.List)
         {
-            var row = packet.List[i];
-            if (row.HasPowerEnd) { depth++; continue; }
-            if (row.HasPowerStart) { if (depth-- == 0) break; continue; }
-            if (depth == 0 && row.HasMetaData && (int)row.MetaData.Type == (int)MetaDataType.BURNED_CARD)
-            { burned = row; break; }
+            if (row.HasPowerStart) open.Push(row);
+            else if (row.HasPowerEnd && open.Count > 0) open.Pop();
         }
-        if (burned == null) burned = new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
-            Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = new List<int>()
-        } };
-        else packet.List.Remove(burned);
-        burned.MetaData.Info.Add(display);
-        packet.List.Add(burned);
+        var unfinished = new HashSet<PowerHistoryData>(open);
+        var rows = new List<PowerHistoryData>();
+        var ranges = new Stack<List<int>>();
+        ranges.Push(new List<int>());
+        void Flush()
+        {
+            var ids = ranges.Peek();
+            if (ids.Count == 0) return;
+            rows.Add(new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+                Type = (HistoryMeta.Type)(int)MetaDataType.BURNED_CARD, Data = 0, Info = ids.ToList()
+            } });
+            ids.Clear();
+        }
+        foreach (var row in packet.List)
+        {
+            if (row.HasPowerStart)
+            {
+                // A child surviving this packet cannot receive its parent's pending range.
+                if (unfinished.Contains(row)) Flush();
+                ranges.Push(new List<int>());
+            }
+            if (row.HasMetaData && (int)row.MetaData.Type == (int)MetaDataType.BURNED_CARD)
+            { ranges.Peek().AddRange(row.MetaData.Info); continue; }
+            if (row.HasPowerEnd) { Flush(); if (ranges.Count > 1) ranges.Pop(); }
+            rows.Add(row);
+        }
+        while (ranges.Count > 0) { Flush(); ranges.Pop(); }
+        packet.List = rows;
     }
 
     // Retail heads a printed trigger card's own activation with TriggerKeyword=TRIGGER_VISUAL: every non-keyword TRIGGER
