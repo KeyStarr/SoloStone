@@ -184,6 +184,9 @@ namespace SabberStoneCore.Enchants
                 mega.IsExhausted = mega.NumAttacksThisTurn >= Actions.CombatRules.AttackLimit(mega);
             if (hadAttackKeyword && entity[Tag] == 0 && entity is Minion minion)
                 minion.UpdateAttackReadinessAfterKeywordLoss();
+            else if (!hadAttackKeyword && Operator == EffectOperator.ADD && (Tag == GameTag.CHARGE || Tag == GameTag.RUSH)
+                && entity[Tag] > 0 && entity is Minion gainer)
+                gainer.UpdateAttackReadinessAfterKeywordGain();
 		}
 
 		/// <summary>
@@ -255,6 +258,9 @@ namespace SabberStoneCore.Enchants
 			}
             if (hadAttackKeyword && playable[Tag] == 0 && playable is Minion minion)
                 minion.UpdateAttackReadinessAfterKeywordLoss();
+            else if (!hadAttackKeyword && Operator == EffectOperator.ADD && (Tag == GameTag.CHARGE || Tag == GameTag.RUSH)
+                && playable[Tag] > 0 && playable is Minion gainer)
+                gainer.UpdateAttackReadinessAfterKeywordGain();
             windfuryHero?.UpdateAttackReadinessAfterAttackLimitChange(previousAttackLimit);
 		}
 
