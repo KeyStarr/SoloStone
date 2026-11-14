@@ -39,7 +39,7 @@ internal static class PoisonousDamageProof
     }
     internal static void Run()
     {
-        KnifeJuggler(); AreaDamage(); DamageWaves(); NestedWaves(); SingleTarget(); Combat(); Weapon(); HeroSources(); Deathrattles(); KeywordTiming(); Prevention(); GenericSources(); KillAndLifestealTiming();
+        KnifeJuggler(); AreaDamage(); DamageWaves(); PerHitLifesteal(); NestedWaves(); SingleTarget(); Combat(); Reactions(); Weapon(); HeroSources(); Deathrattles(); KeywordTiming(); Prevention(); GenericSources(); KillAndLifestealTiming();
         Console.WriteLine("PASS Poisonous waves: damage before poison before collected Lifesteal/deaths; nested waves isolated; serial/single-target history unchanged");
         Console.WriteLine("PASS Poisonous all damage: granted Juggler/Pyromancer; combat/Patron/Acolyte; weapon attack/counter; Hagatha/fatigue/nested hero provenance; printed/granted Deathrattles; timing; prevention; spell/power/location; history on/off");
     }
@@ -129,6 +129,25 @@ internal static class PoisonousDamageProof
                 "both damage tasks flush poison before collected Lifesteal");
         }
     }
+    private static void PerHitLifesteal()
+    {
+        var g = HistoryFactsProof.Fixture(); var p = g.Player1;
+        var source = Summon(p, "BE_193"); source.HasLifeSteal = true; p.Hero.Damage = 10;
+        var first = Summon(p.Opponent, "CS2_200"); var last = Summon(p.Opponent, "CS2_200");
+        int cursor = g.PowerHistory.Full.Count;
+        using (g.PowerHistory.DamageWave(2))
+        {
+            first.TakeDamage(source, 1);
+            Verify(p.Hero.Damage == 9 && last.Damage == 0, "custom wave heals first hit before next victim");
+            last.TakeDamage(source, 1);
+            Verify(p.Hero.Damage == 8, "custom wave preserves second per-hit heal");
+        }
+        var rows = g.PowerHistory.Full.Skip(cursor).ToArray();
+        var poison = rows.Select((e, i) => (e, i)).Where(x => x.e is PowerHistoryBlockStart { TriggerKeyword: 363 }).Select(x => x.i).ToArray();
+        var heal = rows.Select((e, i) => (e, i)).Where(x => x.e is PowerHistoryBlockStart { TriggerKeyword: (int)GameTag.LIFESTEAL }).Select(x => x.i).ToArray();
+        Verify(poison.Length == 2 && heal.Length == 2 && poison[0] < heal[0] && heal[0] < poison[1] && poison[1] < heal[1],
+            "custom wave emits each poison before its Lifesteal without batching heals");
+    }
     private static void NestedWaves()
     {
         foreach (bool wave in new[] { false, true })
@@ -149,8 +168,8 @@ internal static class PoisonousDamageProof
             var entries = g.PowerHistory.Full.Skip(cursor).ToArray();
             int Poison(int id) => Array.FindIndex(entries, e => e is PowerHistoryMetaData m && m.Type == MetaDataType.POISONOUS && m.Info.Contains(id));
             int lastHit = Array.FindIndex(entries, e => e is PowerHistoryMetaData m && m.Type == MetaDataType.DAMAGE && m.Info.Contains(last.Id));
-            Verify(Poison(nested.Id) < lastHit && Poison(first.Id) > lastHit && Poison(last.Id) > Poison(first.Id),
-                "same-source nested hit stays local while outer poison waits");
+            Verify(Poison(first.Id) < Poison(nested.Id) && Poison(nested.Id) < lastHit && Poison(last.Id) > lastHit,
+                "pending outer poison flushes before nested reaction output");
             if (wave) Verify(Poison(secondNested.Id) > Poison(nested.Id) && Poison(secondNested.Id) < lastHit,
                 "nested wave flushes its own poison before outer wave resumes");
             History(g, cursor, wave ? new[] { (source as IPlayable, first as ICharacter), (source, last), (source, nested), (source, secondNested) }
@@ -190,6 +209,17 @@ internal static class PoisonousDamageProof
         Attack(g, attacker, defender);
         Verify(attacker.Zone.Type == Zone.GRAVEYARD && defender.Zone.Type == Zone.GRAVEYARD, "both combat directions poison even pending-dead source");
         History(g, cursor, (attacker, defender), (defender, attacker));
+        Wave(g.PowerHistory.Full.Skip(cursor).ToArray(), new[] { defender.Id, attacker.Id }, 2);
+
+        g = HistoryFactsProof.Fixture(); p = g.Player1;
+        attacker = Summon(p, "CORE_SCH_605"); Grant(g, attacker); attacker.AttackDamage = 1;
+        var left = Summon(p.Opponent, "CS2_200");
+        defender = Summon(p.Opponent, "BE_193"); defender.AttackDamage = 1;
+        var right = Summon(p.Opponent, "CS2_200");
+        cursor = g.PowerHistory.Full.Count; Attack(g, attacker, defender);
+        History(g, cursor, (attacker, defender), (defender, attacker), (attacker, left), (attacker, right));
+        Wave(g.PowerHistory.Full.Skip(cursor).ToArray(), new[] { defender.Id, attacker.Id, left.Id, right.Id }, 4);
+        Verify(new[] { attacker, defender, left, right }.All(m => m.Zone.Type == Zone.GRAVEYARD), "Poisonous cleave retains all four deaths");
 
         foreach (string id in new[] { "BRM_019", "CORE_EX1_007" })
         {
@@ -208,6 +238,28 @@ internal static class PoisonousDamageProof
         defender = Summon(p.Opponent, "CS2_200"); cursor = g.PowerHistory.Full.Count;
         Verify(Generic.AttackBlock(p, attacker, defender, true, false), "forced zero-Attack combat resolves");
         Verify(defender.Zone.Type == Zone.PLAY && defender.Damage == 0, "zero Attack cannot poison"); History(g, cursor);
+    }
+    private static void Reactions()
+    {
+        foreach (bool bounce in new[] { false, true })
+        {
+            var g = HistoryFactsProof.Fixture(); var p = g.Player1;
+            var source = Summon(p, "BE_193");
+            var victim = Summon(p.Opponent, bounce ? "CS2_200" : "CORE_EX1_007");
+            var last = Summon(p.Opponent, "CS2_200");
+            if (bounce) victim.TakeDamageTrigger += _ => Generic.ReturnToHandBlock(p.Opponent, victim);
+            int cursor = g.PowerHistory.Full.Count;
+            new DamageTask(1, EntityType.OP_MINIONS).Process(g, p, source, null);
+            var rows = g.PowerHistory.Full.Skip(cursor).ToArray();
+            int poison = Array.FindIndex(rows, e => e is PowerHistoryMetaData m && m.Type == MetaDataType.POISONOUS && m.Info.Contains(victim.Id));
+            int reaction = Array.FindIndex(rows, e => bounce
+                ? e is PowerHistoryTagChange t && t.EntityId == victim.Id && t.Tag == GameTag.ZONE && t.Value == (int)Zone.HAND
+                : e is PowerHistoryBlockStart b && b.Source == victim.Id);
+            Verify(poison >= 0 && reaction > poison + 2, "poison precedes " + (bounce ? "bounce" : "Acolyte draw block"));
+            Verify(!rows.Skip(reaction + 1).OfType<PowerHistoryTagChange>().Any(t => t.EntityId == victim.Id
+                && t.Tag == GameTag.TO_BE_DESTROYED && t.Value == 1), "no stale poison tag after reaction");
+            Verify(victim.Zone.Type == (bounce ? Zone.HAND : Zone.PLAY) && last.ToBeDestroyed, "reaction state unchanged");
+        }
     }
     private static void Weapon()
     {

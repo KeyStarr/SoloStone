@@ -423,9 +423,27 @@ namespace SabberStoneCore.Kettle
         [NonSerialized] private (int Depth, List<IPowerHistoryEntry> Entries)? _damageWave;
         [NonSerialized] private List<IPowerHistoryEntry> _poisonCapture;
 
+        [NonSerialized] private int _damageReactionDepth;
+
+        internal IDisposable DamageReaction()
+        {
+            if (!_damageWave.HasValue) return null;
+            _damageReactionDepth++;
+            return new EffectSourceScope(() => _damageReactionDepth--);
+        }
+
+        private void FlushPoisonous()
+        {
+            if (!_damageWave.HasValue || _damageWave.Value.Entries.Count == 0) return;
+            var entries = _damageWave.Value.Entries.ToArray();
+            _damageWave.Value.Entries.Clear();
+            foreach (var entry in entries) Add(entry);
+        }
+
         internal IDisposable DamageWave(int targets)
         {
             if (!_enabled || targets < 2) return null;
+            FlushPoisonous();
             var previous = _damageWave;
             var entries = new List<IPowerHistoryEntry>();
             _damageWave = (_damageDepth, entries);
@@ -946,6 +964,7 @@ namespace SabberStoneCore.Kettle
 		public void Add(IPowerHistoryEntry entry)
 		{
             if (_poisonCapture != null) { _poisonCapture.Add(entry); return; }
+            if (_damageWave.HasValue && (_damageReactionDepth > 0 || _damageDepth <= _damageWave.Value.Depth)) FlushPoisonous();
             ObservePublicHand(entry);
 			if (!_enabled) return;
             if (entry is PowerHistoryBlockEnd) FlushBurnedCards();

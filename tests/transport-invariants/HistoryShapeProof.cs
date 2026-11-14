@@ -1186,7 +1186,51 @@ internal static partial class HistoryShapeProof
     }
     internal static void PoisonousOnly()
     {
-        PoisonousWaves(); NestedTriggerDamageDuringCombat(); Synthetic(); HookBoundaries(); DisabledHistoryHooks();
+        PoisonousCombatAndReactions(); PoisonousWaves(); NestedTriggerDamageDuringCombat(); Synthetic(); HookBoundaries(); DisabledHistoryHooks();
+    }
+    private static List<PowerHistoryData> PacketRows(Fixture f) => f.Session.Packets.Where(p => p.Id == 19).SelectMany(p => {
+        var history = new PegasusGame.PowerHistory();
+        using var stream = new MemoryStream(Convert.FromBase64String(p.Base64));
+        history.Deserialize(stream); return history.List;
+    }).ToList();
+
+    private static void PoisonousCombatAndReactions()
+    {
+        foreach (bool cleave in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, cleave ? "CORE_SCH_605" : "BE_193");
+            source.Poisonous = true; source.AttackDamage = 1;
+            var left = cleave ? f.Summon(p.Opponent, "CS2_200") : null;
+            var target = f.Summon(p.Opponent, "BE_193"); target.AttackDamage = 1;
+            var right = cleave ? f.Summon(p.Opponent, "CS2_200") : null;
+            f.Ready("poison-combat"); f.Session.Packets.Clear();
+            f.Act(MinionAttackTask.Any(p, source, target));
+            var rows = PacketRows(f);
+            int poison = rows.FindIndex(r => r.HasPowerStart && r.PowerStart.TriggerKeyword == 363);
+            Check(poison > rows.FindLastIndex(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE), "combat/cleave all hits before poison");
+            var victims = cleave ? new[] { target.Id, source.Id, left.Id, right.Id } : new[] { target.Id, source.Id };
+            Check(rows.Count(r => r.HasMetaData && r.MetaData.Type == HistoryMeta.Type.DAMAGE) == victims.Length
+                && victims.Select((id, i) => rows[poison + i * 5 + 1].MetaData.Info.SequenceEqual(new[] { id })).All(v => v), "combat/cleave consecutive ordered poison");
+        }
+        foreach (bool bounce in new[] { false, true })
+        {
+            var f = new Fixture(); var p = f.Player;
+            var source = f.Summon(p, "BE_193");
+            var target = f.Summon(p.Opponent, bounce ? "CS2_200" : "CORE_EX1_007");
+            f.Summon(p.Opponent, "CS2_200");
+            if (bounce) target.TakeDamageTrigger += _ => Generic.ReturnToHandBlock(p.Opponent, target);
+            f.Ready("poison-reaction"); f.Session.Packets.Clear();
+            new DamageTask(1, EntityType.OP_MINIONS).Process(f.Game, p, source, null); f.Flush();
+            var rows = PacketRows(f);
+            int poison = rows.FindIndex(r => r.HasMetaData && (int)r.MetaData.Type == 22 && r.MetaData.Info.Contains(target.Id));
+            int reaction = rows.FindIndex(r => bounce
+                ? r.HasTagChange && r.TagChange.Entity == target.Id && r.TagChange.Tag == (int)GameTag.ZONE && r.TagChange.Value == (int)Zone.HAND
+                : r.HasPowerStart && r.PowerStart.Source == target.Id);
+            Check(poison >= 0 && reaction > poison + 2 && !rows.Skip(reaction + 1).Any(r => r.HasTagChange
+                && r.TagChange.Entity == target.Id && r.TagChange.Tag == (int)GameTag.TO_BE_DESTROYED && r.TagChange.Value == 1), "poison before reaction, no stale destroy after bounce");
+        }
+        Console.WriteLine("PASS serialized Poisonous mutual combat, cleave, Acolyte draw and bounce ordering");
     }
     private static void PoisonousWaves()
     {

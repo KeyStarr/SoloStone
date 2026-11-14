@@ -396,6 +396,7 @@ namespace SabberStoneCore.Model.Entities
 			// Predamage triggers (e.g. Ice Block)
 			if (Events.HasSubscribers<PreDamageEvent>())
 			{
+                using var preReactionHistory = _history ? game.PowerHistory.DamageReaction() : null;
 				Events.Raise(new PreDamageEvent(this));
 				game.ProcessTasks();
 				amount = game.CurrentEventData.EventNumber;
@@ -483,6 +484,7 @@ namespace SabberStoneCore.Model.Entities
                     combat?HistoryDeathCause.Combat:HistoryDeathCause.SpellOrEffect,historyDamageSequence);
 			if (fatalCandidate) Actions.DeathContextRules.RecordFatal(minion, source, combat);
 
+            using var reactionHistory = _history ? game.PowerHistory.DamageReaction() : null;
             Actions.SwapRules.DamageResolved(this, dealt);
             Actions.NativeTailRules.DamageResolved(this, dealt);
             Actions.StatDamageRules.Resolved(source, dealt);
