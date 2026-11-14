@@ -42,7 +42,7 @@ The ideas behind it:
   Nothing checks a stand-in against the real client, so a stand-in can be wrong without any test noticing.
 - **The engine builds from source.** `run.py` passes `-p:EngineSource=true`, so every suite uses `engine/` as you
   changed it. Many projects fail without it, because they look for a prebuilt DLL that is not in the repository.
-- **Recorded games pin behaviour.** Goldens replay recorded games and must reproduce the same event history and final
+- **Recorded games pin behaviour.** Goldens replay recorded games and must reproduce the same moves, options and final
   state; fuzz plays random games looking for crashes and broken rules. See the next section and "Goldens" in
   [TESTING.md](TESTING.md).
 - **The client tier tests the bridge.** These suites compile against or load your own client's libraries, so they can
@@ -67,9 +67,11 @@ Goldens and the transport replays (`tests/transport-invariants/replays/`) record
    (its index in that list) and a hash of the whole move list.
 3. **Replay.** The replay rebuilds the start, lists the moves again and compares the hash with the recorded one. If
    they differ, it stops at that step: the rules changed there. If they match, it plays the recorded index.
-4. **End.** A golden compares its final history hash and state hash with the recorded ones. A transport replay
-   compares its step count and findings, and, for the 8 that store one, a fingerprint of the final state, history and
-   random-number state.
+4. **End.** A golden compares a hash of the options and choices offered at every step, and its final state hash, with
+   the recorded ones. A transport replay compares its step count and findings, and, for the 8 that store one, a
+   fingerprint of the final state and random-number state. Neither pins the rest of the event history: every
+   presentation fix moved that hash in most games, so all engine changes conflicted on it. The history-shape rules and
+   the client picture in `transport-invariants`, and the card-level history proofs, check it instead.
 
 Most recordings are seeded random bot games (the bot picks a random legal move), not human games. That makes them cheap
 to make and to repeat, and they reach odd cases a person would not play. They are not a check of good play.

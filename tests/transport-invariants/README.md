@@ -33,8 +33,9 @@ games do not (they are replayed from the seed on the current pool).
 | `deathrattle/` | One game that checks that an empty Deathrattle, a granted Deathrattle and Lifesteal stay distinct in the messages, and that its history shape matches the accepted baseline |
 
 17 of these replays (`meta-pre-be`, `private-return`, `deathrattle`) also run their engine half in the `engine-proof`
-suite, which needs no client: legal-move hashes and chosen moves at every step, and a state, history and random-number
-fingerprint for the 8 that store one. A replay that drifts after an intended rules change cannot be renewed from CI. A
+suite, which needs no client: legal-move hashes and chosen moves at every step, and a state and random-number
+fingerprint for the 8 that store one (the history is checked by the packet half here, so a presentation fix renews
+no replay). A replay that drifts after an intended rules change cannot be renewed from CI. A
 maintainer with a client renews it, after the same per-game review as a golden (see "Goldens" in
 [TESTING.md](../../docs/TESTING.md)). The tool that re-records these replays is not in this repository yet.
 

@@ -132,7 +132,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/history/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine (see below) |
 | `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
@@ -244,8 +244,8 @@ shows up as a changed game, not as a quiet success.
 
 Every re-recorded game is classified and printed:
 
-- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the history hash moved.
-  Accepted without a flag.
+- `shape only`: the actions and legal moves are the same (so turns and winner too) and only the decisions hash (the
+  option and choice packets offered at each step) moved. Accepted without a flag.
 - `STATE`: as above, but the final state hash moved. The legal-move hashes cover the options offered, not the board
   numbers, so a rules change that alters stats or tags without changing any offered option (most likely on the last
   turn) looks exactly like this, and a regression can hide in it. These are refused (exit 1, nothing written) unless
@@ -256,6 +256,18 @@ Every re-recorded game is classified and printed:
   field). The line shows how many actions changed and where they first differ. These are refused (exit 1, nothing
   written) unless you pass `--allow-behaviour-change`, which prints a warning per game. A behaviour change needs a
   reviewer's eye on each listed game: say in your change why it changed.
+
+A golden pins the moves, the legal moves at every step, the options and choices offered (`decisionsSha`), the final
+state, turns and winner. It does not pin the rest of the event history the engine sends the client: every
+presentation fix moved that hash in most games, so any two engine changes conflicted on it, and it was re-recorded
+unreviewed anyway. A change that only changes what the client is shown touches no golden; the history-shape rules and
+the client picture in `transport-invariants` and the card-level history proofs check it.
+
+A golden file holds one game per line, with a blank line between games, so two changes that re-record different games
+merge without a conflict. Two changes that both move the same game do conflict: re-record that file on the merged
+engine rather than picking a side. `goldens check` refuses a file in the single-line form written before (with
+`engineSha` and `historySha` fields); `rerecord` converts it, filling in each game's decisions hash, even when no game
+changed, so an older branch is brought up to date by the same command.
 
 `--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
 re-recorded, a behaviour or state change without its flag, a re-recorded game that still does not match, or a file not in the

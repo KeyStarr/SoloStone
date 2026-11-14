@@ -150,7 +150,7 @@ internal static class Core2026Proof
             Check(expected.ReplaySchema == 3, "current Core golden replay schema");
             var actual = new GameRecord();
             Simulation.Finish(actual, Simulation.Run(expected, replay: true));
-            Check(expected.HistorySha == actual.HistorySha && expected.StateSha == actual.StateSha
+            Check(expected.DecisionsSha != null && expected.DecisionsSha == actual.DecisionsSha && expected.StateSha == actual.StateSha
                 && expected.Turns == actual.Turns && expected.Winner == actual.Winner, "current Core golden " + expected.Id);
             count++;
         }

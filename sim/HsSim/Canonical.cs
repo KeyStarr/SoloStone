@@ -88,7 +88,10 @@ public static class Canonical
     }
 
     public static string History(Game game) => string.Concat(game.PowerHistory.Full.Select(entry => Value(entry) + "\n"))
-        + "--- DECISIONS ---\n" + (DecisionTraces.TryGetValue(game, out var decisions) ? decisions.Text.ToString() : "");
+        + "--- DECISIONS ---\n" + DecisionTrace(game);
+
+    // The option and choice packets offered at every step, the part of the history a golden still pins.
+    public static string DecisionTrace(Game game) => DecisionTraces.TryGetValue(game, out var decisions) ? decisions.Text.ToString() : "";
 
     public static void CaptureDecision(Game game, int step, Controller controller, List<PlayerTask> tasks, string legalSha)
     {
