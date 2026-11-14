@@ -70,8 +70,9 @@ Goldens and the transport replays (`tests/transport-invariants/replays/`) record
 4. **End.** A golden compares a hash of the options and choices offered at every step, and its final state hash, with
    the recorded ones. A transport replay compares its step count and findings, and, for the 8 that store one, a
    fingerprint of the final state and random-number state. Neither pins the rest of the event history: every
-   presentation fix moved that hash in most games, so all engine changes conflicted on it. The history-shape rules and
-   the client picture in `transport-invariants`, and the card-level history proofs, check it instead.
+   presentation fix moved that hash in most games, so all engine changes conflicted on it. The card-level history
+   proofs check it in CI, and the history-shape rules and the client picture in `transport-invariants` check every
+   corpus game; that suite needs a client, so a maintainer runs it before merging an engine change.
 
 Most recordings are seeded random bot games (the bot picks a random legal move), not human games. That makes them cheap
 to make and to repeat, and they reach odd cases a person would not play. They are not a check of good play.

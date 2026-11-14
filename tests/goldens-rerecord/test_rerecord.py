@@ -133,7 +133,7 @@ class RerecordTests:
         self.path.write_text(legacy_form(self.original))
         dry = self.rerecord('--dry-run')
         self.assertEqual(dry.returncode, 0, dry.stderr)
-        self.assertIn('converted to one game per line (dry run, not written)', dry.stdout)
+        self.assertIn('converted to one game per line (%d game(s): history hash dropped, decisions hash filled in) (dry run, not written)' % len(self.ids), dry.stdout)
         self.assertEqual(self.path.read_text(), legacy_form(self.original))
         result = self.rerecord()
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -157,6 +157,27 @@ class RerecordTests:
         self.assertEqual(result.returncode, 1, result.stderr)
         self.assertIn(f'changed {self.ids[0]}: STATE', result.stdout)
         self.assertEqual(self.path.read_text(), broken)
+
+    def test_a_game_missing_its_decisions_hash_is_repaired(self):
+        self.path.write_text(self.original.replace('"decisionsSha":"%s",' % self.decisions_sha(2), '', 1))
+        check = subprocess.run([DOTNET, DLL, 'goldens', 'check', str(self.path)], cwd=self.work.name, capture_output=True, text=True, timeout=1200)
+        self.assertEqual(check.returncode, 1, check.stderr)
+        self.assertIn(f'{self.ids[1]} (no decisionsSha)', check.stderr)
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('repaired 1 game(s)', result.stdout)
+        self.assertEqual(self.path.read_text(), self.original)
+
+    def test_a_stray_history_hash_is_dropped(self):
+        sha = self.decisions_sha(1)
+        self.path.write_text(self.original.replace(f'"decisionsSha":"{sha}"', '"historySha":"' + '0' * 64 + f'","decisionsSha":"{sha}"', 1))
+        check = subprocess.run([DOTNET, DLL, 'goldens', 'check', str(self.path)], cwd=self.work.name, capture_output=True, text=True, timeout=1200)
+        self.assertEqual(check.returncode, 1, check.stderr)
+        self.assertIn(f'{self.ids[0]} (has a historySha)', check.stderr)
+        result = self.rerecord()
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('repaired 1 game(s)', result.stdout)
+        self.assertEqual(self.path.read_text(), self.original)
 
     def test_an_earlier_form_file_cannot_be_converted_in_part(self):
         self.path.write_text(legacy_form(self.original))
@@ -199,7 +220,7 @@ class RerecordTests:
     def state_sha(self, index):
         return re.search(r'"stateSha":"([0-9a-f]+)"', self.chunks[index]).group(1)
 
-    def test_a_history_only_change_needs_no_flag(self):
+    def test_a_decisions_only_change_needs_no_flag(self):
         self.corrupt(1, self.decisions_sha(1), '0' * 64)
         self.corrupt(2, self.decisions_sha(2), '1' * 64)
         result = self.rerecord()

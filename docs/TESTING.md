@@ -200,11 +200,12 @@ If you are not sure, run everything.
 ## Goldens
 
 A golden file holds a set of recorded games. Each game is a list of action numbers ("take legal move 28, then 3,
-then 0, ...") plus a hash of its full event history and a hash of its final state. The golden files contain no card
-data and no game text.
+then 0, ...") plus a hash of the legal moves at every step, a hash of the options and choices offered (`decisionsSha`)
+and a hash of its final state. The golden files contain no card data and no game text.
 
-`goldens` replays each recorded game on the current engine and compares both hashes. If one differs, some rule now
-does something different in that game. That is either a bug you just introduced or a deliberate rules change.
+`goldens` replays each recorded game on the current engine and compares those hashes, the turns and the winner. If
+one differs, some rule now does something different in that game. That is either a bug you just introduced or a
+deliberate rules change.
 
 The five files are in `tests/goldens/`:
 
@@ -260,8 +261,10 @@ Every re-recorded game is classified and printed:
 A golden pins the moves, the legal moves at every step, the options and choices offered (`decisionsSha`), the final
 state, turns and winner. It does not pin the rest of the event history the engine sends the client: every
 presentation fix moved that hash in most games, so any two engine changes conflicted on it, and it was re-recorded
-unreviewed anyway. A change that only changes what the client is shown touches no golden; the history-shape rules and
-the client picture in `transport-invariants` and the card-level history proofs check it.
+unreviewed anyway. A change that only changes what the client is shown touches no golden. The card-level history proofs
+in `engine-proof` check it in CI; the history-shape rules and the client picture in `transport-invariants` check every
+corpus game, but that suite needs a client and CI does not run it, so a maintainer runs it before merging a change to
+`engine/` or `plugin/`.
 
 A golden file holds one game per line, with a blank line between games, so two changes that re-record different games
 merge without a conflict. Two changes that both move the same game do conflict: re-record that file on the merged
