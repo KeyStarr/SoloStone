@@ -134,7 +134,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
 | `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
-| `goldens` | Recorded games replay to the same result on the current engine (see below) |
+| `goldens` | Recorded games replay to the same result on the current engine, with a well-formed event history (see below) |
 | `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
@@ -207,6 +207,26 @@ and a hash of its final state. The golden files contain no card data and no game
 one differs, some rule now does something different in that game. That is either a bug you just introduced or a
 deliberate rules change.
 
+It also checks the structure of each replayed game's whole event history (`sim/HsSim/HistoryShape.cs`). These rules
+store nothing per game, so they cannot conflict between two changes, and they hold on every golden game with no
+exceptions:
+
+- every block that starts ends, blocks nest, and none is open when the game ends;
+- every sub-spell that starts ends, inside the block it started in;
+- no tag change, shown, hidden or changed entity, block source or target, or sub-spell source or target names an entity
+  before its `FULL_ENTITY` (or `CREATE_GAME`) creates it;
+- every entity a `META_DATA` names already exists (for `SHOW_BIG_CARD` and `CONTROLLER_AND_ZONE_CHANGE` only the first
+  slot is an entity; the rest are parameters);
+- no `FULL_ENTITY` creates an id that already exists. A rewind (`RESET_GAME`) creates the game again, so the entities
+  it creates again are not duplicates.
+
+A game that breaks one prints `history <game>: ... broken rule(s)` with the rule, the entry index and the entity, and
+fails; `sim/out/<game>.trace` holds its history. Re-recording cannot fix it, and `rerecord` refuses the game: fix the
+engine, or, if the history is right and the rule is wrong, fix the rule (never by adding a list of exceptions).
+`goldens history-selftest tests/goldens/core-2026.json` (also run by the suite) breaks a real game's history once per
+rule and path and checks that exactly that rule fires, at the broken entry. A new rule belongs here only if it holds on every golden
+game; one that needs a list of reviewed exceptions belongs in `transport-invariants`.
+
 The five files are in `tests/goldens/`:
 
 | File | Games | Covers |
@@ -261,10 +281,11 @@ Every re-recorded game is classified and printed:
 A golden pins the moves, the legal moves at every step, the options and choices offered (`decisionsSha`), the final
 state, turns and winner. It does not pin the rest of the event history the engine sends the client: every
 presentation fix moved that hash in most games, so any two engine changes conflicted on it, and it was re-recorded
-unreviewed anyway. A change that only changes what the client is shown touches no golden. The card-level history proofs
-in `engine-proof` check it in CI; the history-shape rules and the client picture in `transport-invariants` check every
-corpus game, but that suite needs a client and CI does not run it, so a maintainer runs it before merging a change to
-`engine/` or `plugin/`.
+unreviewed anyway. A change that only changes what the client is shown touches no golden. In CI the history is checked
+by the structure rules above and the card-level history proofs in `engine-proof`. The finer history-shape rules (damage
+and target metadata, attack and fatigue blocks, privacy, with their reviewed exceptions) and the client picture in
+`transport-invariants` check every corpus game, but that suite needs a client and CI does not run it, so a maintainer
+runs it before merging a change to `engine/` or `plugin/`.
 
 A golden file holds one game per line, with a blank line between games, so two changes that re-record different games
 merge without a conflict. Two changes that both move the same game do conflict: re-record that file on the merged
