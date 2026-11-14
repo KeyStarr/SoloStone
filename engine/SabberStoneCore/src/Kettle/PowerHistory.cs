@@ -445,10 +445,14 @@ namespace SabberStoneCore.Kettle
             if (!_enabled || targets < 2) return null;
             FlushPoisonous();
             var previous = _damageWave;
+            // A wave opened inside a reaction batches its own hits; the outer reaction depth returns on close.
+            int outerReactions = _damageReactionDepth;
+            _damageReactionDepth = 0;
             var entries = new List<IPowerHistoryEntry>();
             _damageWave = (_damageDepth, entries);
             return new EffectSourceScope(() => {
                 _damageWave = previous;
+                _damageReactionDepth = outerReactions;
                 // hslog-tests/25770_inferrable_player.power.log:1542-1673: all hits, then poison, then collected Lifesteal.
                 foreach (var entry in entries) Add(entry);
             });
