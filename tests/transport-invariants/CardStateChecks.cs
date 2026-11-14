@@ -432,7 +432,7 @@ internal static class CardStateChecks
     {
         var tags = new[] { GameTag.TAUNT, GameTag.LIFESTEAL, GameTag.DIVINE_SHIELD, GameTag.POISONOUS, GameTag.STEALTH,
             GameTag.WINDFURY, GameTag.MEGA_WINDFURY, GameTag.REBORN, GameTag.DEATHRATTLE, GameTag.TRIGGER_VISUAL,
-            (GameTag)1211, GameTag.RUSH, GameTag.CHARGE, GameTag.AURA, GameTag.IMMUNE, GameTag.SPELLPOWER };
+            (GameTag)1211, GameTag.RUSH, GameTag.CHARGE, GameTag.AURA };
         var game = OfflinePoolTestRecipes.NewGame();
         NativeSession session = null;
         var match = new NativeMatch((id, packet) => session.Receive(id, packet));
@@ -445,14 +445,36 @@ internal static class CardStateChecks
             new PegasusGame.Tag { Name = (int)GameTag.ENTITY_ID, Value = id },
             new PegasusGame.Tag { Name = (int)GameTag.CARDTYPE, Value = 4 }, new PegasusGame.Tag { Name = (int)GameTag.ZONE, Value = (int)Zone.PLAY },
             new PegasusGame.Tag { Name = (int)GameTag.CONTROLLER, Value = 1 }, new PegasusGame.Tag { Name = (int)GameTag.ZONE_POSITION, Value = 1 },
+            new PegasusGame.Tag { Name = (int)GameTag.IMMUNE, Value = 1 },
+            new PegasusGame.Tag { Name = (int)GameTag.SPELLPOWER, Value = 2 },
             new PegasusGame.Tag { Name = (int)GameTag.DORMANT, Value = sleep ? 1 : 0 } }).ToList() };
         void Send(params PowerHistoryData[] rows) => session.Invoke("SendPowerHistory", new PegasusGame.PowerHistory { List = rows.ToList() });
+        foreach (bool resetGame in new[] { false, true })
+        {
+            var first = resetGame ? new PowerHistoryData { ResetGame = new() } : new PowerHistoryData { CreateGame = new() };
+            var full = new PowerHistoryData { FullEntity = Snapshot(true) };
+            var next = new PowerHistoryData { FullEntity = new() { Entity = id + 1, Name = "CS2_120", Tags = new() } };
+            var packet = new PegasusGame.PowerHistory { List = new() { first, full, next } };
+            session.Invoke("NormalizeDormantVisuals", packet);
+            Check(packet.List.Count == 3 && ReferenceEquals(packet.List[0], first)
+                && ReferenceEquals(packet.List[1], full) && ReferenceEquals(packet.List[2], next), "reset/create preserves contiguous FULL rows");
+            Check(full.FullEntity.Tags.Where(t => tags.Contains((GameTag)t.Name)).All(t => t.Value == 0)
+                && full.FullEntity.Tags.Single(t => t.Name == (int)GameTag.IMMUNE).Value == 1
+                && full.FullEntity.Tags.Single(t => t.Name == (int)GameTag.SPELLPOWER).Value == 2,
+                "snapshot masks visual keywords only");
+        }
         Send(new PowerHistoryData { FullEntity = Snapshot(true) });
         Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "every visual keyword masked in dormant FULL");
         Send(new PowerHistoryData { ShowEntity = Snapshot(true) });
         Check(tags.All(t => session.Client.Entities[id].Get(t) == 0), "sleeping SHOW cannot resurrect printed keywords");
         Send(new PowerHistoryData { ShowEntity = Snapshot(false) });
         Check(tags.All(t => session.Client.Entities[id].Get(t) == 1), "awake SHOW restores all keywords");
+        var sleepRows = new PegasusGame.PowerHistory { List = new() { Change(GameTag.DORMANT, 1) } };
+        session.Invoke("NormalizeDormantVisuals", sleepRows);
+        Check(sleepRows.List.Count == tags.Length + 1 && sleepRows.List.Take(tags.Length).All(r => r.HasTagChange && r.TagChange.Value == 0)
+            && sleepRows.List.Last().TagChange.Tag == (int)GameTag.DORMANT && sleepRows.List.Last().TagChange.Value == 1,
+            "visual clears precede DORMANT=1");
+        Send(new PowerHistoryData { ShowEntity = Snapshot(false) });
         Send(Change(GameTag.DORMANT, 1));
         Send(Change(GameTag.CONTROLLER, 2), Change(GameTag.LIFESTEAL, 0), Change(GameTag.DORMANT, 0));
         Check(tags.All(t => session.Client.Entities[id].Get(t) == (t == GameTag.LIFESTEAL ? 0 : 1)), "transfer restores current logical values");

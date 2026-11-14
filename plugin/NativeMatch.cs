@@ -308,8 +308,7 @@ public sealed class NativeMatch
         || tag == GameTag.DIVINE_SHIELD || tag == GameTag.POISONOUS || tag == GameTag.STEALTH
         || tag == GameTag.WINDFURY || tag == GameTag.MEGA_WINDFURY || tag == GameTag.REBORN
         || tag == GameTag.DEATHRATTLE || tag == GameTag.TRIGGER_VISUAL || (int)tag == 1211
-        || tag == GameTag.RUSH || tag == GameTag.CHARGE || tag == GameTag.AURA
-        || tag == GameTag.IMMUNE || tag == GameTag.SPELLPOWER;
+        || tag == GameTag.RUSH || tag == GameTag.CHARGE || tag == GameTag.AURA;
     private static bool IsDormantTransportTag(int tag) => IsDormantVisualTag((GameTag)tag)
         || tag == (int)GameTag.CARDTYPE || tag == (int)GameTag.ZONE || tag == (int)GameTag.CONTROLLER || tag == (int)GameTag.DORMANT;
 
@@ -5767,7 +5766,6 @@ public sealed class NativeMatch
     {
         // Retail hslog-tests/49534_cached_tag_for_dormant_change.power.log:26724-26728,36502-36510:
         // TAUNT/AURA go to zero during Dormant and return after DORMANT=0; DEATHRATTLE:2002-2004,5290-5296.
-        // IMMUNE and SPELLPOWER likewise describe active board visuals, not a sleeping actor's powers.
         var rows = packet.List;
         for (int index = 0; index < rows.Count; index++)
         {
@@ -5816,10 +5814,15 @@ public sealed class NativeMatch
             if (snapshotWake)
                 rows.Insert(++index, new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
                     Entity = id, Tag = (int)GameTag.DORMANT, Value = 0 } });
-            if ((!sleeping && dormant) || wake || snapshotWake)
+            bool entering = !sleeping && dormant && snapshot == null && row.HasTagChange;
+            int insert = entering && row.TagChange.Tag == (int)GameTag.DORMANT ? index : index + 1;
+            if (entering || wake || snapshotWake)
                 foreach (var tag in tags.Where(t => IsDormantVisualTag((GameTag)t.Key) && t.Value != 0).OrderBy(t => t.Key))
-                    rows.Insert(++index, new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
+                {
+                    rows.Insert(insert++, new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
                         Entity = id, Tag = tag.Key, Value = dormant ? 0 : tag.Value } });
+                    index++;
+                }
             if (row.HasHideEntity || board && tags.TryGetValue((int)GameTag.ZONE, out int destination) && destination != (int)EngineZone.PLAY)
                 dormantVisualTags.Remove(id);
             else if (row.HasTagChange && row.TagChange.Tag == (int)GameTag.CONTROLLER)
