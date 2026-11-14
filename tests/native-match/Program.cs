@@ -102,6 +102,8 @@ internal static partial class Program
         if (args.Contains("--hero-skin-only")) { HeroSkinPresentationTests(); return; }
         if (args.Contains("--board-identity-only")) { NativeMatch.ClockFreeBot = true; BoardIdentityHistory(); return; }
         if (args.Contains("--rewind-presentation-only")) { RewindPresentationTags(); return; }
+        if (args.Contains("--announcer-rewind-only")) { NativeMatch.ClockFreeBot = true; AnnouncerRewindHistory(); return; }
+        if (args.Contains("--king-llane-only")) { NativeMatch.ClockFreeBot = true; KingLlanePlayHistory(); return; }
         if (args.Contains("--vanguard-only")) { NativeMatch.ClockFreeBot = true; VanguardDrawHistory(); return; }
         if (args.Contains("--broxigar-only")) { NativeMatch.ClockFreeBot = true; BroxigarReturnHistory(); return; }
         if (args.Contains("--chillmaw-only")) {
@@ -175,6 +177,7 @@ internal static partial class Program
         if (args.Length == 2 && args[0] == "--spell-healing-review") { SpellHealingReviewProof(args[1]); return; }
         if (args.Contains("--payloads-only")) { StoredPayloadProjection(); return; }
         if (args.Contains("--npc-runner-only")) { NpcTurnRunnerTests.Run(); return; }
+        if (args.Contains("--lotus-npc-only")) { NpcTurnRunnerTests.LotusTroublemakerKeepsNpcPlaying(); return; }
         if (args.Contains("--npc-settle-only")) { NpcPresentationTests.AnimationSettle(); return; }
         if (args.Contains("--npc-presentation-only")) { NpcPresentationTests.Run(); NpcWorldIntegrationTests.Run(); return; }
         if (args.Contains("--npc-world-only")) { NpcWorldIntegrationTests.Run(); return; }
@@ -243,6 +246,8 @@ internal static partial class Program
         HandBuffHistory();
         VanguardDrawHistory();
         BroxigarReturnHistory();
+        KingLlanePlayHistory();
+        AnnouncerRewindHistory();
         GroupProofs.Run(ProofKind.Native);
         if (args.Contains("--hand-buff-only")) return;
         OverloadManaParity();

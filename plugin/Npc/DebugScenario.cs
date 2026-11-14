@@ -25,6 +25,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 //   humanHandMods=CARDID,COST,ATK,HEALTH,PREMIUM,...   (groups of five; '-' = unchanged, spells use -,- for attack and health.
 //       Applies to the first card with that id placed by humanHand: Cost 0..99, Attack 0..9999, Health 1..9999, PREMIUM -, golden,
 //       diamond or signature. Capture-only; every id must be in humanHand.)
+//   humanHandHealth=CARDID,...   (the first card with that id placed by humanHand costs Health instead of Mana this turn, as a Death
+//       Knight Herald Soldier's gift does: a payment override, no enchantment. Needs humanSeat=first; every id must be in humanHand.
+//       Capture-only.)
+//   humanHandHealthWing=CARDID,...   (the same, as Onyxia's Wing's gift does: the Health cost hangs on a CATA_155e2 enchantment.)
 //   humanHandClear=1   (discards the cards dealt to the human's hand, Coin kept, before humanHand places its own)
 //   humanManaRaw=CUR,MAX  npcManaRaw=CUR,MAX   (0..999: the mana counter's tags written directly after main-begin, past the engine's
 //       10 cap, for a counter gag such as 32/333. Needs humanSeat=first; excludes humanMana/npcMana; npcManaRaw CUR <= 10 (its own
@@ -55,7 +59,7 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
@@ -120,6 +124,8 @@ public sealed class DebugScenario
     public ManaRaw NpcManaRaw { get; private set; }
     public bool HumanHandClear { get; private set; }
     public IReadOnlyList<HandMod> HumanHandMods { get; private set; } = new HandMod[0];
+    public IReadOnlyList<string> HumanHandHealth { get; private set; } = new string[0];
+    public IReadOnlyList<string> HumanHandHealthWing { get; private set; } = new string[0];
     // Filled by Apply: hand entity id -> REQUESTED premium (1..3; the host resolves it against the card) for the host to register as owned presentation (NativeMatch.entityPremiums),
     // because the native client only renders Diamond/Signature through the host's quality flags, never from a raw engine tag.
     public IDictionary<int, int> StagedPremiums { get; } = new Dictionary<int, int>();
@@ -168,6 +174,10 @@ public sealed class DebugScenario
         if (values.TryGetValue("humanHandClear", out string clear) && clear == "1" && values.ContainsKey("humanOpeningHand"))
             throw new ArgumentException("humanHandClear=1 would discard the cards humanOpeningHand places; give only one.");
         var humanHand = Cards(values, "humanHand", MaxHand, known);
+        var handHealth = HandHealth(values, "humanHandHealth", humanHand);
+        var handHealthWing = HandHealth(values, "humanHandHealthWing", humanHand);
+        if (handHealth.Intersect(handHealthWing).Any())
+            throw new ArgumentException("humanHandHealth and humanHandHealthWing list the same card: give each card one Health cost.");
         return new DebugScenario {
             BoundRunId = boundRun, FirstPlayer = Seat(values),
             Overdraw = Choice(values, "overdraw", "human", "npc", "human-godfrey", "npc-godfrey"),
@@ -182,6 +192,7 @@ public sealed class DebugScenario
             HumanOpeningHand = Cards(values, "humanOpeningHand", 4, known), NpcOpeningHand = Cards(values, "npcOpeningHand", 4, known),
             NpcHand = Cards(values, "npcHand", MaxHand, known), HumanHand = humanHand,
             HumanHandMods = HandMods(values, "humanHandMods", humanHand, known),
+            HumanHandHealth = handHealth, HumanHandHealthWing = handHealthWing,
             HumanHandClear = Number(values, "humanHandClear", 0, 1) == 1,
             HumanManaRaw = ManaRawValue(values, "humanManaRaw", "humanMana"), NpcManaRaw = ManaRawValue(values, "npcManaRaw", "npcMana"),
             NpcBoard = Cards(values, "npcBoard", MaxBoard, known), HumanBoard = Cards(values, "humanBoard", MaxBoard, known),
@@ -224,6 +235,22 @@ public sealed class DebugScenario
         if (key == "npcManaRaw" && current > 10)
             throw new ArgumentException(key + ": current must be 0..10 (the NPC's turn-start refill would send a negative RESOURCES_USED).");
         return new ManaRaw(current, max);
+    }
+
+    // Card ids placed by humanHand that cost Health this turn. The override expires after the current turn, so only a human who plays
+    // first can use it.
+    private static IReadOnlyList<string> HandHealth(Dictionary<string, string> values, string key, IReadOnlyList<string> hand)
+    {
+        if (!values.TryGetValue(key, out string text)) return new string[0];
+        if (!values.TryGetValue("humanSeat", out string seat) || seat != "first")
+            throw new ArgumentException(key + " needs humanSeat=first (the Health cost lasts only the current turn).");
+        var ids = text.Split(',').Select(id => id.Trim()).ToArray();
+        foreach (string id in ids)
+        {
+            if (ids.Count(other => other == id) > 1) throw new ArgumentException(key + ": " + id + " is listed twice (it applies to the first such card).");
+            if (!hand.Contains(id)) throw new ArgumentException(key + ": " + id + " is not in humanHand (it applies to cards humanHand places).");
+        }
+        return ids;
     }
 
     // CARDID,COST,ATK,HEALTH groups for cards placed by humanHand ('-' keeps the printed value).
@@ -352,6 +379,7 @@ public sealed class DebugScenario
         if (HumanBoardStats != null) lines.Add("humanBoardStats=" + HumanBoardStats);
         if (NpcSummonStats != null) lines.Add("npcSummonStats=" + NpcSummonStats);
         if (HumanHandMods.Count > 0) lines.Add("humanHandMods=" + string.Join(",", HumanHandMods));
+        Add("humanHandHealth", HumanHandHealth); Add("humanHandHealthWing", HumanHandHealthWing);
         if (HumanHandClear) lines.Add("humanHandClear=1");
         if (HumanManaRaw != null) lines.Add("humanManaRaw=" + HumanManaRaw);
         if (NpcManaRaw != null) lines.Add("npcManaRaw=" + NpcManaRaw);
@@ -587,6 +615,15 @@ public sealed class DebugScenario
             }
             if (mod.Premium != 0) StagedPremiums[card.Id] = mod.Premium;
             applied.Add("humanHandMods=" + mod);
+        }
+        foreach (var (id, wing) in HumanHandHealth.Select(id => (id, false)).Concat(HumanHandHealthWing.Select(id => (id, true))))
+        {
+            // Parse keeps each id under one key, once.
+            var card = (SabberStoneCore.Model.Entities.Playable)humanPlaced.First(placed => placed.Card.Id == id);
+            int actor = wing ? SabberStoneCore.Model.Entities.Enchantment.GetInstance(game.Player1, game.Player1.Hero, card,
+                EngineCards.FromId("CATA_155e2")).Id : 0;
+            SabberStoneCore.Actions.CostRules.AddPaymentOverride(card, SabberStoneCore.Model.Costs.CostPaymentKind.Health, game.Turn, actor);
+            applied.Add((wing ? "humanHandHealthWing=" : "humanHandHealth=") + id);
         }
         if (Overdraw != null)
         {

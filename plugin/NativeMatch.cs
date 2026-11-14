@@ -3268,6 +3268,9 @@ public sealed class NativeMatch
                     )
                     AppendPoweredUpHighlight(packet, hiding.Id, 0);
 #endif
+#if ENGINE_SOURCE
+                AppendDeckFlightQualityClears(packet, native);
+#endif
                 if (native.HasTagChange && native.TagChange.Tag == (int)GameTag.OVERLOAD_LOCKED
                     && historicalMana.TryGetValue(native.TagChange.Entity, out var mana))
                 {
@@ -4197,6 +4200,33 @@ public sealed class NativeMatch
         }
     }
 
+    // Card.DoPlayToDeckTransition (a minion leaving play or the graveyard for a deck) builds a hand actor for the entity's
+    // premium and waits for that actor's summon-in spell. A Diamond or Signature actor's Card_Hand_Signature25_SummonIn never
+    // finishes once the HIDE that follows the move has turned the card into a HiddenCard, so the deck's layout blocker and the
+    // power queue stay held for good: King Llane shuffling himself back (#79). Without its quality flag the client reads
+    // Diamond as Signature and Signature as Golden (EntityBase.GetPremiumType), whose flight completes; the next SHOW of
+    // the card sends both flags again.
+    private void AppendDeckFlightQualityClears(NativePowerHistory packet, PowerHistoryData native)
+    {
+        int id, zone;
+        if (native.HasTagChange && native.TagChange.Tag == (int)GameTag.ZONE) { id = native.TagChange.Entity; zone = native.TagChange.Value; }
+        else if (native.HasHideEntity) { id = native.HideEntity.Entity; zone = native.HideEntity.Zone; }
+        else return;
+        if (zone != (int)EngineZone.DECK || !clientTransportTags.TryGetValue(id, out var sent)
+            || !sent.TryGetValue((int)GameTag.ZONE, out int from) || from != (int)EngineZone.PLAY && from != (int)EngineZone.GRAVEYARD
+            || !sent.TryGetValue((int)GameTag.PREMIUM, out int premium) || premium != 2 && premium != 3) return;
+        foreach (int quality in DeckFlightQualityTags)
+            if (sent.TryGetValue(quality, out int value) && value != 0)
+            {
+                var clear = new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange { Entity = id, Tag = quality, Value = 0 } };
+                packet.List.Add(clear);
+                TrackVisibility(clear);
+            }
+    }
+
+    // HAS_DIAMOND_QUALITY, HAS_SIGNATURE_QUALITY.
+    private static readonly int[] DeckFlightQualityTags = { 1932, 2589 };
+
     private void TrackClientState(PowerHistoryData data)
     {
         void Merge(int id, IEnumerable<NativeTag> values)
@@ -5028,6 +5058,20 @@ public sealed class NativeMatch
                 Entity = pair.Key, Tag = (int)GameTag.ZONE, Value = (int)EngineZone.REMOVEDFROMGAME
             } });
         }
+        // A Diamond or Signature minion the attempt took out of the deck goes back through the same client flight as
+        // AppendDeckFlightQualityClears guards: drop its quality flags while the client still holds it in play.
+        foreach (var full in fulls)
+            if (full.Entity.Tags.TryGetValue(GameTag.ZONE, out int restoredZone) && restoredZone == (int)EngineZone.DECK
+                && previous.TryGetValue(full.Entity.Id, out var held) && held.TryGetValue((int)GameTag.ZONE, out int heldZone)
+                && (heldZone == (int)EngineZone.PLAY || heldZone == (int)EngineZone.GRAVEYARD)
+                && held.TryGetValue((int)GameTag.PREMIUM, out int heldPremium) && (heldPremium == 2 || heldPremium == 3))
+                foreach (int quality in DeckFlightQualityTags)
+                    if (held.TryGetValue(quality, out int value) && value != 0)
+                    {
+                        packet.List.Add(new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
+                            Entity = full.Entity.Id, Tag = quality, Value = 0 } });
+                        held[quality] = 0;
+                    }
         packet.List.Add(ToNativeHistory(entries[start]));
         var resetPacket = ToNativeHistory(reset);
         packet.List.Add(resetPacket); TrackVisibility(resetPacket);

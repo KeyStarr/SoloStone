@@ -123,6 +123,21 @@ internal static partial class Program
             RejectsScenario("humanHand=CORE_CS2_189,CORE_CS2_029\nhumanHandMods=" + bad, "hand mods '" + bad + "'");
         RejectsScenario("humanHandMods=CORE_CS2_189,99,0,1,golden", "hand mods without humanHand");
         RejectsScenario("humanHand=CORE_CS2_189\nhumanHandMods=CORE_CS2_189,99,0,1,golden", "client has no definition", id => id != "CORE_CS2_189");
+        // humanHandHealth: cards humanHand places cost Health this turn (a Herald Soldier's gift, #80).
+        const string paid = "humanHand=TIME_034\nhumanHandHealth=TIME_034\nhumanSeat=first";
+        var health = DebugScenario.Parse(paid);
+        Check(health.HumanHandHealth.SequenceEqual(new[] { "TIME_034" }) && health.Canonical() == paid
+            && DebugScenario.Parse(health.Canonical()).Canonical() == paid, "hand Health cost parses and round-trips: " + health.Canonical());
+        RejectsScenario("humanHand=TIME_034\nhumanHandHealth=TIME_034", "hand Health cost without humanSeat=first");
+        RejectsScenario("humanHand=TIME_034\nhumanHandHealth=TIME_034\nhumanSeat=second", "hand Health cost on the second seat");
+        RejectsScenario("humanHandHealth=TIME_034\nhumanSeat=first", "hand Health cost without humanHand");
+        RejectsScenario("humanHand=TIME_034,TIME_034\nhumanHandHealth=TIME_034,TIME_034\nhumanSeat=first", "hand Health cost listed twice");
+        const string wing = "humanHand=TIME_034\nhumanHandHealthWing=TIME_034\nhumanSeat=first";
+        var wingHealth = DebugScenario.Parse(wing);
+        Check(wingHealth.HumanHandHealthWing.SequenceEqual(new[] { "TIME_034" }) && wingHealth.HumanHandHealth.Count == 0
+            && wingHealth.Canonical() == wing, "Wing Health cost parses and round-trips: " + wingHealth.Canonical());
+        RejectsScenario("humanHand=TIME_034\nhumanHandHealthWing=TIME_034", "Wing Health cost without humanSeat=first");
+        RejectsScenario("humanHand=TIME_034\nhumanHandHealth=TIME_034\nhumanHandHealthWing=TIME_034\nhumanSeat=first", "one card under both Health keys");
         // humanHandClear / humanManaRaw / npcManaRaw.
         var raw = DebugScenario.Parse("humanSeat=first\nhumanHandClear=1\nhumanManaRaw=32, 333\nnpcManaRaw=6,777");
         Check(raw.HumanHandClear && raw.HumanManaRaw.Current == 32 && raw.HumanManaRaw.Max == 333 && raw.NpcManaRaw.Max == 777, "raw mana and clear parse");
