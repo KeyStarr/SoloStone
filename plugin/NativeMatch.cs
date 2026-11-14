@@ -3018,7 +3018,6 @@ public sealed class NativeMatch
         if (entries == null)
             return;
 #if ENGINE_SOURCE
-        Game.PowerHistory.FlushBurnedCards();
         ObserveMatchEvents(entries);
         identityBatch = entries;
         identityPosition = -1;

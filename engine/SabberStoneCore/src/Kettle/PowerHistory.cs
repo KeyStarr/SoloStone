@@ -1026,7 +1026,6 @@ namespace SabberStoneCore.Kettle
 
 		public string Print(bool fullFlag = true)
 		{
-            FlushBurnedCards();
 			var str = new StringBuilder();
 			if (fullFlag)
 				Full.ForEach(p => str.Append(p.Print()));
