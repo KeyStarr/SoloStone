@@ -58,7 +58,7 @@ public static class Program
             if (args[0] == "goldens")
             {
                 if (args.Length == 2 && args[1] == "rerecord") throw new UsageException(RerecordUsage);
-                if (args.Length < 3) throw new ArgumentException("goldens record|check|rerecord <file>");
+                if (args.Length < 3) throw new ArgumentException("goldens record|check|rerecord|history-selftest <file>");
                 if (args[1] == "rerecord") return Rerecord(args[2], args[3..]);
                 if (args[1] == "record")
                 {
@@ -95,11 +95,21 @@ public static class Program
                         throw new ArgumentException($"{args[2]}: {string.Join(", ", damaged)}; run `goldens rerecord {args[2]}` to repair it");
                     var watch = Stopwatch.StartNew();
                     int matched = 0;
-                    foreach (GameRecord record in data.Games) if (Check(record, false, out _)) matched++;
-                    Console.Error.WriteLine($"goldens: {matched}/{data.Games.Count} match; mismatches={data.Games.Count - matched}; wall={watch.Elapsed.TotalSeconds:F3}s");
+                    var history = new HistoryShape.Totals();
+                    foreach (GameRecord record in data.Games) if (Check(record, false, out _, history)) matched++;
+                    Console.Error.WriteLine($"goldens: {matched}/{data.Games.Count} match; mismatches={data.Games.Count - matched}; history checked: {history}; wall={watch.Elapsed.TotalSeconds:F3}s");
                     return matched == data.Games.Count ? 0 : 1;
                 }
-                throw new ArgumentException("goldens record|check|rerecord <file>");
+#if SOURCE_ENGINE
+                if (args[1] == "history-selftest")
+                {
+                    Options(args[3..]);
+                    GoldenSuite data = Load<GoldenSuite>(args[2]);
+                    ValidateSuite(data);
+                    return HistoryShapeSelfTest.Run(data.Games, record => Simulation.Run(record, replay: true));
+                }
+#endif
+                throw new ArgumentException("goldens record|check|rerecord|history-selftest <file>");
             }
             if (args[0] == "sim")
             {
@@ -205,6 +215,14 @@ public static class Program
             if (Check(old, false, out GameRecord current))
             {
                 if (old.DecisionsSha == null || old.HistorySha != null) converted[i] = current.DecisionsSha;
+                continue;
+            }
+            if (current != null && old.Failure == null && SameResult(old, current))
+            {
+                // The game replays the same; only its history broke a structure rule (printed above). That is an engine bug,
+                // and the golden stores nothing a re-record could change.
+                failed++;
+                Console.Error.WriteLine($"cannot re-record {old.Id}: its history breaks a structure rule; fix the engine, re-recording cannot");
                 continue;
             }
             try
@@ -408,9 +426,10 @@ public static class Program
     }
 
     // Replays the game (actions and the legal-move hash at every step) and compares the decisions hash, the final state,
-    // turns and winner. The power history is not compared (see GameRecord.HistorySha). A record from a file in the form
-    // written before has no decisions hash; it is compared on the rest.
-    private static bool Check(GameRecord expected, bool dump, out GameRecord current)
+    // turns and winner. The power history is not compared (see GameRecord.HistorySha), only checked against the structure rules
+    // in HistoryShape, which store nothing. A record from a file in the form written before has no decisions hash; it is
+    // compared on the rest.
+    private static bool Check(GameRecord expected, bool dump, out GameRecord current, HistoryShape.Totals history = null)
     {
         Validate(expected);
         Game currentGame = null;
@@ -420,11 +439,15 @@ public static class Program
             Game game = Simulation.Run(expected, replay: true, started: game => currentGame = game);
             current = new GameRecord();
             Simulation.Finish(current, game);
-            bool matches = (expected.DecisionsSha == null || current.DecisionsSha == expected.DecisionsSha) && current.StateSha == expected.StateSha
-                && current.Turns == expected.Turns && current.Winner == expected.Winner;
+            bool same = SameResult(expected, current);
+            var shape = HistoryShape.Check(game.PowerHistory.Full, history);
+            bool matches = same && shape.Count == 0;
             if (dump || !matches) Dump(expected.Id, game);
-            if (!matches)
+            if (!same)
                 Console.Error.WriteLine($"mismatch {expected.Id}: recorded decisions={expected.DecisionsSha} state={expected.StateSha} turns={expected.Turns} winner={expected.Winner}; current decisions={current.DecisionsSha} state={current.StateSha} turns={current.Turns} winner={current.Winner}");
+            if (shape.Count > 0)
+                Console.Error.WriteLine($"history {expected.Id}: {shape.Count} broken rule(s): {string.Join("; ", shape.Take(5))}"
+                    + (shape.Count > 5 ? $"; and {shape.Count - 5} more" : ""));
             if (expected.Failure != null)
             {
                 Console.Error.WriteLine($"{expected.Id}: recorded failure did not reproduce: {expected.Failure}");
@@ -440,6 +463,10 @@ public static class Program
             return false;
         }
     }
+
+    private static bool SameResult(GameRecord expected, GameRecord current) =>
+        (expected.DecisionsSha == null || current.DecisionsSha == expected.DecisionsSha) && current.StateSha == expected.StateSha
+        && current.Turns == expected.Turns && current.Winner == expected.Winner;
 
     private static int Fuzz(int count, int seed, bool cloneProbes)
     {
