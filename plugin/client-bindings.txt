@@ -333,7 +333,10 @@ F	Assembly-CSharp	CraftingPendingTransaction	NormalCreateCount	System.Int32
 F	Assembly-CSharp	CraftingPendingTransaction	NormalDisenchantCount	System.Int32
 F	Assembly-CSharp	CraftingPendingTransaction	Premium	TAG_PREMIUM
 F	Assembly-CSharp	CraftingPendingTransaction	SignatureDisenchantCount	System.Int32
+F	Assembly-CSharp	CraftingUI	m_buttonCreate	CreateButton
 F	Assembly-CSharp	CraftingUI	m_buttonDisenchant	DisenchantButton
+F	Assembly-CSharp	CraftingUI	m_craftValue	*
+F	Assembly-CSharp	CraftingUI	m_disenchantValue	*
 F	Assembly-CSharp	CurrencyManager	m_walletDataModel	*
 F	Assembly-CSharp	CurrencyManager+CurrencyCache	m_status	*
 F	Assembly-CSharp	DeckOptionsMenu	m_deck	*
@@ -706,6 +709,7 @@ F	blizzard.bgsclient	PegasusGame.UserUI	HasMouseInfo	System.Boolean
 F	blizzard.bgsclient	PegasusUtil.MedalInfoData	HasLegendRank	System.Boolean
 M	*	Blizzard.Commerce.CommerceWrapper	get_Instance	*
 M	*	Blizzard.Commerce.ProductId	CreateFrom	(System.Int64)
+M	*	Localization	GetActualLocale	()
 M	*	UberText	GetBounds	()
 M	*	UberText	GetLocalizedFont	()
 M	*	UberText	GetTextBounds	()
@@ -1030,6 +1034,7 @@ M	Assembly-CSharp	CraftingButton	DisableButton	System.Void(System.String)
 M	Assembly-CSharp	CraftingManager	CanCraftCardRightNow	*
 M	Assembly-CSharp	CraftingManager	Get	CraftingManager()
 M	Assembly-CSharp	CraftingManager	GetCardValue	*
+M	Assembly-CSharp	CraftingManager	GetNumClientTransactions	System.Int32()
 M	Assembly-CSharp	CraftingManager	GetPendingClientTransaction	CraftingPendingTransaction()
 M	Assembly-CSharp	CraftingManager	GetShownCardInfo	System.Boolean(EntityDef&,TAG_PREMIUM&)
 M	Assembly-CSharp	CraftingManager	OnCardCreated	System.Void(Network+CardSaleResult)
@@ -1046,6 +1051,7 @@ M	Assembly-CSharp	CraftingUI	DoCreate	(System.Boolean)
 M	Assembly-CSharp	CraftingUI	DoCreate	*
 M	Assembly-CSharp	CraftingUI	DoDisenchant	*
 M	Assembly-CSharp	CraftingUI	IsCraftingEventForCardActive	*
+M	Assembly-CSharp	CraftingUI	SetCreateCostBarActive	*
 M	Assembly-CSharp	CraftingUI	SetDisenchantCostBarActive	*
 M	Assembly-CSharp	CraftingUI	UpdateCraftingButtonsAndSoulboundText	*
 M	Assembly-CSharp	CreateButton	OnRelease	*

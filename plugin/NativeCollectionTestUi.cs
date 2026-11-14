@@ -23,6 +23,8 @@ internal static class NativeCollectionTestUi
     internal static void Name(CollectionManagerDisplay display, Action<PegUIElement, string> name)
     {
         void Active(PegUIElement element, string id) { if (element != null && element.gameObject.activeInHierarchy) name(element, id); }
+        // The dust jar: toggles the crafting tray, which lists missing cards on the Cards pages too.
+        Active(display.m_craftingModeButton, UiRules.CollectionCraftingMode);
         var tray = CollectionDeckTray.Get();
         var content = tray?.GetDecksContent();
         if (content != null) Active(NewDeck?.GetValue(content) as PegUIElement, "collection.newdeck");

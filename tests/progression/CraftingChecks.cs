@@ -120,6 +120,37 @@ internal static class CraftingChecks
         Refused(LocalCrafting.PlanMassDisenchant(null));
         Refused(LocalCrafting.PlanBatch(View(-1), "CATA_452", CraftDirection.Craft, 1, 0));
         Refused(LocalCrafting.PlanBatch(View(1000, -1), "CATA_452", CraftDirection.Craft, 1, -1));
+        // #74 craft tokens: a Normal craft of one copy of a held token's rarity costs 0 dust and names that token.
+        CraftLedgerView Tokened(long dust, string id, int owned, LocalCardTokens tokens) => new CraftLedgerView { Dust = dust,
+            Counts = new Dictionary<string, int> { [id] = owned }, Acquired = new Dictionary<string, int> { [id] = owned }, Tokens = tokens };
+        foreach (var rarity in new[] { ("CATA_452", LocalTokenRarity.Common), ("EDR_001", LocalTokenRarity.Rare),
+            ("CATA_493", LocalTokenRarity.Epic), ("CATA_458", LocalTokenRarity.Legendary) })
+            Check(LocalCrafting.TryGetTokenRarity(rarity.Item1, out var found) && found == rarity.Item2, "token rarity: " + rarity.Item1);
+        Check(!LocalCrafting.TryGetTokenRarity("CORE_EX1_012", out _) && !LocalCrafting.TryGetTokenRarity("EX1_008", out _)
+            && !LocalCrafting.TryGetTokenRarity(null, out _), "uncraftable cards take no token");
+        var legendaryToken = new LocalCardTokens { Legendary = 1 };
+        plan = LocalCrafting.PlanBatch(Tokened(0, "CATA_458", 0, legendaryToken), "CATA_458", CraftDirection.Craft, 1, 0);
+        Check(plan.Ok && plan.DustDelta == 0 && plan.TokenRarity == LocalTokenRarity.Legendary && plan.Cards.Single().CountDelta == 1
+            && plan.Cards.Single().AcquiredAfter == 1 && legendaryToken.Legendary == 1, "legendary token craft with 0 dust; planning is pure");
+        plan = LocalCrafting.PlanBatch(Tokened(40, "CATA_452", 0, legendaryToken), "CATA_452", CraftDirection.Craft, 1, 0);
+        Check(plan.Ok && plan.DustDelta == -40 && plan.TokenRarity == null, "non-matching token: full dust");
+        Refused(LocalCrafting.PlanBatch(Tokened(0, "CATA_452", 0, legendaryToken), "CATA_452", CraftDirection.Craft, 1, 0));
+        var epicTokens = new LocalCardTokens { Epic = 2 };
+        Refused(LocalCrafting.PlanBatch(Tokened(800, "CATA_493", 0, epicTokens), "CATA_493", CraftDirection.Craft, 2, 0));
+        plan = LocalCrafting.PlanBatch(Tokened(0, "CATA_493", 1, epicTokens), "CATA_493", CraftDirection.Craft, 1, 1);
+        Check(plan.Ok && plan.DustDelta == 0 && plan.TokenRarity == LocalTokenRarity.Epic, "second epic copy, second token");
+        plan = LocalCrafting.PlanBatch(Tokened(0, "CATA_493", 2, epicTokens), "CATA_493", CraftDirection.Disenchant, 1, 2);
+        Check(plan.Ok && plan.DustDelta == 200 && plan.TokenRarity == null, "disenchant ignores tokens and pays the normal value");
+        Refused(LocalCrafting.PlanBatch(Tokened(10000, "CATA_458", 0, legendaryToken), "CATA_458", CraftDirection.Craft, 1, 0, 1));
+        Refused(LocalCrafting.PlanBatch(Tokened(10000, "CATA_458", 1, legendaryToken), "CATA_458", CraftDirection.Craft, 1, 1));
+        Refused(LocalCrafting.PlanBatch(Tokened(10000, "CATA_458", 0, new LocalCardTokens { Legendary = 1, Rare = -1 }),
+            "CATA_458", CraftDirection.Craft, 1, 0));
+        plan = LocalCrafting.PlanBatch(Tokened(1600, "CATA_458", 0, null), "CATA_458", CraftDirection.Craft, 1, 0);
+        Check(plan.Ok && plan.DustDelta == -1600 && plan.TokenRarity == null, "no tokens: unchanged price");
+        var massTokens = Tokened(0, "CATA_458", 3, legendaryToken);
+        plan = LocalCrafting.PlanMassDisenchant(massTokens);
+        Check(plan.Ok && plan.DustDelta == 1600 && plan.TokenRarity == null, "mass disenchant unaffected by tokens");
+        Console.WriteLine("PASS craft token planning: rarity match, one copy, no premium, disenchant and mass unaffected");
         Console.WriteLine("PASS crafting prices, eligibility, batch and mass planning");
     }
 }

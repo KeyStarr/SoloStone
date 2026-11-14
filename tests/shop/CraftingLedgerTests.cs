@@ -829,6 +829,111 @@ internal static class CraftingLedgerTests
             Check(result.RewardVersion == 6 && result.DustReward == rolledDust && ledger.DustBalance == before + result.DustReward, "ledger sees stamped-tier V6 settlement credit live");
             Check(ledger.CommitBatch(Common, CraftDirection.Craft, 1, 0).Ok && ledger.DustBalance == result.DustReward, "craft spends post-settlement balance");
         }
+        // #74: ranked milestone craft tokens pay for a Normal craft of their rarity, one copy each, automatically.
+        const string Epic = "CATA_493";
+        LocalCardTokens Tokens(string tokenPath) => Read(tokenPath).CardTokens;
+        void TokenReceipt(string tokenPath, long sequence, string id, LocalTokenRarity rarity) {
+            var receipt = Read(tokenPath).LastCraft;
+            Check(Read(tokenPath).CraftSequence == sequence && receipt.Sequence == sequence && receipt.Op == LocalCraftOp.TokenCraft
+                && receipt.DustDelta == 0 && receipt.TokenRarity == rarity && receipt.TokenDelta == -1 && !receipt.Undoable
+                && receipt.Cards.Count == 1 && receipt.Cards[0].CardId == id && receipt.Cards[0].CountDelta == 1
+                && receipt.Cards[0].AcquiredBefore == 0 && receipt.Cards[0].Premium == 0, "token craft receipt");
+        }
+        string tokenPath = Fresh("token-legendary", 100, d => { d.CardTokens.Legendary = 2; d.CardTokens.Epic = 1; });
+        string tokenMemory;
+        using (var p = new LocalProfile(tokenPath)) {
+            var ledger = new LocalCraftingLedger(p);
+            Check(ledger.CraftsWithToken(Legendary) && ledger.CraftsWithToken(Epic) && !ledger.CraftsWithToken(Common)
+                && !ledger.CraftsWithToken("CORE_EX1_012") && !ledger.CraftsWithToken("EX1_008"), "token eligibility by rarity and craftability");
+            var plan = ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0);
+            Check(plan.Ok && plan.DustDelta == 0 && plan.TokenRarity == LocalTokenRarity.Legendary && ledger.DustBalance == 100
+                && ledger.OwnedCount(Legendary) == 1 && p.Acquired[Legendary] == 1 && p.CardTokenCount(LocalTokenRarity.Legendary) == 1,
+                "legendary token craft with 100 dust: dust unchanged, one token spent, copy owned");
+            TokenReceipt(tokenPath, 1, Legendary, LocalTokenRarity.Legendary);
+            Check(Tokens(tokenPath).Legendary == 1 && Tokens(tokenPath).Epic == 1, "only the matching token is spent");
+            Check(Read(tokenPath).Achievements.Career.CraftedBaseCardIds.Contains(LocalCardCatalog.CopyGroup(Legendary)),
+                "a token craft counts as a craft for achievements");
+            tokenMemory = Memory(p);
+        }
+        using (var p = new LocalProfile(tokenPath)) {
+            var ledger = new LocalCraftingLedger(p);
+            Check(Memory(p) == tokenMemory, "token craft survives reload and validation");
+            // Non-matching rarity: full dust, tokens untouched.
+            var plan = ledger.CommitBatch(Common, CraftDirection.Craft, 1, 0);
+            Check(plan.Ok && plan.DustDelta == -40 && plan.TokenRarity == null && ledger.DustBalance == 60
+                && Tokens(tokenPath).Legendary == 1 && Tokens(tokenPath).Epic == 1, "common craft with only rarer tokens pays dust");
+            Receipt(tokenPath, 2, LocalCraftOp.Craft, -40, (Common, 1, 0));
+            // Batch rule: a held token covers exactly one copy; a two-copy batch is refused, not part-paid.
+            Unchanged(p, tokenPath, () => ledger.CommitBatch(Epic, CraftDirection.Craft, 2, 0));
+            Check(ledger.CommitBatch(Epic, CraftDirection.Craft, 1, 0).Ok && ledger.DustBalance == 60 && Tokens(tokenPath).Epic == 0,
+                "single epic copy uses the epic token");
+            TokenReceipt(tokenPath, 3, Epic, LocalTokenRarity.Epic);
+            Unchanged(p, tokenPath, () => ledger.CommitBatch(Epic, CraftDirection.Craft, 1, 1)); // No token left, 60 < 400.
+            // No minting: the token-made legendary sells for its ordinary value; no path refunds the token or unpaid dust.
+            var sale = ledger.CommitBatch(Legendary, CraftDirection.Disenchant, 1, 1);
+            Check(sale.Ok && sale.DustDelta == 800 && sale.TokenRarity == null && ledger.DustBalance == 860
+                && Tokens(tokenPath).Legendary == 1 && p.Acquired[Legendary] == 1, "disenchanting a token craft pays the normal value only");
+            Receipt(tokenPath, 4, LocalCraftOp.Disenchant, 800, (Legendary, -1, 1));
+            Check(ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0).Ok && ledger.DustBalance == 860
+                && Tokens(tokenPath).Legendary == 0, "the second legendary token recrafts it");
+            Check(ledger.CommitBatch(Legendary, CraftDirection.Disenchant, 1, 1).Ok && ledger.DustBalance == 1660, "second sale");
+            var paid = ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0);
+            Check(paid.Ok && paid.DustDelta == -1600 && paid.TokenRarity == null && ledger.DustBalance == 60, "without tokens the full price returns");
+            Check(!ledger.CraftsWithToken(Legendary) && Tokens(tokenPath).Legendary == 0, "tokens never go negative or come back");
+            tokenMemory = Memory(p);
+        }
+        using (var p = new LocalProfile(tokenPath)) Check(Memory(p) == tokenMemory, "token history survives reload");
+        // Golden: an upgrade with a matching token held pays its full tariff and leaves the token.
+        string tokenGolden = Fresh("token-golden", 400, d => {
+            d.CardTokens.Common = 1; d.Collection.Add(new LocalCardCount { Id = Common, Count = 1, Acquired = 1 });
+        });
+        using (var p = new LocalProfile(tokenGolden)) {
+            Check(LocalCrafting.CommitUpgrade(p, Common, 1, 1, 0).Ok && p.DustBalance == 40 && Tokens(tokenGolden).Common == 1
+                && Read(tokenGolden).LastCraft.TokenRarity == null, "golden upgrade ignores tokens and pays full dust");
+            Unchanged(p, tokenGolden, () => LocalCrafting.CommitPremiumBatch(p, Common, 1, CraftDirection.Craft, 1, 1));
+            Check(Tokens(tokenGolden).Common == 1, "premium craft refusal keeps the token");
+        }
+        // Failed writes spend nothing.
+        foreach (string stage in new[] { "write", "flush", "replace" }) {
+            string failed = Fresh("token-failure-" + stage, 0, d => d.CardTokens.Legendary = 1);
+            using var p = new LocalProfile(failed); var ledger = new LocalCraftingLedger(p);
+            p.CommitFailure = point => { if (point == stage) throw new IOException("injected " + stage); };
+            Unchanged(p, failed, () => ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0));
+            p.CommitFailure = null;
+            Check(p.CardTokenCount(LocalTokenRarity.Legendary) == 1 && ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0).Ok
+                && p.CardTokenCount(LocalTokenRarity.Legendary) == 0 && p.DustBalance == 0, "retry after failed token craft spends once");
+        }
+        // Infinite dust spends no token (the craft is free anyway) and records the ordinary nominal Craft receipt.
+        string tokenInfiniteRoot = Path.Combine(root, "token-infinite"); Directory.CreateDirectory(tokenInfiniteRoot);
+        string tokenLegacy = Path.Combine(tokenInfiniteRoot, "profile.xml");
+        var tokenSlot = ProfileCatalog.Create(tokenLegacy, "Infinite", new ProfileOptions { InfiniteDust = true });
+        string tokenInfinite = ProfileCatalog.ProfilePathForId(tokenLegacy, tokenSlot.Id);
+        using (var p = new LocalProfile(tokenInfinite)) p.SelectCardBack(0);
+        var infiniteData = Read(tokenInfinite); infiniteData.CardTokens.Legendary = 1; Write(tokenInfinite, infiniteData);
+        using (var p = new LocalProfile(tokenInfinite)) {
+            var ledger = new LocalCraftingLedger(p);
+            Check(!ledger.CraftsWithToken(Legendary) && ledger.CommitBatch(Legendary, CraftDirection.Craft, 1, 0).Ok
+                && Tokens(tokenInfinite).Legendary == 1 && Read(tokenInfinite).LastCraft.Op == LocalCraftOp.Craft
+                && Read(tokenInfinite).LastCraft.DustDelta == -1600 && Read(tokenInfinite).LastCraft.TokenDelta == 0,
+                "infinite dust keeps tokens");
+        }
+        // Saved token receipts must keep their shape.
+        foreach (var corruption in new Action<LocalCraftReceipt>[] {
+            r => r.DustDelta = -1600, r => r.TokenDelta = 0, r => r.TokenDelta = -2, r => r.TokenRarity = null,
+            r => r.Cards[0].CountDelta = 2, r => r.Cards.Add(new LocalCraftCard { CardId = Common, CountDelta = 1 }),
+            r => r.Cards[0].Premium = 1 }) {
+            var data = Read(tokenPath);
+            data.LastCraft = new LocalCraftReceipt { Sequence = data.CraftSequence, Op = LocalCraftOp.TokenCraft,
+                TokenRarity = LocalTokenRarity.Legendary, TokenDelta = -1, Cards = new() { new() { CardId = Legendary, CountDelta = 1 } } };
+            string goodPath = tokenPath + ".good.xml"; Write(goodPath, data);
+            using (var good = new LocalProfile(goodPath)) { }
+            corruption(data.LastCraft);
+            string badPath = tokenPath + ".bad.xml"; Write(badPath, data);
+            bool refused = false;
+            try { using var bad = new LocalProfile(badPath); } catch (InvalidOperationException) { refused = true; }
+            Check(refused, "malformed token craft receipt refused on load");
+        }
+        Console.WriteLine("PASS craft tokens: matching rarity free, others and golden full price, one copy per token, no minting, failures, infinite dust, reload, receipts");
         Console.WriteLine("PASS durable crafting: reload, receipts, refusals, failures, mass, lifetime acquisition, packs, decks, settlement");
         Console.WriteLine($"PASS {assertions} crafting ledger checks");
     }

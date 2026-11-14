@@ -57,6 +57,8 @@ internal static class NativeCrafting
         Prefix(harmony, typeof(UpgradeToGoldenPopup), "HandleEvent", nameof(BeforeUpgradeEvent), typeof(string));
         harmony.Patch(Required(typeof(CraftingUI), "UpdateCraftingButtonsAndSoulboundText"),
             postfix: new HarmonyMethod(typeof(NativeCrafting), nameof(ProtectPremiumButton)));
+        harmony.Patch(Required(typeof(CraftingUI), "UpdateCraftingButtonsAndSoulboundText"),
+            postfix: new HarmonyMethod(typeof(NativeCrafting), nameof(ShowTokenCraft)));
         Prefix(harmony, typeof(FixedRewardsMgr), "CanCraftCard", nameof(Permission));
         Prefix(harmony, typeof(CraftingUI), "IsCraftingEventForCardActive", nameof(CraftingEvent));
         Prefix(harmony, typeof(CollectionManager), "RequestDeckContentsForDecksWithoutContentsLoaded", nameof(DeckContentsReady));
@@ -123,6 +125,10 @@ internal static class NativeCrafting
         if (!Enabled) return true;
         __2 = null;
         bool priced = LocalCrafting.TryGetPrice(__0, (int)__1, out int buy, out int sell);
+        // A held craft token pays for a Normal craft (#74): native shows, checks and overlays a 0 cost. The value is the
+        // same for the whole card view (tokens change only on commit), so the in-view Undo refunds the same 0 and the
+        // Normal sell value stays the ordinary one.
+        if (priced && __1 == TAG_PREMIUM.NORMAL && CraftingLedgerRegistry.Current.CraftsWithToken(__0)) buy = 0;
         // Native multiplies per-quality counts by every quality's price, so premium versions always get a value object.
         // Grant-only cards and copies earned through progression have sell value 0 here and Eligible refuses
         // the sale, so the UI shows it as not disenchantable and a queued sale is refused instead of dropped silently.
@@ -165,7 +171,7 @@ internal static class NativeCrafting
         if (manager?.GetPendingClientTransaction()?.GetLastTransactionWasDisenchant() == true) return true;
         if (manager == null || !manager.GetShownCardInfo(out EntityDef card, out TAG_PREMIUM premium)) return false;
         return AllowAction(__0 ? CraftDirection.Upgrade : CraftDirection.Craft, __0 ? TAG_PREMIUM.GOLDEN : premium)
-            && (!__0 || AllowUpgrade(card.GetCardId()));
+            && (__0 ? AllowUpgrade(card.GetCardId()) : AllowTokenCraft(card.GetCardId(), premium));
     }
 
     private static bool BeforeUpgradeEvent(string __0)
@@ -175,7 +181,69 @@ internal static class NativeCrafting
         if (manager == null || !manager.GetShownCardInfo(out EntityDef card, out TAG_PREMIUM premium)) return false;
         return AllowAction(__0 == "CODE_UPGRADE" ? CraftDirection.Upgrade : CraftDirection.Craft,
             __0 == "CODE_UPGRADE" ? TAG_PREMIUM.GOLDEN : premium)
-            && (__0 != "CODE_UPGRADE" || AllowUpgrade(card.GetCardId()));
+            && (__0 == "CODE_UPGRADE" ? AllowUpgrade(card.GetCardId()) : AllowTokenCraft(card.GetCardId(), premium));
+    }
+
+    // One token makes one copy: while a token-paid copy of this card is pending, a second Create is refused before native
+    // adds it (its price would read 0 too). The player closes the card to save it and reopens it for the next copy.
+    private static bool AllowTokenCraft(string cardId, TAG_PREMIUM premium)
+    {
+        var pending = CraftingManager.Get()?.GetPendingClientTransaction();
+        if (premium != TAG_PREMIUM.NORMAL || pending == null || pending.CardID != cardId || pending.NormalCreateCount < 1
+            || !CraftingLedgerRegistry.Current.CraftsWithToken(cardId)) return true;
+        ShowError(TokenOneCopy);
+        return false;
+    }
+
+    internal const string TokenOneCopy = "A craft token makes one copy. Close the card to save it, then open it again to craft another.";
+    // The client's own localized price word for free (the shop's GLUE_SHOP_FREE); a plain 0 if this client lacks the key.
+    internal static string TokenCraftLabel()
+    {
+        return NativeStrings.Get("GLUE_SHOP_FREE", "0");
+    }
+
+    // After native draws the buttons: a token-paid Normal craft reads the client's word for free in the cost bar instead of
+    // "-0", and once its one copy is pending the Create button is disabled (AllowTokenCraft refuses it as well). Undo stays
+    // native. Presentation only: a missing client member logs and leaves native's drawing; the 0 price (Price) and the
+    // second-copy refusal (AllowTokenCraft) do not depend on it.
+    private static void ShowTokenCraft(CraftingUI __instance)
+    {
+        if (!Enabled) return;
+        var manager = CraftingManager.Get();
+        if (manager == null || !manager.GetShownCardInfo(out EntityDef card, out TAG_PREMIUM premium) || card == null
+            || premium != TAG_PREMIUM.NORMAL || !CraftingLedgerRegistry.Current.CraftsWithToken(card.GetCardId())) return;
+        var pending = manager.GetPendingClientTransaction();
+        if (pending != null && pending.CardID == card.GetCardId() && pending.NormalCreateCount > 0)
+        {
+            SafeStep("token create button", () => {
+                __instance.m_buttonCreate.DisableButton();
+                Required(typeof(CraftingUI), "SetCreateCostBarActive").Invoke(__instance, new object[] { false });
+            });
+            return;
+        }
+        // Native prints "-" + the buy value when no net disenchant is pending, else the sell value (an Undo of a sale).
+        SafeStep("token cost label", () => {
+            if (manager.GetNumClientTransactions() >= 0 && UiText(__instance, false) == "-0")
+                SetUiText(__instance, TokenCraftLabel());
+        });
+    }
+
+    // CraftingUI's cost labels are UberText, from a client library the plugin does not reference: reach them by reflection.
+    private static object UiLabel(CraftingUI ui, bool disenchant)
+    {
+        var info = disenchant ? AccessTools.Field(typeof(CraftingUI), "m_disenchantValue") : AccessTools.Field(typeof(CraftingUI), "m_craftValue");
+        return (info ?? throw new MissingFieldException(nameof(CraftingUI), disenchant ? "m_disenchantValue" : "m_craftValue")).GetValue(ui);
+    }
+    private static string UiText(CraftingUI ui, bool disenchant)
+    {
+        object label = UiLabel(ui, disenchant);
+        return label == null ? null : AccessTools.Property(label.GetType(), "Text")?.GetValue(label, null) as string;
+    }
+    private static void SetUiText(CraftingUI ui, string text)
+    {
+        object label = UiLabel(ui, false) ?? throw new InvalidOperationException("CraftingUI.m_craftValue is missing.");
+        (AccessTools.Property(label.GetType(), "Text") ?? throw new MissingMemberException(label.GetType().Name, "Text"))
+            .SetValue(label, text, null);
     }
 
 #if !SOLOSTONE_RELEASE
@@ -198,6 +266,32 @@ internal static class NativeCrafting
                 + ",button=" + CraftingManager.Get()?.m_craftingUI?.m_buttonCreate?.GetCraftingState();
         }
         catch (Exception error) { return "craftUpgrade=error:" + error.GetType().Name; }
+    }
+#endif
+
+#if !SOLOSTONE_RELEASE
+    // Test control (crafting-state craftView): the shown card's native craft controls as drawn, the in-view dust overlay,
+    // its pending counts and whether a craft token pays for its Normal craft. Read-only; null without a shown card.
+    internal static MiniJSON.JsonNode CraftViewState()
+    {
+        var manager = CraftingManager.IsInitialized ? CraftingManager.Get() : null;
+        if (manager == null || !manager.GetShownCardInfo(out EntityDef card, out TAG_PREMIUM premium) || card == null) return null;
+        string id = card.GetCardId();
+        var ui = manager.m_craftingUI;
+        var pending = manager.GetPendingClientTransaction();
+        bool same = pending != null && pending.CardID == id;
+        return new MiniJSON.JsonNode {
+            { "cardId", id }, { "premium", premium.ToString() },
+            { "tokenCraft", Enabled && premium == TAG_PREMIUM.NORMAL && CraftingLedgerRegistry.Current.CraftsWithToken(id) },
+            { "craftValue", ui == null ? null : UiText(ui, false) },
+            { "disenchantValue", ui == null ? null : UiText(ui, true) },
+            { "createState", ui?.m_buttonCreate?.GetCraftingState().ToString() },
+            { "createEnabled", ui?.m_buttonCreate?.IsButtonEnabled() },
+            { "canCraft", manager.CanCraftCardRightNow(card, premium).ToString() },
+            { "uncommittedDust", manager.GetUnCommitedArcaneDustChanges() },
+            { "pendingCreates", same ? pending.NormalCreateCount : 0 },
+            { "pendingDisenchants", same ? pending.NormalDisenchantCount : 0 }
+        };
     }
 #endif
 

@@ -329,6 +329,7 @@ internal sealed partial class NativeTestControl
         catch (Exception error) { Freeze("Control tick failed: " + error.GetType().Name + ": " + error.Message); }
     }
     private static bool NeedsView(ControlRequest request) => (request.Mutation && request.Command != "shop-purchase" && request.Command != "open-packs"
+        && request.Command != "craft-token-grant" && request.Command != "collection-jump"
         && !(request.Command == "press" && UiRules.IsMatchEscape(request.Text("element")))) || request.Command == "state"
         || request.Command == "options" || request.Command == "choices" || request.Command == "wait-until-idle";
     private void ResetSampling()
@@ -525,6 +526,7 @@ internal sealed partial class NativeTestControl
             if (request.Command == "press" || request.Command == "ui-hover" || request.Command == "ui-unhover" || request.Command == "ui-escape" || request.Command == "ui-drag" || request.Command == "ui-scroll") { HandlePress(envelope); return; }
             if (request.Command == "shop-purchase") { HandleShopPurchase(envelope); return; }
             if (request.Command == "open-packs") { HandleOpenPacks(envelope); return; }
+            if (request.Command == "craft-token-grant" || request.Command == "collection-jump") { HandleCraftingTest(envelope); return; }
             if (request.Command == "squelch" || request.Command == "unsquelch" || request.Command == "emote" || request.Command == "npc-emote" || request.Command == "npc-concede"
                 || request.Command == "human-defeat" || request.Command == "premium-unlock-prepare" || request.Command == "achievement-prime" || request.Command == "turn-timer-debug" || request.Command == "spell-stall-arm")
             { HandlePresence(envelope, view); return; }
@@ -2435,18 +2437,24 @@ internal static class TestControlCrafting
                 { "acquired", acquired.TryGetValue(id, out int count) ? count : 0 },
                 { "nativeNormalCount", collection?.GetOwnedCount(id, TAG_PREMIUM.NORMAL) },
                 { "craftable", craftable }, { "craftCost", cost }, { "disenchantValue", value },
-                { "nativeBuy", nativePrice?.GetBuyValue() }, { "nativeSell", nativePrice?.GetSellValue() }
+                { "nativeBuy", nativePrice?.GetBuyValue() }, { "nativeSell", nativePrice?.GetSellValue() },
+                { "tokenCraft", ledger?.CraftsWithToken(id) }
             });
         }
         var receipt = saved.LastCraft;
+        var tokens = saved.CardTokens;
         return new JsonNode {
             { "ledgerActive", ledger != null }, { "dust", ledger?.DustBalance },
             { "craftingMode", craftingMode }, { "shownCardId", shownCardId },
             { "nativeDust", net?.GetArcaneDustBalance() },
             { "nativeDustRaw", net?.GetNetObject<NetCache.NetCacheArcaneDustBalance>()?.Balance },
             { "craftSequence", saved.CraftSequence },
+            { "tokens", tokens == null ? null : new JsonNode {
+                { "common", tokens.Common }, { "rare", tokens.Rare }, { "epic", tokens.Epic }, { "legendary", tokens.Legendary } } },
+            { "craftView", craftingMode ? NativeCrafting.CraftViewState() : null },
             { "lastCraft", receipt == null ? null : new JsonNode {
                 { "sequence", receipt.Sequence }, { "op", receipt.Op.ToString() }, { "dustDelta", receipt.DustDelta },
+                { "tokenRarity", receipt.TokenRarity?.ToString() }, { "tokenDelta", receipt.TokenDelta },
                 { "cards", TestControlProtocol.List(receipt.Cards.Select(card => (object)new JsonNode {
                     { "cardId", card.CardId }, { "countDelta", card.CountDelta }, { "acquiredBefore", card.AcquiredBefore }, { "premium", card.Premium }
                 })) }
