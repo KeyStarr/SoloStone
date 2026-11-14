@@ -230,13 +230,14 @@ internal sealed class Runner
             throw new InvalidOperationException("replay.result: action length or transport findings changed");
         if (replay.EngineFingerprint != null)
         {
-            string fingerprint = Canonical.Sha(Canonical.State(game) + Canonical.History(game)
-                + Canonical.Value(game.Random.CaptureState()));
-            // Renewal audit aid: HS_TRANSPORT_FP_PARTS=1 prints the three parts, so a drift can be shown to be state/history only (RNG identical).
+            // State and random-number state only, as in engine-proof's PinnedReplayEngineProof: the power history is checked by
+            // the history-shape rules and the client picture here, so a presentation fix renews no replay.
+            string fingerprint = Canonical.Sha(Canonical.State(game) + Canonical.Value(game.Random.CaptureState()));
+            // Renewal audit aid: HS_TRANSPORT_FP_PARTS=1 prints the parts, so a drift can be shown to be state only (RNG identical).
             if (Environment.GetEnvironmentVariable("HS_TRANSPORT_FP_PARTS") == "1")
                 Console.WriteLine($"FP_PARTS {record.Id} fingerprint={fingerprint} state={Canonical.Sha(Canonical.State(game))[..12]} history={Canonical.Sha(Canonical.History(game))[..12]} rng={Canonical.Sha(Canonical.Value(game.Random.CaptureState()))[..12]} actions={step}");
             if (verify && replay.EngineFingerprint != fingerprint)
-                throw new InvalidOperationException("replay.engine: state/history/RNG fingerprint changed");
+                throw new InvalidOperationException($"replay.engine: state/RNG fingerprint changed (recorded {replay.EngineFingerprint}, now {fingerprint})");
             replay.EngineFingerprint = fingerprint;
         }
         replay.FindingsSha = findingsSha;

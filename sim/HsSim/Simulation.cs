@@ -30,10 +30,22 @@ public sealed class GameRecord
     public List<string> LegalShas { get; set; } = new();
     public int Turns { get; set; }
     public int Winner { get; set; }
+    // Hash of the whole power history. Goldens no longer store it (read from older files, never written there): every
+    // presentation fix moved it in most games, so any two engine changes conflicted on it. Goldens pin the option and choice
+    // packets (DecisionsSha) and the final state instead; the client-tier transport checks look at the history itself.
     public string HistorySha { get; set; }
+    public string DecisionsSha { get; set; }
     public string StateSha { get; set; }
     public List<int> ClonePoints { get; set; }
     public string Failure { get; set; }
+
+    // The record as a golden file stores it: without the history hash.
+    public GameRecord ForGolden()
+    {
+        var copy = (GameRecord)MemberwiseClone();
+        copy.HistorySha = null;
+        return copy;
+    }
 }
 
 public sealed record DeckSpec(string Id, string Hero, string OpponentName, string[] Cards);
@@ -411,6 +423,7 @@ public static class Simulation
         record.Turns = game.Turn;
         record.Winner = game.Player1.PlayState == PlayState.WON ? 1 : game.Player2.PlayState == PlayState.WON ? 2 : 0;
         record.HistorySha = Canonical.Sha(Canonical.History(game));
+        record.DecisionsSha = Canonical.Sha(Canonical.DecisionTrace(game));
         record.StateSha = Canonical.Sha(Canonical.State(game));
     }
 }

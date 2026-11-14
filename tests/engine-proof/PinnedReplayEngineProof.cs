@@ -5,7 +5,8 @@ using SabberStoneCore.Enums;
 
 // Engine half of the pinned transport replays (tests/transport-invariants/replays). Moved from the transport Runner (verify mode):
 // replay the recorded actions with Simulation.Create/Legal/Process and require the recorded legal-move hash at every step and, where the
-// replay stores one, the state/history/RNG fingerprint. The pinned pool snapshot comes from tests/goldens/pools. Needs no client.
+// replay stores one, the state/RNG fingerprint (the power history is left to the packet half, so a presentation fix renews
+// no replay). The pinned pool snapshot comes from tests/goldens/pools. Needs no client.
 // The packet half (transport parity, history shape, the witnesses that read packets) stays in transport-invariants. The three
 // transport-debt replays record no actions and are not covered here.
 internal static class PinnedReplayEngineProof
@@ -46,7 +47,7 @@ internal static class PinnedReplayEngineProof
                 Check(replay.PlayerDeck?.Cards.Length == 30 && replay.OpponentDeck?.Cards.Length == 30,
                     name + " pins both original stress decks independently of registry growth");
                 if (kind == "deathrattle")
-                    Check(!string.IsNullOrEmpty(replay.EngineFingerprint), name + " pins engine state/history/RNG");
+                    Check(!string.IsNullOrEmpty(replay.EngineFingerprint), name + " pins engine state/RNG");
                 Check(!replay.Focused && !replay.Game.Player.StartsWith("standard-coverage-", StringComparison.Ordinal),
                     name + " is a plain recorded game: focused and standard-coverage replays need the packet runner and stay in transport-invariants");
                 // Name the replay: a bare "fingerprint changed" does not say which one moved (all are listed before failing).
@@ -60,8 +61,12 @@ internal static class PinnedReplayEngineProof
         Check(drifted.Count == 0, "pinned replays failed on the engine: " + string.Join("; ", drifted)
             + ". A pinned replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through transport-invariants, after the same per-game review as a golden.");
         Check(replays == 17 && fingerprints == 8, $"expected 17 pinned replays and 8 fingerprints, found {replays} and {fingerprints} (a replay file was added or removed: update this count with it)");
-        Console.WriteLine($"PASS pinned replays on the engine: {replays} replays, legal-move hash chain and actions at every step, {fingerprints} state/history/RNG fingerprints");
+        Console.WriteLine($"PASS pinned replays on the engine: {replays} replays, legal-move hash chain and actions at every step, {fingerprints} state/RNG fingerprints");
     }
+
+    // The final state and the random-number state. The power history is not in it: every presentation fix moved it.
+    internal static string Fingerprint(SabberStoneCore.Model.Game game) =>
+        Canonical.Sha(Canonical.State(game) + Canonical.Value(game.Random.CaptureState()));
 
     private static void Replay(PinnedReplay replay)
     {
@@ -91,10 +96,9 @@ internal static class PinnedReplayEngineProof
             throw new InvalidOperationException("replay.result: action length changed");
         if (replay.EngineFingerprint != null)
         {
-            string fingerprint = Canonical.Sha(Canonical.State(game) + Canonical.History(game)
-                + Canonical.Value(game.Random.CaptureState()));
+            string fingerprint = Fingerprint(game);
             if (replay.EngineFingerprint != fingerprint)
-                throw new InvalidOperationException("replay.engine: state/history/RNG fingerprint changed");
+                throw new InvalidOperationException($"replay.engine: state/RNG fingerprint changed (recorded {replay.EngineFingerprint}, now {fingerprint})");
         }
     }
 }

@@ -18,8 +18,25 @@ public sealed class GoldenSuite
 #endif
     public string Suite { get; set; }
     public string Policy { get; set; }
+    // Read from files written before one game per line, never written: it changed with every engine change, so any two
+    // engine changes conflicted on it.
     public string EngineSha { get; set; }
     public List<GameRecord> Games { get; set; } = new();
+
+    // One game per line with a blank line between games, so two changes that re-record different games merge in git without
+    // a conflict (git also treats changes on touching lines as a conflict, hence the blank line).
+    // keepHistory writes a game's history hash if it has one: only to recognise a file with a stray one (rerecord drops it).
+    public static string Serialize(GoldenSuite suite, JsonSerializerOptions json, bool keepHistory = false)
+    {
+        string header = JsonSerializer.Serialize(new GoldenSuite { Schema = suite.Schema, Suite = suite.Suite, Policy = suite.Policy }, json);
+        const string empty = "\"games\":[]}";
+        if (!header.EndsWith(empty, StringComparison.Ordinal)) throw new InvalidOperationException("unexpected golden header: " + header);
+        string games = string.Join(",\n\n", suite.Games.Select(game => JsonSerializer.Serialize(keepHistory ? game : game.ForGolden(), json)));
+        return header[..^2] + "\n\n" + games + "\n\n]}\n";
+    }
+
+    // The single-line form written before, with its engine hash.
+    public static string SerializeLegacy(GoldenSuite suite, JsonSerializerOptions json) => JsonSerializer.Serialize(suite, json) + "\n";
 }
 
 public static class Program
@@ -48,8 +65,7 @@ public static class Program
                     var options = Options(args[3..], "suite", "seeds", "policy", "pool-snapshot");
                     string suite = Get(options, "suite", "classic"), policy = Policy(options);
                     var watch = Stopwatch.StartNew();
-                    var data = new GoldenSuite { Suite = suite, Policy = policy,
-                        EngineSha = EngineSha() };
+                    var data = new GoldenSuite { Suite = suite, Policy = policy };
 #if SOURCE_ENGINE
                     var pools = PoolSnapshots.Save(Get(options, "pool-snapshot", null));
 #endif
@@ -62,7 +78,7 @@ public static class Program
                             ));
                         data.Games.Add(record);
                     }
-                    Save(args[2], data);
+                    SaveText(args[2], GoldenSuite.Serialize(data, Json));
                     Console.Error.WriteLine($"recorded {data.Games.Count} games: {args[2]} ({watch.Elapsed.TotalSeconds:F3}s)");
                     return 0;
                 }
@@ -71,9 +87,15 @@ public static class Program
                     Options(args[3..]);
                     GoldenSuite data = Load<GoldenSuite>(args[2]);
                     ValidateSuite(data);
+                    if (data.EngineSha != null)
+                        throw new ArgumentException($"{args[2]} is in the single-line form written before; run `goldens rerecord {args[2]}` to convert it");
+                    string[] damaged = data.Games.Where(record => record.DecisionsSha == null || record.HistorySha != null)
+                        .Select(record => record.Id + (record.DecisionsSha == null ? " (no decisionsSha)" : " (has a historySha)")).ToArray();
+                    if (damaged.Length > 0)
+                        throw new ArgumentException($"{args[2]}: {string.Join(", ", damaged)}; run `goldens rerecord {args[2]}` to repair it");
                     var watch = Stopwatch.StartNew();
                     int matched = 0;
-                    foreach (GameRecord record in data.Games) if (Check(record, false)) matched++;
+                    foreach (GameRecord record in data.Games) if (Check(record, false, out _)) matched++;
                     Console.Error.WriteLine($"goldens: {matched}/{data.Games.Count} match; mismatches={data.Games.Count - matched}; wall={watch.Elapsed.TotalSeconds:F3}s");
                     return matched == data.Games.Count ? 0 : 1;
                 }
@@ -96,7 +118,9 @@ public static class Program
             {
                 if (args.Length < 2) throw new ArgumentException("replay <file.json> [--dump]");
                 var options = Options(args[2..], "dump");
-                return Check(Load<GameRecord>(args[1]), options.ContainsKey("dump")) ? 0 : 1;
+                GameRecord single = Load<GameRecord>(args[1]);
+                if (single.DecisionsSha == null) Console.Error.WriteLine($"{args[1]}: no decisionsSha in this record, so the options and choices are not compared");
+                return Check(single, options.ContainsKey("dump"), out _) ? 0 : 1;
             }
             if (args[0] == "fuzz")
             {
@@ -118,8 +142,6 @@ public static class Program
             return 1;
         }
     }
-
-    private static string EngineSha() => Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(typeof(Game).Assembly.Location)));
 
     private sealed class UsageException(string message) : ArgumentException(message);
 
@@ -160,8 +182,17 @@ public static class Program
         ValidateSuite(data);
         string[] unknown = only.Where(id => data.Games.All(record => record.Id != id)).ToArray();
         if (unknown.Length > 0) throw new UsageException("no such game in the file: " + string.Join(", ", unknown));
+        // A file in the single-line form written before stores the history hash and no decisions hash. It is converted as a
+        // whole: each game that still matches gets its decisions hash from the replay, the history hash is dropped.
+        GoldenSuite output = Deserialize<GoldenSuite>(text);
+        string normal = text.ReplaceLineEndings("\n");
+        bool legacy = GoldenSuite.SerializeLegacy(output, Json) == normal;
+        if (!legacy && GoldenSuite.Serialize(output, Json) != normal && GoldenSuite.Serialize(output, Json, keepHistory: true) != normal)
+            throw new InvalidDataException("golden file is not in the form `goldens record` writes; refusing to rewrite it");
+        if (legacy && only.Count > 0) throw new UsageException("this file is in the single-line form written before: convert the whole file first (no --only)");
         var watch = Stopwatch.StartNew();
         var replaced = new Dictionary<int, GameRecord>();
+        var converted = new Dictionary<int, string>();
         var scope = new List<int>();
         var behavioural = new List<string>();
         var stateOnly = new List<string>();
@@ -171,7 +202,11 @@ public static class Program
             GameRecord old = data.Games[i];
             if (only.Count > 0 && !only.Contains(old.Id)) continue;
             scope.Add(i);
-            if (Check(old, false)) continue;
+            if (Check(old, false, out GameRecord current))
+            {
+                if (old.DecisionsSha == null || old.HistorySha != null) converted[i] = current.DecisionsSha;
+                continue;
+            }
             try
             {
                 GameRecord fresh = Recreate(old, data.Schema);
@@ -219,27 +254,33 @@ public static class Program
             foreach (string id in stateOnly)
                 Console.Error.WriteLine($"WARNING {id}: STATE change re-recorded on request; replay it and compare the final board before committing");
         }
-        if (replaced.Count > 0)
+        // A file in the single-line form written before is rewritten one game per line even when no game changed, so a branch
+        // made before that change is brought up to date by the same command.
+        if (replaced.Count > 0 || legacy || converted.Count > 0)
         {
-            // Rewrite only if the file round-trips, so every game we did not touch stays byte-identical.
-            GoldenSuite output = Deserialize<GoldenSuite>(text);
-            if ((JsonSerializer.Serialize(output, Json) + "\n").ReplaceLineEndings("\n") != text.ReplaceLineEndings("\n"))
-                throw new InvalidDataException("golden file is not in the form `goldens record` writes; refusing to rewrite it");
+            // Rewrite only if the file round-trips (checked above), so every game we did not touch keeps its record.
+            // Onto the record as read (`old` above went through ValidateSuite, which fills in a schema 2 replay schema).
+            foreach (var (index, decisions) in converted) output.Games[index].DecisionsSha = decisions;
             foreach (var (index, fresh) in replaced) output.Games[index] = fresh;
-            output.EngineSha = EngineSha();
-            // Re-check what would be written, loaded back from its own text, before touching the file. Only the re-recorded
-            // games need it: the others matched above, and the round-trip check shows their records did not change.
-            string result = JsonSerializer.Serialize(output, Json) + "\n";
+            output.EngineSha = null;
+            // Re-check what would be written, loaded back from its own text, before touching the file: the re-recorded games and
+            // the converted ones (their decisions hash is new). The others matched above, and the round-trip check shows their
+            // records did not change.
+            string result = GoldenSuite.Serialize(output, Json);
             GoldenSuite reloaded = Deserialize<GoldenSuite>(result);
             ValidateSuite(reloaded);
-            string[] still = replaced.Keys.Where(index => !Check(reloaded.Games[index], false)).Select(index => reloaded.Games[index].Id).ToArray();
+            string[] still = replaced.Keys.Concat(converted.Keys).Where(index => !Check(reloaded.Games[index], false, out _) || reloaded.Games[index].DecisionsSha == null)
+                .Select(index => reloaded.Games[index].Id).ToArray();
             if (still.Length > 0)
             {
                 Console.Error.WriteLine("still mismatching after re-recording: " + string.Join(", ", still));
                 Console.WriteLine($"{replaced.Count} re-recorded, {still.Length} still mismatch; nothing written");
                 return 1;
             }
-            if (!dryRun) Save(path, output);
+            if (!dryRun) SaveText(path, result);
+            string fields = $"{converted.Count} game(s): history hash dropped, decisions hash filled in";
+            if (legacy) Console.WriteLine($"converted to one game per line ({fields})" + (dryRun ? " (dry run, not written)" : ""));
+            else if (converted.Count > 0) Console.WriteLine($"repaired {fields}" + (dryRun ? " (dry run, not written)" : ""));
         }
         string all = only.Count > 0 ? $"all {scope.Count} in scope" : $"all {scope.Count}";
         Console.WriteLine($"{replaced.Count} re-recorded ({replaced.Count - behavioural.Count - stateOnly.Count} shape only, {stateOnly.Count} state, {behavioural.Count} behaviour), {scope.Count - replaced.Count} unchanged, {all} match"
@@ -252,7 +293,7 @@ public static class Program
 
 #if SOURCE_ENGINE
     // One line saying how a re-recorded game differs. SHAPE: same actions and legal moves (so same turns and winner), only
-    // the history hash moved. STATE: same, but the final state hash moved: the board numbers or tags changed without
+    // the decisions hash (the option and choice packets) moved. STATE: same, but the final state hash moved: the board numbers or tags changed without
     // changing any offered option, which the other hashes cannot see. BEHAVIOUR: anything else, including a changed rules/pool version field.
     private static string Classify(GameRecord old, GameRecord fresh, out bool behaviour, out bool stateMoved)
     {
@@ -268,11 +309,11 @@ public static class Program
         behaviour = actions > 0 || legal > 0 || old.Turns != fresh.Turns || old.Winner != fresh.Winner || others.Count > 0;
         stateMoved = !behaviour && old.StateSha != fresh.StateSha;
         if (stateMoved)
-            return $"STATE final state moved ({(old.HistorySha != fresh.HistorySha ? "history and state" : "state only")}); actions, turns and winner unchanged; replay it and compare the final board";
+            return $"STATE final state moved ({(old.DecisionsSha != null && old.DecisionsSha != fresh.DecisionsSha ? "decisions and state" : "state only")}); actions, turns and winner unchanged; replay it and compare the final board";
         if (!behaviour)
         {
             var moved = new List<string>();
-            if (old.HistorySha != fresh.HistorySha) moved.Add("history");
+            if (old.DecisionsSha != null && old.DecisionsSha != fresh.DecisionsSha) moved.Add("decisions");
             return $"shape only ({(moved.Count > 0 ? string.Join(", ", moved) : "no hash")} moved), 0 actions changed";
         }
         string text = $"BEHAVIOUR winner {old.Winner}->{fresh.Winner}, turns {old.Turns}->{fresh.Turns}, actions {old.Actions.Count}->{fresh.Actions.Count} ({actions} changed"
@@ -366,20 +407,24 @@ public static class Program
         }
     }
 
-    private static bool Check(GameRecord expected, bool dump)
+    // Replays the game (actions and the legal-move hash at every step) and compares the decisions hash, the final state,
+    // turns and winner. The power history is not compared (see GameRecord.HistorySha). A record from a file in the form
+    // written before has no decisions hash; it is compared on the rest.
+    private static bool Check(GameRecord expected, bool dump, out GameRecord current)
     {
         Validate(expected);
         Game currentGame = null;
+        current = null;
         try
         {
             Game game = Simulation.Run(expected, replay: true, started: game => currentGame = game);
-            var current = new GameRecord();
+            current = new GameRecord();
             Simulation.Finish(current, game);
-            bool matches = current.HistorySha == expected.HistorySha && current.StateSha == expected.StateSha
+            bool matches = (expected.DecisionsSha == null || current.DecisionsSha == expected.DecisionsSha) && current.StateSha == expected.StateSha
                 && current.Turns == expected.Turns && current.Winner == expected.Winner;
             if (dump || !matches) Dump(expected.Id, game);
             if (!matches)
-                Console.Error.WriteLine($"mismatch {expected.Id}: recorded history={expected.HistorySha} state={expected.StateSha} turns={expected.Turns} winner={expected.Winner}; current history={current.HistorySha} state={current.StateSha} turns={current.Turns} winner={current.Winner}");
+                Console.Error.WriteLine($"mismatch {expected.Id}: recorded decisions={expected.DecisionsSha} state={expected.StateSha} turns={expected.Turns} winner={expected.Winner}; current decisions={current.DecisionsSha} state={current.StateSha} turns={current.Turns} winner={current.Winner}");
             if (expected.Failure != null)
             {
                 Console.Error.WriteLine($"{expected.Id}: recorded failure did not reproduce: {expected.Failure}");
@@ -391,7 +436,7 @@ public static class Program
         {
             if (currentGame != null) Dump(expected.Id, currentGame);
             Diagnostics(expected.Id, error);
-            Console.Error.WriteLine($"mismatch {expected.Id}: {error.Message}; recorded history={expected.HistorySha} state={expected.StateSha}");
+            Console.Error.WriteLine($"mismatch {expected.Id}: {error.Message}; recorded decisions={expected.DecisionsSha} state={expected.StateSha}");
             return false;
         }
     }
@@ -497,12 +542,13 @@ public static class Program
     private static T Load<T>(string path) => Deserialize<T>(File.ReadAllText(path));
     private static T Deserialize<T>(string text) => JsonSerializer.Deserialize<T>(text, Json)
         ?? throw new ArgumentException("null JSON");
-    private static void Save<T>(string path, T value)
+    private static void Save<T>(string path, T value) => SaveText(path, JsonSerializer.Serialize(value, Json) + "\n");
+    private static void SaveText(string path, string text)
     {
         string full = Path.GetFullPath(path);
         Directory.CreateDirectory(Path.GetDirectoryName(full));
         string temporary = full + ".tmp";
-        File.WriteAllText(temporary, JsonSerializer.Serialize(value, Json) + "\n");
+        File.WriteAllText(temporary, text);
         File.Move(temporary, full, overwrite: true);
     }
 }

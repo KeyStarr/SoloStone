@@ -284,8 +284,8 @@ internal static class ForestLordCenariusProof
             });
             var actual = new GameRecord();
             Simulation.Finish(actual, game);
-            Check(actual.StateSha == expected.StateSha && actual.HistorySha == expected.HistorySha &&
-                actual.Winner == expected.Winner && actual.Turns == expected.Turns, "Standard spike full-history/action golden");
+            Check(actual.StateSha == expected.StateSha && expected.DecisionsSha != null && actual.DecisionsSha == expected.DecisionsSha &&
+                actual.Winner == expected.Winner && actual.Turns == expected.Turns, "Standard spike decisions/state/action golden");
         }
         Check(plays > 0 && answers > 0, "goldens exercise Cenarius and sequential choices");
         Console.WriteLine("PASS Standard spike 1 goldens: 3 replays, Cenarius plays=" + plays);
