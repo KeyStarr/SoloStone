@@ -478,9 +478,18 @@ internal static class ClientBridge
                 match.DebugScenarioLog = line => log.LogInfo(line);
             }
 #endif
-            // The NPC's own cosmetic pet (PROPOSED, docs/design/npc-pets.md): wire-only, never recorded or settled.
-            try { match.OpponentPetCard = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0)?.CardId; }
-            catch (Exception error) { log.LogWarning("NPC pet unavailable: " + error.Message); }
+            // The NPC's own cosmetic pet (PROPOSED, docs/design/npc-pets.md): wire-only, never recorded or settled. Options > Show
+            // Opponents' Pets off starts the match without it (NativeOpponentPetsOption.Gate).
+            try
+            {
+                string ownedPet = null;
+#if ENGINE_SOURCE
+                ownedPet = scenario?.NpcPet; // debug scenario npcPet: the NPC owns this pet this match
+#endif
+                if (ownedPet == null) ownedPet = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0)?.CardId;
+                match.OpponentPetCard = NativeOpponentPetsOption.Gate(ownedPet);
+            }
+            catch (Exception error) { match.OpponentPetCard = NativeOpponentPetsOption.Gate(null); log.LogWarning("NPC pet unavailable: " + error.Message); }
             // NPC deck finishes follow the rank the opponent's medal shows (NativeGameplayRank reads the same rating);
             // Casual has no medal, so the player's ladder rank (NpcPremiums.SeatStarIndex).
             if (!string.IsNullOrEmpty(record.NpcId) && record.NpcRating is double npcRating)
@@ -734,6 +743,7 @@ internal static class ClientBridge
 #if !SOLOSTONE_RELEASE
 // Test control only (compiled out of a public build): reads, recovery and option validation for the endpoint.
     internal static NativeTestControl.View ReadTestControlView() => NativeTestControl.ReadView(match, matchId);
+    internal static MiniJSON.JsonNode OpponentPetsTestState() => NativeOpponentPetsOption.State(match);
     internal static Dictionary<string, object> TestControlEntities(string requestedMatch, int[] ids)
     {
         NativeTestControl.AssertMainThread();

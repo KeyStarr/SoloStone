@@ -490,6 +490,9 @@ internal sealed partial class NativeTestControl
                         view.State["fpsCounter"] = NativeFpsCounter.State();
                         view.State["brandLabel"] = NativeBrandLabel.State();
                         view.State["deckInference"] = NativeDeckInferenceOption.State();
+                        // Here, not in ReadView: pet animations and the controller scan change frame to frame and must stay out of the view revision.
+                        try { view.State["opponentPets"] = ClientBridge.OpponentPetsTestState(); }
+                        catch (Exception error) { view.State["opponentPets"] = new JsonNode { { "error", error.GetType().Name + " " + error.Message } }; }
                         view.State["tips"] = NativeUIProbe.TipsState();
                         view.State["language"] = NativeLanguageOption.State();
                         view.State["optionsPanels"] = NativeOptionsPanels.State();
@@ -723,13 +726,22 @@ internal sealed partial class NativeTestControl
                 history.Skip(Math.Max(0, history.Count - casual.Rules.HistoryDepth)).Select(match => LocalRematch.Past(match, decks))), count);
         }
         else picks = QueueForecast.Ranked(ranked, LocalRematch.Request(profile, profile.RankedHistory, decks, ranked.Rules.HistoryDepth, NpcWorldRuntime.Legend), count);
+        // The pet each NPC would bring (NpcPetSeats.For on the pick's seat), whatever Options > Show Opponents' Pets says.
+        var petFamilies = NpcPetSeats.Families(LocalShop.Default);
+        string ForecastPet(MatchPick pick)
+        {
+            try { return NpcPets.Resolve(new NpcPetSeat(pick.Encounter.Npc.Id, pick.Encounter.Deck.Id, LadderRules.IndexForRating(pick.Encounter.Npc.HomeRating),
+            NpcPremiums.SeatStarIndex(mode == "casual" ? CasualRules.Mode : "Ranked", pick.Encounter.Rating, profile.Ladder.StarIndex)), petFamilies)?.CardId; }
+            catch (Exception error) { return "error: " + error.GetType().Name + " " + error.Message; } // as ClientBridge, which shows no pet then
+        }
         return new JsonNode {
             { "available", true }, { "mode", mode }, { "roster", world.All.Count(npc => npc.Notable) },
             { "regularShare", Math.Round(100.0 * picks.Count(pick => pick.Encounter.Npc.Notable) / picks.Count, 1) },
             { "regularsMet", picks.Where(pick => pick.Encounter.Npc.Notable).Select(pick => pick.Encounter.Npc.Id).Distinct().Count() },
             { "picks", TestControlProtocol.List(picks.Select(pick => (object)new JsonNode {
                 { "npcId", pick.Encounter.Npc.Id }, { "name", pick.Encounter.Npc.DisplayName }, { "regular", pick.Encounter.Npc.Notable }, { "regularDraw", pick.RegularDraw },
-                { "deck", pick.Encounter.Deck.Id }, { "rating", Math.Round(pick.Encounter.Rating, 1) }, { "relaxLevel", pick.RelaxLevel } })) }
+                { "deck", pick.Encounter.Deck.Id }, { "rating", Math.Round(pick.Encounter.Rating, 1) }, { "relaxLevel", pick.RelaxLevel },
+                { "pet", ForecastPet(pick) } })) }
         };
     }
 

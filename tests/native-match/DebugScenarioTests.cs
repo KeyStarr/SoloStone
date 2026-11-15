@@ -52,6 +52,10 @@ internal static partial class Program
         Check(DebugScenario.Parse(opening.Canonical()).HumanOpeningHand.SequenceEqual(new[] { "CATA_489", "CS2_182" }), "opening override roundtrip");
         RejectsScenario("humanOpeningHand=" + string.Join(",", Enumerable.Repeat("CS2_182", 5)), "opening maximum");
         RejectsScenario("npcOpeningHand=NOPE_000", "opening card identity");
+        var pet = DebugScenario.Parse("npcPet=PET_4_3");
+        Check(pet.NpcPet == "PET_4_3" && pet.Canonical() == "npcPet=PET_4_3" && DebugScenario.Parse("npcMana=3").NpcPet == null, "npcPet scenario roundtrip");
+        RejectsScenario("npcPet=CS2_182", "npcPet must be a pet card");
+        RejectsScenario("npcPet=PET_4_3,PET_4_1", "npcPet takes one pet");
         RejectsScenario("humanOpeningHand=GAME_005", "opening override cannot forge Coin");
         var tooMany = new NativeMatch((_, __) => { }, "mage", "priest", 183) {
             StartingPlayer = 1, DebugScenario = DebugScenario.Parse("humanOpeningHand=CATA_489,CATA_489,CATA_489,CATA_489")

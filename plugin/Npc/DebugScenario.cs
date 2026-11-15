@@ -34,6 +34,8 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 //       10 cap, for a counter gag such as 32/333. Needs humanSeat=first; excludes humanMana/npcMana; npcManaRaw CUR <= 10 (its own
 //       turn start would otherwise send a negative RESOURCES_USED). Capture-only.)
 //   npcMana=N          humanMana=N           (mana crystals on that player's FIRST turn, full)
+//   npcPet=PET_CARDID  (the NPC owns this pet form for the match, instead of the pet NpcPets gives it or none; Options > Show
+//       Opponents' Pets still decides whether it is shown. Presentation only, applied at match start.)
 //   runId=<this launch's run id>   (REQUIRED by Read: the file is bound to one launch, like enable-test-control)
 // ENGINE_SOURCE builds only (the Deck and lane builds); other builds ignore the file. A file is honoured only while test
 // control is live and its runId is this launch's; anything else is rejected (renamed .rejected-<utc>), and any file left over
@@ -59,7 +61,7 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "npcPet", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
@@ -134,6 +136,15 @@ public sealed class DebugScenario
     public int? NpcMana { get; private set; }
     public int? HumanMana { get; private set; }
     public int? FirstPlayer { get; private set; }
+    // npcPet: the pet form the NPC owns this match (ClientBridge hands it to NativeOpponentPetsOption.Gate); null keeps its own.
+    public string NpcPet { get; private set; }
+    private static string Pet(Dictionary<string, string> values, Func<string, bool> known)
+    {
+        if (!values.TryGetValue("npcPet", out string pet)) return null;
+        if (!pet.StartsWith("PET_", StringComparison.Ordinal) || pet.IndexOf(',') >= 0 || known != null && !known(pet))
+            throw new ArgumentException("npcPet must be one pet card id (PET_...), got: " + pet);
+        return pet;
+    }
     private static int? Seat(Dictionary<string, string> values)
     {
         if (!values.TryGetValue("humanSeat", out string seat)) return null;
@@ -198,7 +209,7 @@ public sealed class DebugScenario
             NpcBoard = Cards(values, "npcBoard", MaxBoard, known), HumanBoard = Cards(values, "humanBoard", MaxBoard, known),
             NpcBoardStats = Stats(values, "npcBoardStats", "npcBoard"), HumanBoardStats = Stats(values, "humanBoardStats", "humanBoard"),
             NpcSummonStats = SummonRule(values, "npcSummonStats", known),
-            NpcMana = Mana(values, "npcMana"), HumanMana = Mana(values, "humanMana") };
+            NpcMana = Mana(values, "npcMana"), HumanMana = Mana(values, "humanMana"), NpcPet = Pet(values, known) };
     }
 
     // ATTACK,HEALTH for the minions a board key summons. Digits only, so no sign, space-inside, decimal or exponent forms.
@@ -396,6 +407,7 @@ public sealed class DebugScenario
         if (AttackWeapon != null) lines.Add("attackWeapon=" + AttackWeapon);
         if (AttackArmor != 0) lines.Add("attackArmor=" + AttackArmor);
         if (AttackLethal) lines.Add("attackLethal=1");
+        if (NpcPet != null) lines.Add("npcPet=" + NpcPet);
         return string.Join("\n", lines);
     }
     public string Describe() => Canonical().Replace("\n", " ");

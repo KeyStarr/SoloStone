@@ -9,6 +9,7 @@
     <Compile Include="../../plugin/TurnTimerSettings.cs" />
     <Compile Include="../../plugin/FpsCounterSettings.cs" />
     <Compile Include="../../plugin/DeckInferenceSettings.cs" />
+    <Compile Include="../../plugin/OpponentPetsSettings.cs" />
     <Compile Include="../shared/BepInExStandIns.cs" Link="BepInExStandIns.cs" />
     <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
     <Compile Include="../shared/StandardBatchData.cs" Link="StandardBatchData.cs" />

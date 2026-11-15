@@ -382,6 +382,8 @@ internal static class NativeOptionsPanels
             AddCheck(panel, check, 0, "fpsCounter", NativeFpsCounterText.Id, NativeFpsCounterText.ObjectName, NativeFpsCounterText.Label, NativeFpsCounter.Attach, NativeFpsCounter.Sync);
             AddCheck(panel, check, 0, "deckInference", NativeDeckInferenceText.Id, NativeDeckInferenceText.ObjectName, NativeDeckInferenceText.Label,
                 NativeDeckInferenceOption.Attach, NativeDeckInferenceOption.Sync);
+            AddCheck(panel, check, 0, "opponentPets", NativeOpponentPetsOption.Id, NativeOpponentPetsOption.ObjectName, NativeOpponentPetsOption.Label,
+                NativeOpponentPetsOption.Attach, NativeOpponentPetsOption.Sync);
             if (NativeOptionsPace.Available)
                 AddPlank(panel, reset, 1, "pace", NativeOptionsPaceText.Id, NativeOptionsPaceText.ObjectName, NativeOptionsPace.Attach, NativeOptionsPace.Sync, NativeOptionsPace.Wanted);
             if (NativeLanguageOption.Available)
