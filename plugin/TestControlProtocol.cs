@@ -296,6 +296,8 @@ internal sealed class ControlRequest
             case "hero-skin-spells": extras = "cardId"; Text("cardId"); break;
             // Read-only: the text SoloStone gives the client for one card ID (its frozen text in the client's language), and the language.
             case "card-raw-text": extras = "cardId"; Text("cardId"); break;
+            // Read-only: what the client's actors render, by premium (Show Plain Cards, NativePlainCardsOption.Render).
+            case "plain-cards-render": extras = ""; break;
             case "options": case "choices": case "concede": extras = "matchId"; Text("matchId"); break;
             // Native squelch of the NPC opponent (EnemyEmoteHandler) and one human emote: local presentation, no game send.
             case "squelch": case "unsquelch": extras = "matchId"; Text("matchId"); break;

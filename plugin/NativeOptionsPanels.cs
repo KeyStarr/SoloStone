@@ -22,8 +22,8 @@ using UnityEngine;
 // Defaults plank and inner section frames are switched off. Frame, header, Back and Done stay; the header reads the panel's title.
 // Rows are copies of that prefab's own checkbox and plank, so they look like Sound Options' rows. The panel then behaves like Sound
 // Options: Back and Escape return to Options, Done and a click outside close it. The controls keep their classes, settings and log
-// lines (NativeTurnTimerOption, HandheldUi, NativeFpsCounter, NativeDeckInferenceOption, NativeOptionsPace, NativeLanguageOption,
-// NativeStarterDecks); only where they live changed.
+// lines (NativeTurnTimerOption, HandheldUi, NativeFpsCounter, NativeDeckInferenceOption, NativePlainCardsOption, NativeOptionsPace,
+// NativeLanguageOption, NativeStarterDecks); only where they live changed.
 //
 // The panel outlives the Options instance (OverlayUI keeps it) and is built once. Layout runs on every open from rendered bounds
 // (OptionsPanelLayout.Plan): until the open animation settles, then once more whenever a row comes or goes, and each settled layout
@@ -382,6 +382,8 @@ internal static class NativeOptionsPanels
             AddCheck(panel, check, 0, "fpsCounter", NativeFpsCounterText.Id, NativeFpsCounterText.ObjectName, NativeFpsCounterText.Label, NativeFpsCounter.Attach, NativeFpsCounter.Sync);
             AddCheck(panel, check, 0, "deckInference", NativeDeckInferenceText.Id, NativeDeckInferenceText.ObjectName, NativeDeckInferenceText.Label,
                 NativeDeckInferenceOption.Attach, NativeDeckInferenceOption.Sync);
+            AddCheck(panel, check, 0, "plainCards", PlainCardsSettings.Id, PlainCardsSettings.ObjectName, PlainCardsSettings.Label,
+                NativePlainCardsOption.Attach, NativePlainCardsOption.Sync);
             if (NativeOptionsPace.Available)
                 AddPlank(panel, reset, 1, "pace", NativeOptionsPaceText.Id, NativeOptionsPaceText.ObjectName, NativeOptionsPace.Attach, NativeOptionsPace.Sync, NativeOptionsPace.Wanted);
             if (NativeLanguageOption.Available)

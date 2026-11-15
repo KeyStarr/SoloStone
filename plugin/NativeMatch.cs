@@ -615,6 +615,9 @@ public sealed class NativeMatch
     internal static Func<LocalProfile> CosmeticsProfile { get; set; }
     // The personal deck whose own card back / hero skin (deck tray cosmetics) override the profile favourites.
     internal long? CosmeticDeckId { get; set; }
+    // Options > Show Plain Cards (NativePlainCardsOption), set before Start and kept for the match: every card of both sides, the
+    // hero included, is sent Normal (PREMIUM and both quality flags 0), engine-authored premium too. Presentation only.
+    internal bool PlainCards { get; set; }
     internal static Func<string, int> NativePetVariant { get; set; }
     private string cosmeticPet;
     private int cosmeticPetVariant, cosmeticPetEntityId;
@@ -3512,6 +3515,7 @@ public sealed class NativeMatch
     // Owned premium of a deck copy or the starting hero; 0 leaves engine-authored values (e.g. Zola's Golden copy) intact.
     private int EntityPremium(int id, string cardId)
     {
+        if (PlainCards) return 0;
         int premium = SourcePremium(id);
         if (premium != 0) return premium;
         return cosmeticHero != null && id == Game.Player1.Hero.Id && cardId == cosmeticBaseHero
@@ -3636,10 +3640,15 @@ public sealed class NativeMatch
         : tag == 2589 ? (premium == 3 ? 1 : 0)
         : (int?)null;
 
+    private static bool IsPremiumTag(int tag) => tag == (int)GameTag.PREMIUM || tag == 1932 || tag == 2589;
+
+    // What the client gets for a premium tag: 0 with Plain Cards, else the owned override (null keeps the engine value).
+    private int? PresentedPremiumValue(int tag, int premium) => PlainCards && IsPremiumTag(tag) ? 0 : OwnedPremiumValue(tag, premium);
+
     // Live getters below serve endpoint stat refresh/audits, never names or historical privacy decisions.
     private int PresentedTagValue(IPlayable entity, GameTag tag) =>
         tag == GameTag.GHOSTLY && temporaryDiscardVisuals.Contains(entity.Id) && entity.Zone?.Type == EngineZone.GRAVEYARD ? 1
-        : SkinTag(entity.Id, entity.Card.Id, (int)tag) ?? OwnedPremiumValue((int)tag, EntityPremium(entity.Id, entity.Card.Id)) ?? PrintedTagValue(entity, tag);
+        : SkinTag(entity.Id, entity.Card.Id, (int)tag) ?? PresentedPremiumValue((int)tag, EntityPremium(entity.Id, entity.Card.Id)) ?? PrintedTagValue(entity, tag);
 
     private IEnumerable<KeyValuePair<GameTag, int>> PresentedStats(IPlayable entity)
     {
@@ -3651,7 +3660,7 @@ public sealed class NativeMatch
             || visibleTransportTags.TryGetValue(entity.Id, out var playTags) && playTags.ContainsKey((int)GameTag.CANT_PLAY))
             stats = stats.Append(new KeyValuePair<GameTag, int>(GameTag.CANT_PLAY, entity[GameTag.CANT_PLAY]));
 #endif
-        return stats.Select(stat => (SkinTag(entity.Id, entity.Card.Id, (int)stat.Key) ?? OwnedPremiumValue((int)stat.Key, premium)) is int value
+        return stats.Select(stat => (SkinTag(entity.Id, entity.Card.Id, (int)stat.Key) ?? PresentedPremiumValue((int)stat.Key, premium)) is int value
             ? new KeyValuePair<GameTag, int>(stat.Key, value) : stat);
     }
 
@@ -5518,7 +5527,7 @@ public sealed class NativeMatch
                 value = Math.Max(value, tag.Tag == TemporaryCardTag ? visual.Ghostly : visual.Temporary);
                 if (temporaryDiscardVisuals.Contains(tag.EntityId)) value = Math.Max(value, 1);
             }
-            if (tag.Tag == GameTag.PREMIUM || (int)tag.Tag == 1932 || (int)tag.Tag == 2589)
+            if (IsPremiumTag((int)tag.Tag))
             {
 #if ENGINE_SOURCE
                 int premium = EntityPremium(tag.EntityId, IdentityAt(identityPosition, tag.EntityId, true, true, definitionOnly: true)?.Name);
@@ -5526,7 +5535,7 @@ public sealed class NativeMatch
                 int premium = EntityPremium(tag.EntityId, Game.IdEntityDic.TryGetValue(tag.EntityId, out var premiumEntity)
                     ? premiumEntity.Card.Id : null);
 #endif
-                value = OwnedPremiumValue((int)tag.Tag, premium) ?? value;
+                value = PresentedPremiumValue((int)tag.Tag, premium) ?? value;
             }
             if (tag.Tag == GameTag.ZONE && IsHiddenFromHuman(tag.EntityId, null))
                 value = HiddenHistoryZone(tag.EntityId, value);
@@ -6532,6 +6541,10 @@ public sealed class NativeMatch
                 tags.RemoveAll(tag => tag.Name == premiumTag);
                 tags.Add(new NativeTag { Name = premiumTag, Value = OwnedPremiumValue(premiumTag, premium).Value });
             }
+        // Plain Cards: engine-authored premium (Zola's Golden copy) and printed quality flags read Normal too.
+        if (PlainCards)
+            for (int at = 0; at < tags.Count; at++)
+                if (IsPremiumTag(tags[at].Name) && tags[at].Value != 0) tags[at] = new NativeTag { Name = tags[at].Name, Value = 0 };
         return new PegasusGame.PowerHistoryEntity
         {
             Entity = entity.Id,

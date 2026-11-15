@@ -52,6 +52,7 @@ if (args.Length == 0)
     TurnTimerOptionChecks.Run();
     FpsCounterOptionChecks.Run();
     DeckInferenceOptionChecks.Run();
+    PlainCardsOptionChecks.Run();
     MasteryChecks.Run();
     CurrentV14ProgressionChecks.Run();
     // The gate runs only this no-argument path; keep the save-catalog/cheat checks in it.

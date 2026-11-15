@@ -116,6 +116,7 @@ internal static class NativeUiTree
         Name(HandheldUi.Checkbox, OptionsPanelText.HandheldId);
         Name(NativeFpsCounter.Checkbox, NativeFpsCounterText.Id);
         Name(NativeDeckInferenceOption.Checkbox, NativeDeckInferenceText.Id);
+        Name(NativePlainCardsOption.Checkbox, PlainCardsSettings.Id);
         Name(NativeLanguageOption.OptionsButton, GameLanguage.Id);
         Name(NativeTurnTimerOption.Dismiss, "options.dismiss");
         Name(NativePackFlip.Button, PackFlipText.ButtonId);

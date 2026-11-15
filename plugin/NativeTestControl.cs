@@ -481,6 +481,7 @@ internal sealed partial class NativeTestControl
                     case "screenshot": HandleCapture(envelope); return;
                     case "locate": connection.Reply(Reply(request, "settled", Locate(request))); return;
                     case "card-raw-text": AssertMainThread(); connection.Reply(Reply(request, "settled", ClientBridge.RawCardTextProbe(request.Text("cardId")))); return;
+                    case "plain-cards-render": AssertMainThread(); connection.Reply(Reply(request, "settled", NativePlainCardsOption.Render())); return;
                     case "card-text": AssertMainThread(); connection.Reply(Reply(request, "settled", CardText(request))); return;
                     case "entity": connection.Reply(Reply(request, "settled", ClientBridge.TestControlEntities(request.Text("matchId"), request.EntityIds("entityIds")))); return;
                     case "ui": case "wait-ui": QueueUi(envelope); return;
@@ -490,6 +491,7 @@ internal sealed partial class NativeTestControl
                         view.State["fpsCounter"] = NativeFpsCounter.State();
                         view.State["brandLabel"] = NativeBrandLabel.State();
                         view.State["deckInference"] = NativeDeckInferenceOption.State();
+                        view.State["plainCards"] = NativePlainCardsOption.State();
                         view.State["tips"] = NativeUIProbe.TipsState();
                         view.State["language"] = NativeLanguageOption.State();
                         view.State["optionsPanels"] = NativeOptionsPanels.State();

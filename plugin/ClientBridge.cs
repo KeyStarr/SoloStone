@@ -35,6 +35,8 @@ internal static class ClientBridge
     internal static bool OwnsLiveMatch => staged && requested && localConnected && match?.Game != null
         && SceneMgr.IsInitialized() && SceneMgr.Get()?.GetMode() == SceneMgr.Mode.GAMEPLAY;
     internal static string DiagnosticMatchId => matchId;
+    // Show Plain Cards as the live match began with it; null outside a match.
+    internal static bool? PlainCardsThisMatch => OwnsLiveMatch ? match.PlainCards : (bool?)null;
     internal static string DiagnosticProfilePath { get; private set; }
     internal static bool MatchJournalEnabled => playtestRecord?.Enabled == true;
     internal static void RecordFx(Dictionary<string, object> row) => playtestRecord?.OnFx(row);
@@ -421,6 +423,7 @@ internal static class ClientBridge
         var prepared = player == null
             ? new NativeMatch(Send, deck, opponent, seed, stars)
             : new NativeMatch(Send, player, opponent, seed, stars, premiumEntries) { CosmeticDeckId = PersonalDeckId(deck) };
+        prepared.PlainCards = NativePlainCardsOption.Enabled;
         var defs = DefLoader.Get().GetAllEntityDefs();
         log.LogInfo("LOCAL_HERO_DEFS Fireblast=" + defs.ContainsKey("HERO_08bp"));
         foreach (string id in RequiredPaladinDefinitions)
@@ -530,6 +533,7 @@ internal static class ClientBridge
             try
             {
                 log.LogInfo("NPC_REPLY_PRIOR match=" + record.Id + " prior=" + NativeDeckInferenceOption.ThisMatch + " nextMatch=" + NativeDeckInferenceOption.Enabled);
+                log.LogInfo("PLAIN_CARDS match=" + record.Id + " thisMatch=" + match.PlainCards + " nextMatch=" + NativePlainCardsOption.Enabled);
                 var npc = NpcCatalog.ForDeck(record.Opponent);
                 var humanDeck = player ?? LocalDecks.Get(record.Deck);
                 var encounterFacts = EncounterFacts(record.Opponent);
