@@ -36,6 +36,9 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 //   npcMana=N          humanMana=N           (mana crystals on that player's FIRST turn, full)
 //   npcHero=CARDID     (the NPC plays this hero card and its own Hero Power, e.g. a Dungeon Run boss LOOTA_BOSS_18h. Any implemented
 //       HERO card the client knows; excludes npcSkin.)
+//   npcDeck=ID,...     (the NPC's whole deck for this match, 1..40 cards in any order, shuffled as usual, e.g. a Dungeon Run boss
+//       deck. Replaces the ladder deck only: the NPC's name, skill and personality stay; no deckbuilding rules apply. npcDeckTop
+//       still adds its cards on top.)
 //   missionId=N        (the client's mission/scenario id for this match, e.g. 2663 = Dungeon Run: the client then runs that mission's
 //       own game entity (boss voice lines, music). 0 or absent: the ordinary staged match.)
 //   runId=<this launch's run id>   (REQUIRED by Read: the file is bound to one launch, like enable-test-control)
@@ -51,7 +54,7 @@ public sealed class DebugScenario
 #else
     public static string Path = @"C:\hs-native-ui-"+@"prototype\reports\debug-scenario";
 #endif
-    public const int MaxDeckTop = 10, MaxHand = 5, MaxBoard = 7, MaxMana = 10;
+    public const int MaxDeckTop = 10, MaxDeck = 40, MaxHand = 5, MaxBoard = 7, MaxMana = 10;
     // This launch's run id (set by the plugin at start); Read requires the file's runId to equal it.
     public static string RunId;
     public sealed class Outcome
@@ -63,7 +66,7 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "npcHero", "missionId", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "npcHero", "npcDeck", "missionId", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
@@ -75,6 +78,7 @@ public sealed class DebugScenario
     public string HumanSkin { get; private set; }
     public string NpcSkin { get; private set; }
     public string NpcHero { get; private set; }
+    public IReadOnlyList<string> NpcDeck { get; private set; } = new string[0];
     public int MissionId { get; private set; }
     public string HeroAttack { get; private set; }
     public string HeroPower { get; private set; }
@@ -186,7 +190,7 @@ public sealed class DebugScenario
             throw new ArgumentException("humanHandHealth and humanHandHealthWing list the same card: give each card one Health cost.");
         if (values.ContainsKey("npcHero") && values.ContainsKey("npcSkin")) throw new ArgumentException("npcHero and npcSkin both set the NPC hero; give only one.");
         return new DebugScenario {
-            NpcHero = HeroCard(values, "npcHero", known), MissionId = Number(values, "missionId", 1, 999999),
+            NpcHero = HeroCard(values, "npcHero", known), NpcDeck = Cards(values, "npcDeck", MaxDeck, known), MissionId = Number(values, "missionId", 1, 999999),
             BoundRunId = boundRun, FirstPlayer = Seat(values),
             Overdraw = Choice(values, "overdraw", "human", "npc", "human-godfrey", "npc-godfrey"),
             HumanSkin = Skin(values, "humanSkin", known), NpcSkin = Skin(values, "npcSkin", known),
@@ -410,6 +414,7 @@ public sealed class DebugScenario
         if (HumanSkin != null) lines.Add("humanSkin=" + HumanSkin);
         if (NpcSkin != null) lines.Add("npcSkin=" + NpcSkin);
         if (NpcHero != null) lines.Add("npcHero=" + NpcHero);
+        Add("npcDeck", NpcDeck);
         if (MissionId != 0) lines.Add("missionId=" + MissionId.ToString(CultureInfo.InvariantCulture));
         if (HeroAttack != null) lines.Add("heroAttack=" + HeroAttack);
         if (HeroPower != null) lines.Add("heroPower=" + HeroPower);
@@ -517,7 +522,7 @@ public sealed class DebugScenario
             if (hand > 0 && player.HandZone.FreeSpace < hand + 1) return name + " hand has no room for " + hand + " more cards plus its draw.";
             return null;
         }
-        foreach (string id in NpcDeckTop.Concat(HumanDeckTop).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard))
+        foreach (string id in NpcDeck.Concat(NpcDeckTop).Concat(HumanDeckTop).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard))
             if (EngineCards.FromId(id) == null) return "unknown card " + id;
         if (HumanOpeningHand.Count > game.Player1.HandZone.Count(c => c.Card.Id != "GAME_005") ||
             NpcOpeningHand.Count > game.Player2.HandZone.Count(c => c.Card.Id != "GAME_005")) return "Opening hand has too few replaceable slots.";
@@ -719,6 +724,7 @@ public sealed class DebugScenario
         if (HumanSkin != null) applied.Add("humanSkin=" + HumanSkin);
         if (NpcSkin != null) applied.Add("npcSkin=" + NpcSkin);
         if (NpcHero != null) applied.Add("npcHero=" + NpcHero);
+        if (NpcDeck.Count > 0) applied.Add("npcDeck=" + NpcDeck.Count + " cards");
         if (MissionId != 0) applied.Add("missionId=" + MissionId.ToString(CultureInfo.InvariantCulture));
         return string.Join("; ", applied);
     }

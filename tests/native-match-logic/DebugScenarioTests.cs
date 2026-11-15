@@ -42,6 +42,27 @@ internal static partial class Program
         Check(scenario.HumanHand.SequenceEqual(new[] { "CORE_EX1_323" }), "collectible hero card can be staged in hand");
     }
 
+    // Dungeon Run POC: a boss plays its own deck (authored here, not client data), through npcDeck.
+    internal const string GiantRatDeck = "CS2_171,CS2_171,CS2_169,CS2_169,CS2_172,CS2_172,CS2_120,CS2_120,CFM_790,CFM_790,"
+        + "DAL_400,DAL_400,EX1_017,EX1_017,CS2_125,CS2_125,CS2_127,CS2_127,CS2_119,CS2_119,CS2_182,CS2_182,CS2_179,CS2_179,"
+        + "EX1_028,EX1_028,CS2_200,CS2_201,CS2_118,CS2_118";
+
+    private static void NpcDeckScenario()
+    {
+        var scenario = DebugScenario.Parse("npcHero=LOOTA_BOSS_18h\nnpcDeck=" + GiantRatDeck + "\nmissionId=2663\n");
+        Check(scenario.NpcDeck.SequenceEqual(GiantRatDeck.Split(',')) && scenario.NpcHero == "LOOTA_BOSS_18h" && scenario.MissionId == 2663,
+            "npcDeck keeps the whole boss deck in its order, beside npcHero and missionId");
+        var again = DebugScenario.Parse(scenario.Canonical());
+        Check(again.Canonical() == scenario.Canonical() && again.NpcDeck.SequenceEqual(scenario.NpcDeck),
+            "npcDeck prints and parses back identically (Replay re-parses the canonical text)");
+        Check(DebugScenario.Parse("npcDeck=CS2_182").NpcDeck.Count == 1, "a one-card boss deck is allowed");
+        Check(DebugScenario.Parse("humanSeat=first").NpcDeck.Count == 0, "no npcDeck keeps the ladder deck");
+        RejectsScenario("npcDeck=" + string.Join(",", Enumerable.Repeat("CS2_182", DebugScenario.MaxDeck + 1)), "more than MaxDeck cards");
+        RejectsScenario("npcDeck=HERO_08", "a hero portrait is not a deck card");
+        RejectsScenario("npcDeck=CS2_182,,CS2_182", "an empty card id");
+        RejectsScenario("npcDeck=CS2_182", "a card the client cannot draw", id => id != "CS2_182");
+    }
+
     private const string RunA = "0b5e3a7e-2f64-4a43-8c3f-4f8b8d2f9a10", RunB = "1c6f4b8f-3a75-4b54-9d40-5a9c9e3ab021";
 
     private static void DebugScenarioFile()

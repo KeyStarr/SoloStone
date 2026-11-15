@@ -541,6 +541,9 @@ public sealed class NativeMatch
 
     // One-shot debug scenario: opening overrides before offers; remaining settings after both mulligans.
     internal DebugScenario DebugScenario { get; set; }
+    private bool NpcDeckOverride => DebugScenario != null && DebugScenario.NpcDeck.Count > 0;
+    // The NPC's deck list as dealt: the scenario's npcDeck when it set one, else the ladder deck.
+    private List<string> BotDeckIds => NpcDeckOverride ? DebugScenario.NpcDeck.ToList() : opponentDeck.CardIds;
     internal Action<string> DebugScenarioLog { get; set; }
     internal string DebugScenarioApplied { get; private set; }
 #if ENGINE_SOURCE
@@ -754,7 +757,9 @@ public sealed class NativeMatch
         EngineCard botHero = ResolveHero(DebugScenario?.NpcHero ?? (DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero
             : ordinaryBotHero.Id));
         var humanCards = playerCards == null ? BuildDeck() : new List<EngineCard>(playerCards);
-        var botCards = opponentDeck == null ? BuildDeck() : opponentDeck.Build();
+        // A debug scenario's npcDeck (e.g. a Dungeon Run boss deck) replaces the ladder deck; no deckbuilding rules apply to it.
+        var botCards = NpcDeckOverride ? DebugScenario.NpcDeck.Select(EngineCards.FromId).ToList()
+            : opponentDeck == null ? BuildDeck() : opponentDeck.Build();
         int firstPlayer = StartingPlayer ?? StableSeed.MatchFirstPlayer(seed);
 #if MATCH_TESTS
         // Preserve legacy fixtures' exact raw StartPlayer; production-path seat tests clear the fixture override.
@@ -780,7 +785,7 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
             EnableCorpses = true,
             Player1Sideboards = playerDeck?.Sideboards,
-            Player2Sideboards = opponentDeck?.Sideboards,
+            Player2Sideboards = NpcDeckOverride ? null : opponentDeck?.Sideboards,
 #endif
             Logging = false
         };
@@ -848,7 +853,7 @@ public sealed class NativeMatch
         var botKeeps = npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
             new MulliganView(Game.Player2.Choice.Choices.Select(id => new MulliganCard(id,
                 Game.IdEntityDic[id].Card.Id, Game.IdEntityDic[id].Card.Cost)), Game.FirstPlayer == Game.Player1,
-                opponentDeck.CardIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));
+                BotDeckIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));
         send(17, ToNativeChoice(botChoices));
 #if ENGINE_SOURCE
         AnswerDecision(botDecision.Id, botDecision.ControllerId, botKeeps);
@@ -2025,7 +2030,7 @@ public sealed class NativeMatch
                     var keeps = npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
                         new MulliganView(choice.Choices.Select(id => new MulliganCard(id,
                             Game.IdEntityDic[id].Card.Id, Game.IdEntityDic[id].Card.Cost)), Game.FirstPlayer == Game.Player1,
-                            opponentDeck.CardIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));
+                            BotDeckIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));
                     send(17, ToNativeChoice(mulliganChoice));
                     task = ChooseTask.Mulligan(Game.Player2, keeps);
                 }
