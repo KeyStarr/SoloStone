@@ -80,6 +80,9 @@ public sealed class DebugScenario
     public string NpcHero { get; private set; }
     public IReadOnlyList<string> NpcDeck { get; private set; } = new string[0];
     public int MissionId { get; private set; }
+    // The boss keys as an encounter (null when none is set): a debug way to stage what a run mode stages.
+    public EncounterSpec Encounter => NpcHero == null && NpcDeck.Count == 0 && MissionId == 0 ? null
+        : new EncounterSpec { NpcHero = NpcHero, NpcDeck = NpcDeck.Count > 0 ? NpcDeck : null, MissionId = MissionId };
     public string HeroAttack { get; private set; }
     public string HeroPower { get; private set; }
     public string HeroPowerUpgrade { get; private set; }

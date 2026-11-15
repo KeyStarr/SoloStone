@@ -42,10 +42,8 @@ internal static partial class Program
         Check(scenario.HumanHand.SequenceEqual(new[] { "CORE_EX1_323" }), "collectible hero card can be staged in hand");
     }
 
-    // Dungeon Run POC: a boss plays its own deck (authored here, not client data), through npcDeck.
-    internal const string GiantRatDeck = "CS2_171,CS2_171,CS2_169,CS2_169,CS2_172,CS2_172,CS2_120,CS2_120,CFM_790,CFM_790,"
-        + "DAL_400,DAL_400,EX1_017,EX1_017,CS2_125,CS2_125,CS2_127,CS2_127,CS2_119,CS2_119,CS2_182,CS2_182,CS2_179,CS2_179,"
-        + "EX1_028,EX1_028,CS2_200,CS2_201,CS2_118,CS2_118";
+    // Dungeon Run's Giant Rat deck (data/runs/loot-v1.json, from https://hearthstone.wiki.gg/wiki/Giant_Rat_(boss)).
+    internal const string GiantRatDeck = "EX1_549,DS1_175,CS2_237,EX1_537,CS2_171,CS2_169,EX1_076,CS2_120,CS2_203,CS2_201";
 
     private static void NpcDeckScenario()
     {
@@ -61,6 +59,15 @@ internal static partial class Program
         RejectsScenario("npcDeck=HERO_08", "a hero portrait is not a deck card");
         RejectsScenario("npcDeck=CS2_182,,CS2_182", "an empty card id");
         RejectsScenario("npcDeck=CS2_182", "a card the client cannot draw", id => id != "CS2_182");
+
+        // The boss keys stage an encounter, as a run mode's boss fight does; without them there is none.
+        EncounterSpec encounter = scenario.Encounter;
+        Check(encounter != null && encounter.NpcHero == "LOOTA_BOSS_18h" && encounter.ReplacesNpcDeck
+            && encounter.NpcDeck.SequenceEqual(GiantRatDeck.Split(',')) && encounter.IsMission && encounter.MissionId == 2663
+            && !encounter.ReplacesPlayerDeck && encounter.NpcCoin && encounter.FirstPlayer == null,
+            "npcHero, npcDeck and missionId become an encounter that changes nothing else");
+        Check(DebugScenario.Parse("missionId=2663").Encounter?.ReplacesNpcDeck == false, "missionId alone is an encounter without a deck");
+        Check(DebugScenario.Parse("humanSeat=first").Encounter == null, "a scenario without boss keys stages no encounter");
     }
 
     private const string RunA = "0b5e3a7e-2f64-4a43-8c3f-4f8b8d2f9a10", RunB = "1c6f4b8f-3a75-4b54-9d40-5a9c9e3ab021";

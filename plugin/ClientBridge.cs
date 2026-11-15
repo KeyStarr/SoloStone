@@ -578,8 +578,8 @@ internal static class ClientBridge
             Set(manager, "m_gameType", GameType.GT_VS_AI);
             Set(manager, "m_nextGameType", GameType.GT_VS_AI);
             Set(manager, "m_nextFormatType", NativeUIProbe.LocalDeckFormat);
-            // A debug scenario may name a mission (e.g. 2663, Dungeon Run): the client then builds that mission's game entity.
-            Set(manager, "m_nextMissionId", scenario?.MissionId ?? 0);
+            // An encounter may name a mission (e.g. 2663, Dungeon Run): the client then builds that mission's game entity.
+            Set(manager, "m_nextMissionId", match.ActiveEncounter?.MissionId ?? 0);
             if (nativeMatchmaking) NativeMatchmaking.Begin();
             var transition = new JobDefinition("Offline.StageGame", StageGame(), Array.Empty<IJobDependency>());
             if (SplashScreen.Get() != null)
@@ -990,8 +990,11 @@ internal static class ClientBridge
             var profile = LocalLadder.Profile;
             selected = profile?.SelectedBoard ?? 0;
             board = BoardChoice.ForPlayer(match.Seed, present, forced, selected, profile?.OwnedBoards ?? new int[0]);
-            int mission = match.DebugScenario?.MissionId ?? 0;
-            int missionBoard = BoardChoice.ForMission(mission, present);
+            // A mission plays on its own board: the encounter's, else its run definition's (the scenario table names none).
+            EncounterSpec encounter = match.ActiveEncounter;
+            int mission = encounter?.MissionId ?? 0;
+            int wanted = encounter == null ? 0 : encounter.BoardId > 0 ? encounter.BoardId : RunCatalog.ForScenario(mission)?.Client.Board ?? 0;
+            int missionBoard = BoardChoice.ForEncounter(wanted, present);
             if (missionBoard > 0)
             {
                 log.LogInfo("board: mission=" + mission + " board=" + missionBoard + " (cosmetic " + board + " not used)");

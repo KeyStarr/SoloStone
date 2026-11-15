@@ -12,12 +12,10 @@ internal static class BoardChoice
         106, 118, 120, 126, 129, 130, 131, 133, 134, 140, 141, 142, 143 };
     internal static readonly int[] FreeBoards = { 1, 2, 3, 4, 5, 6, 7 };
 
-    // A staged mission plays on its own board instead of the player's cosmetic (the scenario table names none; the
-    // server chose it). 2663 Dungeon Run -> 61 Kobolds and Catacombs.
-    private static readonly Dictionary<int, int> MissionBoards = new Dictionary<int, int> { { 2663, 61 } };
-
-    internal static int ForMission(int missionId, IEnumerable<int> presentIds)
-        => missionId != 0 && MissionBoards.TryGetValue(missionId, out var board) && presentIds.Contains(board) ? board : 0;
+    // An encounter's own board (a mission's, e.g. Dungeon Run's 61 Kobolds and Catacombs from its run definition) replaces
+    // the player's cosmetic when the client has it; 0 keeps the cosmetic.
+    internal static int ForEncounter(int boardId, IEnumerable<int> presentIds)
+        => boardId > 0 && presentIds.Contains(boardId) ? boardId : 0;
 
     internal static int Pick(int seed, IEnumerable<int> presentIds, int forcedId)
         => Pick(seed, presentIds, forcedId, Allowlist);

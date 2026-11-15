@@ -541,9 +541,14 @@ public sealed class NativeMatch
 
     // One-shot debug scenario: opening overrides before offers; remaining settings after both mulligans.
     internal DebugScenario DebugScenario { get; set; }
-    private bool NpcDeckOverride => DebugScenario != null && DebugScenario.NpcDeck.Count > 0;
-    // The NPC's deck list as dealt: the scenario's npcDeck when it set one, else the ladder deck.
-    private List<string> BotDeckIds => NpcDeckOverride ? DebugScenario.NpcDeck.ToList() : opponentDeck.CardIds;
+    // A run mode's boss fight (set before Start). A debug scenario's boss keys stage the same thing when this is null.
+    internal EncounterSpec Encounter { get; set; }
+    private EncounterSpec activeEncounter;
+    // The encounter this match is built from: before Start the one it will use (the client is told its mission before the
+    // game exists), after Start the one it did use (a rejected debug scenario's is dropped).
+    internal EncounterSpec ActiveEncounter => Game != null ? activeEncounter : Encounter ?? DebugScenario?.Encounter;
+    // The NPC's deck list as dealt: the encounter's deck when it replaced one, else the ladder deck.
+    private List<string> BotDeckIds => activeEncounter != null && activeEncounter.ReplacesNpcDeck ? activeEncounter.NpcDeck.ToList() : opponentDeck.CardIds;
     internal Action<string> DebugScenarioLog { get; set; }
     internal string DebugScenarioApplied { get; private set; }
 #if ENGINE_SOURCE
@@ -752,43 +757,55 @@ public sealed class NativeMatch
         }
         npcProfile = NpcCatalog.ForDeck(opponentDeck?.Id);
         if (npcProfile != null) npcPilot = NpcPilots.Create(npcProfile, line => BotTrace?.Invoke(line));
-        EngineCard hero = playerHero ?? ResolveHero("HERO_08");
         EngineCard ordinaryBotHero = ResolveHero(opponentDeck == null ? "HERO_08" : opponentDeck.Hero);
-        EngineCard botHero = ResolveHero(DebugScenario?.NpcHero ?? (DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero
-            : ordinaryBotHero.Id));
-        var humanCards = playerCards == null ? BuildDeck() : new List<EngineCard>(playerCards);
-        // A debug scenario's npcDeck (e.g. a Dungeon Run boss deck) replaces the ladder deck; no deckbuilding rules apply to it.
-        var botCards = NpcDeckOverride ? DebugScenario.NpcDeck.Select(EngineCards.FromId).ToList()
-            : opponentDeck == null ? BuildDeck() : opponentDeck.Build();
-        int firstPlayer = StartingPlayer ?? StableSeed.MatchFirstPlayer(seed);
-#if MATCH_TESTS
-        // Preserve legacy fixtures' exact raw StartPlayer; production-path seat tests clear the fixture override.
-        if (!StableSeed.TestFirstPlayer.HasValue)
-#endif
-            firstPlayer = StableSeed.ApplyFirstPlayerRules(firstPlayer, humanCards.Select(card => card.Id), botCards.Select(card => card.Id));
-        var config = new GameConfig
+        activeEncounter = Encounter ?? DebugScenario?.Encounter;
+        // The game's setup: the ordinary match, with whatever the encounter (a run's boss fight or a debug scenario's boss keys)
+        // replaces. Replaced decks follow no deckbuilding rules and carry no sideboards.
+        GameConfig Configure(EncounterSpec setup)
         {
-            Player1Name = "Player",
-            Player2Name = OpponentName = opponentDeck == null ? "Innkeeper" : OpponentDisplayName(npcProfile, opponentDeck),
-            Player1HeroClass = hero.Class,
-            Player1HeroCard = hero,
-            Player1Deck = humanCards,
-            Player2HeroClass = botHero.Class,
-            Player2HeroCard = botHero,
-            Player2Deck = botCards,
-            FormatType = FormatType.FT_WILD,
-            StartPlayer = firstPlayer,
-            Shuffle = true,
-            RandomSeed = seed,
-            SkipMulligan = false,
-            History = true,
-#if ENGINE_SOURCE
-            EnableCorpses = true,
-            Player1Sideboards = playerDeck?.Sideboards,
-            Player2Sideboards = NpcDeckOverride ? null : opponentDeck?.Sideboards,
+            EngineCard hero = setup?.PlayerHero != null ? ResolveHero(setup.PlayerHero) : playerHero ?? ResolveHero("HERO_08");
+            EngineCard botHero = ResolveHero(setup?.NpcHero ?? (DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero
+                : ordinaryBotHero.Id));
+            var humanCards = setup != null && setup.ReplacesPlayerDeck ? setup.PlayerDeck.Select(EngineCards.FromId).ToList()
+                : playerCards == null ? BuildDeck() : new List<EngineCard>(playerCards);
+            var botCards = setup != null && setup.ReplacesNpcDeck ? setup.NpcDeck.Select(EngineCards.FromId).ToList()
+                : opponentDeck == null ? BuildDeck() : opponentDeck.Build();
+            int firstPlayer = setup?.FirstPlayer ?? StartingPlayer ?? StableSeed.MatchFirstPlayer(seed);
+#if MATCH_TESTS
+            // Preserve legacy fixtures' exact raw StartPlayer; production-path seat tests clear the fixture override.
+            if (!StableSeed.TestFirstPlayer.HasValue)
 #endif
-            Logging = false
-        };
+                firstPlayer = StableSeed.ApplyFirstPlayerRules(firstPlayer, humanCards.Select(card => card.Id), botCards.Select(card => card.Id));
+            return new GameConfig
+            {
+                Player1Name = "Player",
+                Player2Name = OpponentName = setup?.NpcName ?? (opponentDeck == null ? "Innkeeper" : OpponentDisplayName(npcProfile, opponentDeck)),
+                Player1HeroClass = hero.Class,
+                Player1HeroCard = hero,
+                Player1Deck = humanCards,
+                Player2HeroClass = botHero.Class,
+                Player2HeroCard = botHero,
+                Player2Deck = botCards,
+                FormatType = FormatType.FT_WILD,
+                StartPlayer = firstPlayer,
+                Shuffle = true,
+                RandomSeed = seed,
+                SkipMulligan = false,
+                History = true,
+#if ENGINE_SOURCE
+                EnableCorpses = true,
+                Player1Sideboards = setup != null && setup.ReplacesPlayerDeck ? null : playerDeck?.Sideboards,
+                Player2Sideboards = setup != null && setup.ReplacesNpcDeck ? null : opponentDeck?.Sideboards,
+                Player1StartingHealth = setup?.PlayerStartingHealth ?? 0,
+                Player2StartingHealth = setup?.NpcStartingHealth ?? 0,
+                Player2StartingMana = setup?.NpcStartingMana ?? 0,
+                SkipCoin = setup != null && !setup.NpcCoin,
+                Player1Loadout = setup?.PlayerLoadout,
+#endif
+                Logging = false
+            };
+        }
+        var config = Configure(activeEncounter);
         Game = new EngineGame(config);
         OpponentPlateName = NpcMemoryText.Plate(OpponentName, npcProfile != null ? NpcMemory : null);
 
@@ -817,15 +834,22 @@ public sealed class NativeMatch
         }
         Game.StartGame();
 #if ENGINE_SOURCE
+        bool scenarioSet = DebugScenario != null;
         ValidateDebugScenario();
         DebugScenario?.ApplyOpening(Game);
-        if (DebugScenario == null && botHero.Id != ordinaryBotHero.Id)
+        if (scenarioSet && DebugScenario == null)
         {
-            // Rejected scenarios must not leave an NPC class override behind. Nothing has been sent/recorded yet;
-            // recreate from the same seed/decks, whose original entity IDs also preserve the premium assignments.
-            config.Player2HeroCard = ordinaryBotHero; config.Player2HeroClass = ordinaryBotHero.Class;
-            Game = new EngineGame(config);
-            Game.StartGame();
+            // A rejected scenario must not leave its NPC hero, skin or deck behind (a run's own encounter stays). Nothing has
+            // been sent or recorded yet: recreate from the same seed; the player's deck entities keep their ids, and with
+            // them their premium assignments.
+            if (Encounter == null) activeEncounter = null;
+            var ordinary = Configure(activeEncounter);
+            if (ordinary.Player2HeroCard.Id != config.Player2HeroCard.Id || !ordinary.Player2Deck.SequenceEqual(config.Player2Deck))
+            {
+                config = ordinary;
+                Game = new EngineGame(config);
+                Game.StartGame();
+            }
         }
 #endif
         IdentifyStartingCoin();
@@ -5708,7 +5732,7 @@ public sealed class NativeMatch
                 NativeEntity entity = ToNativeEntity(player.PowerEntity);
                 // A mission's game entity reads the AI player's HERO_ENTITY from CreateGame itself (retail sends it there) and
                 // throws without it (GenericDungeonMissionEntity.GetOpposingHeroCardID). Only staged missions add it.
-                if (player.PlayerId == BotPlayerId && (DebugScenario?.MissionId ?? 0) != 0 && controller.Hero != null
+                if (player.PlayerId == BotPlayerId && activeEncounter != null && activeEncounter.IsMission && controller.Hero != null
                     && !entity.Tags.Any(tag => tag.Name == (int)GameTag.HERO_ENTITY))
                     entity.Tags.Add(new NativeTag { Name = (int)GameTag.HERO_ENTITY, Value = WireReturnId(controller.Hero.Id) });
                 var mana = (Used: TagValue(player.PowerEntity.Tags, GameTag.RESOURCES_USED),
@@ -5741,7 +5765,7 @@ public sealed class NativeMatch
                     // A mission's game entity (e.g. Dungeon Run's per-boss entity) finds its AI opponent as the player with an empty
                     // game account (GenericDungeonMissionEntity.GetOpposingHeroCardID), as retail AI opponents have.
                     GameAccountId = new NativeBnetId { Hi = 0,
-                        Lo = player.PlayerId == BotPlayerId && (DebugScenario?.MissionId ?? 0) != 0 ? 0UL : (ulong)(index + 1) },
+                        Lo = player.PlayerId == BotPlayerId && activeEncounter != null && activeEncounter.IsMission ? 0UL : (ulong)(index + 1) },
                     CardBack = player.PlayerId == HumanPlayerId && cosmeticCardBack.HasValue ? cosmeticCardBack.Value : npcPresentation?.CardBack(player.PlayerId, player.CardBack) ?? player.CardBack,
                     Entity = entity
                 };
