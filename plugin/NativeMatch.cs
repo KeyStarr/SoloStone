@@ -813,6 +813,7 @@ public sealed class NativeMatch
                 Player1Loadout = setup?.PlayerLoadout,
                 Player2StartingBoard = setup?.NpcBoard,
                 Player1StartingHand = setup?.PlayerHand,
+                Player1RunBossesDefeated = setup?.PlayerBossesDefeated ?? 0,
 #endif
                 Logging = false
             };

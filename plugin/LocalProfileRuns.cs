@@ -53,12 +53,12 @@ public sealed partial class LocalProfile
     });
 
     // The fight's result: the run moves on (or ends), the marker clears and a win counts for the run's class.
-    internal RunState ResolveRunFight(RunEngine engine, string fightId, RunFightResult result) => CommitChange(next =>
+    internal RunState ResolveRunFight(RunEngine engine, string fightId, RunFightResult result, IReadOnlyList<string> deckAdditions = null) => CommitChange(next =>
     {
         LocalRunSlot slot = Slot(next, engine.Definition.Id, false);
         if (slot == null || slot.FightId == null || slot.FightId != fightId) throw new InvalidOperationException("No matching run fight.");
         RunState state = Usable(engine.Definition, slot.Run) ?? throw new InvalidOperationException("The run under way no longer fits its definition.");
-        engine.ResolveFight(state, result);
+        engine.ResolveFight(state, result, deckAdditions);
         if (result == RunFightResult.Won)
         {
             LocalRunClassWins wins = slot.Wins.FirstOrDefault(w => w.Class == state.Class);

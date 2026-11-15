@@ -8,6 +8,7 @@ public static class RunEncounterSpec
         PlayerHero = encounter.Hero,
         PlayerDeck = encounter.Deck.ToList(),
         PlayerStartingHealth = encounter.PlayerHealth,
+        PlayerBossesDefeated = encounter.Round - 1,
         PlayerLoadout = encounter.Passives.Count == 0 ? null : encounter.Passives.ToList(),
         PlayerHand = encounter.Boss.PlayerHand.Count == 0 ? null : encounter.Boss.PlayerHand.ToList(),
         NpcHero = encounter.Boss.Hero,

@@ -112,7 +112,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             var candidates = board.Where(m => !m.Untouchable).ToList();
             if (candidates.Count > 0)
             {
-                Minion centre = candidates[game.Random.Next(candidates.Count)];
+                Minion centre = candidates[DungeonRunCards.Pick(game, candidates.Count)];
                 int pos = centre.ZonePosition;
                 if (pos > 0 && !board[pos - 1].Untouchable) picked.Add(board[pos - 1]);
                 picked.Add(centre);
@@ -126,7 +126,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 
         private static ISimpleTask AddRandomBeam() => new CustomTask((game, controller, source, target, stack) => {
             if (controller.HandZone.IsFull) return;
-            var beam = Entity.FromCard(controller, Cards.FromId(Beams[game.Random.Next(Beams.Length)]));
+            var beam = Entity.FromCard(controller, Cards.FromId(Beams[DungeonRunCards.Pick(game, Beams.Length)]));
             beam[GameTag.DISPLAYED_CREATOR] = source.Id;
             Actions.Generic.AddHandPhase.Invoke(controller, beam);
         });

@@ -59,7 +59,8 @@ public sealed class RunEngine
         };
     }
 
-    public void ResolveFight(RunState state, RunFightResult result)
+    // deckAdditions: cards the fight added to the run deck ("Add it to your Dungeon Deck"), kept only with a win.
+    public void ResolveFight(RunState state, RunFightResult result, IReadOnlyList<string> deckAdditions = null)
     {
         RequireBetweenFights(state);
         if (state.Offer != null) throw new InvalidOperationException("No fight is pending while a reward is offered.");
@@ -80,6 +81,7 @@ public sealed class RunEngine
             case RunFightResult.Won:
                 state.BossesDefeated++;
                 state.Defeated.Add(state.NextBoss);
+                if (deckAdditions != null) state.Deck.AddRange(deckAdditions);
                 state.NextBoss = null;
                 if (state.BossesDefeated == Definition.Rounds.Count)
                 {

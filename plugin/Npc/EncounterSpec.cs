@@ -12,6 +12,8 @@ public sealed class EncounterSpec
     public IReadOnlyList<string> PlayerLoadout;
     // Cards the player gets in hand after the mulligans (a run boss's rule).
     public IReadOnlyList<string> PlayerHand;
+    // Bosses the player's run has defeated before this fight (its run-scaled treasures).
+    public int PlayerBossesDefeated;
 
     // The NPC's side: a boss hero (its own Hero Power comes with it) and deck replace the ladder opponent's.
     public string NpcHero;

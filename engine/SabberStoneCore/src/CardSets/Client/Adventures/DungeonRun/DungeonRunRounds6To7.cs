@@ -155,7 +155,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             if (minions.Count == 0) return;
             int top = minions.Max(m => m.AttackDamage);
             var tied = minions.Where(m => m.AttackDamage == top).ToList();
-            Minion swallowed = tied.Count == 1 ? tied[0] : tied[game.Random.Next(tied.Count)];
+            Minion swallowed = tied.Count == 1 ? tied[0] : tied[DungeonRunCards.Pick(game, tied.Count)];
             bool poisonous = swallowed.Poisonous;
             swallowed.Destroy();
             if (poisonous) controller.Hero.Destroy();

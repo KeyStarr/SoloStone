@@ -138,7 +138,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             {
                 var candidates = pool.Where(id => c.SecretZone.All(s => s.Card.Id != id)).ToList();
                 if (candidates.Count == 0) break;
-                string pick = candidates[game.Random.Next(candidates.Count)];
+                string pick = candidates[DungeonRunCards.Pick(game, candidates.Count)];
                 var secret = (Spell)Entity.FromCard(c, Cards.FromId(pick));
                 secret.Power.Trigger?.Activate(secret);
                 c.SecretZone.Add(secret);

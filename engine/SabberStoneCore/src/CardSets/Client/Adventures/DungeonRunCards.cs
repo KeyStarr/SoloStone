@@ -15,6 +15,14 @@ namespace SabberStoneCore.CardSets.Client.Adventures
             DungeonRun.DungeonRunRounds6To7.Apply(register);
             DungeonRun.DungeonRunFinals.Apply(register);
             DungeonRun.DungeonRunTreasures.Apply(register);
+            DungeonRun.DungeonRunActiveTreasures.Apply(register);
+        }
+
+        // A random index for a run card's own choice, announced like the engine's random tasks do.
+        internal static int Pick(Game game, int count)
+        {
+            game.OnRandomHappened(true);
+            return game.Random.Next(count);
         }
 
         internal static void Plain(Card card)

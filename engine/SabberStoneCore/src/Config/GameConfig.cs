@@ -266,6 +266,11 @@ namespace SabberStoneCore.Config
 		[field: NonSerialized]
 		public IReadOnlyList<string> Player2StartingHand { get; set; }
 
+		/// <summary>Bosses Player 1 has defeated in its run before this fight: the count its run-scaled cards use (Dungeon
+		/// Run's "for each Boss you've defeated this run").</summary>
+		[field: NonSerialized]
+		public int Player1RunBossesDefeated { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>

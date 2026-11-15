@@ -139,6 +139,15 @@ internal static class Program
         Check(admission.IsReady, "fixture is ready: " + string.Join("; ", admission.Report()));
         var engine = new RunEngine(admission);
 
+        // "Add it to your Dungeon Deck": cards a won fight added join the run deck; a tie keeps the deck as it was.
+        RunState added = engine.Start("MAGE", "HERO_08", 7);
+        int deckBefore = added.Deck.Count;
+        engine.ResolveFight(added, RunFightResult.Tied, new[] { "CS2_120" });
+        Check(added.Deck.Count == deckBefore, "a tied fight adds nothing to the run deck");
+        engine.ResolveFight(added, RunFightResult.Won, new[] { "CS2_120", "CS2_182" });
+        Check(added.Deck.Count == deckBefore + 2 && added.Deck.Skip(deckBefore).SequenceEqual(new[] { "CS2_120", "CS2_182" }),
+            "a won fight's Dungeon Deck additions join the run deck");
+
         // A whole won run: health, boss rounds, final-boss mana, hero power upgrade, the reward schedule, deck growth.
         RunState state = engine.Start("MAGE", "HERO_08", 42);
         Check(state.Deck.SequenceEqual(definition.ClassStart("MAGE").Deck), "a run starts with the class start deck");

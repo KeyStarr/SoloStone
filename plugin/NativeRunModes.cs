@@ -167,7 +167,12 @@ internal static class NativeRunModes
         {
             var outcome = MatchOutcome.From(match.Game, match.HumanConceded);
             RunFightResult result = outcome.Result == "Won" ? RunFightResult.Won : outcome.Result == "Lost" ? RunFightResult.Lost : RunFightResult.Tied;
-            RunState run = LocalLadder.Profile.ResolveRunFight(EngineFor(fightDefinition), fightId, result);
+            // Cards the fight added to the run deck ("Add it to your Dungeon Deck"); engine builds only (ENGINE_SOURCE).
+            IReadOnlyList<string> additions = null;
+#if ENGINE_SOURCE
+            additions = SabberStoneCore.Actions.RunDeckRules.Of(match.Game.Player1);
+#endif
+            RunState run = LocalLadder.Profile.ResolveRunFight(EngineFor(fightDefinition), fightId, result, additions);
             Trace("fight " + fightId + " " + result + " -> run " + run.Status + " round=" + run.Round + " next=" + (run.NextBoss ?? "-")
                 + " offer=" + (run.Offer?.Kind.ToString() ?? "-"));
         }

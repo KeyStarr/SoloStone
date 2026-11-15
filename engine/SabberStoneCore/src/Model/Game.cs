@@ -827,6 +827,7 @@ namespace SabberStoneCore.Model
 			StartOfGameRules.AddLoadout(Player2, _gameConfig.Player2Loadout);
 			AddStartingBoard(Player1, _gameConfig.Player1StartingBoard);
 			AddStartingBoard(Player2, _gameConfig.Player2StartingBoard);
+			RunProgressRules.Apply(Player1, _gameConfig.Player1RunBossesDefeated);
 			// A starting Passive Hero Power (a boss's trigger or aura) is live from the start of the game.
 			ActivatePassivePower(Player1);
 			ActivatePassivePower(Player2);
