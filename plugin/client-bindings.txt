@@ -148,6 +148,7 @@ C	blizzard.bgsclient	PegasusShared.CardStack	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.Date	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.DeckCardData	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusShared.GameSaveDataValue	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveKey	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.CardBackModification	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.CardBackModifications	.ctor	System.Void()
@@ -715,6 +716,10 @@ M	*	UberText	GetLocalizedFont	()
 M	*	UberText	GetTextBounds	()
 M	*	UberText	UpdateNow	(System.Boolean)
 M	*	iTween	Count	(UnityEngine.GameObject)
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	OnPlayGameButtonReleased	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	PlayGame	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetHeroButtonsEnabled	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetPlayButtonEnabled	*
 M	Assembly-CSharp	AchievementCategoryDbfRecord	get_Icon	System.String()
 M	Assembly-CSharp	AchievementCategoryDbfRecord	get_Subcategories	System.Collections.Generic.List`1<AchievementSubcategoryDbfRecord>()
 M	Assembly-CSharp	AchievementSubcategoryDbfRecord	get_Icon	System.String()
@@ -727,6 +732,13 @@ M	Assembly-CSharp	Actor	GetPremium	TAG_PREMIUM()
 M	Assembly-CSharp	Actor	GetSpell	*
 M	Assembly-CSharp	Actor	IsColliderEnabled	System.Boolean()
 M	Assembly-CSharp	Actor	IsShown	System.Boolean()
+M	Assembly-CSharp	AdventureConfig	ChangeSubSceneToSelectedAdventure	System.Void()
+M	Assembly-CSharp	AdventureConfig	Get	AdventureConfig()
+M	Assembly-CSharp	AdventureConfig	GetSelectedAdventure	AdventureDbId()
+M	Assembly-CSharp	AdventureConfig	GetSelectedMode	AdventureModeDbId()
+M	Assembly-CSharp	AdventureConfig	OnAdventureSceneAwake	*
+M	Assembly-CSharp	AdventureConfig	SetSelectedAdventureMode	System.Void(AdventureDbId,AdventureModeDbId)
+M	Assembly-CSharp	AdventureConfig	get_CurrentSubScene	Assets.AdventureData+Adventuresubscene()
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -1185,6 +1197,8 @@ M	Assembly-CSharp	DisenchantButton	OnRelease	*
 M	Assembly-CSharp	EmoteHandler	Get	EmoteHandler()
 M	Assembly-CSharp	EmoteHandler	IsValidEmoteTypeForOpponent	System.Boolean(EmoteType)
 M	Assembly-CSharp	EndGameScreen	Awake	*
+M	Assembly-CSharp	EndGameScreen	ContinueButtonPress_Common	*
+M	Assembly-CSharp	EndGameScreen	ContinueButtonPress_PrevMode	*
 M	Assembly-CSharp	EndGameScreen	ContinueEvents	*
 M	Assembly-CSharp	EndGameScreen	Get	EndGameScreen()
 M	Assembly-CSharp	EndGameScreen	HideTwoScoop	()
@@ -1277,6 +1291,7 @@ M	Assembly-CSharp	GameMenu	OnSkipTutorialButtonReleased	*
 M	Assembly-CSharp	GameMenu	RestartButtonPressed	*
 M	Assembly-CSharp	GameMenu	Show	*
 M	Assembly-CSharp	GameMenu	ShowLoginTooltipIfNeeded	*
+M	Assembly-CSharp	GameMgr	FindGameWithHero	*
 M	Assembly-CSharp	GameMgr	Get	GameMgr()
 M	Assembly-CSharp	GameMgr	GetGameSetup	Network+GameSetup()
 M	Assembly-CSharp	GameMgr	GetGameType	PegasusShared.GameType()
@@ -2829,6 +2844,8 @@ M	blizzard.bgsclient	PegasusShared.Date	set_Year	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Def	System.Void(PegasusShared.CardDef)
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Qty	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Tuple	System.Void(System.Collections.Generic.List`1<PegasusShared.GameSaveKey>)
+M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Value	System.Void(PegasusShared.GameSaveDataValue)
+M	blizzard.bgsclient	PegasusShared.GameSaveDataValue	set_IntValue	System.Void(System.Collections.Generic.List`1<System.Int64>)
 M	blizzard.bgsclient	PegasusShared.GameSaveKey	set_Id	System.Void(System.Int64)
 M	blizzard.bgsclient	PegasusUtil.CardBackModification	set_AssetCardBackId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.CardBackModifications	get_CardBackModifications_	System.Collections.Generic.List`1<PegasusUtil.CardBackModification>()
@@ -2882,6 +2899,9 @@ T	Assembly-CSharp	AbsDeckPickerTrayDisplay
 T	Assembly-CSharp	AchievementCategoryDbfRecord		
 T	Assembly-CSharp	AchievementSubcategoryDbfRecord		
 T	Assembly-CSharp	Actor		
+T	Assembly-CSharp	AdventureConfig		
+T	Assembly-CSharp	AdventureDbId		
+T	Assembly-CSharp	AdventureModeDbId		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		
 T	Assembly-CSharp	AlertPopup+PopupInfo		
@@ -2896,6 +2916,8 @@ T	Assembly-CSharp	AnimationUtil+DelOnShownWithPunch
 T	Assembly-CSharp	ArcaneDustAmount		
 T	Assembly-CSharp	ArcaneDustRewardData		
 T	Assembly-CSharp	AssetLoader		
+T	Assembly-CSharp	Assets.AdventureData		
+T	Assembly-CSharp	Assets.AdventureData+Adventuresubscene		
 T	Assembly-CSharp	Assets.BoxDressing		
 T	Assembly-CSharp	Assets.BoxDressing+BoxDressingType		
 T	Assembly-CSharp	Assets.CardHero		
@@ -3512,6 +3534,7 @@ T	blizzard.bgsclient	PegasusShared.DeckSourceType
 T	blizzard.bgsclient	PegasusShared.DeckType		
 T	blizzard.bgsclient	PegasusShared.FormatType		
 T	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate		
+T	blizzard.bgsclient	PegasusShared.GameSaveDataValue		
 T	blizzard.bgsclient	PegasusShared.GameSaveKey		
 T	blizzard.bgsclient	PegasusShared.GameType		
 T	blizzard.bgsclient	PegasusShared.RuneType		

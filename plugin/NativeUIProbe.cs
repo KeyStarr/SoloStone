@@ -252,6 +252,7 @@ internal static partial class NativeUIProbe
             transpiler: new HarmonyMethod(typeof(NativeUIProbe), nameof(CollectionExitOnlineCheck)));
         Hook(harmony, typeof(GameSaveDataManager), "Request", nameof(Preferences), new[] { typeof(List<GameSaveKeyId>), typeof(GameSaveDataManager.OnRequestDataResponseDelegate) });
         Hook(harmony, typeof(GameSaveDataManager), "SaveSubkeys", nameof(SavePreferences));
+        NativeRunModes.Install(harmony, log);
         Hook(harmony, typeof(CollectionManager), "SendCreateDeck", nameof(CreateLocalDraft));
         InitializeCosmeticTrayBinding(harmony);
         Hook(harmony, typeof(CollectionManager), "OnDeckDeletedWhileOffline", nameof(DeleteLocalDraft));
@@ -381,6 +382,7 @@ internal static partial class NativeUIProbe
             if (sceneWaiting && SplashScreen.Get() == null && !SceneMgr.Get().IsTransitioning() && SceneMgr.Get().GetMode() == target)
             {
                 sceneWaiting = false; State("SceneLoaded:" + target);
+                if (target == SceneMgr.Mode.ADVENTURE) NativeRunModes.SceneLoaded();
             }
             if (sceneWaiting && Time.realtimeSinceStartup - sceneBegan > 60)
                 throw new TimeoutException("Native scene did not finish: " + target);
@@ -394,6 +396,7 @@ internal static partial class NativeUIProbe
             NativeHelpUI.Update(AtHome());
             RoutePendingRewardHome();
             RouteFinishedMatchToPicker();
+            NativeRunModes.Update();
             BindPicker();
             NativeRematchUI.Update(pickerTray);
             NativeDeckPickerGuide.Update(pickerTray);
@@ -447,7 +450,8 @@ internal static partial class NativeUIProbe
     private static void RouteFinishedMatchToPicker()
     {
         if (!SceneMgr.IsInitialized()) return;
-        bool stable = active && ready && !sceneWaiting && !SceneMgr.Get().IsTransitioning() && !NativeRewardUI.Active;
+        // A run fight's game scene belongs to its run mode, which leaves it for the adventure screen itself.
+        bool stable = active && ready && !sceneWaiting && !SceneMgr.Get().IsTransitioning() && !NativeRewardUI.Active && !NativeRunModes.OwnsMatch;
         if (LocalRewardPresentation.ShouldRouteFinishedToPicker(stable, Profile?.PendingRewardPresentation != null,
             Profile?.Pending != null, LocalLadder.Screen, SceneMgr.Get().GetMode() == SceneMgr.Mode.GAMEPLAY))
             Navigate(SceneMgr.Mode.TOURNAMENT);
@@ -1495,6 +1499,7 @@ internal static partial class NativeUIProbe
             : button == Box.ButtonType.COLLECTION ? NativeHomeControl.Collection
             : button == Box.ButtonType.OPEN_PACKS ? NativeHomeControl.OpenPacks
             : button == Box.ButtonType.STORE ? NativeHomeControl.Store
+            : button == Box.ButtonType.GAME_MODES && NativeRunModes.Enabled ? NativeHomeControl.RunModes
             : NativeHomeControl.Unsupported;
         NativeMenuTarget route = NativeMenuFlow.HomeRoute(control);
         if (route == NativeMenuTarget.Picker) Navigate(SceneMgr.Mode.TOURNAMENT);
@@ -1505,6 +1510,7 @@ internal static partial class NativeUIProbe
         }
         else if (route == NativeMenuTarget.Pack) Navigate(SceneMgr.Mode.PACKOPENING);
         else if (route == NativeMenuTarget.LocalShop) { } // NativeShop raised this press after opening the local shop.
+        else if (route == NativeMenuTarget.RunModes) NativeRunModes.Open();
         else log.LogWarning("NATIVE_MENU unsupported home control blocked: " + button);
     }
     private static IEnumerable<CodeInstruction> CollectionExitOnlineCheck(IEnumerable<CodeInstruction> instructions)
@@ -1540,6 +1546,7 @@ internal static partial class NativeUIProbe
         __instance.SetBoxButtonInteractions(true, __instance.m_PlayButton, true);
         __instance.SetButtonEnabled(true, __instance.m_OpenPacksButton);
         __instance.SetButtonEnabled(true, __instance.m_CollectionButton);
+        NativeRunModes.ShowModesButton(__instance);
         NativeHiddenEntries.Apply(__instance);
         NativeHomeUI.RefreshDrawer(__instance, Profile.UnopenedPacks, message => log.LogInfo(message));
         NativeShop.RefreshHomeStore();
@@ -1552,7 +1559,8 @@ internal static partial class NativeUIProbe
         {
             if (!ready || sceneWaiting || replayRunning || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting") return;
             if (!NativeResultsUI.CanNavigate(mode == SceneMgr.Mode.HUB)) return;
-            if (mode != SceneMgr.Mode.HUB && mode != SceneMgr.Mode.PACKOPENING && mode != SceneMgr.Mode.COLLECTIONMANAGER && mode != SceneMgr.Mode.TOURNAMENT)
+            if (mode != SceneMgr.Mode.HUB && mode != SceneMgr.Mode.PACKOPENING && mode != SceneMgr.Mode.COLLECTIONMANAGER && mode != SceneMgr.Mode.TOURNAMENT
+                && !(mode == SceneMgr.Mode.ADVENTURE && NativeRunModes.Enabled))
                 throw new ArgumentException("Unsupported native UI target");
             if (mode == SceneMgr.Mode.PACKOPENING)
             {
@@ -2040,8 +2048,13 @@ internal static partial class NativeUIProbe
     private static bool Preferences(List<GameSaveKeyId> __0, GameSaveDataManager.OnRequestDataResponseDelegate __1)
     {
         if (!active) return true;
-        bool valid = __0 != null && __0.Count > 0 && __0.All(k => NativeUIProjection.AllowedPreference(k.ToString()));
-        if (valid) foreach (var key in __0) EnsurePreference(key);
+        bool valid = __0 != null && __0.Count > 0 && __0.All(k => NativeUIProjection.AllowedPreference(k.ToString()) || NativeRunModes.OwnsKey(k)
+            || NativeRunModes.IgnoresKey(k));
+        if (valid) foreach (var key in __0)
+        {
+            if (NativeRunModes.OwnsKey(key)) NativeRunModes.Serve(key, GameSaveDataManager.Get().ApplyGameSaveDataUpdate);
+            else if (!NativeRunModes.IgnoresKey(key)) EnsurePreference(key);
+        }
         else Fail(new InvalidOperationException("Unknown preference request: " + string.Join(",", __0 ?? new List<GameSaveKeyId>())));
         callbacks.Enqueue(() => __1?.Invoke(valid)); return false;
     }
@@ -2049,11 +2062,18 @@ internal static partial class NativeUIProbe
     {
         if (!active) return true;
         bool valid = __0 != null && __0.Count > 0 && __0.All(r => r != null
-            && NativeUIProjection.AllowedPreferenceSave(r.Key.ToString(), r.Subkey.ToString(), r.Long_Values));
+            && (NativeUIProjection.AllowedPreferenceSave(r.Key.ToString(), r.Subkey.ToString(), r.Long_Values) || NativeRunModes.OwnsKey(r.Key)));
         try
         {
             if (valid) foreach (var request in __0)
             {
+                if (NativeRunModes.OwnsKey(request.Key))
+                {
+                    NativeRunModes.Write(request);
+                    SaveLocal(request);
+                    NativeRunModes.Serve(request.Key, GameSaveDataManager.Get().ApplyGameSaveDataUpdate);
+                    continue;
+                }
                 EnsurePreference(request.Key);
                 // The mass-opening tooltip's "seen" flag lives in this save; a failed write only means it shows again next start.
                 if (request.Key == GameSaveKeyId.PLAYER_FLAGS)

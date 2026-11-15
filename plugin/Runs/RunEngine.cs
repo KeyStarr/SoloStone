@@ -20,16 +20,20 @@ public sealed class RunEngine
 
     public RunDefinition Definition { get; private set; }
     public RunAdmission Admission { get; private set; }
+    // Developer builds only: a run starts before its content is complete, and a round without an admitted boss fights any
+    // admitted boss. Public builds never set it; there a run waits until every round and offer can be filled.
+    public bool AllowIncomplete { get; private set; }
 
-    public RunEngine(RunAdmission admission)
+    public RunEngine(RunAdmission admission, bool allowIncomplete = false)
     {
         Admission = admission ?? throw new ArgumentNullException(nameof(admission));
         Definition = admission.Definition;
+        AllowIncomplete = allowIncomplete;
     }
 
     public RunState Start(string cls, string hero, long seed)
     {
-        if (!Admission.IsReady) throw new InvalidOperationException(Definition.Id + " is not ready: " + string.Join("; ", Admission.Problems()));
+        if (!Admission.IsReady && !AllowIncomplete) throw new InvalidOperationException(Definition.Id + " is not ready: " + string.Join("; ", Admission.Problems()));
         RunClassStart start = Definition.ClassStart(cls) ?? throw new ArgumentException(Definition.Id + " has no class " + cls);
         if (string.IsNullOrEmpty(hero)) throw new ArgumentException("A run needs a hero card.");
         var state = new RunState {
@@ -76,6 +80,7 @@ public sealed class RunEngine
             case RunFightResult.Won:
                 // The defeated boss is behind the run: no next boss is known until the rewards are chosen.
                 state.BossesDefeated++;
+                state.Defeated.Add(state.NextBoss);
                 state.NextBoss = null;
                 if (state.BossesDefeated == Definition.Rounds.Count)
                 {
@@ -172,6 +177,7 @@ public sealed class RunEngine
     private string PickBoss(RunState state)
     {
         var round = Definition.Bosses.Where(b => b.Rounds.Contains(state.Round) && Admission.Bosses.Contains(b.Id)).Select(b => b.Id).ToList();
+        if (round.Count == 0 && AllowIncomplete) round = Definition.Bosses.Where(b => Admission.Bosses.Contains(b.Id)).Select(b => b.Id).ToList();
         var foughtFamilies = new HashSet<string>(state.BossesFought.Select(id => Definition.Boss(id)?.Family ?? id), StringComparer.Ordinal);
         var fresh = round.Where(id => !foughtFamilies.Contains(Definition.Boss(id).Family)).ToList();
         var candidates = fresh.Count > 0 ? fresh : round.Where(id => id != state.NextBoss).ToList();

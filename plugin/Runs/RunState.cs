@@ -36,6 +36,8 @@ public sealed class RunState
     public List<string> Deck = new List<string>();
     public List<string> Passives = new List<string>();
     public List<string> BossesFought = new List<string>();
+    // The bosses beaten, in order (a tie is fought but not beaten).
+    public List<string> Defeated = new List<string>();
     public int BossesDefeated;
     public string NextBoss, LostTo;
     // Rewards still to offer after the last win (the current offer is not in it).
@@ -47,7 +49,7 @@ public sealed class RunState
 
     public RunState Clone() => new RunState {
         Definition = Definition, DefinitionVersion = DefinitionVersion, Class = Class, Hero = Hero, Seed = Seed, Step = Step,
-        Status = Status, Deck = Deck.ToList(), Passives = Passives.ToList(), BossesFought = BossesFought.ToList(),
+        Status = Status, Deck = Deck.ToList(), Passives = Passives.ToList(), BossesFought = BossesFought.ToList(), Defeated = Defeated.ToList(),
         BossesDefeated = BossesDefeated, NextBoss = NextBoss, LostTo = LostTo, PendingRewards = PendingRewards.ToList(),
         Offer = Offer?.Clone(), RunEndSeen = RunEndSeen,
     };

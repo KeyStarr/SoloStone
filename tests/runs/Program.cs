@@ -41,6 +41,7 @@ internal static class Program
         NpcWorldJson.Parser = text => MiniJSON.Json.Deserialize(text);
         ShippedDefinitions();
         FixtureRules();
+        SaveDataProjection();
         ParserRejects();
         Console.WriteLine("PASS runs (" + checks + " checks)");
         return 0;
@@ -93,6 +94,22 @@ internal static class Program
         Check(loot.Client.Scenario == 2663 && loot.Client.ServerKey == 24 && loot.Client.ClientKey == 42, "loot: client ids");
         Check(loot.Classes.Count == 9 && loot.Classes.All(c => c.Deck.Count == 10), "loot: nine classes with ten-card start decks");
         Check(loot.Rounds.Count == 8 && loot.Round(8).BossStartingMana == 2, "loot: eight rounds, the final boss starts with 2 mana");
+
+        // Developer builds play an incomplete run: each round without an admitted boss fights an admitted one, and offers
+        // with nothing admitted are skipped. Public builds refuse (checked above for every definition that is not ready).
+        RunAdmission lootAdmission = RunAdmission.Evaluate(loot, Playable, Labelled);
+        if (!lootAdmission.IsReady && lootAdmission.Bosses.Count > 0)
+        {
+            var dev = new RunEngine(lootAdmission, allowIncomplete: true);
+            RunState devRun = dev.Start("MAGE", "HERO_08", 1);
+            for (int round = 1; round <= 3; round++)
+            {
+                Check(lootAdmission.Bosses.Contains(devRun.NextBoss) && devRun.Round == round, "dev run round " + round + ": an admitted boss");
+                dev.ResolveFight(devRun, RunFightResult.Won);
+                while (devRun.Offer != null) dev.Choose(devRun, 0);
+            }
+            Check(devRun.Status == RunStatus.Active && devRun.BossesDefeated == 3, "an incomplete run keeps going in developer builds");
+        }
     }
 
     private static string Describe(RunState s) =>
@@ -230,6 +247,61 @@ internal static class Program
         var otherVersion = engine.Start("MAGE", "HERO_08", 1);
         otherVersion.DefinitionVersion = 2;
         Throws<InvalidOperationException>(() => engine.ResolveFight(otherVersion, RunFightResult.Won), "a run saved by another definition version");
+    }
+
+    // The run as the client's Dungeon Crawl display reads it, and the client's writes as run operations.
+    private static void SaveDataProjection()
+    {
+        RunDefinition definition = RunDefinition.Parse(Read("fixtures", "complete-run.json"));
+        var engine = new RunEngine(RunAdmission.Evaluate(definition, Playable, Labelled));
+        int Dbf(string id) => EngineCards.FromId(id).AssetId;
+        int ClassId(string cls) => (int)Enum.Parse(typeof(CardClass), cls);
+        int Health(string id) => EngineCards.FromId(id)[GameTag.HEALTH];
+        IReadOnlyDictionary<int, long[]> Project(RunState state, params RunClassWinCount[] wins) =>
+            RunSaveData.Project(definition, state, wins, state == null ? 0 : engine.PlayerHealth(state), Dbf, ClassId, Health);
+        long One(IReadOnlyDictionary<int, long[]> values, int subkey) => values[subkey].Single();
+
+        var none = Project(null, new RunClassWinCount { Class = "MAGE", Bosses = 8, Runs = 1 });
+        Check(One(none, RunSaveData.IsRunActive) == 0 && One(none, RunSaveData.ChosenLoot) == 0 && none[RunSaveData.DeckCardList].Length == 0
+            && One(none, 98) == 8 && One(none, 99) == 1 && none[84].Length == 0, "no run: inactive, empty deck, the class crowns");
+        Check(RunSaveData.Owned().All(none.ContainsKey), "every owned subkey is sent, empty when unused (so stale values clear)");
+
+        RunState run = engine.Start("MAGE", "HERO_08", 42);
+        var start = Project(run);
+        RunBoss boss = definition.Boss(run.NextBoss);
+        Check(One(start, RunSaveData.IsRunActive) == 1 && One(start, RunSaveData.DeckClass) == (int)CardClass.MAGE
+            && One(start, RunSaveData.HeroCardDbId) == Dbf("HERO_08") && One(start, RunSaveData.ScenarioId) == 2663,
+            "an active run: class, hero and mission");
+        Check(start[RunSaveData.DeckCardList].SequenceEqual(run.Deck.Select(id => (long)Dbf(id))) && One(start, RunSaveData.HeroHealth) == 15,
+            "the run deck and the player's Health");
+        Check(One(start, RunSaveData.NextBossFight) == Dbf(boss.Hero) && One(start, RunSaveData.NextBossHealth) == Health(boss.Hero)
+            && start[RunSaveData.LootOptionA].Length == 0 && start[RunSaveData.TreasureOption].Length == 0, "the next boss, no offer");
+
+        engine.ResolveFight(run, RunFightResult.Won);
+        var treasure = Project(run);
+        Check(treasure[RunSaveData.TreasureOption].Length == 3 && treasure[RunSaveData.NextBossFight].Length == 0
+            && treasure[RunSaveData.BossesDefeated].Single() == Dbf(boss.Hero) && One(treasure, RunSaveData.HeroHealth) == 20,
+            "after a win: the treasure offer, the defeated boss, no next boss yet, more Health");
+        engine.Choose(run, 0);
+        var loot = Project(run);
+        RunOption first = run.Offer.Options[0];
+        Check(loot[RunSaveData.LootOptionA].SequenceEqual(new long[] { Dbf(first.Title) }.Concat(first.Cards.Select(id => (long)Dbf(id))))
+            && loot[RunSaveData.LootOptionC].Length == 4 && loot[RunSaveData.TreasureOption].Length == 0, "loot bundles: [title card, cards]");
+        engine.Choose(run, 2);
+        engine.ResolveFight(run, RunFightResult.Lost);
+        var lost = Project(run);
+        Check(One(lost, RunSaveData.IsRunActive) == 0 && One(lost, RunSaveData.BossLostTo) == Dbf(definition.Boss(run.LostTo).Hero)
+            && One(lost, RunSaveData.SeenRunComplete) == 0 && lost[RunSaveData.HeroHealth].Length == 0, "a lost run: the boss it lost to, end screen unseen");
+        engine.MarkRunEndSeen(run);
+        var after = Project(run);
+        Check(One(after, RunSaveData.IsRunActive) == 0 && after[RunSaveData.DeckCardList].Length == 0 && after[RunSaveData.BossLostTo].Length == 0,
+            "once its end screen was seen, an ended run shows as no run (the display starts over)");
+
+        RunWrite Write(int subkey, params long[] values) => RunSaveData.Interpret(subkey, values);
+        Check(Write(101, 2).Kind == RunWriteKind.ChooseLoot && Write(101, 2).Index == 1, "the client's loot choice is 1-based");
+        Check(Write(102, 1).Kind == RunWriteKind.ChooseTreasure && Write(102, 1).Index == 0, "the client's treasure choice");
+        Check(Write(168, 1).Kind == RunWriteKind.RunEndSeen && Write(662, 1).Kind == RunWriteKind.Retire, "run-end seen and retire");
+        Check(Write(101, 0).Kind == RunWriteKind.Ignore && Write(236, 5).Kind == RunWriteKind.Ignore, "anything else is not a run operation");
     }
 
     private static void ParserRejects()

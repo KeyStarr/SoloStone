@@ -151,6 +151,7 @@ internal static class NativeHiddenEntries
         if (warned.Add(path)) log?.LogWarning("NATIVE_HIDDEN missing binding: " + path);
     }
     private static bool Applies(Entry entry) => (entry.Id != "home.store" || !NativeShop.HomeStoreReady)
+        && (entry.Id != "home.modes" || !NativeRunModes.Enabled)
         && (!entry.OutsideMatch || !SceneMgr.IsInitialized() || SceneMgr.Get().GetMode() != SceneMgr.Mode.GAMEPLAY);
     // The drawer Journal slot stays visible as SoloStone's Feats entry; its retail routes and handlers stay blocked.
     private static bool Hides(Entry entry) => entry.Id != "home.journal" || !NativeAchievements.HomeJournalReady;

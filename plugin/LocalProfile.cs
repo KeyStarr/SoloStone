@@ -397,6 +397,7 @@ public sealed class LocalRunRecord
     public List<string> Deck = new List<string>();
     public List<string> Passives = new List<string>();
     public List<string> BossesFought = new List<string>();
+    public List<string> Defeated = new List<string>();
     public int BossesDefeated;
     public string NextBoss;
     public string LostTo;
@@ -2111,7 +2112,8 @@ public sealed partial class LocalProfile : IDisposable
             if (run == null) continue;
             Require(run.DefinitionVersion > 0 && ValidName(run.Class, 32) && ValidName(run.Hero, 64) && RunStatuses.Contains(run.Status)
                 && run.Step >= 0 && run.BossesDefeated >= 0, slot.Definition + " run header");
-            Require(Ids(run.Deck, false) && Ids(run.Passives) && Ids(run.BossesFought) && run.PendingRewards != null
+            Require(Ids(run.Deck, false) && Ids(run.Passives) && Ids(run.BossesFought) && Ids(run.Defeated) && run.Defeated.Count == run.BossesDefeated
+                && run.PendingRewards != null
                 && run.PendingRewards.All(kind => ValidName(kind, 32)), slot.Definition + " run lists");
             Require((run.Status == "Active") == (run.NextBoss != null || run.Offer != null) && (run.NextBoss == null || ValidName(run.NextBoss, 64))
                 && (run.LostTo == null || ValidName(run.LostTo, 64)), slot.Definition + " run progress");
@@ -2535,7 +2537,7 @@ public sealed partial class LocalProfile : IDisposable
     };
     private static LocalRunRecord Copy(LocalRunRecord run) => run == null ? null : new LocalRunRecord {
         DefinitionVersion = run.DefinitionVersion, Class = run.Class, Hero = run.Hero, Seed = run.Seed, Step = run.Step, Status = run.Status,
-        Deck = run.Deck?.ToList(), Passives = run.Passives?.ToList(), BossesFought = run.BossesFought?.ToList(),
+        Deck = run.Deck?.ToList(), Passives = run.Passives?.ToList(), BossesFought = run.BossesFought?.ToList(), Defeated = run.Defeated?.ToList(),
         BossesDefeated = run.BossesDefeated, NextBoss = run.NextBoss, LostTo = run.LostTo, PendingRewards = run.PendingRewards?.ToList(),
         Offer = run.Offer == null ? null : new LocalRunOffer { Kind = run.Offer.Kind,
             Options = run.Offer.Options?.Select(o => o == null ? null : new LocalRunOption { Title = o.Title, Cards = o.Cards?.ToList() }).ToList() },

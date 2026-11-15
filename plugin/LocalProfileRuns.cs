@@ -117,7 +117,7 @@ public sealed partial class LocalProfile
     private static RunState Usable(RunDefinition definition, LocalRunRecord run)
     {
         if (run.DefinitionVersion != definition.Version || definition.ClassStart(run.Class) == null) return null;
-        if (run.BossesFought.Concat(new[] { run.NextBoss, run.LostTo }).Any(id => id != null && definition.Boss(id) == null)) return null;
+        if (run.BossesFought.Concat(run.Defeated).Concat(new[] { run.NextBoss, run.LostTo }).Any(id => id != null && definition.Boss(id) == null)) return null;
         try { return ToState(definition.Id, run); }
         catch (ArgumentException) { return null; }
     }
@@ -125,7 +125,7 @@ public sealed partial class LocalProfile
     private static RunState ToState(string definition, LocalRunRecord run) => new RunState {
         Definition = definition, DefinitionVersion = run.DefinitionVersion, Class = run.Class, Hero = run.Hero, Seed = run.Seed,
         Step = run.Step, Status = (RunStatus)Enum.Parse(typeof(RunStatus), run.Status), Deck = run.Deck.ToList(),
-        Passives = run.Passives.ToList(), BossesFought = run.BossesFought.ToList(), BossesDefeated = run.BossesDefeated,
+        Passives = run.Passives.ToList(), BossesFought = run.BossesFought.ToList(), Defeated = run.Defeated.ToList(), BossesDefeated = run.BossesDefeated,
         NextBoss = run.NextBoss, LostTo = run.LostTo,
         PendingRewards = run.PendingRewards.Select(kind => (RunRewardKind)Enum.Parse(typeof(RunRewardKind), kind)).ToList(),
         Offer = run.Offer == null ? null : new RunOffer {
@@ -137,7 +137,7 @@ public sealed partial class LocalProfile
     private static LocalRunRecord ToRecord(RunState state) => new LocalRunRecord {
         DefinitionVersion = state.DefinitionVersion, Class = state.Class, Hero = state.Hero, Seed = state.Seed, Step = state.Step,
         Status = state.Status.ToString(), Deck = state.Deck.ToList(), Passives = state.Passives.ToList(),
-        BossesFought = state.BossesFought.ToList(), BossesDefeated = state.BossesDefeated, NextBoss = state.NextBoss, LostTo = state.LostTo,
+        BossesFought = state.BossesFought.ToList(), Defeated = state.Defeated.ToList(), BossesDefeated = state.BossesDefeated, NextBoss = state.NextBoss, LostTo = state.LostTo,
         PendingRewards = state.PendingRewards.Select(kind => kind.ToString()).ToList(),
         Offer = state.Offer == null ? null : new LocalRunOffer { Kind = state.Offer.Kind.ToString(),
             Options = state.Offer.Options.Select(o => new LocalRunOption { Title = o.Title, Cards = o.Cards.ToList() }).ToList() },

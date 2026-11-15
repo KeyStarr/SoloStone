@@ -4,7 +4,8 @@ internal enum NativeHomeControl
     Traditional,
     Collection,
     OpenPacks,
-    Store
+    Store,
+    RunModes
 }
 
 internal enum NativeMenuTarget
@@ -14,7 +15,9 @@ internal enum NativeMenuTarget
     Collection,
     Pack,
     // The local shop already opened the store (NativeShop fires the STORE press itself): nothing to route or block.
-    LocalShop
+    LocalShop,
+    // Run modes (Dungeon Run) in the client's adventure screen (NativeRunModes).
+    RunModes
 }
 
 internal static class NativeMenuFlow
@@ -25,6 +28,7 @@ internal static class NativeMenuFlow
         if (control == NativeHomeControl.Collection) return NativeMenuTarget.Collection;
         if (control == NativeHomeControl.OpenPacks) return NativeMenuTarget.Pack;
         if (control == NativeHomeControl.Store) return NativeMenuTarget.LocalShop;
+        if (control == NativeHomeControl.RunModes) return NativeMenuTarget.RunModes;
         return NativeMenuTarget.None;
     }
 
