@@ -53,6 +53,8 @@ internal static class ClientBridge
     internal static void ShortenPlayerTurnForTest(int seconds) => (match ?? throw new InvalidOperationException("No local match.")).ShortenPlayerTurnForTest(seconds);
     internal static void LoseForTest() => (match ?? throw new InvalidOperationException("No local match.")).LoseForTest();
     internal static string DiagnosticRunId => runId;
+    // The match test control names: the ladder's, or a run mode's fight (which has no ladder record).
+    internal static string TestControlMatchId => LocalLadder.MatchId.Length > 0 ? LocalLadder.MatchId : NativeRunModes.OwnsMatch ? matchId ?? "" : "";
     internal static bool OwnsLocalPostMatch => staged && match?.Game?.State == SabberStoneCore.Enums.State.COMPLETE
         && matchId == LocalLadder.MatchId && SceneMgr.IsInitialized() && SceneMgr.Get().GetMode() == SceneMgr.Mode.GAMEPLAY;
     private static bool ready, npcGameplaySeen, npcFailed;

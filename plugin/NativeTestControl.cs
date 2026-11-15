@@ -398,7 +398,7 @@ internal sealed partial class NativeTestControl
         catch (Exception error)
         {
             string readError = "Snapshot failed: " + error.GetType().Name + ": " + error.Message;
-            var view = new View { MatchId = LocalLadder.MatchId, Revision = "snapshot-fault" };
+            var view = new View { MatchId = ClientBridge.TestControlMatchId, Revision = "snapshot-fault" };
             view.Blockers.Add(readError); view.ActionBlockers.Add(readError);
             view.State["readError"] = readError;
             view.State["readErrorTrace"] = error.ToString();
@@ -411,7 +411,7 @@ internal sealed partial class NativeTestControl
     {
         var reply = new JsonNode {
             { "v", 1 }, { "runId", launch.RunId }, { "snapshotId", launch.SnapshotId },
-            { "matchId", LocalLadder.MatchId }, { "frame", Time.frameCount }, { "id", request.Id }, { "phase", phase }
+            { "matchId", ClientBridge.TestControlMatchId }, { "frame", Time.frameCount }, { "id", request.Id }, { "phase", phase }
         };
         if (data != null) reply.Add("data", Clone(data));
         if (error != null) reply.Add("error", error);
@@ -1670,7 +1670,7 @@ internal sealed partial class NativeTestControl
     // Read-only hover aim: the plugin never moves the cursor; Input-Client.ps1 does, so native hover code runs unchanged.
     private static JsonNode Locate(ControlRequest request)
     {
-        TestControlProtocol.RequireIdentity(request.Text("matchId"), LocalLadder.MatchId, 0, 0);
+        TestControlProtocol.RequireIdentity(request.Text("matchId"), ClientBridge.TestControlMatchId, 0, 0);
         var front = GameState.Get(); var scene = SceneMgr.Get();
         if (front == null || scene == null || scene.GetMode() != SceneMgr.Mode.GAMEPLAY) throw new InvalidOperationException("No native gameplay scene");
         int id = request.Integer("entityId", 1);
@@ -1719,7 +1719,7 @@ internal sealed partial class NativeTestControl
     // big card's (hover with `hslive hover`, then read this).
     private static JsonNode CardText(ControlRequest request)
     {
-        TestControlProtocol.RequireIdentity(request.Text("matchId"), LocalLadder.MatchId, 0, 0);
+        TestControlProtocol.RequireIdentity(request.Text("matchId"), ClientBridge.TestControlMatchId, 0, 0);
         var front = GameState.Get(); var scene = SceneMgr.Get();
         if (front == null || scene == null || scene.GetMode() != SceneMgr.Mode.GAMEPLAY) throw new InvalidOperationException("No native gameplay scene");
         int id = request.Integer("entityId", 1);
