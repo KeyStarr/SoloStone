@@ -16,7 +16,7 @@ internal static class DungeonRunRound1Proof
     private static void Check(bool value, string message) => Core2026Proof.Check(value, "dungeon run round 1: " + message);
 
     // The player (Mage) goes first; the boss is player 2, as a run fight stages it.
-    internal static Game Fight(string boss, int seed = 11, string[] board = null)
+    internal static Game Fight(string boss, int seed = 11, string[] board = null, string[] hand = null)
     {
         var config = new GameConfig {
             StartPlayer = 1, Player1HeroClass = CardClass.MAGE, Player2HeroCard = Cards.FromId(boss),
@@ -24,7 +24,7 @@ internal static class DungeonRunRound1Proof
             Player1Deck = Enumerable.Repeat("CS2_182", 10).Select(Cards.FromId).ToList(),
             Player2Deck = Enumerable.Repeat("CS2_120", 10).Select(Cards.FromId).ToList(),
             Shuffle = false, SkipMulligan = true, History = true, RandomSeed = seed, SkipCoin = true,
-            Player2StartingBoard = board,
+            Player2StartingBoard = board, Player1StartingHand = hand,
         };
         var game = new Game(config);
         game.StartGame();

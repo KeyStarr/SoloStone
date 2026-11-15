@@ -10,6 +10,8 @@ public sealed class EncounterSpec
     public IReadOnlyList<string> PlayerDeck;
     public int PlayerStartingHealth;
     public IReadOnlyList<string> PlayerLoadout;
+    // Cards the player gets in hand after the mulligans (a run boss's rule).
+    public IReadOnlyList<string> PlayerHand;
 
     // The NPC's side: a boss hero (its own Hero Power comes with it) and deck replace the ladder opponent's.
     public string NpcHero;

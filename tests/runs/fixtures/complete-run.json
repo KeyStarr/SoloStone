@@ -43,9 +43,9 @@
     { "id": "warrior-a", "hero": "HERO_01", "heroPower": "HERO_01bp", "rounds": [7], "source": "fixture",
       "deck": [{ "id": "CS2_106", "count": 2 }] },
     { "id": "mage-final", "hero": "HERO_08", "heroPower": "HERO_08bp", "rounds": [8], "source": "fixture",
-      "deck": [{ "id": "CS2_029", "count": 2 }] },
+      "playerHand": ["CS2_024"], "deck": [{ "id": "CS2_029", "count": 2 }] },
     { "id": "shaman-final", "hero": "HERO_02", "heroPower": "CS2_049", "rounds": [8], "source": "fixture",
-      "deck": [{ "id": "CS2_042", "count": 2 }] }
+      "playerHand": ["CS2_024"], "deck": [{ "id": "CS2_042", "count": 2 }] }
   ],
   "buckets": [
     { "id": "mage-frost", "class": "MAGE", "title": "LOOTA_Mage_23", "source": "fixture", "cards": ["CS2_024", "CS2_028", "EX1_289"] },

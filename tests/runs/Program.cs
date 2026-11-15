@@ -155,6 +155,10 @@ internal static class Program
                 && spec.NpcDeck.SequenceEqual(encounter.Boss.Deck) && spec.NpcStartingMana == encounter.BossStartingMana
                 && !spec.NpcCoin && spec.FirstPlayer == 1 && spec.MissionId == 2663 && spec.BoardId == 61,
                 "round " + round + ": the fight is staged from the run (deck, Health, passives, boss, fight rules, mission, board)");
+            Check((spec.NpcBoard ?? new string[0]).SequenceEqual(encounter.Boss.Board)
+                && (spec.PlayerHand ?? new string[0]).SequenceEqual(encounter.Boss.PlayerHand)
+                && (round != 8 || spec.PlayerHand?.SequenceEqual(new[] { "CS2_024" }) == true),
+                "round " + round + ": the boss's starting board and the player's starting hand come from the boss");
             engine.ResolveFight(state, RunFightResult.Won);
             var kinds = new List<string>();
             while (state.Offer != null)

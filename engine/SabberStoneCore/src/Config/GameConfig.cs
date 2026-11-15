@@ -257,6 +257,15 @@ namespace SabberStoneCore.Config
 		[field: NonSerialized]
 		public IReadOnlyList<string> Player2StartingBoard { get; set; }
 
+		/// <summary>Cards Player 1 gets in hand after the mulligans, before the first turn (The Darkness's Luminous Candles in
+		/// Dungeon Run); never part of the mulligan.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1StartingHand { get; set; }
+
+		/// <summary>Player 2's starting hand; see <see cref="Player1StartingHand"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2StartingHand { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>

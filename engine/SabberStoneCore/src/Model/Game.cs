@@ -861,6 +861,17 @@ namespace SabberStoneCore.Model
 			}
 		}
 
+		// A run mode's extra cards in hand after the mulligans (a full hand keeps the rest out, as for any card added to it).
+		private static void AddStartingHand(Controller player, IReadOnlyList<string> cardIds)
+		{
+			if (cardIds == null) return;
+			foreach (string id in cardIds)
+			{
+				Card card = Cards.FromId(id) ?? throw new ArgumentException("Starting hand card " + id + " is unknown.");
+				Generic.AddHandPhase.Invoke(player, Entity.FromCard(player, card));
+			}
+		}
+
 		private static void ActivatePassivePower(Controller player)
 		{
 			var power = player.Hero?.HeroPower;
@@ -1008,6 +1019,8 @@ namespace SabberStoneCore.Model
 			//Generic.DrawCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"));
 
 			StartOfGameRules.Resolve(this);
+			AddStartingHand(Player1, _gameConfig.Player1StartingHand);
+			AddStartingHand(Player2, _gameConfig.Player2StartingHand);
 			if (Player1[NativeTailRules.NozdormuEnabled] != 0) Player1.TimeOut = 15;
 			if (Player2[NativeTailRules.NozdormuEnabled] != 0) Player2.TimeOut = 15;
 

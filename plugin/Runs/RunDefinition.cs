@@ -36,6 +36,8 @@ public sealed class RunBoss
     public IReadOnlyList<int> Rounds;
     public IReadOnlyList<string> Deck;
     public IReadOnlyList<string> Board;
+    // Cards the player gets in hand after the mulligans in this fight (The Darkness's Luminous Candles).
+    public IReadOnlyList<string> PlayerHand;
 
     public IEnumerable<string> AllCards()
     {
@@ -43,6 +45,7 @@ public sealed class RunBoss
         yield return HeroPower;
         foreach (string id in Deck) yield return id;
         foreach (string id in Board) yield return id;
+        foreach (string id in PlayerHand) yield return id;
     }
 }
 
@@ -151,6 +154,7 @@ public sealed class RunDefinition
                 Rounds = bossRounds,
                 Deck = Counted(NpcWorldJson.List(row, "deck"), id + ".deck"),
                 Board = CardIds(NpcWorldJson.Strings(row, "board"), id + ".board", true),
+                PlayerHand = CardIds(NpcWorldJson.Strings(row, "playerHand"), id + ".playerHand", true),
             });
         }
         definition.Bosses = bosses;

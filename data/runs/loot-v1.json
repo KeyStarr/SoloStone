@@ -443,6 +443,59 @@
         { "id": "ICC_257", "count": 2 }, { "id": "ICC_098", "count": 2 }, { "id": "CFM_902", "count": 1 }, { "id": "EX1_016", "count": 1 },
         { "id": "GVG_114", "count": 1 }
       ]
+    },
+    {
+      "id": "azari-the-devourer", "hero": "LOOTA_BOSS_34h", "heroPower": "LOOTA_BOSS_34p", "rounds": [8],
+      "source": "https://hearthstone.wiki.gg/wiki/Azari,_the_Devourer_(boss)",
+      "deck": [
+        { "id": "EX1_319", "count": 2 }, { "id": "AT_026", "count": 2 }, { "id": "BRM_005", "count": 2 }, { "id": "AT_019", "count": 2 },
+        { "id": "EX1_313", "count": 2 }, { "id": "FP1_022", "count": 2 }, { "id": "EX1_320", "count": 2 }, { "id": "ICC_075", "count": 2 },
+        { "id": "EX1_310", "count": 2 }, { "id": "CS2_064", "count": 2 }, { "id": "CFM_663", "count": 2 }, { "id": "CFM_751", "count": 2 },
+        { "id": "AT_020", "count": 1 }, { "id": "GVG_021", "count": 1 }, { "id": "LOOT_368", "count": 2 }, { "id": "OG_239", "count": 2 }
+      ]
+    },
+    {
+      "id": "king-togwaggle", "hero": "LOOTA_BOSS_99h", "heroPower": "LOOTA_BOSS_99p", "rounds": [8],
+      "source": "https://hearthstone.wiki.gg/wiki/King_Togwaggle_(boss)",
+      "deck": [
+        { "id": "CS2_072", "count": 2 }, { "id": "EX1_126", "count": 2 }, { "id": "LOOT_214", "count": 2 }, { "id": "EX1_124", "count": 2 },
+        { "id": "LOOT_210", "count": 2 }, { "id": "AT_035", "count": 2 }, { "id": "LOOT_412", "count": 2 }, { "id": "LOE_012", "count": 2 },
+        { "id": "NEW1_004", "count": 2 }, { "id": "LOOT_062", "count": 2 }, { "id": "LOOT_041", "count": 2 }, { "id": "CS2_142", "count": 2 },
+        { "id": "LOOT_347", "count": 2 }, { "id": "OG_082", "count": 2 }, { "id": "LOOT_382", "count": 2 }
+      ]
+    },
+    {
+      "id": "the-darkness", "hero": "LOOTA_BOSS_49h", "heroPower": "LOOTA_BOSS_49p", "rounds": [8],
+      "source": "https://hearthstone.wiki.gg/wiki/The_Darkness_(boss)",
+      "playerHand": ["LOOTA_BOSS_49t2", "LOOTA_BOSS_49t2", "LOOTA_BOSS_49t2"],
+      "deck": [
+        { "id": "LOEA_01H", "count": 4 }, { "id": "OG_101", "count": 2 }, { "id": "CFM_603", "count": 2 }, { "id": "EX1_622", "count": 2 },
+        { "id": "CS2_234", "count": 2 }, { "id": "AT_014", "count": 2 }, { "id": "EX1_091", "count": 2 }, { "id": "LOE_104", "count": 2 },
+        { "id": "LOOT_008", "count": 2 }, { "id": "CS1_113", "count": 2 }, { "id": "LOOT_214", "count": 2 }, { "id": "LOOT_210", "count": 2 },
+        { "id": "CS2_057", "count": 2 }, { "id": "EX1_312", "count": 2 }
+      ]
+    },
+    {
+      "id": "vustrasz-the-ancient", "hero": "LOOTA_BOSS_25h", "heroPower": "LOOTA_BOSS_25p", "rounds": [8],
+      "source": "https://hearthstone.wiki.gg/wiki/Vustrasz_the_Ancient",
+      "board": ["LOOT_357l", "LOOT_357l", "LOOT_357l", "LOOT_357l", "LOOT_357l"],
+      "deck": [
+        { "id": "BRMA12_8t", "count": 2 }, { "id": "LOEA_01H", "count": 2 }, { "id": "BRM_004", "count": 2 }, { "id": "ICC_802", "count": 2 },
+        { "id": "CS1_112", "count": 2 }, { "id": "LOOT_278", "count": 2 }, { "id": "GVG_010", "count": 2 }, { "id": "CFM_605", "count": 2 },
+        { "id": "OG_094", "count": 2 }, { "id": "GVG_008", "count": 2 }, { "id": "LOOT_144", "count": 2 }, { "id": "EX1_284", "count": 2 },
+        { "id": "BRM_034", "count": 2 }, { "id": "ICC_029", "count": 2 }, { "id": "CFM_806", "count": 1 }, { "id": "EX1_572", "count": 1 }
+      ]
+    },
+    {
+      "id": "xol-the-unscathed", "hero": "LOOTA_BOSS_26h", "heroPower": "LOOTA_BOSS_26p8", "rounds": [8],
+      "source": "https://hearthstone.wiki.gg/wiki/Xol_the_Unscathed",
+      "deck": [
+        { "id": "EX1_319", "count": 2 }, { "id": "UNG_829", "count": 1 }, { "id": "KAR_089", "count": 2 }, { "id": "EX1_316", "count": 2 },
+        { "id": "EX1_308", "count": 2 }, { "id": "UNG_836", "count": 1 }, { "id": "UNG_831", "count": 2 }, { "id": "OG_109", "count": 2 },
+        { "id": "ICC_218", "count": 4 }, { "id": "KAR_205", "count": 2 }, { "id": "AT_025", "count": 2 }, { "id": "UNG_833", "count": 2 },
+        { "id": "ICC_841", "count": 1 }, { "id": "LOOT_417", "count": 1 }, { "id": "ICC_075", "count": 1 }, { "id": "EX1_310", "count": 2 },
+        { "id": "NEW1_030", "count": 1 }
+      ]
     }
   ],
   "buckets": [],
