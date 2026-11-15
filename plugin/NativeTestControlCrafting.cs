@@ -25,7 +25,27 @@ internal sealed partial class NativeTestControl
                 if (LocalLadder.Screen == "Playing" || profile.HasPendingMatch) throw new InvalidOperationException("Finish the match first.");
                 if (NativeCrafting.PresentationBusy || CraftingManager.GetIsInCraftingMode())
                     throw new InvalidOperationException("Close the crafting view first.");
-                if (request.Command == "craft-token-grant")
+                if (request.Command == "shop-quantity-type")
+                {
+                    string text = request.Text("text");
+                    operation.Detail["text"] = text;
+                    operation.Detail["quantity"] = NativeShop.TypeQuantityForTest(text);
+                    operation.Detail["inputKind"] = "native-text-input-complete";
+                    uiSampleFrame = -1;
+                }
+                else if (request.Command == "gold-grant")
+                {
+                    // The shop quotes from the ledger; a page already open keeps its stepper cap until reopened.
+                    if (NativeShop.PresentationBusy) throw new InvalidOperationException("Finish the shop purchase first.");
+                    int amount = request.Integer("amount");
+                    int before = profile.StoredGoldBalance;
+                    profile.GrantGoldForTest(amount);
+                    operation.Detail["granted"] = amount;
+                    operation.Detail["goldBefore"] = before;
+                    operation.Detail["gold"] = profile.StoredGoldBalance;
+                    operation.Detail["inputKind"] = "local-ledger";
+                }
+                else if (request.Command == "craft-token-grant")
                 {
                     var rarity = (LocalTokenRarity)Enum.Parse(typeof(LocalTokenRarity), request.Text("rarity"));
                     int count = request.Integer("count");

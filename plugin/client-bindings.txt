@@ -168,6 +168,8 @@ F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroName	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerActor	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerContainer	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_playButton	*
+F	Assembly-CSharp	AdjustBuyingAmount	m_decrementClickable	*
+F	Assembly-CSharp	AdjustBuyingAmount	m_incrementClickable	*
 F	Assembly-CSharp	AlertPopup	m_alertText	*
 F	Assembly-CSharp	AlertPopup	m_body	NineSliceElement
 F	Assembly-CSharp	AlertPopup	m_buttonContainer	MultiSliceElement
@@ -727,6 +729,7 @@ M	Assembly-CSharp	Actor	GetPremium	TAG_PREMIUM()
 M	Assembly-CSharp	Actor	GetSpell	*
 M	Assembly-CSharp	Actor	IsColliderEnabled	System.Boolean()
 M	Assembly-CSharp	Actor	IsShown	System.Boolean()
+M	Assembly-CSharp	AdjustBuyingAmount	RefreshQuantity	()
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -2118,6 +2121,8 @@ M	Assembly-CSharp	ProductCatalog	Job_PopulateData	*
 M	Assembly-CSharp	ProductCatalog	MarkProductDataAsDirty	System.Void()
 M	Assembly-CSharp	ProductCatalog	UpdateProductStatus	*
 M	Assembly-CSharp	ProductCatalog	get_Products	System.Collections.Generic.List`1<Hearthstone.DataModels.ProductDataModel>()
+M	Assembly-CSharp	ProductExtensions	GetMaxBulkPurchaseCount	*
+M	Assembly-CSharp	ProductExtensions	ProductSupportsQuantitySelect	*
 M	Assembly-CSharp	ProductPage	GetSelectedVariant	Hearthstone.DataModels.ProductDataModel()
 M	Assembly-CSharp	ProductPage	get_IsOpen	System.Boolean()
 M	Assembly-CSharp	ProductPageContainer	GetCurrentProductPage	ProductPage()
@@ -2882,6 +2887,7 @@ T	Assembly-CSharp	AbsDeckPickerTrayDisplay
 T	Assembly-CSharp	AchievementCategoryDbfRecord		
 T	Assembly-CSharp	AchievementSubcategoryDbfRecord		
 T	Assembly-CSharp	Actor		
+T	Assembly-CSharp	AdjustBuyingAmount		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		
 T	Assembly-CSharp	AlertPopup+PopupInfo		

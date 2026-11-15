@@ -550,9 +550,9 @@ site ProfileFormKit.Request | Method | (unknown type) # NativeRewardUI.LoadRaw l
 # Added after the review: closures and table rows the scanner now follows
 site NativeAchievementStep+<>c__DisplayClass94_0.<SerializedAudioFields>b__1 | Property | (unknown type) # diagnostic: only logs, a missing member degrades to null
 site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager+BigCardEntry.RunFinishedCallbackAndDestroyBigCard (not on this type) # the row table's Method rows read as Field names on the other type; the real rows are listed above
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Field | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Method | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Property | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Field | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Method | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Property | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
 site NativeUIProbe.BeforeMassRevealAll | Field | (unknown type) # reads the same PackOpeningDirector fields as MassPageCards, rowed under the pack reveal proof
 site NativeUIProbe.MassPageCards | Field | (unknown type) # m_massPackOpeningHiddenCards and HiddenCards.m_cards, rowed under the pack reveal proof
 site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager+BigCardEntry.CutoffBigCardTransformEffects (not on this type) # the row table splits on row[0], and the scan reads both arms; the real field and method rows are listed under NativeBigCardWatchdog above

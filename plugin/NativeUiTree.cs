@@ -605,6 +605,23 @@ internal static class NativeUiTree
         ((PegUIElement)item.Handle).TriggerOut();
     }
 
+    // Double click (PegUI.UpdateMouseLeftClick): the first click's down/tap/release and the second mouse-down on the press
+    // frame; the second mouse-up (within 0.7 s) sends DOUBLECLICK instead of tap/release, then release-all and out.
+    internal static bool DoubleClickable(UiElement item) =>
+        item?.Handle is PegUIElement element && element != null && element.IsEnabled() && element.DoubleClickEnabled;
+    internal static void DoublePress(UiElement item)
+    {
+        NativeTestControl.AssertMainThread();
+        var element = (PegUIElement)item.Handle;
+        element.TriggerOver(); element.TriggerPress(); element.TriggerTap(); element.TriggerRelease(); element.TriggerPress();
+    }
+    internal static void DoubleRelease(UiElement item)
+    {
+        NativeTestControl.AssertMainThread();
+        var element = (PegUIElement)item.Handle;
+        element.TriggerDoubleClick(); element.TriggerReleaseAll(true); element.TriggerOut();
+    }
+
     // Mouse-up frame: tap (short click), release, release-all over the element, then the cursor leaves it.
     internal static void Release(UiElement item)
     {

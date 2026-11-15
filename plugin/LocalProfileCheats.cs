@@ -89,6 +89,17 @@ public sealed partial class LocalProfile
             return true;
         });
     }
+    internal const int MaximumTestGoldGrant = 100000;
+    // Test control only (gold-grant, lab builds): add gold to this disposable save for shop live checks (multi-pack buy).
+    internal void GrantGoldForTest(int amount)
+    {
+        if (amount < 1 || amount > MaximumTestGoldGrant) throw new ArgumentOutOfRangeException(nameof(amount));
+        CommitChange(next => {
+            if (next.Pending != null || next.PackRevealPending) throw new InvalidOperationException("Finish the pending match or pack reveal first.");
+            next.GoldBalance = checked(next.GoldBalance + amount);
+            return true;
+        });
+    }
 #endif
 
     internal void PersistNewProfile(ProfileOptions options)
