@@ -115,6 +115,8 @@ SUITES = [
     Suite('ladder-rules', 'dotnet', 'ranked ladder rules (stars, floors, rewards) and a simulated climb through a synthetic opponent world',
           'tests/ladder-rules/LadderRulesTests.csproj'),
     Suite('recipes', 'dotnet', 'the shipped shop deck recipes validate and follow the recipe rules', 'tests/recipes/RecipeTests.csproj'),
+    Suite('runs', 'dotnet', 'run modes (Dungeon Run): the run definitions, strict content admission and the run rules',
+          'tests/runs/RunsTests.csproj'),
     Suite('npc-world', 'dotnet', 'opponent decks, skills, personalities, matchmaking and the opponent population',
           'tests/npc-world/NpcWorldTests.csproj'),
     Suite('npc-world-distribution', 'dotnet', 'opponent mistake distribution: 200 seeded trials per skill tier on six fixtures stay inside the priced bounds (about a minute)',

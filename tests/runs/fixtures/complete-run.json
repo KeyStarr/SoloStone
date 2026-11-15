@@ -1,0 +1,58 @@
+{
+  "schema": "solostone.run/1",
+  "id": "fixture-complete",
+  "version": 1,
+  "name": "Test run: every entry playable",
+  "source": "tests/runs fixture; the decks and buckets are made up, only the schedule follows Dungeon Run",
+  "client": { "adventure": 414, "mode": 5, "scenario": 2663, "wing": 1644, "serverKey": 24, "clientKey": 42, "board": 61 },
+  "playerHealth": { "base": 15, "perWin": 5 },
+  "rounds": [
+    { "round": 1, "rewards": ["passiveTreasure", "loot"] },
+    { "round": 2, "rewards": ["loot"] },
+    { "round": 3, "rewards": ["activeTreasure", "loot"] },
+    { "round": 4, "rewards": ["loot"] },
+    { "round": 5, "rewards": ["passiveTreasure", "loot"] },
+    { "round": 6, "rewards": ["loot"] },
+    { "round": 7, "rewards": ["activeTreasure", "loot"] },
+    { "round": 8, "rewards": [], "bossStartingMana": 2 }
+  ],
+  "classes": [
+    { "class": "MAGE", "deck": ["EX1_277", "NEW1_012", "NEW1_021", "CS2_024", "EX1_608", "CS2_117", "EX1_289", "CS2_182", "CS2_029", "CS2_028"] },
+    { "class": "WARRIOR", "deck": ["EX1_393", "EX1_603", "CS2_105", "CS2_106", "EX1_412", "NEW1_022", "EX1_407", "CS2_182", "CS2_120", "CS2_171"] }
+  ],
+  "bosses": [
+    { "id": "shaman-a", "hero": "HERO_02", "heroPower": "CS2_049", "rounds": [1, 2], "source": "fixture",
+      "deck": [{ "id": "CS2_171", "count": 2 }, { "id": "CS2_120", "count": 2 }] },
+    { "id": "rogue-a", "hero": "HERO_03", "heroPower": "CS2_083b", "rounds": [1], "source": "fixture",
+      "deck": [{ "id": "CS2_172", "count": 4 }] },
+    { "id": "paladin-a", "hero": "HERO_04", "heroPower": "CS2_101", "rounds": [2, 3], "source": "fixture",
+      "deck": [{ "id": "CS2_182", "count": 3 }] },
+    { "id": "hunter-a", "hero": "HERO_05", "heroPower": "DS1h_292", "rounds": [3, 4], "source": "fixture",
+      "deck": [{ "id": "CS2_119", "count": 3 }] },
+    { "id": "druid-a", "hero": "HERO_06", "heroPower": "CS2_017", "rounds": [4, 5], "source": "fixture",
+      "deck": [{ "id": "CS2_201", "count": 2 }] },
+    { "id": "warlock-a", "hero": "HERO_07", "heroPower": "CS2_056", "rounds": [5, 6], "source": "fixture",
+      "deck": [{ "id": "CS2_182", "count": 2 }], "board": ["CS2_120"] },
+    { "id": "priest-a", "hero": "HERO_09", "heroPower": "CS1h_001", "rounds": [6, 7], "source": "fixture",
+      "deck": [{ "id": "CS2_120", "count": 2 }], "upgrades": [{ "fromRound": 7, "heroPower": "CS2_017" }] },
+    { "id": "warrior-a", "hero": "HERO_01", "heroPower": "HERO_01bp", "rounds": [7], "source": "fixture",
+      "deck": [{ "id": "CS2_106", "count": 2 }] },
+    { "id": "mage-final", "hero": "HERO_08", "heroPower": "HERO_08bp", "rounds": [8], "source": "fixture",
+      "deck": [{ "id": "CS2_029", "count": 2 }] },
+    { "id": "shaman-final", "hero": "HERO_02", "heroPower": "CS2_049", "rounds": [8], "source": "fixture",
+      "deck": [{ "id": "CS2_042", "count": 2 }] }
+  ],
+  "buckets": [
+    { "id": "mage-frost", "class": "MAGE", "title": "LOOTA_Mage_23", "source": "fixture", "cards": ["CS2_024", "CS2_028", "EX1_289"] },
+    { "id": "mage-fire", "class": "MAGE", "title": "LOOTA_Mage_24", "source": "fixture", "cards": ["CS2_029", "CS2_032"] },
+    { "id": "mage-arcane", "class": "MAGE", "title": "LOOTA_Mage_28", "source": "fixture", "cards": ["EX1_277", "CS2_025"] },
+    { "id": "mage-friends", "class": "MAGE", "title": "LOOTA_Mage_22", "source": "fixture", "cards": ["EX1_608", "NEW1_012"] },
+    { "id": "warrior-weapons", "class": "WARRIOR", "title": "LOOTA_Warrior_04", "source": "fixture", "cards": ["CS2_106", "EX1_411"] },
+    { "id": "warrior-armor", "class": "WARRIOR", "title": "LOOTA_Warrior_05", "source": "fixture", "cards": ["EX1_606", "EX1_410"] },
+    { "id": "warrior-taunt", "class": "WARRIOR", "title": "LOOTA_Warrior_07", "source": "fixture", "cards": ["CS2_125", "EX1_393"] }
+  ],
+  "treasures": {
+    "passive": ["CS2_182", "CS2_120", "CS2_171", "CS2_172", "CS2_119"],
+    "active": ["CS2_022", "CS2_023", "CS2_026", "CS2_027", "EX1_279"]
+  }
+}
