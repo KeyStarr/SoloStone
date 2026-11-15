@@ -11,8 +11,8 @@ using SabberStoneCore.Triggers;
 namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 {
     // Dungeon Run round 4-5 bosses (https://hearthstone.wiki.gg/wiki/Dungeon_Run), with the Rank 2 heroes of the three that
-    // come back in rounds 6-7. Not yet here: A. F. Kay (her AI plays nothing before turn 6), Brimstone Warden (starts with
-    // four Stone Golems in play), Mushhuckster Max (crafts a potion), Whompwhisker (Mogor's Champion needs Forgetful).
+    // come back in rounds 6-7. Not yet here: A. F. Kay (her AI plays nothing before turn 6), Mushhuckster Max (crafts a
+    // potion), Whompwhisker (Mogor's Champion needs Forgetful).
     internal static class DungeonRunRounds4To5
     {
         internal static void Apply(Action<int, string, Action<Card>> register)
@@ -31,6 +31,25 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             register(46153, "LOOTA_BOSS_06p", card => Targeted(card, new TransformMinionTask(EntityType.TARGET, 1), PlayReq.REQ_MINION_TARGET));
             register(46281, "LOOTA_BOSS_29h", DungeonRunCards.Plain);
             register(46282, "LOOTA_BOSS_29p", card => Targeted(card, new TransformMinionTask(EntityType.TARGET, 3), PlayReq.REQ_MINION_TARGET));
+
+            // Brimstone Warden: starts with four Stone Golems in play (the content file's starting board). Dispel Ward (5):
+            // Silence your minions (waking the Golems: no more "Can't attack", no Deathrattle). The engine's Silence keeps a
+            // card's own "Can't attack", so the power lifts it itself.
+            register(46339, "LOOTA_BOSS_20h", DungeonRunCards.Plain);
+            register(46208, "LOOTA_BOSS_20p", card => {
+                card.PlayAvailabilityPredicate = (c, _) => !c.BoardZone.IsEmpty;
+                Untargeted(card, ComplexTask.Create(new SilenceTask(EntityType.MINIONS), Wake()));
+            });
+            // Stone Golem: 15/5, Can't attack (facts tags). Deathrattle: Lose a Mana Crystal.
+            register(46209, "LOOTA_BOSS_20t", card => {
+                card.Power = new Power { DeathrattleTask = LoseManaCrystal() };
+                DungeonRunCards.Plain(card);
+            });
+            // Looming Presence (League of Explorers adventure; in the Warden's deck): Draw 2 cards. Gain 4 Armor.
+            register(37345, "LOEA_01", card => {
+                card.Power = new Power { PowerTask = ComplexTask.Create(new EnqueueTask(2, new DrawTask()), new ArmorTask(4)) };
+                DungeonRunCards.Plain(card);
+            });
 
             // Elder Jari. Mystic Barrier (1): Gain 3 Armor.
             register(47305, "LOOTA_BOSS_42h", DungeonRunCards.Plain);
@@ -89,6 +108,19 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             register(46266, "LOOTA_BOSS_27h", DungeonRunCards.Plain);
             register(46267, "LOOTA_BOSS_27p", card => Copy(card, new SummonCopyTask(EntityType.TARGET)));
         }
+
+        private static ISimpleTask Wake() => new CustomTask((game, controller, source, target, stack) => {
+            foreach (var minion in controller.BoardZone)
+                if (minion.Card.CantAttack && minion.CantAttack) minion.CantAttack = false;
+        });
+
+        // One fewer Mana Crystal, a spent (empty) one first, as the engine's Felguard does; unlike its ManaCrystalEmptyTask,
+        // never a negative spent count when none is spent.
+        private static ISimpleTask LoseManaCrystal() => new CustomTask((game, controller, source, target, stack) => {
+            if (controller.BaseMana == 0) return;
+            Actions.Generic.ChangeManaCrystal(controller, -1, true);
+            if (controller.UsedMana > 0) controller.UsedMana--;
+        });
 
         private static void Untargeted(Card card, ISimpleTask task)
         {

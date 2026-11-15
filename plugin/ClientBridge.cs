@@ -641,6 +641,7 @@ internal static class ClientBridge
         if (encounter == null || !encounter.ReplacesPlayerDeck || !encounter.ReplacesNpcDeck || encounter.PlayerHero == null || encounter.NpcHero == null)
             throw new ArgumentException("A run fight needs both heroes and both decks.");
         var cards = encounter.PlayerDeck.Concat(encounter.NpcDeck).Concat(encounter.PlayerLoadout ?? new string[0])
+            .Concat(encounter.NpcBoard ?? new string[0])
             .Concat(new[] { encounter.PlayerHero, encounter.NpcHero });
         string missing = cards.FirstOrDefault(id => !ClientKnowsCard(id));
         if (missing != null) throw new InvalidOperationException("Current card definition missing: " + missing);

@@ -811,6 +811,7 @@ public sealed class NativeMatch
                 Player2StartingMana = setup?.NpcStartingMana ?? 0,
                 SkipCoin = setup != null && !setup.NpcCoin,
                 Player1Loadout = setup?.PlayerLoadout,
+                Player2StartingBoard = setup?.NpcBoard,
 #endif
                 Logging = false
             };

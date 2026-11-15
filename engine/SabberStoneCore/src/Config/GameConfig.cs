@@ -248,6 +248,15 @@ namespace SabberStoneCore.Config
 		[field: NonSerialized]
 		public IReadOnlyList<string> Player2Loadout { get; set; }
 
+		/// <summary>Minions Player 1 has in play when the game starts (a run boss's starting board, e.g. Brimstone Warden's
+		/// Stone Golems); they are on the board from the first turn, before the mulligans.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1StartingBoard { get; set; }
+
+		/// <summary>Player 2's starting board; see <see cref="Player1StartingBoard"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2StartingBoard { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>

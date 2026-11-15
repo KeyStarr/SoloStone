@@ -53,6 +53,75 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
                 card.Power = new Power { PowerTask = new DiscoverTask(DiscoverType.BEAST) };
                 card.Implemented = true;
             });
+
+            // King of Beasts, Gahz'rilla (Bristlesnarl's deck).
+            register(2014, "GVG_046", card => {
+                card.Power = new Power {
+                    InfoCardId = "GVG_046e",
+                    PowerTask = ComplexTask.Create(
+                        new IncludeTask(EntityType.MINIONS_NOSOURCE),
+                        new FilterStackTask(SelfCondition.IsRace(Race.BEAST)),
+                        new CountTask(EntityType.STACK),
+                        new AddEnchantmentTask("GVG_046e", EntityType.SOURCE, true))
+                };
+                card.Implemented = true;
+            });
+            register(2202, "GVG_046e", card => {
+                card.Power = new Power { Enchant = Enchants.Enchants.AddAttackScriptTag };
+                card.Implemented = true;
+            });
+            register(2017, "GVG_049", card => {
+                card.Power = new Power {
+                    InfoCardId = "GVG_049e",
+                    Trigger = new Trigger(TriggerType.TAKE_DAMAGE) {
+                        TriggerSource = TriggerSource.SELF,
+                        SingleTask = new AddEnchantmentTask("GVG_049e", EntityType.SOURCE)
+                    }
+                };
+                card.Implemented = true;
+            });
+            register(2204, "GVG_049e", card => {
+                card.Power = new Power { Enchant = new Enchant(ATK.Effect(EffectOperator.MUL, 2)) };
+                card.Implemented = true;
+            });
+
+            // Fel Reaver (Jeeru's and A. F. Kay's decks): Whenever your opponent plays a card, remove the top 3 cards of your
+            // deck (Keening Banshee's removal, on the opponent's plays).
+            register(1982, "GVG_016", card => {
+                card.Power = new Power {
+                    Trigger = new Trigger(TriggerType.PLAY_CARD) {
+                        TriggerSource = TriggerSource.ENEMY,
+                        SingleTask = new EnqueueTask(3, new MoveToGraveYard(EntityType.TOPCARDFROMDECK))
+                    }
+                };
+                card.Implemented = true;
+            });
+
+            // Anubisath Sentinel (Gnosh the Greatworm's deck): Deathrattle: Give a random friendly minion +3/+3.
+            register(2933, "LOE_061", card => {
+                card.Power = new Power {
+                    InfoCardId = "LOE_061e",
+                    DeathrattleTask = ComplexTask.Create(
+                        new RandomTask(1, EntityType.MINIONS_NOSOURCE),
+                        new AddEnchantmentTask("LOE_061e", EntityType.STACK))
+                };
+                card.Implemented = true;
+            });
+
+            // Animated Armor (Chronomancer Inara's deck): Your hero can only take 1 damage at a time.
+            register(36111, "LOE_119", card => {
+                card.Power = new Power {
+                    Trigger = new Trigger(TriggerType.PREDAMAGE) {
+                        TriggerSource = TriggerSource.HERO,
+                        SingleTask = new FuncNumberTask(p => {
+                            var data = p.Game.CurrentEventData;
+                            if (data.EventNumber > 1) data.EventNumber = 1;
+                            return 0;
+                        })
+                    }
+                };
+                card.Implemented = true;
+            });
         }
     }
 }

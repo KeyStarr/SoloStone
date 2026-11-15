@@ -34,7 +34,7 @@ internal static class DungeonRunRounds4To5Proof
     internal static void Run()
     {
         foreach (var (hero, health) in new[] { ("LOOTA_BOSS_17h", 40), ("LOOTA_BOSS_16h", 40), ("LOOTA_BOSS_06h", 40), ("LOOTA_BOSS_29h", 60),
-                     ("LOOTA_BOSS_42h", 30), ("LOOTA_BOSS_46h", 30), ("LOOTA_BOSS_19h", 30), ("LOOTA_BOSS_33h", 50), ("LOOTA_BOSS_39h", 30),
+                     ("LOOTA_BOSS_42h", 30), ("LOOTA_BOSS_20h", 30), ("LOOTA_BOSS_46h", 30), ("LOOTA_BOSS_19h", 30), ("LOOTA_BOSS_33h", 50), ("LOOTA_BOSS_39h", 30),
                      ("LOOTA_BOSS_37h", 40), ("LOOTA_BOSS_51h", 30), ("LOOTA_BOSS_13h", 40), ("LOOTA_BOSS_04h", 30), ("LOOTA_BOSS_27h", 50) })
             Check(DungeonRunRound1Proof.Fight(hero).Player2.Hero.Health == health, hero + ": " + health + " Health");
 
@@ -172,6 +172,29 @@ internal static class DungeonRunRounds4To5Proof
         Play(spider, spider.Player1, "LOE_047");
         Check(spider.Player1.Choice != null && spider.Player1.Choice.Choices.All(id => spider.IdEntityDic[id].Card.IsRace(Race.BEAST)),
             "Tomb Spider: three Beasts");
+        // Brimstone Warden: four Stone Golems (15/5, can't attack) in play from the start, kept by a snapshot; a dying Golem
+        // costs the Warden a Mana Crystal (an empty one first); Dispel Ward silences his minions, which then can attack.
+        var golems = new[] { "LOOTA_BOSS_20t", "LOOTA_BOSS_20t", "LOOTA_BOSS_20t", "LOOTA_BOSS_20t" };
+        foreach (Game warden in new[] { DungeonRunRound1Proof.Fight("LOOTA_BOSS_20h", board: golems),
+                     Reload(DungeonRunRound1Proof.Fight("LOOTA_BOSS_20h", board: golems)) })
+        {
+            Check(warden.Player2.Hero.Health == 30 && warden.Player2.BoardZone.Count == 4 && warden.Player2.BoardZone.All(m =>
+                m.Card.Id == "LOOTA_BOSS_20t" && m.AttackDamage == 15 && m.Health == 5 && m.CantAttack), "Brimstone Warden: four Stone Golems");
+            End(warden);
+            warden.Player2.BaseMana = 5; warden.Player2.UsedMana = 2;
+            Kill(warden, warden.Player2.BoardZone[0]);
+            Check(warden.Player2.BaseMana == 4 && warden.Player2.RemainingMana == 3, "Stone Golem: an empty Mana Crystal lost");
+            warden.Player2.BaseMana = 5; warden.Player2.UsedMana = 0;
+            Use(warden);
+            Check(warden.Player2.BoardZone.Count == 3 && warden.Player2.BoardZone.All(m => !m.CantAttack && m.IsSilenced),
+                "Dispel Ward: the Golems wake");
+            Kill(warden, warden.Player2.BoardZone[0]);
+            Check(warden.Player2.BaseMana == 5, "a silenced Golem has no Deathrattle");
+        }
+        Game looming = DungeonRunRound1Proof.Fight("LOOTA_BOSS_20h");
+        int cards = looming.Player1.HandZone.Count;
+        Play(looming, looming.Player1, "LOEA_01");
+        Check(looming.Player1.HandZone.Count == cards + 2 && looming.Player1.Hero.Armor == 4, "Looming Presence: 2 cards, 4 Armor");
         // Murloc Tinyfin: a 0-cost 1/1.
         Game fin = DungeonRunRound1Proof.Fight("LOOTA_BOSS_42h");
         var tiny = (Minion)Play(fin, fin.Player1, "LOEA10_3");

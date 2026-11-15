@@ -11,6 +11,7 @@ public static class RunEncounterSpec
         PlayerLoadout = encounter.Passives.Count == 0 ? null : encounter.Passives.ToList(),
         NpcHero = encounter.Boss.Hero,
         NpcDeck = encounter.Boss.Deck.ToList(),
+        NpcBoard = encounter.Boss.Board.Count == 0 ? null : encounter.Boss.Board.ToList(),
         NpcStartingMana = encounter.BossStartingMana,
         NpcCoin = definition.BossCoin,
         FirstPlayer = definition.PlayerFirst ? 1 : (int?)null,

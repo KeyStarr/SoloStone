@@ -825,6 +825,8 @@ namespace SabberStoneCore.Model
 			ApplyStartingMana(Player2, _gameConfig.Player2StartingMana);
 			StartOfGameRules.AddLoadout(Player1, _gameConfig.Player1Loadout);
 			StartOfGameRules.AddLoadout(Player2, _gameConfig.Player2Loadout);
+			AddStartingBoard(Player1, _gameConfig.Player1StartingBoard);
+			AddStartingBoard(Player2, _gameConfig.Player2StartingBoard);
 			// A starting Passive Hero Power (a boss's trigger or aura) is live from the start of the game.
 			ActivatePassivePower(Player1);
 			ActivatePassivePower(Player2);
@@ -843,6 +845,20 @@ namespace SabberStoneCore.Model
 
 			// set next step
 			NextStep = Step.BEGIN_FIRST;
+		}
+
+		// A run boss's starting board: minions in play from the start (each with its own auras and triggers live).
+		private static void AddStartingBoard(Controller player, IReadOnlyList<string> cardIds)
+		{
+			if (cardIds == null) return;
+			if (cardIds.Count > player.BoardZone.MaxSize) throw new ArgumentException("A starting board holds at most " + player.BoardZone.MaxSize + " minions.");
+			foreach (string id in cardIds)
+			{
+				Card card = Cards.FromId(id);
+				if (card?.Type != CardType.MINION) throw new ArgumentException("Starting board card " + id + " is not a minion.");
+				var minion = (Minion)Entity.FromCard(player, card, new EntityData { [GameTag.ZONE] = (int)Enums.Zone.PLAY });
+				player.BoardZone.Add(minion);
+			}
 		}
 
 		private static void ActivatePassivePower(Controller player)

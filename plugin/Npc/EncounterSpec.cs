@@ -15,6 +15,8 @@ public sealed class EncounterSpec
     public string NpcHero;
     public IReadOnlyList<string> NpcDeck;
     public string NpcName;
+    // Minions the NPC has in play from the start (a run boss's starting board).
+    public IReadOnlyList<string> NpcBoard;
     public int NpcStartingHealth, NpcStartingMana;
     public bool NpcCoin = true;
 
