@@ -279,9 +279,9 @@ internal static class Program
 
         engine.ResolveFight(run, RunFightResult.Won);
         var treasure = Project(run);
-        Check(treasure[RunSaveData.TreasureOption].Length == 3 && treasure[RunSaveData.NextBossFight].Length == 0
+        Check(treasure[RunSaveData.TreasureOption].Length == 3 && One(treasure, RunSaveData.NextBossFight) == Dbf(definition.Boss(run.NextBoss).Hero)
             && treasure[RunSaveData.BossesDefeated].Single() == Dbf(boss.Hero) && One(treasure, RunSaveData.HeroHealth) == 20,
-            "after a win: the treasure offer, the defeated boss, no next boss yet, more Health");
+            "after a win: the treasure offer with the next boss already chosen, the defeated boss, more Health");
         engine.Choose(run, 0);
         var loot = Project(run);
         RunOption first = run.Offer.Options[0];

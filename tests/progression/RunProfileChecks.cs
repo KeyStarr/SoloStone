@@ -62,7 +62,7 @@ internal static class RunProfileChecks
             Check(again.Encounter.Boss.Id == profile.RunOf(definition).NextBoss && again.Id != fightId, "the same boss is fought again");
             Reject(() => profile.ResolveRunFight(engine, "not-the-fight", RunFightResult.Won), "a result for another fight is refused");
             RunState won = profile.ResolveRunFight(engine, again.Id, RunFightResult.Won);
-            Check(won.Offer != null && won.NextBoss == null && !profile.RunFightUnderway(definition), "a win moves the run to its rewards");
+            Check(won.Offer != null && won.NextBoss != null && !profile.RunFightUnderway(definition), "a win moves the run to its rewards, the next boss already chosen");
             Check(profile.RunWins(definition).Single().Bosses == 1, "the win counts for the class");
         }
         using (var profile = new LocalProfile(path))

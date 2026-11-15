@@ -78,7 +78,6 @@ public sealed class RunEngine
                 state.NextBoss = null;
                 return;
             case RunFightResult.Won:
-                // The defeated boss is behind the run: no next boss is known until the rewards are chosen.
                 state.BossesDefeated++;
                 state.Defeated.Add(state.NextBoss);
                 state.NextBoss = null;
@@ -87,6 +86,9 @@ public sealed class RunEngine
                     state.Status = RunStatus.Won;
                     return;
                 }
+                // The next boss is chosen with the win, so the client has it while the rewards are chosen and reveals it after.
+                state.NextBoss = PickBoss(state);
+                state.BossesFought.Add(state.NextBoss);
                 state.PendingRewards = Definition.Round(state.BossesDefeated).Rewards.ToList();
                 Advance(state);
                 return;
@@ -131,7 +133,7 @@ public sealed class RunEngine
         if (state.Status != RunStatus.Active) throw new InvalidOperationException("The run is over (" + state.Status + ").");
     }
 
-    // Offers the next pending reward that has options; when none is left, picks the next boss.
+    // Offers the next pending reward that has options; when none is left and no boss is chosen yet, picks the next boss.
     private void Advance(RunState state)
     {
         while (state.PendingRewards.Count > 0)
@@ -143,6 +145,7 @@ public sealed class RunEngine
             state.Offer = offer;
             return;
         }
+        if (state.NextBoss != null) return;
         state.NextBoss = PickBoss(state);
         state.BossesFought.Add(state.NextBoss);
     }
