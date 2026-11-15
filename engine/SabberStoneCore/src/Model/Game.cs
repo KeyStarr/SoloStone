@@ -367,9 +367,11 @@ namespace SabberStoneCore.Model
 			{
 				_players[0].AddHeroAndPower(gameConfig.Player1HeroCard ?? Cards.HeroCard(gameConfig.Player1HeroClass));
 				_players[0].BaseClass = _players[0].HeroClass;
+				ApplyStartingHealth(_players[0], gameConfig.Player1StartingHealth);
 
 				_players[1].AddHeroAndPower(gameConfig.Player2HeroCard ?? Cards.HeroCard(gameConfig.Player2HeroClass));
 				_players[1].BaseClass = _players[1].HeroClass;
+				ApplyStartingHealth(_players[1], gameConfig.Player2StartingHealth);
 			}
 
 			TaskQueue = new TaskQueue(this);
@@ -818,6 +820,12 @@ namespace SabberStoneCore.Model
 			// first turn
 			Turn = 1;
 
+			// Run modes: mana crystals before the first turn, and loadout cards set aside to resolve with Start of Game.
+			ApplyStartingMana(Player1, _gameConfig.Player1StartingMana);
+			ApplyStartingMana(Player2, _gameConfig.Player2StartingMana);
+			StartOfGameRules.AddLoadout(Player1, _gameConfig.Player1Loadout);
+			StartOfGameRules.AddLoadout(Player2, _gameConfig.Player2Loadout);
+
 			HistoryFacts.FreezeInitial(this);
             Actions.PayloadRules.CaptureTracking(this);
             CardSets.Client.Sets.AzalinaSoulsever.PrepareDecks(this);
@@ -864,6 +872,21 @@ namespace SabberStoneCore.Model
 			NextStep = Step.BEGIN_DRAW;
 		}
 
+		// A run mode's starting Health replaces the hero card's own (max Health too); 0 keeps the card's. Set through the
+		// Health setter, so history carries it as the hero's HEALTH change and engine and client agree.
+		private static void ApplyStartingHealth(Controller player, int health)
+		{
+			if (health < 0 || health > 1000) throw new ArgumentOutOfRangeException(nameof(health), "Starting Health must be 0..1000.");
+			if (health > 0) player.Hero.BaseHealth = health;
+		}
+
+		// Mana crystals a run mode gives a player before its first turn (the turn then adds one, as usual).
+		private static void ApplyStartingMana(Controller player, int mana)
+		{
+			if (mana < 0 || mana > Controller.MaxResources) throw new ArgumentOutOfRangeException(nameof(mana), "Starting mana must be 0..10.");
+			if (mana > 0) player.BaseMana = mana;
+		}
+
 		/// <summary>
 		/// Part of the state machine.
 		/// Runs when STATE = RUNNING &amp;&amp; NEXTSTEP = BEGIN_DRAW
@@ -892,13 +915,17 @@ namespace SabberStoneCore.Model
 					// 4th card for second player
 					Deal(p);
 
-					IPlayable coin = FromCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"), new EntityData
+					// Run modes can withhold the Coin (Dungeon Run's bosses get none); the fourth card stays.
+					if (!_gameConfig.SkipCoin)
 					{
-						[GameTag.ZONE] = (int)Enums.Zone.HAND,
-						[GameTag.CARDTYPE] = (int)CardType.SPELL,
-						[GameTag.CREATOR] = FirstPlayer.Opponent.PlayerId
-					});
-					Generic.AddHandPhase(FirstPlayer.Opponent, coin);
+						IPlayable coin = FromCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"), new EntityData
+						{
+							[GameTag.ZONE] = (int)Enums.Zone.HAND,
+							[GameTag.CARDTYPE] = (int)CardType.SPELL,
+							[GameTag.CREATOR] = FirstPlayer.Opponent.PlayerId
+						});
+						Generic.AddHandPhase(FirstPlayer.Opponent, coin);
+					}
 				}
 
 				p.NumTurnsLeft = 1;

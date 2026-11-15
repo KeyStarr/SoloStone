@@ -27,6 +27,22 @@ namespace SabberStoneCore.Actions
 
         public static bool HasEffect(Card card) => card != null && Definitions.ContainsKey(card.AssetId);
 
+        /// <summary>Run modes' loadout (Dungeon Run's passive treasures): each card is set aside for its owner before the
+        /// deal and resolves with the other Start of Game sources after both mulligans. A card without a declared Start of
+        /// Game effect would do nothing, so it is refused.</summary>
+        internal static void AddLoadout(Controller owner, IReadOnlyList<string> cardIds)
+        {
+            if (cardIds == null) return;
+            foreach (string id in cardIds)
+            {
+                Card card = Cards.FromId(id);
+                if (!Definitions.TryGetValue(card.AssetId, out var definition))
+                    throw new InvalidOperationException("Loadout card " + id + " declares no Start of Game effect.");
+                IPlayable source = Entity.FromCard(owner, card, new EntityData { [GameTag.ZONE] = (int)Zone.SETASIDE }, owner.SetasideZone);
+                source[Pending] = definition.Eligible == null || definition.Eligible(owner) ? 1 : -1;
+            }
+        }
+
         internal static void Capture(Game game)
         {
             foreach (var owner in new[]{game.Player1,game.Player2})

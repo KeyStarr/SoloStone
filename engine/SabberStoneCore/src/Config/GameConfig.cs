@@ -216,6 +216,38 @@ namespace SabberStoneCore.Config
 		/// </summary>
 		public bool DrawWithRandom { get; set; } = false;
 
+		// Run modes (Dungeon Run and later adventures). Setup-only: they shape the game while it is built, and what they set
+		// lives on in entity tags, so snapshots leave them out and a restored game reads their defaults (the ordinary game).
+
+		/// <summary>Player 1 hero's starting Health; 0 keeps the hero card's own.</summary>
+		[field: NonSerialized]
+		public int Player1StartingHealth { get; set; }
+
+		/// <summary>Player 2 hero's starting Health; 0 keeps the hero card's own.</summary>
+		[field: NonSerialized]
+		public int Player2StartingHealth { get; set; }
+
+		/// <summary>Player 1's mana crystals before its first turn (its first turn then adds one); 0 = none.</summary>
+		[field: NonSerialized]
+		public int Player1StartingMana { get; set; }
+
+		/// <summary>Player 2's mana crystals before its first turn (its first turn then adds one); 0 = none.</summary>
+		[field: NonSerialized]
+		public int Player2StartingMana { get; set; }
+
+		/// <summary>The second player gets no Coin (it still draws its fourth card).</summary>
+		[field: NonSerialized]
+		public bool SkipCoin { get; set; }
+
+		/// <summary>Player 1's loadout: cards set aside at game start whose Start of Game effect runs after the mulligans
+		/// (Dungeon Run's passive treasures). Every card must declare a Start of Game effect.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1Loadout { get; set; }
+
+		/// <summary>Player 2's loadout; see <see cref="Player1Loadout"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2Loadout { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>
