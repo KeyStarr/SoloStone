@@ -53,6 +53,10 @@ public static class LocalBot
             if (id == "CS1h_001" && bot.ControllerAuraEffects[GameTag.HEALING_DOES_DAMAGE] == 1) return DamageScore(target, enemy, 2);
             if (id == "CS1h_001") return !enemy && target != null ? target.Damage > 0 ? Math.Min(2, target.Damage) * 7 : -11000 : -11000;
             if (id == "CS2_102") return 2;
+            // An adventure boss's own Hero Power (Dungeon Run's LOOTA_BOSS_18p Rat Race, and every later adventure's *_BOSS_*):
+            // untargeted ones get a neutral place in the order so the search always tries them (the search then judges the
+            // outcome); left at the default they would sort below every card and fall outside a narrow search.
+            if (target == null && IsBossHeroPower(bot.Hero.HeroPower.Card)) return 10;
             return DamageScore(target, enemy, 1) - 8;
         }
 #if ENGINE_SOURCE
@@ -120,6 +124,9 @@ public static class LocalBot
         if (task.Source is Weapon) return bot.Hero.Weapon == null ? 40.0 + task.Source.Cost : -20;
         return 18.0 + task.Source.Cost;
     }
+
+    internal static bool IsBossHeroPower(SabberStoneCore.Model.Card card) =>
+        card != null && !card.Collectible && card.Type == CardType.HERO_POWER && card.Id.Contains("_BOSS_");
 
     private static double DamageScore(Character target, bool enemy, int damage)
     {

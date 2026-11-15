@@ -547,6 +547,8 @@ public sealed class NativeMatch
     // The encounter this match is built from: before Start the one it will use (the client is told its mission before the
     // game exists), after Start the one it did use (a rejected debug scenario's is dropped).
     internal EncounterSpec ActiveEncounter => Game != null ? activeEncounter : Encounter ?? DebugScenario?.Encounter;
+    // The NPC plays an encounter's own deck (a boss), not the ladder opponent's.
+    private bool BossDeck => activeEncounter != null && activeEncounter.ReplacesNpcDeck;
     // The NPC's deck list as dealt: the encounter's deck when it replaced one, else the ladder deck.
     private List<string> BotDeckIds => activeEncounter != null && activeEncounter.ReplacesNpcDeck ? activeEncounter.NpcDeck.ToList() : opponentDeck.CardIds;
     internal Action<string> DebugScenarioLog { get; set; }
@@ -755,10 +757,16 @@ public sealed class NativeMatch
             if (variant > 0 && family > 0) { opponentPetVariant = variant; opponentPetFamilyId = family; opponentPetEntityId = nextDeckChoiceId--; }
             else OpponentPetCard = null;
         }
-        npcProfile = NpcCatalog.ForDeck(opponentDeck?.Id);
-        if (npcProfile != null) npcPilot = NpcPilots.Create(npcProfile, line => BotTrace?.Invoke(line));
-        EngineCard ordinaryBotHero = ResolveHero(opponentDeck == null ? "HERO_08" : opponentDeck.Hero);
         activeEncounter = Encounter ?? DebugScenario?.Encounter;
+        // A boss with its own deck is not the ladder opponent: no world profile, plan, pilot or presentation (the client's
+        // mission entity speaks for it); the generic search plays it.
+        void ResolveNpcProfile()
+        {
+            npcProfile = BossDeck ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
+            npcPilot = npcProfile != null ? NpcPilots.Create(npcProfile, line => BotTrace?.Invoke(line)) : null;
+        }
+        ResolveNpcProfile();
+        EngineCard ordinaryBotHero = ResolveHero(opponentDeck == null ? "HERO_08" : opponentDeck.Hero);
         // The game's setup: the ordinary match, with whatever the encounter (a run's boss fight or a debug scenario's boss keys)
         // replaces. Replaced decks follow no deckbuilding rules and carry no sideboards.
         GameConfig Configure(EncounterSpec setup)
@@ -843,6 +851,7 @@ public sealed class NativeMatch
             // been sent or recorded yet: recreate from the same seed; the player's deck entities keep their ids, and with
             // them their premium assignments.
             if (Encounter == null) activeEncounter = null;
+            ResolveNpcProfile();
             var ordinary = Configure(activeEncounter);
             if (ordinary.Player2HeroCard.Id != config.Player2HeroCard.Id || !ordinary.Player2Deck.SequenceEqual(config.Player2Deck))
             {
@@ -872,9 +881,10 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
         var botDecision = Game.GetPendingDecisions().Single(d => d.ControllerId == Game.Player2.Id);
 #endif
-        var npc = NpcCatalog.ForDeck(opponentDeck?.Id);
-        // A world profile whose plan does not resolve keeps an empty mulligan (and the legacy search).
-        var botKeeps = npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
+        var npc = BossDeck ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
+        // A world profile whose plan does not resolve keeps an empty mulligan (and the legacy search). A boss keeps its hand.
+        var botKeeps = BossDeck ? Game.Player2.Choice.Choices.ToList()
+            : npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
             new MulliganView(Game.Player2.Choice.Choices.Select(id => new MulliganCard(id,
                 Game.IdEntityDic[id].Card.Id, Game.IdEntityDic[id].Card.Cost)), Game.FirstPlayer == Game.Player1,
                 BotDeckIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));
@@ -2050,8 +2060,9 @@ public sealed class NativeMatch
                 if (choice.ChoiceType == ChoiceType.MULLIGAN)
                 {
                     mulliganChoice = PowerChoicesBuilder.EntityChoices(Game, choice);
-                    var npc = NpcCatalog.ForDeck(opponentDeck?.Id);
-                    var keeps = npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
+                    var npc = BossDeck ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
+                    var keeps = BossDeck ? choice.Choices.ToList()
+                        : npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
                         new MulliganView(choice.Choices.Select(id => new MulliganCard(id,
                             Game.IdEntityDic[id].Card.Id, Game.IdEntityDic[id].Card.Cost)), Game.FirstPlayer == Game.Player1,
                             BotDeckIds, Game.Player1.Hero.Card.Class), BotMulliganPolicy(npc)));

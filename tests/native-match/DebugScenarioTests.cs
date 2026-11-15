@@ -64,6 +64,21 @@ internal static partial class Program
         var aiPlayer = create.Players.Single(p => p.Id == game.Player2.PlayerId);
         Check(aiPlayer.GameAccountId.Lo == 0 && aiPlayer.Entity.Tags.Any(tag => tag.Name == (int)GameTag.HERO_ENTITY),
             "a mission encounter gives the client's mission entity its AI player");
+
+        // The boss is not a ladder opponent: it keeps its opening hand instead of the "no plan" full mulligan.
+        var offered = run.Packets.Where(p => p.Id == 17).Select(p => p.Message).OfType<EntityChoices>()
+            .Where(c => c.PlayerId == game.Player2.PlayerId).Select(c => c.Entities).First();
+        Check(offered.OrderBy(id => id).SequenceEqual(game.Player2.HandZone.Select(card => card.Id).OrderBy(id => id)),
+            "the boss keeps every card of its opening hand");
+
+        // Boss Hero Powers get a neutral place in the AI's order (an untargeted one used to sort below every card).
+        Check(LocalBot.IsBossHeroPower(SabberStoneCore.Model.Cards.FromId("LOOTA_BOSS_18p"))
+            && !LocalBot.IsBossHeroPower(SabberStoneCore.Model.Cards.FromId("HERO_08bp")), "boss Hero Powers are told apart from class ones");
+        match.SendChoices(run.Last<EntityChoices>(17).Id, new List<int>());
+        InvokeProcess(match, SabberStoneCore.Tasks.PlayerTasks.EndTurnTask.Any(game.Player1));
+        var ratRace = game.Player2.Options().FirstOrDefault(task => task.PlayerTaskType == SabberStoneCore.Tasks.PlayerTasks.PlayerTaskType.HERO_POWER);
+        Check(ratRace != null && LocalBot.Score(ratRace) == 10 && LocalBot.Score(ratRace) > LocalBot.Score(SabberStoneCore.Tasks.PlayerTasks.EndTurnTask.Any(game.Player2)),
+            "Rat Race is ordered with the boss's plays, not below them");
     }
 
     // Regression: a debug scenario rejected at Start used to keep its npcDeck while its hero was reset. Now the whole
