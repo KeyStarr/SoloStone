@@ -825,6 +825,9 @@ namespace SabberStoneCore.Model
 			ApplyStartingMana(Player2, _gameConfig.Player2StartingMana);
 			StartOfGameRules.AddLoadout(Player1, _gameConfig.Player1Loadout);
 			StartOfGameRules.AddLoadout(Player2, _gameConfig.Player2Loadout);
+			// A starting Passive Hero Power with a trigger (a boss's) is live from the start, as a replaced one is (PlayCard).
+			ActivatePassivePower(Player1);
+			ActivatePassivePower(Player2);
 
 			HistoryFacts.FreezeInitial(this);
             Actions.PayloadRules.CaptureTracking(this);
@@ -840,6 +843,13 @@ namespace SabberStoneCore.Model
 
 			// set next step
 			NextStep = Step.BEGIN_FIRST;
+		}
+
+		private static void ActivatePassivePower(Controller player)
+		{
+			var power = player.Hero?.HeroPower;
+			if (power != null && power.IsPassiveHeroPower && power.Power?.Trigger != null && power.ActivatedTrigger == null)
+				power.Power.Trigger.Activate(power);
 		}
 
 		/// <summary>

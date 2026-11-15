@@ -26,6 +26,7 @@ namespace SabberStoneCore.CardSets.Client
 
             ClassHeroes.Apply(Register);
             Adventures.DungeonRunCards.Apply(Register);
+            Sets.Legacy.LegacyWildCards.Apply(Register);
 
             Sets.LocationCards.Apply(Register);
             // Per-set registries also define the collectible stress corpus.
