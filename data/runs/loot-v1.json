@@ -143,6 +143,191 @@
         { "id": "EX1_604", "count": 4 }, { "id": "BRM_016", "count": 4 }, { "id": "EX1_407", "count": 2 }, { "id": "ICC_405", "count": 1 },
         { "id": "EX1_082", "count": 8 }, { "id": "GVG_099", "count": 2 }, { "id": "CFM_667", "count": 4 }, { "id": "GVG_090", "count": 5 }
       ]
+    },
+    {
+      "id": "a-f-kay", "hero": "LOOTA_BOSS_54h", "heroPower": "LOOTA_BOSS_54p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/A._F._Kay_(boss)",
+      "deck": [
+        { "id": "LOOTA_823", "count": 2 }, { "id": "LOOTA_812", "count": 2 }, { "id": "OG_308", "count": 4 }, { "id": "OG_229", "count": 1 },
+        { "id": "ICC_090", "count": 2 }, { "id": "UNG_087", "count": 2 }, { "id": "GVG_016", "count": 2 }, { "id": "UNG_079", "count": 2 },
+        { "id": "EX1_298", "count": 1 }, { "id": "AT_120", "count": 2 }, { "id": "EX1_586", "count": 2 }, { "id": "KAR_711", "count": 2 },
+        { "id": "GVG_121", "count": 2 }, { "id": "EX1_105", "count": 2 }, { "id": "EX1_620", "count": 2 }
+      ]
+    },
+    {
+      "id": "battlecrier-jinzo", "hero": "LOOTA_BOSS_17h", "heroPower": "LOOTA_BOSS_17p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Battlecrier_Jin'zo",
+      "deck": [
+        { "id": "EX1_392", "count": 1 }, { "id": "ICC_837", "count": 2 }, { "id": "EX1_603", "count": 2 }, { "id": "EX1_606", "count": 2 },
+        { "id": "CFM_064", "count": 2 }, { "id": "OG_149", "count": 2 }, { "id": "EX1_407", "count": 2 }, { "id": "GVG_056", "count": 1 },
+        { "id": "CFM_790", "count": 2 }, { "id": "EX1_015", "count": 2 }, { "id": "EX1_050", "count": 2 }, { "id": "CFM_853", "count": 2 },
+        { "id": "AT_086", "count": 2 }, { "id": "EX1_093", "count": 2 }, { "id": "AT_111", "count": 2 }, { "id": "EX1_085", "count": 2 }
+      ]
+    },
+    {
+      "id": "blackseed", "hero": "LOOTA_BOSS_06h", "heroPower": "LOOTA_BOSS_06p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Blackseed",
+      "deck": [
+        { "id": "CS2_008", "count": 2 }, { "id": "AT_037", "count": 2 }, { "id": "AT_038", "count": 2 }, { "id": "EX1_154", "count": 2 },
+        { "id": "OG_202", "count": 2 }, { "id": "UNG_111", "count": 2 }, { "id": "GVG_041", "count": 1 }, { "id": "ICC_054", "count": 2 },
+        { "id": "EX1_010", "count": 2 }, { "id": "EX1_045", "count": 2 }, { "id": "OG_156", "count": 2 }, { "id": "UNG_844", "count": 1 },
+        { "id": "ICC_025", "count": 2 }, { "id": "ICC_466", "count": 2 }, { "id": "CFM_667", "count": 2 }, { "id": "CFM_668", "count": 2 }
+      ]
+    },
+    {
+      "id": "brimstone-warden", "hero": "LOOTA_BOSS_20h", "heroPower": "LOOTA_BOSS_20p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Brimstone_Warden",
+      "board": ["LOOTA_BOSS_20t", "LOOTA_BOSS_20t", "LOOTA_BOSS_20t", "LOOTA_BOSS_20t"],
+      "deck": [
+        { "id": "LOEA_01", "count": 4 }, { "id": "LOOTA_BOSS_20t", "count": 11 }, { "id": "EX1_405", "count": 2 }, { "id": "EX1_170", "count": 2 },
+        { "id": "UNG_814", "count": 2 }, { "id": "BRM_028", "count": 1 }, { "id": "AT_060", "count": 2 }, { "id": "EX1_554", "count": 2 },
+        { "id": "ICC_200", "count": 2 }, { "id": "LOE_010", "count": 2 }
+      ]
+    },
+    {
+      "id": "elder-jari", "hero": "LOOTA_BOSS_42h", "heroPower": "LOOTA_BOSS_42p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Elder_Jari",
+      "deck": [
+        { "id": "EX1_169", "count": 2 }, { "id": "LOOT_051", "count": 2 }, { "id": "UNG_108", "count": 2 }, { "id": "CS2_013", "count": 2 },
+        { "id": "EX1_154", "count": 2 }, { "id": "LOOT_351", "count": 2 }, { "id": "CS2_012", "count": 2 }, { "id": "LOOT_054", "count": 2 },
+        { "id": "LOOT_048", "count": 2 }, { "id": "EX1_164", "count": 2 }, { "id": "EX1_165", "count": 2 }, { "id": "EX1_178", "count": 2 },
+        { "id": "GVG_033", "count": 1 }, { "id": "CFM_308", "count": 1 }, { "id": "UNG_852", "count": 1 }, { "id": "ICC_085", "count": 2 },
+        { "id": "EX1_572", "count": 1 }
+      ]
+    },
+    {
+      "id": "fungalmancer-flurgl", "hero": "LOOTA_BOSS_46h", "heroPower": "LOOTA_BOSS_46p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Fungalmancer_Flurgl",
+      "deck": [
+        { "id": "EX1_244", "count": 1 }, { "id": "EX1_565", "count": 2 }, { "id": "ICC_089", "count": 2 }, { "id": "LOOT_062", "count": 2 },
+        { "id": "UNG_201", "count": 2 }, { "id": "AT_052", "count": 2 }, { "id": "AT_046", "count": 2 }, { "id": "GVG_039", "count": 1 },
+        { "id": "CFM_310", "count": 2 }, { "id": "EX1_575", "count": 1 }, { "id": "LOOT_344", "count": 2 }, { "id": "LOEA10_3", "count": 2 },
+        { "id": "EX1_509", "count": 2 }, { "id": "OG_156", "count": 2 }, { "id": "EX1_506", "count": 2 }, { "id": "EX1_507", "count": 2 },
+        { "id": "CFM_344", "count": 1 }
+      ]
+    },
+    {
+      "id": "gutmook", "hero": "LOOTA_BOSS_19h", "heroPower": "LOOTA_BOSS_19p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Gutmook",
+      "deck": [
+        { "id": "LOOTA_109", "count": 2 }, { "id": "LOE_018", "count": 2 }, { "id": "AT_053", "count": 2 }, { "id": "LOOT_060", "count": 2 },
+        { "id": "BRM_011", "count": 2 }, { "id": "EX1_247", "count": 2 }, { "id": "AT_052", "count": 2 }, { "id": "EX1_259", "count": 2 },
+        { "id": "OG_024", "count": 2 }, { "id": "UNG_025", "count": 1 }, { "id": "ICC_090", "count": 2 }, { "id": "NEW1_029", "count": 1 },
+        { "id": "EX1_014", "count": 1 }, { "id": "GVG_068", "count": 2 }, { "id": "LOOT_144", "count": 2 }, { "id": "CFM_669", "count": 2 },
+        { "id": "GVG_118", "count": 1 }
+      ]
+    },
+    {
+      "id": "kraxx", "hero": "LOOTA_BOSS_39h", "heroPower": "LOOTA_BOSS_39p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Kraxx",
+      "deck": [
+        { "id": "CS2_108", "count": 2 }, { "id": "EX1_410", "count": 2 }, { "id": "EX1_402", "count": 2 }, { "id": "AT_064", "count": 2 },
+        { "id": "LOOT_044", "count": 2 }, { "id": "LOOT_367", "count": 2 }, { "id": "CS2_106", "count": 2 }, { "id": "EX1_606", "count": 2 },
+        { "id": "CFM_716", "count": 2 }, { "id": "CFM_756", "count": 2 }, { "id": "CS2_112", "count": 2 }, { "id": "LOOT_365", "count": 3 },
+        { "id": "LOOT_285", "count": 2 }, { "id": "GVG_052", "count": 2 }, { "id": "LOOT_519", "count": 1 }
+      ]
+    },
+    {
+      "id": "lyris-the-wild-mage", "hero": "LOOTA_BOSS_37h", "heroPower": "LOOTA_BOSS_37p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Lyris_the_Wild_Mage",
+      "deck": [
+        { "id": "CS2_023", "count": 5 }, { "id": "BRM_002", "count": 20 }, { "id": "EX1_559", "count": 1 }, { "id": "KAR_711", "count": 4 }
+      ]
+    },
+    {
+      "id": "mushhuckster-max", "hero": "LOOTA_BOSS_50h", "heroPower": "LOOTA_BOSS_50p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Mushhuckster_Max",
+      "deck": [
+        { "id": "LOOTA_107", "count": 2 }, { "id": "CFM_603", "count": 2 }, { "id": "EX1_622", "count": 2 }, { "id": "OG_234", "count": 2 },
+        { "id": "CFM_120", "count": 2 }, { "id": "EX1_059", "count": 2 }, { "id": "LOOT_394", "count": 2 }, { "id": "OG_254", "count": 1 },
+        { "id": "CFM_619", "count": 2 }, { "id": "CFM_063", "count": 2 }, { "id": "LOOT_291", "count": 2 }, { "id": "NEW1_026", "count": 2 },
+        { "id": "LOOT_167", "count": 4 }, { "id": "CFM_854", "count": 2 }, { "id": "OG_300", "count": 1 }
+      ]
+    },
+    {
+      "id": "russell-the-bard", "hero": "LOOTA_BOSS_51h", "heroPower": "LOOTA_BOSS_51p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Russell_the_Bard",
+      "deck": [
+        { "id": "CS2_072", "count": 2 }, { "id": "CFM_630", "count": 2 }, { "id": "KAR_069", "count": 2 }, { "id": "LOOT_214", "count": 2 },
+        { "id": "EX1_124", "count": 2 }, { "id": "EX1_133", "count": 2 }, { "id": "LOOT_211", "count": 2 }, { "id": "LOOT_503", "count": 2 },
+        { "id": "AT_028", "count": 2 }, { "id": "OG_073", "count": 2 }, { "id": "GVG_085", "count": 2 }, { "id": "NEW1_019", "count": 2 },
+        { "id": "EX1_044", "count": 2 }, { "id": "GVG_069", "count": 1 }, { "id": "KAR_114", "count": 1 }, { "id": "NEW1_041", "count": 2 }
+      ]
+    },
+    {
+      "id": "spiritspeaker-azun", "hero": "LOOTA_BOSS_16h", "heroPower": "LOOTA_BOSS_16p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Spiritspeaker_Azun",
+      "deck": [
+        { "id": "UNG_940", "count": 1 }, { "id": "UNG_032", "count": 2 }, { "id": "EX1_622", "count": 2 }, { "id": "CS2_234", "count": 2 },
+        { "id": "CS1_112", "count": 1 }, { "id": "UNG_037", "count": 2 }, { "id": "ICC_213", "count": 2 }, { "id": "KAR_204", "count": 1 },
+        { "id": "OG_335", "count": 2 }, { "id": "ICC_235", "count": 2 }, { "id": "ICC_214", "count": 2 }, { "id": "CFM_120", "count": 2 },
+        { "id": "EX1_096", "count": 2 }, { "id": "ICC_702", "count": 2 }, { "id": "ICC_854", "count": 1 }, { "id": "UNG_900", "count": 1 },
+        { "id": "KAR_114", "count": 1 }, { "id": "ICC_027", "count": 1 }, { "id": "OG_133", "count": 1 }
+      ]
+    },
+    {
+      "id": "thaddock-the-thief", "hero": "LOOTA_BOSS_13h", "heroPower": "LOOTA_BOSS_13p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Thaddock_the_Thief",
+      "deck": [
+        { "id": "CS2_072", "count": 2 }, { "id": "EX1_145", "count": 2 }, { "id": "EX1_144", "count": 2 }, { "id": "KAR_069", "count": 2 },
+        { "id": "UNG_067", "count": 1 }, { "id": "CFM_693", "count": 2 }, { "id": "UNG_060", "count": 1 }, { "id": "NEW1_004", "count": 1 },
+        { "id": "UNG_809", "count": 2 }, { "id": "UNG_205", "count": 2 }, { "id": "CFM_637", "count": 1 }, { "id": "CS2_146", "count": 2 },
+        { "id": "CS2_171", "count": 2 }, { "id": "OG_156", "count": 2 }, { "id": "EX1_015", "count": 2 }, { "id": "EX1_049", "count": 2 },
+        { "id": "UNG_845", "count": 2 }
+      ]
+    },
+    {
+      "id": "waxmancer-sturmi", "hero": "LOOTA_BOSS_04h", "heroPower": "LOOTA_BOSS_04p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Waxmancer_Sturmi",
+      "deck": [
+        { "id": "OG_179", "count": 2 }, { "id": "EX1_610", "count": 1 }, { "id": "EX1_611", "count": 1 }, { "id": "BRM_013", "count": 2 },
+        { "id": "NEW1_031", "count": 2 }, { "id": "EX1_536", "count": 2 }, { "id": "OG_292", "count": 2 }, { "id": "EX1_539", "count": 2 },
+        { "id": "EX1_538", "count": 2 }, { "id": "OG_216", "count": 2 }, { "id": "OG_309", "count": 1 }, { "id": "EX1_534", "count": 2 },
+        { "id": "LOE_046", "count": 2 }, { "id": "LOE_029", "count": 1 }, { "id": "EX1_096", "count": 2 }, { "id": "LOE_047", "count": 2 },
+        { "id": "EX1_016", "count": 1 }, { "id": "OG_133", "count": 1 }
+      ]
+    },
+    {
+      "id": "whompwhisker", "hero": "LOOTA_BOSS_41h", "heroPower": "LOOTA_BOSS_41p", "rounds": [4, 5],
+      "source": "https://hearthstone.wiki.gg/wiki/Whompwhisker",
+      "deck": [
+        { "id": "OG_308", "count": 2 }, { "id": "CS2_108", "count": 2 }, { "id": "EX1_407", "count": 2 }, { "id": "GVG_052", "count": 2 },
+        { "id": "UNG_838", "count": 2 }, { "id": "ICC_405", "count": 1 }, { "id": "CS2_179", "count": 2 }, { "id": "AT_101", "count": 2 },
+        { "id": "OG_200", "count": 2 }, { "id": "AT_088", "count": 2 }, { "id": "LOOT_184", "count": 2 }, { "id": "CS2_186", "count": 2 },
+        { "id": "OG_142", "count": 2 }, { "id": "NEW1_038", "count": 1 }, { "id": "LOOT_137", "count": 2 }, { "id": "UNG_806", "count": 2 }
+      ]
+    },
+    {
+      "id": "blackseed-rank2", "family": "blackseed", "hero": "LOOTA_BOSS_29h", "heroPower": "LOOTA_BOSS_29p", "rounds": [6, 7],
+      "source": "https://hearthstone.wiki.gg/wiki/Blackseed",
+      "deck": [
+        { "id": "CS2_008", "count": 2 }, { "id": "AT_037", "count": 2 }, { "id": "AT_038", "count": 2 }, { "id": "EX1_154", "count": 2 },
+        { "id": "OG_202", "count": 2 }, { "id": "UNG_111", "count": 2 }, { "id": "GVG_041", "count": 1 }, { "id": "ICC_054", "count": 2 },
+        { "id": "EX1_010", "count": 2 }, { "id": "EX1_045", "count": 2 }, { "id": "OG_156", "count": 2 }, { "id": "UNG_844", "count": 1 },
+        { "id": "ICC_025", "count": 2 }, { "id": "ICC_466", "count": 2 }, { "id": "CFM_667", "count": 2 }, { "id": "CFM_668", "count": 2 }
+      ]
+    },
+    {
+      "id": "gutmook-rank2", "family": "gutmook", "hero": "LOOTA_BOSS_33h", "heroPower": "LOOTA_BOSS_33p", "rounds": [6, 7],
+      "source": "https://hearthstone.wiki.gg/wiki/Gutmook",
+      "deck": [
+        { "id": "LOOTA_109", "count": 2 }, { "id": "LOE_018", "count": 2 }, { "id": "AT_053", "count": 2 }, { "id": "LOOT_060", "count": 2 },
+        { "id": "BRM_011", "count": 2 }, { "id": "EX1_247", "count": 2 }, { "id": "AT_052", "count": 2 }, { "id": "EX1_259", "count": 2 },
+        { "id": "OG_024", "count": 2 }, { "id": "UNG_025", "count": 1 }, { "id": "ICC_090", "count": 2 }, { "id": "NEW1_029", "count": 1 },
+        { "id": "EX1_014", "count": 1 }, { "id": "GVG_068", "count": 2 }, { "id": "LOOT_144", "count": 2 }, { "id": "CFM_669", "count": 2 },
+        { "id": "GVG_118", "count": 1 }
+      ]
+    },
+    {
+      "id": "waxmancer-sturmi-rank2", "family": "waxmancer-sturmi", "hero": "LOOTA_BOSS_27h", "heroPower": "LOOTA_BOSS_27p", "rounds": [6, 7],
+      "source": "https://hearthstone.wiki.gg/wiki/Waxmancer_Sturmi",
+      "deck": [
+        { "id": "OG_179", "count": 2 }, { "id": "EX1_610", "count": 1 }, { "id": "EX1_611", "count": 1 }, { "id": "BRM_013", "count": 2 },
+        { "id": "NEW1_031", "count": 2 }, { "id": "EX1_536", "count": 2 }, { "id": "OG_292", "count": 2 }, { "id": "EX1_539", "count": 2 },
+        { "id": "EX1_538", "count": 2 }, { "id": "OG_216", "count": 2 }, { "id": "OG_309", "count": 1 }, { "id": "EX1_534", "count": 2 },
+        { "id": "LOE_046", "count": 2 }, { "id": "LOE_029", "count": 1 }, { "id": "EX1_096", "count": 2 }, { "id": "LOE_047", "count": 2 },
+        { "id": "EX1_016", "count": 1 }, { "id": "OG_133", "count": 1 }
+      ]
     }
   ],
   "buckets": [],

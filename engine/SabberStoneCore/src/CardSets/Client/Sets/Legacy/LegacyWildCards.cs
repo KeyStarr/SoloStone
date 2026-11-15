@@ -3,6 +3,7 @@ using SabberStoneCore.Conditions;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
+using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 using SabberStoneCore.Triggers;
 
@@ -28,6 +29,28 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
                         SingleTask = new SetGameTagTask(GameTag.STEALTH, 1, EntityType.SOURCE)
                     }
                 };
+                card.Implemented = true;
+            });
+
+            // Wrath (Blackseed's and Elder Jari's decks): Choose One - its halves (EX1_154a/b) are shared with the Core reprint.
+            register(836, "EX1_154", card => card.Implemented = true);
+
+            // Murloc Tinyfin (Fungalmancer Flurgl's deck): a vanilla 1/1 with no definition of its own.
+            register(13879, "LOEA10_3", card => card.Implemented = true);
+
+            // Jeweled Scarab, Huge Toad, Tomb Spider (Waxmancer Sturmi's deck).
+            register(2901, "LOE_029", card => {
+                card.Power = new Power { PowerTask = new DiscoverTask(DiscoverType.THREE_COST) };
+                card.Implemented = true;
+            });
+            register(2918, "LOE_046", card => {
+                card.Power = new Power { DeathrattleTask = ComplexTask.Create(
+                    new RandomTask(1, EntityType.ENEMIES),
+                    new DamageTask(1, EntityType.STACK)) };
+                card.Implemented = true;
+            });
+            register(2919, "LOE_047", card => {
+                card.Power = new Power { PowerTask = new DiscoverTask(DiscoverType.BEAST) };
                 card.Implemented = true;
             });
         }
