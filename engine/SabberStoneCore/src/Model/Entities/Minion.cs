@@ -159,6 +159,8 @@ namespace SabberStoneCore.Model.Entities
 			HasCharge = false;
             IsRush = false;
             CantAttackHeroes = false;
+            // The card's own "Can't attack" (Ancient Watcher, Dungeon Run's Stone Golem) is a silenceable keyword.
+            if (Card.CantAttack && this[GameTag.CANT_ATTACK] > 0) CantAttack = false;
 			HasWindfury = false;
             if (this[GameTag.MEGA_WINDFURY] > 0) this[GameTag.MEGA_WINDFURY] = 0;
             if (this[GameTag.IMMUNE_WHILE_ATTACKING] > 0) this[GameTag.IMMUNE_WHILE_ATTACKING] = 0;

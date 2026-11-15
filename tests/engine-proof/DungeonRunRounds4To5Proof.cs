@@ -191,6 +191,14 @@ internal static class DungeonRunRounds4To5Proof
             Kill(warden, warden.Player2.BoardZone[0]);
             Check(warden.Player2.BaseMana == 5, "a silenced Golem has no Deathrattle");
         }
+        // The player's Silence wakes a Golem too (Silence removes a card's own "Can't attack": Ancient Watcher, Ragnaros).
+        Game silenced = DungeonRunRound1Proof.Fight("LOOTA_BOSS_20h", board: golems);
+        var golem = silenced.Player2.BoardZone[0];
+        Play(silenced, silenced.Player1, "EX1_332", golem);
+        Check(!golem.CantAttack && golem.IsSilenced, "Silence wakes a Stone Golem");
+        var watcher = Summon(silenced.Player1, "EX1_045");
+        Play(silenced, silenced.Player1, "EX1_332", watcher);
+        Check(!watcher.CantAttack, "Silence lets Ancient Watcher attack");
         Game looming = DungeonRunRound1Proof.Fight("LOOTA_BOSS_20h");
         int cards = looming.Player1.HandZone.Count;
         Play(looming, looming.Player1, "LOEA_01");

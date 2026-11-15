@@ -33,12 +33,11 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             register(46282, "LOOTA_BOSS_29p", card => Targeted(card, new TransformMinionTask(EntityType.TARGET, 3), PlayReq.REQ_MINION_TARGET));
 
             // Brimstone Warden: starts with four Stone Golems in play (the content file's starting board). Dispel Ward (5):
-            // Silence your minions (waking the Golems: no more "Can't attack", no Deathrattle). The engine's Silence keeps a
-            // card's own "Can't attack", so the power lifts it itself.
+            // Silence your minions (waking the Golems: no more "Can't attack", no Deathrattle).
             register(46339, "LOOTA_BOSS_20h", DungeonRunCards.Plain);
             register(46208, "LOOTA_BOSS_20p", card => {
                 card.PlayAvailabilityPredicate = (c, _) => !c.BoardZone.IsEmpty;
-                Untargeted(card, ComplexTask.Create(new SilenceTask(EntityType.MINIONS), Wake()));
+                Untargeted(card, new SilenceTask(EntityType.MINIONS));
             });
             // Stone Golem: 15/5, Can't attack (facts tags). Deathrattle: Lose a Mana Crystal.
             register(46209, "LOOTA_BOSS_20t", card => {
@@ -108,11 +107,6 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             register(46266, "LOOTA_BOSS_27h", DungeonRunCards.Plain);
             register(46267, "LOOTA_BOSS_27p", card => Copy(card, new SummonCopyTask(EntityType.TARGET)));
         }
-
-        private static ISimpleTask Wake() => new CustomTask((game, controller, source, target, stack) => {
-            foreach (var minion in controller.BoardZone)
-                if (minion.Card.CantAttack && minion.CantAttack) minion.CantAttack = false;
-        });
 
         // One fewer Mana Crystal, a spent (empty) one first, as the engine's Felguard does; unlike its ManaCrystalEmptyTask,
         // never a negative spent count when none is spent.
