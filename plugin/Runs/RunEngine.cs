@@ -7,7 +7,7 @@ public sealed class RunEncounter
 {
     public RunBoss Boss;
     public int Round, PlayerHealth, BossStartingMana;
-    public string Class, Hero, BossHeroPower;
+    public string Class, Hero;
     public IReadOnlyList<string> Deck, Passives;
 }
 
@@ -50,7 +50,7 @@ public sealed class RunEngine
         RunBoss boss = Definition.Boss(state.NextBoss);
         return new RunEncounter {
             Boss = boss, Round = state.Round, PlayerHealth = PlayerHealth(state),
-            BossStartingMana = Definition.Round(state.Round).BossStartingMana, BossHeroPower = boss.HeroPowerFor(state.Round),
+            BossStartingMana = Definition.Round(state.Round).BossStartingMana,
             Class = state.Class, Hero = state.Hero, Deck = state.Deck.ToList(), Passives = state.Passives.ToList(),
         };
     }
@@ -166,11 +166,13 @@ public sealed class RunEngine
         return offer;
     }
 
-    // A boss of the current round not fought yet this run; if all were, any of them but the one just faced.
+    // A boss of the current round whose family was not fought yet this run; if every family was, any boss of the round
+    // but the one just faced (a tie in a round with one boss faces it again).
     private string PickBoss(RunState state)
     {
         var round = Definition.Bosses.Where(b => b.Rounds.Contains(state.Round) && Admission.Bosses.Contains(b.Id)).Select(b => b.Id).ToList();
-        var fresh = round.Where(id => !state.BossesFought.Contains(id)).ToList();
+        var foughtFamilies = new HashSet<string>(state.BossesFought.Select(id => Definition.Boss(id)?.Family ?? id), StringComparer.Ordinal);
+        var fresh = round.Where(id => !foughtFamilies.Contains(Definition.Boss(id).Family)).ToList();
         var candidates = fresh.Count > 0 ? fresh : round.Where(id => id != state.NextBoss).ToList();
         if (candidates.Count == 0) candidates = round;
         if (candidates.Count == 0) throw new InvalidOperationException(Definition.Id + ": round " + state.Round + " has no admitted boss.");

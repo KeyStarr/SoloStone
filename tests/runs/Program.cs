@@ -76,7 +76,6 @@ internal static class Program
                 Check(hero.Type == CardType.HERO, boss.Id + ": " + boss.Hero + " is a hero card");
                 EngineCard power = EngineCards.FromAssetId(hero[GameTag.HERO_POWER]);
                 Check(power != null && power.Id == boss.HeroPower, boss.Id + ": heroPower " + boss.HeroPower + " is the hero's own (" + power?.Id + ")");
-                Check(boss.Upgrades.All(u => Find(u.HeroPower).Type == CardType.HERO_POWER), boss.Id + ": upgrades are hero powers");
                 Check(boss.Source.StartsWith("https://hearthstone.wiki.gg/wiki/", StringComparison.Ordinal), boss.Id + ": names its wiki source");
             }
             foreach (RunBucket bucket in definition.Buckets)
@@ -133,8 +132,6 @@ internal static class Program
             Check(encounter.Round == round && encounter.PlayerHealth == 15 + 5 * (round - 1), "round " + round + ": player health " + encounter.PlayerHealth);
             Check(encounter.Boss.Rounds.Contains(round), "round " + round + ": the boss belongs to the round");
             Check(encounter.BossStartingMana == (round == 8 ? 2 : 0), "round " + round + ": boss starting mana");
-            if (encounter.Boss.Id == "priest-a")
-                Check(encounter.BossHeroPower == (round >= 7 ? "CS2_017" : "CS1h_001"), "priest-a upgrades its hero power from round 7");
             engine.ResolveFight(state, RunFightResult.Won);
             var kinds = new List<string>();
             while (state.Offer != null)
@@ -180,6 +177,21 @@ internal static class Program
         Check(PlayToWin(engine, 7, 1).SequenceEqual(PlayToWin(engine, 7, 1)), "a run replays exactly from its seed");
         Check(!PlayToWin(engine, 7, 1).SequenceEqual(PlayToWin(engine, 8, 1)), "another seed gives another run");
         Check(PlayToWin(engine, 7, 0).Last() != PlayToWin(engine, 7, 2).Last(), "choices change the run");
+
+        // Forms of one boss (a family) never meet in one run, and both forms do get fought across runs.
+        var seenForms = new HashSet<string>();
+        for (long seed = 1; seed <= 40; seed++)
+        {
+            RunState run = engine.Start("MAGE", "HERO_08", seed);
+            while (run.Status == RunStatus.Active)
+            {
+                if (run.Offer != null) engine.Choose(run, 0); else engine.ResolveFight(run, RunFightResult.Won);
+            }
+            var families = run.BossesFought.Select(id => definition.Boss(id).Family).ToList();
+            Check(families.Distinct().Count() == families.Count, "seed " + seed + ": one boss per family: " + string.Join(",", run.BossesFought));
+            seenForms.UnionWith(run.BossesFought.Where(id => definition.Boss(id).Family == "priest"));
+        }
+        Check(seenForms.SetEquals(new[] { "priest-a", "priest-b" }), "both forms of the priest family appear across runs");
 
         // A loss ends the run on that boss.
         RunState lost = engine.Start("WARRIOR", "HERO_01", 3);
@@ -234,6 +246,7 @@ internal static class Program
             "[{ \"id\": \"CS2_171\", \"count\": 2 }, { \"id\": \"CS2_171\", \"count\": 2 }]", "a deck card listed twice");
         Rejects("\"hero\": \"HERO_05\"", "\"hero\": \"HERO 05\"", "an invalid card id");
         Rejects("\"id\": \"druid-a\"", "\"id\": \"Druid_A\"", "an invalid entry id");
+        Rejects("\"family\": \"priest\", \"hero\": \"HERO_09\"", "\"family\": \"Priest Family\", \"hero\": \"HERO_09\"", "an invalid family");
         Rejects("{ \"class\": \"WARRIOR\", \"deck\"", "{ \"class\": \"WIZARD\", \"deck\"", "an unknown class");
     }
 }

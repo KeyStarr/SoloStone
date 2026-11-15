@@ -28,34 +28,19 @@ public sealed class RunClassStart
     public IReadOnlyList<string> Deck;
 }
 
-public sealed class RunHeroPowerUpgrade
-{
-    public int FromRound;
-    public string HeroPower;
-}
-
 public sealed class RunBoss
 {
-    public string Id, Hero, HeroPower, Source;
+    // Family: the forms of one boss (Dungeon Run's later-round bosses are separate hero cards, e.g. Blackseed at 40 Health
+    // with Evolvomancy and at 60 with Greater Evolution). A run fights at most one boss of a family. Defaults to the id.
+    public string Id, Family, Hero, HeroPower, Source;
     public IReadOnlyList<int> Rounds;
     public IReadOnlyList<string> Deck;
     public IReadOnlyList<string> Board;
-    public IReadOnlyList<RunHeroPowerUpgrade> Upgrades;
-
-    // The Hero Power this boss uses in a round: the latest upgrade that has started, else its own.
-    public string HeroPowerFor(int round)
-    {
-        string power = HeroPower;
-        foreach (RunHeroPowerUpgrade upgrade in Upgrades.OrderBy(u => u.FromRound))
-            if (round >= upgrade.FromRound) power = upgrade.HeroPower;
-        return power;
-    }
 
     public IEnumerable<string> AllCards()
     {
         yield return Hero;
         yield return HeroPower;
-        foreach (RunHeroPowerUpgrade upgrade in Upgrades) yield return upgrade.HeroPower;
         foreach (string id in Deck) yield return id;
         foreach (string id in Board) yield return id;
     }
@@ -151,24 +136,16 @@ public sealed class RunDefinition
             if (bosses.Any(b => b.Id == id)) throw new InvalidDataException("Duplicate boss: " + id);
             var bossRounds = NpcWorldJson.List(row, "rounds").Cast<object>().Select(r => RoundNumber(r, rounds.Count, id)).Distinct().ToList();
             if (bossRounds.Count == 0) throw new InvalidDataException(id + ": a boss needs at least one round.");
-            var upgrades = new List<RunHeroPowerUpgrade>();
-            foreach (object upgrade in NpcWorldJson.List(row, "upgrades", false))
-            {
-                var u = NpcWorldJson.Object(upgrade);
-                upgrades.Add(new RunHeroPowerUpgrade {
-                    FromRound = RoundNumber(NpcWorldJson.Integer(u, "fromRound"), rounds.Count, id),
-                    HeroPower = CardId(NpcWorldJson.Text(u, "heroPower"), id + ".upgrades"),
-                });
-            }
+            string family = NpcWorldJson.Text(row, "family", false);
             bosses.Add(new RunBoss {
                 Id = id,
+                Family = family == null ? id : Slug(family, id + ".family"),
                 Hero = CardId(NpcWorldJson.Text(row, "hero"), id + ".hero"),
                 HeroPower = CardId(NpcWorldJson.Text(row, "heroPower"), id + ".heroPower"),
                 Source = NonEmpty(NpcWorldJson.Text(row, "source"), id + ".source"),
                 Rounds = bossRounds,
                 Deck = Counted(NpcWorldJson.List(row, "deck"), id + ".deck"),
                 Board = CardIds(NpcWorldJson.Strings(row, "board"), id + ".board", true),
-                Upgrades = upgrades,
             });
         }
         definition.Bosses = bosses;
