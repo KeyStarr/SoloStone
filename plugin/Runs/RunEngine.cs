@@ -74,11 +74,12 @@ public sealed class RunEngine
                 state.NextBoss = null;
                 return;
             case RunFightResult.Won:
+                // The defeated boss is behind the run: no next boss is known until the rewards are chosen.
                 state.BossesDefeated++;
+                state.NextBoss = null;
                 if (state.BossesDefeated == Definition.Rounds.Count)
                 {
                     state.Status = RunStatus.Won;
-                    state.NextBoss = null;
                     return;
                 }
                 state.PendingRewards = Definition.Round(state.BossesDefeated).Rewards.ToList();

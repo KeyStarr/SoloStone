@@ -6,6 +6,7 @@
   "source": "tests/runs fixture; the decks and buckets are made up, only the schedule follows Dungeon Run",
   "client": { "adventure": 414, "mode": 5, "scenario": 2663, "wing": 1644, "serverKey": 24, "clientKey": 42, "board": 61 },
   "playerHealth": { "base": 15, "perWin": 5 },
+  "fight": { "playerFirst": true, "bossCoin": false },
   "rounds": [
     { "round": 1, "rewards": ["passiveTreasure", "loot"] },
     { "round": 2, "rewards": ["loot"] },

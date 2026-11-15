@@ -132,6 +132,12 @@ internal static class Program
             Check(encounter.Round == round && encounter.PlayerHealth == 15 + 5 * (round - 1), "round " + round + ": player health " + encounter.PlayerHealth);
             Check(encounter.Boss.Rounds.Contains(round), "round " + round + ": the boss belongs to the round");
             Check(encounter.BossStartingMana == (round == 8 ? 2 : 0), "round " + round + ": boss starting mana");
+            EncounterSpec spec = encounter.ToSpec(definition);
+            Check(spec.PlayerHero == "HERO_08" && spec.PlayerDeck.SequenceEqual(state.Deck) && spec.PlayerStartingHealth == encounter.PlayerHealth
+                && (spec.PlayerLoadout ?? new string[0]).SequenceEqual(state.Passives) && spec.NpcHero == encounter.Boss.Hero
+                && spec.NpcDeck.SequenceEqual(encounter.Boss.Deck) && spec.NpcStartingMana == encounter.BossStartingMana
+                && !spec.NpcCoin && spec.FirstPlayer == 1 && spec.MissionId == 2663 && spec.BoardId == 61,
+                "round " + round + ": the fight is staged from the run (deck, Health, passives, boss, fight rules, mission, board)");
             engine.ResolveFight(state, RunFightResult.Won);
             var kinds = new List<string>();
             while (state.Offer != null)

@@ -63,6 +63,8 @@ public sealed class RunDefinition
     public int Version;
     public RunClientIds Client;
     public int BaseHealth, HealthPerWin;
+    // Fight rules (Dungeon Run: the player always goes first, the boss gets no Coin).
+    public bool PlayerFirst, BossCoin;
     public IReadOnlyList<RunRound> Rounds;
     public IReadOnlyList<RunClassStart> Classes;
     public IReadOnlyList<RunBoss> Bosses;
@@ -99,6 +101,9 @@ public sealed class RunDefinition
         var health = NpcWorldJson.Object(root.TryGetValue("playerHealth", out object healthValue) ? healthValue : null);
         definition.BaseHealth = Positive(NpcWorldJson.Integer(health, "base"), "playerHealth.base");
         definition.HealthPerWin = NonNegative(NpcWorldJson.Integer(health, "perWin"), "playerHealth.perWin");
+        var fight = NpcWorldJson.Object(root.TryGetValue("fight", out object fightValue) ? fightValue : null);
+        definition.PlayerFirst = NpcWorldJson.Boolean(fight, "playerFirst");
+        definition.BossCoin = NpcWorldJson.Boolean(fight, "bossCoin");
 
         var rounds = new List<RunRound>();
         foreach (object item in NpcWorldJson.List(root, "rounds"))

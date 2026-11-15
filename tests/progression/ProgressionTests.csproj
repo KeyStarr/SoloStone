@@ -36,6 +36,15 @@
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
   </ItemGroup>
 
+  <!-- Run modes on the save (RunProfileChecks): the run core, the profile's run operations and the runs suite's fixture. -->
+  <ItemGroup>
+    <Compile Include="../../plugin/Runs/*.cs" LinkBase="Runs" />
+    <Compile Include="../../plugin/LocalProfileRuns.cs" Link="LocalProfileRuns.cs" />
+    <Compile Include="../../plugin/Npc/EncounterSpec.cs" Link="EncounterSpec.cs" />
+    <Compile Include="../../plugin/Npc/World/NpcWorldJson.cs" Link="NpcWorldJson.cs" />
+    <None Include="../runs/fixtures/complete-run.json" Link="runs/complete-run.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <ItemGroup>
     <Compile Include="../../plugin/RecipeLibrary.cs" Link="RecipeLibrary.cs" />
     <Compile Include="../../plugin/LocalShop.cs" Link="LocalShop.cs" />

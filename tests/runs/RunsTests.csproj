@@ -8,6 +8,7 @@
   <ItemGroup>
     <Compile Include="../../plugin/Runs/*.cs" LinkBase="Runs" />
     <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/Npc/EncounterSpec.cs" Link="EncounterSpec.cs" />
     <Compile Include="../../plugin/Npc/World/NpcWorldJson.cs" Link="NpcWorldJson.cs" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
