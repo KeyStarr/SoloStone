@@ -739,6 +739,7 @@ M	Assembly-CSharp	AdventureConfig	GetSelectedMode	AdventureModeDbId()
 M	Assembly-CSharp	AdventureConfig	OnAdventureSceneAwake	*
 M	Assembly-CSharp	AdventureConfig	SetSelectedAdventureMode	System.Void(AdventureDbId,AdventureModeDbId)
 M	Assembly-CSharp	AdventureConfig	get_CurrentSubScene	Assets.AdventureData+Adventuresubscene()
+M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnBackButtonPress	*
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -2901,6 +2902,7 @@ T	Assembly-CSharp	AchievementSubcategoryDbfRecord
 T	Assembly-CSharp	Actor		
 T	Assembly-CSharp	AdventureConfig		
 T	Assembly-CSharp	AdventureDbId		
+T	Assembly-CSharp	AdventureDungeonCrawlDisplay		
 T	Assembly-CSharp	AdventureModeDbId		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		

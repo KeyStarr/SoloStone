@@ -34,6 +34,17 @@ internal static class NativeRunModes
             harmony.Patch(AccessTools.Method(typeof(EndGameScreen), handler), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(EndScreenContinue)));
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(EndScreenShown)));
         harmony.Patch(AccessTools.Method(typeof(AdventureConfig), "OnAdventureSceneAwake"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(AdventureSceneAwake)));
+        harmony.Patch(AccessTools.Method(typeof(AdventureDungeonCrawlDisplay), "OnBackButtonPress"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(DisplayBack)));
+    }
+
+    // The display's Back goes to the client's adventure chooser, which offers only Practice (not playable offline). With one
+    // run mode there is nothing to choose: Back goes home. A chooser of run modes can take this over when there are several.
+    private static bool DisplayBack()
+    {
+        if (!InRunMode) return true;
+        Trace("display back: home");
+        NativeUIProbe.Navigate(SceneMgr.Mode.HUB);
+        return false;
     }
 
     // After a run fight the client's victory or defeat screen waits on services that do not exist offline (achievements,
