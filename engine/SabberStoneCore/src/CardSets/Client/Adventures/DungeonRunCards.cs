@@ -14,6 +14,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures
             DungeonRun.DungeonRunRounds4To5.Apply(register);
             DungeonRun.DungeonRunRounds6To7.Apply(register);
             DungeonRun.DungeonRunFinals.Apply(register);
+            DungeonRun.DungeonRunTreasures.Apply(register);
         }
 
         internal static void Plain(Card card)
