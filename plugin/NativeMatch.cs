@@ -787,7 +787,9 @@ public sealed class NativeMatch
             return new GameConfig
             {
                 Player1Name = "Player",
-                Player2Name = OpponentName = setup?.NpcName ?? (opponentDeck == null ? "Innkeeper" : OpponentDisplayName(npcProfile, opponentDeck)),
+                // An encounter's boss goes by its hero's name (Dungeon Run: "Overseer Mogark"), never a ladder opponent's.
+                Player2Name = OpponentName = setup?.NpcName ?? (setup?.NpcHero != null ? botHero.Name
+                    : opponentDeck == null ? "Innkeeper" : OpponentDisplayName(npcProfile, opponentDeck)),
                 Player1HeroClass = hero.Class,
                 Player1HeroCard = hero,
                 Player1Deck = humanCards,
