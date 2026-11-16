@@ -45,7 +45,9 @@ public sealed class RunEngine
         return state;
     }
 
-    public int PlayerHealth(RunState state) => Definition.BaseHealth + Definition.HealthPerWin * state.BossesDefeated;
+    // The player's Health for the next fight; an ended run keeps the Health of its last fight (a won run's final boss).
+    public int PlayerHealth(RunState state) =>
+        Definition.BaseHealth + Definition.HealthPerWin * Math.Min(state.BossesDefeated, Definition.Rounds.Count - 1);
 
     public RunEncounter NextEncounter(RunState state)
     {

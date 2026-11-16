@@ -355,6 +355,8 @@ internal static class Program
             "after a win: the treasure offer with the next boss already chosen, the defeated boss, more Health");
         engine.Choose(run, 0);
         var loot = Project(run);
+        Check(run.Passives.Count == 1 && loot[RunSaveData.DeckCardList].SequenceEqual(run.Deck.Concat(run.Passives).Select(id => (long)Dbf(id))),
+            "the deck list shows the chosen passive treasure with the cards");
         RunOption first = run.Offer.Options[0];
         Check(loot[RunSaveData.LootOptionA].SequenceEqual(new long[] { Dbf(first.Title) }.Concat(first.Cards.Select(id => (long)Dbf(id))))
             && loot[RunSaveData.LootOptionC].Length == 4 && loot[RunSaveData.TreasureOption].Length == 0, "loot bundles: [title card, cards]");
@@ -362,11 +364,20 @@ internal static class Program
         engine.ResolveFight(run, RunFightResult.Lost);
         var lost = Project(run);
         Check(One(lost, RunSaveData.IsRunActive) == 0 && One(lost, RunSaveData.BossLostTo) == Dbf(definition.Boss(run.LostTo).Hero)
-            && One(lost, RunSaveData.SeenRunComplete) == 0 && lost[RunSaveData.HeroHealth].Length == 0, "a lost run: the boss it lost to, end screen unseen");
+            && One(lost, RunSaveData.SeenRunComplete) == 0 && One(lost, RunSaveData.HeroHealth) == 20,
+            "a lost run: the boss it lost to, end screen unseen, the Health of the fight it lost");
         engine.MarkRunEndSeen(run);
         var after = Project(run);
         Check(One(after, RunSaveData.IsRunActive) == 0 && after[RunSaveData.DeckCardList].Length == 0 && after[RunSaveData.BossLostTo].Length == 0,
             "once its end screen was seen, an ended run shows as no run (the display starts over)");
+
+        RunState won = engine.Start("WARRIOR", "HERO_01", 43);
+        while (won.Status == RunStatus.Active)
+        {
+            if (won.Offer != null) engine.Choose(won, 0);
+            else engine.ResolveFight(won, RunFightResult.Won);
+        }
+        Check(One(Project(won), RunSaveData.HeroHealth) == 15 + 5 * 7, "a won run's end screen shows the Health of its final fight");
 
         RunWrite Write(int subkey, params long[] values) => RunSaveData.Interpret(subkey, values);
         Check(Write(101, 2).Kind == RunWriteKind.ChooseLoot && Write(101, 2).Index == 1, "the client's loot choice is 1-based");

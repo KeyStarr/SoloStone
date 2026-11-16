@@ -169,6 +169,8 @@ F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroName	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerActor	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerContainer	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_playButton	*
+F	Assembly-CSharp	AdventureDungeonCrawlDeckTray	m_deck	*
+F	Assembly-CSharp	AdventureDungeonCrawlDisplay	m_dungeonCrawlDeckTray	AdventureDungeonCrawlDeckTray
 F	Assembly-CSharp	AlertPopup	m_alertText	*
 F	Assembly-CSharp	AlertPopup	m_body	NineSliceElement
 F	Assembly-CSharp	AlertPopup	m_buttonContainer	MultiSliceElement
@@ -740,6 +742,7 @@ M	Assembly-CSharp	AdventureConfig	OnAdventureSceneAwake	*
 M	Assembly-CSharp	AdventureConfig	SetSelectedAdventureMode	System.Void(AdventureDbId,AdventureModeDbId)
 M	Assembly-CSharp	AdventureConfig	get_CurrentSubScene	Assets.AdventureData+Adventuresubscene()
 M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnBackButtonPress	*
+M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnRewardOptionSelected	*
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -768,6 +771,7 @@ M	Assembly-CSharp	BannerManager	Get	BannerManager()
 M	Assembly-CSharp	BannerManager	get_IsShowing	System.Boolean()
 M	Assembly-CSharp	BaseHeroSkinInfoManager	EnterPreview	(CollectionCardVisual)
 M	Assembly-CSharp	BaseHeroSkinInfoManager	OnFailedPurchaseAck	(Hearthstone.Store.ProductInfo,PaymentMethod)
+M	Assembly-CSharp	BasePhoneDeckTray	OnCardCountUpdated	*
 M	Assembly-CSharp	BattlegroundsGuideButton	OnTrayEvent	*
 M	Assembly-CSharp	BattlegroundsGuideButton	StartGuideTutorial	*
 M	Assembly-CSharp	BnetBar	Get	BnetBar()
@@ -940,6 +944,7 @@ M	Assembly-CSharp	CollectionDeck	GetCardsWithCardID	System.Collections.Generic.L
 M	Assembly-CSharp	CollectionDeck	GetClasses	System.Collections.Generic.List`1<TAG_CLASS>()
 M	Assembly-CSharp	CollectionDeck	GetDisplayHeroCardID	(System.Boolean)
 M	Assembly-CSharp	CollectionDeck	GetDisplayHeroCardID	*
+M	Assembly-CSharp	CollectionDeck	GetMaxCardCount	System.Int32()
 M	Assembly-CSharp	CollectionDeck	GetOrCreateSideboard	SideboardDeck(System.String,TAG_PREMIUM)
 M	Assembly-CSharp	CollectionDeck	GetRuleset	DeckRuleset(System.Nullable`1<PegasusShared.FormatType>)
 M	Assembly-CSharp	CollectionDeck	GetRuneOrder	PegasusShared.RuneType[]()
@@ -2907,6 +2912,7 @@ T	Assembly-CSharp	Actor
 T	Assembly-CSharp	AdventureConfig		
 T	Assembly-CSharp	AdventureDbId		
 T	Assembly-CSharp	AdventureDeckDbfRecord		
+T	Assembly-CSharp	AdventureDungeonCrawlDeckTray		
 T	Assembly-CSharp	AdventureDungeonCrawlDisplay		
 T	Assembly-CSharp	AdventureHeroPowerDbfRecord		
 T	Assembly-CSharp	AdventureLoadoutTreasuresDbfRecord		
@@ -2938,6 +2944,7 @@ T	Assembly-CSharp	Assets.Global+RewardTrackType
 T	Assembly-CSharp	AttackSpellController		
 T	Assembly-CSharp	BannerManager		
 T	Assembly-CSharp	BaseHeroSkinInfoManager		
+T	Assembly-CSharp	BasePhoneDeckTray		
 T	Assembly-CSharp	BnetBar		
 T	Assembly-CSharp	BnetBarMenuButton		
 T	Assembly-CSharp	BoardDbfRecord		

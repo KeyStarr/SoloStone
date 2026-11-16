@@ -64,7 +64,11 @@ public static class RunSaveData
 
         values[DeckClass] = new long[] { classId(run.Class) };
         values[HeroCardDbId] = new long[] { dbf(run.Hero) };
-        values[DeckCardList] = Ids(run.Deck);
+        // The deck list shows the passive treasures with the cards, as the client itself does when one is chosen; the fights
+        // keep them apart (RunEncounter.Passives become the loadout).
+        values[DeckCardList] = Ids(run.Deck.Concat(run.Passives));
+        // The hero portrait's Health, on the run and on its end screen.
+        values[HeroHealth] = new long[] { playerHealth };
         values[BossesDefeated] = Heroes(run.Defeated);
         values[BossesFoughtList] = Heroes(run.BossesFought);
         values[ScenarioId] = new long[] { definition.Client.Scenario };
@@ -72,7 +76,6 @@ public static class RunSaveData
         if (run.LostTo != null) values[BossLostTo] = new long[] { dbf(definition.Boss(run.LostTo).Hero) };
         if (run.Status == RunStatus.Active)
         {
-            values[HeroHealth] = new long[] { playerHealth };
             if (run.NextBoss != null)
             {
                 RunBoss boss = definition.Boss(run.NextBoss);

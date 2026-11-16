@@ -54,6 +54,7 @@ internal static class NativeRunModes
         harmony.Patch(AccessTools.Method(typeof(AdventureConfig), "OnAdventureSceneAwake"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(AdventureSceneAwake)));
         harmony.Patch(AccessTools.Method(typeof(AdventureDungeonCrawlDisplay), "OnBackButtonPress"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(DisplayBack)));
         harmony.Patch(AccessTools.Method(typeof(RewardPopups), "ShowRewardsForAdventureUnlocks"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(AdventureUnlocks)));
+        harmony.Patch(AccessTools.Method(typeof(AdventureDungeonCrawlDisplay), "OnRewardOptionSelected"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(RewardChosen)));
     }
 
     // The display's Back goes to the client's adventure chooser, which offers only Practice (not playable offline). With one
@@ -77,6 +78,28 @@ internal static class NativeRunModes
         Trace("run end: no adventure unlocks to show");
         callback?.Invoke();
         return false;
+    }
+
+    // A chosen bundle or treasure goes into the deck tray card by card (BasePhoneDeckTray.AddCard), which leaves the tray's
+    // card count as it was; the client sets the count only when it loads a whole deck. The choice is already saved by now
+    // (the client's save request is answered in place), so the count is set from the run: its cards and passive treasures.
+    private static readonly System.Reflection.FieldInfo TrayDeck = AccessTools.Field(typeof(AdventureDungeonCrawlDeckTray), "m_deck");
+    private static readonly System.Reflection.MethodInfo TrayCountUpdated = AccessTools.Method(typeof(BasePhoneDeckTray), "OnCardCountUpdated");
+
+    private static void RewardChosen(AdventureDungeonCrawlDisplay __instance)
+    {
+        if (!InRunMode) return;
+        try
+        {
+            RunState run = LocalLadder.Profile?.RunOf(Current);
+            var tray = __instance.m_dungeonCrawlDeckTray;
+            if (run == null || run.Status != RunStatus.Active || tray == null) return;
+            int count = run.Deck.Count + run.Passives.Count;
+            var deck = (CollectionDeck)TrayDeck.GetValue(tray);
+            TrayCountUpdated.Invoke(tray, new object[] { count, deck?.GetMaxCardCount() ?? count });
+            Trace("deck tray count " + count);
+        }
+        catch (Exception error) { log?.LogWarning("RUNMODE deck tray count not updated: " + error.Message); }
     }
 
     // After a run fight the client's victory or defeat screen waits on services that do not exist offline (achievements,
