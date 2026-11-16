@@ -24,10 +24,18 @@ public sealed class RunAdmission
     public IReadOnlyCollection<string> PassiveTreasures { get; private set; }
     public IReadOnlyCollection<string> ActiveTreasures { get; private set; }
     public IReadOnlyList<RunBlocked> Blocked { get; private set; }
+    private IReadOnlyDictionary<string, IReadOnlyList<string>> pools;
+
+    // The cards a bundle of this bucket draws from: its list, and for a class-pool bucket also every playable collectible card
+    // of its class (the classCards source given to Evaluate; none when it was not given).
+    public IReadOnlyList<string> Pool(RunBucket bucket) =>
+        bucket.ClassPool && pools.TryGetValue(bucket.Id, out var pool) ? pool : bucket.Cards;
 
     // playable: the engine implements the card and the client can show it. labelled: the client can show the card; used for
     // display-only cards (a loot bucket's title card), which never enter play.
-    public static RunAdmission Evaluate(RunDefinition definition, Func<string, bool> playable, Func<string, bool> labelled)
+    // classCards: the collectible card ids of a class (CardClass name), for class-pool buckets.
+    public static RunAdmission Evaluate(RunDefinition definition, Func<string, bool> playable, Func<string, bool> labelled,
+        Func<string, IEnumerable<string>> classCards = null)
     {
         if (definition == null) throw new ArgumentNullException(nameof(definition));
         if (playable == null) throw new ArgumentNullException(nameof(playable));
@@ -57,8 +65,14 @@ public sealed class RunAdmission
         KeyValuePair<string, IEnumerable<string>> Entry(string id, IEnumerable<string> cards) =>
             new KeyValuePair<string, IEnumerable<string>>(id, cards);
 
+        var pools = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
+        foreach (RunBucket bucket in definition.Buckets.Where(b => b.ClassPool))
+            pools[bucket.Id] = bucket.Cards.Concat((classCards?.Invoke(bucket.Class) ?? new string[0]).Where(Playable))
+                .Distinct(StringComparer.Ordinal).ToList();
+
         return new RunAdmission {
             Definition = definition,
+            pools = pools,
             Classes = Admit("class", definition.Classes.Select(c => Entry(c.Class, c.Deck))),
             Bosses = Admit("boss", definition.Bosses.Select(b => Entry(b.Id, b.AllCards()))),
             Buckets = Admit("bucket", definition.Buckets.Select(b => Entry(b.Id, b.Cards)), id => definition.Bucket(id).Title),

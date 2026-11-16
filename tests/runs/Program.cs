@@ -36,11 +36,18 @@ internal static class Program
     private static bool Playable(string id) { EngineCard card = Find(id); return card != null && card.Implemented; }
     private static bool Labelled(string id) => Find(id) != null;
 
+    // As the plugin's: every collectible card of a class, one id per name.
+    private static IEnumerable<string> ClassCards(string cardClass) =>
+        EngineCards.All.Where(c => c.Collectible && c.Class.ToString() == cardClass)
+            .GroupBy(c => c.Name).Select(g => g.Select(c => c.Id).OrderBy(id => id, StringComparer.Ordinal).First())
+            .OrderBy(id => id, StringComparer.Ordinal).ToList();
+
     private static int Main(string[] args)
     {
         NpcWorldJson.Parser = text => MiniJSON.Json.Deserialize(text);
         ShippedDefinitions();
         FixtureRules();
+        ClassPoolBundles();
         SaveDataProjection();
         ParserRejects();
         Console.WriteLine("PASS runs (" + checks + " checks)");
@@ -82,8 +89,11 @@ internal static class Program
             foreach (RunBucket bucket in definition.Buckets)
                 Check(bucket.Source.StartsWith("https://hearthstone.wiki.gg/wiki/", StringComparison.Ordinal), bucket.Id + ": names its wiki source");
 
-            RunAdmission admission = RunAdmission.Evaluate(definition, Playable, Labelled);
+            RunAdmission admission = RunAdmission.Evaluate(definition, Playable, Labelled, ClassCards);
             Check(admission.IsReady == (admission.Problems().Count == 0), definition.Id + ": readiness agrees with its problems");
+            foreach (RunBucket bucket in definition.Buckets.Where(b => b.ClassPool))
+                Check(admission.Pool(bucket).Count > bucket.Cards.Count && bucket.Cards.All(admission.Pool(bucket).Contains)
+                    && admission.Pool(bucket).Except(bucket.Cards).All(id => Playable(id)), bucket.Id + ": a class pool adds the class's playable cards to its list");
             foreach (string line in admission.Report()) Console.WriteLine(line);
             if (!admission.IsReady)
                 Throws<InvalidOperationException>(() => new RunEngine(admission).Start(definition.Classes[0].Class, "HERO_08", 1),
@@ -94,10 +104,53 @@ internal static class Program
         Check(loot.Client.Scenario == 2663 && loot.Client.ServerKey == 24 && loot.Client.ClientKey == 42, "loot: client ids");
         Check(loot.Classes.Count == 9 && loot.Classes.All(c => c.Deck.Count == 10), "loot: nine classes with ten-card start decks");
         Check(loot.Rounds.Count == 8 && loot.Round(8).BossStartingMana == 2, "loot: eight rounds, the final boss starts with 2 mana");
+        foreach (RunClassStart start in loot.Classes)
+        {
+            var buckets = loot.Buckets.Where(b => b.Class == start.Class).ToList();
+            string prefix = "LOOTA_" + start.Class.Substring(0, 1) + start.Class.Substring(1).ToLowerInvariant() + "_";
+            Check(buckets.Count == 12 && buckets.Select(b => b.Title).Distinct().Count() == 12 && buckets.All(b => b.Title.StartsWith(prefix, StringComparison.Ordinal)),
+                "loot " + start.Class + ": twelve buckets, each with its own title card");
+            Check(buckets.All(b => b.Cards.Distinct().Count() == b.Cards.Count && b.Cards.Count >= 3), "loot " + start.Class + ": bucket lists name each card once");
+            Check(buckets.Count(b => b.ClassPool) == (new[] { "MAGE", "PRIEST", "WARLOCK" }.Contains(start.Class) ? 1 : 0),
+                "loot " + start.Class + ": only the Mage, Priest and Warlock Unique buckets draw from the whole class");
+        }
 
         // Developer builds play an incomplete run: each round without an admitted boss fights an admitted one, and offers
         // with nothing admitted are skipped. Public builds refuse (checked above for every definition that is not ready).
-        RunAdmission lootAdmission = RunAdmission.Evaluate(loot, Playable, Labelled);
+        RunAdmission lootAdmission = RunAdmission.Evaluate(loot, Playable, Labelled, ClassCards);
+        // A ready run plays to its end for every class: eight bosses, a bundle of the class's admitted buckets after each of
+        // the first seven, the four treasures.
+        if (lootAdmission.IsReady)
+            foreach (RunClassStart start in loot.Classes)
+            {
+                var engine = new RunEngine(lootAdmission);
+                RunState state = engine.Start(start.Class, "HERO_08", 7);
+                int bundles = 0, bosses = 0;
+                while (state.Status == RunStatus.Active)
+                {
+                    if (state.Offer == null)
+                    {
+                        Check(lootAdmission.Bosses.Contains(state.NextBoss) && loot.Boss(state.NextBoss).Rounds.Contains(state.Round),
+                            "loot " + start.Class + ": an admitted boss of round " + state.Round);
+                        engine.ResolveFight(state, RunFightResult.Won);
+                        bosses++;
+                        continue;
+                    }
+                    if (state.Offer.Kind == RunRewardKind.Loot)
+                    {
+                        foreach (RunOption option in state.Offer.Options)
+                        {
+                            RunBucket bucket = loot.Buckets.Single(b => b.Title == option.Title);
+                            Check(bucket.Class == start.Class && lootAdmission.Buckets.Contains(bucket.Id) && option.Cards.Count == 3
+                                && option.Cards.All(lootAdmission.Pool(bucket).Contains), "loot " + start.Class + ": a bundle of an admitted class bucket");
+                        }
+                        bundles++;
+                    }
+                    engine.Choose(state, bundles % 3);
+                }
+                Check(state.Status == RunStatus.Won && bosses == 8 && bundles == 7 && state.Deck.Count == 10 + 7 * 3 + 2 && state.Passives.Count == 2,
+                    "loot " + start.Class + ": a whole run (" + state.Status + ", " + bosses + " bosses, deck " + state.Deck.Count + ")");
+            }
         if (!lootAdmission.IsReady && lootAdmission.Bosses.Count > 0)
         {
             var dev = new RunEngine(lootAdmission, allowIncomplete: true);
@@ -181,7 +234,7 @@ internal static class Program
                     foreach (RunOption option in offer.Options)
                     {
                         RunBucket bucket = definition.Buckets.Single(b => b.Title == option.Title);
-                        Check(bucket.Class == "MAGE" && option.Cards.Count == 3 && option.Cards.All(bucket.Cards.Contains),
+                        Check(bucket.Class == "MAGE" && option.Cards.Count == 3 && option.Cards.All(admission.Pool(bucket).Contains),
                             "loot: a bundle is three cards of one class bucket");
                     }
                 }
@@ -317,6 +370,46 @@ internal static class Program
         Check(Write(101, 0).Kind == RunWriteKind.Ignore && Write(236, 5).Kind == RunWriteKind.Ignore, "anything else is not a run operation");
     }
 
+    // A class-pool bucket (Dungeon Run's Unique bundles): three different cards from its list and the class's cards, none of
+    // them already in the run deck; without a class source it draws from its list alone.
+    private static void ClassPoolBundles()
+    {
+        string fixture = Read("fixtures", "complete-run.json").Replace(
+            "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"pool\": \"class\",");
+        RunDefinition definition = RunDefinition.Parse(fixture);
+        RunBucket unique = definition.Bucket("mage-friends");
+        Check(unique.ClassPool && definition.Buckets.Count(b => b.ClassPool) == 1, "fixture: one class-pool bucket");
+        var mage = new[] { "CS2_023", "CS2_026", "CS2_027", "CS2_022", "EX1_279", "NOT_A_CARD" };
+        RunAdmission admission = RunAdmission.Evaluate(definition, Playable, Labelled, cls => cls == "MAGE" ? mage : new string[0]);
+        Check(admission.Buckets.Contains(unique.Id) && admission.Pool(unique).Count == unique.Cards.Count + 5
+            && !admission.Pool(unique).Contains("NOT_A_CARD"), "class pool: the list plus the class's playable cards");
+        Check(RunAdmission.Evaluate(definition, Playable, Labelled).Pool(unique).SequenceEqual(unique.Cards), "class pool: no class source, the list alone");
+        int seen = 0;
+        bool freshSeen = false;
+        for (long seed = 1; seed <= 40; seed++)
+        {
+            var engine = new RunEngine(admission);
+            RunState state = engine.Start("MAGE", "HERO_08", seed);
+            while (state.Status == RunStatus.Active)
+            {
+                if (state.Offer == null) { engine.ResolveFight(state, RunFightResult.Won); continue; }
+                foreach (RunOption option in state.Offer.Options.Where(o => o.Title == unique.Title))
+                {
+                    seen++;
+                    bool fresh = admission.Pool(unique).Count(id => !state.Deck.Contains(id)) >= 3;
+                    Check(option.Cards.All(admission.Pool(unique).Contains), "class pool: cards from the pool");
+                    // Once the deck holds all but two of the pool, the bundle draws from the whole pool with replacement.
+                    Check(!fresh || option.Cards.Distinct().Count() == 3 && option.Cards.All(id => !state.Deck.Contains(id)),
+                        "class pool: three different cards the deck lacks");
+                    freshSeen |= fresh;
+                }
+                int pick = state.Offer.Options.FindIndex(o => o.Title == unique.Title);
+                engine.Choose(state, Math.Max(0, pick));
+            }
+        }
+        Check(seen > 0 && freshSeen, "class pool: the bucket was offered");
+    }
+
     private static void ParserRejects()
     {
         string fixture = Read("fixtures", "complete-run.json");
@@ -339,5 +432,7 @@ internal static class Program
         Rejects("\"id\": \"druid-a\"", "\"id\": \"Druid_A\"", "an invalid entry id");
         Rejects("\"family\": \"priest\", \"hero\": \"HERO_09\"", "\"family\": \"Priest Family\", \"hero\": \"HERO_09\"", "an invalid family");
         Rejects("{ \"class\": \"WARRIOR\", \"deck\"", "{ \"class\": \"WIZARD\", \"deck\"", "an unknown class");
+        Rejects("\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"pool\": \"all\",",
+            "an unknown bucket pool");
     }
 }

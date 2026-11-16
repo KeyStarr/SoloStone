@@ -163,8 +163,14 @@ public sealed class RunEngine
             {
                 Random cards = Draw(state, BundleDraw);
                 var option = new RunOption { Title = bucket.Title };
-                // A bundle draws with replacement: the same card can appear more than once.
-                for (int i = 0; i < RunAdmission.OfferSize; i++) option.Cards.Add(bucket.Cards[cards.Next(bucket.Cards.Count)]);
+                IReadOnlyList<string> bundlePool = Admission.Pool(bucket);
+                var fresh = bucket.ClassPool ? bundlePool.Where(id => !state.Deck.Contains(id)).ToList() : null;
+                if (fresh != null && fresh.Count >= RunAdmission.OfferSize)
+                    // A class-pool bundle: three different cards the deck does not hold.
+                    option.Cards.AddRange(Take(fresh, RunAdmission.OfferSize, cards));
+                else
+                    // A bundle draws with replacement: the same card can appear more than once.
+                    for (int i = 0; i < RunAdmission.OfferSize; i++) option.Cards.Add(bundlePool[cards.Next(bundlePool.Count)]);
                 offer.Options.Add(option);
             }
             return offer;

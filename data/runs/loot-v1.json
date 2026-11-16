@@ -498,7 +498,812 @@
       ]
     }
   ],
-  "buckets": [],
+  "buckets": [
+    {
+      "id": "druid-balance", "class": "DRUID", "title": "LOOTA_Druid_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_008", "EX1_012", "EX1_154", "FP1_019", "CS2_012", "EX1_284", "EX1_173", "EX1_563"
+      ]
+    },
+    {
+      "id": "druid-cult-of-cthun", "class": "DRUID", "title": "LOOTA_Druid_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_281", "OG_162", "OG_286", "OG_283", "OG_188", "OG_321", "OG_293", "OG_131", "OG_255", "OG_280"
+      ]
+    },
+    {
+      "id": "druid-jade-fangs", "class": "DRUID", "title": "LOOTA_Druid_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_602", "CFM_713", "CFM_715", "CFM_902", "CFM_343"
+      ]
+    },
+    {
+      "id": "druid-jungle-king", "class": "DRUID", "title": "LOOTA_Druid_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "KAR_300", "AT_042", "OG_048", "LOE_050", "UNG_075", "ICC_854", "AT_039", "GVG_080", "EX1_028", "UNG_100", "CFM_816",
+        "KAR_065", "UNG_086", "AT_041"
+      ]
+    },
+    {
+      "id": "druid-jungle-quest", "class": "DRUID", "title": "LOOTA_Druid_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_116", "UNG_078", "BRM_010", "UNG_109", "EX1_014", "LOOT_233", "UNG_101", "EX1_028", "KAR_065", "CFM_308", "UNG_852"
+      ]
+    },
+    {
+      "id": "druid-mana-growth", "class": "DRUID", "title": "LOOTA_Druid_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_169", "AT_038", "LOOT_351", "GVG_032", "CFM_616", "CS2_013", "AT_043", "OG_202", "LOOT_392", "EX1_164"
+      ]
+    },
+    {
+      "id": "druid-natural-defense", "class": "DRUID", "title": "LOOTA_Druid_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_047", "CS2_005", "UNG_108", "LOOT_051", "LOOT_413", "OG_047", "ICC_079", "LOOT_054", "LOOT_048", "LOOT_309",
+        "ICC_085"
+      ]
+    },
+    {
+      "id": "druid-restoration", "class": "DRUID", "title": "LOOTA_Druid_10",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_120", "EX1_161", "CS2_117", "CS2_007", "AT_044", "AT_111", "GVG_069", "KAR_075", "GVG_031", "GVG_033"
+      ]
+    },
+    {
+      "id": "druid-stampede", "class": "DRUID", "title": "LOOTA_Druid_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_809", "AT_037", "CFM_614", "ICC_051", "FP1_002", "EX1_160", "ICC_808", "CS2_011", "UNG_075", "EX1_158", "ICC_047",
+        "EX1_571", "LOOT_329", "UNG_111"
+      ]
+    },
+    {
+      "id": "druid-stomp", "class": "DRUID", "title": "LOOTA_Druid_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_811", "UNG_086", "UNG_848", "EX1_298", "GVG_114", "ICC_314", "OG_340", "EX1_572", "AT_045", "NEW1_030", "CFM_308",
+        "UNG_852", "OG_042"
+      ]
+    },
+    {
+      "id": "druid-taunt", "class": "DRUID", "title": "LOOTA_Druid_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_051", "ICC_808", "UNG_072", "ICC_807", "EX1_165", "LOOT_383", "ICC_054", "ICC_832", "KAR_061", "LOOT_314", "CS2_232",
+        "UNG_848", "ICC_835"
+      ]
+    },
+    {
+      "id": "druid-wise-decisions", "class": "DRUID", "title": "LOOTA_Druid_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_037", "LOE_115", "GVG_030", "EX1_154", "LOOT_054", "OG_044", "EX1_166", "ICC_047", "GVG_041", "EX1_164", "EX1_178",
+        "OG_195", "EX1_573"
+      ]
+    },
+    {
+      "id": "hunter-beast-training", "class": "HUNTER", "title": "LOOTA_Hunter_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_916", "DS1_175", "UNG_915", "UNG_917", "EX1_539", "CFM_316", "DS1_070", "AT_010", "DS1_178"
+      ]
+    },
+    {
+      "id": "hunter-big-beasts", "class": "HUNTER", "title": "LOOTA_Hunter_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_087", "ICC_905", "UNG_801", "NEW1_041", "EX1_028", "DS1_178", "ICC_828", "EX1_534", "UNG_099", "OG_308", "LOOT_511"
+      ]
+    },
+    {
+      "id": "hunter-deathrattle", "class": "HUNTER", "title": "LOOTA_Hunter_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_052", "GVG_026", "KAR_005", "OG_292", "UNG_800", "ICC_854", "ICC_021", "LOOT_161", "ICC_243", "OG_309", "EX1_534",
+        "LOOT_520", "EX1_016", "ICC_825", "LOOT_511", "OG_133"
+      ]
+    },
+    {
+      "id": "hunter-defense", "class": "HUNTER", "title": "LOOTA_Hunter_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_060", "NEW1_021", "EX1_610", "EX1_611", "FP1_009", "EX1_538", "EX1_093", "GVG_069", "FP1_012", "LOOT_522"
+      ]
+    },
+    {
+      "id": "hunter-legendary", "class": "HUNTER", "title": "LOOTA_Hunter_10",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "KAR_114", "EX1_116", "FP1_010", "GVG_110", "UNG_919", "FP1_013", "GVG_114", "ICC_314", "EX1_543", "OG_042"
+      ]
+    },
+    {
+      "id": "hunter-secrets", "class": "HUNTER", "title": "LOOTA_Hunter_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_222", "EX1_080", "AT_060", "KAR_004", "EX1_610", "EX1_611", "FP1_004", "EX1_533", "EX1_554", "EX1_609", "ICC_200",
+        "LOOT_079", "KAR_006", "EX1_536", "ICC_204", "LOOT_080"
+      ]
+    },
+    {
+      "id": "hunter-shots", "class": "HUNTER", "title": "LOOTA_Hunter_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "DS1_185", "UNG_910", "CS2_084", "BRM_013", "EX1_609", "ICC_049", "EX1_617", "AT_056", "LOOT_077", "DS1_183", "GVG_073",
+        "EX1_537"
+      ]
+    },
+    {
+      "id": "hunter-smugglers", "class": "HUNTER", "title": "LOOTA_Hunter_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_334", "CFM_026", "CFM_338", "CFM_336", "CFM_335", "CFM_668", "BRM_028", "CFM_685"
+      ]
+    },
+    {
+      "id": "hunter-summoner", "class": "HUNTER", "title": "LOOTA_Hunter_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_315", "FP1_002", "EX1_531", "NEW1_031", "UNG_076", "OG_045", "EX1_538", "EX1_595", "OG_249", "AT_062", "LOOT_149",
+        "LOOT_511", "OG_211"
+      ]
+    },
+    {
+      "id": "hunter-tracker", "class": "HUNTER", "title": "LOOTA_Hunter_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "DS1_184", "LOE_105", "EX1_544", "LOE_029", "AT_058", "AT_061", "EX1_096", "AT_063t", "ICC_415", "ICC_828"
+      ]
+    },
+    {
+      "id": "hunter-weapons", "class": "HUNTER", "title": "LOOTA_Hunter_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_222", "CFM_325", "NEW1_018", "GVG_043", "EX1_536", "LOOT_389", "LOOT_118", "GVG_119", "CFM_337", "ICC_096",
+        "DS1_188"
+      ]
+    },
+    {
+      "id": "hunter-wee-beasts", "class": "HUNTER", "title": "LOOTA_Hunter_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_315", "OG_179", "DS1_175", "UNG_915", "EX1_162", "FP1_002", "LOE_046", "KAR_005", "UNG_808", "ICC_419", "LOOT_078",
+        "CFM_316", "UNG_075"
+      ]
+    },
+    {
+      "id": "mage-arcane", "class": "MAGE", "title": "LOOTA_Mage_28",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_231", "EX1_277", "CS2_027", "CS2_023", "AT_005", "CFM_620", "CS2_022", "LOOT_108", "AT_009"
+      ]
+    },
+    {
+      "id": "mage-big-spells", "class": "MAGE", "title": "LOOTA_Mage_27",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_170", "LOOT_130", "LOOT_106", "LOOT_172", "CS2_028", "UNG_955", "LOOT_539", "CS2_032", "LOOT_414", "LOOT_535",
+        "EX1_279"
+      ]
+    },
+    {
+      "id": "mage-chaos", "class": "MAGE", "title": "LOOTA_Mage_20",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_104", "KAR_009", "UNG_028", "UNG_941", "GVG_003", "CFM_649", "UNG_024", "AT_007", "LOOT_537", "OG_090", "LOE_003"
+      ]
+    },
+    {
+      "id": "mage-defense", "class": "MAGE", "title": "LOOTA_Mage_31",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_027", "NEW1_021", "CS2_026", "EX1_295", "LOE_119", "GVG_069", "FP1_012", "CS2_028", "ICC_314"
+      ]
+    },
+    {
+      "id": "mage-elementals", "class": "MAGE", "title": "LOOTA_Mage_21",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_809", "LOOT_103", "UNG_027", "UNG_846", "UNG_818", "UNG_021", "UNG_070", "CS2_033", "UNG_816", "EX1_249", "UNG_847",
+        "EX1_298", "ICC_833", "UNG_907"
+      ]
+    },
+    {
+      "id": "mage-frost", "class": "MAGE", "title": "LOOTA_Mage_23",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_836", "UNG_205", "CS2_024", "OG_081", "GVG_002", "ICC_252", "CS2_026", "EX1_275", "CS2_033", "CS2_028"
+      ]
+    },
+    {
+      "id": "mage-fire", "class": "MAGE", "title": "LOOTA_Mage_24",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOE_002", "CFM_065", "CS2_029", "LOOT_172", "UNG_955", "KAR_076", "CS2_032", "EX1_298", "EX1_279"
+      ]
+    },
+    {
+      "id": "mage-giant-army", "class": "MAGE", "title": "LOOTA_Mage_30",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "FP1_018", "EX1_295", "ICC_823", "GVG_005", "UNG_948", "LOOT_161", "BRM_028", "KAR_711", "EX1_620"
+      ]
+    },
+    {
+      "id": "mage-heroic-power", "class": "MAGE", "title": "LOOTA_Mage_25",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_003", "CFM_807", "AT_006", "AT_119", "AT_090", "AT_127", "AT_008", "AT_099", "ICC_833"
+      ]
+    },
+    {
+      "id": "mage-lost-secrets", "class": "MAGE", "title": "LOOTA_Mage_29",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_020", "FP1_004", "KAR_092", "EX1_287", "FP1_018", "ICC_082", "EX1_295", "EX1_294", "EX1_274", "CFM_760"
+      ]
+    },
+    {
+      "id": "mage-magical-friends", "class": "MAGE", "title": "LOOTA_Mage_22",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_004", "EX1_012", "OG_303", "NEW1_012", "EX1_608", "BRM_002", "NEW1_026", "EX1_284", "EX1_095", "EX1_559", "EX1_563"
+      ]
+    },
+    {
+      "id": "mage-unique", "class": "MAGE", "title": "LOOTA_Mage_32", "pool": "class",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ULD_003", "CFM_621", "LOE_011", "CFM_687"
+      ]
+    },
+    {
+      "id": "paladin-divine-shield", "class": "PALADIN", "title": "LOOTA_Paladin_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_038", "GVG_058", "ICC_913", "AT_087", "EX1_590", "ICC_801", "EX1_020", "AT_095", "OG_310", "CFM_815", "ICC_071",
+        "ICC_858", "EX1_067", "EX1_032", "EX1_383"
+      ]
+    },
+    {
+      "id": "paladin-dragonmaster", "class": "PALADIN", "title": "LOOTA_Paladin_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "KAR_062", "BRM_033", "BRM_020", "BRM_026", "EX1_043", "EX1_284", "BRM_034", "BRM_018", "OG_271", "BRM_025", "CFM_806",
+        "BRM_031", "UNG_848", "LOOT_540", "EX1_563", "EX1_562", "LOOT_137", "EX1_572", "NEW1_030", "OG_317"
+      ]
+    },
+    {
+      "id": "paladin-healing", "class": "PALADIN", "title": "LOOTA_Paladin_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_120", "LOOT_091", "LOOT_398", "CFM_815", "ICC_820", "LOOT_291", "GVG_069", "ICC_245", "KAR_057", "OG_229", "ICC_829"
+      ]
+    },
+    {
+      "id": "paladin-helping-hand", "class": "PALADIN", "title": "LOOTA_Paladin_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_650", "CFM_305", "CFM_753", "CFM_853", "GVG_063", "CFM_639", "BRM_028", "CFM_685"
+      ]
+    },
+    {
+      "id": "paladin-justice", "class": "PALADIN", "title": "LOOTA_Paladin_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_360", "ICC_039", "EX1_382", "CS2_093", "EX1_619", "CS2_094", "LOE_017", "EX1_384", "AT_078", "UNG_015", "AT_081"
+      ]
+    },
+    {
+      "id": "paladin-legendary", "class": "PALADIN", "title": "LOOTA_Paladin_16",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_807", "AT_127", "BRM_028", "EX1_002", "LOOT_500", "GVG_110", "KAR_061", "GVG_118", "LOOT_357", "EX1_298", "ICC_314"
+      ]
+    },
+    {
+      "id": "paladin-many-blessings", "class": "PALADIN", "title": "LOOTA_Paladin_22",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_961", "CS2_087", "EX1_363", "OG_223", "UNG_954", "ICC_244", "LOOT_088", "UNG_953", "AT_074", "CS2_092", "KAR_077",
+        "UNG_843", "EX1_355", "UNG_952", "LOOT_216", "UNG_004"
+      ]
+    },
+    {
+      "id": "paladin-murlocs", "class": "PALADIN", "title": "LOOTA_Paladin_21",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_508", "EX1_509", "OG_006", "CS2_173", "UNG_011", "EX1_506", "EX1_507", "UNG_937", "UNG_089", "AT_076", "EX1_062",
+        "CFM_344", "OG_161", "LOE_026"
+      ]
+    },
+    {
+      "id": "paladin-sacred-arms", "class": "PALADIN", "title": "LOOTA_Paladin_20",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "GVG_059", "GVG_061", "OG_222", "EX1_366", "LOOT_286", "LOOT_118", "CS2_097", "ICC_096", "LOOT_500", "UNG_950"
+      ]
+    },
+    {
+      "id": "paladin-secrets", "class": "PALADIN", "title": "LOOTA_Paladin_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "FP1_020", "AT_073", "CFM_800", "EX1_130", "EX1_136", "EX1_379", "EX1_080", "UNG_011", "FP1_004", "AT_079"
+      ]
+    },
+    {
+      "id": "paladin-silver-hand", "class": "PALADIN", "title": "LOOTA_Paladin_14",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_960", "LOOT_363", "GVG_061", "AT_100", "AT_075", "UNG_962", "GVG_060", "OG_273", "LOOT_313", "LOOT_333", "UNG_950"
+      ]
+    },
+    {
+      "id": "paladin-taunt", "class": "PALADIN", "title": "LOOTA_Paladin_19",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "GVG_085", "UNG_808", "CFM_815", "ICC_912", "OG_145", "FP1_012", "LOOT_383", "UNG_015", "EX1_032", "CFM_062", "KAR_061",
+        "ICC_314", "EX1_383"
+      ]
+    },
+    {
+      "id": "priest-bag-of-tricks", "class": "PRIEST", "title": "LOOTA_Priest_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_661", "AT_015", "EX1_622", "CS2_234", "GVG_011", "ICC_802", "CFM_807", "LOE_079", "OG_100", "UNG_851", "LOE_111",
+        "CFM_657", "LOE_104", "GVG_008", "LOOT_008", "ICC_214"
+      ]
+    },
+    {
+      "id": "priest-cult-of-cthun", "class": "PRIEST", "title": "LOOTA_Priest_13",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_281", "OG_162", "OG_286", "OG_283", "OG_334", "OG_321", "OG_096", "OG_131", "OG_255", "OG_280"
+      ]
+    },
+    {
+      "id": "priest-combo-caster", "class": "PRIEST", "title": "LOOTA_Priest_9",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_004", "UNG_034", "UNG_029", "NEW1_020", "LOOT_209", "KAR_035", "NEW1_026", "UNG_963", "LOOT_414", "ICC_830"
+      ]
+    },
+    {
+      "id": "priest-discipline", "class": "PRIEST", "title": "LOOTA_Priest_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_004", "CS1_129", "CS2_236", "AT_131", "AT_129", "LOOT_278", "GVG_010", "UNG_843", "LOE_053"
+      ]
+    },
+    {
+      "id": "priest-domination", "class": "PRIEST", "title": "LOOTA_Priest_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_032", "CS2_003", "CFM_603", "LOOT_353", "EX1_339", "UNG_035", "EX1_334", "EX1_345", "OG_335", "ICC_207", "EX1_091",
+        "ICC_849", "LOE_104", "ICC_215", "LOOT_541", "CS1_113"
+      ]
+    },
+    {
+      "id": "priest-dragon-priest", "class": "PRIEST", "title": "LOOTA_Priest_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "BRM_004", "KAR_062", "AT_116", "BRM_033", "LOOT_410", "LOOT_144", "EX1_043", "AT_017", "EX1_284", "BRM_034", "CFM_605",
+        "ICC_027", "KAR_033", "CFM_662", "LOOT_540", "EX1_563", "LOOT_137", "EX1_572", "OG_317"
+      ]
+    },
+    {
+      "id": "priest-elementals", "class": "PRIEST", "title": "LOOTA_Priest_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_032", "UNG_809", "UNG_034", "UNG_928", "EX1_335", "UNG_070", "UNG_963", "UNG_816", "UNG_847", "EX1_298", "UNG_907"
+      ]
+    },
+    {
+      "id": "priest-holy", "class": "PRIEST", "title": "LOOTA_Priest_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_621", "AT_055", "GVG_012", "EX1_001", "CS2_235", "AT_011", "CS1_112", "KAR_035", "OG_234", "EX1_624", "GVG_008",
+        "EX1_350"
+      ]
+    },
+    {
+      "id": "priest-last-rites", "class": "PRIEST", "title": "LOOTA_Priest_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_940", "UNG_032", "FP1_002", "LOE_006", "FP1_023", "FP1_009", "ICC_702", "LOOT_187", "FP1_031", "GVG_096", "OG_335",
+        "UNG_900", "UNG_037", "KAR_114", "LOOT_161", "OG_147", "FP1_012", "ICC_098", "EX1_110", "ICC_214", "OG_133"
+      ]
+    },
+    {
+      "id": "priest-resurrection", "class": "PRIEST", "title": "LOOTA_Priest_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "BRM_017", "CS2_181", "LOOT_187", "ICC_213", "UNG_037", "KAR_204", "EX1_016", "LOOT_507", "FP1_013", "ICC_214"
+      ]
+    },
+    {
+      "id": "priest-shadow", "class": "PRIEST", "title": "LOOTA_Priest_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "FP1_001", "ICC_210", "ICC_802", "ICC_212", "EX1_007", "UNG_022", "AT_014", "EX1_625", "LOOT_529", "EX1_591", "LOOT_526",
+        "GVG_014", "ICC_235", "ICC_830"
+      ]
+    },
+    {
+      "id": "priest-unique", "class": "PRIEST", "title": "LOOTA_Priest_10", "pool": "class",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ULD_003", "CFM_621", "CFM_020", "LOE_011"
+      ]
+    },
+    {
+      "id": "rogue-adrenaline-rush", "class": "ROGUE", "title": "LOOTA_Rogue_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_630", "EX1_145", "UNG_057", "EX1_613", "UNG_060", "EX1_044", "UNG_065", "NEW1_026", "OG_080", "EX1_095", "ICC_910",
+        "EX1_614", "CS2_077"
+      ]
+    },
+    {
+      "id": "rogue-assassin", "class": "ROGUE", "title": "LOOTA_Rogue_10",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_072", "CS2_073", "EX1_124", "EX1_522", "EX1_278", "EX1_129", "ICC_809", "OG_176", "EX1_134", "CS2_076", "BRM_008",
+        "UNG_064"
+      ]
+    },
+    {
+      "id": "rogue-bag-of-tricks", "class": "ROGUE", "title": "LOOTA_Rogue_13",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_145", "EX1_144", "EX1_126", "LOOT_204", "LOOT_214", "BRM_007", "LOOT_210", "AT_035", "UNG_060", "LOOT_026", "OG_291",
+        "OG_073", "ICC_827"
+      ]
+    },
+    {
+      "id": "rogue-blademaster", "class": "ROGUE", "title": "LOOTA_Rogue_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_074", "ICC_233", "LOOT_542", "ICC_221", "LOOT_033", "GVG_023", "UNG_823", "LOOT_389", "ICC_850", "CS2_233", "ICC_097",
+        "ICC_240", "GVG_022", "ICC_096"
+      ]
+    },
+    {
+      "id": "rogue-cult-of-cthun", "class": "ROGUE", "title": "LOOTA_Rogue_15",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_281", "OG_284", "OG_162", "OG_286", "OG_283", "OG_321", "OG_131", "OG_255", "OG_282", "OG_280"
+      ]
+    },
+    {
+      "id": "rogue-death-dealer", "class": "ROGUE", "title": "LOOTA_Rogue_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_072", "EX1_012", "ICC_201", "OG_330", "ICC_702", "LOE_019", "ICC_854", "FP1_031", "OG_249", "GVG_096", "UNG_900",
+        "OG_272", "OG_080", "LOOT_161", "LOOT_503", "FP1_012", "EX1_016", "OG_133"
+      ]
+    },
+    {
+      "id": "rogue-evasive", "class": "ROGUE", "title": "LOOTA_Rogue_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_145", "EX1_144", "UNG_809", "UNG_067", "LOOT_204", "CFM_693", "EX1_015", "EX1_049", "LOOT_165", "NEW1_004"
+      ]
+    },
+    {
+      "id": "rogue-exhaustion", "class": "ROGUE", "title": "LOOTA_Rogue_16",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_144", "BRM_007", "EX1_581", "LOE_077", "EX1_050", "FP1_009", "EX1_014", "KAR_712", "NEW1_004"
+      ]
+    },
+    {
+      "id": "rogue-greed", "class": "ROGUE", "title": "LOOTA_Rogue_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_630", "EX1_012", "AT_031", "EX1_096", "EX1_050", "LOOT_211", "CFM_808", "LOE_012", "EX1_284", "CFM_669", "LOOT_357"
+      ]
+    },
+    {
+      "id": "rogue-jade-lotus", "class": "ROGUE", "title": "LOOTA_Rogue_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_690", "CFM_691", "CFM_715", "CFM_902"
+      ]
+    },
+    {
+      "id": "rogue-outlaws", "class": "ROGUE", "title": "LOOTA_Rogue_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_029", "CFM_637", "CFM_325", "CS2_146", "NEW1_018", "GVG_025", "GVG_075", "AT_032", "NEW1_027", "NEW1_022", "CFM_651",
+        "ICC_018", "OG_267", "NEW1_024", "CFM_342"
+      ]
+    },
+    {
+      "id": "rogue-thief", "class": "ROGUE", "title": "LOOTA_Rogue_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_856", "KAR_069", "EX1_100", "OG_330", "AT_033", "CFM_781", "ICC_811", "UNG_061", "KAR_070", "GVG_028"
+      ]
+    },
+    {
+      "id": "shaman-battlecrier", "class": "SHAMAN", "title": "LOOTA_Shaman_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_202", "LOOT_517", "LOE_077", "UNG_072", "BRM_012", "ICC_466", "EX1_284", "CFM_668", "FP1_030", "CFM_852", "CS2_042",
+        "EX1_112", "LOOT_358", "AT_054", "ICC_705", "LOOT_357"
+      ]
+    },
+    {
+      "id": "shaman-destruction", "class": "SHAMAN", "title": "LOOTA_Shaman_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_238", "GVG_038", "LOOT_060", "BRM_011", "KAR_073", "OG_206", "AT_051", "EX1_241", "EX1_259", "UNG_025"
+      ]
+    },
+    {
+      "id": "shaman-elementals", "class": "SHAMAN", "title": "LOOTA_Shaman_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_809", "UNG_202", "LOOT_517", "UNG_845", "UNG_928", "UNG_070", "UNG_816", "UNG_847", "UNG_208", "NEW1_010", "UNG_211",
+        "EX1_298", "UNG_907"
+      ]
+    },
+    {
+      "id": "shaman-farseer", "class": "SHAMAN", "title": "LOOTA_Shaman_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_053", "CS2_038", "FP1_025", "CS2_053", "UNG_956", "GVG_029", "LOOT_161", "ICC_257", "CFM_324", "EX1_110", "EX1_016",
+        "FP1_013", "LOOT_506"
+      ]
+    },
+    {
+      "id": "shaman-frost", "class": "SHAMAN", "title": "LOOTA_Shaman_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_205", "ICC_058", "ICC_056", "ICC_855", "ICC_236", "ICC_078", "ICC_088", "UNG_079", "ICC_289"
+      ]
+    },
+    {
+      "id": "shaman-jade-lotus", "class": "SHAMAN", "title": "LOOTA_Shaman_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_717", "CFM_707", "CFM_715", "CFM_902", "CFM_312"
+      ]
+    },
+    {
+      "id": "shaman-mechanized", "class": "SHAMAN", "title": "LOOTA_Shaman_13",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "GVG_085", "GVG_006", "GVG_103", "GVG_037", "EX1_556", "GVG_036", "GVG_107", "LOE_039", "GVG_096", "OG_145", "GVG_105",
+        "GVG_114"
+      ]
+    },
+    {
+      "id": "shaman-murlocs", "class": "SHAMAN", "title": "LOOTA_Shaman_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_220", "EX1_509", "UNG_942", "CS2_173", "ICC_089", "EX1_506", "UNG_073", "EX1_050", "EX1_103", "EX1_507", "UNG_937",
+        "CFM_310", "UNG_089", "EX1_062", "GVG_040", "CFM_344", "LOE_113"
+      ]
+    },
+    {
+      "id": "shaman-mutations", "class": "SHAMAN", "title": "LOOTA_Shaman_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_027", "LOOT_504", "CFM_696", "EX1_083", "OG_174", "EX1_246", "CFM_697", "OG_328", "LOOT_150", "ICC_481"
+      ]
+    },
+    {
+      "id": "shaman-overload", "class": "SHAMAN", "title": "LOOTA_Shaman_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_313", "LOE_018", "AT_053", "OG_026", "BRM_011", "AT_052", "ICC_081", "EX1_248", "EX1_258", "OG_024", "EX1_567",
+        "EX1_250", "LOOT_064", "ICC_090"
+      ]
+    },
+    {
+      "id": "shaman-restoration", "class": "SHAMAN", "title": "LOOTA_Shaman_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_041", "CFM_120", "GVG_039", "LOOT_373", "AT_048", "UNG_938", "CFM_061", "UNG_817", "GVG_069", "OG_209"
+      ]
+    },
+    {
+      "id": "shaman-totems", "class": "SHAMAN", "title": "LOOTA_Shaman_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_023", "LOOT_062", "AT_052", "EX1_565", "EX1_575", "LOOT_344", "AT_046", "KAR_021", "AT_049", "LOOT_518", "OG_028"
+      ]
+    },
+    {
+      "id": "warlock-blood", "class": "WARLOCK", "title": "LOOTA_Warlock_10",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_319", "UNG_832", "LOOT_013", "UNG_835", "CS2_062", "LOOT_043", "GVG_100", "CFM_094", "OG_121", "EX1_620"
+      ]
+    },
+    {
+      "id": "warlock-cult-of-cthun", "class": "WARLOCK", "title": "LOOTA_Warlock_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_281", "OG_284", "OG_162", "OG_286", "OG_283", "OG_321", "OG_302", "OG_131", "OG_255", "OG_280"
+      ]
+    },
+    {
+      "id": "warlock-destruction", "class": "WARLOCK", "title": "LOOTA_Warlock_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "GVG_015", "ICC_041", "NEW1_021", "CS2_057", "CFM_608", "LOOT_417", "CFM_094", "EX1_312", "NEW1_030", "OG_239"
+      ]
+    },
+    {
+      "id": "warlock-dire-demons", "class": "WARLOCK", "title": "LOOTA_Warlock_11",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "FP1_022", "EX1_310", "LOOT_420", "CS2_064", "CFM_663", "LOOT_306", "CFM_751", "EX1_323", "GVG_021", "LOOT_368", "ICC_831"
+      ]
+    },
+    {
+      "id": "warlock-discard", "class": "WARLOCK", "title": "LOOTA_Warlock_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_829", "KAR_089", "EX1_308", "UNG_836", "OG_109", "AT_021", "KAR_205", "LOOT_417", "UNG_833", "ICC_841", "EX1_310",
+        "UNG_830"
+      ]
+    },
+    {
+      "id": "warlock-little-legion", "class": "WARLOCK", "title": "LOOTA_Warlock_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_319", "CS2_065", "GVG_018", "LOOT_013", "CFM_611", "BRM_005", "BRM_006", "CFM_610", "AT_019", "GVG_045", "GVG_019"
+      ]
+    },
+    {
+      "id": "warlock-huge-hand", "class": "WARLOCK", "title": "LOOTA_Warlock_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_058", "EX1_093", "EX1_043", "AT_127", "BRM_028", "AT_027", "BRM_031", "EX1_323", "EX1_105", "EX1_620"
+      ]
+    },
+    {
+      "id": "warlock-lifesteal", "class": "WARLOCK", "title": "LOOTA_Warlock_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_220", "ICC_055", "GVG_018", "CS2_061", "ICC_810", "LOOT_043", "ICC_905", "EX1_309", "ICC_831"
+      ]
+    },
+    {
+      "id": "warlock-sacrifice", "class": "WARLOCK", "title": "LOOTA_Warlock_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_017", "EX1_316", "ICC_903", "UNG_831", "NEW1_021", "FP1_007", "UNG_083", "ICC_469", "EX1_304", "UNG_047", "EX1_303",
+        "LOOT_161", "AT_025", "EX1_016", "OG_239"
+      ]
+    },
+    {
+      "id": "warlock-swarm", "class": "WARLOCK", "title": "LOOTA_Warlock_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_014", "OG_241", "EX1_162", "FP1_002", "NEW1_019", "OG_113", "UNG_076", "BRM_006", "EX1_597", "GVG_045", "LOOT_375",
+        "EX1_586"
+      ]
+    },
+    {
+      "id": "warlock-taunt", "class": "WARLOCK", "title": "LOOTA_Warlock_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_065", "CFM_790", "EX1_058", "LOOT_013", "UNG_072", "UNG_928", "ICC_466", "LOOT_131", "FP1_012", "UNG_049", "LOOT_383",
+        "ICC_314", "LOOT_368"
+      ]
+    },
+    {
+      "id": "warlock-unique", "class": "WARLOCK", "title": "LOOTA_Warlock_03", "pool": "class",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ULD_003", "CFM_621", "LOE_011", "CFM_750"
+      ]
+    },
+    {
+      "id": "warrior-armor", "class": "WARRIOR", "title": "LOOTA_Warrior_05",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_410", "EX1_402", "LOOT_044", "ICC_837", "LOOT_367", "AT_064", "ICC_062", "LOOT_364", "EX1_606", "CFM_756", "KAR_091",
+        "LOOT_365", "GVG_053", "LOOT_285", "LOOT_519"
+      ]
+    },
+    {
+      "id": "warrior-berserker", "class": "WARRIOR", "title": "LOOTA_Warrior_01",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_607", "EX1_603", "CS2_108", "CS2_104", "EX1_007", "EX1_604", "ICC_408", "BRM_016", "OG_218", "FP1_021", "BRM_019",
+        "GVG_052", "OG_318", "EX1_414", "ICC_405"
+      ]
+    },
+    {
+      "id": "warrior-charge", "class": "WARRIOR", "title": "LOOTA_Warrior_03",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CS2_103", "CS2_146", "AT_087", "NEW1_011", "EX1_116", "EX1_067", "AT_070", "UNG_099", "EX1_414", "AT_125"
+      ]
+    },
+    {
+      "id": "warrior-dragon-heart", "class": "WARRIOR", "title": "LOOTA_Warrior_12",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "AT_071", "KAR_062", "BRM_033", "LOOT_144", "BRM_026", "EX1_043", "AT_017", "EX1_284", "BRM_034", "KAR_033", "BRM_024",
+        "CFM_806", "AT_123", "UNG_848", "LOOT_540", "BRM_030", "LOOT_137", "EX1_572", "NEW1_030", "OG_317"
+      ]
+    },
+    {
+      "id": "warrior-everybody-hurts", "class": "WARRIOR", "title": "LOOTA_Warrior_02",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_400", "EX1_392", "NEW1_036", "CS2_108", "CFM_716", "FP1_024", "OG_276", "GVG_050", "OG_149", "ICC_064", "FP1_021",
+        "EX1_407", "UNG_927", "UNG_848", "ICC_834", "UNG_933"
+      ]
+    },
+    {
+      "id": "warrior-legendary", "class": "WARRIOR", "title": "LOOTA_Warrior_10",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "LOOT_516", "LOE_079", "UNG_851", "FP1_030", "AT_127", "EX1_110", "UNG_840", "AT_132", "EX1_016", "EX1_249", "NEW1_038",
+        "FP1_013", "LOOT_357", "EX1_298", "GVG_114", "OG_300", "ICC_314", "LOE_092", "AT_072"
+      ]
+    },
+    {
+      "id": "warrior-pirates", "class": "WARRIOR", "title": "LOOTA_Warrior_06",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_312", "CFM_637", "CFM_325", "NEW1_018", "GVG_075", "OG_315", "NEW1_027", "NEW1_022", "CFM_651", "NEW1_024", "AT_070"
+      ]
+    },
+    {
+      "id": "warrior-re-enforcer", "class": "WARRIOR", "title": "LOOTA_Warrior_09",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "CFM_643", "CFM_755", "CFM_853", "CFM_631", "CFM_754", "BRM_028", "CFM_685"
+      ]
+    },
+    {
+      "id": "warrior-recruiter", "class": "WARRIOR", "title": "LOOTA_Warrior_13",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "ICC_091", "LOOT_375", "LOOT_370", "CFM_672", "LOOT_184", "LOOT_519", "LOOT_380", "LOOT_521", "OG_042"
+      ]
+    },
+    {
+      "id": "warrior-smash", "class": "WARRIOR", "title": "LOOTA_Warrior_08",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "OG_314", "CS2_114", "CS2_108", "CS2_105", "EX1_391", "AT_064", "EX1_408", "KAR_028", "GVG_052"
+      ]
+    },
+    {
+      "id": "warrior-taunt", "class": "WARRIOR", "title": "LOOTA_Warrior_07",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "UNG_934", "CFM_940", "UNG_926", "LOE_022", "AT_065", "UNG_072", "OG_218", "UNG_957", "FP1_012", "LOOT_383", "LOE_009",
+        "KAR_061", "UNG_848", "ICC_314", "LOOT_137", "OG_340"
+      ]
+    },
+    {
+      "id": "warrior-weapons", "class": "WARRIOR", "title": "LOOTA_Warrior_04",
+      "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
+      "cards": [
+        "EX1_409", "ICC_281", "CS2_106", "AT_066", "LOOT_389", "ICC_064", "FP1_021", "LOOT_118", "ICC_097", "CS2_112", "OG_033",
+        "ICC_096", "EX1_411", "LOOT_203", "OG_220"
+      ]
+    }
+  ],
   "treasures": {
     "passive": ["LOOTA_846", "LOOTA_828", "LOOTA_832", "LOOTA_801", "LOOTA_831", "LOOTA_818", "LOOTA_802", "LOOTA_824", "LOOTA_833", "LOOTA_800",
       "LOOTA_825", "LOOTA_803", "LOOTA_804", "LOOTA_845"],

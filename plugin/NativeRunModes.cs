@@ -95,6 +95,12 @@ internal static class NativeRunModes
     // A run fight owns the current match from staging until the player has left its game scene.
     internal static bool OwnsMatch => phase != FightPhase.None;
 
+    // Every collectible card of a class, one id per name (a reprint shares its original's name), for class-pool buckets.
+    private static IEnumerable<string> ClassCards(string cardClass) =>
+        SabberStoneCore.Model.Cards.All.Where(c => c.Collectible && c.Class.ToString() == cardClass)
+            .GroupBy(c => c.Name).Select(g => g.Select(c => c.Id).OrderBy(id => id, StringComparer.Ordinal).First())
+            .OrderBy(id => id, StringComparer.Ordinal).ToList();
+
     // Content is admitted against the engine and the client together: a card plays only if both know it.
     private static RunEngine EngineFor(RunDefinition definition)
     {
@@ -109,7 +115,7 @@ internal static class NativeRunModes
 #else
         const bool developer = true;
 #endif
-        return new RunEngine(RunAdmission.Evaluate(definition, Playable, Labelled), allowIncomplete: developer);
+        return new RunEngine(RunAdmission.Evaluate(definition, Playable, Labelled, ClassCards), allowIncomplete: developer);
     }
 
     // The client's Dungeon Run play button (and every later adventure's) asks the server for a game with the chosen hero on

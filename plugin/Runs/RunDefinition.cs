@@ -53,6 +53,9 @@ public sealed class RunBucket
 {
     public string Id, Class, Title, Source;
     public IReadOnlyList<string> Cards;
+    // "pool": "class" (Dungeon Run's Mage, Priest and Warlock "Unique" bundles): the bundle draws from the listed cards and
+    // every collectible card of the class, three different cards the run deck does not hold yet.
+    public bool ClassPool;
 }
 
 public sealed class RunDefinition
@@ -172,6 +175,7 @@ public sealed class RunDefinition
                 Title = CardId(NpcWorldJson.Text(row, "title"), id + ".title"),
                 Source = NonEmpty(NpcWorldJson.Text(row, "source"), id + ".source"),
                 Cards = CardIds(NpcWorldJson.Strings(row, "cards", true), id + ".cards", false),
+                ClassPool = BucketPool(NpcWorldJson.Text(row, "pool", false), id),
             });
         }
         definition.Buckets = buckets;
@@ -244,6 +248,13 @@ public sealed class RunDefinition
         if (string.IsNullOrEmpty(id) || id.Length > 64 || id.Any(c => !(char.IsLower(c) || char.IsDigit(c) || c == '-')))
             throw new InvalidDataException(owner + ": ids are lower-case letters, digits and '-': '" + id + "'");
         return id;
+    }
+
+    private static bool BucketPool(string pool, string owner)
+    {
+        if (pool == null || pool == "listed") return false;
+        if (pool == "class") return true;
+        throw new InvalidDataException(owner + ".pool must be \"listed\" or \"class\": " + pool);
     }
 
     private static string NonEmpty(string text, string owner)
