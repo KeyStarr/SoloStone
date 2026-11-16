@@ -148,12 +148,29 @@ internal static class DungeonRunRounds4To5Proof
             && demons.Player2.HandZone.Last().Card.IsRace(Race.DEMON), "Shadow Oil + Netherbloom: a Demon to hand, a 2/2 Demon in play (a Priest boss)");
     }
 
+    // Gemstudded Golem (Kraxx's deck): "Can only attack if you have 5 or more Armor" is a switching aura on CANT_ATTACK. The
+    // history must end on the value the engine holds, or the client shows the Golem free to attack (a playtest desync).
+    private static void GolemHistory()
+    {
+        Game game = BossTurn("LOOTA_BOSS_39h");
+        int before = game.PowerHistory.Full.Count;
+        var golem = Play(game, game.Player2, "LOOT_365");
+        int Logged() => game.PowerHistory.Full.Skip(before).OfType<SabberStoneCore.Kettle.PowerHistoryTagChange>()
+            .Where(t => t.EntityId == golem.Id && t.Tag == GameTag.CANT_ATTACK).Select(t => t.Value).DefaultIfEmpty(-1).Last();
+        Check(golem[GameTag.CANT_ATTACK] == 1 && Logged() == 1, "Gemstudded Golem without Armor: CANT_ATTACK 1, and the history says so");
+        before = game.PowerHistory.Full.Count;
+        game.Player2.Hero.Armor = 5;
+        game.DeathProcessingAndAuraUpdate();
+        Check(golem[GameTag.CANT_ATTACK] == 0 && Logged() == 0, "Gemstudded Golem with 5 Armor: CANT_ATTACK 0, and the history says so");
+    }
+
     [GroupProof("dungeon-run-rounds4-5")]
     internal static void Run()
     {
         AFKay();
         Whompwhisker();
         Mushhuckster();
+        GolemHistory();
         foreach (var (hero, health) in new[] { ("LOOTA_BOSS_17h", 40), ("LOOTA_BOSS_16h", 40), ("LOOTA_BOSS_06h", 40), ("LOOTA_BOSS_29h", 60),
                      ("LOOTA_BOSS_42h", 30), ("LOOTA_BOSS_20h", 30), ("LOOTA_BOSS_46h", 30), ("LOOTA_BOSS_19h", 30), ("LOOTA_BOSS_33h", 50), ("LOOTA_BOSS_39h", 30),
                      ("LOOTA_BOSS_37h", 40), ("LOOTA_BOSS_51h", 30), ("LOOTA_BOSS_13h", 40), ("LOOTA_BOSS_04h", 30), ("LOOTA_BOSS_27h", 50) })
