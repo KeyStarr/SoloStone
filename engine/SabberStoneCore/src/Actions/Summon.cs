@@ -137,8 +137,8 @@ namespace SabberStoneCore.Actions
 
 				g.SummonedMinions.Add(minion);
 
-				// add summon block show entity 
-				if (g.History)
+				// add summon block show entity (a minion created straight into play is already public: see PublishCreatedInPlay)
+				if (g.History && !g.PowerHistory.PublishCreatedInPlay(minion))
 					g.PowerHistory.Add(PowerHistoryBuilder.ShowEntity(minion));
 			};
 

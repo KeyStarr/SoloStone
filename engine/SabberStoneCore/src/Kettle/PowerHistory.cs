@@ -804,6 +804,9 @@ namespace SabberStoneCore.Kettle
                         && armor.Tag == GameTag.ARMOR
                     || entry is PowerHistoryShowEntity show && show.Entity.Id == _target && _phase == VisualPhase.Summon
                         && show.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) && zone == (int)Zone.PLAY
+                    // A minion created straight into play has no SHOW_ENTITY (PublishCreatedInPlay).
+                    || entry is PowerHistoryFullEntity created && created.Entity.Id == _target && _phase == VisualPhase.Summon
+                        && created.Entity.Tags.TryGetValue(GameTag.ZONE, out int createdZone) && createdZone == (int)Zone.PLAY
                     || entry is PowerHistoryTagChange move && move.EntityId == _target && move.Tag == GameTag.ZONE
                         && ((_phase == VisualPhase.Draw || _phase == VisualPhase.Create) && move.Value == (int)Zone.HAND
                             || _phase == VisualPhase.Summon && move.Value == (int)Zone.PLAY);
@@ -1049,6 +1052,76 @@ namespace SabberStoneCore.Kettle
             if (_blocks.Count > 0) _blocks.Peek().HasEffects = parentHadEffects;
             Full.RemoveAt(Full.Count - 1);
             Last.RemoveAt(Last.Count - 1);
+            return true;
+        }
+
+        // Retail publishes all of one activation's summons inside its own block (Unleash the Hounds, Muster for Battle,
+        // Haunted Creeper), so the client spawns them in one task list; one block per queued summon makes it play each
+        // spawn to the end before the next. The just-closed child block rejoins its parent when the two are adjacent
+        // siblings in the unflushed run. Nested blocks (Knife Juggler) stay nested and still delay the next spawn.
+        // History-only: no state, RNG or HistoryFacts change.
+        // A minion created straight into PLAY (a Hound, a Silver Hand Recruit) is public from its FULL_ENTITY, and retail sends
+        // no SHOW_ENTITY for it. The client takes a SHOW_ENTITY as a reveal that a custom spawn spell waits for, so each spawn
+        // played to its end before the next one began (Muster for Battle: Recruits ~1.07 s apart, all three together without
+        // it). Publishes as TAG_CHANGEs only the snapshot tags that differ from what the unflushed run already told the client.
+        // False (the caller sends SHOW_ENTITY) for a summon from a hidden zone, a hand or a deck, or across a flushed packet.
+        internal bool PublishCreatedInPlay(IPlayable playable)
+        {
+            if (!_enabled) return false;
+            Dictionary<GameTag, int> known = null;
+            int at = Last.Count - 1;
+            for (; at >= 0; at--)
+            {
+                var entry = Last[at];
+                if (entry is PowerHistoryHideEntity hide && hide.EntityID == playable.Id
+                    || entry is PowerHistoryShowEntity show && show.Entity.Id == playable.Id
+                    || entry is PowerHistoryChangeEntity change && change.Entity.Id == playable.Id
+                    || entry is PowerHistoryResetGame) return false;
+                if (entry is PowerHistoryFullEntity full && full.Entity.Id == playable.Id)
+                {
+                    if (!full.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) || zone != (int)Zone.PLAY) return false;
+                    known = new Dictionary<GameTag, int>(full.Entity.Tags);
+                    break;
+                }
+            }
+            if (known == null) return false;
+            for (int i = at + 1; i < Last.Count; i++)
+                if (Last[i] is PowerHistoryTagChange tag && tag.EntityId == playable.Id) known[tag.Tag] = tag.Value;
+            // SHOW_ENTITY only sets the tags it carries, so tags missing from the snapshot need no change either; a tag the
+            // client never got reads as 0.
+            foreach (var tag in PowerHistoryBuilder.ShowEntity(playable).Entity.Tags)
+                if (known.TryGetValue(tag.Key, out int value) ? value != tag.Value : tag.Value != 0)
+                    Add(PowerHistoryBuilder.TagChange(playable.Id, tag.Key, tag.Value));
+            return true;
+        }
+
+        internal bool JoinQueuedSummon(PowerHistoryBlockStart child, PowerHistoryBlockStart parent)
+        {
+            if (!_enabled || child == null || parent == null || child.Source != parent.Source) return false;
+            int full = Full.FindLastIndex(e => ReferenceEquals(e, child)), last = Last.FindLastIndex(e => ReferenceEquals(e, child));
+            int length = Full.Count - full;
+            if (full < 1 || last < 1 || Last.Count - last != length || !(Last[Last.Count - 1] is PowerHistoryBlockEnd)) return false;
+            int depth = 0;
+            for (int i = 0; i < length; i++)
+            {
+                var entry = Last[last + i];
+                if (!ReferenceEquals(Full[full + i], entry) || entry is PowerHistoryResetGame) return false;
+                if (entry is PowerHistoryBlockStart) depth++;
+                else if (entry is PowerHistoryBlockEnd) depth--;
+                // A target header or hit of its own would not read as part of the parent's effect.
+                else if (depth == 1 && entry is PowerHistoryMetaData) return false;
+            }
+            if (!(Last[last - 1] is PowerHistoryBlockEnd parentEnd) || !ReferenceEquals(Full[full - 1], parentEnd)) return false;
+            depth = 1;
+            int open = last - 2;
+            for (; open >= 0; open--)
+            {
+                if (Last[open] is PowerHistoryBlockEnd) depth++;
+                else if (Last[open] is PowerHistoryBlockStart && --depth == 0) break;
+            }
+            if (open < 0 || !ReferenceEquals(Last[open], parent)) return false;
+            Full.RemoveRange(full - 1, 2);
+            Last.RemoveRange(last - 1, 2);
             return true;
         }
 
