@@ -96,11 +96,64 @@ internal static class DungeonRunRounds4To5Proof
         }
     }
 
+    private static readonly string[] Ingredients = { "CFM_621t2", "CFM_621t3", "CFM_621t4", "CFM_621t5", "CFM_621t6", "CFM_621t8",
+        "CFM_621t9", "CFM_621t10", "CFM_621t37" };
+
+    // Mushhuckster Max, Mushroom, Mushroom (2): a 1-Mana Mushroom Potion of two distinct random 1-Mana Kazakus effects, which
+    // plays (also after a reload) with both effects.
+    private static void Mushhuckster()
+    {
+        var seen = new System.Collections.Generic.HashSet<string>();
+        for (int seed = 0; seed < 30; seed++)
+        {
+            Game max = BossTurn("LOOTA_BOSS_50h", seed);
+            if (seed == 0) Check(max.Player2.Hero.Health == 40 && max.Player2.Hero.HeroPower.Cost == 2, "Mushhuckster Max: 40 Health, a 2-Mana power");
+            int hand = max.Player2.HandZone.Count;
+            Use(max);
+            var potion = max.Player2.HandZone.Last();
+            var parts = new[] { potion.Card[GameTag.MODULAR_ENTITY_PART_1], potion.Card[GameTag.MODULAR_ENTITY_PART_2] }
+                .Select(id => Cards.FromAssetId(id).Id).ToArray();
+            Check(max.Player2.HandZone.Count == hand + 1 && potion.Card.Id == "LOOTA_BOSS_50t" && potion.Cost == 1
+                && parts[0] != parts[1] && parts.All(Ingredients.Contains), "Mushroom, Mushroom: a 1-Mana potion of two distinct effects");
+            seen.UnionWith(parts);
+        }
+        Check(seen.Count == Ingredients.Length, "Mushroom Potions: all nine effects occur (" + seen.Count + ")");
+
+        foreach (bool reload in new[] { false, true })
+        {
+            Game armor = BossTurn("LOOTA_BOSS_50h");
+            var brew = SabberStoneCore.Actions.GeneratedDefinitionRules.Potion(Cards.FromId("CFM_621t3"), Cards.FromId("CFM_621t8"), "LOOTA_BOSS_50t");
+            SabberStoneCore.Actions.Generic.DrawCard(armor.Player2, brew);
+            if (reload) { armor = Game.LoadSnapshot(armor.SaveSnapshot()); armor.Player2.BaseMana = 10; armor.Player2.UsedMana = 0; }
+            var held = armor.Player2.HandZone.Last();
+            int cards = armor.Player2.HandZone.Count;
+            PlayEntity(armor, armor.Player2, held);
+            Check(armor.Player2.Hero.Armor == 4 && armor.Player2.HandZone.Count == cards, "Stonescale Oil + Kingsblood: 4 Armor and a card" + (reload ? " (after a reload)" : ""));
+        }
+
+        Game fire = BossTurn("LOOTA_BOSS_50h");
+        var yeti = Summon(fire.Player1, "CS2_182");
+        var mine = Summon(fire.Player2, "CS2_120");
+        SabberStoneCore.Actions.Generic.DrawCard(fire.Player2,
+            SabberStoneCore.Actions.GeneratedDefinitionRules.Potion(Cards.FromId("CFM_621t2"), Cards.FromId("CFM_621t4"), "LOOTA_BOSS_50t"));
+        PlayEntity(fire, fire.Player2, fire.Player2.HandZone.Last(), fire.Player1.Hero);
+        Check(fire.Player1.Hero.Damage == 3 && yeti.Damage == 2 && mine.Damage == 2, "Heart of Fire + Felbloom: 3 to the target, 2 to every minion");
+
+        Game demons = BossTurn("LOOTA_BOSS_50h");
+        SabberStoneCore.Actions.Generic.DrawCard(demons.Player2,
+            SabberStoneCore.Actions.GeneratedDefinitionRules.Potion(Cards.FromId("CFM_621t9"), Cards.FromId("CFM_621t10"), "LOOTA_BOSS_50t"));
+        int before = demons.Player2.HandZone.Count;
+        PlayEntity(demons, demons.Player2, demons.Player2.HandZone.Last());
+        Check(demons.Player2.BoardZone.Count == 1 && demons.Player2.HandZone.Count == before
+            && demons.Player2.HandZone.Last().Card.IsRace(Race.DEMON), "Shadow Oil + Netherbloom: a Demon to hand, a 2/2 Demon in play (a Priest boss)");
+    }
+
     [GroupProof("dungeon-run-rounds4-5")]
     internal static void Run()
     {
         AFKay();
         Whompwhisker();
+        Mushhuckster();
         foreach (var (hero, health) in new[] { ("LOOTA_BOSS_17h", 40), ("LOOTA_BOSS_16h", 40), ("LOOTA_BOSS_06h", 40), ("LOOTA_BOSS_29h", 60),
                      ("LOOTA_BOSS_42h", 30), ("LOOTA_BOSS_20h", 30), ("LOOTA_BOSS_46h", 30), ("LOOTA_BOSS_19h", 30), ("LOOTA_BOSS_33h", 50), ("LOOTA_BOSS_39h", 30),
                      ("LOOTA_BOSS_37h", 40), ("LOOTA_BOSS_51h", 30), ("LOOTA_BOSS_13h", 40), ("LOOTA_BOSS_04h", 30), ("LOOTA_BOSS_27h", 50) })

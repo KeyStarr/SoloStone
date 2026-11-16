@@ -49,6 +49,7 @@ internal static class Program
         FixtureRules();
         ClassPoolBundles();
         SaveDataProjection();
+        BossWeights();
         ParserRejects();
         Console.WriteLine("PASS runs (" + checks + " checks)");
         return 0;
@@ -430,6 +431,28 @@ internal static class Program
         Check(seen > 0 && freshSeen, "class pool: the bucket was offered");
     }
 
+    // A boss's weight sets how often it comes up against the others of its round; equal weights draw uniformly.
+    private static void BossWeights()
+    {
+        string fixture = Read("fixtures", "complete-run.json");
+        const string anchor = "\"id\": \"rogue-a\"";
+        Check(fixture.Contains(anchor), "weights: the fixture has rogue-a");
+        RunDefinition rare = RunDefinition.Parse(fixture.Replace(anchor, anchor + ", \"weight\": 1"));
+        Check(rare.Boss("rogue-a").Weight == 1 && rare.Boss("shaman-a").Weight == RunDefinition.DefaultWeight, "weights: parsed, default 4");
+        int Count(RunDefinition definition)
+        {
+            var engine = new RunEngine(RunAdmission.Evaluate(definition, Playable, Labelled));
+            return Enumerable.Range(0, 2000).Count(seed => engine.Start("MAGE", "HERO_08", seed).NextBoss == "rogue-a");
+        }
+        int uniform = Count(RunDefinition.Parse(fixture)), weighted = Count(rare);
+        // Round 1 has two bosses: 1/2 uniformly, 1/5 with weights 1 and 4.
+        Check(uniform > 850 && uniform < 1150, "weights: equal weights pick about half each (" + uniform + "/2000)");
+        Check(weighted > 300 && weighted < 500, "weights: weight 1 against 4 comes up about a fifth of the time (" + weighted + "/2000)");
+        var loot = RunDefinition.Parse(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "data", "runs", "loot-v1.json")));
+        Check(loot.Boss("treasure-vault").Weight == 1 && loot.Bosses.Where(b => b.Id != "treasure-vault").All(b => b.Weight == RunDefinition.DefaultWeight),
+            "loot: the Treasure Vault is rare (weight 1), every other boss weight 4");
+    }
+
     private static void ParserRejects()
     {
         string fixture = Read("fixtures", "complete-run.json");
@@ -454,6 +477,7 @@ internal static class Program
         Rejects("{ \"class\": \"WARRIOR\", \"deck\"", "{ \"class\": \"WIZARD\", \"deck\"", "an unknown class");
         Rejects("\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"pool\": \"all\",",
             "an unknown bucket pool");
+        Rejects("\"id\": \"rogue-a\"", "\"id\": \"rogue-a\", \"weight\": 0", "a boss weight below 1");
         Rejects("\"when\": \"allClasses\"", "\"when\": \"anyClass\"", "an unknown card back condition");
         Rejects("\"cardBack\": 119,", "\"cardBack\": 0,", "a card back id that is not positive");
         Rejects("{ \"when\": \"allClasses\", \"cardBack\": 119, \"source\": \"fixture\" }",

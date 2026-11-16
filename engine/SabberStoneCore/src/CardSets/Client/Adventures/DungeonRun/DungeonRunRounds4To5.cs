@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SabberStoneCore.Auras;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
@@ -11,7 +12,7 @@ using SabberStoneCore.Triggers;
 namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 {
     // Dungeon Run round 4-5 bosses (https://hearthstone.wiki.gg/wiki/Dungeon_Run), with the Rank 2 heroes of the three that
-    // come back in rounds 6-7. Not yet here: Mushhuckster Max (crafts a potion whose options no source lists).
+    // come back in rounds 6-7.
     internal static class DungeonRunRounds4To5
     {
         internal static void Apply(Action<int, string, Action<Card>> register)
@@ -32,6 +33,20 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
                 new RecruitTask(1).Process(game, controller, source, null, stack);
                 new RecruitTask(1).Process(game, controller.Opponent, source, null, stack);
             })));
+
+            // Mushhuckster Max. The wiki lists no potion options (its Mushroom Potion page redirects to Kazakus Potion); per the
+            // project owner (2026-11-16): Mushroom, Mushroom (2, autocast, so from his second turn) adds a 1-Mana Mushroom
+            // Potion that pairs two distinct random effects from the nine 1-Mana Kazakus ingredients (Aya Lotus Kingpin's
+            // audited set), composed like Aya's lesser potion.
+            register(47361, "LOOTA_BOSS_50h", DungeonRunCards.Plain);
+            register(47360, "LOOTA_BOSS_50p", card => Untargeted(card, new CustomTask((game, controller, source, target, stack) => {
+                var parts = Actions.AssembleRules.Take(game, Sets.AyaLotusKingpin.Ingredients.Select(Cards.FromId).ToList(), 2);
+                Actions.Generic.DrawCard(controller, Actions.GeneratedDefinitionRules.Potion(parts[0], parts[1], "LOOTA_BOSS_50t"));
+            })));
+            register(47362, "LOOTA_BOSS_50t", card => {
+                card.Entourage = Sets.AyaLotusKingpin.Ingredients;
+                DungeonRunCards.Plain(card);
+            });
 
             // Battlecrier Jin'zo. Battle Totem (passive): All Battlecries trigger twice (both players, as written).
             register(46338, "LOOTA_BOSS_17h", DungeonRunCards.Plain);

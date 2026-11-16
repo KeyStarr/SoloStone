@@ -101,7 +101,7 @@ namespace SabberStoneCore.Actions
                 AssembleRules.FirstHalf, AssembleRules.SecondHalf })
                 if (source.Card[tag] != 0 && !tags.ContainsKey(tag)) tags[tag] = source[tag];
             bool watfin = source.Game.IdEntityDic.TryGetValue(source[GameTag.CREATOR],out var creator) && creator.Card.Id == "JAIL_EVENT_100";
-            if (!watfin && source.Card.Id != "CATA_470t1" && source.Card.Id != "JAIL_504t3p" && source.Card.Id != "ICC_828t" && source.Card.Id != "JAIL_EVENT_100t") return;
+            if (!watfin && source.Card.Id != "CATA_470t1" && source.Card.Id != "JAIL_504t3p" && source.Card.Id != "LOOTA_BOSS_50t" && source.Card.Id != "ICC_828t" && source.Card.Id != "JAIL_EVENT_100t") return;
             if (!watfin && source.Card[GameTag.MODULAR_ENTITY_PART_1] == 0) return;
             // Historical snapshots cannot consult the later live object or the uncomposed registry token.
             foreach (var tag in source.Card.Tags.Keys)
@@ -181,13 +181,14 @@ namespace SabberStoneCore.Actions
                 option.Power?.PowerTask?.Process(g, c, s, ComponentTarget(option, (IPlayable)s, t), new TaskStack());
         }
 
-        public static Card Potion(Card first, Card second)
+        // templateId: the potion card the composition wears (Aya's JAIL_504t3p; Dungeon Run's Mushroom Potion LOOTA_BOSS_50t).
+        public static Card Potion(Card first, Card second, string templateId = "JAIL_504t3p")
         {
             if (first == null || second == null || first.Id == second.Id ||
                 !CardSets.Client.Sets.AyaLotusKingpin.Ingredients.Contains(first.Id) ||
                 !CardSets.Client.Sets.AyaLotusKingpin.Ingredients.Contains(second.Id))
                 throw new ArgumentException("A lesser potion requires two distinct audited ingredients.");
-            var template = Cards.FromId("JAIL_504t3p");
+            var template = Cards.FromId(templateId);
             var tags = new Dictionary<GameTag, int>(template.Tags) {
                 [GameTag.MODULAR_ENTITY_PART_1] = first.AssetId,
                 [GameTag.MODULAR_ENTITY_PART_2] = second.AssetId,

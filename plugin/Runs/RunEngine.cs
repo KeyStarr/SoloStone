@@ -196,7 +196,17 @@ public sealed class RunEngine
         var candidates = fresh.Count > 0 ? fresh : round.Where(id => id != state.NextBoss).ToList();
         if (candidates.Count == 0) candidates = round;
         if (candidates.Count == 0) throw new InvalidOperationException(Definition.Id + ": round " + state.Round + " has no admitted boss.");
-        return candidates[Draw(state, BossDraw).Next(candidates.Count)];
+        var random = Draw(state, BossDraw);
+        // Equal weights keep the plain uniform draw (the same picks as before weights existed).
+        var weights = candidates.Select(id => Definition.Boss(id).Weight).ToList();
+        if (weights.Distinct().Count() == 1) return candidates[random.Next(candidates.Count)];
+        int roll = random.Next(weights.Sum());
+        for (int i = 0; i < candidates.Count; i++)
+        {
+            if (roll < weights[i]) return candidates[i];
+            roll -= weights[i];
+        }
+        return candidates[candidates.Count - 1];
     }
 
     private static Random Draw(RunState state, long purpose) => new Random(StableSeed.Derive(state.Seed, state.Step++, purpose));

@@ -34,6 +34,9 @@ public sealed class RunBoss
     // with Evolvomancy and at 60 with Greater Evolution). A run fights at most one boss of a family. Defaults to the id.
     public string Id, Family, Hero, HeroPower, Source;
     public IReadOnlyList<int> Rounds;
+    // How often the boss comes up against the others of its round: the chance is weight / the round's total (default 4;
+    // the Treasure Vault, a rare bonus encounter, has 1).
+    public int Weight;
     public IReadOnlyList<string> Deck;
     public IReadOnlyList<string> Board;
     // Cards the player gets in hand after the mulligans in this fight (The Darkness's Luminous Candles).
@@ -167,6 +170,7 @@ public sealed class RunDefinition
                 HeroPower = CardId(NpcWorldJson.Text(row, "heroPower"), id + ".heroPower"),
                 Source = NonEmpty(NpcWorldJson.Text(row, "source"), id + ".source"),
                 Rounds = bossRounds,
+                Weight = BossWeight(NpcWorldJson.Integer(row, "weight", DefaultWeight), id),
                 // An empty deck is a boss without one (Treasure Vault); its hero's rules keep it from drawing.
                 Deck = Counted(NpcWorldJson.List(row, "deck"), id + ".deck", true),
                 Board = CardIds(NpcWorldJson.Strings(row, "board"), id + ".board", true),
@@ -274,6 +278,14 @@ public sealed class RunDefinition
         if (string.IsNullOrEmpty(id) || id.Length > 64 || id.Any(c => !(char.IsLower(c) || char.IsDigit(c) || c == '-')))
             throw new InvalidDataException(owner + ": ids are lower-case letters, digits and '-': '" + id + "'");
         return id;
+    }
+
+    public const int DefaultWeight = 4;
+
+    private static int BossWeight(int weight, string owner)
+    {
+        if (weight < 1 || weight > 100) throw new InvalidDataException(owner + ".weight must be 1..100: " + weight);
+        return weight;
     }
 
     private static bool BucketPool(string pool, string owner)
