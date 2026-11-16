@@ -49,6 +49,10 @@ public sealed class RunEngine
     public int PlayerHealth(RunState state) =>
         Definition.BaseHealth + Definition.HealthPerWin * Math.Min(state.BossesDefeated, Definition.Rounds.Count - 1);
 
+    // The Health the next fight starts with once Start of Game has run (a doubling treasure applies), for the run screen.
+    public int FightStartHealth(RunState state) =>
+        PlayerHealth(state) << state.Passives.Count(Definition.DoubleStartingHealth.Contains);
+
     public RunEncounter NextEncounter(RunState state)
     {
         RequireBetweenFights(state);

@@ -381,7 +381,7 @@ internal static class NativeRunModes
         if ((int)key == definition.Client.ServerKey)
         {
             RunState run = profile.RunOf(definition);
-            int health = run == null ? 0 : EngineFor(definition).PlayerHealth(run);
+            int health = run == null ? 0 : EngineFor(definition).FightStartHealth(run);
             var wins = profile.RunWins(definition).Select(w => new RunClassWinCount { Class = w.Class, Bosses = w.Bosses, Runs = w.Runs });
             values = RunSaveData.Project(definition, run, wins, health, Dbf, ClassId, Health);
             Trace("serve " + key + ": run=" + (run == null ? "none" : run.Status + " round " + run.Round + " next " + (run.NextBoss ?? "-")

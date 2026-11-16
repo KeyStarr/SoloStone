@@ -90,6 +90,9 @@ public sealed class RunDefinition
     public IReadOnlyList<RunBoss> Bosses;
     public IReadOnlyList<RunBucket> Buckets;
     public IReadOnlyList<string> PassiveTreasures, ActiveTreasures;
+    // Passive treasures that double the starting Health at the start of each fight (Potion of Vitality); the run screen
+    // shows the Health a fight starts with.
+    public IReadOnlyList<string> DoubleStartingHealth;
     public IReadOnlyList<RunCardBackReward> CardBackRewards;
 
     public string ResourceName => "SoloStone.Runs." + Id + "-v" + Version + ".json";
@@ -207,6 +210,9 @@ public sealed class RunDefinition
             ? NpcWorldJson.Object(treasureValue) : new Dictionary<string, object>();
         definition.PassiveTreasures = Unique(CardIds(NpcWorldJson.Strings(treasures, "passive"), "treasures.passive", true), "treasures.passive");
         definition.ActiveTreasures = Unique(CardIds(NpcWorldJson.Strings(treasures, "active"), "treasures.active", true), "treasures.active");
+        definition.DoubleStartingHealth = Unique(CardIds(NpcWorldJson.Strings(treasures, "doubleStartingHealth"), "treasures.doubleStartingHealth", true), "treasures.doubleStartingHealth");
+        string notPassive = definition.DoubleStartingHealth.FirstOrDefault(id => !definition.PassiveTreasures.Contains(id));
+        if (notPassive != null) throw new InvalidDataException("treasures.doubleStartingHealth: " + notPassive + " is not a passive treasure.");
 
         // "when": "allClasses" is the only condition: a run won with each of the mode's classes.
         var cardBacks = new List<RunCardBackReward>();

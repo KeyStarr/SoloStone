@@ -109,6 +109,8 @@ internal static class Program
         Check(loot.Buckets.Where(b => b.Excluded.Count > 0).Select(b => b.Id).OrderBy(id => id).SequenceEqual(new[] { "mage-unique", "priest-unique", "warlock-unique" })
             && loot.Buckets.Where(b => b.Excluded.Count > 0).All(b => b.Excluded.SequenceEqual(new[] { "ULD_003" }) && !b.Cards.Contains("ULD_003") && b.Cards.Count == 3),
             "loot: the Unique bundles leave out Zephrys the Great");
+        // Potion of Vitality doubles the starting Health at the start of each fight; the run screen shows the doubled value.
+        Check(loot.DoubleStartingHealth.SequenceEqual(new[] { "LOOTA_800" }), "loot: Potion of Vitality doubles the starting Health");
         // Treasure Coffers (Treasure Vault) add one of the active treasures; the engine keeps its own copy of the list.
         Check(SabberStoneCore.CardSets.Client.Adventures.DungeonRunCards.ActiveTreasures.SequenceEqual(loot.ActiveTreasures),
             "loot: the engine's Treasure Coffer list is the content's active treasures");
@@ -132,6 +134,11 @@ internal static class Program
         // Developer builds play an incomplete run: each round without an admitted boss fights an admitted one, and offers
         // with nothing admitted are skipped. Public builds refuse (checked above for every definition that is not ready).
         RunAdmission lootAdmission = RunAdmission.Evaluate(loot, Playable, Labelled, ClassCards);
+        var vitality = new RunEngine(lootAdmission, allowIncomplete: true).Start("PRIEST", "HERO_09", 5);
+        int plain = new RunEngine(lootAdmission, allowIncomplete: true).FightStartHealth(vitality);
+        vitality.Passives.Add("LOOTA_800");
+        Check(plain == 15 && new RunEngine(lootAdmission, allowIncomplete: true).FightStartHealth(vitality) == 30,
+            "loot: with Potion of Vitality the run screen shows the doubled starting Health (30, not 15)");
         // A ready run plays to its end for every class: eight bosses, a bundle of the class's admitted buckets after each of
         // the first seven, the four treasures.
         if (lootAdmission.IsReady)

@@ -1314,6 +1314,7 @@
     }
   ],
   "treasures": {
+    "doubleStartingHealth": ["LOOTA_800"],
     "passive": ["LOOTA_846", "LOOTA_828", "LOOTA_832", "LOOTA_801", "LOOTA_831", "LOOTA_818", "LOOTA_802", "LOOTA_824", "LOOTA_833", "LOOTA_800",
       "LOOTA_825", "LOOTA_803", "LOOTA_804", "LOOTA_845"],
     "active": ["LOOTA_819", "LOOTA_836", "LOOTA_839", "LOOTA_823", "LOOTA_842a", "LOOTA_812", "LOOTA_834", "LOOTA_842b", "LOOTA_829", "LOOTA_813",
