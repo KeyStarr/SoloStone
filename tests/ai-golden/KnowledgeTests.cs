@@ -30,6 +30,27 @@ public static class KnowledgeTests
         Entity.FromCard(g.Player1, Cards.FromId("GAME_005"), zone: g.Player1.HandZone);
         return g;
     }
+    // A run boss (no NPC profile) facing a player Secret, with a Secret of its own, still searches (BotDriver.ForBoss);
+    // without those options the view throws and the driver falls back.
+    public static void TestBossSearchesThroughSecrets()
+    {
+        var g = SecretBoard(CardClass.HUNTER, "EX1_610");
+        var own = Entity.FromCard(g.Player1, Cards.FromId("CORE_EX1_289"), zone: g.Player1.HandZone);
+        g.Player1.UsedMana = 0;
+        Check(g.Process(PlayCardTask.Spell(g.Player1, own)), "arm own Secret");
+        Check(g.Player1.SecretZone.Count == 1 && g.Player2.SecretZone.Count == 1, "a Secret on each side");
+        Entity.FromCard(g.Player1, Cards.FromId("CS2_182"), zone: g.Player1.HandZone);
+        g.Player1.BaseMana = 10; g.Player1.UsedMana = 0;
+        var budget = BotBudget.ForStars(0).WithoutClock();
+        int index = 0;
+        var plain = BotDriver.Decide(g, 1, DeckStyle.Tempo, s => PilotDecision.From(BotSearch.Choose(s, budget)), ref index);
+        Check(plain.Trace.Kind == "fallback", "without boss options a Secret forces the fallback (" + plain.Trace.Kind + ")");
+        index = 0;
+        var boss = BotDriver.Decide(g, 1, DeckStyle.Tempo, s => PilotDecision.From(BotSearch.Choose(s, budget)), ref index, BotDriver.ForBoss());
+        Check(boss.Trace.Kind == "search" && boss.Task.PlayerTaskType != PlayerTaskType.END_TURN,
+            "a boss with Secrets on both sides searches and plays: " + boss.Task + " trace=" + PlannerTests.Trace(boss.Trace));
+    }
+
     public static void TestHiddenSecretIdentityCannotChangeLethalOrDecision()
     {
         var original = SecretBoard(CardClass.MAGE, "CORE_EX1_287");

@@ -420,6 +420,8 @@ public sealed class NativeMatch
 #endif
     private NpcProfile npcProfile;
     private IGoldenPilot npcPilot;
+    // A run boss's search options (BotDriver.ForBoss), kept for the match.
+    private DriverOptions bossDriverOptions;
     private NpcTurnRunner npcRunner;
     private NpcPresentation npcPresentation;
     private bool npcConcessionPending;
@@ -2494,7 +2496,8 @@ public sealed class NativeMatch
             try
             {
                 var result = BotDriver.Decide(Game, BotPlayerId, opponentDeck.Style,
-                    state => PilotDecision.From(BotSearch.Choose(state, budget)), ref decisionIndex, tasks: tasks);
+                    state => PilotDecision.From(BotSearch.Choose(state, budget)), ref decisionIndex,
+                    BossDeck ? bossDriverOptions ?? (bossDriverOptions = BotDriver.ForBoss()) : null, tasks: tasks);
                 npcDiagnosticDecision = new ReadyNpcDecision(result.Trace).Result;
                 matchRecorder.OnDecision(new GoldenContext(Game.Turn, decisionIndex,
                     unchecked(997 * Game.Turn + decisionIndex * 31), npcProfile), npcDiagnosticDecision,
