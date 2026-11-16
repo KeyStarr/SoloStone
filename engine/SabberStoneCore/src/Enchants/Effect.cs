@@ -321,6 +321,8 @@ namespace SabberStoneCore.Enchants
 		/// </summary>
 		public void RemoveAuraFrom(IPlayable playable, int sourceId = 0)
 		{
+            // An AI fair view's masked stand-in carries no aura effects; there is nothing to remove from it.
+            if (playable.AuraEffects == null && Tag != GameTag.COST) return;
             var windfuryHero = Tag == GameTag.WINDFURY ? playable as Hero : null;
             int previousAttackLimit = windfuryHero?.AttackLimit ?? 1;
 
