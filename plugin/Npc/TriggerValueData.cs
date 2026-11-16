@@ -4,6 +4,7 @@ internal static class TriggerValueData
     internal const string HeroPowerAttack = "AT_132_DRUID AT_132_ROGUE CATA_190p CS2_017 CS2_083b HERO_10bp HERO_10bp2";
     internal const string Rows = @"
 AT_026|SelfDamage|Priced|1|0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0
+AT_027|OwnDraw|NoEffect|0|
 AT_031|SelfAttack|Partial|0.333|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
 BE_008|OwnCard|Priced|0.5|0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0
 BE_255|OwnMinion|Priced|1|0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
