@@ -105,6 +105,10 @@ internal static class Program
         Check(loot.Client.Scenario == 2663 && loot.Client.ServerKey == 24 && loot.Client.ClientKey == 42, "loot: client ids");
         Check(loot.Classes.Count == 9 && loot.Classes.All(c => c.Deck.Count == 10), "loot: nine classes with ten-card start decks");
         Check(loot.Rounds.Count == 8 && loot.Round(8).BossStartingMana == 2, "loot: eight rounds, the final boss starts with 2 mana");
+        // The Unique bundles leave out Zephrys the Great (undocumented wish); no other bundle excludes anything.
+        Check(loot.Buckets.Where(b => b.Excluded.Count > 0).Select(b => b.Id).OrderBy(id => id).SequenceEqual(new[] { "mage-unique", "priest-unique", "warlock-unique" })
+            && loot.Buckets.Where(b => b.Excluded.Count > 0).All(b => b.Excluded.SequenceEqual(new[] { "ULD_003" }) && !b.Cards.Contains("ULD_003") && b.Cards.Count == 3),
+            "loot: the Unique bundles leave out Zephrys the Great");
         // Treasure Coffers (Treasure Vault) add one of the active treasures; the engine keeps its own copy of the list.
         Check(SabberStoneCore.CardSets.Client.Adventures.DungeonRunCards.ActiveTreasures.SequenceEqual(loot.ActiveTreasures),
             "loot: the engine's Treasure Coffer list is the content's active treasures");
@@ -478,6 +482,8 @@ internal static class Program
         Rejects("\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"pool\": \"all\",",
             "an unknown bucket pool");
         Rejects("\"id\": \"rogue-a\"", "\"id\": \"rogue-a\", \"weight\": 0", "a boss weight below 1");
+        Rejects("\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"excluded\": [\"ULD_003\"],",
+            "an excluded card that is not in the bundle's list");
         Rejects("\"when\": \"allClasses\"", "\"when\": \"anyClass\"", "an unknown card back condition");
         Rejects("\"cardBack\": 119,", "\"cardBack\": 0,", "a card back id that is not positive");
         Rejects("{ \"when\": \"allClasses\", \"cardBack\": 119, \"source\": \"fixture\" }",

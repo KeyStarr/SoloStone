@@ -41,9 +41,9 @@ Something went wrong? Tell us on [Discord](https://discord.gg/e45QgKHmC2). The f
   a local ladder, build decks, open packs and earn rewards by playing.
 - **Dungeon Run.** The Kobolds & Catacombs roguelike, under **Modes**: pick a class, beat eight bosses, take loot and
   treasures between fights, one loss ends the run. Bosses, loot and treasures follow the
-  [Hearthstone Wiki](https://hearthstone.wiki.gg/wiki/Dungeon_Run); not in yet are the three "Unique" loot bundles
-  that need Zephrys the Great. A run won with a class crowns it; a run won with all nine classes earns the Candle King
-  card back. Runs pay no gold, dust or ladder progress, as in the original.
+  [Hearthstone Wiki](https://hearthstone.wiki.gg/wiki/Dungeon_Run), except Zephrys the Great, left out of the three
+  "Unique" loot bundles. A run won with a class crowns it; a run won with all nine classes earns the Candle King card
+  back. Runs pay no gold, dust or ladder progress, as in the original.
 - **One fixed card set.** The first release plays the Standard format as it stood just before the *Reign of the Black
   Empire* expansion (the "Violet Hold meta" in the files). It does not follow later balance changes.
 

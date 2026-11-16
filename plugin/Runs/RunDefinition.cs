@@ -55,7 +55,11 @@ public sealed class RunBoss
 public sealed class RunBucket
 {
     public string Id, Class, Title, Source;
+    // The cards the bundle offers: the source's list minus Excluded.
     public IReadOnlyList<string> Cards;
+    // Cards the source lists that the bundle leaves out by the project's choice (Zephrys the Great in the Unique bundles:
+    // his "perfect card" wish is not documented). Kept in the file so the list still matches its source.
+    public IReadOnlyList<string> Excluded;
     // "pool": "class" (Dungeon Run's Mage, Priest and Warlock "Unique" bundles): the bundle draws from the listed cards and
     // every collectible card of the class, three different cards the run deck does not hold yet.
     public bool ClassPool;
@@ -191,7 +195,9 @@ public sealed class RunDefinition
                 Id = id, Class = cls,
                 Title = CardId(NpcWorldJson.Text(row, "title"), id + ".title"),
                 Source = NonEmpty(NpcWorldJson.Text(row, "source"), id + ".source"),
-                Cards = CardIds(NpcWorldJson.Strings(row, "cards", true), id + ".cards", false),
+                Cards = BucketCards(CardIds(NpcWorldJson.Strings(row, "cards", true), id + ".cards", false),
+                    CardIds(NpcWorldJson.Strings(row, "excluded"), id + ".excluded", true), id, out var excluded),
+                Excluded = excluded,
                 ClassPool = BucketPool(NpcWorldJson.Text(row, "pool", false), id),
             });
         }
@@ -286,6 +292,17 @@ public sealed class RunDefinition
     {
         if (weight < 1 || weight > 100) throw new InvalidDataException(owner + ".weight must be 1..100: " + weight);
         return weight;
+    }
+
+    private static IReadOnlyList<string> BucketCards(IReadOnlyList<string> listed, IReadOnlyList<string> excluded, string owner,
+        out IReadOnlyList<string> kept)
+    {
+        string stray = excluded.FirstOrDefault(id => !listed.Contains(id));
+        if (stray != null) throw new InvalidDataException(owner + ".excluded: " + stray + " is not in its cards.");
+        var cards = listed.Where(id => !excluded.Contains(id)).ToList();
+        if (cards.Count == 0) throw new InvalidDataException(owner + ": every card is excluded.");
+        kept = Unique(excluded, owner + ".excluded");
+        return cards;
     }
 
     private static bool BucketPool(string pool, string owner)

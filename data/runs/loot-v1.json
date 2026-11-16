@@ -766,6 +766,7 @@
     },
     {
       "id": "mage-unique", "class": "MAGE", "title": "LOOTA_Mage_32", "pool": "class",
+      "excluded": ["ULD_003"],
       "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
       "cards": [
         "ULD_003", "CFM_621", "LOE_011", "CFM_687"
@@ -945,6 +946,7 @@
     },
     {
       "id": "priest-unique", "class": "PRIEST", "title": "LOOTA_Priest_10", "pool": "class",
+      "excluded": ["ULD_003"],
       "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
       "cards": [
         "ULD_003", "CFM_621", "CFM_020", "LOE_011"
@@ -1213,6 +1215,7 @@
     },
     {
       "id": "warlock-unique", "class": "WARLOCK", "title": "LOOTA_Warlock_03", "pool": "class",
+      "excluded": ["ULD_003"],
       "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run#Card_Buckets",
       "cards": [
         "ULD_003", "CFM_621", "LOE_011", "CFM_750"
