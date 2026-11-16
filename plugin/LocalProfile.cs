@@ -350,6 +350,78 @@ public sealed class LocalProfileData
     public bool ShouldSerializeSeenMassPackTooltip() => SeenMassPackTooltip;
     public int SeenDeathKnightTips;
     public bool ShouldSerializeSeenDeathKnightTips() => SeenDeathKnightTips != 0;
+    // Run modes (Dungeon Run first). Optional, no version bump: absent on every save that never played a run.
+    public List<LocalRunSlot> Runs = new List<LocalRunSlot>();
+    public bool ShouldSerializeRuns() => Runs != null && Runs.Count != 0;
+}
+
+// One run mode on this save (plugin/Runs; operations in LocalProfileRuns.cs): its run, in progress or the last one played,
+// whether a boss fight is under way, the per-class tallies and the client's own flags for the mode. Run fights never
+// become Matches rows and never move gold, dust, XP, ladder, quests, achievements or rewards (retail Dungeon Run paid
+// none either).
+public sealed class LocalRunSlot
+{
+    public string Definition;
+    public LocalRunRecord Run;
+    // Set from the start of a boss fight until its result. A fight a quit or crash interrupted is fought again: recovery
+    // clears the marker and leaves the run as it was (same boss, same Health, same deck).
+    public string FightId;
+    public bool ShouldSerializeFightId() => FightId != null;
+    public List<LocalRunClassWins> Wins = new List<LocalRunClassWins>();
+    public List<LocalRunFlag> ClientFlags = new List<LocalRunFlag>();
+    // Card backs the mode granted (Dungeon Run: Candle King, for a run won with every class), also in OwnedCardBacks; the
+    // ownership ledger counts them as earned. UnshownCardBacks: granted but not yet presented in the client.
+    public List<int> CardBacks = new List<int>();
+    public bool ShouldSerializeCardBacks() => CardBacks != null && CardBacks.Count != 0;
+    public List<int> UnshownCardBacks = new List<int>();
+    public bool ShouldSerializeUnshownCardBacks() => UnshownCardBacks != null && UnshownCardBacks.Count != 0;
+}
+
+public sealed class LocalRunClassWins
+{
+    public string Class;
+    public int Bosses;
+    public int Runs;
+}
+
+// A save-data value the client writes for the mode (voice lines and tutorials it has shown), kept as the client sent it.
+public sealed class LocalRunFlag
+{
+    public int Subkey;
+    public List<long> Values = new List<long>();
+}
+
+// RunState as stored (plugin/Runs/RunState.cs; mapped in LocalProfileRuns.cs).
+public sealed class LocalRunRecord
+{
+    public int DefinitionVersion;
+    public string Class;
+    public string Hero;
+    public long Seed;
+    public int Step;
+    public string Status;
+    public List<string> Deck = new List<string>();
+    public List<string> Passives = new List<string>();
+    public List<string> BossesFought = new List<string>();
+    public List<string> Defeated = new List<string>();
+    public int BossesDefeated;
+    public string NextBoss;
+    public string LostTo;
+    public List<string> PendingRewards = new List<string>();
+    public LocalRunOffer Offer;
+    public bool RunEndSeen;
+}
+
+public sealed class LocalRunOffer
+{
+    public string Kind;
+    public List<LocalRunOption> Options = new List<LocalRunOption>();
+}
+
+public sealed class LocalRunOption
+{
+    public string Title;
+    public List<string> Cards = new List<string>();
 }
 
 // #57 (owner 2026-10-28): what a new save's first commit granted. Seen only hides the popup; it never grants anything.
@@ -704,6 +776,7 @@ public sealed partial class LocalProfile : IDisposable
         if (!ValidNpcFields(npcId, npcDeckId, npcRating)) throw new ArgumentException("Invalid NPC encounter.");
         if (mode != null && !CasualRules.IsCasual(mode)) throw new ArgumentException("Unknown match mode.");
         if (data.Pending != null) throw new InvalidOperationException("A local match is already pending.");
+        if (RunFightUnderway(data)) throw new InvalidOperationException("A run fight is under way.");
         if (data.PendingRewardPresentationId != null)
             throw new InvalidOperationException("The previous local reward must be presented first.");
         if (!ValidName(deck, 64) || !ValidName(opponent, 64) || seed < 0)
@@ -898,6 +971,13 @@ public sealed partial class LocalProfile : IDisposable
 
     public void RecoverInterrupted()
     {
+        if (RunFightUnderway(data))
+        {
+            // A run fight a quit or crash interrupted is fought again: only the marker clears; the run stays as it was.
+            var replay = Snapshot();
+            foreach (var slot in replay.Runs) slot.FightId = null;
+            Commit(replay);
+        }
         if (data.Pending == null) return;
         if (data.Pending.DebugScenario)
         {
@@ -1848,6 +1928,7 @@ public sealed partial class LocalProfile : IDisposable
         HiddenLoaners = (data.HiddenLoaners ?? new List<string>()).ToList(),
         SeenMassPackTooltip = data.SeenMassPackTooltip,
         SeenDeathKnightTips = data.SeenDeathKnightTips,
+        Runs = (data.Runs ?? new List<LocalRunSlot>()).Select(Copy).ToList(),
         PurchaseSequence = data.PurchaseSequence, Purchases = data.Purchases.Select(Copy).ToList(),
         OwnedCoins = data.OwnedCoins.ToList(), FavoriteCoins = data.FavoriteCoins.ToList(),
         OwnedRecipes = data.OwnedRecipes.ToList(), OwnedCardBacks = data.OwnedCardBacks.ToList(),
@@ -2008,6 +2089,48 @@ public sealed partial class LocalProfile : IDisposable
         if (profile.HiddenLoaners == null || profile.HiddenLoaners.Any(key => !IsStarterLoanerShape(key))
             || profile.HiddenLoaners.Distinct(StringComparer.Ordinal).Count() != profile.HiddenLoaners.Count)
             throw new InvalidOperationException("Invalid hidden starter decks.");
+        ValidateRuns(profile);
+    }
+
+    private static bool RunFightUnderway(LocalProfileData profile) => profile.Runs != null && profile.Runs.Any(slot => slot?.FightId != null);
+
+    private static readonly string[] RunStatuses = { "Active", "Won", "Lost", "Retired" };
+
+    // Shape only; what a run's ids mean is checked against its run definition when the plugin loads it (LocalProfileRuns.cs).
+    private static void ValidateRuns(LocalProfileData profile)
+    {
+        void Require(bool ok, string what) { if (!ok) throw new InvalidOperationException("Invalid run data: " + what); }
+        bool Ids(List<string> ids, bool allowEmpty = true) => ids != null && (allowEmpty || ids.Count != 0) && ids.All(id => ValidName(id, 64));
+        Require(profile.Runs != null && profile.Runs.All(slot => slot != null), "slots");
+        Require(profile.Runs.Select(slot => slot.Definition).Distinct(StringComparer.Ordinal).Count() == profile.Runs.Count, "one slot per run mode");
+        Require(!(profile.Pending != null && RunFightUnderway(profile)), "a ladder match and a run fight at once");
+        Require(profile.Runs.Count(slot => slot.FightId != null) <= 1, "two run fights at once");
+        foreach (var slot in profile.Runs)
+        {
+            Require(ValidName(slot.Definition, 64), "run mode id");
+            Require(slot.Wins != null && slot.Wins.All(w => w != null && ValidName(w.Class, 32) && w.Bosses >= 0 && w.Runs >= 0 && w.Runs <= w.Bosses)
+                && slot.Wins.Select(w => w.Class).Distinct(StringComparer.Ordinal).Count() == slot.Wins.Count, slot.Definition + " wins");
+            Require(slot.ClientFlags != null && slot.ClientFlags.All(f => f != null && f.Subkey > 0 && f.Values != null && f.Values.Count <= 512)
+                && slot.ClientFlags.Select(f => f.Subkey).Distinct().Count() == slot.ClientFlags.Count, slot.Definition + " client flags");
+            // A granted card back needs a won run behind it (which classes, the run definition says) and is owned.
+            Require(slot.CardBacks != null && slot.UnshownCardBacks != null && slot.CardBacks.All(id => id > 0)
+                && slot.CardBacks.Distinct().Count() == slot.CardBacks.Count && slot.UnshownCardBacks.Distinct().Count() == slot.UnshownCardBacks.Count
+                && slot.UnshownCardBacks.All(slot.CardBacks.Contains) && (slot.CardBacks.Count == 0 || slot.Wins.Any(w => w.Runs > 0))
+                && slot.CardBacks.All(profile.OwnedCardBacks.Contains), slot.Definition + " card backs");
+            var run = slot.Run;
+            Require(slot.FightId == null || (ValidName(slot.FightId, 64) && run != null && run.Status == "Active" && run.Offer == null),
+                slot.Definition + " fight marker without an active run between rewards");
+            if (run == null) continue;
+            Require(run.DefinitionVersion > 0 && ValidName(run.Class, 32) && ValidName(run.Hero, 64) && RunStatuses.Contains(run.Status)
+                && run.Step >= 0 && run.BossesDefeated >= 0, slot.Definition + " run header");
+            Require(Ids(run.Deck, false) && Ids(run.Passives) && Ids(run.BossesFought) && Ids(run.Defeated) && run.Defeated.Count == run.BossesDefeated
+                && run.PendingRewards != null
+                && run.PendingRewards.All(kind => ValidName(kind, 32)), slot.Definition + " run lists");
+            Require((run.Status == "Active") == (run.NextBoss != null || run.Offer != null) && (run.NextBoss == null || ValidName(run.NextBoss, 64))
+                && (run.LostTo == null || ValidName(run.LostTo, 64)), slot.Definition + " run progress");
+            Require(run.Offer == null || (ValidName(run.Offer.Kind, 32) && run.Offer.Options != null && run.Offer.Options.Count > 0
+                && run.Offer.Options.All(o => o != null && Ids(o.Cards, false) && (o.Title == null || ValidName(o.Title, 64)))), slot.Definition + " run offer");
+        }
     }
 
     private static void ValidateProgression(LocalProfileData profile, int version, string[] heroes)
@@ -2417,6 +2540,20 @@ public sealed partial class LocalProfile : IDisposable
     };
     private static LocalCardTokens Copy(LocalCardTokens tokens) => tokens == null ? null : new LocalCardTokens {
         Common = tokens.Common, Rare = tokens.Rare, Epic = tokens.Epic, Legendary = tokens.Legendary
+    };
+    private static LocalRunSlot Copy(LocalRunSlot slot) => slot == null ? null : new LocalRunSlot {
+        Definition = slot.Definition, Run = Copy(slot.Run), FightId = slot.FightId,
+        Wins = (slot.Wins ?? new List<LocalRunClassWins>()).Select(w => w == null ? null : new LocalRunClassWins { Class = w.Class, Bosses = w.Bosses, Runs = w.Runs }).ToList(),
+        ClientFlags = (slot.ClientFlags ?? new List<LocalRunFlag>()).Select(f => f == null ? null : new LocalRunFlag { Subkey = f.Subkey, Values = f.Values?.ToList() }).ToList(),
+        CardBacks = slot.CardBacks?.ToList(), UnshownCardBacks = slot.UnshownCardBacks?.ToList()
+    };
+    private static LocalRunRecord Copy(LocalRunRecord run) => run == null ? null : new LocalRunRecord {
+        DefinitionVersion = run.DefinitionVersion, Class = run.Class, Hero = run.Hero, Seed = run.Seed, Step = run.Step, Status = run.Status,
+        Deck = run.Deck?.ToList(), Passives = run.Passives?.ToList(), BossesFought = run.BossesFought?.ToList(), Defeated = run.Defeated?.ToList(),
+        BossesDefeated = run.BossesDefeated, NextBoss = run.NextBoss, LostTo = run.LostTo, PendingRewards = run.PendingRewards?.ToList(),
+        Offer = run.Offer == null ? null : new LocalRunOffer { Kind = run.Offer.Kind,
+            Options = run.Offer.Options?.Select(o => o == null ? null : new LocalRunOption { Title = o.Title, Cards = o.Cards?.ToList() }).ToList() },
+        RunEndSeen = run.RunEndSeen
     };
     private static LocalWelcome Copy(LocalWelcome welcome) => welcome == null ? null : new LocalWelcome {
         Version = welcome.Version, PackType = welcome.PackType, Packs = welcome.Packs, Gold = welcome.Gold, Dust = welcome.Dust,

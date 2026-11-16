@@ -12,6 +12,11 @@ internal static class BoardChoice
         106, 118, 120, 126, 129, 130, 131, 133, 134, 140, 141, 142, 143 };
     internal static readonly int[] FreeBoards = { 1, 2, 3, 4, 5, 6, 7 };
 
+    // An encounter's own board (a mission's, e.g. Dungeon Run's 61 Kobolds and Catacombs from its run definition) replaces
+    // the player's cosmetic when the client has it; 0 keeps the cosmetic.
+    internal static int ForEncounter(int boardId, IEnumerable<int> presentIds)
+        => boardId > 0 && presentIds.Contains(boardId) ? boardId : 0;
+
     internal static int Pick(int seed, IEnumerable<int> presentIds, int forcedId)
         => Pick(seed, presentIds, forcedId, Allowlist);
 

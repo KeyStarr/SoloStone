@@ -260,7 +260,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_041a", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0},{PlayReq.REQ_MINION_TARGET,0}}, new Power
 			{
-				PowerTask = new AddEnchantmentTask("GVG_041c", EntityType.SOURCE)
+				PowerTask = new AddEnchantmentTask("GVG_041c", EntityType.TARGET)
 			}));
 
 			// ------------------------------------------ SPELL - DRUID

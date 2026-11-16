@@ -39,12 +39,19 @@ internal sealed class MatchEventLog
     private Ent pendingStat; private string pendingStatBy;
     private int pendingStatFromAtk, pendingStatFromHp;
     private readonly HashSet<int> touched = new HashSet<int>();
+    // Board characters whose stats carry aura effects: an aura's buff reaches the client through its attachment, not as a
+    // stat tag change, so the tracker meets it (and its end) only at the batch's resync.
+    private readonly HashSet<int> auraHeld = new HashSet<int>();
     private readonly Dictionary<int, int> heraldProgress = new Dictionary<int, int>();
     private readonly HashSet<long> announcedOps = new HashSet<long>();
     private IList<IPowerHistoryEntry> batch; private int batchIndex;
     private bool inReset; private int resetEntities;
     // Test hook: throws from inside entry decoding to prove a fault disables the log and never reaches the match.
     internal Action<IPowerHistoryEntry> TestFault;
+    // Transport corrections (NativeMatch.RecordTransportCorrection): tag values the client receives at a history position
+    // with no engine entry of their own, e.g. an aura's stats when it is removed. Applied there as tag changes, so the
+    // tracker follows what the client is sent instead of reporting it as drift (RESYNC).
+    internal Func<IList<IPowerHistoryEntry>, int, IEnumerable<KeyValuePair<int, IReadOnlyDictionary<GameTag, int>>>> Corrections;
     private readonly string humanSeat, npcSeat;
     private static readonly Dictionary<string, string> Names = new Dictionary<string, string>(StringComparer.Ordinal);
 
@@ -92,9 +99,11 @@ internal sealed class MatchEventLog
             batch = entries;
             for (batchIndex = start; batchIndex < entries.Count; batchIndex++)
             {
+                ApplyCorrections(game, entries, batchIndex, facts);
                 TestFault?.Invoke(entries[batchIndex]);
                 Handle(game, entries[batchIndex], facts);
             }
+            ApplyCorrections(game, entries, entries.Count, facts);
             FlushStat();
             AfterBatch(game, facts);
             EndBatch(game);
@@ -401,6 +410,14 @@ internal sealed class MatchEventLog
             ? " stats=" + atk0 + "/" + hp0 + "->" + ent.Atk + "/" + (ent.Health - ent.Damage) : "";
         if (!setup && !inReset)
             Emit(ent.Controller, "TRANSFORM", "entity=#" + ent.Id + " from=" + before + " to=" + Ref(game, ent.Id, change.CardId) + stats + By(game));
+    }
+
+    private void ApplyCorrections(EngineGame game, IList<IPowerHistoryEntry> entries, int index, Facts facts)
+    {
+        if (Corrections == null) return;
+        foreach (var correction in Corrections(entries, index))
+            foreach (var tag in correction.Value)
+                OnTag(game, new PowerHistoryTagChange { EntityId = correction.Key, Tag = tag.Key, Value = tag.Value }, facts);
     }
 
     private void OnTag(EngineGame game, PowerHistoryTagChange change, Facts facts)
@@ -711,9 +728,18 @@ internal sealed class MatchEventLog
                 // A hero's attack is its weapon's: the client derives it, the stream carries no tag change for it.
                 bool atkDiffers = ent.Atk != atk && !(live is Hero);
                 if (live is Hero) ent.Atk = atk;
+                bool aura = live.AuraEffects != null && (live.AuraEffects[GameTag.ATK] != 0 || live.AuraEffects[GameTag.HEALTH] != 0);
+                bool explained = aura || auraHeld.Contains(id) || (live is IPlayable playable && playable.AppliedEnchantments?.Count > 0);
+                if (aura) auraHeld.Add(id); else auraHeld.Remove(id);
                 if (atkDiffers || ent.Health - ent.Damage != hp)
                 {
-                    Emit(ent.Controller, "RESYNC", "target=" + Ref(game, id, card) + " tracked=" + ent.Atk + "/" + (ent.Health - ent.Damage) + " engine=" + atk + "/" + hp);
+                    // Stats an aura or an enchantment set (Flametongue Totem, Crazed Alchemist's swap) are a stat change the
+                    // client was sent; only an unexplained difference is tracker drift.
+                    if (explained)
+                        Emit(ent.Controller, "STATS", "target=" + Ref(game, id, card) + " stats=" + ent.Atk + "/" + (ent.Health - ent.Damage) + "->" + atk + "/" + hp
+                            + " by=" + (aura || auraHeld.Contains(id) ? "aura" : "enchantment"));
+                    else
+                        Emit(ent.Controller, "RESYNC", "target=" + Ref(game, id, card) + " tracked=" + ent.Atk + "/" + (ent.Health - ent.Damage) + " engine=" + atk + "/" + hp);
                     TakeLiveStats(ent, live);
                 }
             }

@@ -110,7 +110,7 @@ internal static class Invariants
         || QuestRules.IsInternalTag(tag) || CostRules.IsInternalTag(tag) || Generic.IsDecisionInternalTag(tag)
         || LeylineRules.IsInternalTag(tag) || StatGainRules.IsInternalTag(tag) || SwapRules.IsInternalTag(tag)
         || CompanionRules.IsInternalTag(tag) || tag == ColossalRules.RealizedFactor
-        || DormantRules.IsPrivateTag(tag) || TemporaryRules.IsPrivateTag(tag) || PlayLockRules.IsPrivateTag(tag)
+        || DormantRules.IsPrivateTag(tag) || TemporaryRules.IsPrivateTag(tag) || PlayLockRules.IsPrivateTag(tag) || BossRules.IsInternalTag(tag)
         || PayloadRules.IsInternalTag(tag) || AuraSpellRules.IsInternalTag(tag) || HealingRules.IsInternalTag(tag)
         || ShatterRules.IsInternalTag(tag) || HandProgressRules.IsInternalTag(tag) || CthunRules.IsInternalTag(tag)
         || OldGodRules.IsInternalTag(tag) || AutonomousTurnRules.IsInternalTag(tag) || DiscoverRealRules.IsInternalTag(tag);

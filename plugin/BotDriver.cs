@@ -94,6 +94,16 @@ public sealed class DriverOptions
 
 public static class BotDriver
 {
+    // A run boss has no NPC profile, so no golden pilot builds its view: it searches a view that removes the player's
+    // Secrets (counted, as the ladder pilot's view does) and tracks its own deck, which keeps its own Secrets live. One
+    // instance per match: the own-deck ledger grows with the game. Without it, any Secret made the view throw and the
+    // boss fell back to ending its turn.
+    public static DriverOptions ForBoss()
+    {
+        var fair = new FairOptions { RemoveOpponentSecrets = true, TrackOwnDeck = true };
+        return new DriverOptions { FairViewFactory = (game, owner, seed, style) => FairBotState.Create(game, owner, seed, style, fair) };
+    }
+
     internal static BotAction BoundedFallback(FairBotState state, IEnumerable<BotAction> legal, Func<bool> spend)
         => BoundedFallback(state, legal, spend, out bool _);
     internal static BotAction BoundedFallback(FairBotState state, IEnumerable<BotAction> legal, Func<bool> spend, out bool complete)
@@ -140,6 +150,11 @@ public static class BotDriver
             trace = DriverTrace.Forced("rewind", task); return task;
         }
 #endif
+        // An adventure boss's autocast Hero Power (AI_MUST_PLAY, e.g. Dungeon Run's Bink the Burglar: Coin) is used whenever it
+        // can be, before anything else. Only adventure and brawl Hero Powers carry the tag; class Hero Powers never do.
+        var mustPlay = tasks.FirstOrDefault(t => t.PlayerTaskType == PlayerTaskType.HERO_POWER && t.Target == null
+            && t.Controller.Hero.HeroPower.Card[GameTag.AI_MUST_PLAY] == 1);
+        if (mustPlay != null) { trace = DriverTrace.Forced("must-play hero power", mustPlay); return mustPlay; }
         return null;
     }
 

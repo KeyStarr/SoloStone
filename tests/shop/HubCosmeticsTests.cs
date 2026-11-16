@@ -51,6 +51,9 @@ internal static class HubCosmeticsTests
         check(picks.All(LocalHubCosmetics.DefaultBoards.Contains) && picks.Distinct().Count() == 7, "random owned varies across matches among owned boards");
         check(Enumerable.Range(0, 400).All(seed => BoardChoice.ForPlayer(seed, present, 0, 0, new int[0]) == picks[seed]), "same seed, same board");
         check(BoardChoice.ForPlayer(5, present, 20, 3, new int[0]) == 20, "verification force wins");
+        check(BoardChoice.ForEncounter(61, present) == 61 && BoardChoice.ForEncounter(0, present) == 0,
+            "an encounter plays on its own board (Dungeon Run: 61); no encounter board keeps the cosmetic");
+        check(BoardChoice.ForEncounter(61, present.Where(id => id != 61)) == 0, "an encounter board the client lacks falls back to the cosmetic");
         int bought = BoardChoice.Allowlist.FirstOrDefault(id => id > 7);
         if (bought > 0) {
             check(BoardChoice.ForPlayer(5, present, 0, bought, new[] { bought }) == bought, "a fixed bought board always loads");

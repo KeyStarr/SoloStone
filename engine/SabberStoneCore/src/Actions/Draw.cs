@@ -44,6 +44,9 @@ namespace SabberStoneCore.Actions
 
         public static Func<Controller, IPlayable, IPlayable> DrawBlock => (controller, selected) =>
         {
+            // A boss that draws nothing (Tad, Treasure Vault) draws nothing from any effect either (Coldlight Oracle), and so
+            // takes no fatigue from it.
+            if (BossRules.DrawsNothing(controller)) return null;
             if (selected != null && selected.Zone != controller.DeckZone)
                 return DrawFrom(controller, selected.Controller, selected);
             if (!PreDrawPhase(controller)) return null;

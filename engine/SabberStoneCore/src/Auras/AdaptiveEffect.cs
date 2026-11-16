@@ -105,6 +105,11 @@ namespace SabberStoneCore.Auras
 					{
 						new Effect(_tag, _operator, _lastValue).RemoveFrom(_owner);
 						new Effect(_tag, _operator, value).ApplyTo(_owner);
+						// RemoveFrom logs the card's own value; a SET ApplyTo writes silently. Log the value that holds now, or
+						// the client keeps the removed one (Gemstudded Golem stayed able to attack on screen while the engine
+						// had CANT_ATTACK set).
+						if (_owner.Game.History)
+							_owner.Game.PowerHistory.Add(Kettle.PowerHistoryBuilder.TagChange(_owner.Id, _tag, _owner[_tag]));
 					}
 				}
 				else
