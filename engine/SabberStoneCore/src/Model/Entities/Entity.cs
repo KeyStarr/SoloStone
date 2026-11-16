@@ -492,6 +492,7 @@ namespace SabberStoneCore.Model.Entities
 				}
 			}
 
+			Actions.RunProgressRules.OnCreated(controller, result);
 			return result;
 		}
 

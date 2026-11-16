@@ -38,6 +38,13 @@ internal static class DungeonRunActiveTreasuresProof
             Check(sidekick[GameTag.ATK] == 6 && sidekick[GameTag.HEALTH] == 6 && sidekick[GameTag.TAG_SCRIPT_DATA_NUM_1] == 4, "Loyal Sidekick: 6/6 after 4 bosses");
             Check(hourglass.Cost == 3, "Shifting Hourglass: costs (3) after 4 bosses");
         }
+        // Made during the fight (a Coffer's or Chest's treasure, a Magic Mirror copy): scaled too, and in a snapshot as well.
+        foreach (Game run in new[] { RunFight(3, "CS2_182"), Game.LoadSnapshot(RunFight(3, "CS2_182").SaveSnapshot()) })
+        {
+            var made = SabberStoneCore.Actions.Generic.DrawCard(run.Player1, Cards.FromId("LOOTA_829"));
+            Check(made[GameTag.ATK] == 5 && made[GameTag.HEALTH] == 5 && made[GameTag.TAG_SCRIPT_DATA_NUM_1] == 3,
+                "Loyal Sidekick made mid-fight: 5/5 after 3 bosses (" + made[GameTag.ATK] + "/" + made[GameTag.HEALTH] + ")");
+        }
         Game fresh = RunFight(0, "LOOTA_829", "LOOTA_830");
         Check(fresh.Player1.HandZone.Concat(fresh.Player1.DeckZone).Single(p => p.Card.Id == "LOOTA_830").Cost == 7, "Shifting Hourglass: (7) before any boss");
 

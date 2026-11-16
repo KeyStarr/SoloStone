@@ -20,7 +20,8 @@ namespace SabberStoneCore.Actions
         // Tag-team partners (George and Karl), on the controller: the partner off the board keeps his Damage and Armor here,
         // and PartnerDown is set once he has been defeated. Private: never sent to the client.
         private const GameTag PartnerDamage = (GameTag)34700, PartnerArmor = (GameTag)34701, PartnerDown = (GameTag)34702;
-        public static bool IsInternalTag(GameTag tag) => (int)tag >= 34700 && (int)tag <= 34702;
+        // 34703: RunProgressRules.Progress (the run's defeated bosses, on the player).
+        public static bool IsInternalTag(GameTag tag) => (int)tag >= 34700 && (int)tag <= 34703;
 
         // The hero plays no cards before its Nth turn (A. F. Kay: none before her sixth; Tad: never).
         internal static void HoldCardsUntilTurn(Card hero, int turn) => HoldUntilTurn[hero.AssetId] = turn;
