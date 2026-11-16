@@ -405,9 +405,9 @@ namespace SabberStoneCore.Model
 		}
 
 		/// <summary> A copy constructor. </summary>
-		private Game(Game game, bool logging, bool resetRandomSeed, bool history, long? derivedSeed = null) : base(null, game)
+		private Game(Game game, bool logging, bool resetRandomSeed, bool history, long? derivedSeed = null, bool detached = false) : base(null, game)
 		{
-            game.Resolution.RequireQuiescent();
+            if (!detached) game.Resolution.RequireQuiescent();
 			//IdEntityDic = new Dictionary<int, IPlayable>(game.IdEntityDic.Count);
 			IdEntityDic = new EntityList(game.IdEntityDic.Count);
 			Game = this;
@@ -447,7 +447,7 @@ namespace SabberStoneCore.Model
 			NextCloneIndex = game.NextCloneIndex;
 			_nextDecisionId = game._nextDecisionId;
 			_optionsDecisionId = game._optionsDecisionId;
-            SpellCompletion = game.SpellCompletion?.Clone();
+            SpellCompletion = detached ? null : game.SpellCompletion?.Clone();
             RewindDisabled = derivedSeed.HasValue || game.RewindDisabled;
             Rewind = RewindDisabled ? null : game.Rewind?.Clone();
             ClearWeapons = game.ClearWeapons == null ? null : new List<int>(game.ClearWeapons);
@@ -498,11 +498,12 @@ namespace SabberStoneCore.Model
 			}
 
 			RestoreCloneSubscriptions(game);
-            Resolution = game.Resolution.CloneBoundary();
+            Resolution = detached ? new ResolutionScheduler() : game.Resolution.CloneBoundary();
             if (derivedSeed.HasValue && game.Rewind?.Stage == RewindStage.Offered)
                 ControllerById(game.Rewind.ControllerId).Choice = null;
 
 			TaskQueue = new TaskQueue(this);
+            if (detached) Generic.ClearDecisionPlay(Player1, Player2);
 
 			SetIndexer(game._idIndex, game._oopIndex);
 		}
@@ -1599,6 +1600,11 @@ namespace SabberStoneCore.Model
 		/// <summary>Clones this game with an independent, explicitly seeded RNG before cloning entities.</summary>
 		public Game CloneForSimulation(long derivedSeed, bool history = false) =>
 			new Game(this, false, false, history, derivedSeed);
+
+		/// <summary>Copies the board for a read-only evaluation, even while an effect is resolving: pending effects,
+		/// queued tasks, an unfinished spell and decision-play cursors are dropped, so the copy is a quiescent state
+		/// that can play cards. Never feed it back into the live game.</summary>
+		internal Game CloneDetached(long derivedSeed) => new Game(this, false, false, false, derivedSeed, detached: true);
 
 		private static long CreateSeed()
 		{

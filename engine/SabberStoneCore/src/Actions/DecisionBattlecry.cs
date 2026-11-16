@@ -121,6 +121,13 @@ namespace SabberStoneCore.Actions
             }
         }
 
+        /// <summary>Detached evaluation copies only: forget the in-flight play cursors without touching entities.</summary>
+        internal static void ClearDecisionPlay(params Controller[] controllers)
+        {
+            foreach (var c in controllers)
+                c[DecisionSource] = c[DecisionTarget] = c[DecisionRemaining] = c[DecisionDefinition] = c[DecisionEcho] = c[AutomaticDecisionTag] = 0;
+        }
+
         internal static void CancelDecisionPlay(Controller c)
         {
             if (!HasDecisionPlay(c)) return;
