@@ -153,6 +153,7 @@ internal static class DungeonRunRounds6To7Proof
         Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
         Check(duo.State == State.RUNNING && duo.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && duo.Player2.Hero.Damage == 0
             && duo.Player2.Hero.HeroPower.Card.Id == "AT_132_PALADIN", "George defeated: Karl takes over, unhurt, with The Silver Hand");
+        Check(duo[GameTag.MISSION_EVENT] == 103, "George defeated: mission event 103 (Karl takes over)");
         duo = Reload(duo);
         End(duo);
         Add(duo.Player2, "LOOTA_BOSS_110");
@@ -170,6 +171,7 @@ internal static class DungeonRunRounds6To7Proof
         End(tag);
         Play(tag, tag.Player2, "LOOTA_BOSS_110");
         Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && tag.Player2.Hero.Damage == 0, "Tag Team: Karl in, unhurt");
+        Check(tag[GameTag.MISSION_EVENT] == 102, "Tag Team: mission event 102 (Karl tagged in: his line, the name banner)");
         var karlCreated = tag.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryFullEntity>()
             .LastOrDefault(f => f.Entity.Id == tag.Player2.Hero.Id);
         Check(karlCreated != null && karlCreated.Entity.Tags.TryGetValue(GameTag.ZONE, out int karlZone) && karlZone == (int)Zone.PLAY,
@@ -181,6 +183,12 @@ internal static class DungeonRunRounds6To7Proof
         End(tag);
         Play(tag, tag.Player2, "LOOTA_BOSS_110");
         Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_15h" && tag.Player2.Hero.Damage == 6, "Tag Team: George back with his 6 Damage (" + tag.Player2.Hero.Card.Id + " " + tag.Player2.Hero.Damage + ")");
+        Check(tag[GameTag.MISSION_EVENT] == 101, "Tag Team: mission event 101 (George tagged in)");
+        int georgeId = tag.Player2.Hero.Id;
+        var georgeHistory = tag.PowerHistory.Full.SkipWhile(e => !(e is SabberStoneCore.Kettle.PowerHistoryFullEntity f && f.Entity.Id == georgeId)).ToList();
+        Check(georgeHistory.Count != 0 && ((SabberStoneCore.Kettle.PowerHistoryFullEntity)georgeHistory[0]).Entity.Tags.TryGetValue(GameTag.DAMAGE, out int kept) && kept == 6
+            && !georgeHistory.OfType<SabberStoneCore.Kettle.PowerHistoryTagChange>().Any(t => t.EntityId == georgeId && t.Tag == GameTag.DAMAGE),
+            "Tag Team: George comes back created with his 6 Damage, not hit for it");
         Play(tag, tag.Player2, "LOOTA_BOSS_110");
         Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && tag.Player2.Hero.Damage == 12, "Tag Team: Karl back with his 12 Damage");
 

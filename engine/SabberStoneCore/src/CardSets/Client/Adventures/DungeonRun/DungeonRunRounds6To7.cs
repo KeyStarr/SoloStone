@@ -24,10 +24,14 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             // game."). Each hero names the other as his partner (BossRules): the one off the board keeps his own Damage.
             register(46323, "LOOTA_BOSS_15h", card => {
                 Actions.BossRules.MarkPartner(card, "LOOTA_BOSS_32h");
+                // George's mission script (client mission LOOT_Dungeon_BOSS_15h): 101 George tagged in, 102 Karl tagged in,
+                // 103 Karl takes over (George defeated), 104 George takes over (Karl defeated).
+                Actions.BossRules.MarkPartnerEvents(card, 101, 104);
                 DungeonRunCards.Plain(card);
             });
             register(46324, "LOOTA_BOSS_32h", card => {
                 Actions.BossRules.MarkPartner(card, "LOOTA_BOSS_15h");
+                Actions.BossRules.MarkPartnerEvents(card, 102, 103);
                 DungeonRunCards.Plain(card);
             });
             // George's Divinity (2): Give all your minions Divine Shield. Karl's is The Silver Hand (AT_132_PALADIN).
