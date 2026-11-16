@@ -764,6 +764,8 @@ M	Assembly-CSharp	AttackSpellController	OnHeroSourceAttackStateFinished	*
 M	Assembly-CSharp	AttackSpellController	OnProcessTaskList	*
 M	Assembly-CSharp	AttackSpellController	OnSourceAttackStateStarted	*
 M	Assembly-CSharp	AttackSpellController	OnStaticHeroSourceAttackStateFinished	*
+M	Assembly-CSharp	BannerManager	Get	BannerManager()
+M	Assembly-CSharp	BannerManager	get_IsShowing	System.Boolean()
 M	Assembly-CSharp	BaseHeroSkinInfoManager	EnterPreview	(CollectionCardVisual)
 M	Assembly-CSharp	BaseHeroSkinInfoManager	OnFailedPurchaseAck	(Hearthstone.Store.ProductInfo,PaymentMethod)
 M	Assembly-CSharp	BattlegroundsGuideButton	OnTrayEvent	*
@@ -2190,8 +2192,10 @@ M	Assembly-CSharp	RewardBoxesDisplay	SetLayer	*
 M	Assembly-CSharp	RewardBoxesDisplay	SetRewards	System.Void(System.Collections.Generic.List`1<RewardData>,System.Collections.Generic.List`1<RewardData>)
 M	Assembly-CSharp	RewardBoxesDisplay	UseDarkeningClickCatcher	System.Void(System.Boolean)
 M	Assembly-CSharp	RewardData	get_RewardType	Reward+Type()
+M	Assembly-CSharp	RewardPopups	ShowRewardsForAdventureUnlocks	*
 M	Assembly-CSharp	RewardUtils	GetNextHeroLevelRewardText	*
 M	Assembly-CSharp	RewardUtils	InitializeRewardItemDataModel	System.Boolean(Hearthstone.DataModels.RewardItemDataModel,TAG_RARITY,TAG_PREMIUM,System.String&)
+M	Assembly-CSharp	RewardUtils	LoadAndDisplayRewards	System.Void(System.Collections.Generic.List`1<RewardData>,System.Action)
 M	Assembly-CSharp	RewardUtils	RewardItemTypeToCurrencyType	CurrencyType(RewardItemType)
 M	Assembly-CSharp	SPJEntryButton	Awake	*
 M	Assembly-CSharp	SPJEntryButton	ShowButton	*
@@ -2902,7 +2906,10 @@ T	Assembly-CSharp	AchievementSubcategoryDbfRecord
 T	Assembly-CSharp	Actor		
 T	Assembly-CSharp	AdventureConfig		
 T	Assembly-CSharp	AdventureDbId		
+T	Assembly-CSharp	AdventureDeckDbfRecord		
 T	Assembly-CSharp	AdventureDungeonCrawlDisplay		
+T	Assembly-CSharp	AdventureHeroPowerDbfRecord		
+T	Assembly-CSharp	AdventureLoadoutTreasuresDbfRecord		
 T	Assembly-CSharp	AdventureModeDbId		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		
@@ -2929,6 +2936,7 @@ T	Assembly-CSharp	Assets.DeckTemplate+SourceType
 T	Assembly-CSharp	Assets.Global		
 T	Assembly-CSharp	Assets.Global+RewardTrackType		
 T	Assembly-CSharp	AttackSpellController		
+T	Assembly-CSharp	BannerManager		
 T	Assembly-CSharp	BaseHeroSkinInfoManager		
 T	Assembly-CSharp	BnetBar		
 T	Assembly-CSharp	BnetBarMenuButton		
@@ -3313,6 +3321,7 @@ T	Assembly-CSharp	RewardBoxesDisplay+RewardSet
 T	Assembly-CSharp	RewardData		
 T	Assembly-CSharp	RewardItemType		
 T	Assembly-CSharp	RewardPackage		
+T	Assembly-CSharp	RewardPopups		
 T	Assembly-CSharp	RewardUtils		
 T	Assembly-CSharp	RuleInvalidReason		
 T	Assembly-CSharp	SceneMgr		

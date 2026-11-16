@@ -1311,5 +1311,8 @@
       "LOOTA_847", "LOOTA_816", "LOOTA_841", "LOOTA_826", "LOOTA_843", "LOOTA_820", "LOOTA_805", "LOOTA_835", "LOOTA_837", "LOOTA_821",
       "LOOTA_827", "LOOT_998k", "LOOTA_811", "LOOTA_806", "LOOTA_840", "LOOT_998l", "LOOTA_838", "LOOTA_817", "LOOTA_830", "LOOTA_822",
       "LOOTA_814"]
-  }
+  },
+  "cardBackRewards": [
+    { "when": "allClasses", "cardBack": 119, "source": "https://hearthstone.wiki.gg/wiki/Dungeon_Run" }
+  ]
 }

@@ -1384,6 +1384,7 @@ public sealed partial class LocalProfile
         }
         skins.UnionWith(p.PortraitGrants.Where(row => row.Kind == "honored").Select(row => row.CardId));
         backs.UnionWith(p.Achievements.Grants.Where(row => row.CardBackId > 0).Select(row => row.CardBackId));
+        backs.UnionWith((p.Runs ?? new List<LocalRunSlot>()).SelectMany(slot => slot.CardBacks ?? new List<int>()));
         skins.UnionWith(p.Achievements.Grants.Where(row => row.HeroSkinId != null).Select(row => row.HeroSkinId));
         if (!recipes.SetEquals(p.OwnedRecipes) || !backs.SetEquals(p.OwnedCardBacks) || !coins.SetEquals(p.OwnedCoins) || !skins.SetEquals(p.OwnedHeroSkins)
             || !themes.SetEquals(p.OwnedHubThemes) || !boards.SetEquals(p.OwnedBoards) || !pets.SetEquals(p.OwnedPets))

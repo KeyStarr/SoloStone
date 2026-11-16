@@ -110,7 +110,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fair-packs` | Pack opening: fair rolls, pity rules and the frozen pack results |
 | `ladder-rules` | Ranked ladder rules (stars, floors, rewards) and a simulated climb through a synthetic opponent world |
 | `recipes` | The shipped shop deck recipes validate and follow the recipe rules |
-| `runs` | Run modes (`plugin/Runs`, `data/runs/`): every run definition parses and names real cards, boss Hero Powers match their heroes, start decks are legal; it prints which entries are blocked by unimplemented cards; and the run rules (health, rewards, ties, losses, seeded replay) on a fixture |
+| `runs` | Run modes (`plugin/Runs`, `data/runs/`): every run definition parses and names real cards, boss Hero Powers match their heroes, start decks are legal and the loot buckets are complete per class; it prints which entries are blocked by unimplemented cards; a whole shipped run plays for every class; the run rules (health, rewards, ties, losses, seeded replay, class-pool bundles, the every-class card back) on a fixture, and the save-data projection the client reads. Runs on the save (fights, crash replay, the card back grant and its ledger) are checked in `progression` |
 | `npc-world` | Opponent decks, skills, personalities, matchmaking and the opponent population |
 | `ai` | Opponent AI fairness: it may not see hidden information |
 | `npc-world-distribution` | The mistake distribution of the opponent skill tiers: 200 seeded trials per tier on six fixtures stay inside their priced bounds (the `--passivity-distribution` run of the `npc-world` program, about a minute; the default `npc-world` run leaves it out) |
@@ -184,7 +184,7 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | Opponent AI (`plugin/Npc/`, `plugin/Bot*.cs`, `plugin/LocalBot.cs`) | `ai`, `ai-audit`, `ai-golden`, `ai-golden-audit`, `npc-world`, `npc-world-distribution`, `native-match-logic`, `engine-proof` |
 | Other plugin code `engine-proof` and `standard-native` compile (`plugin/Local*.cs`, `NativeUIProjection.cs`, `StandardProofNative.cs`) | `engine-proof`, `standard-native`, and your own judgement for the rest |
 | Opponent decks, skills or personalities (`data/npc/`) | `npc-world`, `ai-golden`, `native-match-logic` |
-| Run modes (`plugin/Runs/`, `data/runs/`) | `runs` |
+| Run modes (`plugin/Runs/`, `data/runs/`, `plugin/LocalProfileRuns.cs`) | `runs`, `progression` |
 | Shop, recipes or card mastery (`data/shop/`, `data/progression/`, `plugin/LocalShop.cs`) | `cards`, `recipes`, `shop`, `recipe-picker`, `progression` |
 | The profile, rewards or economy (`plugin/Local*.cs`) | `progression`, `progression-extended`, `shop`, `ladder`, `ladder-extended`, `native-match-logic`, `native-bindings-logic` |
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |

@@ -5,18 +5,36 @@ using BepInEx.Logging;
 using HarmonyLib;
 
 // Run modes in the client's own adventure screen (Dungeon Run first: adventure 414, mode DUNGEON_CRAWL; plugin/Runs holds the
-// rules, RunCatalog the shipped definitions). The Modes button opens it while run modes are enabled: test-control builds
-// only, until the content is complete. The client's Dungeon Crawl display reads the run from the save data served here.
+// rules, RunCatalog the shipped definitions). The Modes button opens it while run modes are enabled. The client's Dungeon
+// Crawl display reads the run from the save data served here.
 internal static class NativeRunModes
 {
     private static ManualLogSource log;
 
-    // Off in the public build until the content is complete; test-hook and developer builds have it.
-    internal static bool Enabled =>
+    // The public build shows run modes once the shipped one is complete against this engine and this client (a boss for
+    // every round, loot for every class, both treasure pools); developer and test-hook builds always show them (an
+    // incomplete run plays there). Decided once the client's cards have loaded.
+    internal static bool Enabled
+    {
+        get
+        {
+            if (RunCatalog.All.Count == 0) return false;
 #if SOLOSTONE_RELEASE
-        false;
+            if (ready == null)
+            {
+                if (!(DefLoader.Get()?.GetAllEntityDefs()?.Count > 0)) return false;
+                RunAdmission admission = EngineFor(Current).Admission;
+                ready = admission.IsReady;
+                if (!admission.IsReady) log?.LogWarning("RUNMODE " + Current.Id + " hidden, not complete: " + string.Join("; ", admission.Problems()));
+            }
+            return ready.Value;
 #else
-        RunCatalog.All.Count > 0;
+            return true;
+#endif
+        }
+    }
+#if SOLOSTONE_RELEASE
+    private static bool? ready;
 #endif
 
     // The run mode the Modes button opens (the first shipped one until there is a chooser).
@@ -35,6 +53,7 @@ internal static class NativeRunModes
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(EndScreenShown)));
         harmony.Patch(AccessTools.Method(typeof(AdventureConfig), "OnAdventureSceneAwake"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(AdventureSceneAwake)));
         harmony.Patch(AccessTools.Method(typeof(AdventureDungeonCrawlDisplay), "OnBackButtonPress"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(DisplayBack)));
+        harmony.Patch(AccessTools.Method(typeof(RewardPopups), "ShowRewardsForAdventureUnlocks"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(AdventureUnlocks)));
     }
 
     // The display's Back goes to the client's adventure chooser, which offers only Practice (not playable offline). With one
@@ -44,6 +63,19 @@ internal static class NativeRunModes
         if (!InRunMode) return true;
         Trace("display back: home");
         NativeUIProbe.Navigate(SceneMgr.Mode.HUB);
+        return false;
+    }
+
+    // A won run's end sequence hands its last step (the run marked seen, Back enabled) to the client's reward popups for the
+    // adventure's unlocks, whose "all shown" never fires offline. A run mode has no such unlocks: with none to show, that
+    // step runs at once.
+    private static bool AdventureUnlocks(List<AdventureHeroPowerDbfRecord> unlockedHeroPowers, List<AdventureDeckDbfRecord> unlockedDecks,
+        List<AdventureLoadoutTreasuresDbfRecord> unlockedLoadoutTreasures, List<AdventureLoadoutTreasuresDbfRecord> upgradedLoadoutTreasures, Action callback)
+    {
+        if (!InRunMode || unlockedHeroPowers?.Count > 0 || unlockedDecks?.Count > 0 || unlockedLoadoutTreasures?.Count > 0 || upgradedLoadoutTreasures?.Count > 0)
+            return true;
+        Trace("run end: no adventure unlocks to show");
+        callback?.Invoke();
         return false;
     }
 
@@ -190,6 +222,7 @@ internal static class NativeRunModes
     // NativeUIProbe.Update: once the fight's game scene is gone, the fight no longer owns anything.
     internal static void Update()
     {
+        PresentWaitingCardBacks();
         if (phase == FightPhase.Ended && SceneMgr.IsInitialized() && SceneMgr.Get().GetMode() != SceneMgr.Mode.GAMEPLAY && !SceneMgr.Get().IsTransitioning())
         {
             Trace("fight " + fightId + " left its game scene for " + SceneMgr.Get().GetMode());
@@ -255,6 +288,48 @@ internal static class NativeRunModes
         // From the hub the scene opens on its chooser; back from a fight it already shows the run mode's screen.
         if (config.CurrentSubScene != Assets.AdventureData.Adventuresubscene.DUNGEON_CRAWL) config.ChangeSubSceneToSelectedAdventure();
         Trace("subscene -> " + config.CurrentSubScene);
+        // A card back still unshown (the game closed before) shows now, unless a run-end sequence is about to show it.
+        RunState run = LocalLadder.Profile?.RunOf(Current);
+        if (run == null || run.Status == RunStatus.Active || run.RunEndSeen) QueueCardBacks(Current);
+    }
+
+    // ---- Rewards ----
+    // A card back the mode granted (Dungeon Run: Candle King) shows in the client's own reward display; the grant itself was
+    // committed with the fight's result (LocalProfile.ResolveRunFight). It waits until the adventure screen is settled and
+    // the run-end banner ("Dungeon cleared with ...") is closed. Dismissed, it counts as shown.
+    private static bool presentingCardBacks;
+    private static RunDefinition cardBacksWaiting;
+
+    private static void QueueCardBacks(RunDefinition definition)
+    {
+        if (definition != null) cardBacksWaiting = definition;
+    }
+
+    private static void PresentWaitingCardBacks()
+    {
+        if (cardBacksWaiting == null || presentingCardBacks || !SceneMgr.IsInitialized() || SceneMgr.Get().IsTransitioning()
+            || SceneMgr.Get().GetMode() != SceneMgr.Mode.ADVENTURE || BannerManager.Get()?.IsShowing == true) return;
+        RunDefinition definition = cardBacksWaiting;
+        cardBacksWaiting = null;
+        LocalProfile profile = LocalLadder.Profile;
+        if (profile == null) return;
+        var backs = profile.UnshownRunCardBacks(definition).Where(id => GameDbf.CardBack?.GetRecord(id) != null).ToList();
+        if (backs.Count == 0) return;
+        presentingCardBacks = true;
+        Trace("card backs shown: " + string.Join(",", backs));
+        try
+        {
+            RewardUtils.LoadAndDisplayRewards(backs.Select(id => (RewardData)new CardBackRewardData(id)).ToList(), () => {
+                presentingCardBacks = false;
+                try { profile.MarkRunCardBacksShown(definition); Trace("card backs dismissed"); }
+                catch (Exception error) { log?.LogError("RUNMODE card backs not marked shown: " + error.Message); }
+            });
+        }
+        catch (Exception error)
+        {
+            presentingCardBacks = false;
+            log?.LogError("RUNMODE card backs not shown: " + error);
+        }
     }
 
     // ---- Save data ----
@@ -327,6 +402,8 @@ internal static class NativeRunModes
                 break;
             case RunWriteKind.RunEndSeen:
                 if (run != null && run.Status != RunStatus.Active && !run.RunEndSeen) profile.MarkRunEndSeen(engine);
+                // The client writes this at the end of its run-end sequence (the banner may still be up; the card back waits).
+                QueueCardBacks(definition);
                 break;
             case RunWriteKind.Retire:
                 if (run != null && run.Status == RunStatus.Active) profile.RetireRun(engine);

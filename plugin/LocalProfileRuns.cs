@@ -52,7 +52,8 @@ public sealed partial class LocalProfile
         return new LocalRunFight { Id = slot.FightId, Encounter = encounter };
     });
 
-    // The fight's result: the run moves on (or ends), the marker clears and a win counts for the run's class.
+    // The fight's result: the run moves on (or ends), the marker clears and a win counts for the run's class. A won run
+    // that completes the mode's every-class set grants its card backs (owned at once, presented later in the client).
     internal RunState ResolveRunFight(RunEngine engine, string fightId, RunFightResult result, IReadOnlyList<string> deckAdditions = null) => CommitChange(next =>
     {
         LocalRunSlot slot = Slot(next, engine.Definition.Id, false);
@@ -65,6 +66,14 @@ public sealed partial class LocalProfile
             if (wins == null) slot.Wins.Add(wins = new LocalRunClassWins { Class = state.Class });
             wins.Bosses++;
             if (state.Status == RunStatus.Won) wins.Runs++;
+            if (state.Status == RunStatus.Won)
+                foreach (int back in engine.Definition.EarnedCardBacks(cls => slot.Wins.FirstOrDefault(w => w.Class == cls)?.Runs ?? 0))
+                    if (!slot.CardBacks.Contains(back))
+                    {
+                        slot.CardBacks.Add(back);
+                        slot.UnshownCardBacks.Add(back);
+                        if (!next.OwnedCardBacks.Contains(back)) next.OwnedCardBacks.Add(back);
+                    }
         }
         slot.FightId = null;
         slot.Run = ToRecord(state);
@@ -74,6 +83,17 @@ public sealed partial class LocalProfile
     internal RunState ChooseRunReward(RunEngine engine, int index) => ChangeRun(engine, state => engine.Choose(state, index));
     internal RunState RetireRun(RunEngine engine) => ChangeRun(engine, engine.Retire);
     internal RunState MarkRunEndSeen(RunEngine engine) => ChangeRun(engine, engine.MarkRunEndSeen);
+
+    // Card backs the mode granted that the client has not presented yet.
+    internal IReadOnlyList<int> UnshownRunCardBacks(RunDefinition definition) =>
+        data.Runs?.FirstOrDefault(s => s.Definition == definition.Id)?.UnshownCardBacks.ToList() ?? new List<int>();
+
+    internal void MarkRunCardBacksShown(RunDefinition definition) => CommitChange(next =>
+    {
+        LocalRunSlot slot = Slot(next, definition.Id, false);
+        slot?.UnshownCardBacks.Clear();
+        return 0;
+    });
 
     internal IReadOnlyList<LocalRunFlag> RunClientFlags(RunDefinition definition) =>
         (data.Runs?.FirstOrDefault(s => s.Definition == definition.Id)?.ClientFlags ?? new List<LocalRunFlag>())

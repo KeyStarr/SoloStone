@@ -369,6 +369,12 @@ public sealed class LocalRunSlot
     public bool ShouldSerializeFightId() => FightId != null;
     public List<LocalRunClassWins> Wins = new List<LocalRunClassWins>();
     public List<LocalRunFlag> ClientFlags = new List<LocalRunFlag>();
+    // Card backs the mode granted (Dungeon Run: Candle King, for a run won with every class), also in OwnedCardBacks; the
+    // ownership ledger counts them as earned. UnshownCardBacks: granted but not yet presented in the client.
+    public List<int> CardBacks = new List<int>();
+    public bool ShouldSerializeCardBacks() => CardBacks != null && CardBacks.Count != 0;
+    public List<int> UnshownCardBacks = new List<int>();
+    public bool ShouldSerializeUnshownCardBacks() => UnshownCardBacks != null && UnshownCardBacks.Count != 0;
 }
 
 public sealed class LocalRunClassWins
@@ -2106,6 +2112,11 @@ public sealed partial class LocalProfile : IDisposable
                 && slot.Wins.Select(w => w.Class).Distinct(StringComparer.Ordinal).Count() == slot.Wins.Count, slot.Definition + " wins");
             Require(slot.ClientFlags != null && slot.ClientFlags.All(f => f != null && f.Subkey > 0 && f.Values != null && f.Values.Count <= 512)
                 && slot.ClientFlags.Select(f => f.Subkey).Distinct().Count() == slot.ClientFlags.Count, slot.Definition + " client flags");
+            // A granted card back needs a won run behind it (which classes, the run definition says) and is owned.
+            Require(slot.CardBacks != null && slot.UnshownCardBacks != null && slot.CardBacks.All(id => id > 0)
+                && slot.CardBacks.Distinct().Count() == slot.CardBacks.Count && slot.UnshownCardBacks.Distinct().Count() == slot.UnshownCardBacks.Count
+                && slot.UnshownCardBacks.All(slot.CardBacks.Contains) && (slot.CardBacks.Count == 0 || slot.Wins.Any(w => w.Runs > 0))
+                && slot.CardBacks.All(profile.OwnedCardBacks.Contains), slot.Definition + " card backs");
             var run = slot.Run;
             Require(slot.FightId == null || (ValidName(slot.FightId, 64) && run != null && run.Status == "Active" && run.Offer == null),
                 slot.Definition + " fight marker without an active run between rewards");
@@ -2533,7 +2544,8 @@ public sealed partial class LocalProfile : IDisposable
     private static LocalRunSlot Copy(LocalRunSlot slot) => slot == null ? null : new LocalRunSlot {
         Definition = slot.Definition, Run = Copy(slot.Run), FightId = slot.FightId,
         Wins = (slot.Wins ?? new List<LocalRunClassWins>()).Select(w => w == null ? null : new LocalRunClassWins { Class = w.Class, Bosses = w.Bosses, Runs = w.Runs }).ToList(),
-        ClientFlags = (slot.ClientFlags ?? new List<LocalRunFlag>()).Select(f => f == null ? null : new LocalRunFlag { Subkey = f.Subkey, Values = f.Values?.ToList() }).ToList()
+        ClientFlags = (slot.ClientFlags ?? new List<LocalRunFlag>()).Select(f => f == null ? null : new LocalRunFlag { Subkey = f.Subkey, Values = f.Values?.ToList() }).ToList(),
+        CardBacks = slot.CardBacks?.ToList(), UnshownCardBacks = slot.UnshownCardBacks?.ToList()
     };
     private static LocalRunRecord Copy(LocalRunRecord run) => run == null ? null : new LocalRunRecord {
         DefinitionVersion = run.DefinitionVersion, Class = run.Class, Hero = run.Hero, Seed = run.Seed, Step = run.Step, Status = run.Status,

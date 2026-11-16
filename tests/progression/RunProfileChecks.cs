@@ -97,6 +97,32 @@ internal static class RunProfileChecks
             Check(profile.RunOf(definition).Status == RunStatus.Lost, "the last run stays readable after it ended");
         }
 
+        // The mode's card back (the fixture's 119, like Candle King) comes with a run won with each of its classes: owned at
+        // once, waiting to be shown in the client, granted only once.
+        RunState WinWholeRun(LocalProfile profile, string cls, string hero, long seed)
+        {
+            RunState state = profile.StartRun(engine, cls, hero, seed);
+            while (state.Status == RunStatus.Active)
+                state = state.Offer != null ? profile.ChooseRunReward(engine, 0) : profile.ResolveRunFight(engine, profile.BeginRunFight(engine).Id, RunFightResult.Won);
+            return state;
+        }
+        using (var profile = new LocalProfile(path))
+        {
+            Check(!profile.OwnedCardBacks.Contains(119) && profile.UnshownRunCardBacks(definition).Count == 0, "no card back while a class has no won run");
+            RunState won = WinWholeRun(profile, "WARRIOR", "HERO_01", 31);
+            Check(won.Status == RunStatus.Won && profile.OwnedCardBacks.Contains(119) && profile.UnshownRunCardBacks(definition).SequenceEqual(new[] { 119 }),
+                "a run won with the last class grants the card back, waiting to be shown");
+        }
+        using (var profile = new LocalProfile(path))
+        {
+            Check(profile.OwnedCardBacks.Contains(119) && profile.UnshownRunCardBacks(definition).Count == 1, "the card back grant survives a relaunch");
+            profile.MarkRunCardBacksShown(definition);
+            Check(profile.UnshownRunCardBacks(definition).Count == 0 && profile.OwnedCardBacks.Contains(119), "shown, the card back stays owned");
+            WinWholeRun(profile, "MAGE", "HERO_08", 32);
+            Check(profile.UnshownRunCardBacks(definition).Count == 0 && profile.OwnedCardBacks.Count(back => back == 119) == 1, "a later won run grants it no second time");
+            Check(profile.StoredGoldBalance == gold && profile.DustBalance == dust && profile.History.Count == matches, "the card back moves no gold, dust or match history");
+        }
+
         // A run saved by another version of its definition cannot be continued; a new run can start.
         var serializer = new XmlSerializer(typeof(LocalProfileData));
         LocalProfileData Read(string file) { using (var stream = File.OpenRead(file)) return (LocalProfileData)serializer.Deserialize(stream); }
@@ -114,6 +140,10 @@ internal static class RunProfileChecks
         }
         Reject(() => new LocalProfile(Variant("fight-on-lost-run", data => data.Runs[0].FightId = "x")).Dispose(), "a fight marker on an ended run is refused at load");
         Reject(() => new LocalProfile(Variant("two-slots", data => data.Runs.Add(data.Runs[0]))).Dispose(), "two slots for one mode are refused at load");
-        Reject(() => new LocalProfile(Variant("wins-over-bosses", data => data.Runs[0].Wins[0].Runs = 9)).Dispose(), "more run wins than boss wins is refused at load");
+        Reject(() => new LocalProfile(Variant("wins-over-bosses", data => data.Runs[0].Wins[0].Runs = data.Runs[0].Wins[0].Bosses + 1)).Dispose(), "more run wins than boss wins is refused at load");
+        Reject(() => new LocalProfile(Variant("card-back-not-owned", data => data.OwnedCardBacks.Remove(119))).Dispose(), "a granted card back missing from the owned ones is refused at load");
+        Reject(() => new LocalProfile(Variant("card-back-without-grant", data => data.Runs[0].CardBacks.Clear())).Dispose(), "an owned run card back without its grant is refused at load");
+        Reject(() => new LocalProfile(Variant("card-back-without-win", data => data.Runs[0].Wins.ForEach(w => w.Runs = 0))).Dispose(), "a run card back without a won run is refused at load");
+        Reject(() => new LocalProfile(Variant("unshown-not-granted", data => data.Runs[0].UnshownCardBacks.Add(5))).Dispose(), "an unshown card back that was never granted is refused at load");
     }
 }

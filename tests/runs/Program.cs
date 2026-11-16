@@ -104,6 +104,11 @@ internal static class Program
         Check(loot.Client.Scenario == 2663 && loot.Client.ServerKey == 24 && loot.Client.ClientKey == 42, "loot: client ids");
         Check(loot.Classes.Count == 9 && loot.Classes.All(c => c.Deck.Count == 10), "loot: nine classes with ten-card start decks");
         Check(loot.Rounds.Count == 8 && loot.Round(8).BossStartingMana == 2, "loot: eight rounds, the final boss starts with 2 mana");
+        // Retail's reward for a run won with all nine classes: the Candle King card back (client card back 119).
+        Check(loot.CardBackRewards.Count == 1 && loot.CardBackRewards[0].CardBack == 119, "loot: the Candle King card back for every class");
+        var eightClasses = loot.Classes.Skip(1).Select(c => c.Class).ToList();
+        Check(!loot.EarnedCardBacks(cls => eightClasses.Contains(cls) ? 3 : 0).Any()
+            && loot.EarnedCardBacks(cls => 1).SequenceEqual(new[] { 119 }), "loot: the card back needs a run won with each of the nine classes");
         foreach (RunClassStart start in loot.Classes)
         {
             var buckets = loot.Buckets.Where(b => b.Class == start.Class).ToList();
@@ -434,5 +439,13 @@ internal static class Program
         Rejects("{ \"class\": \"WARRIOR\", \"deck\"", "{ \"class\": \"WIZARD\", \"deck\"", "an unknown class");
         Rejects("\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\",", "\"title\": \"LOOTA_Mage_22\", \"source\": \"fixture\", \"pool\": \"all\",",
             "an unknown bucket pool");
+        Rejects("\"when\": \"allClasses\"", "\"when\": \"anyClass\"", "an unknown card back condition");
+        Rejects("\"cardBack\": 119,", "\"cardBack\": 0,", "a card back id that is not positive");
+        Rejects("{ \"when\": \"allClasses\", \"cardBack\": 119, \"source\": \"fixture\" }",
+            "{ \"when\": \"allClasses\", \"cardBack\": 119, \"source\": \"fixture\" }, { \"when\": \"allClasses\", \"cardBack\": 119, \"source\": \"fixture\" }",
+            "a card back listed twice");
+        int rewardsAt = fixture.IndexOf("\"cardBackRewards\"", StringComparison.Ordinal);
+        int cut = rewardsAt < 0 ? -1 : fixture.LastIndexOf(',', rewardsAt);
+        Check(cut > 0 && RunDefinition.Parse(fixture.Substring(0, cut) + "}").CardBackRewards.Count == 0, "parser: cardBackRewards is optional");
     }
 }

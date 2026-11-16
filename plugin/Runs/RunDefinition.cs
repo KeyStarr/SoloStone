@@ -58,6 +58,13 @@ public sealed class RunBucket
     public bool ClassPool;
 }
 
+// A cosmetic the run mode grants once (retail Dungeon Run: the Candle King card back for a run won with every class).
+public sealed class RunCardBackReward
+{
+    public int CardBack;
+    public string Source;
+}
+
 public sealed class RunDefinition
 {
     public const string Schema = "solostone.run/1";
@@ -76,12 +83,17 @@ public sealed class RunDefinition
     public IReadOnlyList<RunBoss> Bosses;
     public IReadOnlyList<RunBucket> Buckets;
     public IReadOnlyList<string> PassiveTreasures, ActiveTreasures;
+    public IReadOnlyList<RunCardBackReward> CardBackRewards;
 
     public string ResourceName => "SoloStone.Runs." + Id + "-v" + Version + ".json";
     public RunRound Round(int number) => Rounds[number - 1];
     public RunClassStart ClassStart(string cls) => Classes.FirstOrDefault(c => c.Class == cls);
     public RunBoss Boss(string id) => Bosses.FirstOrDefault(b => b.Id == id);
     public RunBucket Bucket(string id) => Buckets.FirstOrDefault(b => b.Id == id);
+
+    // The card backs earned once a run was won with every class of the mode; runWins: run wins per class.
+    public IEnumerable<int> EarnedCardBacks(Func<string, int> runWins) =>
+        Classes.All(c => runWins(c.Class) > 0) ? CardBackRewards.Select(r => r.CardBack) : Enumerable.Empty<int>();
 
     // NpcWorldJson.Parser must be installed (plugin: EmbeddedJson.Parse; tests: MiniJSON).
     public static RunDefinition Parse(string text)
@@ -184,6 +196,19 @@ public sealed class RunDefinition
             ? NpcWorldJson.Object(treasureValue) : new Dictionary<string, object>();
         definition.PassiveTreasures = Unique(CardIds(NpcWorldJson.Strings(treasures, "passive"), "treasures.passive", true), "treasures.passive");
         definition.ActiveTreasures = Unique(CardIds(NpcWorldJson.Strings(treasures, "active"), "treasures.active", true), "treasures.active");
+
+        // "when": "allClasses" is the only condition: a run won with each of the mode's classes.
+        var cardBacks = new List<RunCardBackReward>();
+        foreach (object item in NpcWorldJson.List(root, "cardBackRewards", false))
+        {
+            var row = NpcWorldJson.Object(item);
+            string when = NpcWorldJson.Text(row, "when");
+            if (when != "allClasses") throw new InvalidDataException("cardBackRewards.when must be \"allClasses\": " + when);
+            int back = Positive(NpcWorldJson.Integer(row, "cardBack"), "cardBackRewards.cardBack");
+            if (cardBacks.Any(r => r.CardBack == back)) throw new InvalidDataException("cardBackRewards: card back " + back + " is listed twice.");
+            cardBacks.Add(new RunCardBackReward { CardBack = back, Source = NonEmpty(NpcWorldJson.Text(row, "source"), "cardBackRewards.source") });
+        }
+        definition.CardBackRewards = cardBacks;
         return definition;
     }
 

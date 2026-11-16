@@ -16,7 +16,7 @@
 SoloStone is an unofficial offline single-player mod for Hearthstone®. It requires your own legally obtained Hearthstone client. Not affiliated with, endorsed by, or sponsored by Blizzard Entertainment. Hearthstone is a trademark or registered trademark of Blizzard Entertainment, Inc.
 
 **Play Hearthstone offline, on your own PC, against computer opponents.** You get the game's own screens, ranked and
-casual matches, deck building, packs and progress, all kept on your machine.
+casual matches, deck building, packs and progress, and Dungeon Run, all kept on your machine.
 
 [Just want to play?](#just-want-to-play) · [How it works](#how-it-works) · [Contributing](#contributing) · [Build from source](docs/BUILDING.md) · [Run the tests](docs/TESTING.md) ([how testing works](docs/TESTING-GUIDE.md))
 
@@ -39,6 +39,12 @@ Something went wrong? Tell us on [Discord](https://discord.gg/e45QgKHmC2). The f
   to the copy and blocks the copy from the internet. Your normal Hearthstone folder is only read.
 - **A local game with computer opponents.** Opponents have their own decks, skill levels and personalities. You climb
   a local ladder, build decks, open packs and earn rewards by playing.
+- **Dungeon Run.** The Kobolds & Catacombs roguelike, under **Modes**: pick a class, beat eight bosses, take loot and
+  treasures between fights, one loss ends the run. Bosses, loot and treasures follow the
+  [Hearthstone Wiki](https://hearthstone.wiki.gg/wiki/Dungeon_Run); a few special bosses (George and Karl, Tad, the
+  Treasure Vault and others) and the three "Unique" loot bundles that need Zephrys the Great are not in yet. A run won
+  with a class crowns it; a run won with all nine classes earns the Candle King card back. Runs pay no gold, dust or
+  ladder progress, as in the original.
 - **One fixed card set.** The first release plays the Standard format as it stood just before the *Reign of the Black
   Empire* expansion (the "Violet Hold meta" in the files). It does not follow later balance changes.
 

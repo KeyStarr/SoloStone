@@ -59,5 +59,8 @@
   "treasures": {
     "passive": ["CS2_182", "CS2_120", "CS2_171", "CS2_172", "CS2_119"],
     "active": ["CS2_022", "CS2_023", "CS2_026", "CS2_027", "EX1_279"]
-  }
+  },
+  "cardBackRewards": [
+    { "when": "allClasses", "cardBack": 119, "source": "fixture" }
+  ]
 }
