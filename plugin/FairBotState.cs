@@ -568,6 +568,7 @@ public sealed class FairBotState
             foreach (var stale in player.SetasideZone.Where(c => !ReferenceEquals(c, copy.IdEntityDic[c.Id])).ToArray())
                 player.SetasideZone.Remove(stale);
         copy.RedactSetupDecksForFairView();
+        copy.MarkSearchCopy();
         var copyChooser = copy.Player1.PlayerId == owner ? copy.Player1 : copy.Player2;
         // Rebuild remembered slots before history projection too: current hidden transforms/tags are not observations.
         if (publicHand != null)

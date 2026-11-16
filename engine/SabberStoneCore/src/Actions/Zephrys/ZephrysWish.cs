@@ -15,6 +15,12 @@ namespace SabberStoneCore.Actions
         internal int MyMinions, EnemyMinions, UnfrozenEnemyMinions, MyHand, MyDeck, EnemyDeck, EnemySecrets;
         internal int MyArmor, MyHeroAttack, MyWeaponAttack, FriendlyDiedThisTurn;
         internal bool EnemyWeapon, EnemyStealth, Murlocs, Demons, DivineShields;
+        /// <summary>Low health, or the enemy board threatens most of it: survival cards are wished for only then (or for lethal).</summary>
+        internal bool Pressed;
+
+        // "Healing comes in when your health is low" (wiki): at most this much Health and Armor, or this little left after
+        // the enemy's visible attacks next turn.
+        private const int LowHealth = 15, LowMargin = 10;
 
         internal static WishView Of(Controller me)
         {
@@ -35,6 +41,8 @@ namespace SabberStoneCore.Actions
                 Murlocs = all.Any(m => m.IsRace(Race.MURLOC)),
                 Demons = all.Any(m => m.IsRace(Race.DEMON)),
                 DivineShields = all.Any(m => m.HasDivineShield),
+                Pressed = me.Hero.Health + me.Hero.Armor <= LowHealth
+                    || me.Hero.Health + me.Hero.Armor - ZephrysWish.Danger(me) <= LowMargin,
             };
         }
 
@@ -55,6 +63,11 @@ namespace SabberStoneCore.Actions
     {
         internal const int Offered = 3;
         private const int RandomSamples = 8;
+        // In an NPC's search copy (Game.IsSearchCopy) the wish only estimates. A search plays Zephrys in dozens of lines, and
+        // the exact wish runs hundreds of simulations; what the NPC is finally offered is computed exactly on the live game.
+        // An estimate tries this turn's cards only: the most expensive few of each category (usually its strongest), aimed at
+        // the most valuable minions on each side, with two runs of a random card of which it keeps the worse.
+        private const int EstimatePerCategory = 3, EstimateTargets = 3, EstimateSamples = 2;
         private const string Placeholder = "CS2_182"; // vanilla 4/5: stands in for every hidden card
         private const string Pyroblast = "EX1_279";
         // Competitive Spirit only acts when its owner's turn starts, so it can never fire during the wish's own turn.
@@ -62,6 +75,31 @@ namespace SabberStoneCore.Actions
         private static readonly HashSet<string> SilenceFirst = new HashSet<string>(StringComparer.Ordinal) { "EX1_332", "EX1_245", "CS2_203" };
 
         private sealed class Option { internal int ChooseOne, TargetId; }
+
+        /// <summary>One wish: where it runs, and the simulations that failed.</summary>
+        private sealed class Wish
+        {
+            internal Game Basis;
+            internal int ControllerId;
+            internal bool Estimate;
+            internal int Failures;
+            internal string FirstFailure;
+
+            // A failed copy is an engine bug on an unusual copied state (blank hands, stand-in Secrets). The live game must
+            // never break on one, so the line is skipped; the failure is counted, logged and visible to the proofs.
+            internal void Fail(string stage, string cardId, Exception e)
+            {
+                Failures++;
+                if (FirstFailure == null) FirstFailure = stage + " " + cardId + ": " + e.GetType().Name + ": " + e.Message;
+            }
+        }
+
+        private static long failures;
+
+        /// <summary>Wish simulations that threw since the process started. The proofs require none.</summary>
+        internal static long Failures => System.Threading.Interlocked.Read(ref failures);
+
+        private static bool Recoverable(Exception e) => !(e is OutOfMemoryException || e is InsufficientExecutionStackException);
 
         private sealed class Result
         {
@@ -75,30 +113,50 @@ namespace SabberStoneCore.Actions
         internal static Card[] Offers(Game game, Controller controller, IEntity source)
         {
             long seed = Mix(game.Seed, game.Turn, source.Id, controller.Id);
-            Game basis;
-            try { basis = PublicCopy(game, controller, seed); }
-            catch (Exception e) when (!(e is OutOfMemoryException)) { basis = null; }
-            if (basis == null || basis.CurrentPlayer.Id != controller.Id) return Fallback(controller);
+            var wish = new Wish { ControllerId = controller.Id, Estimate = game.IsSearchCopy };
+            try { wish.Basis = PublicCopy(game, controller, seed); }
+            catch (Exception e) when (Recoverable(e)) { wish.Fail("public copy", "", e); }
+            // No copy, or off its owner's turn (an effect plays it for them) with no turn to plan: cheap eligible cards.
+            var offers = wish.Basis == null || wish.Basis.CurrentPlayer.Id != controller.Id ? Fallback(controller)
+                : Compute(wish, seed);
+            if (wish.Failures > 0)
+            {
+                System.Threading.Interlocked.Add(ref failures, wish.Failures);
+                game.Log(LogLevel.WARNING, BlockType.PLAY, "ZephrysWish", !game.Logging ? ""
+                    : wish.Failures + " wish simulation(s) failed and were skipped; first: " + wish.FirstFailure);
+            }
+            return offers;
+        }
 
-            var me = basis.ControllerById(controller.Id);
+        private static Card[] Compute(Wish wish, long seed)
+        {
+            var basis = wish.Basis;
+            var me = basis.ControllerById(wish.ControllerId);
             var view = WishView.Of(me);
             int mana = me.RemainingMana;
             int next = Math.Min(10, me.BaseMana + 1) - me.OverloadOwed;
             double baseline = Score(me);
             bool alreadyLethal;
-            try { alreadyLethal = ZephrysLethal.Can(basis.CloneForSimulation(Mix(seed, -1, 0, 0)), controller.Id); }
-            catch (Exception e) when (!(e is OutOfMemoryException)) { alreadyLethal = false; }
+            try { alreadyLethal = ZephrysLethal.Can(basis.CloneForSimulation(Mix(seed, -1, 0, 0)), wish.ControllerId); }
+            catch (Exception e) when (Recoverable(e)) { alreadyLethal = false; wish.Fail("lethal check", "", e); }
 
+            var tried = Enumerable.Range(0, ZephrysPool.Entries.Length).Where(i => ZephrysPool.Eligible(ZephrysPool.Entries[i], view));
+            if (wish.Estimate)
+                tried = tried.Where(i => WishCost(Cards.FromId(ZephrysPool.Entries[i].Id), me) <= mana
+                        && (view.Pressed || ZephrysPool.Entries[i].Category != WishCategory.Survival))
+                    .GroupBy(i => ZephrysPool.Entries[i].Category)
+                    .SelectMany(g => g.OrderByDescending(i => WishCost(Cards.FromId(ZephrysPool.Entries[i].Id), me)).ThenBy(i => i)
+                        .Take(EstimatePerCategory))
+                    .OrderBy(i => i);
             var results = new List<Result>();
-            for (int i = 0; i < ZephrysPool.Entries.Length; i++)
+            foreach (int i in tried)
             {
                 var entry = ZephrysPool.Entries[i];
-                if (!ZephrysPool.Eligible(entry, view)) continue;
                 var card = Cards.FromId(entry.Id);
                 int cost = WishCost(card, me);
                 bool now = cost <= mana;
                 if (!now && (cost > next || entry.Flags.HasFlag(WishFlags.ThisTurnOnly))) continue;
-                var result = Evaluate(basis, controller.Id, entry, card, cost, now, baseline, Mix(seed, i, 0, 0));
+                var result = Evaluate(wish, entry, card, cost, now, baseline, Mix(seed, i, 0, 0));
                 if (result == null) continue;
                 result.Index = i;
                 if (!now)
@@ -119,11 +177,13 @@ namespace SabberStoneCore.Actions
                     && !WishView.Minions(op).Any(m => m.HasLifeSteal && m.AttackDamage > 0))
                     pyro.Lethal = true;
             }
-            return Select(results).Select(r => Cards.FromId(r.Entry.Id)).ToArray();
+            return Select(results, view.Pressed).Select(r => Cards.FromId(r.Entry.Id)).ToArray();
         }
 
-        private static IEnumerable<Result> Select(List<Result> results)
+        private static IEnumerable<Result> Select(List<Result> results, bool pressed)
         {
+            // Survival cards are wished for under pressure only (Mirror Image at full health is no perfect card), unless lethal.
+            results = results.Where(r => pressed || r.Lethal || r.Entry.Category != WishCategory.Survival).ToList();
             var chosen = new List<Result>();
             foreach (var lethal in results.Where(r => r.Lethal)
                          .OrderByDescending(r => SilenceFirst.Contains(r.Entry.Id))
@@ -132,6 +192,11 @@ namespace SabberStoneCore.Actions
                 if (chosen.Count == Offered) break;
                 chosen.Add(lethal);
             }
+
+            // Under pressure the best survival card always takes a slot, next to whatever clears the threat.
+            var save = !pressed ? null : results.Where(r => !chosen.Contains(r) && r.Entry.Category == WishCategory.Survival
+                && r.Delta > 0).OrderByDescending(r => r.Delta).ThenBy(r => r.Index).FirstOrDefault();
+            if (save != null && chosen.Count < Offered) chosen.Add(save);
 
             // The best card of each strongest category; a category may take another slot when its runner-up clearly beats
             // the next category's best (three board clears against a wide board).
@@ -162,12 +227,11 @@ namespace SabberStoneCore.Actions
             return chosen;
         }
 
-        private static Result Evaluate(Game basis, int controllerId, WishEntry entry, Card card, int cost, bool now,
-            double baseline, long seed)
+        private static Result Evaluate(Wish wish, WishEntry entry, Card card, int cost, bool now, double baseline, long seed)
         {
             List<Option> options;
-            try { options = Options(basis, controllerId, entry, card, cost, now, seed); }
-            catch (Exception e) when (!(e is OutOfMemoryException)) { return null; }
+            try { options = Options(wish, entry, card, cost, now, seed); }
+            catch (Exception e) when (Recoverable(e)) { wish.Fail("options", entry.Id, e); return null; }
             if (options.Count == 0) return null;
             bool random = entry.Flags.HasFlag(WishFlags.Random);
             bool lethalAllowed = now && !entry.Flags.HasFlag(WishFlags.NeverForLethal);
@@ -176,25 +240,25 @@ namespace SabberStoneCore.Actions
             {
                 var deltas = new List<double>();
                 bool lethal = lethalAllowed;
-                for (int s = 0; s < (random ? RandomSamples : 1); s++)
+                for (int s = 0; s < (!random ? 1 : wish.Estimate ? EstimateSamples : RandomSamples); s++)
                 {
-                    // A copy is thrown away: a rule that fails on an unusual copied state skips the line, never the live game.
                     try
                     {
-                        var sim = basis.CloneForSimulation(Mix(seed, o, s, 1));
-                        var me = sim.ControllerById(controllerId);
+                        var sim = wish.Basis.CloneForSimulation(Mix(seed, o, s, 1));
+                        var me = sim.ControllerById(wish.ControllerId);
                         if (!Play(sim, me, card, cost, now, options[o])) { lethal = false; continue; }
                         bool won = me.Opponent.Hero.IsDead || sim.State == State.COMPLETE && me.PlayState == PlayState.WINNING;
                         if (!won && me.Hero.IsDead) { deltas.Add(-1000); lethal = false; continue; }
                         deltas.Add(won ? 1000 : Score(me) - baseline);
-                        if (lethal && !won) lethal = ZephrysLethal.Can(sim, controllerId);
+                        if (lethal && !won) lethal = ZephrysLethal.Can(sim, wish.ControllerId);
                     }
-                    catch (Exception e) when (!(e is OutOfMemoryException)) { lethal = false; }
+                    catch (Exception e) when (Recoverable(e)) { lethal = false; wish.Fail("simulation", entry.Id, e); }
                 }
                 if (deltas.Count == 0) continue;
                 deltas.Sort();
                 // Pessimistic for random outcomes: the second-worst run, not the average (Brawl: assume the median survivor).
-                double delta = deltas[Math.Min(1, deltas.Count - 1)];
+                // An estimate has two runs and keeps the worse.
+                double delta = deltas[wish.Estimate ? 0 : Math.Min(1, deltas.Count - 1)];
                 if (best == null || delta > best.Delta || lethal && !best.Lethal)
                     best = new Result { Entry = entry, Cost = cost, Now = now, Delta = Math.Max(delta, best?.Delta ?? delta),
                         Lethal = lethal || (best?.Lethal ?? false) };
@@ -203,10 +267,10 @@ namespace SabberStoneCore.Actions
         }
 
         /// <summary>Legal ways to play the card (Choose One branches and targets), keeping only sensible targets.</summary>
-        private static List<Option> Options(Game basis, int controllerId, WishEntry entry, Card card, int cost, bool now, long seed)
+        private static List<Option> Options(Wish wish, WishEntry entry, Card card, int cost, bool now, long seed)
         {
-            var probe = basis.CloneForSimulation(seed);
-            var me = probe.ControllerById(controllerId);
+            var probe = wish.Basis.CloneForSimulation(seed);
+            var me = probe.ControllerById(wish.ControllerId);
             var playable = Prepare(me, card, cost, now);
             var options = new List<Option>();
             foreach (var task in me.Options().OfType<PlayCardTask>())
@@ -215,7 +279,12 @@ namespace SabberStoneCore.Actions
                 if (!ZephrysPool.TargetAllowed(entry, me, task.Target)) continue;
                 options.Add(new Option { ChooseOne = task.ChooseOne, TargetId = task.Target?.Id ?? 0 });
             }
-            return options;
+            if (!wish.Estimate) return options;
+            var aims = probe.IdEntityDic;
+            var kept = new HashSet<int>(new[] { me, me.Opponent }.SelectMany(side => WishView.Minions(side)
+                .Where(m => options.Any(o => o.TargetId == m.Id))
+                .OrderByDescending(m => Value(m, true)).ThenBy(m => m.Id).Take(EstimateTargets).Select(m => m.Id)));
+            return options.Where(o => o.TargetId == 0 || !(aims[o.TargetId] is Minion) || kept.Contains(o.TargetId)).ToList();
         }
 
         private static IPlayable Prepare(Controller me, Card card, int cost, bool now)

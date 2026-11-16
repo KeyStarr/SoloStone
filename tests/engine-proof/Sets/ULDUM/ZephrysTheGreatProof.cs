@@ -23,6 +23,7 @@ internal static class ZephrysTheGreatProof
     [GroupProof("zephrys-the-great", ProofKind.Cards)]
     internal static void Run()
     {
+        long failures = ZephrysWish.Failures;
         Registration();
         for (int seed = 1; seed <= 3; seed++)
         {
@@ -45,6 +46,11 @@ internal static class ZephrysTheGreatProof
         Documented();
         Pool();
         Budget();
+        Estimate();
+        OffTurn();
+        Shudderwock();
+        Stress();
+        Core2026Proof.Check(ZephrysWish.Failures == failures, "no wish simulation failed: " + (ZephrysWish.Failures - failures));
     }
 
     // ---- Fixture ----
@@ -257,15 +263,41 @@ internal static class ZephrysTheGreatProof
         Ready(p.Opponent, "CS2_200");
         Expect("single minion", Wish(g, p, 8), null, "NEW1_007");
 
-        // Low health facing a big board: survival.
+        // Low health facing a big board: a survival card, next to an answer to the board.
         g = New(CardClass.DRUID); p = g.Player1;
         p.Hero.Damage = p.Hero.BaseHealth - 6;
         foreach (var id in new[] { "CS2_200", "CS2_201" }) Ready(p.Opponent, id);
         var low = Wish(g, p, 6);
         Console.WriteLine("Zephrys low health: " + Names(low));
-        Core2026Proof.Check(low.Any(id => ZephrysPool.Entries.Single(e => e.Id == id).Category is WishCategory.Survival or WishCategory.BoardClear
-            or WishCategory.Removal), "low health: a way to survive");
+        Core2026Proof.Check(low.Any(id => Category(id) == WishCategory.Survival), "low health: a survival card: " + Names(low));
+        Core2026Proof.Check(low.Any(id => Category(id) is WishCategory.BoardClear or WishCategory.Removal), "low health: an answer: " + Names(low));
+
+        // Low health, little mana, nothing on the enemy board: healing.
+        g = New(CardClass.DRUID); p = g.Player1;
+        p.Hero.Damage = p.Hero.BaseHealth - 5;
+        Expect("low health, 3 mana", Wish(g, p, 3), "CS2_007");
+
+        // Full health against a weapon: no survival card (Mirror Image is no perfect card here).
+        g = New(); p = g.Player1;
+        p.Opponent.Hero.Weapon = null;
+        p.Opponent.Hero.AddWeapon((Weapon)Entity.FromCard(p.Opponent, Cards.FromId("CS2_112")));
+        var armed = Wish(g, p, 3);
+        Console.WriteLine("Zephrys full health against a weapon: " + Names(armed));
+        Core2026Proof.Check(armed.All(id => Category(id) != WishCategory.Survival), "full health: no survival card: " + Names(armed));
+
+        // One big threat: single-target removal.
+        g = New(CardClass.SHAMAN); p = g.Player1;
+        Ready(p.Opponent, "CS2_201");
+        var threat = Wish(g, p, 4);
+        Console.WriteLine("Zephrys one big threat: " + Names(threat));
+        Core2026Proof.Check(threat.Any(id => Category(id) == WishCategory.Removal), "one big threat: removal: " + Names(threat));
+
+        // Late game, empty boards: a big proactive card.
+        g = New(CardClass.PALADIN); p = g.Player1;
+        Expect("late game, empty boards", Wish(g, p, 8), "EX1_383");
     }
+
+    private static WishCategory Category(string id) => ZephrysPool.Entries.Single(e => e.Id == id).Category;
 
     private static void Pool()
     {
@@ -292,5 +324,101 @@ internal static class ZephrysTheGreatProof
         watch.Stop();
         Console.WriteLine("Zephrys worst case: " + watch.ElapsedMilliseconds + " ms: " + Names(offers));
         Core2026Proof.Check(watch.ElapsedMilliseconds < 5000, "wish within a generous time limit");
+    }
+
+    private static Game WorstCase()
+    {
+        var g = New(CardClass.MAGE); var p = g.Player1;
+        foreach (var id in new[] { "CS2_120", "CS2_168", "CS2_171", "CS2_172", "CS2_179", "CS2_182" }) Ready(p, id);
+        foreach (var id in new[] { "CS2_120", "CS2_168", "CS2_171", "CS2_172", "CS2_179", "CS2_182", "CS2_200" }) Ready(p.Opponent, id);
+        return g;
+    }
+
+    private static void Estimate()
+    {
+        // An NPC's search copy estimates; the mark reaches every clone of the copy and never the live game.
+        var g = WorstCase();
+        var copy = g.CloneExact(history: true);
+        copy.MarkSearchCopy();
+        Core2026Proof.Check(!g.IsSearchCopy && copy.IsSearchCopy && copy.CloneExact().IsSearchCopy
+            && copy.CloneForSimulation(1).IsSearchCopy && !g.CloneExact().IsSearchCopy, "search copies and their clones only");
+
+        string[] Run(Game game, out long ms)
+        {
+            var watch = Stopwatch.StartNew();
+            var offers = Wish(game, game.Player1, 4);
+            ms = watch.ElapsedMilliseconds;
+            return offers;
+        }
+        var estimate = Run(copy, out long fast);
+        var again = g.CloneExact(history: true); again.MarkSearchCopy();
+        Core2026Proof.Check(Run(again, out _).SequenceEqual(estimate), "an estimate is deterministic");
+        var exact = Run(g, out long slow);
+        Console.WriteLine("Zephrys estimate " + fast + " ms: " + Names(estimate) + "; exact " + slow + " ms: " + Names(exact));
+        Core2026Proof.Check(estimate.Length == ZephrysWish.Offered && estimate.Distinct().Count() == estimate.Length,
+            "an estimate offers three distinct cards");
+        Core2026Proof.Check(estimate.All(id => Cards.FromId(id).Cost <= 4 || id == "EX1_586"), "an estimate offers this turn's cards only");
+    }
+
+    private static void OffTurn()
+    {
+        // Off its owner's turn there is no turn to plan: cheap eligible cards, no simulation.
+        var g = New(); var p = g.Player2;
+        p.BaseMana = 3; p.UsedMana = 0;
+        var zephrys = Add(p, Zephrys);
+        var offers = ZephrysWish.Offers(g, p, zephrys);
+        Console.WriteLine("Zephrys off turn: " + Names(offers.Select(c => c.Id)));
+        Core2026Proof.Check(offers.Length == ZephrysWish.Offered && offers.Distinct().Count() == offers.Length
+            && offers.All(c => c.Cost <= 3 && ZephrysPool.Entries.Any(e => e.Id == c.Id)), "off-turn offers: three cheap pool cards");
+    }
+
+    private static void Shudderwock()
+    {
+        // Shudderwock repeats the wish: the recipe runs again, mid-Battlecry, and picks one offer at random.
+        var g = New(CardClass.SHAMAN); var p = g.Player1;
+        Wish(g, p, 8);
+        CoreCostProof.Answer(g, p.Choice.Choices[0]);
+        var shudderwock = Add(p, "GIL_820");
+        p.BaseMana = 10; p.UsedMana = 0;
+        var play = p.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == shudderwock.Id);
+        Core2026Proof.Check(g.Process(play), "Shudderwock played");
+        Core2026Proof.Check(p.Choice == null && p.HandZone.Count == 2
+            && p.HandZone.All(c => ZephrysPool.Entries.Any(e => e.Id == c.Card.Id)), "Shudderwock repeats the wish into hand");
+    }
+
+    private static void Stress()
+    {
+        // Mixed boards with auras, Deathrattles, damage triggers, Secrets and weapons: every wish completes, offers stay valid.
+        string[] minions = { "EX1_097", "NEW1_019", "NEW1_020", "EX1_591", "EX1_350", "CS2_222", "EX1_012", "EX1_556", "EX1_008",
+            "EX1_023", "EX1_563", "EX1_614", "CS2_042", "EX1_584", "EX1_565", "CS2_201", "EX1_383", "EX1_110", "EX1_001", "NEW1_021",
+            "CS2_179", "CS2_182", "CS2_120" };
+        CardClass[] classes = { CardClass.MAGE, CardClass.HUNTER, CardClass.PRIEST, CardClass.ROGUE, CardClass.WARLOCK,
+            CardClass.WARRIOR, CardClass.SHAMAN, CardClass.PALADIN, CardClass.DRUID, CardClass.DEMONHUNTER };
+        var watch = Stopwatch.StartNew();
+        for (int seed = 1; seed <= 20; seed++)
+        {
+            var rng = new Random(seed);
+            var g = New(classes[seed % classes.Length], classes[(seed * 3) % classes.Length], seed); var p = g.Player1;
+            for (int i = rng.Next(0, 7); i > 0; i--) Ready(p, minions[rng.Next(minions.Length)]);
+            for (int i = rng.Next(0, 8); i > 0; i--) Ready(p.Opponent, minions[rng.Next(minions.Length)]);
+            for (int i = rng.Next(0, 6); i > 0; i--) Add(p.Opponent, "CS2_182");
+            if (rng.Next(3) == 0)
+            {
+                var secret = Add(p.Opponent, new[] { "EX1_295", "EX1_289", "EX1_610", "EX1_130" }[rng.Next(4)]);
+                p.Opponent.SecretZone.Add((Spell)p.Opponent.HandZone.Remove(secret));
+            }
+            if (rng.Next(3) == 0)
+            {
+                p.Opponent.Hero.Weapon = null;
+                p.Opponent.Hero.AddWeapon((Weapon)Entity.FromCard(p.Opponent, Cards.FromId("CS2_112")));
+            }
+            p.Hero.Damage = rng.Next(0, 25);
+            p.Opponent.Hero.Damage = rng.Next(0, 25);
+            var offers = Wish(g, p, rng.Next(0, 9));
+            Core2026Proof.Check(offers.Length <= ZephrysWish.Offered && offers.Distinct().Count() == offers.Length
+                && offers.All(id => ZephrysPool.Entries.Any(e => e.Id == id)), "stress " + seed + ": valid offers: " + Names(offers));
+            if (offers.Length > 0) CoreCostProof.Answer(g, p.Choice.Choices[0]);
+        }
+        Console.WriteLine("Zephrys stress: 20 wishes in " + watch.ElapsedMilliseconds + " ms");
     }
 }

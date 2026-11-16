@@ -16,6 +16,7 @@ namespace SabberStoneCore.Actions
     internal static class ZephrysLethal
     {
         private const int NodeBudget = 64;
+        private const int MaxPowerReach = 3;
 
         private static readonly Lazy<HashSet<string>> BasicPowers = new Lazy<HashSet<string>>(() => {
             var names = new HashSet<string>(StringComparer.Ordinal);
@@ -42,7 +43,11 @@ namespace SabberStoneCore.Actions
             if (Dead(me)) return true;
             int budget = NodeBudget;
             var power = me.Hero.HeroPower;
-            if (power != null && IsBasicPower(power.Card))
+            bool basic = power != null && IsBasicPower(power.Card);
+            // No copy is worth making when every attack plus the most a Basic power adds (3: Ballista Shot; a dagger or
+            // claws add at most 2 attack) cannot reach the hero.
+            if (UpperBound(me) + (basic ? MaxPowerReach : 0) < me.Opponent.Hero.Health + me.Opponent.Hero.Armor) return false;
+            if (basic)
             {
                 var withPower = game.CloneForSimulation(game.Seed ^ 0x5A5A);
                 if (UsePower(withPower, controllerId) && Attack(withPower, controllerId, ref budget)) return true;
