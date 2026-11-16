@@ -96,6 +96,13 @@ internal static class DungeonRunRounds6To7Proof
         holds.Player2.BaseMana = 10; holds.Player2.UsedMana = 0;
         Check(holds.Player2.Options().All(t => t.PlayerTaskType != PlayerTaskType.PLAY_CARD), "Tad plays no card even when given one");
 
+        // "Will not draw anything": not from the player's cards either (Coldlight Oracle: each player draws two), and no fatigue.
+        Game oracle = Boss("LOOTA_BOSS_22h", TadDeck);
+        int tadDeck = oracle.Player2.DeckZone.Count;
+        Play(oracle, oracle.Player1, "EX1_050");
+        Check(oracle.Player2.HandZone.Count == 0 && oracle.Player2.DeckZone.Count == tadDeck && oracle.Player1.HandZone.Count >= 2,
+            "Coldlight Oracle: the player draws, Tad draws nothing");
+
         Game crab = DungeonRunRound1Proof.Fight("LOOTA_BOSS_22h");
         End(crab);
         Summon(crab.Player2, "LOOTA_102");
@@ -163,6 +170,10 @@ internal static class DungeonRunRounds6To7Proof
         End(tag);
         Play(tag, tag.Player2, "LOOTA_BOSS_110");
         Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && tag.Player2.Hero.Damage == 0, "Tag Team: Karl in, unhurt");
+        var karlCreated = tag.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryFullEntity>()
+            .LastOrDefault(f => f.Entity.Id == tag.Player2.Hero.Id);
+        Check(karlCreated != null && karlCreated.Entity.Tags.TryGetValue(GameTag.ZONE, out int karlZone) && karlZone == (int)Zone.PLAY,
+            "Tag Team: the incoming hero is created in play (the client's hero swap spell needs its zone)");
         tag = Reload(tag);
         End(tag);
         Play(tag, tag.Player1, "CS2_029", tag.Player2.Hero);

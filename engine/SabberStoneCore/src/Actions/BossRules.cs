@@ -67,7 +67,10 @@ namespace SabberStoneCore.Actions
 
         private static void BringIn(Controller c, string heroId, int damage, int armor)
         {
-            c.AddHeroAndPower(Cards.FromId(heroId));
+            // Created in PLAY (as retail's hero swaps): the client's swap spell (TagTeamSwapSpell, a HeroSwapSpell) applies only
+            // the new hero's FULL_ENTITY before it looks up the hero's zone; created zoneless and moved after, the hero had no
+            // zone there, the spell threw and the match froze.
+            c.AddHeroAndPower(Cards.FromId(heroId), null, new EntityData { [GameTag.ZONE] = (int)Zone.PLAY });
             c.Hero.Damage = damage;
             c.Hero.Armor = armor;
         }
