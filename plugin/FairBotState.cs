@@ -1120,6 +1120,9 @@ public sealed class FairBotState
             if (!kept.Contains(actor.Id) && actor.Controller.SetasideZone.Contains(actor)) actor.Controller.SetasideZone.Remove(actor);
             game.IdEntityDic.Remove(actor.Id);
         }
+        // A trigger registered apart from its owner's ActivatedTrigger (an enchantment's hand trigger: Shifting Scroll,
+        // Shadow Reflection) outlived its masked owner; cloning the view then failed to find the owner.
+        foreach (var stale in game.Triggers.Where(t => !game.IdEntityDic.ContainsKey(t.SourceId)).ToList()) stale.Remove();
         // EntityList.Remove deliberately leaves its count unchanged; repair the clone's registry before reuse.
         entityCount.SetValue(game.IdEntityDic, visible.Length);
         int next = visible.Select(c => c.Id).DefaultIfEmpty(3).Max() + 1;
