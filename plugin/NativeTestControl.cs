@@ -21,6 +21,10 @@ internal sealed partial class NativeTestControl
 #endif
     private string CaptureRoot => Reports + @"\control";
     private const int TradeKeyword = 1720;
+    // Semantic act classes beyond plain plays: act sets the client's selected option, sub-option, target and position and
+    // calls SendOption, the packet the native targeting and Choose One UI send at their end. Flip off to refuse them again.
+    internal const bool TargetedBattlecryQualified = true;
+    internal const bool ChooseOneQualified = true;
     private static NativeTestControl current;
     private readonly OfflineLaunchContext launch;
     private readonly ManualLogSource log;
@@ -800,16 +804,16 @@ internal sealed partial class NativeTestControl
             if (blocker != null || !view.EndTurnReady) throw new InvalidOperationException("End-turn button blocked: " + (blocker ?? view.State["endTurnBlocker"] ?? "endTurnSettling"));
         }
         PlayerTask task = ClientBridge.ValidateTestControlOption(options.ID, index, target, sub, position);
-        // shortcut: advanced semantic classes need separate Windows qualification before enabling.
-        // Trade (untargeted, keyword 1720) is qualified; choose-one and targeted battlecries are not.
+        // Advanced semantic classes are enabled once qualified live: Trade (untargeted, keyword 1720), Choose One and
+        // targeted Battlecries (the constants above); other power keywords stay refused.
 #if STANDARD_PROOF || ENGINE_SOURCE
         bool trade = (int)option.Main.PowerKeyword == TradeKeyword && target == 0 && sub == -1 && position == 0
             && task.PlayerTaskType == PlayerTaskType.TRADE_CARD;
 #else
         const bool trade = false;
 #endif
-        if (sub != -1 || ((int)option.Main.PowerKeyword != 0 && !trade)
-            || (target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion))
+        if ((sub != -1 && !ChooseOneQualified) || ((int)option.Main.PowerKeyword != 0 && !trade)
+            || (!TargetedBattlecryQualified && target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion))
             throw new InvalidOperationException("Unqualified semantic action class (choose-one/targeted battlecry)");
         expectedSend = "option"; expectedOptions = options.ID; expectedIndex = index;
         expectedTarget = target; expectedSub = sub; expectedPosition = position;
@@ -2323,19 +2327,21 @@ internal sealed partial class NativeTestControl
                     {
                         var positions = new JsonList();
                         int keyword = (int)(sub?.PowerKeyword ?? 0);
-                        bool enabled = subIndex == -1 && (keyword == 0 || keyword == TradeKeyword);
+                        bool enabled = (subIndex == -1 || ChooseOneQualified) && (keyword == 0 || keyword == TradeKeyword);
                         for (int position = 0; position <= 7; position++)
                             try
                             {
                                 ValidateClientOption(packet, index, target, subIndex);
                                 PlayerTask task = ClientBridge.ValidateTestControlOption(packet.ID, index, target, subIndex, position);
-                                if (target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion) enabled = false;
+                                if (!TargetedBattlecryQualified && target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion) enabled = false;
                                 positions.Add(position);
                             }
                             catch (Exception error) when (error is InvalidOperationException || error is ArgumentException) { }
                         if (positions.Count > 0) legal.Add(new JsonNode { { "target", target }, { "positions", positions }, { "semanticEnabled", enabled } });
                     }
+                    var subEntity = subIndex >= 0 ? GameState.Get()?.GetEntity(sub?.ID ?? 0) : null;
                     return new JsonNode { { "sub", subIndex }, { "source", sub?.ID ?? 0 }, { "keyword", (int)(sub?.PowerKeyword ?? 0) },
+                        { "name", subEntity?.GetName() },
                         { "error", sub?.PlayErrorInfo?.PlayError.ToString() }, { "errorParam", sub?.PlayErrorInfo?.PlayErrorParam },
                         { "targets", targets }, { "permitted", legal }, { "positionProvenance", "NativeMatch.ValidateOption" } };
                 }
