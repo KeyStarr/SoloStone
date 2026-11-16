@@ -3026,6 +3026,9 @@ public sealed class NativeMatch
                 eventBatch.Add(line);
                 try { EventTrace?.Invoke(line); } catch (Exception) { }
             }, HumanPlayerId.ToString(), BotPlayerId.ToString());
+            eventLog.Corrections = (entries, index) => copyCompletions
+                .Where(c => ReferenceEquals(c.Entries, entries) && c.HistoryIndex == index)
+                .Select(c => new KeyValuePair<int, IReadOnlyDictionary<GameTag, int>>(c.EntityId, c.Tags)).ToList();
         }
         eventBatch.Clear();
         return true;
