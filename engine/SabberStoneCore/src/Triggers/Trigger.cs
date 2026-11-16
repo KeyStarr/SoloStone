@@ -26,6 +26,8 @@ namespace SabberStoneCore.Triggers
 	{ 
 		private readonly TriggerManager.TriggerHandler _processHandler;
 		private readonly int _sourceId;
+		/// <summary>The entity the trigger belongs to (its owner's id).</summary>
+		public int SourceId => _sourceId;
 		private readonly TriggerType _triggerType;
 		private readonly SequenceType _sequenceType;
 		private readonly bool _isSecret;
