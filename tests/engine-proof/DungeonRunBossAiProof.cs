@@ -170,6 +170,13 @@ internal static class DungeonRunBossAiProof
                                 if (!fg.IdEntityDic.TryGetValue(aura.Owner.Id, out var owner) || !ReferenceEquals(owner, aura.Owner))
                                     Console.WriteLine("TRACE aura owner " + aura.Owner.Id + " " + aura.Owner.Card?.Id + " zone " + aura.Owner.Zone?.Type
                                         + " -> in view: " + (owner == null ? "missing" : owner.GetType().Name + " " + owner.Card?.Id + " " + owner.Zone?.Type));
+                            foreach (var trigger in fg.Triggers)
+                            {
+                                int sid = (int)typeof(SabberStoneCore.Triggers.Trigger).GetField("_sourceId", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(trigger);
+                                if (!fg.IdEntityDic.ContainsKey(sid))
+                                    Console.WriteLine("TRACE trigger owner " + sid + " missing in view; live: " + (game.IdEntityDic.TryGetValue(sid, out var live)
+                                        ? live.GetType().Name + " " + live.Card?.Id + " zone " + live.Zone?.Type + " ctrl " + live.Controller.PlayerId : "missing too"));
+                            }
                             foreach (var e in game.Player1.SetasideZone)
                                 Console.WriteLine("TRACE live setaside " + e.Id + " " + e.Card.Id + " pending " + e[SabberStoneCore.Actions.StartOfGameRules.Pending]);
                             BotSearch.Choose(view, budget);
