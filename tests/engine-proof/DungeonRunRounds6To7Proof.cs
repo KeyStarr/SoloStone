@@ -29,9 +29,163 @@ internal static class DungeonRunRounds6To7Proof
 
     private static Game Reload(Game game) => Game.LoadSnapshot(game.SaveSnapshot());
 
+    private static Game Boss(string hero, string[] deck, string[] board = null)
+    {
+        var config = new SabberStoneCore.Config.GameConfig {
+            StartPlayer = 1, Player1HeroClass = CardClass.MAGE, Player2HeroCard = Cards.FromId(hero), Player2HeroClass = Cards.FromId(hero).Class,
+            Player1Deck = Enumerable.Repeat("CS2_182", 20).Select(Cards.FromId).ToList(),
+            Player2Deck = deck.Select(Cards.FromId).ToList(),
+            Shuffle = false, SkipMulligan = true, History = true, RandomSeed = 11, SkipCoin = true, Player2StartingBoard = board,
+        };
+        var game = new Game(config);
+        game.StartGame();
+        return game;
+    }
+
+    private static readonly string[] TadDeck = { "LOOTA_102", "UNG_852", "OG_024", "EX1_250", "UNG_919", "EX1_543", "UNG_085", "NEW1_029", "EX1_110", "EX1_298" };
+
+    // Tad: no hand and no draws; Catch and Release pulls the deck minion costing his mana; undamaged, his 11th turn brings the
+    // Sunken Chest, whose death gives the player Tad's Pole and ends the fight. Any damage to him (even before a reload)
+    // means no Chest. He never plays a card.
+    private static void Tad()
+    {
+        foreach (int damageOnTurn in new[] { 0, 4 })
+        {
+            Game tad = Boss("LOOTA_BOSS_22h", TadDeck);
+            Check(tad.Player2.Hero.Health == 20 && tad.Player2.HandZone.Count == 0 && tad.Player2.DeckZone.Count == 10, "Tad: 20 Health, no hand");
+            for (int turn = 1; turn <= 10; turn++)
+            {
+                End(tad);
+                if (turn == 5) tad = Reload(tad);
+                Check(tad.Player2.HandZone.Count == 0 && tad.Player2.Hero.Damage == (damageOnTurn != 0 && turn > damageOnTurn ? 1 : 0),
+                    "Tad: no draw on turn " + turn);
+                Check(tad.Player2.BaseMana == turn, "Tad: " + turn + " mana");
+                Use(tad);
+                var caught = tad.Player2.BoardZone.Last();
+                Check(caught.Card.Cost == turn, "Catch and Release: the " + turn + "-cost minion (" + caught.Card.Id + ")");
+                foreach (var m in tad.Player2.BoardZone.ToList()) Kill(tad, m);
+                End(tad);
+                if (turn == damageOnTurn)
+                {
+                    tad.Player1.Hero.HeroPower.IsExhausted = false;
+                    tad.Player1.BaseMana = 10; tad.Player1.UsedMana = 0;
+                    var ping = tad.Player1.Options().First(t => t.PlayerTaskType == PlayerTaskType.HERO_POWER && t.Target == tad.Player2.Hero);
+                    Check(tad.Process(ping), "the player pings Tad");
+                }
+            }
+            End(tad);
+            Check(tad.Player2.DeckZone.Count == 0, "Tad: his deck is fished out");
+            if (damageOnTurn != 0) { Check(Power(tad.Player2) == null, "a damaged Tad brings no Sunken Chest"); continue; }
+            Use(tad);
+            var chest = tad.Player2.BoardZone.Single();
+            Check(chest.Card.Id == "LOOTA_103", "turn 11: the Sunken Chest");
+            Check(Power(tad.Player2) == null, "only one Sunken Chest");
+            End(tad);
+            tad.Player1.BaseMana = 10; tad.Player1.UsedMana = 0;
+            var breakChest = tad.Player1.Options().First(t => t.PlayerTaskType == PlayerTaskType.HERO_POWER && t.Target == chest);
+            Check(tad.Process(breakChest), "the player breaks the Sunken Chest");
+            Check(SabberStoneCore.Actions.RunDeckRules.Of(tad.Player1).SequenceEqual(new[] { "LOOTA_BOSS_22t" }),
+                "Sunken Chest: Tad's Pole for the player's Dungeon Deck (" + string.Join(",", SabberStoneCore.Actions.RunDeckRules.Of(tad.Player1)) + ")");
+            Check(tad.State == State.COMPLETE && tad.Player1.PlayState == PlayState.WON,
+                "Sunken Chest: Tad loses (" + tad.State + ", " + tad.Player1.PlayState + ", Tad dead " + tad.Player2.Hero.IsDead + ")");
+        }
+
+        Game holds = Boss("LOOTA_BOSS_22h", TadDeck);
+        End(holds);
+        Add(holds.Player2, "CS2_120");
+        holds.Player2.BaseMana = 10; holds.Player2.UsedMana = 0;
+        Check(holds.Player2.Options().All(t => t.PlayerTaskType != PlayerTaskType.PLAY_CARD), "Tad plays no card even when given one");
+
+        Game crab = DungeonRunRound1Proof.Fight("LOOTA_BOSS_22h");
+        End(crab);
+        Summon(crab.Player2, "LOOTA_102");
+        End(crab); End(crab);
+        Check(crab.Player2.Hero.Damage == 5, "Starving Crab: 5 damage to its own hero at the start of its turn");
+
+        Game pole = DungeonRunRound1Proof.Fight("LOOTA_BOSS_22h");
+        Play(pole, pole.Player1, "LOOTA_BOSS_22t");
+        int deck = pole.Player2.DeckZone.Count;
+        End(pole);
+        Check(pole.Player1.BoardZone.Count == 1 && pole.Player1.BoardZone[0].Card.Id == "CS2_120" && pole.Player2.DeckZone.Count == deck - 1,
+            "Tad's Pole: a minion from the opponent's deck at the end of the turn");
+    }
+
+    // Treasure Vault: seven Treasure Coffers, no deck and no draws (so no fatigue); each Coffer gives the player an active
+    // treasure; Doors Are Closing (5) ends the game, which the player wins.
+    private static void Vault()
+    {
+        string[] coffers = Enumerable.Repeat("LOOTA_BOSS_52t", 7).ToArray();
+        Game vault = Boss("LOOTA_BOSS_52h", new string[0], coffers);
+        Check(vault.Player2.Hero.Health == 60 && vault.Player2.BoardZone.Count(m => m.Card.Id == "LOOTA_BOSS_52t") == 7
+            && vault.Player2.HandZone.Count == 0, "Treasure Vault: 60 Health, seven Coffers, no hand");
+        Kill(vault, vault.Player2.BoardZone[0]);
+        Kill(vault, vault.Player2.BoardZone[0]);
+        var added = SabberStoneCore.Actions.RunDeckRules.Of(vault.Player1);
+        Check(added.Count == 2 && added.All(SabberStoneCore.CardSets.Client.Adventures.DungeonRunCards.ActiveTreasures.Contains),
+            "Treasure Coffer: an active treasure for the player's Dungeon Deck each");
+        for (int turn = 1; turn <= 5; turn++)
+        {
+            End(vault);
+            if (turn == 3) vault = Reload(vault);
+            Check(vault.Player2.Hero.Damage == 0 && vault.Player2.HandZone.Count == 0, "Treasure Vault: no draw, no fatigue on turn " + turn);
+            Check((Power(vault.Player2) != null) == (turn == 5), "Doors Are Closing: " + (turn == 5 ? "usable at 5 mana" : "not yet"));
+            if (turn < 5) End(vault);
+        }
+        Use(vault);
+        Check(vault.State == State.COMPLETE && vault.Player1.PlayState == PlayState.WON, "Doors Are Closing: the player wins");
+    }
+
+    // George and Karl: Karl takes over when George falls (the game goes on), and the game ends when both have. Tag Team swaps
+    // them while both stand, each keeping his own Damage (through snapshots too). Divinity: Divine Shield for every minion.
+    private static void GeorgeAndKarl()
+    {
+        Game duo = DungeonRunRound1Proof.Fight("LOOTA_BOSS_15h");
+        Check(duo.Player2.Hero.Health == 30, "George: 30 Health");
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Check(duo.State == State.RUNNING && duo.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && duo.Player2.Hero.Damage == 0
+            && duo.Player2.Hero.HeroPower.Card.Id == "AT_132_PALADIN", "George defeated: Karl takes over, unhurt, with The Silver Hand");
+        duo = Reload(duo);
+        End(duo);
+        Add(duo.Player2, "LOOTA_BOSS_110");
+        duo.Player2.BaseMana = 10; duo.Player2.UsedMana = 0;
+        Check(duo.Player2.Options().All(t => t.PlayerTaskType != PlayerTaskType.PLAY_CARD || t.Source.Card.Id != "LOOTA_BOSS_110"),
+            "Tag Team: no swap once George is down");
+        End(duo);
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Play(duo, duo.Player1, "EX1_279", duo.Player2.Hero);
+        Check(duo.State == State.COMPLETE && duo.Player1.PlayState == PlayState.WON, "Karl defeated too: the player wins");
+
+        Game tag = DungeonRunRound1Proof.Fight("LOOTA_BOSS_15h");
+        Play(tag, tag.Player1, "CS2_029", tag.Player2.Hero);
+        End(tag);
+        Play(tag, tag.Player2, "LOOTA_BOSS_110");
+        Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && tag.Player2.Hero.Damage == 0, "Tag Team: Karl in, unhurt");
+        tag = Reload(tag);
+        End(tag);
+        Play(tag, tag.Player1, "CS2_029", tag.Player2.Hero);
+        Play(tag, tag.Player1, "CS2_029", tag.Player2.Hero);
+        End(tag);
+        Play(tag, tag.Player2, "LOOTA_BOSS_110");
+        Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_15h" && tag.Player2.Hero.Damage == 6, "Tag Team: George back with his 6 Damage (" + tag.Player2.Hero.Card.Id + " " + tag.Player2.Hero.Damage + ")");
+        Play(tag, tag.Player2, "LOOTA_BOSS_110");
+        Check(tag.Player2.Hero.Card.Id == "LOOTA_BOSS_32h" && tag.Player2.Hero.Damage == 12, "Tag Team: Karl back with his 12 Damage");
+
+        Game divinity = BossTurn("LOOTA_BOSS_15h");
+        var a = Summon(divinity.Player2, "CS2_120");
+        var b = Summon(divinity.Player2, "CS2_182");
+        Use(divinity);
+        Check(a.HasDivineShield && b.HasDivineShield, "Divinity: Divine Shield for every friendly minion");
+    }
+
     [GroupProof("dungeon-run-rounds6-7")]
     internal static void Run()
     {
+        GeorgeAndKarl();
+        Tad();
+        Vault();
         foreach (var (hero, health) in new[] { ("LOOTA_BOSS_23h", 50), ("LOOTA_BOSS_53h", 50), ("LOOTA_BOSS_21h", 40), ("LOOTA_BOSS_36h", 20),
                      ("LOOTA_BOSS_43h", 40), ("LOOTA_BOSS_47h", 50), ("LOOTA_BOSS_24h", 50), ("LOOTA_BOSS_48h", 40), ("LOOTA_BOSS_38h", 50) })
             Check(DungeonRunRound1Proof.Fight(hero).Player2.Hero.Health == health, hero + ": " + health + " Health");

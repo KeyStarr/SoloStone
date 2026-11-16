@@ -13,6 +13,7 @@ public static class RunEncounterSpec
         PlayerHand = encounter.Boss.PlayerHand.Count == 0 ? null : encounter.Boss.PlayerHand.ToList(),
         NpcHero = encounter.Boss.Hero,
         NpcDeck = encounter.Boss.Deck.ToList(),
+        NpcHasNoDeck = encounter.Boss.Deck.Count == 0,
         NpcBoard = encounter.Boss.Board.Count == 0 ? null : encounter.Boss.Board.ToList(),
         NpcStartingMana = encounter.BossStartingMana,
         NpcCoin = definition.BossCoin,

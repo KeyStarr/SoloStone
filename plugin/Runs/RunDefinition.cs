@@ -167,7 +167,8 @@ public sealed class RunDefinition
                 HeroPower = CardId(NpcWorldJson.Text(row, "heroPower"), id + ".heroPower"),
                 Source = NonEmpty(NpcWorldJson.Text(row, "source"), id + ".source"),
                 Rounds = bossRounds,
-                Deck = Counted(NpcWorldJson.List(row, "deck"), id + ".deck"),
+                // An empty deck is a boss without one (Treasure Vault); its hero's rules keep it from drawing.
+                Deck = Counted(NpcWorldJson.List(row, "deck"), id + ".deck", true),
                 Board = CardIds(NpcWorldJson.Strings(row, "board"), id + ".board", true),
                 PlayerHand = CardIds(NpcWorldJson.Strings(row, "playerHand"), id + ".playerHand", true),
             });
@@ -231,7 +232,7 @@ public sealed class RunDefinition
         return (int)number;
     }
 
-    private static IReadOnlyList<string> Counted(System.Collections.IList rows, string owner)
+    private static IReadOnlyList<string> Counted(System.Collections.IList rows, string owner, bool allowEmpty = false)
     {
         var ids = new List<string>();
         foreach (object item in rows)
@@ -243,7 +244,7 @@ public sealed class RunDefinition
             if (ids.Contains(id)) throw new InvalidDataException(owner + ": " + id + " is listed twice; use count.");
             for (int i = 0; i < count; i++) ids.Add(id);
         }
-        if (ids.Count == 0) throw new InvalidDataException(owner + " is empty.");
+        if (ids.Count == 0 && !allowEmpty) throw new InvalidDataException(owner + " is empty.");
         return ids;
     }
 

@@ -18,6 +18,8 @@ public sealed class EncounterSpec
     // The NPC's side: a boss hero (its own Hero Power comes with it) and deck replace the ladder opponent's.
     public string NpcHero;
     public IReadOnlyList<string> NpcDeck;
+    // The boss has no deck at all (Dungeon Run's Treasure Vault): an empty NpcDeck then replaces the opponent's deck.
+    public bool NpcHasNoDeck;
     public string NpcName;
     // Minions the NPC has in play from the start (a run boss's starting board).
     public IReadOnlyList<string> NpcBoard;
@@ -32,6 +34,6 @@ public sealed class EncounterSpec
     public int MissionId, BoardId;
 
     public bool ReplacesPlayerDeck => PlayerDeck != null && PlayerDeck.Count > 0;
-    public bool ReplacesNpcDeck => NpcDeck != null && NpcDeck.Count > 0;
+    public bool ReplacesNpcDeck => NpcDeck != null && (NpcDeck.Count > 0 || NpcHasNoDeck);
     public bool IsMission => MissionId != 0;
 }

@@ -11,12 +11,28 @@ using SabberStoneCore.Triggers;
 namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 {
     // Dungeon Run round 4-5 bosses (https://hearthstone.wiki.gg/wiki/Dungeon_Run), with the Rank 2 heroes of the three that
-    // come back in rounds 6-7. Not yet here: A. F. Kay (her AI plays nothing before turn 6), Mushhuckster Max (crafts a
-    // potion), Whompwhisker (Mogor's Champion needs Forgetful).
+    // come back in rounds 6-7. Not yet here: Mushhuckster Max (crafts a potion whose options no source lists).
     internal static class DungeonRunRounds4To5
     {
         internal static void Apply(Action<int, string, Action<Card>> register)
         {
+            // A. F. Kay (https://hearthstone.wiki.gg/wiki/A._F._Kay_(boss)): "plays no cards from turns one to five, but then
+            // plays Boots of Haste and fills the board with 8/8s on turn six". Retail's AI held her cards; here no card of
+            // hers is playable before her sixth turn (her minions and weapons still attack). Idle (2): Do nothing.
+            register(47495, "LOOTA_BOSS_54h", card => {
+                Actions.BossRules.HoldCardsUntilTurn(card, 6);
+                DungeonRunCards.Plain(card);
+            });
+            register(47494, "LOOTA_BOSS_54p", card => Untargeted(card, new CustomTask((g, c, s, t, stack) => { })));
+
+            // Whompwhisker. Join the Fray (2, autocast): Both players Recruit a minion (he first, then the player). His deck
+            // has Mogor's Champion (Forgetful, Sets/Legacy/LegacyWildCards.cs).
+            register(47303, "LOOTA_BOSS_41h", DungeonRunCards.Plain);
+            register(47302, "LOOTA_BOSS_41p", card => Untargeted(card, new CustomTask((game, controller, source, target, stack) => {
+                new RecruitTask(1).Process(game, controller, source, null, stack);
+                new RecruitTask(1).Process(game, controller.Opponent, source, null, stack);
+            })));
+
             // Battlecrier Jin'zo. Battle Totem (passive): All Battlecries trigger twice (both players, as written).
             register(46338, "LOOTA_BOSS_17h", DungeonRunCards.Plain);
             register(46174, "LOOTA_BOSS_17p", card => PassiveAura(card, GameTag.EXTRA_BATTLECRIES_BASE));

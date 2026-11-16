@@ -35,6 +35,12 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
             // Wrath (Blackseed's and Elder Jari's decks): Choose One - its halves (EX1_154a/b) are shared with the Core reprint.
             register(836, "EX1_154", card => card.Implemented = true);
 
+            // Mogor's Champion (Whompwhisker's deck): 50% chance to attack the wrong enemy (Forgetful).
+            register(2491, "AT_088", card => {
+                card.Power = new Power { Trigger = Actions.ForgetfulRules.Trigger() };
+                card.Implemented = true;
+            });
+
             // Murloc Tinyfin (Fungalmancer Flurgl's deck): a vanilla 1/1 with no definition of its own.
             register(13879, "LOEA10_3", card => card.Implemented = true);
 

@@ -751,6 +751,7 @@ namespace SabberStoneCore.Model
         internal void CheckDeadHeroes()
         {
             Actions.CorpseRules.ResurrectHeroes(this);
+            Actions.BossRules.TagInPartners(this);
 			// check dead heroes here again (TODO)
 			if (State != State.COMPLETE)
 			{
@@ -876,7 +877,7 @@ namespace SabberStoneCore.Model
 		private static void ActivatePassivePower(Controller player)
 		{
 			var power = player.Hero?.HeroPower;
-			if (power == null || !power.IsPassiveHeroPower) return;
+			if (power == null || !(power.IsPassiveHeroPower || BossRules.HasStandingTrigger(power.Card))) return;
 			if (power.Power?.Trigger != null && power.ActivatedTrigger == null) power.Power.Trigger.Activate(power);
 			if (power.Power?.Aura != null && power.OngoingEffect == null) power.Power.Aura.Activate(power);
 		}
@@ -938,14 +939,15 @@ namespace SabberStoneCore.Model
 			//FirstPlayer.Opponent.NumCardsToDraw = 4;
 
 			// Self-removing Start of Game sources are never dealt; with nothing else left the slot stays empty.
-			void Deal(Controller p) { if (!StartOfGameRules.OpeningBlocked(p)) Generic.Draw(p, StartOfGameRules.OpeningPick(p)); }
+			// A boss that draws nothing (BossRules) gets no opening hand.
+			void Deal(Controller p) { if (!StartOfGameRules.OpeningBlocked(p) && !BossRules.DrawsNothing(p)) Generic.Draw(p, StartOfGameRules.OpeningPick(p)); }
 
 			_players.ToList().ForEach(p =>
 			{
 				// quest draw if there is
 				// Tag 1192 marks a Sidequest; Sidequests are not part of this guaranteed Quest draw.
 				IPlayable quest = p.DeckZone.FirstOrDefault(q => q is Spell spell && spell.IsQuest && spell.Card[(GameTag)1192] == 0);
-				if (quest != null) Generic.Draw(p, quest); else Deal(p);
+				if (quest != null && !BossRules.DrawsNothing(p)) Generic.Draw(p, quest); else Deal(p);
 				Deal(p);
 				Deal(p);
 
@@ -1167,7 +1169,7 @@ namespace SabberStoneCore.Model
 				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, CurrentPlayer.Id, "", 0, 0, effectIndex: -1)); // turn start effect
 
 			//CurrentPlayer.NumCardsToDraw = 1;
-			if (!Actions.DrawReplacementRules.TryReplaceNormalDraw(CurrentPlayer))
+			if (!Actions.BossRules.DrawsNothing(CurrentPlayer) && !Actions.DrawReplacementRules.TryReplaceNormalDraw(CurrentPlayer))
                 using(Facts.TurnStartDraw()) Generic.Draw(CurrentPlayer);
 
 			if (History)
@@ -1483,6 +1485,7 @@ namespace SabberStoneCore.Model
 			}
 
             Actions.CorpseRules.ResurrectHeroes(this);
+            Actions.BossRules.TagInPartners(this);
 
 			if (Player1.Hero.ToBeDestroyed)
 			{

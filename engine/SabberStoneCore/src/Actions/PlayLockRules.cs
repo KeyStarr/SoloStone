@@ -16,7 +16,7 @@ namespace SabberStoneCore.Actions
         public static bool IsPrivateTag(GameTag tag) => (int)tag >= 32550 && (int)tag <= 32552;
         private static bool Has(IEntity target, GameTag tag) => target.AppliedEnchantments?.Any(e => e[Restriction] == (int)tag) == true;
         public static bool BlocksPlay(IPlayable target) => target.Zone == target.Controller.HandZone
-            && (Has(target, GameTag.CANT_PLAY) || CardSets.Client.Sets.ArrivalRules.BlocksPlay(target));
+            && (Has(target, GameTag.CANT_PLAY) || CardSets.Client.Sets.ArrivalRules.BlocksPlay(target) || BossRules.HoldsCards(target));
         public static bool IsSleeping(IEntity target) => target.Zone == target.Controller.BoardZone && Has(target, GameTag.CANT_ATTACK);
 
         public static Enchantment LockHand(IPlayable target, IPlayable source, string enchantmentId, int ownerEnds = 1)

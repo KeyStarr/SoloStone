@@ -104,6 +104,10 @@ internal static class Program
         Check(loot.Client.Scenario == 2663 && loot.Client.ServerKey == 24 && loot.Client.ClientKey == 42, "loot: client ids");
         Check(loot.Classes.Count == 9 && loot.Classes.All(c => c.Deck.Count == 10), "loot: nine classes with ten-card start decks");
         Check(loot.Rounds.Count == 8 && loot.Round(8).BossStartingMana == 2, "loot: eight rounds, the final boss starts with 2 mana");
+        // Treasure Coffers (Treasure Vault) add one of the active treasures; the engine keeps its own copy of the list.
+        Check(SabberStoneCore.CardSets.Client.Adventures.DungeonRunCards.ActiveTreasures.SequenceEqual(loot.ActiveTreasures),
+            "loot: the engine's Treasure Coffer list is the content's active treasures");
+        Check(loot.Boss("treasure-vault").Deck.Count == 0 && loot.Boss("treasure-vault").Board.Count == 7, "loot: Treasure Vault has no deck and seven Coffers");
         // Retail's reward for a run won with all nine classes: the Candle King card back (client card back 119).
         Check(loot.CardBackRewards.Count == 1 && loot.CardBackRewards[0].CardBack == 119, "loot: the Candle King card back for every class");
         var eightClasses = loot.Classes.Skip(1).Select(c => c.Class).ToList();

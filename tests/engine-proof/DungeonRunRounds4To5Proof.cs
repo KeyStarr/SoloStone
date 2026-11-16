@@ -30,9 +30,77 @@ internal static class DungeonRunRounds4To5Proof
 
     private static Game Reload(Game game) => Game.LoadSnapshot(game.SaveSnapshot());
 
+    // A. F. Kay: no card of hers is playable before her sixth turn (snapshots keep the rule); then she plays as usual. Idle
+    // does nothing.
+    private static void AFKay()
+    {
+        foreach (bool reload in new[] { false, true })
+        {
+            Game kay = DungeonRunRound1Proof.Fight("LOOTA_BOSS_54h");
+            if (reload) kay = Game.LoadSnapshot(kay.SaveSnapshot());
+            Check(kay.Player2.Hero.Health == 40, "A. F. Kay: 40 Health");
+            for (int turn = 1; turn <= 6; turn++)
+            {
+                End(kay);
+                kay.Player2.BaseMana = 10; kay.Player2.UsedMana = 0;
+                if (turn == 3) kay = Game.LoadSnapshot(kay.SaveSnapshot());
+                bool plays = kay.Player2.Options().Any(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD);
+                Check(plays == (turn == 6), "A. F. Kay: turn " + turn + (turn == 6 ? " plays cards" : " plays no card"));
+                if (turn < 6) End(kay);
+            }
+        }
+        Game idle = BossTurn("LOOTA_BOSS_54h");
+        int hand = idle.Player2.HandZone.Count, board = idle.Player1.BoardZone.Count + idle.Player2.BoardZone.Count;
+        Use(idle);
+        Check(idle.Player2.HandZone.Count == hand && idle.Player1.BoardZone.Count + idle.Player2.BoardZone.Count == board
+            && idle.Player1.Hero.Damage == 0, "Idle: nothing happens");
+    }
+
+    // Whompwhisker, Join the Fray: a minion from each player's deck onto each board. Mogor's Champion (Forgetful): about half
+    // its attacks go to another enemy (at random, Stealth included) when there is one; with only the intended target there
+    // is no wrong one.
+    private static void Whompwhisker()
+    {
+        Game fray = BossTurn("LOOTA_BOSS_41h");
+        Check(fray.Player2.Hero.Health == 40, "Whompwhisker: 40 Health");
+        int bossDeck = fray.Player2.DeckZone.Count, playerDeck = fray.Player1.DeckZone.Count;
+        Use(fray);
+        Check(fray.Player2.BoardZone.Count == 1 && fray.Player2.BoardZone[0].Card.Id == "CS2_120" && fray.Player2.DeckZone.Count == bossDeck - 1
+            && fray.Player1.BoardZone.Count == 1 && fray.Player1.BoardZone[0].Card.Id == "CS2_182" && fray.Player1.DeckZone.Count == playerDeck - 1,
+            "Join the Fray: both players Recruit a minion");
+
+        int wrong = 0, stealthHit = 0;
+        const int trials = 60;
+        for (int seed = 0; seed < trials; seed++)
+        {
+            Game game = DungeonRunRound1Proof.Fight("LOOTA_BOSS_41h", seed);
+            var champion = Summon(game.Player1, "AT_088");
+            var intended = Summon(game.Player2, "CS2_120");
+            var hidden = Summon(game.Player2, "CS2_120");
+            hidden.HasStealth = true;
+            Attack(game, champion, intended);
+            bool hitIntended = intended.Damage > 0 || intended.IsDead;
+            bool hitOther = hidden.Damage > 0 || hidden.IsDead || game.Player2.Hero.Damage > 0;
+            Check(hitIntended != hitOther, "Mogor's Champion: exactly one target is hit");
+            if (hitOther) wrong++;
+            if (hidden.Damage > 0 || hidden.IsDead) stealthHit++;
+        }
+        Check(wrong > trials / 4 && wrong < trials * 3 / 4, "Forgetful: about half the attacks go wrong (" + wrong + "/" + trials + ")");
+        Check(stealthHit > 0, "Forgetful: a Stealthed minion can be the wrong target");
+        for (int seed = 0; seed < 10; seed++)
+        {
+            Game alone = DungeonRunRound1Proof.Fight("LOOTA_BOSS_41h", seed);
+            var champion = Summon(alone.Player1, "AT_088");
+            Attack(alone, champion, alone.Player2.Hero);
+            Check(alone.Player2.Hero.Damage == 8, "Forgetful: with no other enemy the hero is hit");
+        }
+    }
+
     [GroupProof("dungeon-run-rounds4-5")]
     internal static void Run()
     {
+        AFKay();
+        Whompwhisker();
         foreach (var (hero, health) in new[] { ("LOOTA_BOSS_17h", 40), ("LOOTA_BOSS_16h", 40), ("LOOTA_BOSS_06h", 40), ("LOOTA_BOSS_29h", 60),
                      ("LOOTA_BOSS_42h", 30), ("LOOTA_BOSS_20h", 30), ("LOOTA_BOSS_46h", 30), ("LOOTA_BOSS_19h", 30), ("LOOTA_BOSS_33h", 50), ("LOOTA_BOSS_39h", 30),
                      ("LOOTA_BOSS_37h", 40), ("LOOTA_BOSS_51h", 30), ("LOOTA_BOSS_13h", 40), ("LOOTA_BOSS_04h", 30), ("LOOTA_BOSS_27h", 50) })

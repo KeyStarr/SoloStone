@@ -434,6 +434,12 @@
       ]
     },
     {
+      "id": "treasure-vault", "hero": "LOOTA_BOSS_52h", "heroPower": "LOOTA_BOSS_52p", "rounds": [6, 7],
+      "source": "https://hearthstone.wiki.gg/wiki/Treasure_Vault",
+      "deck": [],
+      "board": ["LOOTA_BOSS_52t", "LOOTA_BOSS_52t", "LOOTA_BOSS_52t", "LOOTA_BOSS_52t", "LOOTA_BOSS_52t", "LOOTA_BOSS_52t", "LOOTA_BOSS_52t"]
+    },
+    {
       "id": "voodoomaster-vex", "hero": "LOOTA_BOSS_38h", "heroPower": "LOOTA_BOSS_38p", "rounds": [6, 7],
       "source": "https://hearthstone.wiki.gg/wiki/Voodoomaster_Vex",
       "deck": [

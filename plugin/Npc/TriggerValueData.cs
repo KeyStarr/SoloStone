@@ -6,6 +6,7 @@ internal static class TriggerValueData
 AT_026|SelfDamage|Priced|1|0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0
 AT_027|OwnDraw|NoEffect|0|
 AT_031|SelfAttack|Partial|0.333|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+AT_088|SelfAttack|SelfRemoving|1|0,0,-0.125,0,0,0,0,0,0,0.333,-0.042,-0.125,-0.083,0,0,0,0,0,0,0
 BE_008|OwnCard|Priced|0.5|0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0
 BE_255|OwnMinion|Priced|1|0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 BE_701|OwnMinion|Priced|1|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
