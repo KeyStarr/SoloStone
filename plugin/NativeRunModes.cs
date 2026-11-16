@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Logging;
 using HarmonyLib;
+using MiniJSON;
 
 // Run modes in the client's own adventure screen (Dungeon Run first: adventure 414, mode DUNGEON_CRAWL; plugin/Runs holds the
 // rules, RunCatalog the shipped definitions). The Modes button opens it while run modes are enabled. The client's Dungeon
@@ -435,4 +436,44 @@ internal static class NativeRunModes
     }
 
     internal static void Trace(string message) => log?.LogInfo("RUNMODE " + message);
+
+    // ---- Test tools ----
+    // The run as a tester reads it (test control's state, hook builds): status, Health of the next fight, next boss, the
+    // pending offer and the deck, with card names. Null without a run mode or a save.
+    private static RunEngine testEngine;
+    internal static JsonNode TestView()
+    {
+        RunDefinition definition = Current;
+        LocalProfile profile = LocalLadder.Profile;
+        if (!Enabled || definition == null || profile == null) return null;
+        string Name(string id)
+        {
+            try { return SabberStoneCore.Model.Cards.FromId(id).Name; }
+            catch (KeyNotFoundException) { return id; }
+        }
+        JsonList Names(IEnumerable<string> ids) { var list = new JsonList(); foreach (string id in ids) list.Add(Name(id)); return list; }
+        var node = new JsonNode { { "mode", definition.Id } };
+        RunState run = profile.RunOf(definition);
+        if (run == null) { node["status"] = "none"; return node; }
+        if (testEngine == null || testEngine.Definition != definition) testEngine = EngineFor(definition);
+        node["status"] = run.Status.ToString();
+        node["class"] = run.Class;
+        node["round"] = run.Round;
+        node["bossesDefeated"] = run.BossesDefeated;
+        node["health"] = testEngine.FightStartHealth(run);
+        node["nextBoss"] = run.NextBoss == null ? null : Name(definition.Boss(run.NextBoss).Hero) + " (" + run.NextBoss + ")";
+        node["lostTo"] = run.LostTo;
+        node["runEndSeen"] = run.RunEndSeen;
+        node["deckCount"] = run.Deck.Count;
+        node["deck"] = Names(run.Deck);
+        node["passives"] = Names(run.Passives);
+        if (run.Offer != null)
+        {
+            var options = new JsonList();
+            foreach (RunOption option in run.Offer.Options)
+                options.Add(new JsonNode { { "title", option.Title == null ? null : Name(option.Title) }, { "cards", Names(option.Cards) } });
+            node["offer"] = new JsonNode { { "kind", run.Offer.Kind.ToString() }, { "options", options } };
+        }
+        return node;
+    }
 }

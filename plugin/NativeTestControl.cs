@@ -186,9 +186,13 @@ internal sealed partial class NativeTestControl
         }
         if (active != null)
         {
-            active.Phase = active.Phase == "fault" || active.Sends != 0 || active.Detail.ContainsKey("nativeInvocationStarted") ? "fault" : "rejected";
-            active.Detail["error"] = reason + "; reconcile action-status before retry";
-            if (active.Phase == "fault") LatchFault(reason);
+            // An action that already settled stays settled: a restart after it (a new token) leaves nothing unknown to fault.
+            if (active.Phase != "settled")
+            {
+                active.Phase = active.Phase == "fault" || active.Sends != 0 || active.Detail.ContainsKey("nativeInvocationStarted") ? "fault" : "rejected";
+                active.Detail["error"] = reason + "; reconcile action-status before retry";
+                if (active.Phase == "fault") LatchFault(reason);
+            }
             active = null; owner = null; inSubmission = false;
         }
     }
@@ -2071,6 +2075,8 @@ internal sealed partial class NativeTestControl
             { "heldEntityId", pressRecord.HeldEntity } };
         view.State["concedeStallRecovery"] = NativeConcedeStallRecovery.LastRecovery;
         var scenarioOutcome = DebugScenario.LastOutcome;
+        try { view.State["run"] = NativeRunModes.TestView(); }
+        catch (Exception error) { view.State["run"] = new JsonNode { { "error", error.GetType().Name + ": " + error.Message } }; }
         view.State["debugScenario"] = scenarioOutcome == null ? null : new JsonNode {
             { "status", scenarioOutcome.Status }, { "detail", scenarioOutcome.Detail }, { "runId", scenarioOutcome.RunId } };
         view.State["unresolvedLocalChange"] = zone?.HasUnresolvedLocalChange() ?? false;
@@ -2094,14 +2100,48 @@ internal sealed partial class NativeTestControl
 #else
                 player.BoardZone
 #endif
-                .Select(card => (object)new JsonNode {
-                { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) }, { "position", card.ZonePosition + 1 }
-            })) }
+                .Select(card => (object)BoardCard(match, card, player, human))) }
         };
-        if (human) result.Add("hand", TestControlProtocol.List(player.HandZone.Select(card => (object)new JsonNode {
-            { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) }
-        })));
+        // Compact play view (test tools): names, costs, stats and keywords, so a tester needs no per-entity reads.
+        result.Add("heroName", player.Hero.Card.Name);
+        result.Add("heroPower", new JsonNode { { "id", match.WireReturnId(player.Hero.HeroPower.Id) }, { "name", player.Hero.HeroPower.Card.Name },
+            { "cost", player.Hero.HeroPower.Cost }, { "used", player.Hero.HeroPower.IsExhausted } });
+        if (player.Hero.Weapon != null)
+            result.Add("weapon", new JsonNode { { "id", match.WireReturnId(player.Hero.Weapon.Id) }, { "name", player.Hero.Weapon.Card.Name },
+                { "attack", player.Hero.Weapon.AttackDamage }, { "durability", player.Hero.Weapon.Durability } });
+        result.Add("heroAttack", player.Hero.AttackDamage);
+        result.Add("secretCount", player.SecretZone.Count(card => card.IsSecret));
+        if (human)
+        {
+            result.Add("secrets", TestControlProtocol.List(player.SecretZone.Where(card => card.IsSecret).Select(card => (object)card.Card.Name)));
+            result.Add("hand", TestControlProtocol.List(player.HandZone.Select(card => (object)new JsonNode {
+                { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) },
+                { "name", card.Card.Name }, { "cost", card.Cost }
+            })));
+        }
         return result;
+    }
+    private static JsonNode BoardCard(NativeMatch match, SabberStoneCore.Model.Entities.IPlayable card, SabberStoneCore.Model.Entities.Controller player, bool human)
+    {
+        var node = new JsonNode {
+            { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) },
+            { "position", card.ZonePosition + 1 }, { "name", card.Card.Name } };
+        if (card is SabberStoneCore.Model.Entities.Minion minion)
+        {
+            node.Add("attack", minion.AttackDamage); node.Add("health", minion.Health);
+            var keywords = new List<object>();
+            if (minion.HasTaunt) keywords.Add("taunt");
+            if (minion.HasDivineShield) keywords.Add("shield");
+            if (minion.HasStealth) keywords.Add("stealth");
+            if (minion.IsFrozen) keywords.Add("frozen");
+            if (minion.HasWindfury) keywords.Add("windfury");
+            if (minion.Poisonous) keywords.Add("poisonous");
+            if (minion.HasLifeSteal) keywords.Add("lifesteal");
+            if (minion.IsDormant) keywords.Add("dormant");
+            if (human && minion.CanAttack) keywords.Add("ready");
+            if (keywords.Count != 0) node.Add("keywords", TestControlProtocol.List(keywords));
+        }
+        return node;
     }
     private static JsonNode ClientPlayer(GameState front, Player player)
     {
@@ -2242,6 +2282,11 @@ internal sealed partial class NativeTestControl
             { "entities", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Cast<object>()) },
             { "unchoosableEntities", TestControlProtocol.List((choices?.UnchoosableEntities ?? new List<int>()).Cast<object>()) },
             { "selected", TestControlProtocol.List((front?.GetChosenEntities() ?? new List<Entity>()).Select(entity => (object)entity.GetEntityId())) },
+            // Test tools: what each choice is, so a tester picks by name without reading entities one by one.
+            { "cards", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Select(id => {
+                var entity = front?.GetEntity(id);
+                return (object)new JsonNode { { "id", id }, { "cardId", entity?.GetCardId() }, { "name", entity?.GetName() } };
+            })) },
             { "handTargets", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Select(id => {
                 var row = new JsonNode { { "entityId", id }, { "clickable", false } };
                 try { var point = NativeGameplayDrag.ChoicePoint(id); row["clickable"] = true;
