@@ -252,7 +252,7 @@ class Runner:
         self.logs.mkdir(parents=True, exist_ok=True)
         self.engine_built = None  # None not tried, else True or False
         self.env = dict(os.environ, SOLOSTONE_ROOT=str(ROOT), DOTNET_CLI_TELEMETRY_OPTOUT='1', DOTNET_NOLOGO='1', DOTNET_SKIP_FIRST_TIME_EXPERIENCE='1',
-                        PYTHONDONTWRITEBYTECODE='1')
+                        PYTHONDONTWRITEBYTECODE='1', SOLOSTONE_PYTHON=sys.executable)
 
     def shared(self):
         return self.artifacts / 'build'
@@ -282,7 +282,7 @@ class Runner:
 
     def build_project(self, log, project, artifacts, props=()):
         command = [self.dotnet, 'build', project, '-c', 'Release', '--artifacts-path', artifacts, '-p:EngineSource=true',
-                   '-p:NuGetAudit=false', '--nologo', '-v', 'quiet', '-m:1', *props]
+                   '-p:NuGetAudit=false', f'-p:SoloStonePython={sys.executable}', '--nologo', '-v', 'quiet', '-m:1', *props]
         return self.step(log, command, 'build')
 
     def ensure_hssim(self, log):
@@ -340,7 +340,7 @@ class Runner:
                  'sub-spell check would skip (docs/BUILDING.md step 1)')
             return False
         return all(self.step(log, [self.dotnet, 'build', project, '-c', 'Release', '-p:EngineSource=true', '-p:NuGetAudit=false',
-                                   '--nologo', '-v', 'quiet', '-m:1'], 'build') for project in suite.prebuild_in_tree_with_client)
+                                   f'-p:SoloStonePython={sys.executable}', '--nologo', '-v', 'quiet', '-m:1'], 'build') for project in suite.prebuild_in_tree_with_client)
 
     def run_mono(self, suite, log):
         """A .NET Framework program (the client's runtime): built like a dotnet suite, run under mono (directly on Windows)."""

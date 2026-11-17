@@ -23,6 +23,18 @@ static partial class Program
             if(process.ExitCode!=0) throw new Exception("Could not create test junction (exit "+process.ExitCode+")");
         }
     }
+    // A file symlink (there is no junction for files). Windows creates one only in Developer Mode or from an elevated prompt;
+    // without that the check is skipped, with the reason, and false is returned. Off Windows it always links.
+    static bool? fileLinks;
+    static bool LinkFile(string link,string target,string what) {
+        if (fileLinks==null) {
+            string probe=Path.Combine(Path.GetTempPath(),"solostone-link-probe-"+Guid.NewGuid().ToString("N"));
+            try { File.CreateSymbolicLink(probe,target); File.Delete(probe); fileLinks=true; }
+            catch (Exception e) when (OperatingSystem.IsWindows() && (e is IOException || e is UnauthorizedAccessException)) { fileLinks=false; }
+        }
+        if (fileLinks==false) { Skip(what+": Windows creates file symlinks only in Developer Mode or from an elevated prompt"); return false; }
+        File.CreateSymbolicLink(link,target); return true;
+    }
     static Func<ClientFacts,Verdict> Policy(TestedClient tested) => facts=>ClientPolicy.Decide(facts,tested,null,null,BindingResult.NotAvailable,null);
     static SetupOptions SetupOf(string source,string root,string bundle,TestedClient tested,string saves,string client=null,bool accept=false) => new SetupOptions {
         Source=source, Root=root, ClientPath=client, Bundle=bundle, SaveRoot=saves, Check=Policy(tested), AcceptedWarning=accept };
@@ -165,6 +177,14 @@ static partial class Program
             if(skipped.Count!=0 && Environment.GetEnvironmentVariable("SOLOSTONE_REQUIRE_ALL")=="1") { Console.Error.WriteLine("FAIL: skipped with SOLOSTONE_REQUIRE_ALL=1: "+string.Join("; ",skipped)); return 1; }
             Console.WriteLine("PASS "+count+" installer checks, "+skipped.Count+" skipped"+(skipped.Count==0?"":" ("+string.Join("; ",skipped)+")")); return 0;
         } catch(Exception e) { Console.Error.WriteLine(e); return 1; }
-        finally { Directory.Delete(temp,true); }
+        finally { DeleteTemp(temp); }
+    }
+    // Some checks load the fixture libraries they craft (Assembly.LoadFile), and the default load context keeps them mapped until
+    // this process exits. Windows cannot delete a mapped file, so there the rest is removed and the folder is left with a note.
+    static void DeleteTemp(string temp) {
+        try { Directory.Delete(temp,true); }
+        catch(Exception e) when(OperatingSystem.IsWindows() && (e is IOException || e is UnauthorizedAccessException)) {
+            Console.WriteLine("NOTE "+temp+" is left behind: a library the checks loaded is still open ("+e.Message+")");
+        }
     }
 }

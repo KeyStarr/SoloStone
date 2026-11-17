@@ -88,7 +88,7 @@
     <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
   </ItemGroup>
   <Target Name="ExtractNativeCosmetics" BeforeTargets="CoreCompile">
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_native_cosmetics.py&quot; &quot;$(IntermediateOutputPath)NativeCosmetics.g.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_native_cosmetics.py&quot; &quot;$(IntermediateOutputPath)NativeCosmetics.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)NativeCosmetics.g.cs" /></ItemGroup>
   </Target>
   <ItemGroup><Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /></ItemGroup>

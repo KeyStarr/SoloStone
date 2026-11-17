@@ -10,9 +10,9 @@
     <Compile Include="../../plugin/ProfileStartupStatus.cs" Link="ProfileStartupStatus.cs" />
   </ItemGroup>
   <Target Name="ExtractCraftingBatch" BeforeTargets="CoreCompile">
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_crafting.py&quot; &quot;$(IntermediateOutputPath)CraftingBatch.g.cs&quot;" />
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_matchmaking.py&quot; &quot;$(IntermediateOutputPath)Matchmaking.g.cs&quot;" />
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_gameplay_rank.py&quot; &quot;$(IntermediateOutputPath)GameplayRank.g.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_crafting.py&quot; &quot;$(IntermediateOutputPath)CraftingBatch.g.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_matchmaking.py&quot; &quot;$(IntermediateOutputPath)Matchmaking.g.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_gameplay_rank.py&quot; &quot;$(IntermediateOutputPath)GameplayRank.g.cs&quot;" />
     <ItemGroup>
       <Compile Include="$(IntermediateOutputPath)CraftingBatch.g.cs" />
       <Compile Include="$(IntermediateOutputPath)Matchmaking.g.cs" />

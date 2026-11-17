@@ -267,7 +267,7 @@ public static class MatchJournalTests
             {
                 record.OnPostAction(1, "hash");
                 Check(record.FlushAndWait(5000) && record.Enabled, "cleanup failure disabled new journal");
-                Check(File.ReadAllLines(Path.Combine(directory, "current.jsonl")).Length == 2, "new journal left empty");
+                Check(OpenJournalReads.Lines(Path.Combine(directory, "current.jsonl")).Length == 2, "new journal left empty");
                 Check(Directory.GetFiles(directory, "*.jsonl").Length == 50 && File.ReadAllText(locked) == "preserved-0", "retention did not try other eligible files");
                 Check(warnings.Any(w => w.Contains("old-0.jsonl")), "cleanup failure not reported");
             }
@@ -285,7 +285,7 @@ public static class MatchJournalTests
                 Check(first.FlushAndWait(5000), "first active journal timed out");
                 string path = Path.Combine(directory, "first.jsonl");
                 File.SetLastWriteTimeUtc(path, new DateTime(2000, 1, 1));
-                var bytes = File.ReadAllBytes(path);
+                var bytes = OpenJournalReads.Bytes(path);
                 for (int i = 0; i < 49; i++)
                 {
                     string old = Path.Combine(directory, "old-" + i + ".jsonl");
@@ -296,10 +296,10 @@ public static class MatchJournalTests
                 {
                     second.OnPostAction(1, "second");
                     Check(second.FlushAndWait(5000) && second.Enabled, "second journal timed out");
-                    Check(File.Exists(path) && File.ReadAllBytes(path).SequenceEqual(bytes), "retention removed another active journal");
+                    Check(File.Exists(path) && OpenJournalReads.Bytes(path).SequenceEqual(bytes), "retention removed another active journal");
                     Check(Directory.GetFiles(directory, "*.jsonl").Length == 50, "active journals not counted in retention");
                     first.OnPostAction(2, "later");
-                    Check(first.FlushAndWait(5000) && File.ReadAllLines(path).Length == 3, "active journal lost its later writes");
+                    Check(first.FlushAndWait(5000) && OpenJournalReads.Lines(path).Length == 3, "active journal lost its later writes");
                 }
             }
         }

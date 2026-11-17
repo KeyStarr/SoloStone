@@ -22,9 +22,12 @@ internal static class GrindTierChecks
     {
         string source = RepoRoot.Find("tools/grind_pace.py");
         Check(source != null, "find Python pace model in this worktree");
-        var start = new System.Diagnostics.ProcessStartInfo("python3") {
+        // tests/run.py hands over its own interpreter; otherwise `python` on Windows (where `python3` is often only the Store stub).
+        string interpreter = Environment.GetEnvironmentVariable("SOLOSTONE_PYTHON") is { Length: > 0 } given ? given : OperatingSystem.IsWindows() ? "python" : "python3";
+        var start = new System.Diagnostics.ProcessStartInfo(interpreter) {
             WorkingDirectory = source!, RedirectStandardOutput = true, RedirectStandardError = true
         };
+        start.ArgumentList.Add("-X"); start.ArgumentList.Add("utf8");
         start.ArgumentList.Add("-c");
         start.ArgumentList.Add("import json, sys; from pathlib import Path; sys.path.insert(0, 'tools'); "
             + "import grind_pace; print(json.dumps(grind_pace.load_catalogue(Path('.')).deck_costs))");

@@ -10,6 +10,6 @@
     <Compile Include="$(IntermediateOutputPath)DeckRuntime.Generated.cs" />
   </ItemGroup>
   <Target Name="ExtractDeckRuntime" BeforeTargets="CoreCompile">
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_runtime.py&quot; &quot;$(IntermediateOutputPath)DeckRuntime.Generated.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_runtime.py&quot; &quot;$(IntermediateOutputPath)DeckRuntime.Generated.cs&quot;" />
   </Target>
 </Project>

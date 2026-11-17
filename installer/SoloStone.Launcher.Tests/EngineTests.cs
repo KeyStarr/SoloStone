@@ -247,8 +247,8 @@ static partial class Program
             Check(with(bad).Unreadable!=null,"unreadable save refused: "+bad.Substring(0,Math.Min(30,bad.Length)));
         File.WriteAllText(Path.Combine(slot,"profile.xml"),ProfileXml(15));
         string target=Path.Combine(temp,"scan-target"); Directory.CreateDirectory(target); File.WriteAllText(Path.Combine(target,"profile.xml"),ProfileXml(15));
-        File.Delete(Path.Combine(slot,"profile.xml")); File.CreateSymbolicLink(Path.Combine(slot,"profile.xml"),Path.Combine(target,"profile.xml"));
-        Check(Saves.Scan(saves).Unreadable!=null,"linked save refused");
+        File.Delete(Path.Combine(slot,"profile.xml")); if(LinkFile(Path.Combine(slot,"profile.xml"),Path.Combine(target,"profile.xml"),"linked save refused"))
+            Check(Saves.Scan(saves).Unreadable!=null,"linked save refused");
     }
     static void StageRefusals(string temp) {
         var f=NewFixture(temp); string code=f.Code;

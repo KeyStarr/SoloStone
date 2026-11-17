@@ -18,7 +18,7 @@ internal static partial class Program
         for (int lane = 0; lane <= 3; lane++)
         {
             string root = OfflineGuard.LaneRoot(lane);
-            var launch = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB", root + @"\client\Hearthstone.exe",
+            var launch = OfflineGuard.ResolveHeldLaunch(@"LAB\HSNativeUIProbe", "LAB", root + @"\client\Hearthstone.exe",
                 LabTestPaths.LocalData,
                 new[] { "-hs-native-ui-run", RunA, "-hs-native-ui-lane", lane.ToString() }, false);
             string path = launch.Reports + @"\debug-scenario"; // OfflineProbe startup uses launch.Reports.
