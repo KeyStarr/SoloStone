@@ -625,11 +625,12 @@ public sealed class FairBotState
                     foreach (var branch in kept.ChooseOnePlayables ?? Array.Empty<IPlayable>())
                         if (branch != null) visibleOffboard.Add(branch.Id);
                 }
-        // Start of Game sources set aside (a run's passive treasures, StartOfGameRules.AddLoadout) are revealed to both players;
-        // dropping one left its aura behind, so every search copy failed (Game clone: aura owner missing) and a run boss facing
-        // a passive treasure fell back on each decision.
-        foreach (var actor in copy.IdEntityDic.Values.Where(c => c.Zone?.Type == EngineZone.SETASIDE && copy.Turn >= 1
-            && SabberStoneCore.Actions.StartOfGameRules.HasEffect(c.Card)))
+        // A run's loadout (passive treasures, StartOfGameRules.AddLoadout) is shown to both players; dropping one left its aura
+        // behind, so every search copy failed (Game clone: aura owner missing) and a run boss facing a passive treasure fell
+        // back on each decision. Only marked loadout cards: other set-aside Start of Game cards (an unchosen Discover option)
+        // stay hidden.
+        foreach (var actor in copy.IdEntityDic.Values.Where(c => c.Zone?.Type == EngineZone.SETASIDE
+            && c[SabberStoneCore.Actions.StartOfGameRules.Loadout] == 1))
             visibleOffboard.Add(actor.Id);
         // C'Thun's set-aside proxy (RitualTask) carries the buffs from rituals both players saw played; masked, the next ritual
         // found no ongoing effect on it and the search copy failed.

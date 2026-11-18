@@ -11,6 +11,9 @@ namespace SabberStoneCore.Actions
     public static class StartOfGameRules
     {
         public const GameTag Pending = (GameTag)32600;
+        /// <summary>A run's loadout card (AddLoadout): both players are shown it, so the opponent AI's fair view may keep it.
+        /// Any other set-aside Start of Game card (an unchosen Discover option) stays private.</summary>
+        public const GameTag Loadout = (GameTag)32601;
         public static bool IsInternalTag(GameTag tag) => (int)tag >= 32600 && (int)tag <= 32602;
         private static readonly Dictionary<int, (Action<IPlayable> Effect, Func<Controller,bool> Eligible, int Priority)>
             Definitions = new Dictionary<int, (Action<IPlayable>, Func<Controller,bool>, int)>();
@@ -40,6 +43,7 @@ namespace SabberStoneCore.Actions
                     throw new InvalidOperationException("Loadout card " + id + " declares no Start of Game effect.");
                 IPlayable source = Entity.FromCard(owner, card, new EntityData { [GameTag.ZONE] = (int)Zone.SETASIDE }, owner.SetasideZone);
                 source[Pending] = definition.Eligible == null || definition.Eligible(owner) ? 1 : -1;
+                source[Loadout] = 1;
             }
         }
 

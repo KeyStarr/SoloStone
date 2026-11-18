@@ -67,6 +67,20 @@ internal static class RunSetupProof
         Core2026Proof.Check(ineligible.Player1[NativeTailRules.NozdormuEnabled] == 0 && ineligible.Player1.TimeOut == 75,
             "an ineligible loadout card does nothing");
 
+        // The opponent AI's fair view keeps a loadout card (both players are shown it; masked, its aura lost its owner and
+        // the search copy failed), but not another set-aside Start of Game card such as an unchosen Discover option.
+        Game shown = Start(c => c.Player1Loadout = new[] { "CS3_035" }, player2Deck: new[] { "CS3_035", "CS2_120", "CS2_120", "CS2_120", "CS2_120" });
+        var loadout = shown.Player1.SetasideZone.Single(e => e.Card.Id == "CS3_035");
+        var skipped = SabberStoneCore.Model.Entities.Entity.FromCard(shown.Player1, Cards.FromId("CS3_035"),
+            new SabberStoneCore.Model.Entities.EntityData { [GameTag.ZONE] = (int)Zone.SETASIDE }, shown.Player1.SetasideZone);
+        Core2026Proof.Check(shown.Process(EndTurnTask.Any(shown.Player1)), "end the player's turn before the AI's view");
+        var view = FairBotState.Create(shown, shown.Player2.PlayerId, 7, DeckStyle.Value).FingerprintGame;
+        Core2026Proof.Check(view.IdEntityDic.TryGetValue(loadout.Id, out var seen) && !(seen is SabberStoneCore.Model.Entities.Unknown)
+            && seen.Card.Id == "CS3_035", "fair view: the loadout card is visible");
+        Core2026Proof.Check(!view.IdEntityDic.TryGetValue(skipped.Id, out var hidden) || hidden is SabberStoneCore.Model.Entities.Unknown
+            || hidden.Card.Id != "CS3_035", "fair view: an unchosen Start of Game card stays hidden");
+        Core2026Proof.Check(view.CloneExact() != null, "fair view: the view copies");
+
         bool refused = false;
         try { Start(c => c.Player2Loadout = new[] { "CS2_182" }); }
         catch (InvalidOperationException) { refused = true; }
