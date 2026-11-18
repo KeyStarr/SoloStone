@@ -19,12 +19,28 @@ internal static class ReviewRegressionTests
     {
         var failures = new List<string>();
         foreach (Action test in new Action[] { DeckOrder, HiddenIds, TagOrder, HeadlessTasks, RewindCache,
-            DuplicateActions, ReplyTriggers, RewindSecrets, PlayedSecretHistory })
+            DuplicateActions, ReplyTriggers, RewindSecrets, PlayedSecretHistory, MaskedAuraTargets })
         {
             try { test(); Console.WriteLine("PASS review regression " + test.Method.Name); }
             catch (Exception error) { failures.Add(test.Method.Name + ": " + error.Message); }
         }
         DriverTests.Check(failures.Count == 0, string.Join("\n", failures));
+    }
+    // A public aura's applied list named a hand card the view masks: the stand-in has no aura effects (and canonicalisation
+    // renumbers its id), so removing the aura in a search line threw and the AI fell back (Glinda Crowskin's Echo).
+    private static void MaskedAuraTargets()
+    {
+        var game = DriverTests.Fixture();
+        var glinda = (Minion)Entity.FromCard(game.Player2, Cards.FromId("GIL_618"));
+        Generic.SummonBlock(game, glinda, -1, null);
+        var hidden = Generic.DrawCard(game.Player2, Cards.FromId("CS2_182"));
+        game.DeathProcessingAndAuraUpdate();
+        DriverTests.Check(hidden[GameTag.ECHO] == 1, "Glinda gives the hidden minion Echo");
+        var pyroblast = Generic.DrawCard(game.Player1, Cards.FromId("EX1_279"));
+        var state = View(game);
+        var kill = state.Actions.Single(a => a.Type == PlayerTaskType.PLAY_CARD && a.Source == pyroblast.Id && a.Target == glinda.Id);
+        var after = state.Apply(kill);
+        DriverTests.Check(FairViewTests.Copy(after).IdEntityDic[glinda.Id].Zone?.Type == Zone.GRAVEYARD, "Pyroblast kills Glinda in the view");
     }
     private static void DeckOrder()
     {

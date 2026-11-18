@@ -185,7 +185,11 @@ namespace SabberStoneCore.Enchants
 
 		public override void ActivateTo(IEntity entity, int num1 = 0, int num2 = -1)
 		{
-			Clone((IPlayable) entity);
+			// A minion has one OngoingEffect slot. When its own aura holds it (Flametongue Totem given Thunder Bluff Valiant's
+			// +2 Attack), taking the slot orphaned that aura: it outlived the minion's death or Silence. Such a buff is applied
+			// as a plain enchantment instead; a repeat buff then adds another one rather than raising a count.
+			if (!(entity is IPlayable playable && playable.OngoingEffect != null && !(playable.OngoingEffect is OngoingEnchant)))
+				Clone((IPlayable) entity);
 
 			base.ActivateTo(entity, num1, num2);
 		}

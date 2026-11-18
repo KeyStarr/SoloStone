@@ -1147,6 +1147,18 @@ public sealed class FairBotState
         game.SetIndexer(next, game.NextOop);
         return ids;
     }
+    private static readonly FieldInfo auraApplied = typeof(SabberStoneCore.Auras.Aura)
+        .GetField("AppliedEntityIdCollection", BindingFlags.Instance | BindingFlags.NonPublic);
+    // A public aura (the opponent's Sorcerer's Apprentice, Runeforge Haunter) lists the ids it buffed. The masked stand-in
+    // carries no aura effects, and canonicalisation later renumbers or drops its id, so the entry would name nothing or
+    // another stand-in, and removing the aura threw. The stand-in holds no buff, so the masked id leaves every aura.
+    private static void ForgetAuraTarget(EngineGame game, int id)
+    {
+        foreach (var aura in game.Auras.SelectMany(AuraParts).OfType<SabberStoneCore.Auras.Aura>())
+            ((ICollection<int>)auraApplied.GetValue(aura)).Remove(id);
+    }
+    private static IEnumerable<SabberStoneCore.Auras.IAura> AuraParts(SabberStoneCore.Auras.IAura aura) => aura is SabberStoneCore.Auras.MultiAura multi
+        ? multi.SelectMany(AuraParts) : new[] { aura };
     private sealed class PrivacyDeck : SabberStoneCore.Model.Zones.DeckZone
     {
         internal PrivacyDeck(EngineController player, IEnumerable<IPlayable> roots) : base(player)
@@ -1441,6 +1453,7 @@ public sealed class FairBotState
         else hidden.Zone = old.Zone;
         game.IdEntityDic[old.Id] = hidden;
 #if ENGINE_SOURCE
+        ForgetAuraTarget(game, old.Id);
         if (fires.Length != 0)
         {
             if (player.AppliedEnchantments == null) player.AppliedEnchantments = new List<Enchantment>();
