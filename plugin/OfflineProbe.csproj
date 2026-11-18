@@ -105,6 +105,7 @@
     <EmbeddedResource Condition="'$(EngineSource)' != 'true'" Include="../engine/SabberStoneCore/resources/Data/OfflinePoolCatalog.xml" LogicalName="SoloStone.Npc.OfflinePoolCatalog.xml" />
     <EmbeddedResource Include="../data/npc/decks-v1.json" LogicalName="SoloStone.Npc.decks-v1.json" />
     <EmbeddedResource Include="../data/npc/casual-decks-v1.json" LogicalName="SoloStone.Npc.casual-decks-v1.json" />
+    <EmbeddedResource Include="../data/npc/arena-decks-v1.json" LogicalName="SoloStone.Npc.arena-decks-v1.json" />
     <EmbeddedResource Include="../data/npc/skills-v1.json" LogicalName="SoloStone.Npc.skills-v1.json" />
     <EmbeddedResource Include="../data/npc/personalities-v1.json" LogicalName="SoloStone.Npc.personalities-v1.json" />
     <EmbeddedResource Include="../data/npc/notables-v1.json" LogicalName="SoloStone.Npc.notables-v1.json" />
@@ -114,4 +115,5 @@
   <ItemGroup>
     <EmbeddedResource Include="../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
   </ItemGroup>
+  <ItemGroup><EmbeddedResource Include="../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" /></ItemGroup>
 </Project>

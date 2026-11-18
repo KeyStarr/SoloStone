@@ -55,7 +55,7 @@ public sealed partial class LocalProfile
         LocalClassRewardGrant reward = null;
         CommitChange(next => {
             var match = next.Pending;
-            if (match == null || match.Id != matchId || match.DebugScenario || CasualRules.IsCasual(match.Mode)
+            if (match == null || match.Id != matchId || match.DebugScenario || !ArenaRules.IsRanked(match.Mode)
                 || !LocalCoreProgression.Heroes.Contains(match.DeckHero) || next.PackRevealPending)
                 throw new InvalidOperationException("A live Ranked class match is required.");
             var xp = next.ClassXp.Single(row => row.Hero == match.DeckHero);

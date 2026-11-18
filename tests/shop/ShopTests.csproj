@@ -58,4 +58,11 @@
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
   </ItemGroup>
 <ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/ArenaContract.cs" />
+    <Compile Include="../../plugin/DraftRules.cs" />
+    <Compile Include="../../plugin/ArenaRun.cs" />
+    <Compile Include="../../plugin/ArenaService.cs" />
+    <EmbeddedResource Include="../../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" />
+  </ItemGroup>
 </Project>

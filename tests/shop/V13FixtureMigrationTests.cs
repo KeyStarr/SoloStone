@@ -23,7 +23,7 @@ internal static class V13FixtureMigrationTests
             check(profile.Gold == before.GoldBalance && profile.DustBalance == before.DustBalance && profile.OwnedPets.Count == 0,
                 "V13 fixture loads and migrates");
         var migrated = Read(path);
-        check(migrated.Version == 15 && migrated.OwnedPets.Count == 0 && migrated.PetProgress.Count == 0 && migrated.SelectedPet == null,
+        check(migrated.Version == LocalProfile.SaveVersion && migrated.OwnedPets.Count == 0 && migrated.PetProgress.Count == 0 && migrated.SelectedPet == null,
             "V13 fixture migrates to the current version with an empty pet ledger");
         check(original.SequenceEqual(File.ReadAllBytes(path + ".v13.bak")), "V13 fixture migration keeps a byte-exact backup");
         before.FavoriteCardBacks.Add(before.SelectedCardBack ?? 0); before.SelectedCardBack = null;
@@ -44,7 +44,7 @@ internal static class V13FixtureMigrationTests
         check(v14before.Version == 14, "V14 fixture is a V14 save");
         using (var profile = new LocalProfile(v14path)) check(profile.Gold == v14before.GoldBalance, "V14 fixture loads and upgrades");
         var v14after = Read(v14path);
-        check(v14after.Version == 15 && v14original.SequenceEqual(File.ReadAllBytes(v14path + ".v14.bak")), "V14 fixture upgrade is in place with a byte-exact .v14.bak");
+        check(v14after.Version == LocalProfile.SaveVersion && v14original.SequenceEqual(File.ReadAllBytes(v14path + ".v14.bak")), "V14 fixture upgrade is in place with a byte-exact .v14.bak");
         v14before.FavoriteCardBacks.Add(v14before.SelectedCardBack ?? 0); v14before.SelectedCardBack = null;
         v14before.GrindTier = GrindTiers.Successor(v14before.GrindTier).Id;
         v14after.Version = 14;

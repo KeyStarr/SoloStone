@@ -417,7 +417,11 @@ internal static class ClientBridge
         IReadOnlyList<LocalDeckCard> premiumEntries = null)
     {
         EnsureCanStart();
-        NativeUIProjection.ValidateMatchDeckBinding(deck, player);
+        // Arena (#6): the drafted deck is served by LocalDecks.ArenaDeck under its own key and has no saved-deck binding.
+        bool arena = ArenaRules.IsDeckKey(deck);
+        if (arena && (player != null || LocalDecks.ArenaDeck == null || LocalDecks.ArenaDeck.Id != deck))
+            throw new InvalidOperationException("Arena deck is not staged.");
+        if (!arena) NativeUIProjection.ValidateMatchDeckBinding(deck, player);
         var prepared = player == null
             ? new NativeMatch(Send, deck, opponent, seed, stars)
             : new NativeMatch(Send, player, opponent, seed, stars, premiumEntries) { CosmeticDeckId = PersonalDeckId(deck) };
@@ -427,7 +431,7 @@ internal static class ClientBridge
             if (!defs.ContainsKey(id)) throw new InvalidOperationException("Required Paladin definition missing: " + id);
         var decks = LocalDecks.All.Concat(LocalDecks.TestLoaners).Concat(LocalDecks.TestOpponents)
             .Concat(LocalDecks.PlayerStarterDecks).Concat(LocalDecks.NpcDecks);
-        foreach (var checkedDeck in player == null ? decks : decks.Concat(new[] { player }))
+        foreach (var checkedDeck in player != null ? decks.Concat(new[] { player }) : arena ? decks.Concat(new[] { LocalDecks.ArenaDeck }) : decks)
         {
             foreach (var card in checkedDeck.Build())
                 if (!defs.ContainsKey(card.Id)) throw new InvalidOperationException("Current card definition missing: " + card.Id);

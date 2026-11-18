@@ -102,6 +102,8 @@ public static class DeckInference
     // The inferred reply table (same shape as CardFrequencies.For): cached per class, play multiset, floor and exclusions.
     public static IReadOnlyList<CardFrequency> Table(CardClass heroClass, IEnumerable<string> played, BrainOptions brain)
     {
+        // Arena: a drafted opponent's deck follows the draft's card frequencies, not a constructed meta; the public plays are not read.
+        if (brain != null && brain.ReplyPrior == ReplyPrior.Arena) return ArenaReplyTable.For(heroClass);
         var plays = (played ?? Enumerable.Empty<string>()).OrderBy(x => x, StringComparer.Ordinal).ToArray();
         var excluded = brain?.ExcludedDecks ?? new string[0];
         double floor = brain?.InferenceFloor ?? .15;

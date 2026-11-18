@@ -22,7 +22,7 @@ names = ["TryReadBatch", "CanCraft", "Price", "CraftingEvent", "Permission", "Be
          "FinishClose", "HasMassExtras", "LedgerPreviewCard", "WarnMassRefresh", "ShowRefreshError", "SettlementDust",
          "FeaturedCardSet", "CoreCardSet", "ShownCardIsCore", "AllowTokenCraft", "ShowTokenCraft", "TokenCraftLabel", "UiLabel", "UiText", "SetUiText"]
 ledger = (Path(__file__).parents[2] / "plugin/LocalCraftingLedger.cs").read_text()
-parts = [block(r"internal interface ICraftingLedger", ledger), block(r"internal static class CraftingLedgerRegistry", ledger)]
+parts = [block(r"internal interface ICraftingLedger", ledger)]
 body = [block(r"    private sealed class BatchCompletion")]
 for name in ["batch", "closing", "massCompleting, massListenersFailed", "massResponse", "massRefreshErrorShown"]:
     body.append(re.search(r"    private static [^\n]+ " + name + r";", source).group())

@@ -8,6 +8,12 @@ if (args.Length == 2 && args[0] == "--deck-premium-owner-save")
     return;
 }
 
+if (args.Length == 2 && args[0] == "--gen-arena-decks")
+{
+    ArenaDeckGenerator.Write(args[1]);
+    return;
+}
+
 if (args.SequenceEqual(new[] { "--deck-premiums-only" }))
 {
     var deckPremiumRoot = Path.Combine(Path.GetTempPath(), "hs-deck-premiums-" + Guid.NewGuid());
@@ -45,6 +51,9 @@ if (args.SequenceEqual(new[] { "--grind-tiers-only" }))
 
 if (args.Length == 0)
 {
+    var arenaRoot = Path.Combine(Path.GetTempPath(), "hs-arena-" + Guid.NewGuid());
+    Directory.CreateDirectory(arenaRoot);
+    try { ArenaChecks.Run(arenaRoot); NativeArenaBoundary.NativeArena.RunRealServiceTests(arenaRoot); } finally { Directory.Delete(arenaRoot, true); }
     var premiumRoot = Path.Combine(Path.GetTempPath(), "hs-deck-premiums-" + Guid.NewGuid());
     Directory.CreateDirectory(premiumRoot);
     try { DeckPremiumChecks.Run(premiumRoot); } finally { Directory.Delete(premiumRoot, true); }
@@ -127,7 +136,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
     try
     {
         using (var v11 = new LocalProfile(Path.Combine(root, "v11-new.xml"))) v11.CreateDraft("V11", "HERO_08");
-        Check(Read(Path.Combine(root, "v11-new.xml")).Version == 15, "new profiles use the current save version");
+        Check(Read(Path.Combine(root, "v11-new.xml")).Version == LocalProfile.SaveVersion, "new profiles use the current save version");
         PremiumChecks.Run(root);
         RewardV3Checks.Run();
         DeathKnightChecks.Run(root);
@@ -147,7 +156,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
         using (var profile = new LocalProfile(curvePath))
             Check(profile.ClassXp["HERO_08"] == 1000 && profile.ClassLevel("HERO_08") == 10, "curve reload preserves XP");
         var curveAfter = Read(curvePath);
-        Check(curveAfter.Version == 15 && curveAfter.CoreScheduleVersion == LocalCoreProgression.ScheduleVersion
+        Check(curveAfter.Version == LocalProfile.SaveVersion && curveAfter.CoreScheduleVersion == LocalCoreProgression.ScheduleVersion
             && curveSave.CoreGrants.All(old => curveAfter.CoreGrants.Any(card => card.Id == old.Id && card.Count >= old.Count))
             && LocalCoreProgression.Owned(curveAfter.ClassXp.ToDictionary(entry => entry.Hero, entry => entry.Xp), false)
                 .All(pair => curveAfter.CoreGrants.Any(card => card.Id == pair.Key && card.Count == pair.Value))

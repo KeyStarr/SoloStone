@@ -91,6 +91,15 @@ internal static class RematchTests
             profile.AcknowledgeRewardPresentation(casual.Id);
             Check(LocalRematch.Encounter(profile, mm, Deck, out refusal) == null && refusal.StartsWith(LocalRematch.CasualRefusal, StringComparison.Ordinal),
                 "a Casual last match refuses: " + refusal);
+            // Arena (#6): no rematch either; the run's NPC is not a ladder opponent.
+            profile.CommitChange(next => { next.GoldBalance = 1000; return true; });
+            var arena = new ArenaService(profile); arena.Begin("rematch-arena"); arena.Choose(0, 0);
+            for (int slot = 1; slot <= 30; slot++) arena.Choose(slot, 0);
+            string key = ArenaRules.DeckKey(profile.ArenaRun.RunId);
+            var run = profile.Begin(key, npc.DeckIds[0], 6, npc.Id, npc.DeckIds[0], 1300, ArenaRules.Mode);
+            profile.Settle(run.Id, "Lost", 6, false);
+            profile.AcknowledgeRewardPresentation(run.Id);
+            Check(LocalRematch.Encounter(profile, mm, Deck, out refusal) == null && refusal.Contains("Arena"), "an Arena last match refuses: " + refusal);
         }
     }
 

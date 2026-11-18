@@ -37,6 +37,7 @@ internal static class LocalRematch
         var all = profile.History;
         LocalMatchRecord last = all.Count == 0 ? null : all[all.Count - 1];
         if (last != null && CasualRules.IsCasual(last.Mode)) refusal = CasualRefusal + " (last match was Casual)";
+        else if (last != null && ArenaRules.IsArena(last.Mode)) refusal = "no rematch in Arena (last match was Arena)";
         else if (last?.NpcId == null || (last.NpcDeckId != null && last.NpcDeckId != last.Opponent)) refusal = "last opponent is not a world NPC";
         // Interrupted matches already count as losses for ladder and head-to-head; keep that treatment here.
         else if (last.Result != "Lost" && last.Result != "Tied" && last.Result != "Abandoned") refusal = "last match was not a loss or tie";

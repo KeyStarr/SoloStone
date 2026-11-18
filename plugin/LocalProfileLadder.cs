@@ -28,8 +28,8 @@ public sealed partial class LocalProfile
     // #37: the ladder reads ranked matches only. A Casual record never carries a ladder receipt and never moves stars,
     // hidden rating, calibration, Legend number or the NPC field's drift epoch.
     internal static List<LocalMatchRecord> RankedMatches(LocalProfileData profile) =>
-        profile.Matches.Where(match => !CasualRules.IsCasual(match.Mode)).ToList();
-    internal int RankedMatchCount => data.Matches.Count(match => !CasualRules.IsCasual(match.Mode));
+        profile.Matches.Where(match => ArenaRules.IsRanked(match.Mode)).ToList();
+    internal int RankedMatchCount => data.Matches.Count(match => ArenaRules.IsRanked(match.Mode));
     public IReadOnlyList<LocalMatchRecord> RankedHistory => RankedMatches(data).Select(Copy).ToArray();
     public IReadOnlyList<LocalMatchRecord> CasualHistory => data.Matches.Where(match => CasualRules.IsCasual(match.Mode)).Select(Copy).ToArray();
     // Hidden Casual matchmaking rating: the stored one, else the seed the first Casual settlement will store.
@@ -65,8 +65,19 @@ public sealed partial class LocalProfile
         double? last = null;
         foreach (var match in profile.Matches.Concat(profile.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { profile.Pending }))
         {
-            if (match.Mode != null && !CasualRules.IsCasual(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
+            if (match.Mode != null && !CasualRules.IsCasual(match.Mode) && !ArenaRules.IsArena(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
             bool settled = match != profile.Pending;
+            // Arena (#6): a run's match has neither a ladder nor a Casual receipt and must name its run; no other mode may.
+            if (ArenaRules.IsArena(match.Mode)) {
+                if (match.Casual != null || match.Ladder != null || (match.TierRewards != null && match.TierRewards.Count != 0)
+                    || match.RivalGold != 0 || match.Gold != 0 || match.BonusGold != 0 || match.PackReward
+                    || !Guid.TryParseExact(match.ArenaRunId ?? "", "D", out _) || match.ArenaWins < 0 || match.ArenaLosses < 0
+                    || (match.Packs != null && match.Packs.Count != 0) || (settled && match.DustReward != 0)
+                    || (match.AchievementGrants != null && match.AchievementGrants.Count != 0))
+                    throw new InvalidOperationException("Invalid Arena match record.");
+                continue;
+            }
+            if (match.ArenaRunId != null) throw new InvalidOperationException("Arena run id on a non-Arena match.");
             if (!CasualRules.IsCasual(match.Mode) || !settled) {
                 if (match.Casual != null) throw new InvalidOperationException("Casual receipt on a ranked or pending match.");
                 continue;
@@ -96,7 +107,7 @@ public sealed partial class LocalProfile
     }
 
     private LadderPosition EffectiveLadder(LocalProfileData profile) => profileOptions.StartLegendOne
-        && profile.LadderRuleVersion == 0 && !profile.Matches.Any(match => !CasualRules.IsCasual(match.Mode)) ? CheatLegendOne(profileOptions.LegendRating) : LadderOf(profile);
+        && profile.LadderRuleVersion == 0 && !profile.Matches.Any(match => ArenaRules.IsRanked(match.Mode)) ? CheatLegendOne(profileOptions.LegendRating) : LadderOf(profile);
 
     // The reservation's position, derived from history alone so the first ladder receipt can be checked against it:
     // star index = the legacy fold; best = the fold at V10 migration (matches without receipts), then its running

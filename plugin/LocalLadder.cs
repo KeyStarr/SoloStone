@@ -28,6 +28,8 @@ internal static class LocalLadder
         if (profile != null) throw new InvalidOperationException("A save is already bound.");
         profile = selectedProfile;
         collectionUi = new LocalCollectionUI(profile);
+        ArenaMatchHook.MatchStarter = StartArenaMatch;
+        DraftRules.FallbackLog = message => Debug.LogWarning(message);
     }
 
     internal static void ResetStartup(LocalProfile selectedProfile)
@@ -168,27 +170,32 @@ internal static class LocalLadder
 
     // casual: Standard Casual (#37): a Casual NPC queue and no ladder accounting (LocalMatchRecord.Mode).
     // rematch (#28) is Ranked-only: it replays a Ranked match against the ladder gate, so rematch with casual refuses the start.
+    // arena: an Arena (#6) match: the run's drafted deck (LocalDecks.ArenaDeck, key "arena:<run id>") against a drafted-deck NPC picked
+    // by the run's record. No saved-deck ownership or copy rule applies, no rematch and no playtest knob.
     internal static void StartSelected(string selected, LocalDeck resolved, bool personal, bool nativeMatchmaking = false,
-        bool rematch = false, bool casual = false)
+        bool rematch = false, bool casual = false, bool arena = false)
     {
         if (screen == "Starting" || screen == "Playing" || profile.Pending != null) return;
         try
         {
             // Every check that can refuse runs first: Begin commits Pending only for a match that is ready to stage.
             if (rematch && casual) throw new InvalidOperationException("Rematch unavailable: " + LocalRematch.CasualRefusal);
-            IReadOnlyList<LocalDeckCard> entries = NativeUIProjection.ValidateStart(profile, selected, resolved, personal);
+            if (arena && (rematch || casual || personal)) throw new InvalidOperationException("Arena has no rematch, Casual or saved-deck start.");
+            if (arena && (resolved == null || !ReferenceEquals(resolved, LocalDecks.ArenaDeck) || selected != resolved.Id))
+                throw new InvalidOperationException("Arena deck is not staged.");
+            IReadOnlyList<LocalDeckCard> entries = arena ? null : NativeUIProjection.ValidateStart(profile, selected, resolved, personal);
             // Presentation only: a mismatch shows Normal cards, never refuses.
             IReadOnlyList<LocalDeckCard> premiumEntries = personal
                 ? NativeMatch.PremiumEntries(resolved.CardIds, entries, message => Debug.LogWarning(message)) : null;
             // A rematch names its opponent: the playtest knob stays queued for the next normal start.
-            playtest = rematch ? null : PlaytestQueue.Read(log: message => Debug.LogWarning(message));
+            playtest = rematch || arena ? null : PlaytestQueue.Read(log: message => Debug.LogWarning(message));
 #if STANDARD_PROOF
             bool proof = StandardProofNative.IsProof(selected);
             LocalDeck opponent = proof ? LocalDecks.Get(StandardProofNative.Opponent(selected))
                 : LocalDecks.NextOpponent(profile.RankedHistory.Select(match => match.Opponent));
             int seed = proof ? 0 : Guid.NewGuid().GetHashCode() & int.MaxValue;
 #else
-            LocalDeck opponent = LocalDecks.OpponentFor(selected, profile.RankedHistory.Select(match => match.Opponent));
+            LocalDeck opponent = arena ? null : LocalDecks.OpponentFor(selected, profile.RankedHistory.Select(match => match.Opponent));
             int seed = Guid.NewGuid().GetHashCode() & int.MaxValue;
 #endif
 #if STANDARD_PROOF
@@ -210,6 +217,7 @@ internal static class LocalLadder
                 opponent = playtest.Opponent(false);
             }
             else if (rematch) encounter = RematchEncounter(selected, out worldDeck);
+            else if (arena) encounter = ArenaEncounter(out worldDeck);
             else
             {
 #if STANDARD_PROOF
@@ -221,13 +229,13 @@ internal static class LocalLadder
             {
                 if (playtest == null) opponent = worldDeck;   // resolved and validated inside TryWorldEncounter
                 // Before PrepareLocalMatch: NativeMatch resolves the world NPC's profile and library deck through S1/S5.
-                NpcWorldRuntime.Begin(encounter);
+                if (!arena) NpcWorldRuntime.Begin(encounter);   // ArenaEncounter already began it (before it resolved the deck)
             }
-            var prepared = ClientBridge.PrepareLocalMatch(selected, opponent.Id, seed, profile.Stars, personal ? resolved : null, premiumEntries);
+            var prepared = ClientBridge.PrepareLocalMatch(selected, opponent.Id, seed, profile.Stars, personal ? resolved : null, premiumEntries);   // arena: the deck is served by key
             // Rivals-lite: the NPC's memory from SETTLED history only (no Pending exists yet: refused above). Every world
             // encounter, ladder or a playtest knob naming a world NPC id; fixed-deck playtests have no encounter and no memory.
             // Presentation only (name plate, emote choice), set before the match starts.
-            if (encounter != null)
+            if (encounter != null && ArenaRules.CarriesNpcMemory(arena ? ArenaRules.Mode : null))   // Arena keeps no rivals: Ranked/Casual memory never reaches an Arena opponent
                 prepared.Match.NpcMemory = NativeMatch.MemoryFrom(profile.NpcRecord(encounter.Npc.Id));
             var queued = playtest;
             // One-shot debug scenario (engine-source builds only; null elsewhere): armed on the pending record below so the
@@ -236,8 +244,8 @@ internal static class LocalLadder
             DebugScenario scenario = DebugScenario.Read(null, message => Debug.LogWarning(message), ClientBridge.ClientKnowsCard,
                 DebugScenario.RunId, NativeTestControl.DiagnosticsEnabled);
             LocalAchievementPendingContext achievementContext = encounter != null && playtest == null && scenario == null && NativeMatch.SupportsAchievementEvidence
-                ? profile.AchievementContextFor(resolved, personal, encounter.Npc.Id, encounter.Rating,
-                    (casual ? CasualAchievementBand(encounter.Rating) : NpcWorld.BandForStarIndex(profile.Ladder.StarIndex)).ToString(), premiumEntries, personal ? profile.GetDraft(long.Parse(selected.Substring(7))).Sideboards : null) : null;
+                ? profile.AchievementContextFor(resolved, personal || arena, encounter.Npc.Id, encounter.Rating,
+                    (casual || arena ? CasualAchievementBand(encounter.Rating) : NpcWorld.BandForStarIndex(profile.Ladder.StarIndex)).ToString(), premiumEntries, personal ? profile.GetDraft(long.Parse(selected.Substring(7))).Sideboards : null, arena) : null;
             // A launch that throws after Begin clears its unstarted Pending atomically: no ladder change, no trapped save.
             // Test-control lanes only: a one-shot pet XP pacing percent frozen into this match's pending record (PetPacingKnob).
             if (PetPacingKnob.Take(PetPacingKnob.Path, NativeTestControl.DiagnosticsEnabled, PetPacingKnob.RunId, message => Debug.LogWarning(message)) is int pacing)
@@ -247,7 +255,7 @@ internal static class LocalLadder
                 if (scenario.FirstPlayer.HasValue) profile.ArmFirstPlayer(scenario.FirstPlayer.Value);
             }
             try {
-            profile.BeginLaunch(selected, opponent.Id, seed, encounter, achievementContext, casual ? CasualRules.Mode : null, record => {
+            profile.BeginLaunch(selected, opponent.Id, seed, encounter, achievementContext, casual ? CasualRules.Mode : arena ? ArenaRules.Mode : null, record => {
                 // Stage first: a refusal throws before any displayed state (a previous result, the active id) changes.
                 ClientBridge.StartLocalMatch(record, prepared, queued, nativeMatchmaking, scenario);
                 active = record;
@@ -316,7 +324,7 @@ internal static class LocalLadder
             throw new InvalidOperationException("World deck id is not storable: " + deckId);
         LocalDeck resolved = LocalDecks.Get(deckId);   // the same lookup the native side uses (ExternalDecks seam)
         resolved.Build();                              // throws when the deck is not playable
-        opponentLabel = OpponentLabel(encounter, profile.History);
+        opponentLabel = OpponentLabel(encounter, profile.History.Where(match => !ArenaRules.IsArena(match.Mode)).ToList());
         return resolved;
     }
 
@@ -365,6 +373,47 @@ internal static class LocalLadder
         return encounter.Npc.DisplayName + (record.Games > 0 ? " (" + record.Label + ")" : "");
     }
 
+    // Arena (#6): the Arena NPC of the run's next match. No fallback to a ladder or legacy opponent (an Arena start that cannot
+    // find its drafted-deck opponent refuses). Inputs: the run's own record and its earlier opponents, never the player's deck.
+    private static NpcEncounter ArenaEncounter(out LocalDeck deck)
+    {
+        deck = null;
+        var matchmaker = NpcWorldRuntime.Arena ?? throw new InvalidOperationException("Arena opponents are unavailable.");
+        var run = profile.ArenaRun ?? throw new InvalidOperationException("No Arena run.");
+        var played = profile.History.Where(match => match.ArenaRunId == run.RunId && match.Result != null).ToList();
+        var request = new ArenaRequest(run.Seed, played.Count, run.Wins, run.Losses,
+            played.Where(match => match.NpcDeckId != null).Select(match => match.NpcDeckId), played.Where(match => match.NpcId != null).Select(match => match.NpcId));
+        NpcEncounter encounter = matchmaker.Next(request);
+        string deckId = encounter.Deck.Id;
+        if (string.IsNullOrWhiteSpace(deckId) || deckId.Length > 64 || deckId.Any(char.IsControl))
+            throw new InvalidOperationException("Arena deck id is not storable: " + deckId);
+        NpcWorldRuntime.Begin(encounter);
+        LocalDeck resolved = LocalDecks.Get(deckId);
+        resolved.Build();
+        opponentLabel = encounter.Npc.DisplayName;   // no head-to-head record: Arena keeps no rivals
+        deck = resolved;
+        return encounter;
+    }
+
+    // ArenaService.StartMatch: the plugin side. The deck is rebuilt from the run (hero + 30 picks, no ownership or copy check).
+    internal static bool StartArenaMatch(ArenaRun run, out string failure)
+    {
+        failure = null;
+        if (profile == null || run == null || run.Phase != ArenaPhase.Ready) { failure = "No Ready Arena run."; return false; }
+        if (screen == "Starting" || screen == "Playing" || profile.Pending != null) { failure = "A match is already running."; return false; }
+        try
+        {
+            var deck = LocalDecks.ArenaDeckFor(ArenaRules.DeckKey(run.RunId), run.Hero, run.Deck);
+            deck.Build();
+            LocalDecks.ArenaDeck = deck;
+            StartSelected(deck.Id, deck, false, arena: true);
+            if (screen == "Starting") return true;
+            failure = error ?? "Arena match could not start.";
+            return false;
+        }
+        catch (Exception problem) { failure = "Arena match could not start: " + problem.Message + " You can retire the run to collect its reward."; return false; }
+    }
+
     // Diamond/Legend-gated achievement feats stay Ranked-only: a Casual match queues them at most at Platinum.
     internal static LadderBand CasualAchievementBand(double npcRating)
     {
@@ -392,7 +441,7 @@ internal static class LocalLadder
             NpcWorldRuntime.Begin(encounter);
             LocalDeck resolved = LocalDecks.Get(deckId);
             resolved.Build();
-            opponentLabel = OpponentLabel(encounter, profile.History);
+            opponentLabel = OpponentLabel(encounter, profile.History.Where(match => !ArenaRules.IsArena(match.Mode)).ToList());
             deck = resolved;
             return encounter;
         }

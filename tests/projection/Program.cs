@@ -720,6 +720,10 @@ Check((bool)Call("AllowedCache","NetCacheCollection"),"collection cache accepted
 Check(!(bool)Call("AllowedCache","NetCacheQuests"),"unknown cache rejected");
 Check((bool)Call("AllowedPreference","COLLECTION_MANAGER"),"collection preference accepted");
 Check(!(bool)Call("AllowedPreference","QUESTS"),"unknown preference rejected");
+Check(NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_LAST_SEEN_ARENA_SEASON", new long[] { 1 }), "local Arena season preference accepted");
+Check(NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_SHOULD_START_UNDERGROUND_ARENA", new long[] { 0 }), "normal Arena mode preference accepted");
+Check(!NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_SHOULD_START_UNDERGROUND_ARENA", new long[] { 1 }), "Underground preference cannot enable another mode");
+Check(!NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_HAS_UNLOCKED_ARENA", new long[] { 1 }), "bootstrap unlock is not a user preference write");
 Check(type!.GetMethod("ResolvePublisher", BindingFlags.Static|BindingFlags.NonPublic) != null, "publisher resolver is implemented");
 Check(((MethodInfo)Call("ResolvePublisher",typeof(Publisher))).Name == "OnNetCacheObjReceived", "exact generic publisher resolved");
 try { Call("ResolvePublisher",typeof(NoPublisher)); throw new Exception("missing publisher accepted"); }
@@ -1139,6 +1143,7 @@ Check(Completion(true,false,true,true) == "Ignore", "duplicate completion after 
 Check(Completion(true,true,false,false) == "Ignore", "stale prior director cannot fail a newer reveal");
 Check(Completion(true,true,true,false) == "Fail", "current director cannot finish before durable Done acknowledgement");
 Check(Completion(true,true,true,true) == "Complete", "acknowledged exact director completes its reveal");
+Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Arena) == NativeMenuTarget.Arena, "home Arena routes to native draft");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Traditional) == NativeMenuTarget.Picker, "home Traditional routes to picker");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Collection) == NativeMenuTarget.Collection, "home Collection routes to collection");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.OpenPacks) == NativeMenuTarget.Pack, "home Open Packs routes to pack opening");

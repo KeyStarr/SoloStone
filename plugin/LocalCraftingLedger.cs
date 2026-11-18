@@ -17,7 +17,7 @@ internal interface ICraftingLedger
 
 internal static class CraftingLedgerRegistry
 {
-    internal static ICraftingLedger Current = null;
+    internal static ICraftingLedger Current; // bound with ArenaServiceRegistry in NativeUIProbe.BindSave
 }
 
 internal sealed class LocalCraftingLedger : ICraftingLedger

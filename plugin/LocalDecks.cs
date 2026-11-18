@@ -1176,7 +1176,12 @@ public static class LocalDecks
     public static Func<string, LocalDeck> ExternalDecks;
     // A throwing hook is logged and treated as "no such deck" (the same InvalidOperationException as today).
     public static Action<string> ExternalDecksLog;
-    public static LocalDeck Get(string id) => All.Concat(TestLoaners).Concat(TestOpponents).Concat(PlayerStarterDecks).Concat(NpcDecks).SingleOrDefault(d => d.Id == id)
+    // Arena (#6): the drafted deck of the run being played, served by its "arena:<run id>" key until the next Arena match replaces it.
+    // It is a run-scoped snapshot, never a library, loaner or saved deck, so no ownership or copy-limit rule applies to it.
+    internal static LocalDeck ArenaDeck;
+    internal static LocalDeck ArenaDeckFor(string deckKey, string hero, IEnumerable<string> cardIds) => new LocalDeck(deckKey,
+        "Arena Deck", hero, "Arena opponent", "Arena drafted deck", DeckStyle.Value, new string[0], cardIds.ToArray());
+    public static LocalDeck Get(string id) => ArenaDeck != null && ArenaDeck.Id == id ? ArenaDeck : All.Concat(TestLoaners).Concat(TestOpponents).Concat(PlayerStarterDecks).Concat(NpcDecks).SingleOrDefault(d => d.Id == id)
         ?? External(id) ?? throw new InvalidOperationException("Unknown local deck: " + id);
     // Stable identity wins; catalogue order retains ownership of ambiguous legacy display-name aliases.
     internal static LocalDeck Resolve(IEnumerable<LocalDeck> decks, string key)

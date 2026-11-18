@@ -18,7 +18,7 @@ internal static class V10ReservationTests
             }
         }
         var data = Read(path);
-        Check(data.Version == 15 && data.DeckKits.Single().Id == "kit:floor:gold-10"
+        Check(data.Version == LocalProfile.SaveVersion && data.DeckKits.Single().Id == "kit:floor:gold-10"
             && data.DeckKits[0].GoldCap == 3200 && data.MilestoneCatchUp == null,
             "current profile earns a receipt-backed deck kit");
         data.GoldBalance = 10000;

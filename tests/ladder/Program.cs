@@ -152,7 +152,7 @@ try
         exposed.Clear();
         CheckCollection(store, 93, 186, "collection escaped by reference");
         var pending = store.Begin("mage", "priest", 123);
-        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>15</Version>"), "new profile is not the current version with rolled rewards");
+        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>" + LocalProfile.SaveVersion + "</Version>"), "new profile is not the current version with rolled rewards");
         Reject(() => store.Begin("mage", "warrior", 124), "second pending match");
         var result = store.Settle(pending.Id, "Won", 12, false);
         var rolled = Rolled(pending, "Won"); freshGold = rolled.Gold;
@@ -758,7 +758,7 @@ try
     Check(LocalProfile.NextStars(150, "Lost") == 150, "Legend floor");
 
     string missingVersionPath = Path.Combine(root, "missing-version.xml");
-    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>15</Version>", "");
+    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>" + LocalProfile.SaveVersion + "</Version>", "");
     Check(!missingVersion.Contains("<Version>"), "missing-version fixture still has a version");
     File.WriteAllText(missingVersionPath, missingVersion);
     Reject(() => { using var ignored = new LocalProfile(missingVersionPath); }, "missing profile version");

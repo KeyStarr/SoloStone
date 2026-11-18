@@ -219,11 +219,13 @@ internal sealed partial class NativeTestControl
             nextFlagCheck = now + (transport == null ? 1f : .5f);
             if (!Enabled(out readToken))
             {
+                NativeArena.TestControlEnabled(false);
                 if (transport != null) Stop("Control flag disabled");
                 nextFlagCheck = now + 1f;
                 return;
             }
             if (transport != null && token != readToken) Stop("Control token changed");
+            NativeArena.TestControlEnabled(true);
         }
         if (transport == null)
         {
@@ -487,6 +489,7 @@ internal sealed partial class NativeTestControl
                     case "state":
                         view.State["grindTier"] = LocalLadder.Profile?.GrindTier.Id;
                         view.State["playMode"] = LocalLadder.Profile == null ? null : LocalLadder.Profile.PrefersCasual ? "casual" : "ranked";
+                        view.State["arena"] = NativeArena.State();
                         view.State["fpsCounter"] = NativeFpsCounter.State();
                         view.State["brandLabel"] = NativeBrandLabel.State();
                         view.State["deckInference"] = NativeDeckInferenceOption.State();
@@ -1257,7 +1260,7 @@ internal sealed partial class NativeTestControl
         catch (Exception error)
         {
             snapshot = new UiSnapshot { Scene = "unknown", Screen = LocalLadder.Screen };
-            snapshot.Busy.Add("readError:" + error.GetType().Name + ": " + error.Message);
+            snapshot.Busy.Add("readError:" + error.GetType().Name + ": " + error.Message + " @ " + (error.StackTrace ?? "").Split('\n').FirstOrDefault()?.Trim());
             UiRules.Finish(snapshot);
         }
         // Tree read plus hit tests runs every frame while UI work is pending; keep its cost visible.
@@ -1331,6 +1334,7 @@ internal sealed partial class NativeTestControl
     private static JsonNode UiData(UiSnapshot snapshot, List<string> busy, bool all)
     {
         JsonNode data = snapshot.ToJson(busy);
+        data["arena"] = NativeArena.State();
         data["reportIssue"] = NativeReportUI.State();
         data["achievementToast"] = NativeAchievementToast.State();
         data["matchmaking"] = NativeMatchmaking.State(); // Finding Opponent popup: Cancel plate parts, disabled/face-down state.

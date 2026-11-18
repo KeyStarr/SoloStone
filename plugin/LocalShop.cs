@@ -1241,8 +1241,8 @@ public sealed partial class LocalProfile
         }
         int stars = 0;
         foreach (var m in p.Matches.Concat(p.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { p.Pending })) {
-            // #37 Casual: no ladder receipt and outside the star fold; its progression receipt is checked like a ranked one.
-            if (CasualRules.IsCasual(m.Mode) && m.Casual != null) {
+            // #37 Casual and Arena (#6): no ladder receipt and outside the star fold; the progression receipt is checked like a ranked one.
+            if (ArenaRules.IsArena(m.Mode) && m.Result != null || CasualRules.IsCasual(m.Mode) && m.Casual != null) {
                 if (m.Result == null || m.Ladder != null || (m.TierRewards != null && m.TierRewards.Count != 0)
                     || !m.ClassXpBefore.HasValue || !m.ClassXpAfter.HasValue || m.ClassXpBefore < 0 || m.ClassXpAfter < m.ClassXpBefore
                     || m.ProgressionRuleVersion < 1 || !ValidIds(m.UnlockedCardIds) || m.UnlockedCardIds.Any(id => !LocalCoreProgression.ById.ContainsKey(id)))
@@ -1252,7 +1252,7 @@ public sealed partial class LocalProfile
                     throw new InvalidOperationException("Invalid class XP receipt.");
                 continue;
             }
-            int after = CasualRules.IsCasual(m.Mode) ? stars : NextStars(stars, m.Result);
+            int after = !ArenaRules.IsRanked(m.Mode) ? stars : NextStars(stars, m.Result);
             if (m.Ladder == null) {
                 if (m.ClassXpBefore.HasValue || m.ClassXpAfter.HasValue || m.UnlockedCardIds != null || m.ProgressionRuleVersion != 0 || m.TierRewards != null || m.DustReward != 0)
                     throw new InvalidOperationException("Partial historical match receipt.");

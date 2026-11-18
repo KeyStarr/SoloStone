@@ -1827,6 +1827,8 @@ M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ArenaCardDenylist	System.Void(Sy
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ConstructedCardDenylist	System.Void(System.Collections.Generic.List`1<System.Int32>)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ContinuousQuickOpenEnabled	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_DuelsCardDenylist	System.Void(System.Collections.Generic.List`1<System.Int32>)
+M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableArenaPhaseMessageFTUXTracking	System.Void(System.Boolean)
+M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableArenaPhaseMessages	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableUpgradeToGolden	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_MassCatchupPackOpeningEnabled	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_MassPackOpeningEnabled	System.Void(System.Boolean)

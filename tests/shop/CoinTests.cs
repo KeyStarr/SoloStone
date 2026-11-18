@@ -124,10 +124,11 @@ internal static class CoinTests
         LocalShop.TestOverride = shop;
         string old = fresh("coin-old-v15", 300);
         var xml = XDocument.Load(old);
+        xml.Root!.Element("Version")!.Value = "15";
         xml.Root!.Element("OwnedCoins")!.Remove(); xml.Root.Element("FavoriteCoins")!.Remove(); xml.Save(old);
         byte[] oldBytes = File.ReadAllBytes(old);
         using (var p = new LocalProfile(old)) check(p.OwnedCoins.SequenceEqual(new[] { 1 }) && p.FavoriteCoins.SequenceEqual(new[] { 1 }), "V15 without coin elements loads defaults");
-        check(oldBytes.SequenceEqual(File.ReadAllBytes(old)), "old V15 read does not rewrite save");
+        check(Read(old).Version == LocalProfile.SaveVersion && oldBytes.SequenceEqual(File.ReadAllBytes(old + ".v15.bak")), "old V15 coin defaults upgrade with a byte-exact backup");
         using (var p = new LocalProfile(fresh("coin-cheat", 0), new ProfileOptions { AllCosmetics = true })) {
             check(p.OwnsCoin(2) && p.OwnedCoins.SequenceEqual(new[] { 1, 2, 3 }), "AllCosmetics coin ownership is a projection");
             p.SetCoinFavorite(2, true);

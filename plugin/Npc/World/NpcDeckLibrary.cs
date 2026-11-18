@@ -114,6 +114,17 @@ public sealed class NpcDeckLibrary
         }
         return GoldenData.Copy(result);
     }
+    // NpcWorldHooks.ArenaPopulation body: the drafted Arena lists (admission "arena"), one entry per copy, for the Arena reply table.
+    public IReadOnlyList<PopulationDeck> ArenaPopulation()
+    {
+        var result = new List<PopulationDeck>();
+        foreach (var deck in Decks.Where(d => d.Admission == "arena")) {
+            SabberStoneCore.Enums.CardClass heroClass;
+            if (Enum.TryParse(deck.Class, true, out heroClass))
+                result.Add(new PopulationDeck(deck.Id, heroClass, deck.Cards.SelectMany(card => Enumerable.Repeat(card.Id, card.Count))));
+        }
+        return GoldenData.Copy(result);
+    }
     public IEnumerable<NpcDeckEntry> ForBand(LadderBand band) => Admitted.Where(deck => deck.Tags.Allows(band));
 
     // Builds the engine-facing deck. opponentName is the NPC display name (native name plate reads LocalDeck.Opponent).

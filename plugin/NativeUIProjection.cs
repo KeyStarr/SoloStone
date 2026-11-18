@@ -1068,7 +1068,12 @@ internal static class NativeUIProjection
     internal static bool AllowedPreference(string name) => name == "COLLECTION_MANAGER" || name == "PLAYER_FLAGS";
     internal static bool AllowedPreferenceSave(string key, string subkey, long[] values) => key == "COLLECTION_MANAGER"
         || key == "PLAYER_FLAGS" && subkey == "PLAYER_FLAGS_HAS_SEEN_MASS_PACK_OPENING_TOOLTIP"
-            && values != null && values.Length == 1 && values[0] == 1;
+            && values != null && values.Length == 1 && values[0] == 1
+        || key == "PLAYER_FLAGS" && AllowedArenaPreference(subkey, values);
+    internal static bool AllowedArenaPreference(string subkey, long[] values) => values != null && values.Length == 1
+        && (subkey == "PLAYER_FLAGS_LAST_SEEN_ARENA_SEASON" && values[0] == 1
+            || subkey == "PLAYER_FLAGS_SHOULD_START_UNDERGROUND_ARENA" && values[0] == 0
+            || subkey == "PLAYER_FLAGS_HAS_SEEN_UNDERGROUND_UNLOCK_ANIMATION" && values[0] == 1);
     // Format picker modes, as the popup's own event and object names spell them (WILD_BUTTON_CLICKED, ...).
     internal static readonly string[] FormatPickerModes = { "STANDARD", "WILD", "CASUAL", "CLASSIC", "TWIST" };
     // Which mode a picker button selects: a single mode named by its own send-event actions wins; otherwise the nearest

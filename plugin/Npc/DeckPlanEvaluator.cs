@@ -148,7 +148,7 @@ public sealed partial class DeckPlanEvaluator : IStateEvaluator
             .Select(OwnBoard).OrderByDescending(v => v).Skip(free).Sum();
         // Inferred prior (BrainOptions): clears weighted by the deck posterior from the opponent's public plays. Every
         // Score is from the bot's side (ReplyValue too: its `own` is the bot), so `enemy` is always the real opponent.
-        bool inferred = Brain != null && Brain.ReplyPrior == ReplyPrior.Inferred && inferredClass.HasValue;
+        bool inferred = Brain != null && Brain.ReplyPrior != ReplyPrior.Class && inferredClass.HasValue;
         if (inferred && inferredTable == null) inferredTable = DeckInference.Table(inferredClass.Value, inferredPlays, Brain);
         foreach (var clear in inferred ? CardFrequencies.Clears(inferredTable, mana)
             : CardFrequencies.Clears(heroClass, mana)) {
@@ -353,7 +353,7 @@ public sealed partial class DeckPlanEvaluator : IStateEvaluator
         if (!incomingAllowance.TryGetValue(allowanceKey, out double allowance)) {
             var key = (enemy.Class, unknown, mana);
             if (!incomingHands.TryGetValue(key, out var samples)) {
-                var table = Brain != null && Brain.ReplyPrior == ReplyPrior.Inferred && inferredClass.HasValue
+                var table = Brain != null && Brain.ReplyPrior != ReplyPrior.Class && inferredClass.HasValue
                     ? (inferredTable ?? (inferredTable = DeckInference.Table(inferredClass.Value, inferredPlays, Brain)))
                     : CardFrequencies.ForOrEmpty(enemy.Class);
                 samples = table.Count == 0 ? new[] { new HandSample(new string[0], 1) }

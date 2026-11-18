@@ -224,6 +224,20 @@ public static class LadderRules
 // #37 Standard Casual (owner 2026-10-28): a hidden matchmaking rating, never shown and never read by the ladder. Seeded from
 // the ranked hidden rating at the first Casual game, then moved by Elo on Casual results only. Ties change nothing, as on
 // the ladder; an abandoned Casual match is a loss.
+// Arena (#6): a run's matches. Mode only marks the record; a run's progress lives in the save's ArenaRun. Arena matches never
+// touch the ladder or the hidden Casual rating and pay no per-match gold, dust, pack, rival gold, achievement or Feat.
+public static class ArenaRules
+{
+    public const string Mode = "Arena";
+    public static bool IsArena(string mode) => mode == Mode;
+    // A match that moves the ladder: every mode except Casual and Arena (Ranked records carry no mode).
+    public static bool IsRanked(string mode) => !CasualRules.IsCasual(mode) && !IsArena(mode);
+    // Arena has no rivals: an Arena opponent never brings Ranked/Casual head-to-head memory (rival emotes and lines).
+    public static bool CarriesNpcMemory(string mode) => !IsArena(mode);
+    public static string DeckKey(string runId) => "arena:" + runId;
+    public static bool IsDeckKey(string key) => key != null && key.StartsWith("arena:", System.StringComparison.Ordinal);
+}
+
 public static class CasualRules
 {
     public const string Mode = "Casual";

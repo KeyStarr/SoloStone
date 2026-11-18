@@ -150,7 +150,7 @@ internal static class StartupSaveChecks
             Case("options is a link", "links-rejected", () => { File.Move(options, realOptions); File.CreateSymbolicLink(options, realOptions); },
                 () => { File.Delete(options); File.Move(realOptions, options); });
         }
-        // A save from a pre-V15 version is not a failure: it upgrades through the ordinary open.
+        // A save from an older version is not a failure: it upgrades through the ordinary open.
         var old = Load(); old.Version = 14; Save(old);
         Check(Decide(legacy).IsAuto, "a supported older version is not a failure");
         Put(profile, good);

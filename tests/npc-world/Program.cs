@@ -19,7 +19,7 @@ internal static class Program
             if (args.Length == 1 && args[0] == "--world")
             {
                 DeckLibrarySuite.Run(); SkillSuite.Run(); QuestSuite.Run(); MistakeTargetSuite.Run();
-                PopulationSuite.Run(); MatchmakerSuite.Run(); PetSuite.Run(); CasualSuite.Run(); CastSuite.Run();
+                PopulationSuite.Run(); MatchmakerSuite.Run(); PetSuite.Run(); CasualSuite.Run(); ArenaSuite.Run(); CastSuite.Run();
                 Console.WriteLine("npc-world deck and world suites passed");
                 return 0;
             }
@@ -53,6 +53,7 @@ internal static class Program
             MatchmakerSuite.Run();    // WP4
             PetSuite.Run();           // NPC pets (PROPOSED)
             CasualSuite.Run();        // #37 Standard Casual
+            ArenaSuite.Run();         // #6 Arena
             CastSuite.Run();          // #66 named cast
             Console.WriteLine("npc-world tests passed");
             return 0;

@@ -67,7 +67,7 @@ internal static class HubCosmeticsTests
             p.SelectBoard(4); p.SelectHubTheme("random");
         }
         using (var p = new LocalProfile(path)) check(p.SelectedBoard == 4 && p.SelectedHubTheme == "random", "selection persists across restart");
-        check(Read(path).Version == 15, "new profiles use V15");
+        check(Read(path).Version == LocalProfile.SaveVersion, "new profiles use the current version");
 
         // Buying equips; gold is taken once; ownership and selection survive restart; replay never charges twice.
         var theme = themes.First(p => p.Price > 0 && !p.verify);

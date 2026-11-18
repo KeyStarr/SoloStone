@@ -651,6 +651,12 @@ internal static partial class NativeCrafting
     }
 }
 
+// This harness substitutes the save boundary; progression checks the real registry's Arena save binding.
+internal static class CraftingLedgerRegistry
+{
+    internal static ICraftingLedger Current;
+}
+
 internal sealed class FakeCraftingLedger : ICraftingLedger
 {
     public long DustBalance { get; internal set; } = 1000;

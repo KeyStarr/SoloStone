@@ -9,7 +9,7 @@ public sealed class CardFrequency
 {
     public string CardId { get; }
     public double Weight { get; }
-    public int Copies { get; }
+    public int Copies { get; private set; }
     public bool Threat { get; }
     public bool AreaThreat { get; }
     public CardFrequency(string cardId, double weight)
@@ -21,6 +21,9 @@ public sealed class CardFrequency
         Threat = card.Type == CardType.SPELL && (AreaThreat || text.Contains("damage") && text.Contains("minion")
             || text.Contains("destroy") || text.Contains("transform"));
     }
+    // A table whose population is not capped at 2 copies (Arena: a draft has no copy limit).
+    internal CardFrequency(string cardId, double weight, int copies) : this(cardId, weight)
+    { Copies = Math.Max(1, copies); }
     private CardFrequency(CardFrequency source, double weight)
     { CardId = source.CardId; Weight = weight; Copies = source.Copies; Threat = source.Threat; AreaThreat = source.AreaThreat; }
     internal CardFrequency WithWeight(double weight) => new CardFrequency(this, weight);

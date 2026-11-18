@@ -918,7 +918,11 @@ internal static class UiRules
         foreach (var group in elements.GroupBy(element => element.Id).Where(group => group.Count() > 1).ToList())
         {
             int index = 1;
-            foreach (UiElement element in group.OrderByDescending(element => element.Id == "shop.back" && element.Hit).ThenBy(element => element.Y).ThenBy(element => element.X).ThenBy(element => element.Instance))
+            // Arena and Draft controls exist in several native variants (landing, tray, off-screen pages): the pressable on-screen one is the bare id.
+            bool arena = group.Key.StartsWith("arena.", StringComparison.Ordinal) || group.Key.StartsWith("draft.", StringComparison.Ordinal);
+            foreach (UiElement element in group.OrderByDescending(element => element.Id == "shop.back" && element.Hit)
+                .ThenByDescending(element => arena && element.Hit).ThenByDescending(element => arena && element.OnScreen)
+                .ThenByDescending(element => arena && element.Enabled).ThenBy(element => element.Y).ThenBy(element => element.X).ThenBy(element => element.Instance))
                 if (index++ > 1) element.Id += "#" + (index - 1);
         }
     }

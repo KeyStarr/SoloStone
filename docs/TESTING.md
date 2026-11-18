@@ -124,7 +124,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `ladder` | The ranked ladder profile code: results and rewards, milestones, ledger, placement and casual mode |
 | `ladder-extended` | The older ladder-program checks, in the same program under `--extended`: the economy, pack and deck-library checks. The ledger, milestone-ledger and rating-placement checks run in `ladder`. Fixtures for saves no build wrote (rule-0 or rule-1 ranked history) are deleted |
 | `recipe-picker` | The recipe picker and recipe guide of the native shop |
-| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens (the program's no-argument run) |
+| `progression` | Profile, rewards, quests, achievements, ranks and settings logic behind the native screens; Arena drafts, runs, rewards and NPC drafting (the program's no-argument run) |
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
 | `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
 | `shop` | The native shop: catalogue, purchases, deck tiles and art maths |

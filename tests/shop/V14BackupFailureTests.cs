@@ -1,4 +1,4 @@
-// EnsureBackup runs when a V13/V14 save upgrades to V15. A refused or failed backup or commit must leave the save
+// EnsureBackup runs when a V13/V14/V15 save upgrades to current. A refused or failed backup or commit must leave the save
 // and any existing backup untouched, and a retry against a matching backup must finish the upgrade.
 internal static class V14BackupFailureTests
 {

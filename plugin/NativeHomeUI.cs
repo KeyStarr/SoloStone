@@ -213,19 +213,18 @@ internal static class NativeHomeUI
         return "";
     }
 
-    // The disabled fourth-mode face says Fan-made modes (community mods, modder toolkit); it stays inert like Arena.
+    // The disabled fourth-mode face says Fan-made modes (community mods, modder toolkit); it stays inert.
     // Only the native face text changes, so font, plate and size stay native; the tooltip headline reads the same text.
     internal const string FanModesLabel = "Fan-made modes";
     internal const string ArenaEntry = "home.arena", FanModesEntry = "home.battlegrounds";
 
-    // One switch for the Fan-made modes relabel and the Arena/Fan-made modes slot swap: each follows its hidden-entry policy, so an
-    // enabled (implemented) Arena or Battlegrounds is neither force-relabelled nor swapped. active: entry id -> policy applies.
+    // Keep Arena above Fan-made modes while that placeholder is active, including when Arena is playable.
     internal static void ApplyModePolicy(Box box, Action<string> report, Func<string, bool> active = null)
     {
         if (box == null) return;
-        bool campaigns = active == null || active(FanModesEntry), arena = active == null || active(ArenaEntry);
+        bool campaigns = active == null || active(FanModesEntry);
         if (campaigns) LabelFanModes(box, report); // Box.SetupButtonText rewrites the face on every HUB load
-        if (campaigns && arena) SwapModeSlots(box, report); // native re-layout restores the authored slots
+        if (campaigns) SwapModeSlots(box, report); // native re-layout restores the authored slots
     }
 
     private static void LabelFanModes(Box box, Action<string> report)
@@ -326,7 +325,7 @@ internal static class NativeHomeUI
     }
 
     private static bool IsUnavailableMode(Box box, PegUIElement button) => box != null && button != null
-        && (button == box.m_ArenaButton || button == box.m_BattleGroundsButton || button == box.m_GameModesButton);
+        && (button == box.m_BattleGroundsButton || button == box.m_GameModesButton);
 
     internal static bool ShowModeTooltip(Box box, PegUIElement button)
     {

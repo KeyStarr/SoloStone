@@ -85,6 +85,21 @@ public static class LocalCardCatalog
         return card != null;
 #endif
     }
+    // THE single "may be in a current Ranked/Standard deck" predicate (active meta sets + Core + the listed Event cards; Basic, Classic,
+    // Hall of Fame and every older set are Wild). Arena's pool is built on this alone. InActiveMeta is NOT this: it also admits
+    // cards from sets no meta lists. When #87 lands its own Standard definition, re-point this one method.
+    internal static bool IsStandardLegal(EngineCard card)
+    {
+#if ENGINE_SOURCE
+        return card != null && card.Collectible && StandardIdSet.Value.Contains(card.Id);
+#else
+        return card != null && card.Collectible;
+#endif
+    }
+#if ENGINE_SOURCE
+    private static readonly Lazy<HashSet<string>> StandardIdSet = new Lazy<HashSet<string>>(() =>
+        new HashSet<string>(OfflinePoolPolicy.Load().Members.Where(m => m.Scope == "Standard").Select(m => m.CardId), StringComparer.Ordinal));
+#endif
     // What V2 requires of a client: every collectible card a player or NPC can have in the active meta, and the pack pool.
     internal static IReadOnlyList<string> ActivePoolIds() => Array.AsReadOnly(Cards.All
         .Where(card => card.Implemented && card.Collectible && InActiveMeta(card)).Select(card => card.Id)

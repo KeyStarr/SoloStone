@@ -62,7 +62,97 @@ MethodSignature(gameMetadata, "Actor", "GetPremium", Array.Empty<string>(), "TAG
 Console.WriteLine("PASS Actor.GetPremium(): TAG_PREMIUM pack reveal contract");
 MethodSignature(gameMetadata, "GameMgr", "ShowTransitionPopup", new[] { "String", "Int32" }, "Void", signatures);
 MethodSignature(gameMetadata, "GameMgr", "LoadTransitionPopup", new[] { "String" }, "Void", signatures);
+// Native Arena transport and boot: method signatures belong to the pinned client, not the offline stand-ins.
+foreach (var contract in new[] {
+    ("CollectionManager", "GetHeroPremium", new[] { "TAG_CLASS" }, "TAG_PREMIUM"),
+    ("Network", "SendArenaSessionRequest", Array.Empty<string>(), "Void"),
+    ("Network", "RequestDraftChoicesAndContents", new[] { "Boolean" }, "Void"),
+    ("Network", "DraftBegin", new[] { "Boolean" }, "Void"),
+    ("Network", "RedraftBegin", new[] { "Boolean" }, "Void"),
+    ("Network", "MakeDraftChoice", new[] { "Int64", "Int32", "Int32", "Int32", "Boolean", "Boolean", "List`1<Int32>" }, "Void"),
+    ("Network", "DraftRetire", new[] { "Int64", "Int32", "Int32", "Boolean" }, "Void"),
+    ("Network", "AckDraftRewards", new[] { "Int64", "Int32", "Boolean" }, "Void"),
+    ("Network", "DraftRequestDisablePremiums", Array.Empty<string>(), "Void"),
+    ("Network", "RequestArenaRatingInfo", Array.Empty<string>(), "Void"),
+    ("Network", "SaveArenaDeck", new[] { "Int64", "List`1<CardUserData>", "Int64", "Int32", "RuneType[]", "Boolean" }, "Void"),
+    ("Network", "GetArenaSessionResponse", Array.Empty<string>(), "ArenaSessionResponse"),
+    ("Network", "GetDraftChoicesAndContents", Array.Empty<string>(), "DraftChoicesAndContents"),
+    ("Network", "GetBeginDraft", Array.Empty<string>(), "BeginDraft"),
+    ("Network", "GetDraftChosen", Array.Empty<string>(), "DraftChosen"),
+    ("Network", "GetRetiredDraft", Array.Empty<string>(), "DraftRetired"),
+    ("Network", "GetRewardsAckDraftID", Array.Empty<string>(), "Int64"),
+    ("Network", "GetDraftRemovePremiumsResponse", Array.Empty<string>(), "DraftChoicesAndContents"),
+    ("Network", "GetArenaRatingInfoResponse", Array.Empty<string>(), "ArenaRatingInfoResponse"),
+    ("Network", "GetSaveArenaDeckResponse", Array.Empty<string>(), "SaveArenaDeckResponse"),
+    ("Network", "GetDraftError", Array.Empty<string>(), "DraftError"),
+    ("Network", "FakeHandleType", new[] { "Int32" }, "Boolean"),
+    ("DraftManager", "OnLoggedIn", Array.Empty<string>(), "Void"),
+    ("DraftManager", "RegisterDisplayHandlers", Array.Empty<string>(), "Void"),
+    ("DraftManager", "OnArenaSessionResponsePacket", new[] { "ArenaSessionResponse" }, "Void"),
+    ("DraftManager", "FindGame", Array.Empty<string>(), "Void"),
+    ("ArenaLandingPageManager", "SpendTicket", Array.Empty<string>(), "Void"),
+    ("ArenaLandingPageManager", "StartMatchmaking", Array.Empty<string>(), "Void"),
+    ("ArenaLandingPageManager", "ShowArenaDisclaimer", Array.Empty<string>(), "Void"),
+    ("ArenaLandingPageManager", "CheckForFTUXPopup", Array.Empty<string>(), "IEnumerator"),
+    ("ArenaLandingPageManager", "UpdateArenaRatingValues", new[] { "Int32", "Int32" }, "Void"),
+    ("GameMgr", "GetPostGameSceneMode", Array.Empty<string>(), "Mode"),
+    ("BnetPresenceMgr", "SetGameFieldBlob", new[] { "UInt32", "IProtoBuf" }, "Boolean"),
+    ("PresenceMgr", "SetStatus", new[] { "Enum[]" }, "Boolean"),
+    ("PresenceMgr", "SetPrevStatus", Array.Empty<string>(), "Boolean")
+}) MethodSignature(gameMetadata, contract.Item1, contract.Item2, contract.Item3, contract.Item4, signatures);
+Console.WriteLine("PASS Arena native message, boot and return contracts");
+// The DRAFT boot watch (plugin/NativeArenaLoad.cs) reads every wait of the scene-loaded coroutines by field name.
+foreach (var (typeName, fieldName, fieldType) in new[] {
+    ("DraftDisplay", "m_confirmButton", "NormalButton"), ("DraftDisplay", "m_heroPower", "Actor"),
+    ("DraftDisplay", "m_currentMode", "DraftMode"), ("DraftDisplay", "m_netCacheReady", "Boolean"),
+    ("DraftDisplay", "m_arenaLandingPageManagerWidget", "Widget"), ("DraftScene", "m_arenaLandingPageWidget", "WidgetTemplate"),
+    ("ArenaLandingPageManager", "m_isNormalWidgetLoaded", "Boolean"), ("ArenaLandingPageManager", "m_isUndergroundWidgetLoaded", "Boolean"),
+    ("ArenaLandingPageManager", "m_isWidgetDoneInitialStateChanging", "Boolean"),
+    ("ArenaLandingPageManager", "m_FTUECoroutine", "Coroutine"), ("ArenaLandingPageManager", "m_tavernTicketDisplay", "TavernTicketDisplay"),
+    ("ArenaLandingPage", "m_playButtonNoActiveRun", "GameObject"), ("ArenaLandingPage", "m_playButtonActiveRun", "GameObject"),
+    ("ArenaLandingPage", "m_getMoreTicketsButtonWidget", "WidgetInstance"), ("TavernTicketDisplay", "m_widget", "Widget"), ("SceneMgr", "m_scene", "PegasusScene") })
+    if (Field(gameMetadata, typeName, fieldName).DecodeSignature(signatures, (object)null) != fieldType)
+        throw new Exception("Arena boot watch field changed: " + typeName + "." + fieldName);
+Console.WriteLine("PASS Arena boot watch reads the pinned client's scene-loaded waits");
+if (!Calls(plugin, pluginMetadata, Method(pluginMetadata, "NativeUIProbe", "Navigate")).Contains(("NativeArena", "NavigationTarget")))
+    throw new Exception("Arena post-reward routing bypasses the shared navigation target");
 var hooks = new[] {
+    ("CollectionDeck", "SendChanges", "NativeArena", "ArenaDeckChanges"),
+    ("CollectionManager", "GetHeroPremium", "NativeArena", "DraftHeroPremium"),
+    ("Network", "SendArenaSessionRequest", "NativeArena", "SessionRequest"),
+    ("Network", "RequestDraftChoicesAndContents", "NativeArena", "ContentsRequest"),
+    ("Network", "DraftBegin", "NativeArena", "BeginRequest"),
+    ("Network", "MakeDraftChoice", "NativeArena", "ChoiceRequest"),
+    ("Network", "DraftRetire", "NativeArena", "RetireRequest"),
+    ("Network", "AckDraftRewards", "NativeArena", "AckRequest"),
+    ("Network", "DraftRequestDisablePremiums", "NativeArena", "PremiumsRequest"),
+    ("Network", "RequestArenaRatingInfo", "NativeArena", "RatingRequest"),
+    ("Network", "SaveArenaDeck", "NativeArena", "SaveRequest"),
+    ("Network", "RedraftBegin", "NativeArena", "RedraftRequest"),
+    ("Network", "GetArenaSessionResponse", "NativeArena", "SessionReply"),
+    ("Network", "GetDraftChoicesAndContents", "NativeArena", "ContentsReply"),
+    ("Network", "GetBeginDraft", "NativeArena", "BeginReply"),
+    ("Network", "GetDraftChosen", "NativeArena", "ChoiceReply"),
+    ("Network", "GetRetiredDraft", "NativeArena", "RetireReply"),
+    ("Network", "GetRewardsAckDraftID", "NativeArena", "AckReply"),
+    ("Network", "GetDraftRemovePremiumsResponse", "NativeArena", "PremiumsReply"),
+    ("Network", "GetArenaRatingInfoResponse", "NativeArena", "RatingReply"),
+    ("Network", "GetSaveArenaDeckResponse", "NativeArena", "SaveReply"),
+    ("Network", "GetDraftError", "NativeArena", "ErrorReply"),
+    ("Box", "OnArenaButtonPressed", "NativeArena", "HomeButton"),
+    ("Hub", "HandleAreanaButtonPressed", "NativeArena", "HomeArena"),
+    ("ArenaLandingPageManager", "Awake", "NativeArena", "BeforeScene"),
+    ("DraftDisplay", "Awake", "NativeArena", "BeforeScene"),
+    ("ArenaLandingPageManager", "SpendTicket", "NativeArena", "Enter"),
+    ("ArenaLandingPageManager", "ToggleUndergroundState", "NativeArena", "Underground"),
+    ("ArenaLandingPageManager", "ShowArenaDisclaimer", "NativeArena", "Disclaimer"),
+    ("ArenaLandingPageManager", "CheckForFTUXPopup", "NativeArena", "NoFtue"),
+    ("ArenaLandingPageManager", "UpdateArenaRatingValues", "NativeArena", "NoRating"),
+    ("ArenaModeToggleButton", "DetermineStartingState", "NativeArena", "ToggleStartingState"),
+    ("DraftManager", "FindGame", "NativeArena", "FindGame"),
+    ("ArenaLandingPageManager", "StartMatchmaking", "NativeArena", "FindGame"),
+    ("DraftDisplay", "PlayButtonPress", "NativeArena", "FindGame"),
+    ("GameMgr", "GetPostGameSceneMode", "NativeArena", "ReturnToDraft"),
     ("GameMenu", "Awake", "NativeReportUI", "AddRow"),
     ("GameMenu", "GetButtons", "NativeReportUI", "ListRow"),
     ("GameMenu", "Show", "NativeReportUI", "PrepareMenu"),
@@ -337,6 +427,9 @@ foreach (string option in new[] { "HAS_SEEN_MULLIGAN", "HAS_SEEN_THE_COIN", "HAS
     foreach (string owner in new[] { "Option", "ServerOptionFlag" })
         if (TryEnumValue(gameMetadata, owner, option) == null)
             failures.Add(owner + "::" + option + " match onboarding flag missing");
+foreach (string option in new[] { "HAS_SEEN_FORGE", "HAS_SEEN_FORGE_REVAMP", "HAS_SEEN_FORGE_REVAMP_UNDERGROUND" })
+    if (TryEnumValue(gameMetadata, "Option", option) == null)
+        failures.Add("Option::" + option + " missing (Arena first-visit slides are suppressed through it)");
 var finalizer = Method(pluginMetadata, "NativeUIProbe", "FinishLocalReorder");
 var finalizerSignature = finalizer.DecodeSignature(signatures, (object)null);
 var finalizerParameters = Parameters(pluginMetadata, finalizer);

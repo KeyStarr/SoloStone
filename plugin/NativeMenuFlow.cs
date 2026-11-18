@@ -2,6 +2,7 @@ internal enum NativeHomeControl
 {
     Unsupported,
     Traditional,
+    Arena,
     Collection,
     OpenPacks,
     Store
@@ -11,6 +12,7 @@ internal enum NativeMenuTarget
 {
     None,
     Picker,
+    Arena,
     Collection,
     Pack,
     // The local shop already opened the store (NativeShop fires the STORE press itself): nothing to route or block.
@@ -21,6 +23,7 @@ internal static class NativeMenuFlow
 {
     internal static NativeMenuTarget HomeRoute(NativeHomeControl control)
     {
+        if (control == NativeHomeControl.Arena) return NativeMenuTarget.Arena;
         if (control == NativeHomeControl.Traditional) return NativeMenuTarget.Picker;
         if (control == NativeHomeControl.Collection) return NativeMenuTarget.Collection;
         if (control == NativeHomeControl.OpenPacks) return NativeMenuTarget.Pack;
