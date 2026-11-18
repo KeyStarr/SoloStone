@@ -493,8 +493,7 @@ namespace SabberStoneCore.Auras
 				AppliedEntityIdCollection.ForEach(Game.IdEntityDic, effects,
 					(id, idDict, effs) =>
 					{
-						// An AI fair view masks the opponent's private actors, and with them ids an aura had applied to.
-						if (!idDict.TryGetValue(id, out IPlayable entity)) return;
+						IPlayable entity = idDict[id];
 						for (int i = 0; i < effs.Length; i++)
 							effs[i].RemoveAuraFrom(entity, _ownerId);
 					});
