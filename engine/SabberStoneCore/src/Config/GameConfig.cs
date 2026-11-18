@@ -203,6 +203,9 @@ namespace SabberStoneCore.Config
 		// Only schema-2 replay hosts may select this; MemberwiseClone preserves it.
 		internal bool LegacyPoolReplay { get; set; }
 
+		// Set by Game.MarkSearchCopy on an NPC's search copy; MemberwiseClone carries it to every clone of that copy.
+		internal bool SearchCopy { get; set; }
+
 		// Replay hosts supply verified historical membership; ordinary games use the installed catalog.
 		[field: NonSerialized]
 		internal OfflinePoolManifest ReplayPools { get; set; }

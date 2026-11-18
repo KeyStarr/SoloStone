@@ -27,6 +27,7 @@ namespace SabberStoneCore.CardSets.Client
             ClassHeroes.Apply(Register);
 
             Sets.LocationCards.Apply(Register);
+            WildModules.Apply(Register);
             // Per-set registries also define the collectible stress corpus.
             void RegisterStandard(int dbfId, string id, Action<Card> configure)
             {
