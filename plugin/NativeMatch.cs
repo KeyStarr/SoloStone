@@ -3038,6 +3038,10 @@ public sealed class NativeMatch
                 eventBatch.Add(line);
                 try { EventTrace?.Invoke(line); } catch (Exception) { }
             }, HumanPlayerId.ToString(), BotPlayerId.ToString());
+            // The log follows the transport corrections the client is sent at each history position (an aura's removal).
+            eventLog.Corrections = (entries, index) => copyCompletions
+                .Where(c => ReferenceEquals(c.Entries, entries) && c.HistoryIndex == index)
+                .Select(c => new MatchEventLog.TransportCorrection(c.EntityId, c.Tags, c.RequiresPublicReplay)).ToList();
         }
         eventBatch.Clear();
         return true;

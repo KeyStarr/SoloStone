@@ -72,6 +72,7 @@ internal static partial class Program
         EventBudgetSeparate();
         EventsCannotCloseJournal();
         Console.WriteLine("PASS match event log: separate event budget, events cannot close the journal");
+        MatchEventLogAuraChecks();
     }
 
     private static void Check(bool condition, string message)
