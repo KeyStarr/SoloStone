@@ -6,8 +6,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
     internal static class CataclysmCards
     {
         // Batch 6 blocked on core primitives; leave these collectibles unregistered:
-        // CATA_496: temporary CANT_ATTACK survives Silence (Minion.Silence drops OneTurnEffects
-        // without undoing this tag); Enchantment.Remove cannot separately expire restriction/control.
+        // CATA_496 (registered in CursedChains.cs): its turn-scoped ban ends with Silence, which returns control and removes
+        // the enchantment (engine regression guard in SilenceCantAttackProof; retail wording is unpinned).
         // CATA_550: core change: no bounded remainder summon API; OnBodyEntered replays
         // the entire +99 declaration, so a refill cannot cap the final batch to the remainder.
         // CATA_139: core change: no positive stat-gain event; aura polling loses intermediate gains.

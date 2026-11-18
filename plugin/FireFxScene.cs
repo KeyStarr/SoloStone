@@ -41,12 +41,13 @@ internal static class FireFxScene
             return method == null ? "unavailable" : Cut(Convert.ToString(method.Invoke(component, null), CultureInfo.InvariantCulture));
         } catch { return "unavailable"; }
     }
-    private static string ParticlePlaying(Component component)
+    private static string ParticleProperty(Component component, string name, string module = null)
     {
         if (component == null) return "";
         try {
-            var property = component.GetType().GetProperty("isPlaying");
-            return property == null ? "unavailable" : Convert.ToString(property.GetValue(component, null), CultureInfo.InvariantCulture);
+            object owner = module == null ? component : component.GetType().GetProperty(module)?.GetValue(component, null);
+            var property = owner?.GetType().GetProperty(name);
+            return property == null ? "unavailable" : Convert.ToString(property.GetValue(owner, null), CultureInfo.InvariantCulture);
         } catch { return "unavailable"; }
     }
     internal static JsonNode Read(int selectedScene, int selectedRoot, string name = null, int after = 0)
@@ -90,7 +91,9 @@ internal static class FireFxScene
                     var p = transform.position;
                     rows.Add(new JsonNode { { "name", Cut(go.name) }, { "path", Path(transform) },
                         { "instance", go.GetInstanceID() }, { "x", p.x }, { "y", p.y }, { "z", p.z },
-                        { "particle", particle != null }, { "particlePlaying", ParticlePlaying(particle) },
+                        { "particle", particle != null }, { "particlePlaying", ParticleProperty(particle, "isPlaying") },
+                        { "particleEmitting", ParticleProperty(particle, "isEmitting") }, { "particleCount", ParticleProperty(particle, "particleCount") },
+                        { "particleLoop", ParticleProperty(particle, "loop", "main") }, { "particleDuration", ParticleProperty(particle, "duration", "main") },
                         { "spell", spell == null ? "" : Cut(spell.gameObject.name) },
                         { "spellInstance", spell == null ? 0 : spell.gameObject.GetInstanceID() },
                         { "spellComponentId", spell == null ? 0 : spell.GetInstanceID() },

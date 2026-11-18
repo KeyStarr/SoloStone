@@ -131,11 +131,18 @@ try
             if (paladinPack.Contains(card.Id)) reachedPaladinPackCards.Add(card.Id);
     }
     Check(reachedPaladinPackCards.SetEquals(paladinPack), "not all Paladin pack cards are reachable");
+    // The engine macro: any catalog card still built from its base row ($ text gets " @spelldmg"). Ice Lance (CS2_031) has a
+    // Wild identity row (facts/README.md), which keeps the client text as is, so it now pins only the markup cleanup.
+    var macroCard = LocalEconomy.Catalog.Where(card => card.Text != null && card.Text.Contains("@spelldmg"))
+        .OrderBy(card => card.Id, StringComparer.Ordinal).FirstOrDefault();
+    Check(macroCard != null, "no catalog card exercises engine macro cleanup");
+    string macroRules = LocalCollectionUI.RulesText(macroCard);
+    Check(macroRules.Length != 0 && !macroRules.Contains("@") && !macroRules.Contains("$") && !macroRules.Contains("<"),
+        "card rules leaked engine formatting macros: " + macroCard.Id + " " + macroRules);
     var iceLance = LocalEconomy.Catalog.Single(card => card.Id == "CS2_031");
-    Check(iceLance.Text.Contains("@spelldmg"), "Ice Lance fixture no longer exercises engine macro cleanup");
     Check(LocalCollectionUI.RulesText(iceLance) ==
         "Freeze a character. If it was already Frozen, deal 4 damage instead.",
-        "card rules leaked engine formatting macros");
+        "card rules leaked engine formatting markup");
     var blessingOfMight = LocalEconomy.Catalog.Single(card => card.Id == "CS2_087");
     Check(blessingOfMight.Text.Contains("_"), "Blessing of Might fixture no longer exercises engine spacing markers");
     Check(LocalCollectionUI.RulesText(blessingOfMight) == "Give a minion +3 Attack.",

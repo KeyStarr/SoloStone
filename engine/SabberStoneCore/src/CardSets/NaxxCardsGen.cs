@@ -166,7 +166,7 @@ namespace SabberStoneCore.CardSets
 			{
 				DeathrattleTask = ComplexTask.Create(
 					new RandomTask(1, EntityType.MINIONS),
-					new AddEnchantmentTask("FP1_023e", EntityType.TARGET))
+					new AddEnchantmentTask("FP1_023e", EntityType.STACK))
 			}));
 
 		}
@@ -210,7 +210,7 @@ namespace SabberStoneCore.CardSets
 		private static void Shaman(IDictionary<string, CardDef> cards)
 		{
 			// ----------------------------------------- SPELL - SHAMAN
-			// [FP1_025] Reincarnate - COST:2
+			// [FP1_025] Reincarnate - COST:1
 			// - Set: naxx, Rarity: common
 			// --------------------------------------------------------
 			// Text: Destroy a minion, then return it to life with full Health.
@@ -222,8 +222,10 @@ namespace SabberStoneCore.CardSets
 			cards.Add("FP1_025", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0},{PlayReq.REQ_MINION_TARGET,0}}, new Power
 			{
 				PowerTask = ComplexTask.Create(
+					new ConditionTask(EntityType.TARGET, SelfCondition.IsMyTurn),
 					new DestroyTask(EntityType.TARGET, true),
-					new CopyTask(EntityType.TARGET, Zone.PLAY))
+					new FlagTask(true, new CopyTask(EntityType.TARGET, Zone.PLAY)),
+					new FlagTask(false, new CopyTask(EntityType.TARGET, Zone.PLAY, toOpponent: true)))
 			}));
 
 		}
@@ -242,10 +244,13 @@ namespace SabberStoneCore.CardSets
 			cards.Add("FP1_022", new CardDef(new Power
 			{
 				DeathrattleTask = ComplexTask.Create(
-					new IncludeTask(EntityType.HAND),
-					new FilterStackTask(SelfCondition.IsRace(Race.DEMON)),
-					new RandomTask(1, EntityType.STACK),
-					new SummonTask())
+					new ConditionTask(EntityType.SOURCE, SelfCondition.IsNotBoardFull),
+					new FlagTask(true, ComplexTask.Create(
+						new IncludeTask(EntityType.HAND),
+						new FilterStackTask(SelfCondition.IsRace(Race.DEMON)),
+						new RandomTask(1, EntityType.STACK),
+						new RemoveFromHand(EntityType.STACK),
+						new SummonTask())))
 			}));
 
 		}
@@ -569,7 +574,7 @@ namespace SabberStoneCore.CardSets
 			// [FP1_028] Undertaker - COST:1 [ATK:1/HP:2]
 			// - Set: naxx, Rarity: common
 			// --------------------------------------------------------
-			// Text: Whenever you summon a minion with <b>Deathrattle</b>, gain +1 Attack.
+			// Text: Whenever you summon a minion with <b>Deathrattle</b>, gain +1/+1.
 			// --------------------------------------------------------
 			// RefTag:
 			// - DEATHRATTLE = 1
@@ -676,7 +681,7 @@ namespace SabberStoneCore.CardSets
 			// [FP1_002t] Spectral Spider (*) - COST:1 [ATK:1/HP:1]
 			// - Set: naxx,
 			// --------------------------------------------------------
-			cards.Add("FP1_002t", new CardDef());
+			cards.Add("FP1_002t", new CardDef { Configure = card => card.SetPrintedRaces(Race.UNDEAD, Race.BEAST) });
 
 			// --------------------------------------- MINION - NEUTRAL
 			// [FP1_006] Deathcharger (*) - COST:1 [ATK:2/HP:3]
@@ -697,7 +702,7 @@ namespace SabberStoneCore.CardSets
 			// [FP1_007t] Nerubian (*) - COST:4 [ATK:4/HP:4]
 			// - Set: naxx,
 			// --------------------------------------------------------
-			cards.Add("FP1_007t", new CardDef());
+			cards.Add("FP1_007t", new CardDef { Configure = card => card.SetPrintedRaces(Race.UNDEAD) });
 
 			// --------------------------------------- MINION - NEUTRAL
 			// [FP1_012t] Slime (*) - COST:1 [ATK:1/HP:2]

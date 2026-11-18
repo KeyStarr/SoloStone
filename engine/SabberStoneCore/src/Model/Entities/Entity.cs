@@ -175,8 +175,9 @@ namespace SabberStoneCore.Model.Entities
 			_logging = !costProbe && game.Logging;
 			if (_history)
 			{
-				if (!tags.ContainsKey(GameTag.ENTITY_ID))
-					tags.Add(GameTag.ENTITY_ID, Id);
+				// _data, not the caller's dictionary: a plain dictionary is copied above, so writing to it would drop the id.
+				if (!_data.ContainsKey(GameTag.ENTITY_ID))
+					_data.Add(GameTag.ENTITY_ID, Id);
 			}
 		}
 

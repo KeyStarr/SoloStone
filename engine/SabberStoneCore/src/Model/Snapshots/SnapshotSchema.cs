@@ -54,7 +54,9 @@ namespace SabberStoneCore.Model.Snapshots
                 typeof(HistoryRecorder).GetNestedType("TransferScope", BindingFlags.NonPublic) })
             // History-only effect plays: append, never renumber published definition type IDs.
             .Concat(new[] { typeof(Kettle.PowerHistoryEffectPlayStart) })
-            .Concat(new[] { typeof(Kettle.PowerHistoryRetainedOverdraw) }).ToArray();
+            .Concat(new[] { typeof(Kettle.PowerHistoryRetainedOverdraw) })
+            // Garrison Commander's aura (Auras is namespace-discovered): append, never renumber published definition type IDs.
+            .Concat(new[] { typeof(Auras.ExtraHeroPowerUseAura) }).ToArray();
         private static readonly string[] Namespaces = {
             "SabberStoneCore.Model", "SabberStoneCore.Model.Entities", "SabberStoneCore.Model.Zones",
             "SabberStoneCore.Config", "SabberStoneCore.Enums", "SabberStoneCore.Enchants",

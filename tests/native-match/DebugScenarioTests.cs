@@ -19,6 +19,7 @@ internal static partial class Program
         DebugScenarioParsing();
         DebugScenarioMatch();
         DebugScenarioBoardStats();
+        DebugScenarioWounds();
         DebugScenarioSummonStats();
         DebugScenarioHandMods();
         DebugScenarioManaRawAndClear();
@@ -308,6 +309,47 @@ internal static partial class Program
         "humanBoard=DINO_401,TIME_064,EDR_031\nhumanBoardStats=999,999\n"
         + "npcBoard=DINO_410,DINO_410,DINO_410,DINO_410,DINO_410,DINO_410,DINO_410\n"
         + "humanDeckTop=CORE_EX1_011,CATA_308,JAIL_307,CATA_308,JAIL_307,CATA_581,CATA_581\nhumanSeat=first";
+
+    // humanHeroDamage / humanBoardDamage: wound the human side after the board is placed (live-check staging for heal cards).
+    private static void DebugScenarioWounds()
+    {
+        const string board = "humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,10\n";
+        var wounds = DebugScenario.Parse(board + "humanHeroDamage=7\nhumanBoardDamage=3");
+        Check(wounds.HumanHeroDamage == 7 && wounds.HumanBoardDamage == 3, "wound keys parse");
+        string text = wounds.Canonical();
+        Check(text == "humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,10\nhumanBoardDamage=3\nhumanHeroDamage=7" && DebugScenario.Parse(text).Canonical() == text,
+            "wound keys round-trip: " + text);
+        Check(DebugScenario.Parse("humanHeroDamage=1").HumanHeroDamage == 1 && DebugScenario.Parse("humanHeroDamage=29").HumanHeroDamage == 29
+            && DebugScenario.Parse("humanBoard=CS2_182\nhumanBoardDamage=999").HumanBoardDamage == 999, "wound limits accepted");
+        foreach (string bad in new[] { "0", "30", "-1", "+5", "1.5", "a", "5,5", "1e1", "07", "00" })
+            RejectsScenario("humanHeroDamage=" + bad, "hero damage '" + bad + "'");
+        foreach (string bad in new[] { "0", "1000", "-1", "+5", "2.5", "a", "5,5", "0999" })
+            RejectsScenario("humanBoard=CS2_182\nhumanBoardDamage=" + bad, "board damage '" + bad + "'");
+        RejectsScenario("humanBoardDamage=3", "board damage without humanBoard");
+        RejectsScenario("npcBoard=CS2_182\nhumanBoardDamage=3", "board damage needs the human board key");
+        RejectsScenario("humanHeroDamage=3\nhumanHeroDamage=3", "duplicate hero damage");
+        RejectsScenario("humanBoard=CS2_182\nhumanBoardDamage=3\nhumanBoardDamage=3", "duplicate board damage");
+        RejectsScenario("humanHeroDamage=3\nheroAttack=npc\nattackLethal=1", "hero damage with the NPC's lethal attack on the human hero");
+        Check(DebugScenario.Parse("humanHeroDamage=3\nheroAttack=human\nattackLethal=1").HumanHeroDamage == 3, "lethal on the NPC hero may combine");
+        Check(DebugScenario.Parse("humanHeroDamage=3\nheroAttack=npc").HumanHeroDamage == 3, "NPC attack without lethal may combine");
+        try { DebugScenario.Parse("humanBoard=CS2_182\nhumanBoardDamage=1000"); throw new Exception("1000 accepted"); }
+        catch (ArgumentException error) { Check(error.Message.Contains("humanBoardDamage"), "error names the key: " + error.Message); }
+        var (match, _) = AnimationMatch();
+        var game = match.Game;
+        string applied = wounds.Apply(game);
+        var human = game.Player1.BoardZone.OfType<Minion>().ToList();
+        Check(human.Count == 2 && human.All(m => m.BaseHealth == 10 && m.Damage == 3 && m.Health == 7), "board wounds: max 10, Health 7");
+        Check(game.Player1.Hero.Damage == 7 && game.Player1.Hero.BaseHealth == 30 && game.Player1.Hero.Health == 23, "hero wounded, max unchanged");
+        Check(game.Player2.Hero.Damage == 0, "the NPC hero is untouched");
+        Check(applied.Contains("humanBoardDamage=3") && applied.Contains("humanHeroDamage=7"), "outcome detail names both: " + applied);
+        // Clamp: more damage than Health leaves 1 Health, nothing dies.
+        var (match2, _) = AnimationMatch();
+        DebugScenario.Parse("humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,5\nhumanBoardDamage=999").Apply(match2.Game);
+        Check(match2.Game.Player1.BoardZone.OfType<Minion>().All(m => m.Health == 1 && m.Damage == 4 && m.Zone.Type == EngineZone.PLAY), "board damage clamps to 1 Health");
+        var (match3, _) = AnimationMatch();
+        string one = DebugScenario.Parse("humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,1\nhumanBoardDamage=5").Apply(match3.Game);
+        Check(one.Contains("(0 minions wounded") && match3.Game.Player1.BoardZone.OfType<Minion>().All(m => m.Damage == 0 && m.Health == 1), "1-Health bodies are not wounded and not counted: " + one);
+    }
 
     private static void DebugScenarioBoardStats()
     {

@@ -12,6 +12,7 @@
 // GNU Affero General Public License for more details.
 #endregion
 using System.Collections.Generic;
+using System.Linq;
 using SabberStoneCore.Auras;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Conditions;
@@ -41,7 +42,10 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_050", new CardDef(new Power
 			{
-				PowerTask = ComplexTask.SummonRandomMinion(GameTag.COST, 1)
+				// 37.0: a Deathrattle (it was a battlecry-slot task that fired on play).
+				DeathrattleTask = ComplexTask.Create(
+					new RandomMinionTask(GameTag.COST, 1),
+					new SummonTask(SummonSide.DEATHRATTLE))
 			}));
 
 			// ----------------------------------------- MINION - DRUID
@@ -221,9 +225,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_119", new CardDef(new Power
 			{
-				// TODO [LOE_119] Animated Armor && Test: Animated Armor_LOE_119
-				//PowerTask = null,
-				//Trigger = null,
+				// "Your hero can only take 1 damage at a time": applied by CombatRules.Incoming (before armor) while this
+				// minion is on the board and not silenced. The aura only records the rule; AuraEffects has no slot for the tag.
+				Aura = new Aura(AuraType.HERO, new Effect(GameTag.INCOMING_DAMAGE_CAP, EffectOperator.SET, 1))
 			}));
 
 			// ------------------------------------------- SPELL - MAGE
@@ -352,7 +356,12 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_006", new CardDef(new Power
 			{
-				PowerTask = new DiscoverTask(DiscoverType.DEATHRATTLE)
+				// 37.0: the discovered card costs (1) less (never below 0).
+				PowerTask = new DiscoverTask(DiscoverType.DEATHRATTLE, new CustomTask((g, c, s, t, stack) =>
+				{
+					if (t is SabberStoneCore.Model.Entities.Playable chosen)
+						SabberStoneCore.Actions.CostRules.AddModifier(chosen, EffectOperator.SUB, 1);
+				}))
 			}));
 
 			// ----------------------------------------- SPELL - PRIEST
@@ -498,6 +507,7 @@ namespace SabberStoneCore.CardSets
 			{
 				Trigger = new Trigger(TriggerType.PLAY_CARD)
 				{
+					TriggerSource = TriggerSource.FRIENDLY,
 					Condition = SelfCondition.IsOverloadCard,
 					SingleTask = ComplexTask.Create(
 						new GetGameTagTask(GameTag.OVERLOAD, EntityType.TARGET),
@@ -515,7 +525,8 @@ namespace SabberStoneCore.CardSets
 			cards.Add("LOE_113", new CardDef(new Power
 			{
 				Aura = new AdaptiveCostEffect(p => p.Controller.BoardZone.GetAll(q => q.IsRace(Race.MURLOC)).Length),
-				PowerTask = new AddEnchantmentTask("LOE_113e", EntityType.ALLMINIONS)
+				// 37.0: "Give your minions +2/+2" (the script gave every minion on both sides the buff).
+				PowerTask = new AddEnchantmentTask("LOE_113e", EntityType.MINIONS)
 			}));
 
 		}
@@ -569,8 +580,15 @@ namespace SabberStoneCore.CardSets
 			cards.Add("LOE_116", new CardDef(new Power
 			{
 				PowerTask = ComplexTask.Create(
-					new ConditionTask(EntityType.SOURCE, SelfCondition.IsBoardFull),
-					new FlagTask(true, new AddEnchantmentTask("LOE_009e", EntityType.SOURCE)))
+					// 6 other minions; a Location fills a slot but is not a minion.
+					new ConditionTask(EntityType.SOURCE, new SelfCondition(me => me.Controller.BoardZone.Count(
+						other => other != me && other is SabberStoneCore.Model.Entities.Minion) >= 6)),
+					new FlagTask(true, ComplexTask.Create(
+						new FuncNumberTask(p => {
+							if (p.Game.History) p.Game.PowerHistory.TargetRange(new[] { p.Id });
+							return 0;
+						}),
+						new AddEnchantmentTask("LOE_009e", EntityType.SOURCE))))
 			}));
 
 			// ---------------------------------------- SPELL - WARLOCK
@@ -634,10 +652,11 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_009", new CardDef(new Power
 			{
-				// TODO [LOE_009] Obsidian Destroyer && Test: Obsidian Destroyer_LOE_009
 				InfoCardId = "LOE_009e",
-				//PowerTask = null,
-				//Trigger = null,
+				Trigger = new Trigger(TriggerType.TURN_END)
+				{
+					SingleTask = new SummonTask("LOE_009t", SummonSide.RIGHT)
+				}
 			}));
 
 			// --------------------------------------- MINION - WARRIOR
@@ -649,12 +668,7 @@ namespace SabberStoneCore.CardSets
 			// GameTag:
 			// - TAUNT = 1
 			// --------------------------------------------------------
-			cards.Add("LOE_022", new CardDef(new Power
-			{
-				// TODO [LOE_022] Fierce Monkey && Test: Fierce Monkey_LOE_022
-				//PowerTask = null,
-				//Trigger = null,
-			}));
+			cards.Add("LOE_022", new CardDef());
 
 			// --------------------------------------- WEAPON - WARRIOR
 			// [LOE_118] Cursed Blade - COST:1 [ATK:2/HP:0]
@@ -667,10 +681,10 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_118", new CardDef(new Power
 			{
-				// TODO [LOE_118] Cursed Blade && Test: Cursed Blade_LOE_118
+				// "Double all damage dealt to your hero": applied by CombatRules.Incoming (before armor) while this weapon is
+				// equipped and not destroyed or silenced. The aura only records the rule; AuraEffects has no slot for the tag.
 				InfoCardId = "LOE_118e",
-				//PowerTask = null,
-				//Trigger = null,
+				Aura = new Aura(AuraType.HERO, new Effect(GameTag.INCOMING_DAMAGE_MULTIPLIER, EffectOperator.SET, 2))
 			}));
 
 		}
@@ -699,12 +713,7 @@ namespace SabberStoneCore.CardSets
 			// GameTag:
 			// - TAUNT = 1
 			// --------------------------------------------------------
-			cards.Add("LOE_009t", new CardDef(new Power
-			{
-				// TODO [LOE_009t] Scarab && Test: Scarab_LOE_009t
-				//PowerTask = null,
-				//Trigger = null,
-			}));
+			cards.Add("LOE_009t", new CardDef());
 
 		}
 
@@ -742,9 +751,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_029", new CardDef(new Power
 			{
-				// TODO [LOE_029] Jeweled Scarab && Test: Jeweled Scarab_LOE_029
-				//PowerTask = null,
-				//Trigger = null,
+				PowerTask = new DiscoverTask(DiscoverType.THREE_COST)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -760,6 +767,12 @@ namespace SabberStoneCore.CardSets
 			{
 				Aura = new Aura(AuraType.HAND, Effects.SetCost(5))
 			}));
+
+			// --------------------------------------- MINION - NEUTRAL
+			// [LOEA10_3] Murloc Tinyfin - COST:0 [ATK:1/HP:1]
+			// - Race: murloc, Set: loe, Rarity: common
+			// --------------------------------------------------------
+			cards.Add("LOEA10_3", new CardDef());
 
 			// --------------------------------------- MINION - NEUTRAL
 			// [LOE_039] Gorillabot A-3 - COST:4 [ATK:3/HP:4]
@@ -790,9 +803,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_046", new CardDef(new Power
 			{
-				// TODO [LOE_046] Huge Toad && Test: Huge Toad_LOE_046
-				//PowerTask = null,
-				//Trigger = null,
+				DeathrattleTask = ComplexTask.DamageRandomTargets(1, EntityType.ENEMIES, 1)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -808,9 +819,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_047", new CardDef(new Power
 			{
-				// TODO [LOE_047] Tomb Spider && Test: Tomb Spider_LOE_047
-				//PowerTask = null,
-				//Trigger = null,
+				PowerTask = new DiscoverTask(DiscoverType.BEAST)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -824,9 +833,24 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_053", new CardDef(new Power
 			{
-				// TODO [LOE_053] Djinni of Zephyrs && Test: Djinni of Zephyrs_LOE_053
-				//PowerTask = null,
-				//Trigger = null,
+				Trigger = new Trigger(TriggerType.AFTER_CAST)
+				{
+					TriggerSource = TriggerSource.FRIENDLY,
+					SingleTask = new CustomTask((g, c, s, t, stack) =>
+					{
+						// After you cast a spell on another friendly minion, cast a copy of it on this one.
+						if (!(s is SabberStoneCore.Model.Entities.Minion djinni) || djinni.Zone?.Type != Zone.PLAY) return;
+						if (!(t is SabberStoneCore.Model.Entities.Spell spell) || spell.Controller != c || spell.CardTarget <= 0) return;
+						if (!g.IdEntityDic.TryGetValue(spell.CardTarget, out var aimed)
+							|| !(aimed is SabberStoneCore.Model.Entities.Minion other) || other == djinni || other.Controller != c) return;
+						int mode = 0;
+						foreach (var entry in c.PlayHistory) if (entry.SourceId == spell.Id) mode = entry.SubOption;
+						var copy = (SabberStoneCore.Model.Entities.Spell)SabberStoneCore.Model.Entities.Entity.FromCard(c, spell.Card,
+							new SabberStoneCore.Model.Entities.EntityData { [GameTag.CREATOR] = s.Id, [GameTag.DISPLAYED_CREATOR] = s.Id });
+						copy.CardTarget = djinni.Id;
+						SabberStoneCore.Actions.Generic.CastAutomaticSpell(c, g, copy, djinni, mode > 0 ? mode : 0, lockedTarget: true);
+					})
+				}
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -840,10 +864,10 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_061", new CardDef(new Power
 			{
-				// TODO [LOE_061] Anubisath Sentinel && Test: Anubisath Sentinel_LOE_061
 				InfoCardId = "LOE_061e",
-				//PowerTask = null,
-				//Trigger = null,
+				DeathrattleTask = ComplexTask.Create(
+					new RandomTask(1, EntityType.MINIONS_NOSOURCE),
+					new AddEnchantmentTask("LOE_061e", EntityType.STACK))
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -954,10 +978,12 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_089", new CardDef(new Power
 			{
-				PowerTask = ComplexTask.Create(
-							new SummonTask("LOE_089t", SummonSide.DEATHRATTLE),
+				DeathrattleTask = ComplexTask.Create(
+							// Each summon takes the dying minion's slot and pushes the earlier ones right, so the last summoned
+							// is leftmost: Rascally, Wily, Grumbly read left to right.
+							new SummonTask("LOE_089t3", SummonSide.DEATHRATTLE),
 							new SummonTask("LOE_089t2", SummonSide.DEATHRATTLE),
-							new SummonTask("LOE_089t3", SummonSide.DEATHRATTLE))
+							new SummonTask("LOE_089t", SummonSide.DEATHRATTLE))
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -974,22 +1000,21 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_092", new CardDef(new Power
 			{
-				// TODO [LOE_092] Arch-Thief Rafaam && Test: Arch-Thief Rafaam_LOE_092
-				//PowerTask = null,
-				//Trigger = null,
+				PowerTask = new DiscoverTask(DiscoverType.ARTIFACT)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
 			// [LOE_107] Eerie Statue - COST:4 [ATK:7/HP:7]
 			// - Set: loe, Rarity: rare
 			// --------------------------------------------------------
-			// Text: Can’t attack unless it’s the only minion in the battlefield.
+			// Text: Can’t attack unless it’s the only minion on the battlefield.
 			// --------------------------------------------------------
 			cards.Add("LOE_107", new CardDef(new Power
 			{
-				// TODO [LOE_107] Eerie Statue && Test: Eerie Statue_LOE_107
-				//PowerTask = null,
-				//Trigger = null,
+				// 37.0: "unless it's the only minion on the battlefield" (either side).
+				Aura = new AdaptiveEffect(new SelfCondition(me =>
+					me.Controller.BoardZone.Any(other => other != me && other is SabberStoneCore.Model.Entities.Minion)
+					|| me.Controller.Opponent.BoardZone.Any(other => other is SabberStoneCore.Model.Entities.Minion)), GameTag.CANT_ATTACK)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -1121,6 +1146,60 @@ namespace SabberStoneCore.CardSets
 				//PowerTask = null,
 				//Trigger = null,
 			}));
+
+			// ---------------------------------------- SPELL - NEUTRAL
+			// [LOEA16_3] Lantern of Power (*) - COST:10
+			// - Set: loe,
+			// --------------------------------------------------------
+			// Text: Give a minion +10/+10.
+			// --------------------------------------------------------
+			// PlayReq:
+			// - REQ_TARGET_TO_PLAY = 0
+			// - REQ_MINION_TARGET = 0
+			// --------------------------------------------------------
+			cards.Add("LOEA16_3", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0},{PlayReq.REQ_MINION_TARGET,0}}, new Power
+			{
+				PowerTask = new AddEnchantmentTask("LOEA16_3e", EntityType.TARGET)
+			}));
+
+			// ----------------------------------- ENCHANTMENT - NEUTRAL
+			// [LOEA16_3e] Lantern of Power (*) - COST:0
+			// - Set: loe,
+			// --------------------------------------------------------
+			// Text: +10/+10.
+			// --------------------------------------------------------
+			cards.Add("LOEA16_3e", new CardDef(new Power
+			{
+				Enchant = new Enchant(Effects.AttackHealth_N(10))
+			}));
+
+			// ---------------------------------------- SPELL - NEUTRAL
+			// [LOEA16_4] Timepiece of Horror (*) - COST:10
+			// - Set: loe,
+			// --------------------------------------------------------
+			// Text: Deal $10 damage randomly split among all enemies. @spelldmg
+			// --------------------------------------------------------
+			cards.Add("LOEA16_4", new CardDef(new Power
+			{
+				PowerTask = new EnqueueTask(10, ComplexTask.DamageRandomTargets(1, EntityType.ENEMIES, 1), true)
+			}));
+
+			// ---------------------------------------- SPELL - NEUTRAL
+			// [LOEA16_5] Mirror of Doom (*) - COST:10
+			// - Set: loe,
+			// --------------------------------------------------------
+			// Text: Fill your board with 3/3 Mummy Zombies.
+			// --------------------------------------------------------
+			cards.Add("LOEA16_5", new CardDef(new Power
+			{
+				PowerTask = new SummonTask("LOEA16_5t", 7)
+			}));
+
+			// --------------------------------------- MINION - NEUTRAL
+			// [LOEA16_5t] Mummy Zombie (*) - COST:3 [ATK:3/HP:3]
+			// - Race: undead, Set: loe,
+			// --------------------------------------------------------
+			cards.Add("LOEA16_5t", new CardDef() { Configure = card => card.SetPrintedRaces(Race.UNDEAD) });
 
 			// --------------------------------------- MINION - NEUTRAL
 			// [LOE_089t] Rascally Runt (*) - COST:2 [ATK:2/HP:2]

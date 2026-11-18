@@ -66,6 +66,9 @@ static partial class Program
             var english=new Dictionary<string,string>();
             foreach(var rows in new[]{mainDoc.RootElement.GetProperty("cards"),mainDoc.RootElement.GetProperty("overlay").GetProperty("cards")})
                 foreach(var row in rows.EnumerateArray()) if(row.TryGetProperty("text",out var text) && text.GetString().Length!=0 && !row.TryGetProperty("snapshot",out _)) english[row.GetProperty("id").GetString()]=text.GetString();
+            // A Wild identity row's text is what the engine plays instead of its base row's (facts/README.md).
+            if(mainDoc.RootElement.TryGetProperty("identity",out var identityRows))
+                foreach(var row in identityRows.EnumerateArray()) { string id=row.GetProperty("id").GetString(), text=row.GetProperty("text").GetString(); if(text.Length!=0) english[id]=text; else english.Remove(id); }
             Check(english.Count>9000,"the card file has English text for thousands of distinct ids");
             var allFiles=Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"facts"),"violet-hold-2026-09*.json").Select(Path.GetFileName).OrderBy(n=>n,StringComparer.Ordinal).ToArray();
             Check(allFiles.SequenceEqual(new[]{"violet-hold-2026-09.json"}.Concat(locales.Select(l=>"violet-hold-2026-09."+l+".json")).OrderBy(n=>n,StringComparer.Ordinal)),"one file per non-English client locale, next to the card file");

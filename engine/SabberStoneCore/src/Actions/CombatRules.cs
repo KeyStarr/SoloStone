@@ -46,6 +46,19 @@ namespace SabberStoneCore.Actions
             return (int)Math.Min(int.MaxValue, Math.Min(int.MaxValue, Math.Max(0L, damage + addition)) * multiplier);
         }
 
+        /// <summary>Damage rules that act on the hero's incoming amount before armor: Cursed Blade doubles it, then Animated
+        /// Armor caps it at 1 (a final amount of 1 is also what both together give).</summary>
+        internal static int Incoming(Hero target, int damage)
+        {
+            if (target == null || damage <= 0) return damage;
+            var weapon = target.Weapon;
+            if (weapon != null && weapon.Card.Id == "LOE_118" && weapon.Durability > 0 && weapon[GameTag.SILENCED] == 0)
+                damage = (int)Math.Min(int.MaxValue, 2L * damage);
+            foreach (var minion in target.Controller.BoardZone.OfType<Minion>())
+                if (minion.Card.Id == "LOE_119" && Active(minion) && minion.Zone?.Type == Zone.PLAY) return Math.Min(damage, 1);
+            return damage;
+        }
+
         internal static bool ReplaceDamage(Hero target, int damage)
         {
             var weapon = target?.Weapon;

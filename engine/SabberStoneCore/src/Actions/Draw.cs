@@ -109,8 +109,10 @@ namespace SabberStoneCore.Actions
                     // NativeMatch's ShowInHistory) that this is a card drawn and cast, so it gets a history tile.
                     game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, playable.Id, "", 0, 0,
                         effectIndex: 0, triggerKeyword: (int)GameTag.TOPDECK));
-                // Illusion retains its actual hand residence when its summon cannot fit.
-                if (playable.Card.Id != "EDR_260t" || !controller.BoardZone.IsFull)
+                // Illusion retains its actual hand residence when its summon cannot fit. A "When you draw this" minion (Sea Reaver,
+                // Flame Leviathan: no Summoned When Drawn tag 3128) fires its effect from the hand and stays there; spells are cast.
+                bool staysInHand = playable is Minion && playable.Card[(GameTag)3128] == 0;
+                if (!staysInHand && (playable.Card.Id != "EDR_260t" || !controller.BoardZone.IsFull))
                     controller.SetasideZone.Add(controller.HandZone.Remove(playable));
                 game.Log(LogLevel.INFO, BlockType.TRIGGER, "TOPDECK",
                     !game.Logging ? "" : $"{playable}'s TOPDECK effect is activated.");

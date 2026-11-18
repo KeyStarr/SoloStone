@@ -132,16 +132,20 @@ namespace SabberStoneCore.Model
                 Standard.Add((CardClass)Enum.Parse(typeof(CardClass), name.Substring("Standard/Class/".Length)), LegacyGenerationV1.Get(name));
             foreach (string name in LegacyGenerationV1.Names.Where(n => n.StartsWith("Wild/Class/", StringComparison.Ordinal)))
                 Wild.Add((CardClass)Enum.Parse(typeof(CardClass), name.Substring("Wild/Class/".Length)), LegacyGenerationV1.Get(name));
-            StandardCostMinionCards = LegacyGenerationV1.Names.Where(n => n.StartsWith("Standard/Cost/", StringComparison.Ordinal))
-                .ToDictionary(n => int.Parse(n.Substring("Standard/Cost/".Length), System.Globalization.CultureInfo.InvariantCulture), n => LegacyGenerationV1.Get(n).ToList());
-            WildCostMinionCards = LegacyGenerationV1.Names.Where(n => n.StartsWith("Wild/Cost/", StringComparison.Ordinal))
-                .ToDictionary(n => int.Parse(n.Substring("Wild/Cost/".Length), System.Globalization.CultureInfo.InvariantCulture), n => LegacyGenerationV1.Get(n).ToList());
+            // #141 replaces these pools with a format-aware accessor; until then the frozen cost buckets keep their membership and
+            // are regrouped by each card's CURRENT cost when a Wild identity row changed it (Mechwarper 2 -> 4), so a random-by-cost
+            // effect never returns a card of another cost. Original relative order stays; moved cards are appended to their new
+            // bucket in frozen-list order (buckets ascending).
+            StandardCostMinionCards = RegroupByCurrentCost(LegacyGenerationV1.Names.Where(n => n.StartsWith("Standard/Cost/", StringComparison.Ordinal))
+                .ToDictionary(n => int.Parse(n.Substring("Standard/Cost/".Length), System.Globalization.CultureInfo.InvariantCulture), n => LegacyGenerationV1.Get(n).ToList()));
+            WildCostMinionCards = RegroupByCurrentCost(LegacyGenerationV1.Names.Where(n => n.StartsWith("Wild/Cost/", StringComparison.Ordinal))
+                .ToDictionary(n => int.Parse(n.Substring("Wild/Cost/".Length), System.Globalization.CultureInfo.InvariantCulture), n => LegacyGenerationV1.Get(n).ToList()));
 
 			// DH has no V1 frozen entry; its live pools must not expand any legacy nine-class input.
 			var demonHunterCards = All.Where(c => c.Collectible && c.Implemented && c.Type != CardType.HERO &&
 				(c.Class == CardClass.DEMONHUNTER ||
 				 !c.ExcludeFromLegacyRandomPools && c.Class == CardClass.NEUTRAL && c.MultiClassGroup == 0)).ToArray();
-			Standard[CardClass.DEMONHUNTER] = demonHunterCards.Where(c => StandardSets.Contains(c.Set)).ToList().AsReadOnly();
+			Standard[CardClass.DEMONHUNTER] = demonHunterCards.Where(c => StandardSets.Contains(LegacySet(c))).ToList().AsReadOnly();
 			Wild[CardClass.DEMONHUNTER] = demonHunterCards.ToList().AsReadOnly();
 
             // Project Standard registry is normalized to CORE and the six modern sets, including BE.
@@ -155,7 +159,7 @@ namespace SabberStoneCore.Model
                  !c.ExcludeFromLegacyRandomPools && c.MultiClassGroup == 0)).ToArray();
             Standard[CardClass.DEATHKNIGHT] = deathKnightCards.Where(c =>
                 c.Class == CardClass.NEUTRAL && c[GameTag.MULTIPLE_CLASSES] == 0
-                    ? StandardSets.Contains(c.Set) : projectStandard.Contains(c.Id)).ToList().AsReadOnly();
+                    ? StandardSets.Contains(LegacySet(c)) : projectStandard.Contains(c.Id)).ToList().AsReadOnly();
             Wild[CardClass.DEATHKNIGHT] = deathKnightCards.ToList().AsReadOnly();
 
 			// Temporary fix for Lotus Assassin
@@ -167,6 +171,25 @@ namespace SabberStoneCore.Model
 
 			// filtered out cards ... cosmetic purpose
 			Data.Cards.Remove("HERO_01c"); // HERO Deathwing
+		}
+
+		// Only cards whose Cost a Wild identity row changed move (other frozen mismatches are historical quirks the golden games pin).
+		private static Dictionary<int, List<Card>> RegroupByCurrentCost(Dictionary<int, List<Card>> frozen)
+		{
+			var identity = new HashSet<string>(CardFacts.Embedded.Identity.Where(e => e.Id != null).Select(e => e.Id), StringComparer.Ordinal);
+			bool Moves(Card card, int bucket) => card.Cost != bucket && identity.Contains(card.Id);
+			var regrouped = frozen.Keys.ToDictionary(k => k, k => new List<Card>());
+			foreach (int bucket in frozen.Keys.OrderBy(k => k))
+				foreach (Card card in frozen[bucket])
+					if (!Moves(card, bucket)) regrouped[bucket].Add(card);
+			foreach (int bucket in frozen.Keys.OrderBy(k => k))
+				foreach (Card card in frozen[bucket])
+					if (Moves(card, bucket))
+					{
+						if (!regrouped.ContainsKey(card.Cost)) regrouped[card.Cost] = new List<Card>();
+						regrouped[card.Cost].Add(card);
+					}
+			return regrouped;
 		}
 
 		#endregion
@@ -232,7 +255,32 @@ namespace SabberStoneCore.Model
 		/// </summary>
 		public static bool IsFormatLegal(Card card, FormatType formatType) =>
 			card != null && card.Collectible && card.Implemented && !card.Id.StartsWith("HERO", StringComparison.Ordinal) &&
-			(formatType == FormatType.FT_WILD || formatType == FormatType.FT_STANDARD && StandardSets.Contains(card.Set));
+			(formatType == FormatType.FT_WILD || formatType == FormatType.FT_STANDARD && StandardSets.Contains(LegacySet(card)));
+
+		// The legacy StandardSets test (2021 sets) reads a Wild identity row's card by its base row's set, so a 37.0 set change
+		// (Hall of Fame cards back in EXPERT1) neither joins the legacy Standard pools nor changes legacy Standard legality.
+		// Lazy and tolerant: a bad identity row must fail in CardLoader.ApplyIdentity with its InvalidDataException, not here.
+		private static Dictionary<string, CardSet> _legacySets;
+		private static Dictionary<string, CardSet> LegacySets => _legacySets ?? (_legacySets = BaseSets(CardFacts.Embedded));
+
+		// One pass over the base rows: the first base row per identity id (as the loader places it), its CARD_SET.
+		private static Dictionary<string, CardSet> BaseSets(CardFacts.Document facts)
+		{
+			var wanted = new HashSet<string>(facts.Identity.Where(e => e.Id != null).Select(e => e.Id), StringComparer.Ordinal);
+			var firstBase = new Dictionary<string, CardFacts.Entity>(wanted.Count, StringComparer.Ordinal);
+			foreach (CardFacts.Entity entity in facts.Cards)
+				if (wanted.Contains(entity.Id) && !firstBase.ContainsKey(entity.Id)) firstBase.Add(entity.Id, entity);
+			var sets = new Dictionary<string, CardSet>(wanted.Count, StringComparer.Ordinal);
+			foreach (CardFacts.Entity e in facts.Identity)
+			{
+				if (e.Id == null || !firstBase.TryGetValue(e.Id, out CardFacts.Entity row)) continue;
+				foreach (var tag in row.Tags)
+					if (tag.GameTag == GameTag.CARD_SET) { sets[e.Id] = (CardSet)(int)tag.TagValue; break; }
+			}
+			return sets;
+		}
+
+		internal static CardSet LegacySet(Card card) => LegacySets.TryGetValue(card.Id, out CardSet set) ? set : card.Set;
 
 		/// <summary>
 		/// Returns the default hero class card.

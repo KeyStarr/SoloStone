@@ -106,19 +106,19 @@ namespace SabberStoneCore.CardSets
 			// [BRM_010t] Druid of the Flame (*) - COST:3 [ATK:5/HP:2]
 			// - Race: beast, Set: brm, Rarity: common
 			// --------------------------------------------------------
-			cards.Add("BRM_010t", new CardDef());
+			cards.Add("BRM_010t", new CardDef { Configure = card => card.SetPrintedRaces(Race.BEAST, Race.ELEMENTAL) });
 
 			// ----------------------------------------- MINION - DRUID
 			// [BRM_010t2] Druid of the Flame (*) - COST:3 [ATK:2/HP:5]
 			// - Race: beast, Set: brm, Rarity: common
 			// --------------------------------------------------------
-			cards.Add("BRM_010t2", new CardDef());
+			cards.Add("BRM_010t2", new CardDef { Configure = card => card.SetPrintedRaces(Race.BEAST, Race.ELEMENTAL) });
 
 			// ----------------------------------------- MINION - DRUID
 			// [OG_044b] Druid of the Flame (*) - COST:3 [ATK:5/HP:5]
 			// - Race: beast, Set: brm, Rarity: common
 			// --------------------------------------------------------
-			cards.Add("OG_044b", new CardDef());
+			cards.Add("OG_044b", new CardDef { Configure = card => card.SetPrintedRaces(Race.BEAST, Race.ELEMENTAL) });
 
 			// ------------------------------------------ SPELL - DRUID
 			// [BRM_010a] Firecat Form (*) - COST:0
@@ -398,7 +398,7 @@ namespace SabberStoneCore.CardSets
 			cards.Add("BRM_011", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0}}, new Power
 			{
 				PowerTask = ComplexTask.Create(
-					new DamageTask(2, EntityType.TARGET),
+					new DamageTask(2, EntityType.TARGET, true),
 					new SetControllerGameTagTask(GameTag.OVERLOAD_LOCKED, 0),
 					new SetControllerGameTagTask(GameTag.OVERLOAD_OWED, 0))
 			}));
@@ -592,7 +592,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("BRM_027", new CardDef(new Power
 			{
-				PowerTask = new ReplaceHeroTask("BRM_027h", "BRM_027p"),
+				DeathrattleTask = new ReplaceHeroTask("BRM_027h", "BRM_027p", removeSource: false),
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -699,7 +699,7 @@ namespace SabberStoneCore.CardSets
 			{
 				PowerTask = ComplexTask.Create(
 					new ConditionTask(EntityType.SOURCE, SelfCondition.IsDragonInHand),
-					new FlagTask(true, new DamageTask(3, EntityType.TARGET)))
+					new FlagTask(true, new DamageTask(5, EntityType.TARGET)))
 			}));
 
 		}

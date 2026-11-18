@@ -38,6 +38,14 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 			Controller c = _op ? controller.Opponent : controller;
 
+			// Poisoned Blade (AT_034): the owner's Hero Power gives the equipped Blade +1 Attack instead of equipping a weapon.
+			// Only a Hero Power as the source; every other WeaponTask (Battlecry, Deathrattle, spell) is untouched.
+			if (_card != null && source is HeroPower power && power.Controller == c && c.Hero.Weapon?.Card.Id == "AT_034")
+			{
+				Generic.AddEnchantmentBlock(game, Cards.FromId("AT_034e"), (IPlayable) source, c.Hero.Weapon, 0, 0, 0);
+				return TaskState.COMPLETE;
+			}
+
 			Weapon weapon = _card != null
 				? Entity.FromCard(c, _card) as Weapon
 				: stack?.Playables[0] as Weapon;

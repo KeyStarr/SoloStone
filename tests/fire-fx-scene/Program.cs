@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 var root = new GameObject("board"); var spell = root.Add("ReuseFX_Missile_Fire_Fireball_Medium");
-spell.Components["Spell"] = new TestSpell(spell); var particle = spell.Add("FireParticleBall"); particle.Components["ParticleSystem"] = new Component(particle);
+spell.Components["Spell"] = new TestSpell(spell); var particle = spell.Add("FireParticleBall"); particle.Components["ParticleSystem"] = new TestParticle(particle);
 var custom = root.Add("JAILFX_JailhouseManastorm_CustomSummon(Clone)");
 var manastormParticle = custom.Add("DetachRoot").Add("PS_KeyForming"); manastormParticle.Components["ParticleSystem"] = new Component(manastormParticle);
 var immolate = root.Add("Card_Hand_Immolate(Clone)"); immolate.Components["Spell"] = new TestSpell(immolate);
@@ -20,6 +20,12 @@ Check(rows.Cast<JsonNode>().Any(r => (string)r["name"] == "PersistentFlame" && (
 Check(rows.Cast<JsonNode>().Any(r => (string)r["name"] == "PS_KeyForming"), "non-fire Manastorm descendants included");
 var p = rows.Cast<JsonNode>().Single(r => (string)r["name"] == "FireParticleBall");
 Check((string)p["spell"] == spell.name && (string)p["spellState"] == "POWER" && (bool)p["particle"], "particle parent and spell state");
+Check((string)p["particlePlaying"] == "True" && (string)p["particleEmitting"] == "False" && (string)p["particleCount"] == "7"
+    && (string)p["particleLoop"] == "True" && (string)p["particleDuration"] == "2.5", "playing tail records emission, live count, loop and duration in the same spell row");
+var spellRow = rows.Cast<JsonNode>().Single(r => (string)r["name"] == spell.name);
+Check((string)spellRow["particleEmitting"] == "" && (string)spellRow["particleCount"] == "", "non-particle rows retain empty particle fields");
+var unavailable = rows.Cast<JsonNode>().Single(r => (string)r["name"] == "PS_KeyForming");
+Check((string)unavailable["particleEmitting"] == "unavailable" && (string)unavailable["particleDuration"] == "unavailable", "missing Unity properties stay unavailable");
 Check((int)p["spellComponentId"] != (int)p["spellInstance"] && (int)p["spellComponentId"] == spell.Components["Spell"].GetInstanceID(), "spell component ID joins telemetry, game object ID stays separate");
 Check(((string)p["path"]).Contains("board/ReuseFX_Missile"), "ancestry");
 try { FireFxScene.Read(0, 99); throw new Exception("accepted missing root"); } catch (InvalidOperationException) { }
@@ -39,6 +45,11 @@ Check(((JsonList)resumed["objects"]).Count == 10 && (bool)resumed["complete"], "
 Console.WriteLine("PASS paged read-only spell/particle scene inventory");
 static void Check(bool value, string message) { if (!value) throw new Exception(message); }
 class TestSpell : Component { public TestSpell(GameObject go) : base(go) {} public string GetActiveState() => "POWER"; }
+class TestParticle : Component {
+ public TestParticle(GameObject go) : base(go) {} public bool isPlaying => true; public bool isEmitting => false;
+ public int particleCount => 7; public TestParticleMain main => new();
+}
+struct TestParticleMain { public bool loop => true; public float duration => 2.5f; }
 static class NativeTestControl { public static void AssertMainThread() {} }
 namespace MiniJSON { class JsonNode : Dictionary<string, object> {} class JsonList : List<object> {} }
 namespace UnityEngine {

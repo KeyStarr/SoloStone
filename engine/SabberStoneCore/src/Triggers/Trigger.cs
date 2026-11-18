@@ -405,7 +405,8 @@ namespace SabberStoneCore.Triggers
             // Grant metadata is scoped to the event; mirrors must resolve before the recipient is drawn.
             // A waiting Sigil fires as a SIGIL-keyed TRIGGER block and leaves SECRET at its end (Actions/SigilRules).
             ISimpleTask task = SingleTask;
-            int? keyword = null;
+            int? keyword = _triggerType == TriggerType.INSPIRE && _owner.Card[GameTag.INSPIRE] != 0
+                ? (int)GameTag.INSPIRE : null;
             if (Actions.SigilRules.IsActive(_owner))
             {
                 keyword = (int)Actions.SigilRules.Sigil;

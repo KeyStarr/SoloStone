@@ -128,7 +128,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `progression-extended` | The older progression fixtures, in the same program under `--extended`: full premium fixtures and class rewards, the Core schedule reconciliation, Death Knight rules, hero drafts, test loaners and NPC records. Each check runs in this suite or in `progression`, never both |
 | `progression-standard-batches` | The Standard test loaners and batch manifests against the client's card export (about 14,000 checks). `client` tier: it needs `data/carddb/<build>/cards.json.gz` and `set-overrides.json`, built from your client and never committed, and is skipped without them. It needs no client library |
 | `shop` | The native shop: catalogue, purchases, deck tiles and art maths |
-| `native-match-logic` | The native match checks that need no client: the opponent turn runner, presentation and memory, rematch, the quest bot, 36 showcase games, fair-view privacy, coin-flip control, debug scenario lane paths and files, the match event log budget, NPC pet seats and the controller admission invariant. Slices: `--npc-runner-only`, `--npc-presentation-only`, `--rematch-only`, `--quests-only`, `--showcase-only`, `--npc-pets-only`, `--coin-flip-only`, `--debug-scenario-only`, `--fair-view-only`, `--match-event-log-only`, `--controller-admission-only`; any other argument fails |
+| `native-match-logic` | The native match checks that need no client: the opponent turn runner, presentation and memory, rematch, the quest bot, 36 showcase games, fair-view privacy, coin-flip control, debug scenario lane paths and files, the match event log budget, NPC pet seats and the controller admission invariant. Slices: `--npc-runner-only`, `--npc-presentation-only`, `--rematch-only`, `--quests-only`, `--showcase-only`, `--npc-pets-only`, `--coin-flip-only`, `--debug-scenario-only`, `--fair-view-only`, `--match-event-log-only`, `--controller-admission-only`, `--hero-replace-history-only`, `--wild-fx-history-only` (Inspire/TARGET history and hero power registration); any other argument fails |
 | `native-bindings-logic` | Plugin logic that needs no client: the crafting, matchmaking, rank, home, strings and status-routine hooks (built from extracts of the plugin sources), and the plugin source-text pins (achievement toast, reward UI and format lock code must contain, or must not contain, given text) |
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
@@ -169,6 +169,15 @@ client is in the `ci` tier. The other half is a `client` suite of its own, run w
 
 `engine-proof-client` requires the export (it fails, never skips, a comparison). The identity comparisons of the whole card corpus run in
 `engine-proof`, so a maintainer run needs `engine-proof` with the export present as well as `engine-proof-client`.
+
+`EngineProof --wild-sets-only` runs all `[GroupProof(..., ProofKind.WildCards)]` groups; the full run includes them too.
+A group also runs through its derived flag, for example `--wild-y0a-pilot-cards-only`.
+`--standard-sets-only` retains its existing scope. Wild cases use `WildSetsProof.Case(id, scenario)`:
+legacy script registration, exclusion from the active Standard meta, Wild legality, pinned export comparisons when
+available, three seeded Wild games, exact clone and snapshot checks. Each case reports Standard reprints sharing its behaviour.
+Wild manifests live in `tests/progression/batches/wild/<wave>-<group>.txt`, one collectible ID per line.
+The `progression` suite checks exact equality with literal Wild cases, rejects duplicates/overlaps and Standard IDs;
+the Standard manifest loader ignores this subfolder.
 
 The card export (`data/carddb/37.0.0.254477/cards.json.gz`) is optional for `engine-proof`: with it, each card is also
 compared with the export, exactly as before; without it, the run prints one `SKIP ...` line for each kind of

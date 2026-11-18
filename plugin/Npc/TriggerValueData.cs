@@ -3,8 +3,11 @@ internal static class TriggerValueData
 {
     internal const string HeroPowerAttack = "AT_132_DRUID AT_132_ROGUE CATA_190p CS2_017 CS2_083b HERO_10bp HERO_10bp2";
     internal const string Rows = @"
+AT_014|OwnDraw|Priced|1|0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0
 AT_026|SelfDamage|Priced|1|0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0
+AT_027|OwnDraw|NoEffect|0|
 AT_031|SelfAttack|Partial|0.333|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+AT_121|OwnCard|NoEffect|0|
 BE_008|OwnCard|Priced|0.5|0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0
 BE_255|OwnMinion|Priced|1|0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 BE_701|OwnMinion|Priced|1|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -94,7 +97,9 @@ GIL_640|OwnDraw|Priced|1|0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 GIL_664|OwnSpell|Priced|1|1,2,2.5,2,0,0,0,0,0,0,0.016,0.047,-0.016,0,0,0,0,0,0,0
 GIL_691|OwnDraw|Priced|1|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
 GIL_807|OwnSpell|Priced|1|0,0,0,0,0,0,1,0,0,0,0.016,0.047,-0.016,0,0,0,0,0,0,0
+GVG_025|OwnMinion|NoEffect|0|
 GVG_034|SelfDamage|Priced|1|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
+GVG_049|SelfDamage|Priced|1|0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 GVG_062|OwnMinion|Partial|0.111|0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 GVG_075|OwnMinion|Partial|0.111|0,0,0,0,0,0,0,0,0,-0.25,-0.375,-1.125,-1.75,0,0,0,0,0,0,0
 GVG_104|OwnMinion|Partial|0.222|0,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
@@ -121,6 +126,8 @@ KAR_021|OwnSpell|Priced|1|1,0.375,1.625,1,0.25,0,0,0,0,-0.313,0.016,0.047,-0.109
 KAR_035|OwnSpell|Priced|1|0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0
 KAR_036|OwnSpell|Priced|1|0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 LOE_016|OwnMinion|Partial|0.111|0,0,0,0,0,0,0,0,0,-0.25,-0.375,-1.125,-1.75,0,0,0,0,0,0,0
+LOE_018|OwnCard|NoEffect|0|
+LOE_053|OwnSpell|NoEffect|0|
 LOE_086|OwnSpell|Priced|1|1,1.531,1.969,1.5,0.125,0.047,0,0,0,0,0.016,0.047,-0.016,0,0,0,0,0,0,0
 LOOT_078|SelfAttack|Priced|0.667|0,0,0,0,0,0,0,0,0,0,-0.5,-1.5,-2,0,0,0,0,0,0,0
 LOOT_218|SelfAttack|Partial|0.333|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0

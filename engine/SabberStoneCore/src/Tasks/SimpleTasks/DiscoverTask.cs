@@ -298,10 +298,17 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.BASIC_HEROPOWERS:
 				{
 					choiceAction = ChoiceAction.HEROPOWER;
+					// One basic Hero Power per class, taken from the class's base hero (never a skin's variant), and not
+					// the class of the Hero Power I hold now.
+					CardClass heldClass = controller.Hero.HeroPower?.Card.Class ?? controller.Hero.Card.Class;
 					Card[][] cardSets =
 					{
-						Cards.HeroCards().Where(p => !p.ExcludeFromLegacyRandomPools && p != controller.Hero.Card)
-							.Select(p => Cards.FromAssetId(p[GameTag.HERO_POWER])).ToArray()
+						// Retail also offers the Demon Hunter (Demon Claws) and Death Knight (Ghoul Charge) basic powers
+						// (hearthstone.wiki.gg, Sir Finley Mrrgglton: patches 17.0 and 25.0 made them Discoverable); appended after the nine.
+						Cards.HeroCards().Where(p => !p.ExcludeFromLegacyRandomPools && p.Class != CardClass.NEUTRAL && p.Class != CardClass.INVALID)
+							.GroupBy(p => p.Class).Select(group => group.OrderBy(p => p.Id, StringComparer.Ordinal).First())
+							.Concat(new[] { Cards.FromId("HERO_10"), Cards.FromId("HERO_11") }.Where(h => h != null))
+							.Select(p => Cards.FromAssetId(p[GameTag.HERO_POWER])).Where(power => power.Class != heldClass).ToArray()
 					};
 					return cardSets;
 				}

@@ -40,6 +40,8 @@ internal static partial class Program
             ["--fair-view-only"] = FairViewChecks,
             ["--match-event-log-only"] = MatchEventLogChecks,
             ["--controller-admission-only"] = ControllerAdmissionControls,
+            ["--hero-replace-history-only"] = HeroReplaceHistoryProof.Run,
+            ["--wild-fx-history-only"] = WildFxHistoryProof.Run,
         };
         var unknown = args.Where(arg => !slices.ContainsKey(arg)).ToArray();
         if (unknown.Length != 0) throw new ArgumentException("Unknown argument: " + string.Join(" ", unknown));
@@ -52,9 +54,11 @@ internal static partial class Program
     {
         DebugScenarioLanePaths();
         AcceptsHeroCardScenario();
+        DebugScenarioHumanHeroPower();
+        DebugScenarioWeaponAndGraveyard();
         DebugScenarioFile();
         DebugScenarioNeverSettles();
-        Console.WriteLine("PASS debug scenario lane paths, hero card scenario, scenario file and never-settles");
+        Console.WriteLine("PASS debug scenario lane paths, hero card scenario, humanHeroPower, weapon/graveyard keys, scenario file and never-settles");
     }
 
     private static void FairViewChecks()

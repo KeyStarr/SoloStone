@@ -73,8 +73,13 @@ namespace SabberStoneCore.Actions
                 }
 
 				game.TaskQueue.StartEvent();
-				heroPower.ActivateTask(PowerActivation.POWER, target, chooseOne);
-				game.ProcessTasks();
+				RepeatRules.BeginHeroPowerEffect(c);
+				try
+				{
+					heroPower.ActivateTask(PowerActivation.POWER, target, chooseOne);
+					game.ProcessTasks();
+				}
+				finally { RepeatRules.EndHeroPowerEffect(c); }
 				game.TaskQueue.EndEvent();
 
 				game.DeathProcessingAndAuraUpdate();

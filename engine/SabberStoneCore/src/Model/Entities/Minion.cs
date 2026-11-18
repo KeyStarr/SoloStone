@@ -159,6 +159,7 @@ namespace SabberStoneCore.Model.Entities
 			HasCharge = false;
             IsRush = false;
             CantAttackHeroes = false;
+            if (Card.CantAttack && CantAttack) CantAttack = false; // the card's own printed "Can't attack" is silenceable text; a ban another effect set stays (B16TimersBoundaryProof.Unpinned_Control, SilenceCantAttackProof)
 			HasWindfury = false;
             if (this[GameTag.MEGA_WINDFURY] > 0) this[GameTag.MEGA_WINDFURY] = 0;
             if (this[GameTag.IMMUNE_WHILE_ATTACKING] > 0) this[GameTag.IMMUNE_WHILE_ATTACKING] = 0;
@@ -488,7 +489,8 @@ namespace SabberStoneCore.Model.Entities
 			set { this[GameTag.ENRAGED] = value ? 1 : 0; }
 		}
 
-		public bool Freeze => Card.Freeze && !Actions.PastColossalCombat.SilencedWing(this);
+		// Silence removes the Freeze keyword from any freezing minion (retail), not only the Wings.
+		public bool Freeze => Card.Freeze && !IsSilenced;
 
 		public bool Poisonous
 		{

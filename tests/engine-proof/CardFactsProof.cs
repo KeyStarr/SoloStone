@@ -37,7 +37,8 @@ internal static class CardFactsProof
         }
         TextHashes();
         ReaderRefusesBadInput();
-        Console.WriteLine("PASS card file without a client: embedded file, no XML resource, text hashes, reader refusals");
+        Identity(facts);
+        Console.WriteLine($"PASS card file without a client: embedded file, no XML resource, text hashes, reader refusals, {facts.Identity.Length} Wild identity rows");
     }
 
     /// <summary>The comparison with the client's XML files (client tier): the card file must load to exactly what they load to.</summary>
@@ -47,8 +48,9 @@ internal static class CardFactsProof
         var xmlOverlay = ClientOverlay.Read(File.OpenRead(DataPath + "ClientOverlay.xml"));
         var facts = CardFacts.Read(File.OpenRead(FilePath), CardFacts.Meta);
 
-        var expected = ClientOverlay.AddTo(CardLoader.LoadDefinitions(xmlBase), xmlOverlay);
-        var actual = ClientOverlay.AddTo(facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray(), facts.Overlay);
+        // The Wild identity rows come from the client export, not the XMLs (checked by Identity and the Wild proofs): both sides apply them.
+        var expected = ClientOverlay.AddTo(CardLoader.ApplyIdentity(CardLoader.LoadDefinitions(xmlBase), facts.Identity), xmlOverlay);
+        var actual = ClientOverlay.AddTo(CardLoader.ApplyIdentity(facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray(), facts.Identity), facts.Overlay);
         Check(expected.Length == 8333 + 2381 && actual.Length == expected.Length, "card count " + actual.Length);
         var differences = new List<string>();
         for (int i = 0; i < expected.Length; i++) Compare(expected[i], actual[i], differences);
@@ -123,8 +125,14 @@ internal static class CardFactsProof
         using var document = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(FilePath));
         var root = document.RootElement;
         Check(root.GetProperty("meta").GetString() == CardFacts.Meta, "file meta label");
-        int hashed = 0;
-        foreach (var row in root.GetProperty("cards").EnumerateArray().Concat(root.GetProperty("overlay").GetProperty("cards").EnumerateArray()))
+        int hashed = 0, identity = 0;
+        var rows = root.GetProperty("cards").EnumerateArray().Concat(root.GetProperty("overlay").GetProperty("cards").EnumerateArray());
+        if (root.TryGetProperty("identity", out var identityRows))
+        {
+            identity = identityRows.GetArrayLength();
+            rows = rows.Concat(identityRows.EnumerateArray());
+        }
+        foreach (var row in rows)
         {
             bool hasText = row.TryGetProperty("text", out var text), hasHash = row.TryGetProperty("textHash", out var hash);
             Check(hasText == hasHash, "text hash presence: " + row.GetProperty("id").GetString());
@@ -133,7 +141,121 @@ internal static class CardFactsProof
             Check(hash.GetString() == actual, "text hash: " + row.GetProperty("id").GetString());
             hashed++;
         }
-        Check(hashed == 6914 + 2389, "text hash count " + hashed);
+        Check(hashed == 6914 + 2389 + identity, "text hash count " + hashed);
+    }
+
+    // Wild identity rows: exactly the Wild manifests' ids, each the base card's id and dbf, loaded in the base card's place with
+    // the overlay rules; every other card loads from its base row. The loader refuses a row it cannot place.
+    // Tags the client stores as a flag (1) and the engine reads as the amount (tools/gen_card_facts.py AMOUNT_TAGS).
+    internal static readonly SabberStoneCore.Enums.GameTag[] AmountTags = { SabberStoneCore.Enums.GameTag.SPELLPOWER, SabberStoneCore.Enums.GameTag.OVERLOAD };
+
+    internal static int? TextAmount(SabberStoneCore.Enums.GameTag tag, string text)
+    {
+        string plain = System.Text.RegularExpressions.Regex.Replace(text ?? "", "<[^>]*>", "");
+        var found = System.Text.RegularExpressions.Regex.Match(plain, tag == SabberStoneCore.Enums.GameTag.SPELLPOWER
+            ? @"Spell Damage \+(\d+)" : @"Overload:?\s*\((\d+)\)");
+        return found.Success ? int.Parse(found.Groups[1].Value) : (int?)null;
+    }
+
+    // An identity card with an amount tag plays the amount its text states (Spell Damage +5 is 5, not the client's flag 1).
+    private static int CheckAmounts(IEnumerable<(CardFacts.Entity Row, Card Card)> cards)
+    {
+        int checkedTags = 0;
+        foreach (var (row, card) in cards)
+            foreach (var tag in AmountTags)
+            {
+                if (!card.Tags.ContainsKey(tag)) continue;
+                string text = (string)row.Tags.First(t => t.GameTag == SabberStoneCore.Enums.GameTag.CARDTEXT).TagValue;
+                Check(card.Tags[tag] == TextAmount(tag, text), "identity amount " + tag + " of " + row.Id + ": " + card.Tags[tag]);
+                Check(tag != SabberStoneCore.Enums.GameTag.SPELLPOWER || card.SpellPower == card.Tags[tag], "identity SpellPower of " + row.Id);
+                Check(tag != SabberStoneCore.Enums.GameTag.OVERLOAD || card.Overload == card.Tags[tag], "identity Overload of " + row.Id);
+                checkedTags++;
+            }
+        return checkedTags;
+    }
+
+    /// <summary>A scratch card file's identity rows (e.g. a temporary manifest entry): applied to its base rows, amounts checked.</summary>
+    internal static void IdentityFile(string path)
+    {
+        var facts = CardFacts.Read(File.OpenRead(path), CardFacts.Meta);
+        var built = facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray();
+        var applied = CardLoader.ApplyIdentity(built, facts.Identity);
+        var at = built.Select((c, i) => (c.Id, i)).GroupBy(p => p.Id).ToDictionary(g => g.Key, g => g.First().i);
+        int amounts = CheckAmounts(facts.Identity.Select(row => (row, applied[at[row.Id]])));
+        if (at.TryGetValue("EX1_563", out int malygos) && facts.Identity.Any(row => row.Id == "EX1_563"))
+            Check(applied[malygos].SpellPower == 5 && applied[malygos][SabberStoneCore.Enums.GameTag.SPELLPOWER] == 5, "EX1_563 identity keeps Spell Damage +5");
+        Console.WriteLine($"PASS identity file {path}: {facts.Identity.Length} rows, {amounts} amount tags"
+            + (facts.Identity.Any(row => row.Id == "EX1_563") ? "; EX1_563 SpellPower=" + applied[malygos].SpellPower : ""));
+    }
+
+    private static void Identity(CardFacts.Document facts)
+    {
+        var listed = Directory.GetFiles("tests/progression/batches/wild", "*.txt").OrderBy(p => p, StringComparer.Ordinal)
+            .SelectMany(p => File.ReadAllText(p).TrimEnd('\r', '\n').Split('\n')).Select(l => l.TrimEnd('\r')).ToArray();
+        Check(facts.Identity.Select(e => e.Id).OrderBy(i => i, StringComparer.Ordinal)
+            .SequenceEqual(listed.OrderBy(i => i, StringComparer.Ordinal)), "identity rows are the Wild manifests' ids");
+        var order = facts.Cards.Select((e, i) => (e.Id, i)).GroupBy(p => p.Id).ToDictionary(g => g.Key, g => g.First().i);
+        Check(facts.Identity.Select(e => order[e.Id]).SequenceEqual(facts.Identity.Select(e => order[e.Id]).OrderBy(i => i)), "identity rows in base order");
+        var built = facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray();
+        var applied = CardLoader.ApplyIdentity(built, facts.Identity);
+        var rowOf = facts.Identity.ToDictionary(e => e.Id);
+        var differences = new List<string>();
+        for (int i = 0; i < built.Length; i++)
+        {
+            if (rowOf.TryGetValue(built[i].Id, out var row))
+            {
+                Check(built[i].AssetId == row.AssetId, "identity keeps dbf " + row.Id);
+                Compare(CardLoader.Build(row, true), applied[i], differences);
+                // The engine's card list carries the identity too (Cards adds scripts, not definitions).
+                var engine = Cards.FromId(row.Id);
+                // The Cleave rule (Lake Thresher, Magnataur Alpha, Foe Reaper 4000) is a script-owned engine tag, not part of the client row.
+                Check(engine.Tags.Where(t => t.Key != SabberStoneCore.Actions.CombatRules.Cleave).OrderBy(t => (int)t.Key)
+                    .SequenceEqual(applied[i].Tags.Where(t => t.Key != SabberStoneCore.Actions.CombatRules.Cleave).OrderBy(t => (int)t.Key)) && engine.Text == applied[i].Text
+                    && engine.Races.SequenceEqual(applied[i].Races), "the engine loads the identity of " + row.Id);
+            }
+            else if (!ReferenceEquals(built[i], applied[i])) differences.Add(built[i].Id + " replaced without an identity row");
+        }
+        CheckEmpty(differences, "identity rows");
+        CheckAmounts(facts.Identity.Select(row => (row, Cards.FromId(row.Id))));
+        Check(TextAmount(SabberStoneCore.Enums.GameTag.SPELLPOWER, "<b>Spell Damage +5</b>") == 5
+            && TextAmount(SabberStoneCore.Enums.GameTag.OVERLOAD, "<b><b>Overload</b>:</b> (3)") == 3
+            && TextAmount(SabberStoneCore.Enums.GameTag.OVERLOAD, "Draw a card.") == null, "amount text parsing");
+        // Legacy Standard pools and legality (2021 StandardSets) read an identity card by its base row's set.
+        var baseById = facts.Cards.GroupBy(e => e.Id).ToDictionary(g => g.Key, g => g.First());
+        foreach (var row in facts.Identity)
+        {
+            var baseSet = (SabberStoneCore.Enums.CardSet)(int)baseById[row.Id].Tags.First(t => t.GameTag == SabberStoneCore.Enums.GameTag.CARD_SET).TagValue;
+            var card = Cards.FromId(row.Id);
+            bool legacyStandard = Cards.StandardSets.Contains(baseSet);
+            Check(Cards.LegacySet(card) == baseSet, "legacy set of " + row.Id);
+            foreach (var cls in new[] { SabberStoneCore.Enums.CardClass.DEMONHUNTER, SabberStoneCore.Enums.CardClass.DEATHKNIGHT })
+                Check(!Cards.Standard[cls].Contains(card) || legacyStandard, "identity card joins the legacy Standard pool of " + cls + ": " + row.Id);
+            Check(Cards.IsFormatLegal(card, SabberStoneCore.Enums.FormatType.FT_STANDARD) == (legacyStandard && card.Collectible && card.Implemented),
+                "legacy Standard legality of " + row.Id);
+        }
+        if (facts.Identity.Length == 0) return;
+        var sample = facts.Identity[0];
+        void Refused(string what, CardFacts.Entity entity)
+        {
+            bool refused = false;
+            try { CardLoader.ApplyIdentity(built, new[] { entity }); }
+            catch (InvalidDataException) { refused = true; }
+            Check(refused, "identity refuses " + what);
+        }
+        Refused("an unknown id", new CardFacts.Entity { Id = sample.Id + "x", AssetId = sample.AssetId, Tags = sample.Tags });
+        Refused("another dbf", new CardFacts.Entity { Id = sample.Id, AssetId = sample.AssetId + 1, Tags = sample.Tags });
+        Refused("a row without set", new CardFacts.Entity { Id = sample.Id, AssetId = sample.AssetId,
+            Tags = sample.Tags.Where(t => t.GameTag != SabberStoneCore.Enums.GameTag.CARD_SET).ToArray() });
+        Tag[] Replaced(SabberStoneCore.Enums.GameTag tag, int value) =>
+            sample.Tags.Select(t => t.GameTag == tag ? new Tag(tag, value) : t).ToArray();
+        int type = (int)sample.Tags.First(t => t.GameTag == SabberStoneCore.Enums.GameTag.CARDTYPE).TagValue;
+        Refused("a card type change", new CardFacts.Entity { Id = sample.Id, AssetId = sample.AssetId,
+            Tags = Replaced(SabberStoneCore.Enums.GameTag.CARDTYPE, type == 4 ? 7 : 4) });
+        Refused("a non-collectible row", new CardFacts.Entity { Id = sample.Id, AssetId = sample.AssetId,
+            Tags = Replaced(SabberStoneCore.Enums.GameTag.COLLECTIBLE, 0) });
+        bool duplicate = false;
+        try { CardLoader.ApplyIdentity(built, new[] { sample, sample }); } catch (InvalidDataException) { duplicate = true; }
+        Check(duplicate, "identity refuses a duplicate row");
     }
 
     // Guard against a comparison that cannot fail: each mutation must be seen.
@@ -213,6 +335,11 @@ internal static class CardFactsProof
         Refused("unterminated string", "{\"meta\":\"m");
         Refused("schema version", File("").Replace("\"schemaVersion\":1,\"meta\"", "\"schemaVersion\":2,\"meta\""));
         Refused("overlay row without text", File("").Replace("\"cards\":[]}", "\"cards\":[{\"id\":\"A\",\"dbf\":1,\"name\":\"n\",\"tags\":[]}]}"));
+        string WithIdentity(string row) => File("").Substring(0, File("").Length - 1) + ",\"identity\":[" + row + "]}";
+        Check(Parse(WithIdentity("{\"id\":\"A\",\"dbf\":1,\"name\":\"n\",\"text\":\"t\",\"tags\":[[1,2]]}")).Identity.Single().Tags.Length == 3, "identity rows read");
+        Check(Parse(File("")).Identity.Length == 0, "a file without identity rows has none");
+        Refused("identity row without text", WithIdentity("{\"id\":\"A\",\"dbf\":1,\"name\":\"n\",\"tags\":[]}"));
+        Refused("overlay field on an identity row", WithIdentity("{\"id\":\"A\",\"dbf\":1,\"name\":\"n\",\"text\":\"t\",\"tags\":[],\"originalId\":\"B\"}"));
     }
 
     private static void CheckEmpty(List<string> differences, string what)

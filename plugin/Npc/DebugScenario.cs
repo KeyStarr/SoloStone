@@ -20,6 +20,16 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 //       Attack (0..999) and Health (1..999, max health too); locations are unaffected. Capture-only, needs the board key.
 //       The value REPLACES the base stat (set, not added): auras on that side add on top, and base-stat changes applied during the
 //       summon are overwritten.)
+//   humanHeroDamage=N   (1..29: after the board and hand are placed, the human hero takes N damage: a real wound, Health = max - N, max
+//       unchanged. Excludes heroAttack=npc with attackLethal=1 (that wounds the same hero). Human side only; capture/live-check staging for heal cards.)
+//   humanBoardDamage=N   (1..999: every minion humanBoard summoned takes N damage but keeps at least 1 Health, so none dies; locations
+//       are unaffected. Needs humanBoard; applied after humanBoardStats, so the clamp uses the staged Health.)
+//   humanHeroPower=CARDID   (a constructed HERO_POWER card (not Battlegrounds, Mercenaries, Tavern Brawl, tutorial or mission ones): after the boards are placed the human hero's hero power is replaced by it, through the
+//       engine's ReplaceHeroPower task, the path heroPowerUpgrade and hero cards use, so the native client sees an ordinary hero power
+//       swap. Human side only; capture/live-check staging for hero-power effects. Give mana with humanMana/humanManaRaw.)
+//   humanWeapon=CARDID   (a non-Battlegrounds WEAPON with a native client definition; equipped through WeaponTask)
+//   humanWeaponDurability=N   (1..9 durability left via DAMAGE; needs humanWeapon)
+//   humanGraveyard=ID,...   (up to seven friendly minions already dead this game, without firing Deathrattles)
 //   npcSummonStats=CARDID,ATK,HEALTH   (for the rest of this match every minion with that card id the NPC side summons gets those
 //       base stats, Attack 0..9999 and Health 1..9999: a game-local AfterSummon handler, never a card definition. Capture-only.)
 //   humanHandMods=CARDID,COST,ATK,HEALTH,PREMIUM,...   (groups of five; '-' = unchanged, spells use -,- for attack and health.
@@ -59,7 +69,7 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "humanHeroDamage", "humanBoardDamage", "humanHeroPower", "humanWeapon", "humanWeaponDurability", "humanGraveyard", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
@@ -73,6 +83,10 @@ public sealed class DebugScenario
     public string HeroAttack { get; private set; }
     public string HeroPower { get; private set; }
     public string HeroPowerUpgrade { get; private set; }
+    public string HumanHeroPower { get; private set; }   // null = not staged
+    public string HumanWeapon { get; private set; }
+    public int HumanWeaponDurability { get; private set; }   // 0 = printed durability
+    public IReadOnlyList<string> HumanGraveyard { get; private set; } = new string[0];
     public string AttackSecret { get; private set; }
     public string AttackWeapon { get; private set; }
     public int AttackArmor { get; private set; }
@@ -131,6 +145,9 @@ public sealed class DebugScenario
     public IDictionary<int, int> StagedPremiums { get; } = new Dictionary<int, int>();
     public BoardStats NpcBoardStats { get; private set; }
     public BoardStats HumanBoardStats { get; private set; }
+    public const int MaxHeroDamage = 29, MaxBoardDamage = 999;
+    public int HumanHeroDamage { get; private set; }    // 0 = not staged
+    public int HumanBoardDamage { get; private set; }   // 0 = not staged
     public int? NpcMana { get; private set; }
     public int? HumanMana { get; private set; }
     public int? FirstPlayer { get; private set; }
@@ -178,7 +195,22 @@ public sealed class DebugScenario
         var handHealthWing = HandHealth(values, "humanHandHealthWing", humanHand);
         if (handHealth.Intersect(handHealthWing).Any())
             throw new ArgumentException("humanHandHealth and humanHandHealthWing list the same card: give each card one Health cost.");
+        int heroDamage = WoundNumber(values, "humanHeroDamage", MaxHeroDamage);
+        if (heroDamage > 0 && Number(values, "attackLethal", 0, 1) == 1 && values.TryGetValue("heroAttack", out string attacker) && attacker == "npc")
+            throw new ArgumentException("humanHeroDamage and heroAttack=npc with attackLethal=1 both set the human hero's damage; give only one.");
+        int boardDamage = 0;
+        if (values.TryGetValue("humanBoardDamage", out string boardDamageText))
+        {
+            if (!values.ContainsKey("humanBoard")) throw new ArgumentException("humanBoardDamage needs humanBoard (it wounds the minions that key summons).");
+            boardDamage = WoundNumber(values, "humanBoardDamage", MaxBoardDamage);
+        }
+        int weaponDurability = WoundNumber(values, "humanWeaponDurability", 9);
+        if (weaponDurability > 0 && !values.ContainsKey("humanWeapon"))
+            throw new ArgumentException("humanWeaponDurability needs humanWeapon.");
         return new DebugScenario {
+            HumanHeroDamage = heroDamage, HumanBoardDamage = boardDamage, HumanHeroPower = HeroPowerCard(values, "humanHeroPower", known),
+            HumanWeapon = WeaponCard(values, known), HumanWeaponDurability = weaponDurability,
+            HumanGraveyard = Cards(values, "humanGraveyard", MaxBoard, known),
             BoundRunId = boundRun, FirstPlayer = Seat(values),
             Overdraw = Choice(values, "overdraw", "human", "npc", "human-godfrey", "npc-godfrey"),
             HumanSkin = Skin(values, "humanSkin", known), NpcSkin = Skin(values, "npcSkin", known),
@@ -199,6 +231,46 @@ public sealed class DebugScenario
             NpcBoardStats = Stats(values, "npcBoardStats", "npcBoard"), HumanBoardStats = Stats(values, "humanBoardStats", "humanBoard"),
             NpcSummonStats = SummonRule(values, "npcSummonStats", known),
             NpcMana = Mana(values, "npcMana"), HumanMana = Mana(values, "humanMana") };
+    }
+
+    // A HERO_POWER card id from the card db (hero cards and base heroes are not hero powers).
+    private static string HeroPowerCard(Dictionary<string, string> values, string key, Func<string, bool> known)
+    {
+        if (!values.TryGetValue(key, out string id)) return null;
+        if (id.Length == 0 || id.Length > 64 || id.Any(c => !(char.IsLetterOrDigit(c) || c == '_' || c == '-')))
+            throw new ArgumentException(key + " has an invalid card id: '" + id + "'");
+        SabberStoneCore.Model.Card card;
+        try { card = EngineCards.FromId(id); }
+        catch (KeyNotFoundException) { card = null; }
+        if (card == null) throw new ArgumentException(key + ": unknown card id " + id);
+        if (card.Type.ToString() != "HERO_POWER") throw new ArgumentException(key + ": " + id + " is a " + card.Type + ", not a hero power.");
+        // Numeric set ids from the card db export (the engine's CardSet enum lacks Tutorial and Mercenaries): MISSIONS 5, TB 18,
+        // MERCENARIES (LETTUCE) 1586, BATTLEGROUNDS 1453, TUTORIAL 1904. The export has no Mercenaries hero power; the id stays for builds that do.
+        int set = (int)card.Set;
+        if (set == 5 || set == 18 || set == 1453 || set == 1586 || set == 1904)
+            throw new ArgumentException(key + ": " + id + " is a hero power of set " + set + " (Battlegrounds, Mercenaries, Tavern Brawl, tutorial or mission), not a constructed one.");
+        if (!card.Implemented) throw new ArgumentException(key + ": " + id + " has no engine behaviour registration.");
+        if (known != null && !known(id)) throw new ArgumentException(key + ": " + id + " has no native client definition.");
+        return id;
+    }
+
+    private static string WeaponCard(Dictionary<string, string> values, Func<string, bool> known)
+    {
+        const string key = "humanWeapon";
+        var ids = Cards(values, key, 1, known);
+        if (ids.Count == 0) return null;
+        string id = ids[0];
+        var card = EngineCards.FromId(id);
+        if (card.Type.ToString() != "WEAPON") throw new ArgumentException(key + ": " + id + " is a " + card.Type + ", not a weapon.");
+        if ((int)card.Set == 1453) throw new ArgumentException(key + ": " + id + " is a Battlegrounds weapon (set 1453), not a constructed one.");
+        return id;
+    }
+
+    // A whole number 1..max written without leading zeros (absent = 0).
+    private static int WoundNumber(Dictionary<string, string> values, string key, int max)
+    {
+        if (values.TryGetValue(key, out string text) && text.StartsWith("0", StringComparison.Ordinal)) throw new ArgumentException(key + ": out of range");
+        return Number(values, key, 1, max);
     }
 
     // ATTACK,HEALTH for the minions a board key summons. Digits only, so no sign, space-inside, decimal or exponent forms.
@@ -355,6 +427,8 @@ public sealed class DebugScenario
                 throw new ArgumentException(key + ": " + id + " is a " + type + ", not a playable card.");
             if (key.EndsWith("Board", StringComparison.Ordinal) && type != "MINION" && type != "LOCATION")
                 throw new ArgumentException(key + ": " + id + " is not a board minion or location.");
+            if (key == "humanGraveyard" && type != "MINION")
+                throw new ArgumentException(key + ": " + id + " is not a minion.");
             if (known != null && !known(id)) throw new ArgumentException(key + ": " + id + " has no native client definition.");
         }
         return ids;
@@ -377,6 +451,12 @@ public sealed class DebugScenario
         Add("npcBoard", NpcBoard); Add("humanBoard", HumanBoard);
         if (NpcBoardStats != null) lines.Add("npcBoardStats=" + NpcBoardStats);
         if (HumanBoardStats != null) lines.Add("humanBoardStats=" + HumanBoardStats);
+        if (HumanBoardDamage > 0) lines.Add("humanBoardDamage=" + HumanBoardDamage.ToString(CultureInfo.InvariantCulture));
+        if (HumanHeroDamage > 0) lines.Add("humanHeroDamage=" + HumanHeroDamage.ToString(CultureInfo.InvariantCulture));
+        if (HumanHeroPower != null) lines.Add("humanHeroPower=" + HumanHeroPower);
+        if (HumanWeapon != null) lines.Add("humanWeapon=" + HumanWeapon);
+        if (HumanWeaponDurability > 0) lines.Add("humanWeaponDurability=" + HumanWeaponDurability.ToString(CultureInfo.InvariantCulture));
+        Add("humanGraveyard", HumanGraveyard);
         if (NpcSummonStats != null) lines.Add("npcSummonStats=" + NpcSummonStats);
         if (HumanHandMods.Count > 0) lines.Add("humanHandMods=" + string.Join(",", HumanHandMods));
         Add("humanHandHealth", HumanHandHealth); Add("humanHandHealthWing", HumanHandHealthWing);
@@ -495,7 +575,7 @@ public sealed class DebugScenario
             if (hand > 0 && player.HandZone.FreeSpace < hand + 1) return name + " hand has no room for " + hand + " more cards plus its draw.";
             return null;
         }
-        foreach (string id in NpcDeckTop.Concat(HumanDeckTop).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard))
+        foreach (string id in NpcDeckTop.Concat(HumanDeckTop).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard).Concat(HumanGraveyard).Concat(HumanWeapon == null ? new string[0] : new[] { HumanWeapon }))
             if (EngineCards.FromId(id) == null) return "unknown card " + id;
         if (HumanOpeningHand.Count > game.Player1.HandZone.Count(c => c.Card.Id != "GAME_005") ||
             NpcOpeningHand.Count > game.Player2.HandZone.Count(c => c.Card.Id != "GAME_005")) return "Opening hand has too few replaceable slots.";
@@ -551,6 +631,7 @@ public sealed class DebugScenario
             applied.Add(name + "=" + string.Join(",", ids) + " (deck " + player.DeckZone.Count + ")");
         }
         var humanPlaced = new List<SabberStoneCore.Model.Entities.IPlayable>();
+        var humanBodies = new List<SabberStoneCore.Model.Entities.Minion>();
         void Hand(EngineController player, IReadOnlyList<string> ids, string name)
         {
             if (ids.Count == 0) return;
@@ -572,6 +653,7 @@ public sealed class DebugScenario
                 if (body is SabberStoneCore.Model.Entities.Minion minion)
                 {
                     SabberStoneCore.Actions.Generic.SummonBlock(game, minion, -1, null);
+                    if (player == game.Player1) humanBodies.Add(minion);
                     // Same tag-write path as heroAttack's hero ATK: the Character setters set the printed value and max
                     // health (no damage) and record a TagChange, which the native transport sends in the same history packet
                     // as the summon, before main-begin. In play already, so it is an ordinary public stat change for both seats.
@@ -639,6 +721,18 @@ public sealed class DebugScenario
             applied.Add("overdraw=" + Overdraw);
         }
         Board(game.Player2, NpcBoard, "npcBoard", NpcBoardStats); Board(game.Player1, HumanBoard, "humanBoard", HumanBoardStats);
+        if (HumanBoardDamage > 0)
+        {
+            // After the stats: a real wound (Damage tag; max Health unchanged), clamped so the minion keeps 1 Health.
+            int wounded = 0;
+            foreach (var body in humanBodies)
+            {
+                if (body.Zone != game.Player1.BoardZone) continue;
+                body.Damage = Math.Min(HumanBoardDamage, body.BaseHealth - 1);
+                if (body.Damage > 0) wounded++;
+            }
+            applied.Add("humanBoardDamage=" + HumanBoardDamage + " (" + wounded + " minions wounded, min 1 Health)");
+        }
         if (NpcSummonStats != null)
         {
             // Registered AFTER the staged boards, so it only affects later summons (never re-stats the boards above).
@@ -657,6 +751,44 @@ public sealed class DebugScenario
             applied.Add("npcSummonStats=" + rule);
         }
         Mana(game.Player2, NpcMana, "npcMana"); Mana(game.Player1, HumanMana, "humanMana");
+        if (HumanWeapon != null)
+        {
+            new SabberStoneCore.Tasks.SimpleTasks.WeaponTask(HumanWeapon).Process(game, game.Player1, game.Player1.Hero, null);
+            var weapon = game.Player1.Hero.Weapon;
+            if (HumanWeaponDurability > 0)
+            {
+                // Negative DAMAGE is clamped by the engine; raise max durability only when the requested remainder needs it.
+                if (weapon[SabberStoneCore.Enums.GameTag.DURABILITY] < HumanWeaponDurability) weapon.Durability = HumanWeaponDurability;
+                weapon.Damage = weapon[SabberStoneCore.Enums.GameTag.DURABILITY] - HumanWeaponDurability;
+            }
+            applied.Add("humanWeapon=" + HumanWeapon + " (durability " + weapon.Durability + ")");
+        }
+        foreach (string id in HumanGraveyard)
+        {
+            // Resurrect's IsDead filter and play requirement read this marker, not the death event history.
+            // Remove the setter's pending-death entry: this minion already died, so no death reactions run at setup.
+            var dead = (SabberStoneCore.Model.Entities.Minion)EngineEntity.FromCard(game.Player1, EngineCards.FromId(id), zone: game.Player1.GraveyardZone);
+            dead.ToBeDestroyed = true;
+            game.DeadMinions.Remove(dead);
+            // BoardEntered(dead, summon: true) appends a MinionSummonedFact and calls OldGodRules.RecordSummon, even with a full staged board.
+            const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+            var facts = typeof(EngineGame).GetProperty("Facts", flags).GetValue(game, null);
+            facts.GetType().GetMethod("BoardEntered", flags).Invoke(facts, new object[] { dead, true });
+            SabberStoneCore.Actions.CorpseRules.RecordDeath(dead);
+            facts.GetType().GetMethod("Died", flags).Invoke(facts, new object[] { dead, dead.Cost });
+            game.Player1.NumFriendlyMinionsThatDiedThisTurn++;
+            game.CurrentPlayer.NumMinionsPlayerKilledThisTurn++;
+            game.NumMinionsKilledThisTurn++;
+        }
+        if (HumanGraveyard.Count > 0) applied.Add("humanGraveyard=" + string.Join(",", HumanGraveyard));
+        if (HumanHeroPower != null)
+        {
+            // Same task and history path as heroPowerUpgrade below (ReplaceHeroPower: the old power goes to SETASIDE, the new one
+            // becomes the hero's), so an upgrade staged for the human acts on the replaced power.
+            new SabberStoneCore.Tasks.SimpleTasks.ReplaceHeroPower(EngineCards.FromId(HumanHeroPower))
+                .Process(game, game.Player1, game.Player1.Hero, null);
+            applied.Add("humanHeroPower=" + HumanHeroPower + " (hero power " + game.Player1.Hero.HeroPower.Card.Id + ")");
+        }
         foreach (var player in new[] { game.Player1, game.Player2 })
         {
             string seat = player == game.Player1 ? "human" : "npc";
@@ -692,6 +824,12 @@ public sealed class DebugScenario
             }
             applied.Add("heroAttack=" + HeroAttack + "; weapon=" + (AttackWeapon ?? "none")
                 + "; secret=" + (AttackSecret ?? "none") + "; armor=" + AttackArmor + "; lethal=" + AttackLethal);
+        }
+        if (HumanHeroDamage > 0)
+        {
+            // Same tag-write path as attackLethal (a recorded DAMAGE change, max Health untouched).
+            game.Player1.Hero.Damage = Math.Min(HumanHeroDamage, game.Player1.Hero.BaseHealth - 1);
+            applied.Add("humanHeroDamage=" + HumanHeroDamage + " (hero Health " + game.Player1.Hero.Health + ")");
         }
         if (HumanSkin != null) applied.Add("humanSkin=" + HumanSkin);
         if (NpcSkin != null) applied.Add("npcSkin=" + NpcSkin);

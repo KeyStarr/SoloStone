@@ -14,6 +14,7 @@
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <Compile Include="../../plugin/NativeHeraldText.cs" Link="NativeHeraldText.cs" />
     <Compile Include="../shared/GroupProofs.cs" Link="GroupProofs.cs" />
+    <EmbeddedResource Include="../../private/docs/design/*.md" LogicalName="GroupProofRequirements/%(Filename).md" />
     <EmbeddedResource Include="definition-fixtures/*.b64" LogicalName="DefinitionFixtures/%(Filename).b64" />
     <None Include="legacy-generation-v1.sha256" CopyToOutputDirectory="PreserveNewest" />
     <None Include="event-traces/*.txt" CopyToOutputDirectory="PreserveNewest" />

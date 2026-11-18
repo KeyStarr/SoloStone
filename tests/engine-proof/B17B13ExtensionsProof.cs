@@ -185,6 +185,14 @@ internal static class B17B13ExtensionsProof
         deios.Silence(); p.Hero.HeroPower.IsExhausted=false; p.UsedMana=0;
         Core2026Proof.Check(Generic.HeroPower(p,p.Opponent.Hero),"silenced control accepted");
         Core2026Proof.Check(p.Opponent.Hero.Damage == 3,"silence removes power repeat");
+        // Rules record deathrattle-doubler-simultaneous-death (retail 34104_subspell.power.log): the aura is gone before Deathrattles resolve.
+        { var d = ImbueProof.Make(CardClass.MAGE); var q = d.Player1; var oq = q.Opponent;
+          var dd = Summon(q,"TIME_064"); var sw = Summon(q,"FP1_029"); int h = oq.HandZone.Count;
+          sw.ToBeDestroyed = true; d.DeathProcessingAndAuraUpdate();
+          Core2026Proof.Check(oq.HandZone.Count == h + 2,"Deios alive: Deathrattle triggers twice");
+          dd.ToBeDestroyed = true; d.DeathProcessingAndAuraUpdate(); var d2 = Summon(q,"TIME_064"); var sw2 = Summon(q,"FP1_029"); h = oq.HandZone.Count;
+          d2.ToBeDestroyed = true; sw2.ToBeDestroyed = true; d.DeathProcessingAndAuraUpdate();
+          Core2026Proof.Check(oq.HandZone.Count == h + 1,"Deios dies with a Deathrattle minion: one trigger"); }
     }
     internal static void Unpinned_DeiosChoices()
     {

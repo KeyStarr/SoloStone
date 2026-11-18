@@ -148,7 +148,19 @@ internal static class OfflinePoolLegacyCompatibilityProof
             Check(costs.Count == LegacyGenerationV1.Names.Count(n => n.StartsWith(prefix + "/Cost/")), "cost keys changed");
             foreach (var cls in frozenClasses.Where(cls => cls != CardClass.DEATHKNIGHT))
                 Same(prefix + "/Class/" + cls, classes[cls]);
-            foreach (var pair in costs) Same(prefix + "/Cost/" + pair.Key, pair.Value);
+            // #141 interim (Cards.cs): the frozen Cost/N membership is kept, regrouped by each card's current Cost: the cards whose Cost an identity row
+            // changed move to their current bucket, after the unmoved ones, in frozen-list order (buckets ascending).
+            var identityIds = SabberStoneCore.Loader.CardFacts.Embedded.Identity.Select(e => e.Id).ToHashSet();
+            var frozenCosts = costs.Keys.ToDictionary(k => k, k => LegacyGenerationV1.Get(prefix + "/Cost/" + k).ToList());
+            foreach (var pair in costs)
+            {
+                var expected = frozenCosts[pair.Key].Where(c => !(c.Cost != pair.Key && identityIds.Contains(c.Id))).ToList();
+                expected.AddRange(frozenCosts.OrderBy(f => f.Key).Where(f => f.Key != pair.Key).SelectMany(f => f.Value)
+                    .Where(c => c.Cost == pair.Key && identityIds.Contains(c.Id)));
+                Check(pair.Value.Select(c => c.Id + ":" + c.AssetId).SequenceEqual(expected.Select(c => c.Id + ":" + c.AssetId)),
+                    "regrouped consumer input changed: " + prefix + "/Cost/" + pair.Key);
+            }
+            Check(costs.Values.Sum(l => l.Count) == frozenCosts.Values.Sum(l => l.Count), "regrouping keeps the frozen membership: " + prefix);
         }
     }
 
