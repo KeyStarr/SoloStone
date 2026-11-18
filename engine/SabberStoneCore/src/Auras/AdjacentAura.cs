@@ -93,8 +93,7 @@ namespace SabberStoneCore.Auras
 					_left = null;
 				}
 			}
-			// Bounded like the right side: an AI fair view can hold an owner whose position runs past its masked board.
-			if (_left == null && pos > 0 && pos - 1 < _board.SlotCount)
+			if (_left == null && pos > 0)
 			{
 				Minion left = (_board.HasLocations ? _board.GetSlot(pos - 1) as Minion : _board[pos - 1]);
 				if (left != null && !left.Untouchable)

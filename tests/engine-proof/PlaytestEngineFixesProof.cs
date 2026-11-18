@@ -8,7 +8,7 @@ using SabberStoneCore.Tasks.PlayerTasks;
 using static Core2026Proof;
 
 // Engine and AI fixes found by live playtests and boss-AI sweeps (Dungeon Run work, 2026-11), none of them specific to a
-// run: a card definition, aura edge cases and the opponent AI's fair view of hidden cards. Four more bugs from the same work
+// run: a card definition and the opponent AI's fair view of hidden cards. Four more bugs from the same work
 // are fixed in open pull requests and are not repeated here: Silence and a card's own "Can't attack" (#144, #165),
 // Voidcaller and Dark Wispers (#165), a switching Adaptive effect's history (Gemstudded Golem, #167).
 internal static class PlaytestEngineFixesProof
