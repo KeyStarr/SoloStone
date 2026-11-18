@@ -23,5 +23,5 @@
     <None Include="../goldens/pools/*" LinkBase="pools" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/npc/*.json" LinkBase="data/npc" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
-<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" /></ItemGroup>
 </Project>

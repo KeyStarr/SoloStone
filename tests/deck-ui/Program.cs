@@ -2,6 +2,7 @@ int checks = 0;
 void Check(bool value, string label) { checks++; if (!value) throw new Exception(label); }
 DeckLayoutRuntimeHarness.Run(Check);
 ProfileMenuRuntimeHarness.Run(Check);
+NpcDifficultyUiChecks.Run(Check);
 // Save picker paging after a delete (six a page): the page falls back to the last one that still has rows; Next only with rows beyond.
 Check(new[] { (0, 0, 0), (0, 5, 0), (1, 6, 0), (1, 7, 1), (2, 13, 2), (3, 13, 2), (3, 12, 1), (4, 20, 3), (9, 1, 0), (-1, 4, 0) }
     .All(row => ProfileMenuGeometry.ClampPage(row.Item1, row.Item2) == row.Item3), "page clamps to the last page that has rows");

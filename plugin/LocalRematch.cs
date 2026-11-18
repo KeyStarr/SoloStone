@@ -18,8 +18,9 @@ internal static class LocalRematch
     {
         var ladder = profile.Ladder;
         int? legendNumber = ladder.LegendReached && legend != null ? legend.LegendNumber(ladder.Rating, matches.Count) : (int?)null;
+        // The save's NPC difficulty shapes every ladder pick and rematch (NpcDifficulty.cs); Hard is today's matchmaker.
         return new MatchRequest(profile.NpcProfileSeed, matches.Count, ladder.StarIndex, ladder.Rating, legendNumber,
-            matches.Skip(Math.Max(0, matches.Count - depth)).Select(match => Past(match, decks)));
+            matches.Skip(Math.Max(0, matches.Count - depth)).Select(match => Past(match, decks)), NpcDifficulties.Find(profile.NpcDifficulty));
     }
 
     internal static PastEncounter Past(LocalMatchRecord match, NpcDeckLibrary decks) => new PastEncounter(

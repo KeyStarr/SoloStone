@@ -54,7 +54,8 @@ internal static class NativeGameplayRank
             }
             else if (__instance.GetSide() == Player.Side.OPPOSING && pending.NpcRating.HasValue)
             {
-                rating = pending.NpcRating.Value;
+                // Easy/Medium NPCs are shown at the player's rank (NpcDifficultyLevel.DisplayRating); Hard shows the real rating.
+                rating = NpcPetSeats.ShownRating(pending, pending.NpcRating.Value, profile.Ladder.StarIndex, profile.Ladder.Rating);
                 position = NativeUIProbe.ProjectOpponentLadder(rating);
                 wins = 0;
                 arrivedByWin = false;

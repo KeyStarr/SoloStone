@@ -314,10 +314,17 @@ internal static class LocalLadder
         string deckId = encounter.Deck.Id;
         if (string.IsNullOrWhiteSpace(deckId) || deckId.Length > 64 || deckId.Any(char.IsControl))
             throw new InvalidOperationException("World deck id is not storable: " + deckId);
-        LocalDeck resolved = LocalDecks.Get(deckId);   // the same lookup the native side uses (ExternalDecks seam)
-        resolved.Build();                              // throws when the deck is not playable
-        opponentLabel = OpponentLabel(encounter, profile.History);
-        return resolved;
+        // Begin first: a non-ladder deck (a Core-step deck of NPC difficulty, admission "core") resolves only while an encounter
+        // references it, as Casual does. A failed lookup ends the encounter again.
+        NpcWorldRuntime.Begin(encounter);
+        try
+        {
+            LocalDeck resolved = LocalDecks.Get(deckId);   // the same lookup the native side uses (ExternalDecks seam)
+            resolved.Build();                              // throws when the deck is not playable
+            opponentLabel = OpponentLabel(encounter, profile.History);
+            return resolved;
+        }
+        catch { NpcWorldRuntime.End(); throw; }
     }
 
     // #28: the deck picker's REMATCH button, asked every frame. Recomputed only when the selection, the match count or the
@@ -326,6 +333,7 @@ internal static class LocalLadder
     private static string rematchSelected, rematchPending;
     private static int rematchMatches = -1;
     private static bool rematchCasual;
+    private static string rematchDifficulty;
     private static NpcEncounter rematchOffer;
     internal static string RematchRefusal { get; private set; }
     internal static void ForgetRematchOffer() { rematchMatches = -1; rematchOffer = null; }
@@ -334,9 +342,9 @@ internal static class LocalLadder
         if (profile == null || screen == "Starting" || screen == "Playing") return null;
         bool casual = NativeUIProjection.CasualPlayMode;   // the picker's Ranked/Casual switch: Rematch is Ranked-only (#37)
         if (rematchMatches == profile.MatchCount && rematchSelected == selected && rematchPending == profile.PendingMatchId
-            && rematchCasual == casual) return rematchOffer;
+            && rematchCasual == casual && rematchDifficulty == profile.NpcDifficulty) return rematchOffer;
         rematchMatches = profile.MatchCount; rematchSelected = selected; rematchPending = profile.PendingMatchId; rematchOffer = null;
-        rematchCasual = casual;
+        rematchCasual = casual; rematchDifficulty = profile.NpcDifficulty;   // Options can change the level while the picker is open
         try
         {
             string refusal = LocalRematch.CasualRefusal;
@@ -384,7 +392,8 @@ internal static class LocalLadder
             var casual = profile.CasualHistory;
             var decks = NpcWorldRuntime.World.Catalogs.Decks;
             var request = new CasualRequest(profile.NpcProfileSeed, casual.Count, profile.RankedMatchCount, profile.CasualRating,
-                casual.Skip(Math.Max(0, casual.Count - matchmaker.Rules.HistoryDepth)).Select(match => LocalRematch.Past(match, decks)));
+                casual.Skip(Math.Max(0, casual.Count - matchmaker.Rules.HistoryDepth)).Select(match => LocalRematch.Past(match, decks)),
+                NpcDifficulties.Find(profile.NpcDifficulty), profile.Ladder.StarIndex);
             NpcEncounter encounter = matchmaker.Next(request);
             string deckId = encounter.Deck.Id;
             if (string.IsNullOrWhiteSpace(deckId) || deckId.Length > 64 || deckId.Any(char.IsControl))

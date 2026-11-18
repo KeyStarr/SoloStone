@@ -96,6 +96,8 @@ public sealed partial class LocalProfile
         if (FileExists()) throw new InvalidOperationException("Creation cheats apply only to a new save.");
         var next = Snapshot();
         next.GrindTier = options.GrindTier ?? GrindTiers.Default.Id;
+        // NPC difficulty chosen on the Create save form (owner 2026-11-15: new saves start at Medium).
+        next.NpcDifficulty = options.NpcDifficulty ?? NpcDifficultyIds.NewSaveDefault;
         // #57: every new save, cheats included, gets the welcome gift in this same creation commit.
         ApplyWelcome(next);
         if (options.AllCards)
@@ -216,6 +218,9 @@ public sealed partial class LocalProfile
         WelcomeSkipped = EarlierSaveTrace(path);
         if (WelcomeSkipped != null) return false;
         var next = Snapshot();
+        // A brand-new player save made without the Create form (first launch) starts at the new-save difficulty, like the form's
+        // default; an existing save never reaches this branch, so it never gains the field (absent = Hard).
+        next.NpcDifficulty = profileOptions?.NpcDifficulty ?? NpcDifficultyIds.NewSaveDefault;
         ApplyWelcome(next);
         Commit(next);
         return true;

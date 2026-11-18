@@ -22,6 +22,10 @@ public sealed class ProfileOptions {
     // the creation choice; profile.xml owns the live pace (LocalProfile.SetGrindTier).
     public string GrindTier;
     public bool ShouldSerializeGrindTier() => GrindTier != null;
+    // NPC difficulty chosen on the Create save form (optional element, same Version 1 schema); profile.xml owns the live
+    // setting (LocalProfile.SetNpcDifficulty). Absent = NpcDifficultyIds.NewSaveDefault at creation.
+    public string NpcDifficulty;
+    public bool ShouldSerializeNpcDifficulty() => NpcDifficulty != null;
     // Sandbox "All decks" (owner 2026-10-28). Optional element, written only when set: options files from before it load
     // unchanged (false), and saves without it stay readable by builds that predate it. Same Version 1 schema.
     public bool AllDecks;
@@ -914,6 +918,7 @@ public static class ProfileCatalog
     }
     private static void ValidateOptions(ProfileOptions value) { if (value == null || value.Version != 1 || value.MetaId != MetaId
         || value.GrindTier != null && !GrindTiers.IsKnown(value.GrindTier)
+        || value.NpcDifficulty != null && !NpcDifficultyIds.IsSelectable(value.NpcDifficulty)
         || double.IsNaN(value.LegendRating) || double.IsInfinity(value.LegendRating)
         || (value.StartLegendOne ? value.LegendRating <= 0 : value.LegendRating != 0)) throw new InvalidOperationException("Unsupported save options."); }
     private static void RequireSlot(string path, string name, bool options) { OfflineGuard.ValidateProfileFiles(path); if (!File.Exists(path)) throw new InvalidOperationException("Save file is missing: " + name); if (options) ReadOptions(Path.Combine(Path.GetDirectoryName(path), "profile-options.xml")); }

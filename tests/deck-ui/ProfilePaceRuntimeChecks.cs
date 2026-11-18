@@ -178,6 +178,34 @@ static partial class ProfileMenuRuntimeHarness
             check(Math.Abs(wrappers[0].transform.position.y - wrappers[1].transform.position.y - .45f) < .001f
                 && Math.Abs(group.Height - .9f) < .001f, "production stack adds no retail spacing between reserved row blocks");
 
+            // Production single-line difficulty placement, native checkbox and fallback, both target sizes.
+            foreach (int height in new[] { 720, 800 })
+            foreach (bool kit in new[] { true, false })
+            {
+                float unit = height * ProfileMenuGeometry.UnitShare, width = unit * 7.24f;
+                var compactRows = new List<ProfilePaceGeometry.Element>();
+                for (int index = 0; index < 4; index++)
+                {
+                    float middle = unit * (3 - index) * .6f;
+                    var control = new CheckBox();
+                    var caption = new Component { GlyphWidth = 55, Text = "Hard — The full ladder: strong decks, sharp NPCs" };
+                    var glyph = kit ? null : new Component { GlyphWidth = .5f };
+                    float cell = ArrangeDifficultyRow(control, glyph, caption, new Vector3(width / 2, middle, 0), unit, width, kit);
+                    var captionBounds = ProfileFormKit.RenderedBounds(caption).Value;
+                    ProfileFormKit.Span(control.gameObject, right, out float cx0, out float cx1);
+                    ProfileFormKit.Span(control.gameObject, up, out float cy0, out float cy1);
+                    check(captionBounds.min.x >= 0 && captionBounds.max.x <= width && captionBounds.min.y > middle - cell / 2 && captionBounds.max.y < middle + cell / 2,
+                        $"{height}: compact difficulty caption fits reserved cell, kit={kit}");
+                    check(cy0 > middle - cell / 2 && cy1 < middle + cell / 2 && cx0 >= 0 && cx1 <= width,
+                        $"{height}: difficulty control fits cell without touching next row, kit={kit}");
+                    if (kit) check(cx1 < captionBounds.min.x, "compact difficulty checkbox stays left of its caption");
+                    compactRows.Add(new ProfilePaceGeometry.Element("difficulty." + index,
+                        new DeckRect(0, middle - cell / 2, width, cell)));
+                }
+                check(ProfilePaceGeometry.Check(new DeckRect(0, -unit, width, unit * 4), compactRows).Count == 0,
+                    $"{height}: all four compact difficulty row cells are disjoint");
+            }
+
             paceSamples = 0; paceCheckFrame = Time.frameCount + 3;
             SamplePaceCheck(); Time.frameCount += 2; SamplePaceCheck();
             check(paceSamples == 0, "pace diagnostic waits for layout and text mesh settling");

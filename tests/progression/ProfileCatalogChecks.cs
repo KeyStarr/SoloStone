@@ -1029,15 +1029,19 @@ internal static class ProfileCatalogChecks
         string deckFields = System.Text.RegularExpressions.Regex.Match(deck, @"expected = \[([^\]]+)\]").Groups[1].Value.Replace("'", "");
         Check(baseFields.Length > 0 && deckFields == baseFields, "both script validators hold the same base field list");
         int number = 0;
-        foreach (var options in new[] { new ProfileOptions(), new ProfileOptions { GrindTier = GrindTiers.GrinderId }, new ProfileOptions { AllDecks = true }, new ProfileOptions { GrindTier = GrindTiers.Relaxed6xId, AllDecks = true } })
+        foreach (var options in new[] { new ProfileOptions(), new ProfileOptions { GrindTier = GrindTiers.GrinderId }, new ProfileOptions { AllDecks = true }, new ProfileOptions { GrindTier = GrindTiers.Relaxed6xId, AllDecks = true },
+            new ProfileOptions { NpcDifficulty = "easy" }, new ProfileOptions { GrindTier = GrindTiers.GrinderId, NpcDifficulty = "medium", AllDecks = true } })
         {
             var slot = Add(legacy, "Save " + ++number, options);
             var written = System.Xml.Linq.XDocument.Load(Path.Combine(SlotDir(legacy, slot.Id), "profile-options.xml")).Root!.Elements().Select(element => element.Name.LocalName).ToArray();
             string tail = string.Join(",", written.Skip(8));
             Check(string.Join(",", written.Take(8)) == baseFields, "the game writes the validators' base fields in order");
-            Check(ps1.Contains(tail.Length == 0 ? "@($optionFields," : "\"$optionFields," + tail + "\"", StringComparison.Ordinal), "Assert-Options accepts what the game writes: " + tail);
-            string deckTail = tail.Length == 0 ? "(expected," : "expected + [" + string.Join(",", written.Skip(8).Select(name => "'" + name + "'")) + "]";
-            Check(deck.Contains(deckTail, StringComparison.Ordinal), "the Deck validator accepts what the game writes: " + tail);
+            // The validators build their allowed lists from the optional elements in ProfileOptions' order: GrindTier, NpcDifficulty, AllDecks.
+            var optional = new[] { "GrindTier", "NpcDifficulty", "AllDecks" };
+            Check(ps1.Contains("foreach ($g in @('', ',GrindTier')) { foreach ($d in @('', ',NpcDifficulty')) { foreach ($a in @('', ',AllDecks'))", StringComparison.Ordinal)
+                && written.Skip(8).SequenceEqual(optional.Where(name => written.Skip(8).Contains(name))), "Assert-Options accepts what the game writes: " + tail);
+            Check(deck.Contains("for g in ([], ['GrindTier']) for d in ([], ['NpcDifficulty']) for a in ([], ['AllDecks'])", StringComparison.Ordinal),
+                "the Deck validator accepts what the game writes: " + tail);
         }
         foreach (var tier in GrindTiers.Selectable)
             Check(System.Text.RegularExpressions.Regex.IsMatch(tier.Id, "^[a-z0-9-]{1,32}$"), "pace id fits the validators' shape: " + tier.Id);

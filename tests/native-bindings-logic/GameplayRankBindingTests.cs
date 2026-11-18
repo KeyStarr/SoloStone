@@ -85,6 +85,14 @@ internal static class GameplayRankBindingTests
         Check(ordinary.IsDisplayable() && ordinary.GetCurrentMedal(FormatType.FT_STANDARD).starLevel == 75
             && ordinary.GetCurrentMedal(FormatType.FT_STANDARD).legendIndex == 0,
             "non-Legend opponent receives ordinary native rank translator");
+        // Easy/Medium: the opponent medal reads the shown rating at the player's rank, never the stored real rating.
+        int calls = NpcPetSeats.Calls;
+        profile.Pending.NpcDifficulty = "easy"; profile.Pending.NpcRating = 1010;
+        var shown = Rank(new Player(Player.Side.OPPOSING), native);
+        Check(NpcPetSeats.Calls > calls && shown.GetCurrentMedal(FormatType.FT_STANDARD).starLevel
+            == Rank(new Player(Player.Side.FRIENDLY), native).GetCurrentMedal(FormatType.FT_STANDARD).starLevel,
+            "an Easy opponent is shown at the player's rank");
+        profile.Pending.NpcDifficulty = null; profile.Pending.NpcRating = 1300;
         profile.Pending.NpcRating = double.NaN;
         Check(ReferenceEquals(Rank(new Player(Player.Side.OPPOSING), native), native) && log.Warnings.Count == 1,
             "invalid opponent snapshot fails closed to native translator");
@@ -165,7 +173,15 @@ internal sealed class LocalProfile
 }
 internal sealed class GrindTier { internal LadderPace Ladder = new(); }
 internal sealed class LadderPace { }
-internal sealed class LocalMatchRecord { internal string Id; internal double? NpcRating; internal string Mode; internal string GrindTier; }
+internal sealed class LocalMatchRecord { internal string Id; internal double? NpcRating; internal string Mode; internal string GrindTier; internal string NpcDifficulty; }
+// Stand-in for the production shown-rating rule (NpcDifficultyLevel.DisplayRating, tested in npc-world): an Easy/Medium NPC is
+// shown at the player's rank, a Hard one at its real rating. Records each call so the hook is proven to pass the player's rank.
+internal static class NpcPetSeats
+{
+    internal static int Calls;
+    internal static double ShownRating(LocalMatchRecord record, double real, int playerStarIndex, double playerRating)
+    { Calls++; return record?.NpcDifficulty == null ? real : 1000 + playerStarIndex * 4; }
+}
 internal static class GrindTiers
 {
     private static readonly Dictionary<string, GrindTier> Rows = new();

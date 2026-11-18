@@ -479,13 +479,15 @@ internal static class ClientBridge
             }
 #endif
             // The NPC's own cosmetic pet (PROPOSED, docs/design/npc-pets.md): wire-only, never recorded or settled.
-            try { match.OpponentPetCard = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0)?.CardId; }
+            try { match.OpponentPetCard = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0,
+                LocalLadder.Profile?.Ladder.Rating ?? 0)?.CardId; }
             catch (Exception error) { log.LogWarning("NPC pet unavailable: " + error.Message); }
             // NPC deck finishes follow the rank the opponent's medal shows (NativeGameplayRank reads the same rating);
             // Casual has no medal, so the player's ladder rank (NpcPremiums.SeatStarIndex).
             if (!string.IsNullOrEmpty(record.NpcId) && record.NpcRating is double npcRating)
                 match.OpponentPremiumSeat = new NpcPremiumSeat(record.NpcId, record.NpcDeckId ?? record.Opponent,
-                    NpcPremiums.SeatStarIndex(record.Mode, npcRating, LocalLadder.Profile?.Ladder.StarIndex ?? 0),
+                    NpcPremiums.SeatStarIndex(record.Mode, NpcPetSeats.ShownRating(record, npcRating, LocalLadder.Profile?.Ladder.StarIndex ?? 0,
+                        LocalLadder.Profile?.Ladder.Rating ?? 0), LocalLadder.Profile?.Ladder.StarIndex ?? 0),
                     NpcWorldRuntime.World?.Find(record.NpcId)?.PersonalityId);
             if (playtest != null)
             {
@@ -611,7 +613,9 @@ internal static class ClientBridge
             return new Dictionary<string, object> {
                 { "npcId", active.Npc?.Id }, { "deckId", active.Deck.Id }, { "skill", active.Skill?.Id },
                 { "skillTier", active.Skill?.Tier }, { "personality", active.Personality?.Id },
-                { "rating", active.Rating }, { "reason", active.Reason }, { "replyPrior", NativeDeckInferenceOption.ThisMatch } };
+                { "rating", active.Rating }, { "reason", active.Reason }, { "replyPrior", NativeDeckInferenceOption.ThisMatch },
+                { "difficulty", active.Difficulty ?? NpcDifficultyIds.Hard }, { "difficultyPosition", active.DifficultyPosition },
+                { "coreDeck", NpcDifficultyShaper.IsCoreDeck(active.Deck) }, { "planNodes", active.Profile?.Budget.PlanNodes } };
         }
         catch (Exception) { return null; }
     }

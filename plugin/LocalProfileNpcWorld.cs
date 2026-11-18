@@ -13,25 +13,36 @@ public sealed partial class LocalProfile
     }
 
     // Agreed with WP4 (LocalLadder.StartSelected): Begin(selected, e.Deck.Id, seed, e). Opponent stays the deck id.
-    public LocalMatchRecord Begin(string deck, string opponent, int seed, NpcEncounter encounter) => encounter == null
-        ? Begin(deck, opponent, seed)
-        : Begin(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating);
+    // Every encounter overload arms the encounter's NPC difficulty for the Begin it calls (stamped on the pending record).
+    public LocalMatchRecord Begin(string deck, string opponent, int seed, NpcEncounter encounter)
+    {
+        if (encounter == null) return Begin(deck, opponent, seed);
+        ArmNpcDifficulty(encounter.Difficulty);
+        return Begin(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating);
+    }
 
     // BeginLaunch (unstarted Pending cleared when the launch throws) with the same encounter mapping as Begin.
     public LocalMatchRecord BeginLaunch(string deck, string opponent, int seed, NpcEncounter encounter, System.Action<LocalMatchRecord> launch)
-        => encounter == null
-        ? BeginLaunch(deck, opponent, seed, launch)
-        : BeginLaunch(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating, launch);
+    {
+        if (encounter == null) return BeginLaunch(deck, opponent, seed, launch);
+        ArmNpcDifficulty(encounter.Difficulty);
+        return BeginLaunch(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating, launch);
+    }
 
     internal LocalMatchRecord BeginLaunch(string deck, string opponent, int seed, NpcEncounter encounter,
         LocalAchievementPendingContext achievementContext, System.Action<LocalMatchRecord> launch)
-        => encounter == null
-        ? BeginLaunch(deck, opponent, seed, launch)
-        : BeginLaunch(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating, achievementContext, launch);
+    {
+        if (encounter == null) return BeginLaunch(deck, opponent, seed, launch);
+        ArmNpcDifficulty(encounter.Difficulty);
+        return BeginLaunch(deck, opponent, seed, encounter.Npc?.Id, encounter.Deck?.Id, encounter.Rating, achievementContext, launch);
+    }
 
     // mode: null = Ranked, CasualRules.Mode = Standard Casual (#37). A Casual match without a world encounter still
     // records its mode, so it never touches the ladder.
     internal LocalMatchRecord BeginLaunch(string deck, string opponent, int seed, NpcEncounter encounter,
         LocalAchievementPendingContext achievementContext, string mode, System.Action<LocalMatchRecord> launch)
-        => BeginLaunch(deck, opponent, seed, encounter?.Npc?.Id, encounter?.Deck?.Id, encounter?.Rating, achievementContext, mode, launch);
+    {
+        ArmNpcDifficulty(encounter?.Difficulty);
+        return BeginLaunch(deck, opponent, seed, encounter?.Npc?.Id, encounter?.Deck?.Id, encounter?.Rating, achievementContext, mode, launch);
+    }
 }

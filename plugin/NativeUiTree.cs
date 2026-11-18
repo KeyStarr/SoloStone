@@ -112,6 +112,7 @@ internal static class NativeUiTree
         foreach (var control in NativeOptionsPanels.Controls) Name(control.Key, control.Value);
         Name(NativeStarterDecks.OptionsButton, NativeStarterText.OptionsId);
         Name(NativeOptionsPace.OptionsButton, NativeOptionsPaceText.Id);
+        Name(NativeOptionsDifficulty.OptionsButton, NativeOptionsDifficulty.Id);
         Name(NativeTurnTimerOption.Checkbox, NativeTurnTimerOption.Id);
         Name(HandheldUi.Checkbox, OptionsPanelText.HandheldId);
         Name(NativeFpsCounter.Checkbox, NativeFpsCounterText.Id);

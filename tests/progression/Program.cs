@@ -34,6 +34,15 @@ if (args.SequenceEqual(new[] { "--premium-tracks-only" }))
     return;
 }
 
+if (args.SequenceEqual(new[] { "--npc-difficulty-only" }))
+{
+    string difficultyRoot = Path.Combine(Path.GetTempPath(), "hs-npc-difficulty-" + Guid.NewGuid());
+    Directory.CreateDirectory(difficultyRoot);
+    try { NpcDifficultyChecks.Run(difficultyRoot); }
+    finally { Directory.Delete(difficultyRoot, true); }
+    return;
+}
+
 if (args.SequenceEqual(new[] { "--grind-tiers-only" }))
 {
     string grindRoot = Path.Combine(Path.GetTempPath(), "hs-grind-tiers-" + Guid.NewGuid());
@@ -57,7 +66,7 @@ if (args.Length == 0)
     // The gate runs only this no-argument path; keep the save-catalog/cheat checks in it.
     var gateCatalogRoot = Path.Combine(Path.GetTempPath(), "hs-profile-catalog-" + Guid.NewGuid());
     Directory.CreateDirectory(gateCatalogRoot);
-    try { RewardV5Checks.Run(gateCatalogRoot); MatchTimingChecks.Run(gateCatalogRoot); GrindTierChecks.Run(gateCatalogRoot); ProfileCatalogChecks.Run(gateCatalogRoot); StartupSaveChecks.Run(gateCatalogRoot); SaveHoldChecks.Run(gateCatalogRoot); HiddenLoanerChecks.Run(gateCatalogRoot); TestLoanerGateChecks.Run(gateCatalogRoot); MassPackChecks.Run(gateCatalogRoot); DeathKnightTipChecks.Run(gateCatalogRoot); PremiumPackChecks.Run(gateCatalogRoot); DeckRecordChecks.Run(gateCatalogRoot); }
+    try { RewardV5Checks.Run(gateCatalogRoot); MatchTimingChecks.Run(gateCatalogRoot); GrindTierChecks.Run(gateCatalogRoot); NpcDifficultyChecks.Run(gateCatalogRoot); ProfileCatalogChecks.Run(gateCatalogRoot); StartupSaveChecks.Run(gateCatalogRoot); SaveHoldChecks.Run(gateCatalogRoot); HiddenLoanerChecks.Run(gateCatalogRoot); TestLoanerGateChecks.Run(gateCatalogRoot); MassPackChecks.Run(gateCatalogRoot); DeathKnightTipChecks.Run(gateCatalogRoot); PremiumPackChecks.Run(gateCatalogRoot); DeckRecordChecks.Run(gateCatalogRoot); }
     finally { Directory.Delete(gateCatalogRoot, true); }
     return;
 }

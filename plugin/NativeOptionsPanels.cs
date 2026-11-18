@@ -384,6 +384,8 @@ internal static class NativeOptionsPanels
                 NativeDeckInferenceOption.Attach, NativeDeckInferenceOption.Sync);
             if (NativeOptionsPace.Available)
                 AddPlank(panel, reset, 1, "pace", NativeOptionsPaceText.Id, NativeOptionsPaceText.ObjectName, NativeOptionsPace.Attach, NativeOptionsPace.Sync, NativeOptionsPace.Wanted);
+            if (NativeOptionsDifficulty.Available)
+                AddPlank(panel, reset, 1, "difficulty", NativeOptionsDifficulty.Id, NativeOptionsDifficulty.ObjectName, NativeOptionsDifficulty.Attach, NativeOptionsDifficulty.Sync, NativeOptionsDifficulty.Wanted);
             if (NativeLanguageOption.Available)
                 AddPlank(panel, reset, 1, "language", GameLanguage.Id, GameLanguage.ObjectName, NativeLanguageOption.Attach, NativeLanguageOption.Sync, null);
             AddPlank(panel, reset, 1, "restoreStarters", NativeStarterText.OptionsId, NativeStarterText.OptionsObject, NativeStarterDecks.Attach, null, NativeStarterDecks.Wanted);

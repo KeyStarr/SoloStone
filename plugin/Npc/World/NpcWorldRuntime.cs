@@ -63,7 +63,7 @@ public static class NpcWorldRuntime
             PlaytestQueue.WorldProfileResolver = null;
             clientSeams = false;
         }
-        PendingNpcForDeck = null; DecorationLog = null;
+        PendingNpcForDeck = null; DecorationLog = null; DifficultyLog = null; difficultyLogged = null;
         World = null; Matchmaker = null; Legend = null; Active = null; Casual = null; deckResolver = null;
         lock (planGate) plans.Clear();
     }
@@ -92,6 +92,7 @@ public static class NpcWorldRuntime
             Install(world, new LadderMatchmaker(world));
             InstallClientSeams(pendingNpcForDeck);
             DecorationLog = RateLimited(log);
+            DifficultyLog = log;   // one line per match, never rate limited: the log must show every match's level
             // Prefer a library-only deck: golden decks also live in LocalDecks.NpcDecks and would not exercise the seam.
             var admitted = world.Catalogs.Decks.Admitted.ToList();
             var sample = admitted.FirstOrDefault(d => !LocalDecks.NpcDecks.Any(deck => deck.Id == d.Id)) ?? admitted.FirstOrDefault()
@@ -182,6 +183,12 @@ public static class NpcWorldRuntime
             Say(DecorationLog, "npc deck inference unavailable; class prior for this match: " + error.GetType().Name + ": " + error.Message);
         }
         Active = inferred ? encounter.WithReplyPrior(ReplyPrior.Inferred) : encounter;
+        // One line per match: a start begins the same encounter twice (deck resolve, then the start itself).
+        if (ReferenceEquals(encounter, difficultyLogged)) return;
+        difficultyLogged = encounter;
+        Say(DifficultyLog, "NPC_DIFFICULTY level=" + (encounter.Difficulty ?? NpcDifficultyIds.Hard) + " position=" + encounter.DifficultyPosition
+            + " npc=" + encounter.Npc?.Id + " deck=" + encounter.Deck?.Id + " core=" + NpcDifficultyShaper.IsCoreDeck(encounter.Deck)
+            + " skill=" + encounter.Skill?.Id + " planNodes=" + encounter.Profile?.Budget.PlanNodes + " rating=" + encounter.Rating.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
     }
 
     public static void End() { Active = null; }
@@ -248,6 +255,9 @@ public static class NpcWorldRuntime
 
     // Host log for DecoratePilot fallbacks (the live plugin sets it at boot; null in the harness).
     public static Action<string> DecorationLog { get; set; }
+    // Host log for the NPC_DIFFICULTY line every Begin writes (the live plugin sets it at boot; null in the harness).
+    public static Action<string> DifficultyLog { get; set; }
+    private static NpcEncounter difficultyLogged;
 
     internal static MulliganPolicy MulliganFor(NpcProfile profile, DeckPlan plan)
     {

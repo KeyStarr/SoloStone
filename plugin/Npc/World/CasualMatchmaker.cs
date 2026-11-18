@@ -13,9 +13,19 @@ public sealed class CasualRequest
     public int RankedIndex { get; }                  // count of ranked matches (NpcLegendField drift epoch)
     public double CasualRating { get; }              // hidden Casual MMR (CasualRules), never shown
     public IReadOnlyList<PastEncounter> History { get; }   // Casual encounters, oldest first
-    public CasualRequest(long profileSeed, int casualIndex, int rankedIndex, double casualRating, IEnumerable<PastEncounter> history)
+    // The save's NPC difficulty (NpcDifficulties); null or Hard = today's queue, unchanged.
+    public NpcDifficultyLevel Difficulty { get; }
+    // The player's ranked star index: Easy/Medium anchor the boost on it (the player's rank, not the Casual rating). null = the Casual rating.
+    public int? StarIndex { get; }
+    public CasualRequest(long profileSeed, int casualIndex, int rankedIndex, double casualRating, IEnumerable<PastEncounter> history,
+        NpcDifficultyLevel difficulty = null, int? starIndex = null)
     { ProfileSeed = profileSeed; CasualIndex = casualIndex; RankedIndex = rankedIndex; CasualRating = casualRating;
-      History = GoldenData.Copy(history); }
+      History = GoldenData.Copy(history); Difficulty = difficulty; StarIndex = starIndex; }
+    internal bool Shifted => Difficulty != null && !Difficulty.IsHard;
+    // Easy/Medium: the shifted ladder position in stars (negative at the Core step): the ranked star index when given, else the
+    // hidden Casual rating.
+    internal int Position => !Shifted ? 0 : StarIndex.HasValue ? Difficulty.LadderPosition(Math.Max(0, Math.Min(LadderRules.LegendIndex, StarIndex.Value)))
+        : Difficulty.RatingPosition(CasualRating);
 }
 
 // Casual deck catalog: data/npc/casual-decks-v1.json. Same deck schema as decks-v1.json, every deck admission "casual"
@@ -188,6 +198,7 @@ public sealed class CasualMatchmaker
         int seed = StableSeed.Derive(request.ProfileSeed, CasualTag, request.CasualIndex);
         bool fun = new MatchRng(seed, StreamKind).NextDouble() < Rules.FunShare;
         double target = request.CasualRating + new MatchRng(seed, StreamTarget).Gauss() * Rules.JitterSigma;
+        if (request.Shifted) target -= request.Difficulty.ShiftRating;   // Easy/Medium: the opponents of a lower Casual rating
         var ranked = Legend.Ranked(request.RankedIndex);
         int count = Math.Min(request.History.Count, Rules.HistoryDepth);
         var recent = request.History.Skip(request.History.Count - count).Reverse().ToArray();   // most recent first
@@ -224,8 +235,8 @@ public sealed class CasualMatchmaker
             throw new InvalidOperationException("NPC " + chosen.Npc.Id + " references an unknown skill or personality.");
         var profile = buildProfile(chosen.Npc, deck, personality, skill);
         int matchSeed = StableSeed.Derive(seed, StreamMatch) & int.MaxValue;
-        var encounter = new NpcEncounter(chosen.Npc, deck, skill, personality, profile, chosen.Rating, matchSeed,
-            fun ? "casual-fun" : "casual-own");
+        var encounter = NpcDifficultyShaper.Shape(new NpcEncounter(chosen.Npc, deck, skill, personality, profile, chosen.Rating, matchSeed,
+            fun ? "casual-fun" : "casual-own"), request.Difficulty, request.Position, seed, World, buildProfile, coreStep: false);   // Casual fun decks stay
         return new MatchPick(encounter, target, level, false, false, regularDraw);
     }
 

@@ -53,6 +53,7 @@ internal static class NativeProfileSelector
         log = logger; launch = context;
         if (context.SnapshotId != null || context.LaneId != 0) return;
         NativeOptionsPace.Initialize(logger);
+        NativeOptionsDifficulty.Initialize(logger);
         harmony.Patch(AccessTools.Method(typeof(BnetBar), "HandleEscapeKey") ?? throw new MissingMethodException("BnetBar", "HandleEscapeKey"),
             prefix: new HarmonyMethod(typeof(NativeProfileSelector), nameof(BeforeEscape)));
         harmony.Patch(AccessTools.Method(typeof(GameMenu), "Awake") ?? throw new MissingMethodException("GameMenu", "Awake"),
@@ -203,6 +204,48 @@ internal static class NativeProfileSelector
         catch (Exception error) { log?.LogError("SAVE_SELECTOR pace unavailable: " + error); ReturnToOptions(); ShowError(error.Message); }
     }
 
+    internal static void OpenDifficulty()
+    {
+        try
+        {
+            if (popup == null) popup = new GameObject("SoloStoneProfileSelector").AddComponent<NativeProfileMenu>();
+            popup.OpenDifficulty();
+        }
+        catch (Exception error) { log?.LogError("SAVE_SELECTOR difficulty unavailable: " + error); ReturnToOptions(); ShowError(error.Message); }
+    }
+
+    private static readonly Dictionary<string, string> slotDifficulties = new Dictionary<string, string>();
+
+    // Read only the root field, never construct a LocalProfile (which locks/migrates the save), or read match history.
+    internal static string ReadDifficulty(string path)
+    {
+        OfflineGuard.ValidateProfileFiles(path);
+        using (var reader = System.Xml.XmlReader.Create(path, new System.Xml.XmlReaderSettings {
+            DtdProcessing = System.Xml.DtdProcessing.Prohibit, XmlResolver = null, MaxCharactersInDocument = 64 * 1024 * 1024
+        }))
+            // LocalProfileData serializes GrindTier (optional), NpcDifficulty (optional), then Version and the rest: the first
+            // other depth-1 element means the field is absent, so an old save is never read to its end.
+            while (reader.Read())
+            {
+                if (reader.NodeType != System.Xml.XmlNodeType.Element || reader.Depth != 1) continue;
+                if (reader.LocalName == "NpcDifficulty") return NpcDifficultyIds.Resolve(reader.ReadElementContentAsString());
+                if (reader.LocalName != "GrindTier") break;
+            }
+        return NpcDifficultyIds.Default;
+    }
+
+    internal static string SlotDifficulty(string id)
+    {
+        if (IsOpenSave(id, null) && LocalLadder.Profile != null) return LocalLadder.Profile.NpcDifficulty;
+        if (slotDifficulties.TryGetValue(id, out string cached)) return cached;
+        string difficulty = null;
+        try { difficulty = ReadDifficulty(ProfileCatalog.ProfilePathForId(RootProfilePath, id)); }
+        catch (Exception error) { Log("SAVE_SELECTOR difficulty id=" + id + " unavailable: " + error.Message); }
+        return slotDifficulties[id] = difficulty;
+    }
+
+    internal static void RefreshSlotDifficulties() => slotDifficulties.Clear();
+
     // Back from a Pace page opened in Options > SoloStone Options: that panel again, else Options.
     internal static void ReturnToOptions() => NativeOptionsPanels.ReturnFromPace();
 
@@ -330,7 +373,7 @@ internal static class NativeProfileSelector
         {
             var slots = new JsonList();
             foreach (var row in ProfileCatalog.List(launch.RootProfilePath))
-                slots.Add(new JsonNode { { "id", row.Id }, { "name", row.Name }, { "unavailable", row.Unavailable } });
+                slots.Add(new JsonNode { { "id", row.Id }, { "name", row.Name }, { "unavailable", row.Unavailable }, { "difficulty", SlotDifficulty(row.Id) } });
             string selected = ProfileCatalog.SelectedId(launch.RootProfilePath);
             node["slots"] = slots; node["selectedId"] = selected;
             // What the delete rule treats as open, and that file's hash: a delete of another save must leave both alone.
@@ -409,7 +452,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
     private Action fieldsLayout;
     private readonly Dictionary<PegUIElement, string> controls = new Dictionary<PegUIElement, string>();
     private readonly HashSet<PegUIElement> selectedControls = new HashSet<PegUIElement>();
-    private bool startup, wizard, pacePage, paceFromOptions, ownsNativeDialog, loading, cheatsOpen, editing, manage;
+    private bool startup, wizard, pacePage, difficultyPage, paceFromOptions, ownsNativeDialog, loading, cheatsOpen, editing, manage;
     private int page;
     private string saveName, pendingName;
     private ProfileOptions options;
@@ -451,12 +494,20 @@ internal sealed class NativeProfileMenu : ButtonListMenu
 
     internal void Open(bool fromStartup)
     {
-        startup = fromStartup; wizard = pacePage = paceFromOptions = loading = manage = false; page = 0; Build(); Show();
+        startup = fromStartup; wizard = pacePage = difficultyPage = paceFromOptions = loading = manage = false; page = 0; Build(); Show();
         ProfileFormKit.Request(() => { if (this != null && IsShown() && !loading) Build(); }, true);
     }
 
     internal void OpenPace()
     {
+        difficultyPage = false;
+        startup = wizard = loading = manage = false; pacePage = paceFromOptions = true; page = 0; Build(); Show();
+        ProfileFormKit.Request(() => { if (this != null && IsShown() && !loading) Build(); }, true);
+    }
+
+    internal void OpenDifficulty()
+    {
+        difficultyPage = true;
         startup = wizard = loading = manage = false; pacePage = paceFromOptions = true; page = 0; Build(); Show();
         ProfileFormKit.Request(() => { if (this != null && IsShown() && !loading) Build(); }, true);
     }
@@ -475,7 +526,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
     private void LeavePace()
     {
         bool toOptions = paceFromOptions;
-        pacePage = paceFromOptions = false;
+        pacePage = difficultyPage = paceFromOptions = false;
         Hide();
         if (toOptions) NativeProfileSelector.ReturnToOptions();
     }
@@ -496,21 +547,23 @@ internal sealed class NativeProfileMenu : ButtonListMenu
         paceMeshes.Clear();
         owned.Clear(); rows.Clear(); slices.Clear(); beforeLayout.Clear(); afterLayout.Clear(); unsized.Clear(); fieldRows.Clear(); fieldsContent = null; fieldsLayout = null; controls.Clear(); selectedControls.Clear();
         nameText = null; nameColor = null; unitPlank = null; cheatList = null; cheatRows = 0; cheatPitch = 0; unitWorld = 0; unitScale = 1; kitScale = 0;
-        Header(wizard ? "Create save" : pacePage ? "Pace" : "Choose save");
+        Header(wizard ? "Create save" : pacePage ? (difficultyPage ? "NPC Difficulty" : "Pace") : "Choose save");
         Axes();
-        if (wizard) BuildWizard(ProfileFormKit.Ready); else if (pacePage) BuildPace(ProfileFormKit.Ready); else BuildSlots(ProfileFormKit.Ready);
+        if (wizard) BuildWizard(ProfileFormKit.Ready); else if (pacePage) { if (difficultyPage) BuildDifficulty(ProfileFormKit.Ready); else BuildPace(ProfileFormKit.Ready); } else BuildSlots(ProfileFormKit.Ready);
         if (shown) Show();
     }
 
     private void BuildSlots(bool kit)
     {
+        NativeProfileSelector.RefreshSlotDifficulties();
         var slots = ProfileCatalog.List(NativeProfileSelector.RootProfilePath).ToArray();
         string selected = ProfileCatalog.SelectedId(NativeProfileSelector.RootProfilePath);
         page = ProfileMenuGeometry.ClampPage(page, slots.Length);
         foreach (var slot in slots.Skip(page * ProfileMenuGeometry.PageSize).Take(ProfileMenuGeometry.PageSize))
         {
             var captured = slot;
-            string label = slot.Name + (slot.Unavailable == null ? "" : " (unavailable: " + slot.Unavailable + ")");
+            string difficulty = NativeProfileSelector.SlotDifficulty(slot.Id);
+            string label = slot.Name + " · " + (difficulty == null ? "Unknown difficulty" : NpcDifficultyIds.Name(difficulty)) + (slot.Unavailable == null ? "" : " (unavailable: " + slot.Unavailable + ")");
             if (manage) { ManageRow(captured, label, slot.Id == selected, NativeProfileSelector.IsOpenSave(slot.Id, selected)); continue; }
             UIBButton row = Plank("ProfileSlot-" + slot.Id, "save.slot:" + slot.Id, label, _ => {
                 if (captured.Unavailable != null) return;
@@ -518,7 +571,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
                 else if (captured.Id == selected) NativeProfileSelector.EnterCurrent();
                 else NativeProfileSelector.Switch(captured.Id);
             });
-            if (slot.Id == selected) { selectedControls.Add(row); MarkCurrent(row, kit, label); }
+            if (slot.Id == selected) { selectedControls.Add(row); MarkCurrent(row, kit, slot.Name, difficulty == null ? "Unknown difficulty" : NpcDifficultyIds.Name(difficulty)); }
             // A damaged save stays listed so its name is not silently lost, but it cannot be opened.
             if (slot.Unavailable != null) row.SetEnabled(false);
         }
@@ -572,7 +625,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
     {
         int number = 1; var names = new HashSet<string>(slots.Select(slot => slot.Name), StringComparer.OrdinalIgnoreCase);
         while (names.Contains("Save " + number)) number++;
-        saveName = "Save " + number; options = new ProfileOptions { GrindTier = GrindTiers.Default.Id }; cheatsOpen = false; wizard = true; Build();
+        saveName = "Save " + number; options = new ProfileOptions { GrindTier = GrindTiers.Default.Id, NpcDifficulty = NpcDifficultyIds.NewSaveDefault }; cheatsOpen = false; wizard = true; Build();
     }
 
     private void BuildWizard(bool kit)
@@ -590,6 +643,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
         controls[meta] = "save.meta.violet-hold";
         ConfigureMeta(meta);
         PaceRows(kit, "save.pace:", () => GrindTiers.Find(options.GrindTier), tier => options.GrindTier = tier.Id);
+        DifficultyRows(kit, "save.difficulty:", () => options.NpcDifficulty, id => options.NpcDifficulty = id);
         // Sandbox keeps its own one-line pitch; Pace reserves explicit two-line slices.
         cheatList = null; cheatRows = 0; cheatPitch = 0;
         Divider();
@@ -614,6 +668,38 @@ internal sealed class NativeProfileMenu : ButtonListMenu
         PaceRows(kit, "save.pace.set:", () => LocalLadder.Profile.GrindTier, tier => LocalLadder.Profile.SetGrindTier(tier.Id));
         PaceNote();
         slices.Add(new Slice { Object = back.gameObject });
+    }
+
+    private void BuildDifficulty(bool kit)
+    {
+        var back = Plank("SoloStoneDifficultyBack", "save.difficulty.back", NativeStrings.Get("GLOBAL_BACK", "Back"), _ => LeavePace(), false);
+        if (kit) KitScale();
+        // A delayed rebuild can run after the save closed: no profile reads as the default and selects nothing.
+        DifficultyRows(kit, "save.difficulty.set:", () => LocalLadder.Profile?.NpcDifficulty ?? NpcDifficultyIds.Default, id => {
+            if (LocalLadder.Profile == null) return;
+            LocalLadder.Profile.SetNpcDifficulty(id);
+            NativeOptionsDifficulty.Sync();
+        });
+        Label("SoloStoneDifficultyNote", "Applies from your next match.", LabelColor, .7f);
+        slices.Add(new Slice { Object = back.gameObject });
+    }
+
+    private void DifficultyRows(bool kit, string prefix, Func<string> current, Action<string> select)
+    {
+        if (wizard) Label("SoloStoneDifficultyHeading", "NPC Difficulty", LabelColor, .8f);
+        var group = Wrapper("SoloStoneDifficultyRows");
+        var body = SizedContent(group, out Mesh mesh);
+        var content = new List<GameObject>();
+        foreach (string id in NpcDifficultyIds.All)
+        {
+            string captured = id;
+            var row = ChoiceRow(kit, id, prefix + id, NpcDifficultyIds.Name(id) + " — " + NpcDifficultyIds.Summary(id), null,
+                () => current() == captured, () => select(captured), NpcDifficultyIds.IsLocked(id));
+            row.transform.parent.SetParent(body.transform, true);
+            content.Add(row);
+        }
+        beforeLayout.Add(() => StackPaceRows(content, group, mesh));
+        afterLayout.Add(() => CenterPaceRows(content));
     }
 
     private void PaceRows(bool kit, string prefix, Func<GrindTier> current, Action<GrindTier> select)
@@ -676,7 +762,20 @@ internal sealed class NativeProfileMenu : ButtonListMenu
 
     private GameObject PaceRow(bool kit, GrindTier tier, string semanticId, Func<bool> read, Action select)
     {
-        var wrapper = Wrapper("ProfilePace-" + tier.Id);
+        var row = ChoiceRow(kit, tier.Id, semanticId, tier.Name, "one meta deck ~" + PaceHours(tier.HoursPerMetaDeck)
+            + " h · half collection ~" + tier.HoursToHalfCollection + " h", read, select, false);
+        ConfigurePaceTooltip(row.GetComponentInChildren<PegUIElement>(), tier);
+        return row;
+    }
+
+    private GameObject ChoiceRow(bool kit, string id, string semanticId, string title, string summary, Func<bool> read, Action select, bool locked)
+    {
+        var wrapper = Wrapper("SoloStoneProfileChoice-" + semanticId);
+        Func<bool> choose = () => {
+            if (locked) { NativeProfileSelector.Log("NPC_DIFFICULTY locked id=" + id); return false; }
+            select();
+            return true;
+        };
         var content = SizedContent(wrapper, out Mesh mesh, false);
         PegUIElement control;
         Component glyph = null;
@@ -690,45 +789,66 @@ internal sealed class NativeProfileMenu : ButtonListMenu
             box.SetChecked(read());
             box.AddEventListener(UIEventType.RELEASE, _ => {
                 if (Locked()) { box.SetChecked(read()); return; }
-                try { select(); } catch (Exception error) { box.SetChecked(read()); NativeProfileSelector.ShowError(error.Message); return; }
+                try { if (!choose()) { box.SetChecked(read()); return; } } catch (Exception error) { box.SetChecked(read()); NativeProfileSelector.ShowError(error.Message); return; }
                 Build();
             });
             control = box;
         }
         else
         {
-            var plank = Plank("ProfilePaceFallback-" + tier.Id, null, "", _ => {
-                try { select(); } catch (Exception error) { NativeProfileSelector.ShowError(error.Message); return; }
+            var plank = Plank("SoloStoneProfileChoiceFallback-" + semanticId, null, "", _ => {
+                try { if (!choose()) return; } catch (Exception error) { NativeProfileSelector.ShowError(error.Message); return; }
                 Build();
             }, false);
             plank.transform.SetParent(content.transform, true);
             control = plank;
-            glyph = Caption(content.transform, read() ? "☑" : "☐", LabelColor, .8f);
+            glyph = Caption(content.transform, read() ? "☑" : "☐", locked ? new Color(.5f, .5f, .5f) : LabelColor, .8f);
         }
+        // A locked level is natively disabled: a real click does nothing (the fallback plank, or the checkbox, ignores input).
+        if (locked) control.SetEnabled(false);
         control.name = wrapper.name + "Control";
         controls[control] = semanticId;
         if (read()) selectedControls.Add(control);
-        var name = Caption(content.transform, tier.Name, LabelColor, .8f);
-        var stats = Caption(content.transform, "one meta deck ~" + PaceHours(tier.HoursPerMetaDeck)
-            + " h · half collection ~" + tier.HoursToHalfCollection + " h", new Color(.76f, .72f, .63f), .6f);
+        var name = Caption(content.transform, title, locked ? new Color(.5f, .5f, .5f) : LabelColor, .8f);
+        var stats = summary == null ? null : Caption(content.transform, summary, new Color(.76f, .72f, .63f), .6f);
         foreach (var text in new[] { glyph, name, stats }) ProfileFormKit.SingleLine(text);
         // Capture only menu-local dimensions. Per-layout world dimensions follow the current wrapper scale.
         float baseScale = wrapper.transform.lossyScale.x, localUnit = unitWorld / baseScale, localWidth = FormWidth / baseScale;
         var nameScale = name.transform.localScale;
-        var statsScale = stats.transform.localScale;
+        var statsScale = stats == null ? Vector3.one : stats.transform.localScale;
         var controlScale = control.transform.localScale;
         beforeLayout.Add(() => {
             float unit = localUnit * wrapper.transform.lossyScale.x, width = localWidth * wrapper.transform.lossyScale.x;
-            name.transform.localScale = nameScale; stats.transform.localScale = statsScale;
+            name.transform.localScale = nameScale; if (stats != null) stats.transform.localScale = statsScale;
             control.transform.localScale = controlScale;
-            float pitch = ArrangePaceRow(control, glyph, name, stats, wrapper.transform.position, unit, width, kit);
+            float pitch = stats == null ? ArrangeDifficultyRow(control, glyph, name, wrapper.transform.position, unit, width, kit)
+                : ArrangePaceRow(control, glyph, name, stats, wrapper.transform.position, unit, width, kit);
             SizeSlice(wrapper, mesh, width, pitch);
         });
-        TrackPace(tier.Id + ".checkbox", camera => kit ? MeshScreen(control.gameObject, camera) : TextScreen(glyph, camera));
-        TrackPace(tier.Id + ".name", camera => TextScreen(name, camera));
-        TrackPace(tier.Id + ".stats", camera => TextScreen(stats, camera));
-        ConfigurePaceTooltip(control, tier);
+        TrackPace(semanticId + ".checkbox", camera => kit ? MeshScreen(control.gameObject, camera) : TextScreen(glyph, camera));
+        TrackPace(semanticId + ".name", camera => TextScreen(name, camera));
+        if (stats != null) TrackPace(semanticId + ".stats", camera => TextScreen(stats, camera));
         return content;
+    }
+
+    // Single-line difficulty rows reserve a fixed cell, so four rows add only 2.4 plank heights to the form.
+    private float ArrangeDifficultyRow(PegUIElement control, Component glyph, Component name, Vector3 origin, float unit, float width, bool kit)
+    {
+        float left = Vector3.Dot(origin, right) - width / 2 + unit * .35f, middle = Vector3.Dot(origin, up);
+        float check = unit * .4f, gap = unit * .15f;
+        PlacePaceText(name, left + check + gap, middle, width - unit * .7f - check - gap, unit * .34f);
+        if (kit)
+        {
+            ProfileFormKit.SizeOnPlane(control.gameObject, right, up, check, check);
+            ProfileFormKit.Center(control.gameObject, right, up, left + check / 2, middle);
+        }
+        else
+        {
+            ProfileFormKit.SizeOnPlane(control.gameObject, right, up, width, unit * .5f);
+            ProfileFormKit.Center(control.gameObject, right, up, Vector3.Dot(origin, right), middle);
+            PlacePaceText(glyph, left, middle, check, check);
+        }
+        return unit * .6f;
     }
 
     // Explicit row cells: checkbox left, two caption clones right. Glyph bounds determine placement, never a
@@ -881,7 +1001,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
         var camera = CameraUtils.FindFirstByLayerMask(1 << m_menu.gameObject.layer);
         if (camera == null) return;
         try { CheckPace(camera); }
-        catch (Exception error) { NativeProfileSelector.Log("SAVE_FORM paceCheck page=" + (wizard ? "wizard" : "pace")
+        catch (Exception error) { NativeProfileSelector.Log("SAVE_FORM paceCheck page=" + (wizard ? "wizard" : difficultyPage ? "difficulty" : "pace")
             + " screen=" + Screen.width + "x" + Screen.height + " ok=false inner=unavailable issues=[diagnostic:" + error.Message + "]"); }
     }
 
@@ -907,7 +1027,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
                 ? new DeckRect(rect.Value.x, rect.Value.y, rect.Value.width, rect.Value.height) : default));
         }
         var issues = ProfilePaceGeometry.Check(inner, elements);
-        string result = "SAVE_FORM paceCheck page=" + (wizard ? "wizard" : "pace") + " screen=" + Screen.width + "x" + Screen.height
+        string result = "SAVE_FORM paceCheck page=" + (wizard ? "wizard" : difficultyPage ? "difficulty" : "pace") + " screen=" + Screen.width + "x" + Screen.height
             + " ok=" + (issues.Count == 0 ? "true" : "false") + " inner=" + Rect.MinMaxRect(inner.X, inner.Y, inner.X + inner.Width, inner.Y + inner.Height)
             + " innerSource=background.middle+border.inner-edges elements=" + elements.Count
             + " issues=[" + string.Join(";", issues) + "]";
@@ -1049,7 +1169,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
     {
         var row = CreateMenuButton(id, label, e => { if (!Locked()) action(e); }); rows.Add(row); owned.Add(row.gameObject);
         if (semanticId != null) controls[row] = semanticId;
-        if (semanticId == "save.create" || semanticId == "save.cancel" || semanticId == "save.pace.back" || semanticId == "save.cheat.heading")
+        if (semanticId == "save.create" || semanticId == "save.cancel" || semanticId == "save.pace.back" || semanticId == "save.difficulty.back" || semanticId == "save.cheat.heading")
             TrackPace(semanticId, camera => ColliderScreen(row.gameObject, camera) ?? MeshScreen(row.gameObject, camera));
         if (slice) slices.Add(new Slice { Object = row.gameObject });
         if (unitPlank == null)
@@ -1477,7 +1597,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
     }
 
     // Current save: the native Options check glyph on the plank face, just left of its name (ProfileMenuGeometry.CheckCenter).
-    private void MarkCurrent(UIBButton row, bool kit, string label)
+    private void MarkCurrent(UIBButton row, bool kit, string label, string difficulty)
     {
         // Everything is measured and decided on the unparented clone (it lives under the kit holder), so a clone that is
         // then discarded can never inflate this row's Span; it is parented only once it is known to fit.
@@ -1487,7 +1607,7 @@ internal sealed class NativeProfileMenu : ButtonListMenu
             || !ProfileFormKit.Span(row.gameObject, up, out float y0, out float y1) || !ProfileFormKit.Span(row.gameObject, toward, out _, out float z1))
         {
             Discard(glyph);
-            row.SetText(ProfileMenuGeometry.FallbackLabel(label));
+            row.SetText(ProfileMenuGeometry.FallbackLabel(label) + " · " + difficulty);
             return;
         }
         glyph.transform.rotation = ProfileFormKit.Correction(plankFacing) * glyph.transform.rotation;
@@ -1512,11 +1632,11 @@ internal sealed class NativeProfileMenu : ButtonListMenu
             }
             nameMin = lo; nameMax = hi;
         }
-        var plan = ProfileMenuGeometry.PlanCheck(x0, x1, nameMin, nameMax, width, label.Length);
+        var plan = ProfileMenuGeometry.PlanCheck(x0, x1, nameMin, nameMax, width, (label + " · " + difficulty).Length);   // the whole row text, not the name alone
         if (!plan.HasValue)
         {
             Discard(glyph);
-            row.SetText(ProfileMenuGeometry.FallbackLabel(label));
+            row.SetText(ProfileMenuGeometry.FallbackLabel(label) + " · " + difficulty);
             return;
         }
         glyph.transform.SetParent(face.transform, true);

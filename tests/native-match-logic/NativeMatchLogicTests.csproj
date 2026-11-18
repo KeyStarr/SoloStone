@@ -56,7 +56,7 @@
     <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
     <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
-    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
+    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" />
     <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
     <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
     <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
