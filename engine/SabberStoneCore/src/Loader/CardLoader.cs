@@ -13,6 +13,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using SabberStoneCore.Enums;
@@ -31,8 +32,44 @@ namespace SabberStoneCore.Loader
 		{
 			// Get definitions from the embedded per-meta card file
 			var cards = CardFacts.Embedded.Cards.Select(e => Build(e, overlay: false)).ToArray();
-            return ClientOverlay.AddTo(cards, ClientOverlay.Data);
+            return ClientOverlay.AddTo(ApplyIdentity(cards, CardFacts.Embedded.Identity), ClientOverlay.Data);
         }
+
+		// Wild identity rows (facts/README.md): each replaces the base card with the same id and dbf, in its place, so the
+		// card list order (random pools, first card per dbf) stays. Built with the overlay rules, as client-export data.
+		internal static Card[] ApplyIdentity(Card[] baseCards, CardFacts.Entity[] identity)
+		{
+			if (identity == null || identity.Length == 0) return baseCards;
+			var index = new Dictionary<string, int>(baseCards.Length, StringComparer.Ordinal);
+			for (int i = 0; i < baseCards.Length; i++)
+				if (!index.ContainsKey(baseCards[i].Id)) index.Add(baseCards[i].Id, i);
+				else index[baseCards[i].Id] = -1;
+			var result = (Card[])baseCards.Clone();
+			var done = new HashSet<string>(StringComparer.Ordinal);
+			foreach (CardFacts.Entity entity in identity)
+			{
+				if (entity?.Id == null || !done.Add(entity.Id))
+					throw new InvalidDataException("Wild identity row duplicate or without id: " + entity?.Id);
+				if (!index.TryGetValue(entity.Id, out int at) || at < 0)
+					throw new InvalidDataException("Wild identity row matches no single base card: " + entity.Id);
+				if (baseCards[at].AssetId != entity.AssetId)
+					throw new InvalidDataException("Wild identity row changes the dbf of " + entity.Id);
+				if (!new[] { GameTag.CARDTYPE, GameTag.CARD_SET, GameTag.COLLECTIBLE }.All(tag => entity.Tags.Any(t => t.GameTag == tag)))
+					throw new InvalidDataException("Wild identity row missing type/set/collectible: " + entity.Id);
+				if (TagOf(entity, GameTag.CARDTYPE) != (int)baseCards[at].Type)
+					throw new InvalidDataException("Wild identity row changes the card type of " + entity.Id);
+				if (TagOf(entity, GameTag.COLLECTIBLE) != 1)
+					throw new InvalidDataException("Wild identity row is not collectible: " + entity.Id);
+				result[at] = Build(entity, overlay: true);
+			}
+			return result;
+		}
+
+		private static int TagOf(CardFacts.Entity entity, GameTag tag)
+		{
+			foreach (var t in entity.Tags) if (t.GameTag == tag) return (int)t.TagValue;
+			return int.MinValue;
+		}
 
 		// Private tools and tests still build cards from the XML; the engine itself does not.
         internal static Card[] LoadDefinitions(XDocument cardDefsXml, bool overlay = false)

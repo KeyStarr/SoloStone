@@ -436,6 +436,7 @@ namespace SabberStoneCore.CardSets
 			// - ELITE = 1
 			// - CANT_ATTACK = 1
 			// --------------------------------------------------------
+			// The 37.0 export lacks CANT_ATTACK; the Wild identity row keeps the base tag (generator rule for lost tags).
 			cards.Add("EX1_298", new CardDef(new Power
 			{
 				Trigger = new Trigger(TriggerType.TURN_END)

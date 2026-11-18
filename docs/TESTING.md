@@ -170,6 +170,15 @@ client is in the `ci` tier. The other half is a `client` suite of its own, run w
 `engine-proof-client` requires the export (it fails, never skips, a comparison). The identity comparisons of the whole card corpus run in
 `engine-proof`, so a maintainer run needs `engine-proof` with the export present as well as `engine-proof-client`.
 
+`EngineProof --wild-sets-only` runs all `[GroupProof(..., ProofKind.WildCards)]` groups; the full run includes them too.
+A group also runs through its derived flag, for example `--wild-y0a-pilot-cards-only`.
+`--standard-sets-only` retains its existing scope. Wild cases use `WildSetsProof.Case(id, scenario)`:
+legacy script registration, exclusion from the active Standard meta, Wild legality, pinned export comparisons when
+available, three seeded Wild games, exact clone and snapshot checks. Each case reports Standard reprints sharing its behaviour.
+Wild manifests live in `tests/progression/batches/wild/<wave>-<group>.txt`, one collectible ID per line.
+The `progression` suite checks exact equality with literal Wild cases, rejects duplicates/overlaps and Standard IDs;
+the Standard manifest loader ignores this subfolder.
+
 The card export (`data/carddb/37.0.0.254477/cards.json.gz`) is optional for `engine-proof`: with it, each card is also
 compared with the export, exactly as before; without it, the run prints one `SKIP ...` line for each kind of
 comparison and a `SKIPPED n x ...` total at the end. The comparisons that need the client itself (the independent pool derivation,

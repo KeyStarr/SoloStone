@@ -10724,4 +10724,23 @@
 {"id":"YOD_010","dbf":56077,"name":"Shotbot","text":"<b>Reborn</b>","textHash":"83a3ccc6304ccc71","tags":[[45,2],[47,2],[48,2],[114,0],[183,1403],[199,5],[200,17],[202,4],[203,1],[321,1],[1085,1]]},
 {"id":"YOG_514","dbf":101021,"name":"Chaotic Tendril","text":"<b>Battlecry:</b> Cast a\nrandom @-Cost spell.\nImprove your future\nChaotic Tendrils.","textHash":"5d18f252131b4c0b","tags":[[2,1],[45,1],[47,1],[48,1],[183,1858],[199,12],[202,4],[203,1],[218,1],[321,1],[1824,1]]},
 {"id":"YOP_001e","dbf":62005,"name":"Loner","text":"Your next <b>Outcast</b> card costs (1) less.","textHash":"bcbb5629a3ff8e5e","tags":[[183,1466],[199,12],[202,6],[321,0],[362,1]]}
-]}}
+]},
+"identity":[
+{"id":"CS2_057","dbf":914,"name":"Shadow Bolt","text":"Deal $4 damage\nto a minion.","textHash":"5939bb30aafe8ef2","tags":[[48,3],[183,1635],[199,9],[201,3],[202,5],[203,2],[251,1],[268,2],[321,1],[1635,6]]},
+{"id":"CS2_059","dbf":469,"name":"Blood Imp","text":"[x]  <b>Stealth</b>. At the end of your  \nturn, give another random\n friendly minion +1 Health.","textHash":"e8e330b0bbd46da7","tags":[[32,1],[45,1],[48,1],[183,3],[191,1],[199,9],[200,15],[201,3],[202,4],[203,1],[251,3],[268,2],[321,1],[1965,1]]},
+{"id":"CS2_061","dbf":919,"name":"Drain Life","text":"Deal $2 damage. Restore #2 Health to your hero.","textHash":"90bfa14baa94a23f","tags":[[48,3],[183,1635],[199,9],[201,3],[202,5],[203,2],[251,1],[268,2],[321,1],[1635,6]]},
+{"id":"CS2_063","dbf":982,"name":"Corruption","text":"Choose an enemy minion. At the start of your turn, destroy it.","textHash":"13cdf3afb448cc11","tags":[[48,1],[183,1635],[199,9],[201,3],[202,5],[203,2],[251,1],[321,1],[1635,6]]},
+{"id":"CS2_073","dbf":268,"name":"Cold Blood","text":"Give a minion +2 Attack. <b>Combo:</b> +4 Attack instead.","textHash":"119fce31bc59e882","tags":[[48,1],[183,3],[199,7],[201,3],[202,5],[203,1],[220,1],[251,1],[268,2],[321,1]]},
+{"id":"CS2_075","dbf":710,"name":"Sinister Strike","text":"Deal $3 damage to the_enemy hero.","textHash":"2a84c5764f8dfaac","tags":[[48,1],[183,1635],[199,7],[201,3],[202,5],[203,2],[251,6],[268,2],[321,1]]},
+{"id":"CS2_077","dbf":630,"name":"Sprint","text":"Draw 4 cards.","textHash":"70e69782a5c9dbf2","tags":[[48,5],[183,1635],[199,7],[201,3],[202,5],[203,2],[251,1],[268,2],[321,1]]},
+{"id":"CS2_080","dbf":421,"name":"Assassin's Blade","text":"","textHash":"e3b0c44298fc1c14","tags":[[45,5],[47,2],[48,4],[183,1635],[199,7],[201,3],[202,7],[203,2],[251,6],[268,2],[321,1]]},
+{"id":"CS2_233","dbf":1064,"name":"Blade Flurry","text":"Destroy your weapon and deal its damage to all enemy minions.","textHash":"c8986f3a1b13d02f","tags":[[48,2],[183,3],[199,7],[201,3],[202,5],[203,3],[251,1],[268,2],[321,1],[370,1]]},
+{"id":"EX1_124","dbf":904,"name":"Eviscerate","text":"Deal $2 damage. <b>Combo:</b> Deal $4 damage instead.","textHash":"5a5993dfb3b7e807","tags":[[48,2],[183,3],[199,7],[201,3],[202,5],[203,1],[220,1],[251,1],[268,2],[321,1]]},
+{"id":"EX1_126","dbf":282,"name":"Betrayal","text":"Force an enemy minion to deal its damage to the minions next to it.","textHash":"5a03660a71d377c4","tags":[[48,2],[183,3],[199,7],[201,3],[202,5],[203,1],[251,6],[268,2],[321,1]]},
+{"id":"EX1_128","dbf":990,"name":"Conceal","text":"Give your minions <b>Stealth</b> until your next_turn.","textHash":"c1e4184b7c45005c","tags":[[48,1],[183,3],[199,7],[201,3],[202,5],[203,1],[251,1],[268,2],[321,1],[1635,6]],"refs":[[191,1]]},
+{"id":"EX1_133","dbf":391,"name":"Perdition's Blade","text":"<b>Battlecry:</b> Deal 1 damage. <b>Combo:</b> Deal 2 instead.","textHash":"e3c5409f40aac64d","tags":[[45,2],[47,2],[48,3],[183,3],[199,7],[201,3],[202,7],[203,3],[218,1],[220,1],[251,1],[268,2],[321,1]]},
+{"id":"EX1_137","dbf":708,"name":"Headcrack","text":"Deal $2 damage to the enemy hero. <b>Combo:</b> Return this to your hand next turn.","textHash":"d4e68bd993245817","tags":[[48,3],[183,3],[199,7],[201,3],[202,5],[203,3],[220,1],[251,1],[321,1]]},
+{"id":"EX1_144","dbf":365,"name":"Shadowstep","text":"Return a friendly minion to your hand. It_costs (2) less.","textHash":"2e9faafe09dba7c1","tags":[[183,3],[199,7],[201,3],[202,5],[203,1],[251,1],[321,1],[1635,6],[2589,1]]},
+{"id":"EX1_181","dbf":52263,"name":"Call of the Void","text":"Add a random Demon to your hand.","textHash":"185326336095c0b6","tags":[[48,1],[114,0],[183,1635],[199,9],[202,5],[203,1],[321,1],[1635,6]]},
+{"id":"EX1_182","dbf":52264,"name":"Pilfer","text":"Add a random card from another class to_your hand.","textHash":"0f12d900ce73a09c","tags":[[48,1],[114,0],[183,1635],[199,7],[202,5],[203,1],[321,1]]}
+]}

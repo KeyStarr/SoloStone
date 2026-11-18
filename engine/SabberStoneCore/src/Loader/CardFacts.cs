@@ -31,6 +31,8 @@ namespace SabberStoneCore.Loader
 			public string Meta;
 			public Entity[] Cards;
 			public ClientOverlay.Document Overlay;
+			/// <summary>Wild identity rows: the 37.0 client identity of base cards a Wild wave lists. Empty when the file has none.</summary>
+			public Entity[] Identity = Array.Empty<Entity>();
 		}
 
 		internal static readonly Document Embedded = Read(typeof(CardFacts).Assembly.GetManifestResourceStream(Resource), Meta);
@@ -72,6 +74,11 @@ namespace SabberStoneCore.Loader
 							result.Cards = cards.ToArray();
 							break;
 						case "overlay": result.Overlay = ReadOverlay(); break;
+						case "identity":
+							var identity = new List<Entity>(64);
+							ReadArray(() => identity.Add(ReadRow(null, identity: true)));
+							result.Identity = identity.ToArray();
+							break;
 						default: throw Bad("unknown key " + key);
 					}
 				} while (Next('}'));
@@ -111,7 +118,8 @@ namespace SabberStoneCore.Loader
 			}
 
 			// With a definition, also fills the overlay fields that ClientOverlay.Read takes from the XML.
-			private Entity ReadRow(ClientOverlay.Definition definition)
+			// An identity row is a base row in the overlay's shape: name and text required, no overlay-only field.
+			private Entity ReadRow(ClientOverlay.Definition definition, bool identity = false)
 			{
 				var entity = new Entity();
 				string name = null, text = null;
@@ -146,6 +154,7 @@ namespace SabberStoneCore.Loader
 					}
 				} while (Next('}'));
 				if (entity.Id == null || !hasAsset || tags == null) throw Bad("incomplete card row");
+				if (identity && (name == null || text == null)) throw Bad("identity row needs name and text: " + entity.Id);
 
 				// String tags have no order dependence: Card only keeps them as Name and Text.
 				int count = tags.Length + (name != null ? 1 : 0) + (text != null ? 1 : 0);

@@ -141,7 +141,7 @@ namespace SabberStoneCore.Model
 			var demonHunterCards = All.Where(c => c.Collectible && c.Implemented && c.Type != CardType.HERO &&
 				(c.Class == CardClass.DEMONHUNTER ||
 				 !c.ExcludeFromLegacyRandomPools && c.Class == CardClass.NEUTRAL && c.MultiClassGroup == 0)).ToArray();
-			Standard[CardClass.DEMONHUNTER] = demonHunterCards.Where(c => StandardSets.Contains(c.Set)).ToList().AsReadOnly();
+			Standard[CardClass.DEMONHUNTER] = demonHunterCards.Where(c => StandardSets.Contains(LegacySet(c))).ToList().AsReadOnly();
 			Wild[CardClass.DEMONHUNTER] = demonHunterCards.ToList().AsReadOnly();
 
             // Project Standard registry is normalized to CORE and the six modern sets, including BE.
@@ -155,7 +155,7 @@ namespace SabberStoneCore.Model
                  !c.ExcludeFromLegacyRandomPools && c.MultiClassGroup == 0)).ToArray();
             Standard[CardClass.DEATHKNIGHT] = deathKnightCards.Where(c =>
                 c.Class == CardClass.NEUTRAL && c[GameTag.MULTIPLE_CLASSES] == 0
-                    ? StandardSets.Contains(c.Set) : projectStandard.Contains(c.Id)).ToList().AsReadOnly();
+                    ? StandardSets.Contains(LegacySet(c)) : projectStandard.Contains(c.Id)).ToList().AsReadOnly();
             Wild[CardClass.DEATHKNIGHT] = deathKnightCards.ToList().AsReadOnly();
 
 			// Temporary fix for Lotus Assassin
@@ -232,7 +232,32 @@ namespace SabberStoneCore.Model
 		/// </summary>
 		public static bool IsFormatLegal(Card card, FormatType formatType) =>
 			card != null && card.Collectible && card.Implemented && !card.Id.StartsWith("HERO", StringComparison.Ordinal) &&
-			(formatType == FormatType.FT_WILD || formatType == FormatType.FT_STANDARD && StandardSets.Contains(card.Set));
+			(formatType == FormatType.FT_WILD || formatType == FormatType.FT_STANDARD && StandardSets.Contains(LegacySet(card)));
+
+		// The legacy StandardSets test (2021 sets) reads a Wild identity row's card by its base row's set, so a 37.0 set change
+		// (Hall of Fame cards back in EXPERT1) neither joins the legacy Standard pools nor changes legacy Standard legality.
+		// Lazy and tolerant: a bad identity row must fail in CardLoader.ApplyIdentity with its InvalidDataException, not here.
+		private static Dictionary<string, CardSet> _legacySets;
+		private static Dictionary<string, CardSet> LegacySets => _legacySets ?? (_legacySets = BaseSets(CardFacts.Embedded));
+
+		// One pass over the base rows: the first base row per identity id (as the loader places it), its CARD_SET.
+		private static Dictionary<string, CardSet> BaseSets(CardFacts.Document facts)
+		{
+			var wanted = new HashSet<string>(facts.Identity.Where(e => e.Id != null).Select(e => e.Id), StringComparer.Ordinal);
+			var firstBase = new Dictionary<string, CardFacts.Entity>(wanted.Count, StringComparer.Ordinal);
+			foreach (CardFacts.Entity entity in facts.Cards)
+				if (wanted.Contains(entity.Id) && !firstBase.ContainsKey(entity.Id)) firstBase.Add(entity.Id, entity);
+			var sets = new Dictionary<string, CardSet>(wanted.Count, StringComparer.Ordinal);
+			foreach (CardFacts.Entity e in facts.Identity)
+			{
+				if (e.Id == null || !firstBase.TryGetValue(e.Id, out CardFacts.Entity row)) continue;
+				foreach (var tag in row.Tags)
+					if (tag.GameTag == GameTag.CARD_SET) { sets[e.Id] = (CardSet)(int)tag.TagValue; break; }
+			}
+			return sets;
+		}
+
+		internal static CardSet LegacySet(Card card) => LegacySets.TryGetValue(card.Id, out CardSet set) ? set : card.Set;
 
 		/// <summary>
 		/// Returns the default hero class card.

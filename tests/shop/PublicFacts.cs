@@ -17,7 +17,10 @@ internal static class PublicFacts
         string file = Directory.GetFiles(Path.Combine(root, "facts"), meta + "-*.json").Where(path => Path.GetFileName(path).Count(c => c == '.') == 1).OrderBy(path => path, StringComparer.Ordinal).Last();
         using var json = JsonDocument.Parse(File.ReadAllText(file));
         var rows = new Dictionary<string, Row>(StringComparer.Ordinal);
-        foreach (var list in new[] { json.RootElement.GetProperty("cards"), json.RootElement.GetProperty("overlay").GetProperty("cards") })
+        // A Wild identity row replaces its base row (facts/README.md): first, so TryAdd keeps it.
+        var lists = new List<JsonElement> { json.RootElement.GetProperty("cards"), json.RootElement.GetProperty("overlay").GetProperty("cards") };
+        if (json.RootElement.TryGetProperty("identity", out var identity)) lists.Insert(0, identity);
+        foreach (var list in lists)
             foreach (var card in list.EnumerateArray())
             {
                 var tags = card.GetProperty("tags").EnumerateArray().ToDictionary(tag => tag[0].GetInt32(), tag => tag[1].GetInt32());

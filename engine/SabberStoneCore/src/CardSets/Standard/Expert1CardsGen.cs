@@ -2451,8 +2451,8 @@ namespace SabberStoneCore.CardSets.Standard
 			// --------------------------------------------------------
 			cards.Add("EX1_124", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0}}, new Power
 			{
-				PowerTask = new DamageTask(2, EntityType.TARGET),
-				ComboTask = new DamageTask(4, EntityType.TARGET)
+				PowerTask = new DamageTask(2, EntityType.TARGET, true),
+				ComboTask = new DamageTask(4, EntityType.TARGET, true)
 			}));
 
 			// ------------------------------------------ SPELL - ROGUE
@@ -2482,9 +2482,9 @@ namespace SabberStoneCore.CardSets.Standard
 			// --------------------------------------------------------
 			cards.Add("EX1_137", new CardDef(new Power
 			{
-				PowerTask = new DamageTask(2, EntityType.OP_HERO),
+				PowerTask = new DamageTask(2, EntityType.OP_HERO, true),
 				ComboTask = ComplexTask.Create(
-					new DamageTask(2, EntityType.OP_HERO),
+					new DamageTask(2, EntityType.OP_HERO, true),
 					new SetGameTagTask(GameTag.HEADCRACK_COMBO, 1, EntityType.SOURCE)),
 				Trigger = new Trigger(TriggerType.TURN_END)
 				{
@@ -2537,11 +2537,27 @@ namespace SabberStoneCore.CardSets.Standard
 			// [EX1_182] Pilfer - COST:1
 			// - Set: expert1, Rarity: common
 			// --------------------------------------------------------
-			// Text: Add a random card to your hand <i>(from your opponent's class)</i>.
+			// Text: Add a random card from another class to_your hand.
 			// --------------------------------------------------------
 			cards.Add("EX1_182", new CardDef(new Power
 			{
-				PowerTask = ComplexTask.AddRandomOpClassCardToHand
+				PowerTask = ComplexTask.Create(
+					new CustomTask((game, controller, source, target, stack) =>
+					{
+						var pool = new List<Card>();
+						foreach (CardClass cardClass in new[] { CardClass.DRUID, CardClass.HUNTER, CardClass.MAGE, CardClass.PALADIN,
+							CardClass.PRIEST, CardClass.ROGUE, CardClass.SHAMAN, CardClass.WARLOCK, CardClass.WARRIOR,
+							CardClass.DEMONHUNTER, CardClass.DEATHKNIGHT })
+						{
+							if (cardClass == controller.HeroClass) continue;
+							if (Cards.FormatTypeClassCards(game.FormatType).TryGetValue(cardClass, out var classCards))
+								pool.AddRange(classCards.Where(c => c.Class == cardClass && c.Collectible && c.Implemented && c.Type != CardType.HERO && c[GameTag.QUEST] == 0));
+						}
+						if (pool.Count == 0) { stack.Playables = new List<IPlayable>(); return; }
+						stack.Playables = new List<IPlayable> { Entity.FromCard(controller, pool.Choose(game.Random)) };
+						game.OnRandomHappened(true);
+					}),
+					new AddStackTo(EntityType.HAND))
 			}));
 
 			// ----------------------------------------- WEAPON - ROGUE

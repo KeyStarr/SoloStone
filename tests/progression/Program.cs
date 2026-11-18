@@ -16,6 +16,19 @@ if (args.SequenceEqual(new[] { "--deck-premiums-only" }))
     return;
 }
 
+if (args.Length == 2 && args[0] == "--wild-identity-catalog")
+{
+    // A scratch card file (e.g. with a temporary manifest entry): its NewBasicIds identity rows keep CORE/FREE.
+    Console.WriteLine($"PASS Wild identity catalog sets: {WildBatchChecks.CatalogSets(args[1])} NewBasicIds identity rows in {args[1]}");
+    return;
+}
+
+if (args.SequenceEqual(new[] { "--wild-batches-only" }))
+{
+    WildBatchChecks.Run();
+    return;
+}
+
 if (args.SequenceEqual(new[] { "--standard-batches-only" }))
 {
     var batchRoot = Path.Combine(Path.GetTempPath(), "hs-standard-batches-" + Guid.NewGuid());
@@ -48,6 +61,7 @@ if (args.Length == 0)
     var premiumRoot = Path.Combine(Path.GetTempPath(), "hs-deck-premiums-" + Guid.NewGuid());
     Directory.CreateDirectory(premiumRoot);
     try { DeckPremiumChecks.Run(premiumRoot); } finally { Directory.Delete(premiumRoot, true); }
+    WildBatchChecks.Run();
     CraftingChecks.Run();
     TurnTimerOptionChecks.Run();
     FpsCounterOptionChecks.Run();

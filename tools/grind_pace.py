@@ -355,7 +355,8 @@ def definitions_from_facts(root, manifest, meta, core):
         raise ValueError("No card file in facts/ for meta " + meta["id"])
     facts = json.loads(files[-1].read_text())
     rows = {}
-    for row in facts["cards"] + facts["overlay"]["cards"]:
+    # A Wild identity row replaces its base row (facts/README.md): first, so setdefault keeps it.
+    for row in facts.get("identity", []) + facts["cards"] + facts["overlay"]["cards"]:
         rows.setdefault(row["id"], dict(row["tags"]))
     set_of = {c["id"]: name for name, s in manifest["sets"].items() for c in s["cards"]}
     name_of_number = {tags[TAG_SET]: set_of[cid] for cid, tags in rows.items() if cid in set_of and TAG_SET in tags}
