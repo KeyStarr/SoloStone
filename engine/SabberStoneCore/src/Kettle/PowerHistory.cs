@@ -697,6 +697,12 @@ namespace SabberStoneCore.Kettle
         internal Enchantment GrantedDeathrattle { get; set; }
 
         /// <summary>
+        /// Presentation only, set by the task processor while it resolves a Deathrattle queued by an actual death (DeathId > 0): the
+        /// block source is then in the graveyard because of this death, so a stand-in effect may start at its last board slot.
+        /// </summary>
+        internal bool DeathrattleFromDeath { get; set; }
+
+        /// <summary>
         /// Id of an entity whose power task runs inside another entity's block (Wisprider triggering the hero power).
         /// The hit is attributed in a TRIGGER block of that entity, which no POWER-keyed recipe matches, so the entity
         /// keeps the recipe it has when it runs in its own block. Presentation only.
@@ -735,8 +741,20 @@ namespace SabberStoneCore.Kettle
             if (recipe == null || (recipe.Group ? target != null
                 : recipe.Targets == VisualTargets.Resolved && target == null)) return null;
             int visualSource = recipe.Source == VisualSource.Inherit ? 0
-                : recipe.Source == VisualSource.Hero ? source.Controller.Hero.Id : source.Id;
+                : recipe.Source == VisualSource.Hero ? source.Controller.Hero.Id
+                : recipe.Source == VisualSource.Dying ? DyingSource(source) : source.Id;
             return new VisualScope(this, game, recipe, phase, visualSource, target, requirePublicOrigin);
+        }
+
+        // The Deathrattle's own minion (or location or weapon) while the client still has its card at a board slot: in play (an explicit
+        // trigger on a living minion) or in the graveyard because of this death. Anything else (replayed from hand, deck or an old
+        // graveyard) falls back to the owner's public hero.
+        private int DyingSource(IPlayable source)
+        {
+            var type = source.Zone?.Type;
+            bool onBoard = (source is Minion || source is Weapon || source.Card.Type == CardType.LOCATION)
+                && (type == Zone.PLAY || type == Zone.GRAVEYARD && DeathrattleFromDeath && source.Id == CurrentBlock.Source);
+            return onBoard ? source.Id : source.Controller.Hero.Id;
         }
 
         private sealed class VisualScope : IDisposable
@@ -779,16 +797,8 @@ namespace SabberStoneCore.Kettle
                 {
                     var entries = _history.Full.Skip(_full).ToArray();
                     if (!_history.Last.Skip(_last).SequenceEqual(entries)) return;
-                    int groupDepth = 0;
-                    bool hit = false;
-                    foreach (var entry in entries)
-                    {
-                        if (entry is PowerHistoryBlockStart) groupDepth++;
-                        else if (entry is PowerHistoryBlockEnd) groupDepth--;
-                        else if (groupDepth == 0 && entry is PowerHistoryMetaData meta
-                            && meta.Type == MetaDataType.DAMAGE && meta.Data > 0) hit = true;
-                    }
-                    if (!hit) return;
+                    // Owner ruling 2026-11-18: an area effect plays once whenever it runs, on an empty side or with every hit prevented too
+                    // (a per-target recipe still plays nothing without a hit).
                     // A pulse before the hits avoids replaying the full-board effect after nested reactions.
                     var pulse = new IPowerHistoryEntry[] {
                         new PowerHistorySubSpellStart { Source = _source, SpellPrefabGuid = _recipe.Prefab },

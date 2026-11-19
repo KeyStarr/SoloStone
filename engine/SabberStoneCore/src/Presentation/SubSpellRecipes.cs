@@ -5,7 +5,9 @@ using SabberStoneCore.Kettle;
 namespace SabberStoneCore.Presentation
 {
     internal enum VisualPhase { Damage, DamageGroup, Heal, BoardBuff, Draw, Create, Summon, Armor }
-    internal enum VisualSource { Hero, Effect, Inherit }
+    // Dying: the Deathrattle's own minion while its card is still on the board (in play, or in the graveyard because of this death),
+    // else the owner's public hero. The default of every Deathrattle recipe: retail sources the cue at the dying minion.
+    internal enum VisualSource { Hero, Effect, Inherit, Dying }
     internal enum VisualTargets { Resolved, None }
 
     // Pinned 37.0.0.254477. Admission/provenance: data/fx/subspell-recipes.tsv.
@@ -29,6 +31,7 @@ namespace SabberStoneCore.Presentation
             void Add(string cards, VisualPhase phase, string prefab, VisualTargets targets = VisualTargets.Resolved,
                 bool pulse = false, BlockType block = BlockType.POWER, int keyword = 0, int subOption = -1, VisualSource source = VisualSource.Hero, bool group = false, int effectIndex = 0)
             {
+                if (block == BlockType.TRIGGER && keyword == (int)GameTag.DEATHRATTLE && source == VisualSource.Hero) source = VisualSource.Dying;
                 foreach (string card in cards.Split(' '))
                     result.Add((card, block, effectIndex, subOption, keyword, phase), new SubSpellRecipe(prefab, source, targets, pulse, group));
             }
@@ -36,6 +39,8 @@ namespace SabberStoneCore.Presentation
                 "ReuseFX_Generic_Missile_Cannon_Super_Quickest:ed9fdef57cbdcbb44bbfd9f06c1c8d24");
             Add("END_000", VisualPhase.Damage, "ShadowBolt_FX:e6ce5b6e7e1250e4a92dac52a3508671");
             // FIR_909 repeated-cast live cleanup accepted 2026-11-02; same per-hit missile, including spell fan-out.
+            // CATA_582 and JAIL_307 also appear here but their per-hit missile is unreachable since 2026-11-18: DamageTask tries the area (DamageGroup)
+            // recipe first for every count, and a matching area recipe suppresses the per-hit cue (a one-target hit plays the pulse).
             // Grouped full-board waves keep their existing pulses; the remaining quarantined routes are listed in docs/design/damage-fx-coverage-20261027.md.
             Add("FIR_909 DINO_406 END_025 EDR_255 JAIL_801 CATA_585 CATA_582 CATA_303 ONY_018t2 BE_554 BE_153 BE_153t CAP_101 FIR_916 FIR_939 JAIL_307 TLC_227", VisualPhase.Damage, "ReuseFX_Fire_Missile_Fireball_Medium_Super_Simultaneous:161d5760bd9de1e41baf4c5611e61eed");
             // Delayed damage, one missile per hit. Neither CardDef authors a play or trigger spell (census: empty, no trigger
@@ -52,8 +57,8 @@ namespace SabberStoneCore.Presentation
             // Erupting Volcano: native CardDef has no authored play spell (empty census), so the activation's resolved hits
             // had splats but no missile. Board location is the visual origin, as for Past Silvermoon; same missile as the spell routes.
             Add("CATA_584", VisualPhase.Damage, "ReuseFX_Fire_Missile_Fireball_Medium_Super_Simultaneous:161d5760bd9de1e41baf4c5611e61eed", source: VisualSource.Effect);
-            // Location-granted Deathrattle damage, same census-empty gap: composite Elise locations (all enemies, hero-sourced like
-            // the other Deathrattle damage routes: the dead location has no actor) and Past/Present/Future Gnomeregan's TIME_044t1e (2 to enemy hero).
+            // Location-granted Deathrattle damage, same census-empty gap: composite Elise locations (all enemies, sourced at the
+            // dying location like the other Deathrattle routes: the client draws a cue from the source's Card, which stays at its slot after death) and Past/Present/Future Gnomeregan's TIME_044t1e (2 to enemy hero).
             Add("TLC_100t1 TLC_100t2 TLC_100t3", VisualPhase.Damage, "ReuseFX_Physical_Missile_Generic_Super_Simultaneous:6ff0a03c3b353254d887e154c0f94e33", block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             Add("TIME_044t1e", VisualPhase.Damage, "ReuseFX_Holy_Missile_Smite_Medium_Super_Quick_FastActorTriggers:30caf938696e3224bb610c73b35469e6", block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             Add("CORE_ONY_018", VisualPhase.Damage, "ReuseFX_Fire_Missile_Fireball_Medium_Super_Simultaneous:161d5760bd9de1e41baf4c5611e61eed", subOption: 1);
@@ -71,6 +76,8 @@ namespace SabberStoneCore.Presentation
             Add("JAIL_EVENT_101hp", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0");
             Add("EDR_263", VisualPhase.Damage, "ReuseFX_Lightning_Missile_Bolt_Small_Super_Simultaneous:4e176ec954bdc6f4bb7494e521d35c8a", subOption: 0);
             Add("EDR_813", VisualPhase.Damage, "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1", subOption: 1);
+            // EDR_570 sub-option 0, EDR_820 sub-option 1 and the area-only cards below (CATA_581, EDR_820b, EDR_570A): the per-hit missile is unreachable
+            // since 2026-11-18 (the DamageGroup recipe is chosen first and suppresses it); the rows stay because the Damage-phase lookup and DelegatedPowerFx still read them.
             Add("EDR_570", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0", subOption: 0);
             Add("EDR_820", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0", subOption: 1);
             Add("EDR_570", VisualPhase.DamageGroup, "ReuseFX_Shadow_Fire_AE_Shockwave_Small_BothSides_Super:1f77cfbb2d94e3f4982cf07e849fa699", VisualTargets.None, subOption: 0, source: VisualSource.Effect, group: true);
@@ -92,12 +99,13 @@ namespace SabberStoneCore.Presentation
             Add("EDR_421", VisualPhase.Damage, "ReuseFX_Shadow_Missile_Blast_Small_Super_Simultaneous:e39b07044149c034d9b1d70182afe5b0", block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             Add("TLC_401", VisualPhase.Damage, "ReuseFX_Frost_Missile_Snowball_Medium_Fast_Super_Simultaneous:4fecda861d7d78b4186c3a3c3091c1e5", block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             // Quarantined Deathrattle damage, re-admitted (owner 2026-11-16): the client authors no effect for any of these (census: empty),
-            // so each shows a substitute like the other Deathrattle routes above. One small Fireblast missile per hit from the public hero
-            // (Sizzling Cinder, Destructive Blaze); one enemy-side pulse (the Flamestrike/Explosive Trap OpponentSide flood; fel for Felrattler) (Avatar of Destruction, Sewer Imp, Felrattler).
+            // so each shows a substitute like the other Deathrattle routes above. One small Fireblast missile per hit from the dying minion
+            // (Sizzling Cinder, Destructive Blaze); one enemy-side pulse (the Flamestrike/Explosive Trap OpponentSide flood) for Avatar of
+            // Destruction, Sewer Imp and Felrattler. Like every Deathrattle recipe they start at the dying minion (VisualSource.Dying).
             Add("TLC_249 CATA_586", VisualPhase.Damage, "ReuseFX_Missile_Fire_Fireball_Small_Super:b8e7bb6e0944d204297efdc937967085", block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE);
             Add("FIR_778 JAIL_007", VisualPhase.Damage, "ReuseFX_Fire_AE_Flood_OpponentSide_Super:0b9b3e4ef9b62a240b4cbf362c0511b4", VisualTargets.None, block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE, group: true);
             // Felrattler (Fel, "all enemy minions"): the client authors no fel one-side area prefab that works as a sub-spell (Fel_AE_OpponentArea_FX,
-            // the Exploding Bloatbat trigger effect, washed the whole board in the live check), so it shares the proven enemy-side flood (owner call: fel colour). As for every area cue, it plays only when damage lands (B14PresentationProof), so an empty enemy side shows nothing.
+            // the Exploding Bloatbat trigger effect, washed the whole board in the live check), so it shares the proven enemy-side flood (owner call: fel colour). Area cues play every time the effect runs (owner ruling 2026-11-18), so an empty enemy side still shows the flood.
             Add("CORE_WC_701", VisualPhase.Damage, "ReuseFX_Fire_AE_Flood_OpponentSide_Super:0b9b3e4ef9b62a240b4cbf362c0511b4", VisualTargets.None, block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE, group: true);
             Add("JAIL_398", VisualPhase.Damage, "ReuseFX_Fire_AE_Flood_BothSides_Super:1d77444aaeef20d4494e2ad82c551341", VisualTargets.None, block: BlockType.TRIGGER, keyword: (int)GameTag.DEATHRATTLE, group: true);
             Add("EDR_842", VisualPhase.Damage, "ReuseFX_Decay_Missile_AcidGlob_Super_Simultaneous:1e8b03e89cf4f7a4d8dc823cf8132ad1", block: BlockType.TRIGGER);

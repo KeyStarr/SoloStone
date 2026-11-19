@@ -56,8 +56,10 @@ internal static partial class HistoryShapeProof
             f.Game.DeathProcessingAndAuraUpdate(); f.Ready("vulcanos-no-hit");
             int setup = f.Game.PowerHistory.Full.Count;
             f.Act(EndTurnTask.Any(f.Player));
-            Check(!f.Game.PowerHistory.Full.Skip(setup).OfType<PowerHistorySubSpellStart>()
-                .Any(s => s.Source == source.Id), "empty Vulcanos damage has no area effect cue");
+            // Owner-approved behaviour change, 2026-11-18 ("for area effects ... send en mass"): an area effect plays once every time it runs,
+            // on an empty side too (this pin used to demand no cue without damage). Per-target effects still play nothing without a target.
+            Check(f.Game.PowerHistory.Full.Skip(setup).OfType<PowerHistorySubSpellStart>()
+                .Count(s => s.Source == source.Id && s.Targets.Count == 0) == 1, "empty Vulcanos damage still plays its area effect once");
             Clean(f, "SPLIT_EFFECT_BLOCK");
         });
         foreach (string variant in new[] { "immune", "silenced" })
@@ -71,8 +73,11 @@ internal static partial class HistoryShapeProof
                 f.Ready("vulcanos-" + variant);
                 int setup = f.Game.PowerHistory.Full.Count;
                 f.Act(EndTurnTask.Any(f.Player));
-                Check(victim.Damage == 0 && !f.Game.PowerHistory.Full.Skip(setup).OfType<PowerHistorySubSpellStart>()
-                    .Any(s => s.Source == source.Id), "prevented Vulcanos damage has no area effect cue");
+                // Owner-approved behaviour change, 2026-11-18: prevented hits (Immune) still play the area effect each time it runs; a Silenced
+                // Vulcanos runs no effect at all, so it plays none.
+                int cues = f.Game.PowerHistory.Full.Skip(setup).OfType<PowerHistorySubSpellStart>().Count(s => s.Source == source.Id && s.Targets.Count == 0);
+                Check(victim.Damage == 0 && cues == (variant == "immune" ? 1 : 0),
+                    variant == "immune" ? "prevented Vulcanos damage still plays its area effect once" : "silenced Vulcanos runs no effect and plays no area cue (got " + cues + ")");
                 Clean(f, "SPLIT_EFFECT_BLOCK");
             });
         foreach (string card in new[] { "CORE_CS2_042", "CORE_TRL_240", "CORE_ULD_191", "CORE_UNG_848" })
