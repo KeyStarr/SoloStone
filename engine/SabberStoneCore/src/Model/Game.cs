@@ -1559,7 +1559,21 @@ namespace SabberStoneCore.Model
 			//Inter-Phase steps
 			
 			AuraUpdate();
-			SummonResolutionStep();
+
+			// Summon Resolution Step
+			if (TriggerManager.HasOnSummonTrigger)
+			{
+				using var summonCatchUp = Resolution.Enter(ResolutionKind.SummonOn);
+                List<Minion> minions = SummonedMinions;
+				TaskQueue.StartEvent();
+				for (int i = 0; i < minions.Count; i++)
+				{
+					TriggerManager.OnSummonTrigger(minions[i]);
+				}
+				ProcessTasks();
+				TaskQueue.EndEvent();
+			}
+			SummonedMinions.Clear();
 
 			TaskQueue.StartEvent();
 			do
@@ -1583,44 +1597,12 @@ namespace SabberStoneCore.Model
 				using (Resolution.Enter(ResolutionKind.DeathResolution))
                     ProcessTasks(); // Death Resolution Phase
 				ResolveReborns();
-				// The Death Phase ends: its Deathrattle and Reborn summons resolve before the next Death Creation Step.
-				if (SummonedMinions.Count != 0)
-				{
-					if (TriggerManager.HasOnSummonTrigger) AuraUpdate();
-					SummonResolutionStep();
-				}
 			} while (DeadMinions.Count != 0 || DeadBoardObjects.Count != 0);
 			TaskQueue.EndEvent();
             if (Actions.LifecycleRules.ContinueDeaths(this)) DeathProcessingAndAuraUpdate();
 
 			AuraUpdate();	// Aura Update (Other) step(Not implemented)
             Actions.Generic.ResolveDeferredSummons(this);
-		}
-
-		// Summon Resolution Step: "whenever you summon" triggers for the summons of the Phase that just ended.
-		// Each batch leaves the list before it fires: a reaction can reach a nested cleanup (an overdrawn IMPFERNAL!), which
-		// must not fire the same summons again. Engine choice, not a rulebook rule (it does not cover summons made during
-		// this step): summons made by the reactions resolve in another pass of the same step, so no summon event is left
-		// pending when the action ends.
-		private void SummonResolutionStep()
-		{
-			for (int pass = 0; SummonedMinions.Count != 0; pass++)
-			{
-				var batch = SummonedMinions.ToArray();
-				SummonedMinions.Clear();
-				if (!TriggerManager.HasOnSummonTrigger) return;
-				if (pass == 64)
-				{
-					Log(LogLevel.WARNING, BlockType.PLAY, "Game", !Logging ? "" : $"Summon Resolution Step stopped after 64 passes; {batch.Length} summons dropped.");
-					return;
-				}
-				using var summonCatchUp = Resolution.Enter(ResolutionKind.SummonOn);
-				TaskQueue.StartEvent();
-				foreach (Minion minion in batch)
-					TriggerManager.OnSummonTrigger(minion);
-				ProcessTasks();
-				TaskQueue.EndEvent();
-			}
 		}
 
 

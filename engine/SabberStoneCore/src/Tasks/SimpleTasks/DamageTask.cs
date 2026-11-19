@@ -54,10 +54,10 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 			IList<IPlayable> entities = IncludeTask.GetEntities(Type, in controller, source, target, stack?.Playables);
             if (game.History) game.PowerHistory.TargetRange(entities, Type);
-            using var visual = game.History ? (entities.Count > 1
-                ? game.PowerHistory.Visual(game, Presentation.VisualPhase.DamageGroup, source as IPlayable)
-                    ?? game.PowerHistory.Visual(game, Presentation.VisualPhase.Damage, source as IPlayable)
-                : game.PowerHistory.Visual(game, Presentation.VisualPhase.Damage, source as IPlayable)) : null;
+            // The area recipe is chosen by what the effect is, not by how many it hit (Owner ruling 2026-11-18): an area effect plays for one target,
+            // an empty side and prevented hits alike; without an area recipe the per-hit recipe applies as before.
+            using var visual = game.History ? (game.PowerHistory.Visual(game, Presentation.VisualPhase.DamageGroup, source as IPlayable)
+                ?? game.PowerHistory.Visual(game, Presentation.VisualPhase.Damage, source as IPlayable)) : null;
 
             bool collectLifesteal = HealingRules.BeginDamage(source as IPlayable);
             try

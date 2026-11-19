@@ -19,6 +19,14 @@ internal static partial class Program
         var recipes = (System.Collections.IDictionary)typeof(SabberStoneCore.Model.Game).Assembly
             .GetType("SabberStoneCore.Presentation.SubSpellRecipes").GetField("Recipes", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null);
         var spells = new List<(string Card, string Prefab)>();
+        // A spell with an area recipe plays it for every run of its damage (one target, none, or prevented hits too): count it as well.
+        var areaPrefab = new Dictionary<string, string>();
+        foreach (System.Collections.DictionaryEntry entry in recipes)
+        {
+            var key = (System.Runtime.CompilerServices.ITuple)entry.Key;
+            if ((BlockType)key[1] == BlockType.POWER && (int)key[2] == 0 && (int)key[3] == -1 && (int)key[4] == 0 && key[5].ToString() == "DamageGroup")
+                areaPrefab[(string)key[0]] = (string)entry.Value.GetType().GetField("Prefab", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance).GetValue(entry.Value);
+        }
         foreach (System.Collections.DictionaryEntry entry in recipes)
         {
             var key = (System.Runtime.CompilerServices.ITuple)entry.Key;
@@ -31,7 +39,8 @@ internal static partial class Program
         int compared = 0, repeated = 0;
         foreach (var (card, prefab) in spells.OrderBy(s => s.Card))
         {
-            var plain = PlaySpell(card, prefab, false); var marked = PlaySpell(card, prefab, true);
+            areaPrefab.TryGetValue(card, out string area);
+            var plain = PlaySpell(card, prefab, false, area); var marked = PlaySpell(card, prefab, true, area);
             if (plain.Shots < 0 || marked.Shots < 0) continue; // not playable on this board
             compared++;
             if (marked.Damage > plain.Damage)
@@ -49,7 +58,7 @@ internal static partial class Program
 
     private static readonly List<string> Crashed = new List<string>();
 
-    private static (int Shots, int Damage) PlaySpell(string card, string prefab, bool mark)
+    private static (int Shots, int Damage) PlaySpell(string card, string prefab, bool mark, string area = null)
     {
         try
         {
@@ -62,7 +71,7 @@ internal static partial class Program
             if (task == null) return (-1, 0);
             InvokeProcess(match, task); FlushFieldHistory(match);
             var rows = History(capture, cursor);
-            return (rows.Count(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == prefab),
+            return (rows.Count(e => e.HasSubSpellStart && (e.SubSpellStart.SpellPrefabGuid == prefab || e.SubSpellStart.SpellPrefabGuid == area)),
                 rows.Count(e => e.HasMetaData && (int)e.MetaData.Type == 1));
         }
         catch (Exception error) { Crashed.Add(card + (mark ? " (marked)" : "") + ": " + error.GetType().Name + " " + error.Message); return (-2, 0); }
