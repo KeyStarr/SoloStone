@@ -23,7 +23,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 for (int i = 0; i < 2; i++) ctx.Summon("EDR_810t", position + i);
             }) };
         }
-        private static int Amount(IPlayable source) => 1 + source.Controller.BoardZone.Count(m =>
+        private static int Amount(IPlayable source) => 1 + source.Controller.BoardZone.CountInteractable(m =>
             m.Card.Id == "EDR_810" && !m.IsSilenced && !m.IsDead && !m.Untouchable);
 
         internal static void ConfigureLeech(Card card)
@@ -34,7 +34,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     var source = (Minion)s;
                     if (source.Zone != c.BoardZone || source.IsDead) return;
-                    var candidates = c.Opponent.BoardZone.Where(m => !m.Untouchable).Cast<Character>()
+                    var candidates = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable).Cast<Character>()
                         .Append(c.Opponent.Hero).Where(m => !m.IsDead).ToArray();
                     if (candidates.Length == 0) return;
                     var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);

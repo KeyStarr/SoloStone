@@ -227,8 +227,11 @@ namespace SabberStoneCore.Tasks
 						card[GameTag.MULTIPLE_CLASSES] != 0 && CardClassRules.IsAllowedInDeck(card, op.BaseClass)) &&
 						card.Collectible && card.Implemented && card.Type != CardType.HERO).Distinct().ToArray();
 					if (actual.Length == 0) return;
-					var decoys = Cards.FormatTypeClassCards(g.FormatType)[op.BaseClass]
-						.Where(card => (card.Class == op.BaseClass || op.BaseClass == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0) && !op.DeckCards.Contains(card)).ToList();
+					var glimmerPool = Cards.RandomPool(g, PoolDestination.Other, s);
+					var decoys = (glimmerPool.Legacy ? Cards.FormatTypeClassCards(g.FormatType)[op.BaseClass]
+							.Where(card => card.Class == op.BaseClass || op.BaseClass == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0)
+						: glimmerPool.ClassOnly(op.BaseClass))
+						.Where(card => !op.DeckCards.Contains(card)).ToList();
 					var choices = new List<Card> { actual.Choose(g.Random) };
 					while (choices.Count < 3 && decoys.Count > 0)
 					{
@@ -244,8 +247,10 @@ namespace SabberStoneCore.Tasks
 				// Per call: these pools come from this opponent's starting deck, class and format.
 				var deckClassCards = new List<Card>();
 				var deckClassIds = new HashSet<int>();
-				IReadOnlyList<Card> classCards = Cards.FormatTypeClassCards(c.Game.FormatType)[op.BaseClass]
-					.Where(card => card.Class == op.BaseClass)
+				var classPool = Cards.RandomPool(c.Game, PoolDestination.Other, s);
+				IReadOnlyList<Card> classCards = (classPool.Legacy ? Cards.FormatTypeClassCards(c.Game.FormatType)[op.BaseClass]
+						.Where(card => card.Class == op.BaseClass)
+						: classPool.ClassOnly(op.BaseClass))
 					.ToList();
 				foreach (Card card in op.DeckCards)
 				{
@@ -731,7 +736,7 @@ namespace SabberStoneCore.Tasks
 				if (!secretClasses.Contains(cls))
 					cls = CardClass.MAGE;
 
-				Card[] candidates = GetFormatTypeClassSecrets(source.Game.FormatType, cls)
+				Card[] candidates = ClassSecrets(source.Game, cls, source)
 					.Where(c => !existing.Contains(c.AssetId)).ToArray();
 
 				Card[] choices = candidates.ChooseNElements(3, source.Game.Random);
@@ -750,13 +755,22 @@ namespace SabberStoneCore.Tasks
 				// Preserve legacy-only casting; modern quests share the secret capacity.
 				if (c.SecretZone.ModernQuests.Count != 0 && c.SecretZone.IsFull) return;
 				int[] activeSecrets = c.SecretZone.Select(secret => secret.Card.AssetId).ToArray();
-				Card[] cardsList = GetFormatTypeClassSecrets(g.FormatType, cardClass)
+				Card[] cardsList = ClassSecrets(g, cardClass, s)
 					.Where(card => !activeSecrets.Contains(card.AssetId)).ToArray();
-				if ((cardClass == CardClass.DEMONHUNTER || cardClass == CardClass.DEATHKNIGHT) && cardsList.Length == 0) return;
+				// A match pool can hold no secret for a class (frozen lists always did); nothing to cast then.
+				if (cardsList.Length == 0) return;
 				Spell spell = (Spell)Entity.FromCard(c, cardsList.Choose(g.Random));
 				Generic.CastSpell(c, g, spell, null, 0);
 				g.OnRandomHappened(true);
 			});
+
+		// The match's secret pool: cached on the pool instance (per manifest), or in the frozen format memo for legacy replays.
+		private static Card[] ClassSecrets(Game game, CardClass cardClass, IEntity source)
+		{
+			var pool = Cards.RandomPool(game, PoolDestination.Other, source);
+			return pool.Legacy ? GetFormatTypeClassSecrets(game.FormatType, cardClass)
+				: pool.WithoutSource(pool.Secrets(cardClass), source).ToArray();
+		}
 
 		private static Card[] GetFormatTypeClassSecrets(FormatType format, CardClass cardClass)
 		{
@@ -1149,7 +1163,9 @@ namespace SabberStoneCore.Tasks
 				controller.SetasideZone.Add(controller.Hero.HeroPower);
 				controller.Hero.HeroPower = heroPower;
 
-				var cards = Cards.FormatTypeClassCards(game.FormatType)[randClass].Where(p => p.Class == randClass && !p.IsQuest).ToArray();
+				var renouncePool = Cards.RandomPool(game, PoolDestination.Hand, source);
+				var cards = (renouncePool.Legacy ? Cards.FormatTypeClassCards(game.FormatType)[randClass].Where(p => p.Class == randClass)
+					: renouncePool.ClassOnly(randClass)).Where(p => !p.IsQuest).ToArray();
 
 				// replace cards in hand
 				for (int i = 0; i < controller.HandZone.Count; i++)

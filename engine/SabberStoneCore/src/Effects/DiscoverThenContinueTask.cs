@@ -117,8 +117,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
                 result = _fixedOffers == null ? _discover.Process(game, controller, source, target, stack) :
                     Actions.Generic.CreateChoiceCards(controller, source, null, ChoiceType.GENERAL, ChoiceAction.STACK,
                         _fixedOffers.Select(Cards.FromId).ToArray(), null) ? TaskState.COMPLETE : TaskState.STOP;
-            if ((_companionRoster || _offers != null || _fixedOffers != null || _poolFilter.HasValue) && controller.Choice != null &&
-                (Actions.Generic.IsDecisionRecipe(controller) || _reductionBudget > 0))
+            if (controller.Choice != null)
                 foreach (int id in controller.Choice.Choices)
                     game.IdEntityDic[id][Actions.Generic.PrivateDecisionOfferTag] = controller.PlayerId;
             if (controller.Choice == null && _reductionBudget > 0) source[DiscoverRealRules.Budget] = 0;

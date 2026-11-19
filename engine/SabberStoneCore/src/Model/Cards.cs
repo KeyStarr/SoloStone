@@ -226,6 +226,9 @@ namespace SabberStoneCore.Model
 		/// <returns></returns>
 		public static IEnumerable<Card> FormatTypeCards(FormatType formatType) => formatType == FormatType.FT_STANDARD ? AllStandard : AllWild;
 
+		/// <summary>The match's random-effect pool (policy: GameConfig.PoolFormat). See RandomPools.MatchRandomPool.</summary>
+		public static RandomPools.MatchRandomPool RandomPool(Game game, PoolDestination destination = PoolDestination.Other, Model.Entities.IEntity source = null) => RandomPools.MatchRandomPool.For(game, destination, source);
+
 		/// <summary>
 		/// Checks implemented deck-card legality against the configured format sets, independently of random-generation pools.
 		/// Includes collectible Hero cards; this is not a complete deck validator or a current rotation policy.

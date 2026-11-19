@@ -26,7 +26,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int budget=Budget((IPlayable)s);
                 for(int i=0;i<budget;i++)
                 {
-                    var enemies=c.Opponent.BoardZone.Where(m=>!m.Untouchable).Cast<ICharacter>()
+                    var enemies=c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable).Cast<ICharacter>()
                         .Append(c.Opponent.Hero).Where(e=>!e.IsDead).ToArray();
                     if(enemies.Length==0) break;
                     int lowest=enemies.Min(e=>e.Health);

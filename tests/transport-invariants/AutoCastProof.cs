@@ -402,6 +402,7 @@ public static class AutoCastProof
         game.DeathProcessingAndAuraUpdate();
         spell.Zone?.Remove(spell);
         p.DeckZone.Add(spell);
+        session.Client.IgnoreMillLock = true; // the fixture puts a cast spell back into the deck by hand, which no real game does
         var changed = Generic.ChangeEntityBlock(p, spell, Cards.FromId("CS2_029"), false);
         session.Flush(); game.PowerHistory.Last.Clear();
         Check(changed.Card.Id == "CS2_029" && changed.Zone == p.DeckZone, "fixture: cast, returned and transformed in the deck");

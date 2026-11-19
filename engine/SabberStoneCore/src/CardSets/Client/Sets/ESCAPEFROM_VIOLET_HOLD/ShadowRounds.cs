@@ -29,12 +29,12 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     while (budget[PayloadRules.Value] > 0 && g.State != State.COMPLETE && victim != null)
                     {
                         budget[PayloadRules.Value]--;
-                        if (victim.Zone != c.Opponent.BoardZone || victim.IsDormant) break;
+                        if (victim.Zone != c.Opponent.BoardZone || victim.Untouchable) break;
                         new EffectContext(g,c.Id,s.Id,victim.Id).Damage(victim.Id,2,spellDamage:true);
                         bool died = victim.IsDead || victim.ToBeDestroyed;
                         g.DeathProcessingAndAuraUpdate();
                         if (!died || g.State == State.COMPLETE || budget[PayloadRules.Value] == 0) break;
-                        var targets = c.Opponent.BoardZone.Where(m=>!m.Untouchable && !m.IsDead && !m.ToBeDestroyed).ToArray();
+                        var targets = c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable && !m.IsDead && !m.ToBeDestroyed).ToArray();
                         victim = targets.Length == 0 ? null : targets[g.Random.Next(targets.Length)];
                     }
                 }

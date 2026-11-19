@@ -14,7 +14,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
-                var candidates = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                var candidates = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                 if (candidates.Length == 0) return;
                 int attack = candidates.Max(m => m.AttackDamage);
                 var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);

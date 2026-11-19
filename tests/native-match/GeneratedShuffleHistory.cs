@@ -1,3 +1,4 @@
+using System.IO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,6 +31,7 @@ internal static partial class Program
     // scope.
     private static void GeneratedShuffleHistory()
     {
+        ReplacedDeckShuffleHistory();
         BatchedStoryShuffle();
         ShuffleBatchBarriers();
         PlagueAttackShuffle();
@@ -63,6 +65,8 @@ internal static partial class Program
             var entries = History(capture, cursor);
             var generated = destination.DeckZone.Where(c => !before.Contains(c.Id)).ToArray();
             string label = scenario.Card + ":middle=" + scenario.Middle + ":bot=" + bot;
+            // A card whose own play effect is a deck-spawn spell keeps its generated cards directly in its POWER block (#153).
+            bool ownSpell = SabberStoneCore.Kettle.PowerHistory.IsDeckSpawnPlaySpell(scenario.Card);
             Check(generated.Length == scenario.Count, label + " shuffle outcome");
             var scopes = new Stack<PowerHistorySubSpellStart>();
             var blocks = new Stack<PowerHistoryStart>();
@@ -71,6 +75,7 @@ internal static partial class Program
                 if (entry.HasPowerStart) blocks.Push(entry.PowerStart);
                 if (entry.HasSubSpellStart)
                 {
+                    Check(!ownSpell, label + " the card's own deck-spawn spell gets no generic sub-spell scope");
                     Check(blocks.Any(b => b.Source == source.Id && (int)b.Type == (int)BlockType.POWER), label + " shuffle inside source POWER");
                     scopes.Push(entry.SubSpellStart);
                 }
@@ -78,6 +83,10 @@ internal static partial class Program
                 {
                     Check(TagValue(entry.FullEntity.Tags, GameTag.ZONE) == (int)EngineZone.DECK
                         && entry.FullEntity.Name == "", label + " anonymous FULL_ENTITY starts in DECK for SpawnToDeckSpell targeting");
+                    if (ownSpell)
+                        Check(scopes.Count == 0 && blocks.Count > 0 && blocks.Peek().Source == source.Id && (int)blocks.Peek().Type == (int)BlockType.POWER,
+                            label + " DECK FULL sits directly in the card's own POWER block for its spawn spell");
+                    else
                     Check(scopes.Count == 1 && scopes.Peek().SpellPrefabGuid == GeneratedShufflePrefab
                         && scopes.Peek().TargetEntityIds.Count == 0 && scopes.Peek().SourceEntityId == destination.Hero.Id,
                         label + " creation enclosed by zero-target native spawn effect");
@@ -88,7 +97,7 @@ internal static partial class Program
             Check(scopes.Count == 0 && blocks.Count == 0, label + " balanced history");
             // Cosmic interleaves a damage hit before each card, so each insertion keeps its own scope.
             Check(entries.Count(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == GeneratedShufflePrefab)
-                == (scenario.Card == "JAIL_892" ? scenario.Count : 1), label + " consecutive insertions share one scope on both viewers");
+                == (ownSpell ? 0 : scenario.Card == "JAIL_892" ? scenario.Count : 1), label + " consecutive insertions share one scope on both viewers");
             foreach (var card in generated)
             {
                 int full = entries.FindIndex(e => e.HasFullEntity && e.FullEntity.Entity == card.Id);
@@ -104,7 +113,7 @@ internal static partial class Program
                         label + " friendly reveal has generated definition/type/creator");
                     Check(entries[hide + 1].HasMetaData && (int)entries[hide + 1].MetaData.Type == (int)MetaDataType.TARGET
                         && entries[hide + 1].MetaData.Info.SequenceEqual(new[] { card.Id })
-                        && entries.Skip(hide + 2).Any(e => e.HasSubSpellEnd), label + " retail post-hide target inside open scope");
+                        && (ownSpell || entries.Skip(hide + 2).Any(e => e.HasSubSpellEnd)), label + " retail post-hide target inside open scope");
                 }
                 else Check(snapshot.Name == "" && HasOnlyHiddenTags(snapshot.Tags)
                     && entries.Where(e => SnapshotEntity(e) == card.Id).All(e => string.IsNullOrEmpty(SnapshotName(e))),
@@ -118,7 +127,63 @@ internal static partial class Program
             capture.SerializeAll();
         }
         GeneratedShuffleBoundaries();
+        OwnDeckSpawnSpellHistory();
         Console.WriteLine("PASS generated shuffle: Cosmic Outcast/middle, Forgotten Torch, Gang Up copies, Iron Juggernaut/Beneath the Grounds opponent deck/preallocated batches; both views, boundaries, native spawn contract/privacy");
+    }
+
+    // #160: retiring each old deck card must not split the replacement cards into separate flights.
+    private static void ReplacedDeckShuffleHistory()
+    {
+        foreach (bool bot in new[] { false, true })
+        {
+            var (match, capture) = AnimationMatch(bot);
+            var owner = match.Game.CurrentPlayer;
+            foreach (var old in owner.HandZone.ToArray()) owner.SetasideZone.Add(owner.HandZone.Remove(old));
+            var held = EngineEntity.FromCard(owner, Cards.FromId("CS2_182"), zone: owner.HandZone);
+            var source = EngineEntity.FromCard(owner, Cards.FromId("TIME_707"), zone: owner.HandZone);
+            source.Cost = 0;
+            var before = owner.DeckZone.Select(c => c.Id).ToHashSet();
+            FlushFieldHistory(match); int cursor = capture.Packets.Count;
+            Check(match.Game.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryTagChange>()
+                .Any(e => before.Contains(e.EntityId) && e.Tag == GameTag.ZONE && e.Value == (int)EngineZone.HAND),
+                "replacement fixture has own deck cards returned from starting hand; bot=" + bot);
+            if (!bot) Check(NativeHistory(capture).Any(e => e.HasShowEntity && before.Contains(e.ShowEntity.Entity)
+                && !string.IsNullOrEmpty(e.ShowEntity.Name)), "replacement fixture has known own deck cards returned by mulligan");
+            InvokeProcess(match, owner.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == source.Id));
+            FlushFieldHistory(match);
+            var generated = owner.DeckZone.Select(c => c.Id).ToHashSet();
+            string label = "TIME_707:bot=" + bot;
+            Check(generated.Count == before.Count && generated.Count > 1 && !generated.Overlaps(before)
+                && held.Zone == owner.SetasideZone, label + " replaces hand and entire deck");
+            var entries = capture.HistorySnapshots(cursor).SelectMany(p => p.List).ToList();
+            int scopes = 0, depth = 0, enclosed = 0;
+            foreach (var entry in entries)
+            {
+                if (entry.HasSubSpellStart && entry.SubSpellStart.SpellPrefabGuid == GeneratedShufflePrefab)
+                {
+                    scopes++; depth++;
+                    Check(entry.SubSpellStart.TargetEntityIds.Count == 0,
+                        label + " spawn scope has zero explicit wire targets; targets=["
+                        + string.Join(",", entry.SubSpellStart.TargetEntityIds) + "]");
+                }
+                if (entry.HasTagChange && before.Contains(entry.TagChange.Entity))
+                    Check(depth == 0, label + " retired deck card stays outside spawn inference");
+                if (entry.HasFullEntity && generated.Contains(entry.FullEntity.Entity))
+                {
+                    Check(depth == 1 && TagValue(entry.FullEntity.Tags, GameTag.ZONE) == (int)EngineZone.DECK,
+                        label + " replacement FULL enclosed in deck shuffle");
+                    enclosed++;
+                }
+                if (entry.HasSubSpellEnd) depth--;
+            }
+            Check(scopes == 1 && depth == 0 && enclosed == generated.Count,
+                label + " replacements share one shuffle scope; scopes=" + scopes + ", cards=" + enclosed);
+            if (bot) Check(entries.Where(e => generated.Contains(SnapshotEntity(e)))
+                .All(e => string.IsNullOrEmpty(SnapshotName(e))), label + " replacement identities remain private");
+            AssertGeneratedShuffleAdmission(capture);
+            capture.SerializeAll();
+        }
+        Console.WriteLine("PASS Alternate Reality: one replacement-deck shuffle scope, zero explicit wire targets, R1 clean; both seats with mulligan returns, privacy");
     }
 
     private static void BatchedStoryShuffle()
@@ -172,7 +237,8 @@ internal static partial class Program
     private static void ShuffleBatchBarriers()
     {
         foreach (bool reveal in new[] { false, true })
-        foreach (string barrier in new[] { "none", "creator", "tag", "zone", "block", "reset", "flush", "listener", "other-deck" })
+        foreach (string barrier in new[] { "none", "creator", "tag", "zone", "block", "reset", "flush", "listener", "other-deck",
+            "replacement", "hand-replacement", "replacement-tag", "opponent-replacement" })
         {
             var (match, _) = AnimationMatch();
             var game = match.Game; var owner = game.Player1;
@@ -189,7 +255,16 @@ internal static partial class Program
                 Check(SabberStoneCore.Actions.Generic.ShuffleIntoDeck(destination, source, card, reveal), "barrier setup shuffle");
                 return card;
             }
+            var retiringOwner = barrier == "opponent-replacement" ? owner.Opponent : owner;
+            var retiring = EngineEntity.FromCard(retiringOwner, Cards.FromId("CS2_182"),
+                zone: barrier == "hand-replacement" ? retiringOwner.HandZone : retiringOwner.DeckZone);
             var first = Shuffle(owner);
+            if (barrier.Contains("replacement"))
+            {
+                retiring[SabberStoneCore.Actions.CardStateBoundary.ReplacedHiddenZone] = (int)retiring.Zone.Type;
+                retiringOwner.SetasideZone.Add(retiring.Zone.Remove(retiring));
+                if (barrier == "replacement-tag") retiring[GameTag.COST] = 1;
+            }
             SabberStoneCore.Kettle.IPowerHistoryEntry entry = barrier switch {
                 "creator" => SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(first.Id, GameTag.DISPLAYED_CREATOR, source.Id),
                 "tag" => SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(source.Id, GameTag.COST, 1),
@@ -205,8 +280,17 @@ internal static partial class Program
             var scopes = history.Full.Skip(blockIndex).OfType<SabberStoneCore.Kettle.PowerHistorySubSpellStart>()
                 .Where(e => e.SpellPrefabGuid == GeneratedShufflePrefab).ToArray();
             // A silent listener adds no rows, so it cannot separate flights; one that does is the tag/block barrier.
-            bool joined = barrier is "none" or "creator" or "listener";
+            bool joined = barrier is "none" or "creator" or "listener" or "replacement";
             Check(scopes.Length == (joined ? 1 : 2), "shuffle grouping respects " + barrier + " barrier; reveal=" + reveal);
+            if (barrier == "replacement")
+                foreach (var rows in new[] { history.Last, history.Full })
+                {
+                    var retiredRows = rows.OfType<SabberStoneCore.Kettle.PowerHistoryTagChange>()
+                        .Where(e => e.EntityId == retiring.Id).ToArray();
+                    int start = rows.IndexOf(scopes[0]);
+                    Check(retiredRows.Length > 0 && rows.Skip(start - retiredRows.Length).Take(retiredRows.Length)
+                        .SequenceEqual(retiredRows), "retirement rows stay ordered immediately before spawn scope in both histories");
+                }
             Check(history.Full.Count(e => e is SabberStoneCore.Kettle.PowerHistorySubSpellStart)
                 == history.Full.Count(e => e is SabberStoneCore.Kettle.PowerHistorySubSpellEnd), barrier + " keeps scopes balanced; reveal=" + reveal);
             if (barrier != "flush")
@@ -468,7 +552,8 @@ internal static partial class Program
                     label + " hidden shuffle retains DECK FULL and authored spawn target");
             }
             Check(entries.Count(e => e.HasSubSpellStart && e.SubSpellStart.SpellPrefabGuid == GeneratedShufflePrefab)
-                == 1, label + " both viewers retain one batched spawn scope for hidden cards");
+                == (SabberStoneCore.Kettle.PowerHistory.IsDeckSpawnPlaySpell(cardId) ? 0 : 1),
+                label + " both viewers: hidden cards sit in the source POWER block for its own deck-spawn spell");
             AssertGeneratedShuffleAdmission(capture);
             capture.SerializeAll();
         }
@@ -731,5 +816,87 @@ internal static partial class Program
             AssertGeneratedShuffleAdmission(capture);
             capture.SerializeAll();
         }
+    }
+
+    // Issue #153: the client's own deck-spawn play spell (SpawnToDeckSpell) reads the DECK FULL_ENTITYs of its own POWER
+    // task list. The generic sub-spell around them gave it an empty list, it never attached and the card lost its effect
+    // (Gang Up, Excavated Evil, Rat Catcher). Marrowslicer's retail log keeps FULL(DECK)/SHOW/HIDE/TARGET directly in the POWER
+    // block. Every card that shuffles generated cards from its own play effect (the 59 direct recipes of
+    // generated-shuffle-evidence.md) is classified by its census play effect; the spawn ones are played here.
+    private static readonly string[] directGeneratedShuffleRecipes = (
+        "AT_035 BE_153 BOT_087 BOT_288 BOT_511 BOT_559 BRM_007 CAP_400 CAP_404 CATA_136 CFM_095 CFM_324 CFM_602b CFM_660 CORE_SW_439 "
+        + "DAL_010 DAL_060 DAL_063 DAL_565 DAL_582 DAL_736 GIL_815 GIL_828 GVG_031 GVG_035 GVG_056 ICC_091 ICC_215 JAIL_225 JAIL_386 "
+        + "JAIL_879 JAIL_881 JAIL_882 JAIL_892 KAR_096 LOE_002 LOE_019t LOE_079 LOE_110 LOE_111 LOOT_026 LOOT_056 LOOT_106 LOOT_526 "
+        + "LOOT_541 LOOT_542 OG_255 TIME_025 TIME_026 TIME_027 TLC_518 TLC_826 TRL_502 TRL_541 TRL_541t UNG_851 UNG_914 UNG_920t1 UNG_957")
+        .Split(' ');
+
+    // Recipes with an authored play effect that is not a deck spawn (a deck swap, a missile, an impact, a targeted paw).
+    private static readonly string[] authoredNonSpawnPlayEffects = { "GIL_828", "LOOT_541", "TIME_027", "TRL_541t", "UNG_920t1" };
+
+    private static void OwnDeckSpawnSpellHistory()
+    {
+        var census = File.ReadAllLines("data/fx/empty-playeffect-37.0.0.254477.tsv").Skip(1).Select(l => l.Split('\t'))
+            .ToDictionary(c => c[0], c => (Status: c[2], Path: c[3]));
+        int spawn = 0, generic = 0, other = 0;
+        foreach (string id in directGeneratedShuffleRecipes)
+        {
+            var (status, path) = census[id];
+            bool own = SabberStoneCore.Kettle.PowerHistory.IsDeckSpawnPlaySpell(id);
+            if (own) { Check(status == "authored" && System.Text.RegularExpressions.Regex.IsMatch(path,
+                    "Spawn|ToDeck|DeckAE|GangUp|ForgottenTorch|CopyHandToDeck"), id + " is classified as a deck-spawn play effect: " + path); spawn++; }
+            else if (status == "authored") { Check(authoredNonSpawnPlayEffects.Contains(id), id + " has an authored play effect and must be classified: " + path); other++; }
+            else generic++;
+        }
+        Console.WriteLine($"generated-shuffle recipes: {directGeneratedShuffleRecipes.Length}; own deck-spawn spell {spawn}, other authored effect {other}, empty (generic scope kept) {generic}");
+        int exercised = 0; var notExercised = new List<string>();
+        foreach (string id in directGeneratedShuffleRecipes.Where(SabberStoneCore.Kettle.PowerHistory.IsDeckSpawnPlaySpell))
+        foreach (bool bot in new[] { false, true })
+        {
+            var (match, capture) = AnimationMatch(bot, "showcase-demon-hunter-outcast");
+            var owner = match.Game.CurrentPlayer;
+            foreach (var old in owner.HandZone.ToArray()) owner.SetasideZone.Add(owner.HandZone.Remove(old));
+            EngineEntity.FromCard(owner, Cards.FromId("CS2_182"), zone: owner.BoardZone);
+            var victim = EngineEntity.FromCard(owner.Opponent, Cards.FromId("CS2_200"), zone: owner.Opponent.BoardZone);
+            var source = EngineEntity.FromCard(owner, Cards.FromId(id), zone: owner.HandZone);
+            EngineEntity.FromCard(owner, Cards.FromId("CS2_231"), zone: owner.HandZone); // a hand to copy (Dead Man's Hand)
+            var before = owner.DeckZone.Concat(owner.Opponent.DeckZone).Select(c => c.Id).ToHashSet();
+            FlushFieldHistory(match);
+            int cursor = capture.Packets.Count;
+            var play = owner.Options().FirstOrDefault(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == source.Id);
+            if (play == null) { notExercised.Add(id + ":bot=" + bot + " unplayable"); continue; }
+            InvokeProcess(match, play);
+            FlushFieldHistory(match);
+            var entries = History(capture, cursor);
+            var generated = owner.DeckZone.Concat(owner.Opponent.DeckZone).Where(c => !before.Contains(c.Id)).ToArray();
+            if (generated.Length == 0) { notExercised.Add(id + ":bot=" + bot + " no shuffle"); continue; }
+            string label = id + ":bot=" + bot;
+            var blocks = new Stack<PowerHistoryStart>();
+            var decked = new HashSet<int>();
+            foreach (var entry in entries)
+            {
+                if (entry.HasPowerStart) blocks.Push(entry.PowerStart);
+                if (entry.HasSubSpellStart)
+                    Check(entry.SubSpellStart.SpellPrefabGuid != GeneratedShufflePrefab, label + " no generic spawn sub-spell around its own deck-spawn effect");
+                if (entry.HasFullEntity && generated.Any(c => c.Id == entry.FullEntity.Entity)
+                    && TagValue(entry.FullEntity.Tags, GameTag.ZONE) == (int)EngineZone.DECK)
+                {
+                    Check(blocks.Any(b => b.Source == source.Id && (int)b.Type == (int)BlockType.POWER), label + " DECK FULL inside the card's POWER block");
+                    decked.Add(entry.FullEntity.Entity);
+                }
+                if (entry.HasPowerEnd) blocks.Pop();
+            }
+            Check(decked.Count == generated.Length, label + " every generated card has a DECK FULL_ENTITY for the spawn spell");
+            foreach (var card in generated)
+            {
+                int full = entries.FindIndex(e => e.HasFullEntity && e.FullEntity.Entity == card.Id);
+                int hide = entries.FindIndex(e => e.HasHideEntity && e.HideEntity.Entity == card.Id);
+                Check(full >= 0 && hide > full && entries.Skip(hide).Take(3).Any(e => e.HasMetaData && (int)e.MetaData.Type == (int)MetaDataType.TARGET
+                    && e.MetaData.Info.SequenceEqual(new[] { card.Id })), label + " the spawn TARGET still names the generated card (not rewritten to a typed anchor)");
+            }
+            AssertGeneratedShuffleAdmission(capture);
+            exercised++;
+        }
+        Console.WriteLine($"own deck-spawn effects exercised {exercised} plays; not exercised: {string.Join(", ", notExercised)}");
+        Check(exercised >= 20, "own deck-spawn sweep exercised the cards");
     }
 }

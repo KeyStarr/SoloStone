@@ -35,13 +35,42 @@ games do not (they are replayed from the seed on the current pool).
 17 of these replays (`meta-pre-be`, `private-return`, `deathrattle`) also run their engine half in the `engine-proof`
 suite, which needs no client: legal-move hashes and chosen moves at every step, and a state and random-number
 fingerprint for the 8 that store one (the history is checked by the packet half here, so a presentation fix renews
-no replay). A replay that drifts after an intended rules change cannot be renewed from CI. A
-maintainer with a client renews it, after the same per-game review as a golden (see "Goldens" in
-[TESTING.md](../../docs/TESTING.md)). The tool that re-records these replays is not in this repository yet.
+no replay). An intended rules change needs the same per-game review as a golden (see "Goldens" in
+[TESTING.md](../../docs/TESTING.md)); renewal is explicit, never automatic in CI. Engine-only renewal needs no client,
+but the packet half still needs a maintainer's client run.
+
+## Replay tools
+
+Run the built programs from the repository root:
+
+- `EngineProof.dll --renew-replay PATH [--dump DIR] [--baseline DIR --accept "LABEL;LABEL" [--accept-behaviour "SHA: reason"] --write]`:
+  run `--dump` on the last passing commit, then `--baseline` on the new engine to inspect drift at each step.
+  `--write` requires `--accept` naming exactly the printed labels, including `legal moves` and `unlabelled state`
+  when present. It rewrites only `legalShas` and `engineFingerprint`, and refuses an illegal recorded action,
+  a changed chosen move or RNG state. Changed turns or winner require `--accept-behaviour` and are then updated
+  only in the game record.
+- `EngineProof.dll --rerecord-replay PATH --baseline DIR --expect-first-diff STEP [--dump DIR] [--write]`:
+  regenerate a random-policy replay from its pinned decks, pool, seed and policy. Use a baseline dumped by
+  `--renew-replay --dump` on the last passing commit. Chosen move, legal hash, RNG and full state must match before
+  `STEP`, and the first difference must occur exactly there. Inspect the report before `--write`, which replaces
+  only `actions`, `legalShas`, game-record `turns`/`winner`, and `engineFingerprint`. **It leaves `findingsSha`
+  unchanged.** Run the client-tier replay check to validate packet findings; engine rerecording cannot renew them.
+- `TransportInvariants.dll --search-deathrattle-replay [MAX_GAMES]`: search current-engine random games for a
+  Ravenous Felhunter (`EDR_891`) witness with at least two qualifying Deathrattle blocks, a completed game and no
+  transport violations (default cap: 200). It prints `HIT`/`miss` and history findings; a `HIT` does not itself
+  accept those findings or write a replay. Requires the client-tier setup below.
 
 ## Running
 
 `python3 tests/run.py --suite transport-invariants --client "/path/to/Hearthstone"`. It needs the card export built
 locally from a client (`data/carddb/<build>/cards.json.gz`), so it skips on most machines (see "Data built locally" in
 [TESTING.md](../../docs/TESTING.md)). Packet logs go to `sim/out/transport/`, which git ignores. Slices (run the built
-`TransportInvariants.dll` directly; `run.py` passes no arguments): `--meta-pre-be-only [name]`, `--private-return-only`, `--deathrattle-replay-only`, `--transport-debt-only [name]`.
+`TransportInvariants.dll` directly; `run.py` passes no arguments): `--meta-pre-be-only [name]`, `--private-return-only`, `--deathrattle-replay-only`, `--transport-debt-only [name]`, `--replay-tail-renew-only`.
+
+### Renewing a replay's tail
+
+`dotnet TransportInvariants.dll --renew-replay-tail PATH [--from-step N] [--seed N] [--write | --out FILE]`, run from the
+repository root: when a pinned replay's game legitimately changes under a reviewed retail rule, it replays the recorded steps up to the
+first one that no longer plays (an illegal action, or the first legal-move hash that differs), plays the rest with a seeded random
+policy and records the seed in the file (`renewals`). Dry run by default. See "Renewing a pinned transport replay" in
+[TESTING.md](../../docs/TESTING.md). Replays renewed before this tool existed carry no `renewals` record.

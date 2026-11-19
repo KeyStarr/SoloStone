@@ -31,7 +31,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 },
                 DeathrattleTask = new CustomTask((g, c, s, t, stack) =>
                     new EffectContext(g, c.Id, s.Id, stack: stack).DamageBatch(
-                        c.Opponent.BoardZone.Where(m => !m.Untouchable).Select(m => m.Id)
+                        c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable).Select(m => m.Id)
                             .Append(c.Opponent.Hero.Id), Damage((IPlayable)s)))
             };
         }

@@ -70,6 +70,49 @@ internal static partial class Program
             .Any(f => f.Rule == "R1" && f.Entity == 30), "rewritten object cannot conceal missing target in bytes already sent"); cases++;
         Assert("unknown FX accepts hidden authored target", new[] { Full(10, "JAIL_407", 4), Start(10), Target(id: 20), end }, "R1", 0);
         Assert("unknown FX still rejects missing authored target", new[] { Full(10, "JAIL_407", 4), Start(10), Target(id: 999), end }, "R1", 1);
+        foreach (bool npc in new[] { false, true })
+        {
+            int owner = npc ? 2 : 1;
+            var heroPrefix = new[] { Full(100, "CATA_190h", 3, 3, owner), Full(101, "HERO_07", 3, 1, owner),
+                Full(102, "CS2_056", 10, 1, owner), Start(100, BlockType.PLAY), Tag(100, GameTag.ZONE, 1) };
+            Assert("old hero alone is prediction-exempt " + owner,
+                heroPrefix.Concat(new[] { Tag(101, GameTag.ZONE, 6), end }), "R7", 0);
+            Assert("a newly created hero is not the old hero " + owner,
+                heroPrefix.Concat(new[] { Full(104, "TLC_513t", 3, 1, owner), end }), "R7", npc ? 0 : 1);
+            Assert("hero power retirement is not prediction-exempt " + owner,
+                heroPrefix.Concat(new[] { Tag(102, GameTag.ZONE, 6), end }), "R7", npc ? 0 : 1);
+            Assert("hero power FULL is not prediction-exempt " + owner,
+                heroPrefix.Concat(new[] { Full(103, "CATA_190p", 10, 1, owner), end }), "R7", npc ? 0 : 1);
+            Assert("child processes retirement then replacement " + owner,
+                heroPrefix.Concat(new[] { Tag(101, GameTag.ZONE, 6), Start(1, BlockType.TRIGGER),
+                    Tag(102, GameTag.ZONE, 6), Full(103, "CATA_190p", 10, 1, owner), end, end }), "R7", 0);
+            // Reveal in place (the paired list skips the actor refresh), sub-spell lists, packet continuations and SECRET destinations.
+            var entities = new[] { Full(50, "played", 4, 3, owner), Full(51, "hand", 4, 3, owner), Full(52, "board", 4, 1, owner),
+                Full(53, "secret", 5, 7, owner, 1), Full(54, "deck", 4, 2, owner), Full(55, "enchant", 6, 1, owner) };
+            var playStart = entities.Append(Start(50, BlockType.PLAY)).ToArray();
+            var move = Tag(50, GameTag.ZONE, 1);
+            PowerHistoryData Show(int id, int type, int zone) => new() { ShowEntity = Full(id, "shown", type, zone, owner, type == 5 ? 1 : 0).FullEntity };
+            int Expect(int count) => npc ? 0 : count;
+            void Case(string name, IEnumerable<PowerHistoryData> body, int count) => Assert(name + " " + owner, playStart.Concat(body), "R7", Expect(count));
+            Case("reveal in place of a HAND card", new[] { move, Show(51, 4, 3), end }, 1);
+            Case("reveal in place of a PLAY card", new[] { move, Show(52, 4, 1), end }, 1);
+            Case("reveal in place of a SECRET card", new[] { move, Show(53, 5, 7), end }, 1);
+            Case("reveal in place without a ZONE tag", new[] { move, new PowerHistoryData { ShowEntity = new() { Entity = 51, Name = "shown" } }, end }, 1);
+            Case("reveal in place of a DECK card", new[] { move, Show(54, 4, 2), end }, 0);
+            Case("CHANGE_ENTITY in place", new[] { move, new PowerHistoryData { ChangeEntity = Full(51, "changed", 4, 3, owner).FullEntity }, end }, 0);
+            Case("reveal of an enchantment", new[] { move, Show(55, 6, 1), end }, 0);
+            Case("reveal in a nested TRIGGER block", new[] { move, Start(1, BlockType.TRIGGER), Show(51, 4, 3), end, end }, 0);
+            Case("reveal after the card is in PLAY, past a nested block", new[] { move, Start(1, BlockType.TRIGGER), end, Show(51, 4, 3), end }, 0);
+            Case("sub-spell list that moves the played card", new[] { sub, move, Full(56, "new", 4, 3, owner), subEnd, end }, 1);
+            Case("sub-spell list without the played card", new[] { sub, Full(56, "new", 4, 3, owner), subEnd, end }, 0);
+            var firstPacket = prefix.Concat(playStart).Append(Tag(50, GameTag.COST, 1)).ToArray();
+            Check(NativeAdmission.ValidatePackets(new IReadOnlyList<PowerHistoryData>[] { firstPacket, new[] { move, Full(56, "new", 4, 3, owner), end } })
+                .Count(f => f.Rule == "R7") == Expect(1), "admission control packet continuation holds the move and the creation " + owner); cases++;
+            Check(NativeAdmission.ValidatePackets(new IReadOnlyList<PowerHistoryData>[] { firstPacket.Append(move).ToArray(), new[] { Full(56, "new", 4, 3, owner), end } })
+                .Count(f => f.Rule == "R7") == 0, "admission control packet continuation: the move came in the earlier packet " + owner); cases++;
+            Assert("SECRET destination is never paired " + owner, new[] { Full(57, "quest", 5, 3, owner, 1), Start(57, BlockType.PLAY),
+                Tag(57, GameTag.ZONE, 7), Full(56, "new", 4, 3, owner), end }, "R7", 0);
+        }
         Console.WriteLine($"PASS native admission controls: {cases} positive/negative cases");
     }
 }

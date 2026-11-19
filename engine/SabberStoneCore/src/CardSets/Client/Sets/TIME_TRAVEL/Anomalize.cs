@@ -41,7 +41,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var assignments = new List<int[]>();
                 Permute(original.ToArray(), 0, assignments);
                 var distinct = assignments.GroupBy(values => string.Join(",", values)).Select(group => group.First()).ToArray();
-                int BadHealth(int[] values) => participants.Select((m, i) => !m.IsDormant && values[2 * i + 1] <= 0 ? 1 : 0).Sum();
+                int BadHealth(int[] values) => participants.Select((m, i) => !m.Untouchable && values[2 * i + 1] <= 0 ? 1 : 0).Sum();
                 int Unchanged(int[] values) => values.Where((value, i) => value == original[i]).Count();
                 int bestHealth = distinct.Min(BadHealth);
                 var living = distinct.Where(values => BadHealth(values) == bestHealth).ToArray();
@@ -49,7 +49,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var candidates = living.Where(values => Unchanged(values) == bestChanged).ToArray();
                 var result = candidates[g.Random.Next(candidates.Length)];
                 for (int i = 0; i < participants.Count; i++)
-                    if (!participants[i].IsDormant)
+                    if (!participants[i].Untouchable)
                         Generic.AddEnchantmentBlock(g, Cards.FromId("TIME_859e"), (IPlayable)s, participants[i], result[2 * i], result[2 * i + 1]);
                 g.DeathProcessingAndAuraUpdate();
             }) };

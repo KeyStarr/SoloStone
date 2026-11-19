@@ -24,7 +24,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             ColossalRules.DeclareLayout(card, new[] { 1 }, "TSC_962t");
             card.Power = new Power {
                 PowerTask = new CustomTask((g,c,s,t,k) => {
-                    var victims = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).ToArray();
+                    var victims = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToArray();
                     foreach (var victim in victims) PayloadRules.StoreCard(s, Food, victim.Card);
                     foreach (var victim in victims) victim.Destroy();
                 }),
@@ -42,6 +42,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g,c,s,t,k) => {
+                // untouchable-ok: own payload bookkeeping: clears the stored food from every Gigafin body, whatever its state
                 foreach (var body in c.BoardZone.Where(m => m.Card.Id == "TSC_962").ToArray())
                     foreach (var food in PayloadRules.Entries(body, Food)) PayloadRules.Remove(food);
             }) };

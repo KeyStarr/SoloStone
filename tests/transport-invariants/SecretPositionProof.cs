@@ -19,8 +19,10 @@ internal static class SecretPositionProof
     {
         foreach (int actor in new[] { 1, 2 })
         {
+            // Desperate Measures casts a random Paladin Secret and the Standard pool holds none, so this transport check runs
+            // on the frozen pool its Wild-only secrets come from; it is about the secret's position, not the pool.
             var game = new Game(new GameConfig { RandomSeed = 7, StartPlayer = actor, SkipMulligan = true,
-                History = true, Logging = false,
+                History = true, Logging = false, UnversionedRandomPoolReplay = true,
                 Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_231"), 30).ToList(),
                 Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_231"), 30).ToList() });
             game.StartGame();

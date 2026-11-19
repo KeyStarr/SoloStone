@@ -27,7 +27,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 TriggerSource = TriggerSource.FRIENDLY,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     if (!(s is Enchantment helper) || !(helper.Target is Minion parent) || parent.IsSilenced
+                        // untouchable-ok: Petrified (TLC_253e) is a Dormant enchant the card applies; the parent must still be asleep
                         || !parent.IsDormant || parent.Controller != c || g.CurrentPlayer != c
+                        // untouchable-ok: membership of the parent body itself, not a read of other minions
                         || parent.Zone != c.BoardZone || !c.BoardZone.Slots.Contains(parent)
                         || !parent.AppliedEnchantments.Contains(helper)) return;
                     if (g.Random.Next(2) == 0) DormantRules.Awaken(parent);

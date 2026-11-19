@@ -60,8 +60,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
             switch (form.Id)
             {
                 case "JAIL_458t1":
-                    var enemies = c.Opponent.BoardZone.GetAll().Cast<ICharacter>().Concat(new[] { c.Opponent.Hero })
-                        .Where(e => !e.IsDead && !(e is Minion m && m.IsDormant) && e.Id != stack.Number1).ToList();
+                    var enemies = c.Opponent.BoardZone.Interactable.Cast<ICharacter>().Concat(new[] { c.Opponent.Hero })
+                        .Where(e => !e.IsDead && e.Id != stack.Number1).ToList();
                     for (int i = 0; i < 2 && enemies.Count > 0; i++)
                     {
                         int pick = g.Random.Next(enemies.Count); g.Facts.Freeze(enemies[pick],source); enemies.RemoveAt(pick);

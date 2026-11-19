@@ -71,7 +71,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         internal static void Destruction(Card card) => ConfigurePart(card,new CustomTask(ForceAll));
         [StandardCard("CAP_405t2",132849)]
         internal static void Conspiracy(Card card) => ConfigurePart(card,new CustomTask((g,c,s,t,stack) => {
-            var candidates=c.Opponent.BoardZone.Where(m=>!m.Untouchable && !m.IsDead).ToArray();
+            var candidates=c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable && !m.IsDead).ToArray();
             if(candidates.Length>0) new ControlTask(EntityType.TARGET).Process(g,c,s,candidates[g.Random.Next(candidates.Length)]);
         }));
         [StandardCard("CAP_405t3",132843)]
@@ -117,14 +117,14 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static void ConfigurePart(Card card,ISimpleTask task) { card.Implemented=true;card.ExcludeFromLegacyRandomPools=true;card.Power=new Power { PowerTask=task }; }
         private static void ForceAll(Game g,Controller c,IEntity s,IPlayable t,TaskStack stack)
         {
-            var queue=g.Player1.BoardZone.Concat(g.Player2.BoardZone).Where(m=>!m.Untouchable && !m.IsDead)
+            var queue=g.Player1.BoardZone.Interactable.Concat(g.Player2.BoardZone.Interactable).Where(m=>!m.Untouchable && !m.IsDead)
                 .Select(m=>(Body:m,Order:m.OrderOfPlay)).ToArray();
             for(int i=queue.Length-1;i>0;i--) { int j=g.Random.Next(i+1);var tmp=queue[i];queue[i]=queue[j];queue[j]=tmp; }
             var previous=g.CurrentEventData;
             try { foreach(var original in queue) {
                 var attacker=original.Body;
                 if(attacker.Zone!=attacker.Controller.BoardZone || attacker.OrderOfPlay!=original.Order || attacker.Untouchable || attacker.IsDead) continue;
-                var defenders=g.Player1.BoardZone.Concat(g.Player2.BoardZone).Where(m=>m.Id!=attacker.Id && !m.Untouchable && !m.IsDead).ToArray();
+                var defenders=g.Player1.BoardZone.Interactable.Concat(g.Player2.BoardZone.Interactable).Where(m=>m.Id!=attacker.Id && !m.Untouchable && !m.IsDead).ToArray();
                 if(defenders.Length==0) continue;
                 Generic.AttackBlock(attacker.Controller,attacker,defenders[g.Random.Next(defenders.Length)],true,true);
             } } finally { g.CurrentEventData=previous; }

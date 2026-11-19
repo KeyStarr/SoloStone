@@ -353,10 +353,36 @@ class RerecordTests:
 class Schema3Tests(RerecordTests, unittest.TestCase):
     golden = 'core-2026.json'
 
+    def test_renew_random_pools_stamps_the_policy_on_the_chosen_games_only(self):
+        # A repair keeps a record on its own pools (see test_restores_only_the_corrupted_games: the file comes back
+        # byte-identical). Renewal moves a record onto the match random pool policy and stamps it. The committed file
+        # is already renewed (#141), so take the stamp off its first game (a shape-only game) to get an unversioned
+        # record, then renew only that game: it must come back exactly as committed and every other game untouched.
+        stamp = ',"randomPoolPolicyVersion":"match-random/1"'
+        first = self.chunks[1]
+        self.assertIn(stamp, first)
+        self.path.write_text(self.original.replace(first, first.replace(stamp, '', 1), 1))
+        result = self.rerecord('--only', self.ids[0], '--renew-random-pools')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn('1 re-recorded (1 shape only, 0 state, 0 behaviour)', result.stdout)
+        self.assertEqual(self.path.read_text(), self.original)
+        # The renewed record replays under the new policy, and the rest still replay on the frozen pools.
+        again = self.rerecord()
+        self.assertEqual(again.returncode, 0, again.stderr)
+        self.assertIn(f'0 re-recorded (0 shape only, 0 state, 0 behaviour), {len(self.ids)} unchanged, all {len(self.ids)} match', again.stdout)
+        # Renewing nothing more is a no-op for the renewed game.
+        self.assertEqual(self.rerecord('--only', self.ids[0], '--renew-random-pools').stdout.count('changed '), 0)
+
 
 @unittest.skipUnless(DLL and DOTNET, 'run through tests/run.py --suite goldens-rerecord')
 class Schema2Tests(RerecordTests, unittest.TestCase):
     golden = 'core-reprints.json'
+
+    def test_renew_random_pools_is_refused_for_a_schema_2_file(self):
+        result = self.rerecord('--renew-random-pools')
+        self.assertEqual(result.returncode, 2, result.stderr)
+        self.assertIn('stay on the frozen pools', result.stderr)
+        self.assertEqual(self.path.read_text(), self.original)
 
 
 if __name__ == '__main__':

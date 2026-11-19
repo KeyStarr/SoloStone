@@ -19,8 +19,6 @@
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
-    <None Include="fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="../goldens/pools/*" LinkBase="pools" CopyToOutputDirectory="PreserveNewest" />
     <None Include="../../data/npc/*.json" LinkBase="data/npc" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 <ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>

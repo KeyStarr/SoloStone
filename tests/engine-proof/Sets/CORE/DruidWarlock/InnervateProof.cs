@@ -30,6 +30,7 @@ internal static class InnervateProof
         });
         p.BaseMana = 10; p.UsedMana = 0; p.TemporaryMana = 0;
         source = Add(p, id); Core2026Proof.Check(g.Process(p.Options().Single(t => t.Source?.Id == source.Id)), "Innervate accepted at cap");
-        Core2026Proof.Check(p.RemainingMana == 10 && p.TemporaryMana == 0 && p.BaseMana == 10, "ten-mana cap gives no extra crystal");
+        // Patch 29.0: temporary Mana may exceed maximum Mana, so Innervate at 10/10 gives 11/10 (no permanent crystal).
+        Core2026Proof.Check(p.RemainingMana == 11 && p.TemporaryMana == 1 && p.BaseMana == 10, "Innervate at the ten-mana cap gives 11/10");
     }, legacyPoolMember: true);
 }

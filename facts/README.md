@@ -5,9 +5,9 @@
 > this repository's licences (AGPL, CC BY) cover them. They are here only so the rules engine can show and play the
 > cards. See [NOTICE](../NOTICE) section 5. The locale files described below are the same: Blizzard's card text.
 
-One JSON file per meta. The engine embeds the file and loads every card from it, in file order. A file is frozen once shipped, so a meta reads and plays the same on any client.
+One JSON file per meta. The engine embeds the file and loads every card from it, in file order. A file is frozen once shipped, so a meta reads and plays the same on any client. One exception, approved by the owner on 2026-11-15 (#117): the shipped `violet-hold-2026-09` file gained the spell-school tag (1635) on 579 base spell rows that predate spell schools, so a card shows and counts its school in a match.
 
-The file is generated from the client's card definitions by private tooling that is not in the public repository (`tools/gen_card_facts.py`, run after `tools/gen_card_overlay.py`; `--check` fails on a stale file).
+The file is generated from the client's card definitions by private tooling that is not in the public repository (`tools/gen_card_facts.py`, run after `tools/gen_card_overlay.py`; `--check` fails on a stale file). Base rows come from the client's card definitions (build 38377), which predate spell schools; the spell school (tag 1635) of a base row without one is taken from the client card export the overlay was generated from (its SHA-256 is the overlay's `exportSha256`, and the generator refuses any other file). Nothing else is taken from the export.
 
 ## Schema, version 1
 
@@ -24,7 +24,7 @@ The file is generated from the client's card definitions by private tooling that
 | `name` | overlay rows | English name. Absent means no name |
 | `text` | overlay rows | Raw English text. Absent means no text, which is not the same as `""` |
 | `textHash` | with `text` | First 16 hex digits of the SHA-256 of `text` as UTF-8, for the client drift check. The loader does not read it |
-| `tags` | yes | `[tag, value]` integer pairs in source order. A list, so a duplicate tag still fails at load as it did from XML |
+| `tags` | yes | `[tag, value]` integer pairs in source order, except that the spell school (tag 1635), where the generator adds it, is inserted in tag-number order (the source tags are already sorted, so no other tag moves). A list, so a duplicate tag still fails at load as it did from XML |
 | `refs` | no | Referenced tags, same shape. The first value per tag wins |
 | `reqs` | no | `[requirement, parameter]` pairs in order |
 | `entourage` | no | Generated-card IDs in order |

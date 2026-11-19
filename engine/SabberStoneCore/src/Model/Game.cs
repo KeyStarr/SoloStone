@@ -125,6 +125,9 @@ namespace SabberStoneCore.Model
 
 		internal void RestoreOfflinePools(OfflinePoolManifest manifest) => OfflinePools = manifest;
 		internal bool LegacyPoolReplay => _gameConfig.LegacyPoolReplay;
+		internal bool UnversionedRandomPoolReplay => _gameConfig.UnversionedRandomPoolReplay;
+		/// <summary>The match's random pool policy (see <see cref="GameConfig.PoolFormat"/>).</summary>
+		public GenerationFormat PoolFormat => _gameConfig.PoolFormat;
 
 		internal Util.DeepCloneableRandom Random { get; set; }
 
@@ -605,12 +608,25 @@ namespace SabberStoneCore.Model
                  !LocationRules.CanActivate(activation.Controller, activation.Source, activation.ActionTarget))) return false;
 			if (Resolution.HasSuspendedEffect && !(gameTask is ConcedeTask)) return false;
             if (SpellCompletion != null && !(gameTask is ChooseTask) && !(gameTask is ConcedeTask)) return false;
-            bool beganRewind = RewindRules.TryBegin(this, gameTask);
+            // Rewind can settle overdue summon reactions before its snapshot; keep that history with this action.
+            bool prepareRewind = RewindRules.WouldBegin(this, gameTask) && !IsSnapshotBoundary;
+            if (prepareRewind && !RewindRules.IsLegalTask(this, gameTask)) return false;
+            bool preparedHistory = !preserveHistory && prepareRewind;
+            if (preparedHistory) PowerHistory?.Last.Clear();
+            bool beganRewind = RewindRules.TryBegin(this, gameTask, out bool settled);
+            if (settled && (State != State.RUNNING || Player1.Choice != null || Player2.Choice != null ||
+                Resolution.HasSuspendedEffect || SpellCompletion != null || !RewindRules.IsLegalTask(this, gameTask)))
+            {
+                _optionsDecisionId = NextDecisionId;
+                SettleTerminalState();
+                RefreshHistoryDisplays();
+                return true;
+            }
             bool result;
 			_snapshotOperationDepth++;
 			try
 			{
-				result = ProcessCore(gameTask, preserveHistory);
+                result = ProcessCore(gameTask, preserveHistory || preparedHistory);
                 if (result)
                 {
                     if (TaskQueue.IsQuiescent) _interruptedAction = false;
@@ -803,8 +819,9 @@ namespace SabberStoneCore.Model
 			_players.ToList().ForEach(p => p.PlayState = PlayState.PLAYING);
 
 			// starting mulligan draw block
+			PowerHistoryBlockStart opening = null;
 			if (History)
-				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
+				PowerHistory.Add(opening = PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
 
 			// getting first player
 			FirstPlayer = _gameConfig.StartPlayer < 0
@@ -820,8 +837,13 @@ namespace SabberStoneCore.Model
 
 			HistoryFacts.FreezeInitial(this);
             Actions.PayloadRules.CaptureTracking(this);
+            // PowerHistory is null when History is off; opening is set only when it is on.
+            int preparedFull = opening != null ? PowerHistory.Full.Count : 0, preparedLast = opening != null ? PowerHistory.Last.Count : 0;
             CardSets.Client.Sets.AzalinaSoulsever.PrepareDecks(this);
             DeckbuildingRules.Prepare(this);
+            // Deckbuilding cards (Azalina's copies, Beatrix's sideboard copies) are starting deck cards: the client must create
+            // them with the game, before the opening block, or a copy dealt into the opening hand shows face up at the deck.
+            if (opening != null) PowerHistory.HoistOpeningDeckEntities(opening, preparedFull, preparedLast);
 
 			// Capture restrictions before any opening card leaves its deck.
 			StartOfGameRules.Capture(this);
@@ -1359,6 +1381,9 @@ namespace SabberStoneCore.Model
             using var resolution = Resolution.Enter(ResolutionKind.DeathCreation);
             // A later trigger can consume/transform a pending victim before death creation.
             DeadMinions.RemoveAll(minion => minion.Zone != minion.Controller.BoardZone);
+            // Retail: damage alone leaves a minion mortally wounded only until this step; one lifted above 0 Health by a heal,
+            // a Health buff or an aura survives. A Deathrattle heal comes after this step and cannot undo the death.
+            DeadMinions.RemoveAll(minion => { bool rescued = minion.RescuedFromDamageWound; minion.SettleDamageWound(); return rescued; });
             Actions.DeathContextRules.CaptureBatch(this);
             Actions.PayloadRules.CaptureDeaths(this);
 			if (ClearWeapons != null)

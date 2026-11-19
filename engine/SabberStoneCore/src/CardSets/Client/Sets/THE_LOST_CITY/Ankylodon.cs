@@ -32,7 +32,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 {
                     var attacker = (Minion)g.IdEntityDic[id];
                     if (attacker.IsDead || attacker.Zone != c.BoardZone || attacker.Untouchable) continue;
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).Cast<ICharacter>()
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).Cast<ICharacter>()
                         .Append(c.Opponent.Hero).Where(e => !e.IsDead).ToArray();
                     if (enemies.Length == 0) break;
                     var defender = enemies[g.Random.Next(enemies.Length)]; g.OnRandomHappened(true);

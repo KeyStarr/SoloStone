@@ -66,7 +66,54 @@ internal static class PluginSourcePins
         string uiTree = File.ReadAllText(Path.Combine(root, "plugin/NativeUiTree.cs"));
         if (!uiTree.Contains("NativeShopOpenText.DialogButtonId(popupId, \"okay\")"))
             failures.Add("Unfinished reveal OK must have its semantic control id");
+        // #119: Nefarian's Creation draws the first-picked dragon's art; the hook must stay installed and read the part tag.
+        string creationPath = Path.Combine(root, "plugin/NativeCreationPortrait.cs");
+        string creation = File.Exists(creationPath) ? File.ReadAllText(creationPath) : "";
+        foreach (string required in new[] { "\"CATA_470t1\"", "FirstPartTag = 471", "\"UpdatePortraitTexture\"", "SetPortraitTexture(texture)", "\"HistoryCard\"", "\"LoadTile\"", "\"m_portraitTexture\"",
+            "\"m_usingInitialPortraitMaterial\"", "\"GetPortraitMaterial\"", "SetPortraitMaterial(material, -1)",
+            "TAG_PREMIUM.DIAMOND ? TAG_PREMIUM.GOLDEN",
+            "UseFirstDragonPremiumMaterial(__instance, entity, texture)", "material.mainTexture == null", "material.mainTexture = partTexture" })
+            if (!creation.Contains(required)) failures.Add("Creation portrait hook lost: " + required);
+        if (!File.ReadAllText(Path.Combine(root, "plugin/ClientBridge.cs")).Contains("NativeCreationPortrait.Install(harmony, log)"))
+            failures.Add("Creation portrait hook is not installed by ClientBridge");
+        DeckImportPins(root, failures);
         if (failures.Count != 0) throw new Exception(string.Join("\n", failures));
-        Console.WriteLine("PASS plugin source-text pins (achievement toast, reward UI, format lock, shop open)");
+        Console.WriteLine("PASS plugin source-text pins (achievement toast, reward UI, format lock, shop open, creation portrait, deck-code import)");
+    }
+    // Deck-code import (#140): the clipboard import is served, never granting and never touching the server or the format.
+    private static void DeckImportPins(string root, List<string> failures)
+    {
+        string probe = File.ReadAllText(Path.Combine(root, "plugin/NativeUIProbe.cs"));
+        string editor = File.ReadAllText(Path.Combine(root, "plugin/NativeDeckEditor.cs"));
+        string hooks = File.ReadAllText(Path.Combine(root, "plugin/NativeDeckCodeHooks.cs"));
+        string profile = File.ReadAllText(Path.Combine(root, "plugin/NativeDeckCodeProfile.cs"));
+        string plan = File.ReadAllText(Path.Combine(root, "plugin/NativeDeckCodeImport.cs"));
+        if (probe.Contains("BlockDeckImport", StringComparison.Ordinal) || editor.Contains("BlockDeckImport", StringComparison.Ordinal)
+            || hooks.Contains("BlockDeckImport", StringComparison.Ordinal))
+            failures.Add("the clipboard create must not be blocked any more (BlockDeckImport is gone)");
+        foreach (string row in new[] {
+            "Hook(harmony, typeof(CollectionManagerDisplay), \"CreateDeckFromClipboard\", nameof(PlanDeckCodeImport))",
+            "Hook(harmony, typeof(CollectionManagerDisplay), \"OnDeckCreatedFromClipboard\", nameof(ProjectImportedDeck))",
+            "Hook(harmony, typeof(CollectionInputMgr), \"PasteDeckInEditModeFromShareableDeck\", nameof(BlockDeckEditPaste))" })
+            if (!probe.Contains(row, StringComparison.Ordinal)) failures.Add("deck-code import hook row missing: " + row);
+        int createStart = editor.IndexOf("private static bool CreateLocalDraft(", StringComparison.Ordinal);
+        int createEnd = editor.IndexOf("// Live 2026-10-25", createStart, StringComparison.Ordinal);
+        string create = createStart < 0 || createEnd < 0 ? "" : editor.Substring(createStart, createEnd - createStart);
+        if (create.Length == 0) failures.Add("CreateLocalDraft not found for its deck-code pins (renamed?)");
+        foreach (string required in new[] { "Profile.CreateDraftFromCode(", "NativeUIProjection.OwnsCreateSource(", "TakePendingImport()" })
+            if (!create.Contains(required, StringComparison.Ordinal)) failures.Add("CreateLocalDraft must serve a planned pasted deck: " + required);
+        foreach (string forbidden in new[] { "Network.", "SetFormatType", "OfflineDataCache", "Grant" })
+            if (create.Contains(forbidden, StringComparison.Ordinal) || hooks.Contains(forbidden, StringComparison.Ordinal)
+                || profile.Contains(forbidden, StringComparison.Ordinal) || plan.Contains(forbidden, StringComparison.Ordinal))
+                failures.Add("deck-code import must never touch the server, the format or grants: " + forbidden);
+        if (System.Text.RegularExpressions.Regex.Matches(profile, @"\bCommit\(").Count != 1 || profile.Contains("CreateDraft(", StringComparison.Ordinal))
+            failures.Add("CreateDraftFromCode must write through exactly one commit, with no empty draft first");
+        if (!probe.Contains("nameof(TidyRefusedImport)", StringComparison.Ordinal) || !probe.Contains("nameof(LeaveCollectionImportState)", StringComparison.Ordinal)
+            || !editor.Contains("importCreated = true;", StringComparison.Ordinal))
+            failures.Add("a refused or failed import must restore the client's callbacks (postfix), and leaving the Collection must drop the fill skip");
+        foreach (string required in new[] { "IsInEditMode() == true) return true;", "nativeFillSkip.TryConsume(", "nativeFillSkip.Arm(__0);", "RestoreDeckCreatedCallbacks(", "RemoveDeckCreatedListener(", "Invoke(__instance, \"RejectDeckFromClipboard\")" })
+            if (!hooks.Contains(required, StringComparison.Ordinal)) failures.Add("deck-code hooks lost a review fix: " + required);
+        if (plan.Contains("KeepsWildOnlyCards", StringComparison.Ordinal) || !plan.Contains("Cards.FromId(id).Collectible", StringComparison.Ordinal))
+            failures.Add("Usable must require collectible cards and carry no Wild switch (the profile ledger decides, PR #136)");
     }
 }

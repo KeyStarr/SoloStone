@@ -1292,6 +1292,36 @@ public static class LocalDecks
 #endif
     }
 
+    internal static bool HasModelledSideboard(string owner)
+    {
+#if ENGINE_SOURCE
+        return SabberStoneCore.Actions.DeckbuildingRules.HasSideboard(owner);
+#else
+        return false;
+#endif
+    }
+
+    internal static int SideboardSlotCount(string owner)
+    {
+#if ENGINE_SOURCE
+        return SabberStoneCore.Actions.DeckbuildingRules.SlotCount(owner);
+#else
+        return 0;
+#endif
+    }
+
+    // A card the client treats as a sideboard owner that SoloStone does not model (E.T.C. Band Manager, Zilliax Deluxe 3000):
+    // ValidateNativeSave refuses it in a main deck, so deck-code import drops it before saving.
+    internal static bool IsUnsupportedSideboardOwner(string id)
+    {
+#if ENGINE_SOURCE
+        return id != null && nativeSaveCardIndex.Value.TryGetValue(id, out var card) && card[(SabberStoneCore.Enums.GameTag)2931] > 0
+            && !SabberStoneCore.Actions.DeckbuildingRules.HasSideboard(id);
+#else
+        return false;
+#endif
+    }
+
     // Shared by recipe validation and native editor save; incomplete ownership never rejects a draft.
     internal static void ValidateNativeSave(IEnumerable<string> main, IEnumerable<LocalSideboard> sideboards, bool complete = false)
     {

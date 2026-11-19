@@ -18,17 +18,30 @@ public static class BoardActorInvariant
     {
         var client = new ClientModel { RepairNullToPlayActors = repairNullToPlayActors };
         var faults = new List<string>();
-        int packet = 0;
+        int packet = 0, milled = 0;
         foreach (var history in packets)
         {
             client.Apply(history);
-            faults.AddRange(Inspect(client).Select(detail => $"packet={packet} {detail}"));
+            faults.AddRange(InspectBoard(client).Select(detail => $"packet={packet} {detail}"));
+            faults.AddRange(client.MillFaults.Skip(milled).Select(detail => $"packet={packet} {detail}"));
+            milled = client.MillFaults.Count;
             packet++;
         }
         return faults;
     }
 
-    internal static IEnumerable<string> Inspect(ClientModel client)
+    // What the client holds after these packets: named actors with their zone and controller (the live audit's input).
+    public static IReadOnlyList<(int Id, string Card, int Zone, int Controller)> ClientCards(IEnumerable<PowerHistory> packets)
+    {
+        var client = new ClientModel();
+        foreach (var history in packets) client.Apply(history);
+        return client.Entities.Where(pair => pair.Value.CardId.Length > 0)
+            .Select(pair => (pair.Key, pair.Value.CardId, pair.Value.CardZone, pair.Value.CardController)).ToList();
+    }
+
+    internal static IEnumerable<string> Inspect(ClientModel client) => InspectBoard(client).Concat(client.MillFaults);
+
+    private static IEnumerable<string> InspectBoard(ClientModel client)
     {
         foreach (var pair in client.Entities)
         {

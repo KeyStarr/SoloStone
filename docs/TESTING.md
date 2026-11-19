@@ -65,7 +65,8 @@ python3 tests/run.py --client "/path/to/Hearthstone"
 `--client` takes your Hearthstone folder, or its `Managed` folder. It copies the libraries the plugin references (the
 13 files in step 1 of [BUILDING.md](BUILDING.md)) into `references/game/`, which git ignores, then runs everything.
 Nothing is committed and nothing leaves your machine. Later runs find the copied files, so `--client` is needed only
-after your client changes. Use the client version named in `installer/tested-client.json`; another one can fail
+after your client changes. It refuses a folder that is `references/game` itself (or links to it), so it never removes
+the copy it would copy from. Use the client version named in `installer/tested-client.json`; another one can fail
 in ways that are not bugs.
 
 A `client` suite is **skipped, with the reason printed**, when `references/game` is incomplete or when data it needs
@@ -132,12 +133,13 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fx-harmony` | The effect patches applied by the real Harmony library under Mono. Needs `mono` |
 | `fire-fx-scene` | The fire effect scene helper |
 | `dormant`, `kindred`, `reborn` | Engine rules for Dormant, Kindred and Reborn cards |
-| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/RNG fingerprint, on the pinned pool snapshot; a replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through `transport-invariants`, after the same per-game review as a golden), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
+| `engine-proof` | Card-by-card engine proofs (effects, resolution, snapshots, definitions) and the engine rule proofs (Imbue, Dormant, Rewind, History, Location, Decision, pools), the canonical hash and replay policy checks, the Shadow of Demise trial recipes, the engine half of the pinned transport replays (`tests/transport-invariants/replays`: legal-move hashes at every step and, for the 8 replays that store one, the state/RNG fingerprint, on the pinned pool snapshot; after the same per-game review as a golden, `EngineProof.dll --renew-replay` accepts labelled state/legal-move drift, or `--rerecord-replay` regenerates changed games against a baseline and expected first difference; neither runs automatically in CI. `TransportInvariants.dll --search-deathrattle-replay` searches for replacement witnesses. Rerecording leaves `findingsSha` unchanged, so the client-tier packet check is still required; see the [transport replay tools](../tests/transport-invariants/README.md#replay-tools)), and the opponent planner on a recorded turn-10 position. Without the card export built from a client, the check of each card against that export is skipped and printed, and the card's scenario still runs. See "Engine proofs and native flow checks" |
 | `standard-native` | Native Standard-format flow checks that need no client: quest definitions, playability policy, loaners, definition audit, input trace binding |
 | `goldens` | Recorded games replay to the same result on the current engine, with a well-formed event history (see below) |
 | `goldens-rerecord` | `goldens rerecord` restores only the changed games and leaves the rest of a golden file byte-identical |
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
+| `run-tool` | This runner: `--client` refuses `references/game` itself, a link to it, or files that link into it, and a failed copy keeps the earlier copy |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
 ## The client suites
@@ -174,6 +176,47 @@ comparison and a `SKIPPED n x ...` total at the end. The comparisons that need t
 hero powers) are skipped in `engine-proof` even when the export is there, and run in `engine-proof-client`. Nothing is skipped silently. The client half builds with
 `-p:ClientTransport=true`, which defines `CLIENT_TRANSPORT`, adds the client's libraries and links the plugin's native match.
 
+## Client drop prediction
+
+When you drag a card from your hand and drop it, the client doesn't wait for the game. It moves the card to the board at
+once, as a prediction. When the play's history arrives, the client pairs it with that prediction and then **ignores every
+card zone change in the play block's own task list that moves the played card to PLAY**, because it thinks it has
+already done them. Rows inside nested blocks are processed normally.
+
+Retail sends whatever happens to other cards during a play in nested blocks, so nothing is lost. If SoloStone leaves such a
+row in that list, the client silently drops it. Seen so far:
+- a card created in hand gets no actor: it counts as in hand but never shows, and the queue can hang (#118, #82, #116, #183);
+- a hero card's new hero power never replaces the old one (#169, #88).
+
+**The rule:** in a human PLAY block, the list that moves the played card to PLAY may move no other card. R7 allows two:
+the hero a hero card replaces, and a weapon the played weapon replaces. A creation, zone move, hide, reveal or controller
+change of any other card goes into a nested block (see `NativeMatch.NestPredictedPlayCreations`). Opponent plays aren't
+predicted, so their shape is free.
+
+**Why the usual checks miss it:** the test-control `act` command and the headless suites play the card directly, so the
+client makes no prediction and ignores nothing. A history bug of this kind passed every packet suite before R7, and it
+still passes a live check that uses `act`.
+
+**How to check a change to what the plugin sends during a play:**
+- The `native-match` suite (client tier; its program's `--admission-only` slice runs just this sweep). Admission rule R7
+  (`tests/native-match/NativeAdmission.cs`) reports any such row in a predicted PLAY list, over every Standard loaner
+  fixture and both seats. A new kind of row needs a new R7 case, not an exemption.
+- A live check with a native drag of the card (test control's `entity-drag` without `click`, or a physical drag), never
+  `act`.
+
+The paired list can be any of the block's own lists: one after a nested block, a sub-spell's list, or the rows that
+continue the block in a later packet. R7 checks all of them. Besides moves, it also reports a card revealed in place
+(a SHOW_ENTITY of a card that stays in hand, on the board or in SECRET), because the client refreshes that card's actor
+only when it processes the list.
+
+These need no R7 case, because the client loses nothing there:
+- A transform in place (CHANGE_ENTITY): the card refreshes its own actor.
+- Position rows: the prediction itself shifts the cards in hand and on the board around the played card. A card that
+  entered the zone after the drop misses that shift and can be off by one, but that can only tie it with a neighbour.
+  The client breaks a tie by the entity's position tag, which still applies, so the order stays right.
+- A Secret, quest or Sigil: it moves from hand straight to SECRET. The client predicts PLAY, so that list is never
+  paired.
+
 ## You changed X, run Y
 
 | You changed | Run |
@@ -188,9 +231,10 @@ hero powers) are skipped in `engine-proof` even when the export is there, and ru
 | Native screens (`plugin/Native*.cs`, `plugin/Deck*.cs`) | `projection`, `deck-ui`, `shop`, `fx-harmony` |
 | Packs (`data/packs/`, `plugin/FairPack*.cs`) | `fair-packs`, `cards` |
 | Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-bindings-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |
+| What a play sends to the client (the history of a PLAY block, `plugin/NativeMatch.cs`) | As above (`native-match` runs admission rule R7), plus a live check with a real drag: see [Client drop prediction](#client-drop-prediction) |
 | Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder`, `ladder-extended` |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
-| The shared test code (`tests/shared/`, `tests/run.py`) | Everything |
+| The shared test code (`tests/shared/`, `tests/run.py`) | Everything (for `tests/run.py`, at least `run-tool`) |
 
 Test folders are named after their suite (`tests/ai-golden`, `tests/fair-packs`, `tests/dormant`, ...). Code that two suites compile
 lives in `tests/shared/`, linked into each suite (a few small test helpers are still duplicated between `native-match` and `native-match-logic`); test data that is not a suite's own is in `tests/fixtures/`.
@@ -287,11 +331,43 @@ and target metadata, attack and fatigue blocks, privacy, with their reviewed exc
 `transport-invariants` check every corpus game, but that suite needs a client and CI does not run it, so a maintainer
 runs it before merging a change to `engine/` or `plugin/`.
 
+### Renewing a pinned transport replay
+
+A pinned replay in `tests/transport-invariants/replays/` (see its README) can stop matching when a pinned retail rule
+changes the game it recorded: a recorded action is no longer legal, or the legal moves at a step changed so the same action
+number means another move. The tail renewal tool re-records it from that step. It needs a client like the suite does, and
+never runs in a normal test run. Run it from the repository root:
+
+```
+dotnet TransportInvariants.dll --renew-replay-tail PATH [--from-step N] [--seed N] [--write | --out FILE]
+```
+
+It replays the recorded actions on the current engine up to the first step that differs: the first action that is no longer
+legal or the first legal-move hash that differs, whichever comes first (`--from-step N` starts earlier, never later). Then it
+plays the rest of the game with a seeded random policy (`--seed`, default derived from the game's seed) and re-records the
+legal-move hashes, the fingerprint, the findings hash, the turns and the winner. The decks, the pool pin and the game seed
+stay. Each tail's start step and seed are appended to `renewals` in the file, so it can be redone. It prints the before and
+after (turns, winner, actions, fingerprint), the first drifted legal-move hash, the count of unchanged steps, the findings
+hash and the transport and history-shape findings of the new tail, and writes nothing unless `--write` (replace the file) or
+`--out FILE` (write a copy) is given. A replay that still plays as recorded writes nothing. A changed game with no drifted hash and no illegal action (a different fingerprint, a game that ends early), or an identical game whose transport findings changed, is refused with a message asking for `--from-step N`. A game that plays identically with
+only its legal-move hashes drifted is refused: the engine-proof renewal tool (`EngineProof.dll --renew-replay`) re-records those,
+with its guards.
+
+The tool re-records, it does not decide: a renewal still needs a reviewed pinned retail rule and the same per-game review
+as a golden, and the replay's own proof (`--deathrattle-replay-only`, `--meta-pre-be-only`, `--private-return-only`) must
+pass afterwards. `--replay-tail-renew-only` checks the tool itself.
+
 A golden file holds one game per line, with a blank line between games, so two changes that re-record different games
 merge without a conflict. Two changes that both move the same game do conflict: re-record that file on the merged
 engine rather than picking a side. `goldens check` refuses a file in the single-line form written before (with
 `engineSha` and `historySha` fields); `rerecord` converts it, filling in each game's decisions hash, even when no game
 changed, so an older branch is brought up to date by the same command.
+
+A schema 3 record written before the random pool policy (`randomPoolPolicyVersion`) replays on the frozen legacy pools, and a
+plain `rerecord` keeps it there: it repairs hashes without changing which cards a random effect can roll. To move a file
+onto the match random pool policy (random effects draw only from the match's Standard pool, #141) pass
+`--renew-random-pools`: every unversioned game in scope is run again under the policy and stamped with it, and the
+games whose result changes are classified as above. Schema 2 files stay on the frozen pools and refuse the flag.
 
 `--dry-run` prints the same and writes nothing. Exit code 0 is success, 1 is a refusal or failure (a game could not be
 re-recorded, a behaviour or state change without its flag, a re-recorded game that still does not match, or a file not in the

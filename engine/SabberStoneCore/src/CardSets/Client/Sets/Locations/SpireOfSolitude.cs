@@ -31,7 +31,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     Generic.SummonBlock(g, demon, Math.Clamp(position, 0, c.BoardZone.SlotCount), s);
                     if (demon.Health <= 0) demon.ToBeDestroyed = true;
                     g.DeathProcessingAndAuraUpdate();
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                     if (demon.Zone == c.BoardZone && !demon.IsDead && enemies.Length != 0 && g.State != State.COMPLETE)
                     {
                         var selected = enemies[g.Random.Next(enemies.Length)];

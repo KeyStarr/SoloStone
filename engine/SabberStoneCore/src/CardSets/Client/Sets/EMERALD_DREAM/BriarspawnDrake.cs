@@ -19,7 +19,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_END) {
                 TriggerSource = TriggerSource.FRIENDLY,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
-                    var targets = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsImmune && !m.ToBeDestroyed).ToArray();
+                    var targets = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsImmune && !m.ToBeDestroyed).ToArray();
                     if (targets.Length == 0 || !DeathContextRules.Active((Minion)s)) return;
                     var victim = targets[g.Random.Next(targets.Length)];
                     int previous = s[DeathContextRules.ExcessCombat];

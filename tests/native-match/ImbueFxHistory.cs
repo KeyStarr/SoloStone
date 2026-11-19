@@ -150,6 +150,13 @@ internal static partial class Program
         int pulse = rows.FindIndex(IsImbueFx);
         var hits = rows.Select((r, i) => (r, i)).Where(x => x.r.HasMetaData && (int)x.r.MetaData.Type == 1).ToArray();
         Check(hits.Length == 2 && hits.All(x => x.i > pulse + 3), "Wisprider power fires after the pulse and tags, at magnitude 2");
+        // #109: the delegated hero power keeps its own recipe, so each missile of the volley is the crystal missile
+        // from the hero (not the client's default Fireball), balanced, one per hit.
+        const string crystal = "ReuseFX_Arcane_Missile_Crystal_Small_Super_Simultaneous_WithIdle:6c662c0f4f538374dbd930f66e205eb3";
+        var subs = rows.Where(r => r.HasSubSpellStart && !r.SubSpellStart.SpellPrefabGuid.StartsWith("EDRFX_Imbue")).Select(r => r.SubSpellStart).ToArray();
+        Check(subs.Length == 2 && subs.All(s => s.SpellPrefabGuid == crystal && s.SourceEntityId == owner.Hero.Id
+            && s.TargetEntityIds.Count == 1), $"Wisprider volley: one crystal missile per hit from the hero (got {subs.Length}: {string.Join(" | ", subs.Select(x => x.SpellPrefabGuid + " src=" + x.SourceEntityId))})");
+        Check(rows.Count(r => r.HasSubSpellStart) == rows.Count(r => r.HasSubSpellEnd), "Wisprider volley sub-spells balanced");
         capture.SerializeAll();
     }
 

@@ -33,12 +33,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.HistoryDisplay(GameTag.TAG_SCRIPT_DATA_NUM_1,PayloadRules.FirstReference);
-            card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,stack)=> {
-                var taught=PayloadRules.Entries(s,1).FirstOrDefault(); if(taught==null) return;
-                var spell=Entity.FromCard(c,taught.Card,new EntityData { [GameTag.DISPLAYED_CREATOR]=s.Id });
-                var cast=new TaskStack(); cast.AddPlayable(spell);
-                new PlayTask(PlayType.SPELL,true).Process(g,c,s,null,cast);
-            }) };
+            TaughtSpellRules.ConfigureBattlecry(card);
         }
     }
 }

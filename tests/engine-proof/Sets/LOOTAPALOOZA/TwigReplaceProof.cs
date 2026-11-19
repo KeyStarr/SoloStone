@@ -4,7 +4,7 @@ using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
 
 // Issue #83: a Death Knight with Twig of the World Tree (LOOT_392) equipped can play another weapon over it. Twig is destroyed
-// and its Deathrattle gains 10 full Mana Crystals (to the cap of 10), so after a 2-Cost weapon at 4 crystals 8 Mana is left.
+// and its Deathrattle refreshes the Mana Crystals (current retail text, owner ruling 2026-11-18), so after a 2-Cost weapon at 4 crystals 4 Mana is left.
 internal static class TwigReplaceProof
 {
     [GroupProof("twig-replace", ProofKind.Cards)]
@@ -26,7 +26,7 @@ internal static class TwigReplaceProof
             Core2026Proof.Check(play != null, id + " can be played over Twig");
             Core2026Proof.Check(game.Process(play), id + " play accepted");
             Core2026Proof.Check(p.Hero.Weapon?.Id == next.Id && twig.Zone == p.GraveyardZone, id + " replaces Twig, which is destroyed");
-            Core2026Proof.Check(p.BaseMana == 10 && p.RemainingMana == 10 - next.Cost, id + ": Twig's Deathrattle gives full crystals up to 10");
+            Core2026Proof.Check(p.BaseMana == Math.Max(4, next.Cost) && p.RemainingMana == p.BaseMana, id + ": Twig's Deathrattle refreshes the crystals and gains none");
         }
     }
 }

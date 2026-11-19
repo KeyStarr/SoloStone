@@ -109,7 +109,8 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			IReadOnlyList<Card> cardsList =
 				GetCardList(source, _cardType, cardClass, _cardSet, _race, _rarity, _gameTagFilter);
 
-			if ((cardClass == CardClass.DEMONHUNTER || cardClass == CardClass.DEATHKNIGHT) && cardsList.Count == 0)
+			// The match pool can hold no card for a filter (the frozen lists never did, except for DH/DK): nothing to generate.
+			if (cardsList.Count == 0)
 			{
 				stack.Playables = Array.Empty<IPlayable>();
 				return TaskState.STOP;
@@ -128,6 +129,21 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			CardClass cardClass = CardClass.INVALID, CardSet cardSet = CardSet.INVALID, Race race = Race.INVALID,
 			Rarity rarity = Rarity.INVALID, GameTag[] gameTagFilter = null)
 		{
+			var pool = Cards.RandomPool(source.Game, PoolDestination.Hand, source);
+			if (!pool.Legacy)
+			{
+				// The match's pool: a multi-class card counts for every class it lists, a dual-type minion for both
+				// types, and the generated card is never its own source.
+				var matches = (cardClass == CardClass.INVALID ? pool.All : pool.ClassOnly(cardClass)).Where(p =>
+					(cardType == CardType.INVALID || p.Type == cardType) &&
+					(cardSet == CardSet.INVALID || p.Set == cardSet) &&
+					(race == Race.INVALID || p.IsRace(race)) &&
+					(rarity == Rarity.INVALID || p.Rarity == rarity) &&
+					(gameTagFilter == null || Array.TrueForAll(gameTagFilter, gameTag => p.Tags.ContainsKey(gameTag))) &&
+					!p.IsQuest && p[GameTag.QUEST] == 0).ToArray();
+				return pool.WithoutSource(matches, source);
+			}
+
 			IEnumerable<Card> cards = source.Game.FormatType == FormatType.FT_STANDARD
 				? Cards.AllStandard
 				: Cards.AllWild;

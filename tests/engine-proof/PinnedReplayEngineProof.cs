@@ -9,7 +9,7 @@ using SabberStoneCore.Enums;
 // no replay). The pinned pool snapshot comes from tests/goldens/pools. Needs no client.
 // The packet half (transport parity, history shape, the witnesses that read packets) stays in transport-invariants. The three
 // transport-debt replays record no actions and are not covered here.
-internal static class PinnedReplayEngineProof
+internal static partial class PinnedReplayEngineProof
 {
     private sealed class PinnedReplay
     {
@@ -20,6 +20,7 @@ internal static class PinnedReplayEngineProof
         public string EngineFingerprint { get; set; }
         public bool Focused { get; set; }
         public string FindingsSha { get; set; }
+        public JsonElement? Renewals { get; set; } // written by a tail renewal (transport-invariants --renew-replay-tail); not used here
     }
 
     private static readonly JsonSerializerOptions Json = new() {
@@ -59,7 +60,7 @@ internal static class PinnedReplayEngineProof
             }
         }
         Check(drifted.Count == 0, "pinned replays failed on the engine: " + string.Join("; ", drifted)
-            + ". A pinned replay that drifts after an intended rules change cannot be renewed from CI: a maintainer with a client renews it through transport-invariants, after the same per-game review as a golden.");
+            + ". After the same per-game review as a golden, use EngineProof.dll --renew-replay for labelled drift or EngineProof.dll --rerecord-replay for changed games; see tests/transport-invariants/README.md (Replay tools). Neither runs automatically in CI.");
         Check(replays == 17 && fingerprints == 8, $"expected 17 pinned replays and 8 fingerprints, found {replays} and {fingerprints} (a replay file was added or removed: update this count with it)");
         Console.WriteLine($"PASS pinned replays on the engine: {replays} replays, legal-move hash chain and actions at every step, {fingerprints} state/RNG fingerprints");
     }

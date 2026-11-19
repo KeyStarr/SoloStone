@@ -14,7 +14,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
-                int count = c.BoardZone.Count(m => m.Damage > 0) + c.Opponent.BoardZone.Count(m => m.Damage > 0);
+                int count = c.BoardZone.Interactable.Count(m => m.Damage > 0) + c.Opponent.BoardZone.Interactable.Count(m => m.Damage > 0);
                 var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);
                 for (int i = 0; i < count; i++) ctx.GiveBuff(s.Id, "TIME_871e");
             }) };

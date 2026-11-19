@@ -133,7 +133,9 @@ internal static class NpcTurnRunnerTests
             var rig = new NativeRig(profile.DeckId, false);
             var game = rig.Match.Game; var human = game.Player1; var npc = game.Player2;
             human.BaseMana = 10; human.UsedMana = 0;
-            var lotus = SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("JAIL_470"), zone: human.HandZone);
+            // Drawn from the deck, as in a real match: only a play that started in the deck reaches the opponent's public plays.
+            var lotus = SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("JAIL_470"), zone: human.DeckZone);
+            SabberStoneCore.Actions.Generic.Draw(human, lotus);
             SabberStoneCore.Model.Entities.Entity.FromCard(human, Cards.FromId("JAIL_470"), zone: human.DeckZone);
             for (int i = 0; i < twoManaPlays; i++)
             {

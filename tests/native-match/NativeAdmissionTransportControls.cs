@@ -192,33 +192,47 @@ internal static partial class Program
                 "unknown anonymous/enchantment FX retains inference instead of inventing a hero anchor");
             cases++;
         }
+        foreach (string hero in new[] { "CORE_EX1_323", "CATA_190h", "TLC_513t" })
+        foreach (bool npc in new[] { false, true })
         foreach (bool sameOwner in new[] { false, true })
         foreach (bool usesPower in new[] { false, true })
         {
-            var capture = new Capture();
-            var match = new NativeMatch(capture.Send);
-            PowerHistoryData Full(int id, string card, int type, int owner) => new() { FullEntity = new() {
+            var (match, capture) = AnimationMatch();
+            int owner = npc ? 2 : 1;
+            PowerHistoryData Full(int id, string card, int type, int controller, int zone = 1) => new() { FullEntity = new() {
                 Entity = id, Name = card, Tags = new() { new() { Name = (int)GameTag.CARDTYPE, Value = type },
-                    new() { Name = (int)GameTag.CONTROLLER, Value = owner } } } };
-            var power = Full(201, "EX1_tk33", 10, sameOwner ? 1 : 2);
-            var start = new PowerHistoryData { PowerStart = new() { Source = 200, Type = (HistoryBlock.Type)(int)BlockType.POWER } };
+                    new() { Name = (int)GameTag.CONTROLLER, Value = controller }, new() { Name = (int)GameTag.ZONE, Value = zone } } } };
+            PowerHistoryData Tag(int id, GameTag tag, int value) => new() { TagChange = new() { Entity = id, Tag = (int)tag, Value = value } };
+            var power = Full(201, "EX1_tk33", 10, sameOwner ? owner : 3 - owner);
             var packet = new PegasusGame.PowerHistory { List = new() {
-                Full(200, "CORE_EX1_323", 3, 1),
-                new() { PowerStart = new() { Source = 200, Type = (HistoryBlock.Type)(int)BlockType.PLAY } }, power,
-                new() { TagChange = new() { Entity = usesPower ? 201 : 200, Tag = (int)GameTag.COST, Value = 0 } }, start,
-                Full(202, "EX1_323w", 7, 1), new() { PowerEnd = new() }, new() { PowerEnd = new() } } };
+                Full(200, hero, 3, owner, 3), Full(203, "HERO_07", 3, owner), Full(204, "CS2_056", 10, owner),
+                new() { PowerStart = new() { Source = 200, Type = HistoryBlock.Type.PLAY } },
+                Tag(203, GameTag.ZONE, 6), Tag(204, GameTag.ZONE, 6), power,
+                Tag(usesPower ? 201 : 200, GameTag.COST, 0), Tag(200, GameTag.ZONE, 1),
+                new() { PowerStart = new() { Source = 200, Type = HistoryBlock.Type.POWER } },
+                Full(202, "EX1_323w", 7, owner), new() { PowerEnd = new() }, new() { PowerEnd = new() } } };
+            int cursor = capture.Packets.Count;
             typeof(NativeMatch).GetMethod("SendPowerHistory", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(match, new object[] { packet });
-            var sent = capture.HistorySnapshots().Single().List;
-            Check(NativeAdmission.Validate(sent).Count(f => f.Rule == "R4") == (sameOwner && !usesPower ? 0 : 1),
-                "hero power FULL ownership repair requires same controller");
-            if (sameOwner && !usesPower)
+            var sent = capture.HistorySnapshots(cursor).Single().List;
+            var blocks = new Stack<PowerHistoryStart>();
+            foreach (var row in sent)
             {
-                var mutant = sent.ToList();
-                var sentPower = mutant.Single(e => e.HasFullEntity && e.FullEntity.Entity == 201);
-                var sentStart = mutant.Single(e => e.HasPowerStart && (int)e.PowerStart.Type == (int)BlockType.POWER);
-                mutant.Remove(sentPower); mutant.Insert(mutant.IndexOf(sentStart), sentPower);
-                Check(NativeAdmission.Validate(mutant).Any(f => f.Rule == "R4"), "returning hero-power FULL to parent must fail strict scanner");
+                if (row.HasPowerStart) blocks.Push(row.PowerStart);
+                int entity = row.HasFullEntity ? row.FullEntity.Entity : row.HasTagChange ? row.TagChange.Entity : 0;
+                if (blocks.Count > 0 && (entity == 201 || entity == 204))
+                    Check(blocks.Peek().Type == (npc ? HistoryBlock.Type.PLAY : HistoryBlock.Type.TRIGGER),
+                        hero + " power FULL, retirement and related tags survive predicted PLAY; NPC shape unchanged");
+                if (blocks.Count > 0 && (entity == 200 || entity == 203))
+                    Check(blocks.Peek().Type == HistoryBlock.Type.PLAY, hero + " hero rows remain in PLAY");
+                if (row.HasPowerEnd) blocks.Pop();
             }
+            Check(sent.Count(e => e.HasFullEntity && e.FullEntity.Entity == 201) == 1,
+                hero + " power FULL emitted exactly once");
+            var faults = NativeAdmission.Validate(sent);
+            Check(faults.All(f => f.Rule != "R7"), hero + " no power creation or retirement left in predicted PLAY");
+            // Jaraxxus relocation runs during engine conversion; generic normalization must not conceal a missing repair.
+            Check(faults.Count(f => f.Rule == "R4") == (hero == "CORE_EX1_323" ? 1 : 0),
+                hero + " only Jaraxxus requires the power FULL inside its effect list");
             cases++;
         }
         Console.WriteLine($"PASS native admission transport: {cases} cases; both block kinds, ordered typed targets/source fallback, authored metadata, privacy, removal mutations");

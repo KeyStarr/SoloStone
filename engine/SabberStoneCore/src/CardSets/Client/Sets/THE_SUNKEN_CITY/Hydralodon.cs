@@ -23,7 +23,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             ColossalRules.Declare(card, "TSC_950t", "TSC_950t2");
             card.Power = new Power { PowerTask = new CustomTask((g,c,s,t,k) => {
-                foreach (var head in c.BoardZone.Where(IsHead)) Effects.Rush.ApplyTo(head);
+                foreach (var head in c.BoardZone.Interactable.Where(IsHead)) Effects.Rush.ApplyTo(head);
             }) };
         }
 
@@ -33,7 +33,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g,c,s,t,k) => {
-                if (!c.BoardZone.Any(m => m.Card.Id == "TSC_950" && !m.IsDead && !m.IsDormant)) return;
+                if (!c.BoardZone.Interactable.Any(m => m.Card.Id == "TSC_950" && !m.IsDead)) return;
                 for (int i = 0; i < 2 && !c.BoardZone.IsFull; i++)
                     new EffectContext(g,c.Id,s.Id).Summon("TSC_950t", Math.Min(((Minion)s).LastBoardPosition + i, c.BoardZone.SlotCount));
             }) };

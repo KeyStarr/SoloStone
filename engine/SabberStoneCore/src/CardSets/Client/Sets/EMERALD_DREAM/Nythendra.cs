@@ -32,7 +32,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_START) {
                 SingleTask = new CustomTask((g,c,s,t,stack) => {
                     if (!(s is Minion source) || source.Zone != c.BoardZone || source.IsSilenced || g.CurrentPlayer != c) return;
-                    var beetles = c.BoardZone.Where(m=>m.Card.Id=="EDR_818t").ToArray();
+                    var beetles = c.BoardZone.Interactable.Where(m=>m.Card.Id=="EDR_818t").ToArray();
                     int position = beetles.Min(m=>m.ZonePosition);
                     foreach (var beetle in beetles) { c.BoardZone.Remove(beetle); c.SetasideZone.Add(beetle); }
                     var definition = Cards.FromId("EDR_818").Clone();

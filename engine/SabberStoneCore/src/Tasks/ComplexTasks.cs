@@ -166,11 +166,7 @@ namespace SabberStoneCore.Tasks
 		public static ISimpleTask ExcessManaCheck
 			=> Create(
 				new ConditionTask(EntityType.SOURCE, new SelfCondition(me => me.Controller.BaseMana == me.Controller[GameTag.MAXRESOURCES])),
-				new FlagTask(true, new AddCardTo("CS2_013t", EntityType.HAND)),
-				new FlagTask(false, Create(
-					new ConditionTask(EntityType.SOURCE, new SelfCondition(me => me.Controller.RemainingMana == me.Controller[GameTag.MAXRESOURCES])),
-					new FlagTask(true, new AddCardTo("CS2_013t", EntityType.HAND))))
-				);
+				new FlagTask(true, new AddCardTo("CS2_013t", EntityType.HAND)));
 
 		public static ISimpleTask SpendAllManaTask(ISimpleTask task)
 		{

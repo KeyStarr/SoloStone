@@ -386,13 +386,15 @@ internal static partial class RewindProof
         var source = Add(g.Player1, "TIME_001");
         Check(g.SummonedMinions.Count != 0, "fixture has unsettled summon");
         long skipped = RewindRules.SkippedNonQuiescentBoundaries;
-        Check(g.Process(PlayCardTask.Any(g.Player1, source)) && g.Rewind == null && g.Player1.Choice == null,
-            "busy live boundary plays normally without snapshot or offer");
+        Check(g.Process(PlayCardTask.Any(g.Player1, source)) && g.Rewind != null && g.Player1.Choice != null,
+            "pending summon settles before baseline and offer");
         Check(g.Player1.UsedMana == 3 && g.Player1.NumCardsPlayedThisTurn == 1 &&
-            RewindRules.SkippedNonQuiescentBoundaries == skipped + 1, "busy play pays once and diagnoses skipped offer");
+            RewindRules.SkippedNonQuiescentBoundaries == skipped, "busy play pays once without skipping offer");
+        Answer(g, false);
     }
     internal static void Run()
     {
+        ReportRegressions();
         KarovClocksworthAfterExpiredTax();
         ClocksworthCopiedRecipe();
         CardStateRollback();

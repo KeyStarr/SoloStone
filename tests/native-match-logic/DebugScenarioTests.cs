@@ -18,7 +18,7 @@ internal static partial class Program
         for (int lane = 0; lane <= 3; lane++)
         {
             string root = OfflineGuard.LaneRoot(lane);
-            var launch = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB", root + @"\client\Hearthstone.exe",
+            var launch = OfflineGuard.ResolveHeldLaunch(@"LAB\HSNativeUIProbe", "LAB", root + @"\client\Hearthstone.exe",
                 LabTestPaths.LocalData,
                 new[] { "-hs-native-ui-run", RunA, "-hs-native-ui-lane", lane.ToString() }, false);
             string path = launch.Reports + @"\debug-scenario"; // OfflineProbe startup uses launch.Reports.
@@ -40,6 +40,79 @@ internal static partial class Program
     {
         var scenario = DebugScenario.Parse("humanHand=CORE_EX1_323\nhumanMana=10\n");
         Check(scenario.HumanHand.SequenceEqual(new[] { "CORE_EX1_323" }), "collectible hero card can be staged in hand");
+    }
+
+    private static Game CorpseScenarioGame(CardClass human = CardClass.DEATHKNIGHT,
+        CardClass npc = CardClass.DEATHKNIGHT, bool enabled = true)
+    {
+        var game = new Game(new SabberStoneCore.Config.GameConfig {
+            RandomSeed = 19, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
+            History = true, Logging = false, EnableCorpses = enabled,
+            Player1HeroClass = human, Player2HeroClass = npc,
+            Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList(),
+            Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList()
+        });
+        game.StartGame();
+        return game;
+    }
+
+    private static void DebugScenarioCorpses()
+    {
+        var scenario = DebugScenario.Parse("humanCorpses=15\nnpcCorpses=7");
+        string canonical = scenario.Canonical();
+        Check(canonical == "humanCorpses=15\nnpcCorpses=7"
+            && DebugScenario.Parse(canonical).Canonical() == canonical, "Corpses canonical replay");
+        Check(DebugScenario.Parse("humanMana=3").HumanCorpses == null, "omitted Corpses stay unset");
+        foreach (string key in new[] { "humanCorpses", "npcCorpses" })
+        {
+            foreach (string bad in new[] { "-1", "+1", "1.5", "ten", "1000", "2147483647", "2147483648", "1,2" })
+                RejectsScenario(key + "=" + bad, key + " invalid count");
+            RejectsScenario(key + "=1\n" + key + "=2", key + " duplicate");
+            Check(DebugScenario.Parse(key + "=999").Canonical() == key + "=999", key + " maximum");
+            foreach (var game in new[] { CorpseScenarioGame(CardClass.MAGE, CardClass.MAGE),
+                CorpseScenarioGame(enabled: false),
+                key == "humanCorpses" ? CorpseScenarioGame(CardClass.MAGE) : CorpseScenarioGame(npc: CardClass.MAGE) })
+            {
+                var invalid = DebugScenario.Parse(key + "=0\nhumanHand=CS2_182");
+                int hand = game.Player1.HandZone.Count;
+                Check(invalid.Validate(game)?.Contains(key) == true, key + " requires enabled DK seat, including zero");
+                try { invalid.Apply(game); throw new Exception("invalid Corpses scenario applied"); }
+                catch (InvalidOperationException) { }
+                Check(game.Player1.HandZone.Count == hand
+                    && SabberStoneCore.Actions.CorpseRules.Available(game.Player1) == 0
+                    && SabberStoneCore.Actions.CorpseRules.Available(game.Player2) == 0, "rejection applies nothing");
+            }
+        }
+        var staged = CorpseScenarioGame();
+        Check(scenario.Validate(staged) == null && scenario.Apply(staged) == "humanCorpses=15; npcCorpses=7", "Corpses applied summary");
+        Check(SabberStoneCore.Actions.CorpseRules.Available(staged.Player1) == 15
+            && SabberStoneCore.Actions.CorpseRules.Available(staged.Player2) == 7, "real Corpses resource seeded per seat");
+        var zero = CorpseScenarioGame();
+        DebugScenario.Parse("humanCorpses=0\nnpcCorpses=0").Apply(zero);
+        Check(SabberStoneCore.Actions.CorpseRules.Available(zero.Player1) == 0
+            && SabberStoneCore.Actions.CorpseRules.Available(zero.Player2) == 0, "zero Corpses accepted");
+        Console.WriteLine("PASS DebugScenarioCorpses: parsing, replay, per-seat resource, zero, invalid counts and DK gating");
+    }
+
+    private static void DebugScenarioCorpsesQuest()
+    {
+        var game = CorpseScenarioGame();
+        var scenario = DebugScenario.Parse("humanCorpses=15\nhumanHand=TLC_433");
+        scenario.Apply(game);
+        var player = game.Player1;
+        player.BaseMana = 10;
+        var quest = (Spell)player.HandZone.Single(card => card.Card.Id == "TLC_433");
+        Check(game.Process(player.Options().First(task => task.Source?.Id == quest.Id)), "play Reanimate the Terror");
+        Check(quest.QuestProgress == 0 && !player.HandZone.Any(card => card.Card.Id == "TLC_433t"), "seeding does not count as spending");
+        Check(SabberStoneCore.Actions.CorpseRules.TrySpend(player, 14) && quest.QuestProgress == 14
+            && player.SecretZone.ModernQuests.Contains(quest)
+            && !player.HandZone.Any(card => card.Card.Id == "TLC_433t"), "quest waits for fifteenth Corpse");
+        Check(SabberStoneCore.Actions.CorpseRules.TrySpend(player, 1)
+            && SabberStoneCore.Actions.CorpseRules.Available(player) == 0
+            && player[GameTag.CORPSES_SPENT_THIS_GAME] == 15, "spend all fifteen staged Corpses");
+        Check(quest.Zone == player.GraveyardZone && !player.SecretZone.ModernQuests.Contains(quest)
+            && player.HandZone.Count(card => card.Card.Id == "TLC_433t") == 1, "quest completes and Tyrax enters hand");
+        Console.WriteLine("PASS DebugScenarioCorpsesQuest: 15 staged Corpses spent completes TLC_433 and puts TLC_433t in hand");
     }
 
     private const string RunA = "0b5e3a7e-2f64-4a43-8c3f-4f8b8d2f9a10", RunB = "1c6f4b8f-3a75-4b54-9d40-5a9c9e3ab021";

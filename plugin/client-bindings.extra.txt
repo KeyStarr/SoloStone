@@ -452,14 +452,14 @@ row M SoundManager Play # GetDeclaredMethods().Single(name == Play && 4 paramete
 site NativeTurnTimerOption.Initialize | Enumerate | SoundManager.(members chosen at run time) # row above: the Single(...) lookup
 site NativeTurnTimerOption.Initialize | Patch | (target not known from the IL) # row above: the Single(...) lookup
 
-# NativeUIProbe+<>c__DisplayClass162_0.<CurrentRecipeGuide>b__0
+# NativeUIProbe+<>c__DisplayClass191_0.<CurrentRecipeGuide>b__0
 row F DeckTemplatePicker m_currentSelectedDeck # recipe guide: which template is selected
-site NativeUIProbe+<>c__DisplayClass162_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
+site NativeUIProbe+<>c__DisplayClass191_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
 
-# NativeUIProbe+<MassBoosterOpened>d__373.MoveNext
+# NativeUIProbe+<MassBoosterOpened>d__402.MoveNext
 row F PackOpeningDirector m_massPackOpeningHighlights # mass pack opening: the widgets must have loaded before the receipt is fed
 row F PackOpeningDirector m_massPackOpeningSummary # mass pack opening: the widgets must have loaded before the receipt is fed
-site NativeUIProbe+<MassBoosterOpened>d__373.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
+site NativeUIProbe+<MassBoosterOpened>d__402.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
 
 # NativeUIProbe.Batch
 row F NetCache+NetCacheBatchRequest m_requests # cache batch requests are made non-reloading while the probe is active
@@ -566,3 +566,7 @@ site NativeBigCardWatchdog.ResolveBindings | Method | HistoryManager.m_showingBi
 
 # Code that tolerates a missing target. It must not block players; each line goes stale if the code stops reading the client.
 skip NativeShopTilePrices.Mirror # cosmetic: copies price text style, and skips any field a client lacks (field != null)
+skip NativeCreationPortrait.Install # cosmetic: patches Actor.UpdatePortraitTexture only if it exists (self-adapting, ClientChecks.NoteSelfAdapting); a miss leaves the stock Creation art
+skip NativeCreationPortrait.PortraitOf # cosmetic: CardDef.GetPortraitTexture and AssetHandle.Asset (AssetHandle is outside references/game) are found by name, any failure is caught and leaves the stock art
+skip NativeCreationPortrait.MaterialOf # cosmetic: CardDef.GetPortraitMaterial and AssetHandle.Asset are found by name, any failure is caught and leaves the template's golden art
+skip NativeCreationPortrait.InstallTile # cosmetic: patches HistoryCard.LoadTile only if it exists, with fields found by name (self-adapting, ClientChecks.NoteSelfAdapting); a miss leaves the stock history tile

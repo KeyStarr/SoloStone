@@ -159,6 +159,80 @@ internal static partial class NativeAdmission
             if (inferred.Any(id => state[id].Type != 0) || requiresTyped)
                 foreach (int id in inferred.Where(id => state[id].Type == 0)) CheckTarget(id, "inferred");
         }
+        // R7 (#118, #82, #116). A card the human drops from the hand has a local prediction (InputManager.DropHeldMinionLikeCard /
+        // DropHeldSpellLikeCard add a HAND -> PLAY zone change). ZoneMgr.CheckAndIgnoreServerChangeList pairs it with the server's own
+        // first PLAY task list that moves the same card to PLAY (any of the block's own lists), and then ignores EVERY card zone change in that list
+        // (ZoneChangeList.ShouldIgnoreZoneChange): a card created into the hand, discarded or moved by that list never gets an actor.
+        // So a task list of a human PLAY block (its own rows between nested blocks) that holds the played card's move may move no other card.
+        // Also the SHOW_ENTITY actor refresh is skipped there: a card revealed in place in HAND/PLAY/SECRET keeps its old actor.
+        // A sub-spell list inside the block chains to the block's first list, so it can be the paired list too.
+        void ValidatePredictedPlay(Segment segment, int row)
+        {
+            var start = segment.Block.Start;
+            if ((int)start.Type != (int)BlockType.PLAY || !state.TryGetValue(start.Source, out var played)
+                || played.Controller != 1 || played.Zone != (int)SabberStoneCore.Enums.Zone.HAND || played.Type is 1 or 2 or 6) return;
+            int ZoneTag(PowerHistoryData data, int id)
+            {
+                var shown = data.HasShowEntity ? data.ShowEntity : data.HasChangeEntity ? data.ChangeEntity : null;
+                if (shown?.Entity == id) return shown.Tags.Where(t => t.Name == (int)GameTag.ZONE).Select(t => t.Value).DefaultIfEmpty(-1).Last();
+                return -1;
+            }
+            bool entersPlay = segment.Tasks.Any(t => t.Data.HasTagChange && t.Data.TagChange.Entity == start.Source
+                    && t.Data.TagChange.Tag == (int)GameTag.ZONE && t.Data.TagChange.Value == (int)SabberStoneCore.Enums.Zone.PLAY
+                || ZoneTag(t.Data, start.Source) == (int)SabberStoneCore.Enums.Zone.PLAY);
+            if (!entersPlay) return;
+            // Only the retiring hero is exempt from prediction suppression; hero powers still need a processed child list.
+            var oldHeroes = state.Where(p => played.Type == (int)CardType.HERO && p.Key != start.Source
+                && p.Value.Type == (int)CardType.HERO && p.Value.Controller == played.Controller
+                && p.Value.Zone == (int)SabberStoneCore.Enums.Zone.PLAY
+                && !segment.Tasks.Any(t => t.Data.HasFullEntity && t.Data.FullEntity.Entity == p.Key)).Select(p => p.Key).ToHashSet();
+            var zones = new Dictionary<int, int>();
+            int Zone(int id) => zones.TryGetValue(id, out int z) ? z : state.TryGetValue(id, out var known) ? known.Zone : -1;
+            // An enchantment's FULL_ENTITY carries no CARDTYPE (its SHOW does), so judge it by any snapshot in the list.
+            var cardless = segment.Tasks.Select(t => t.Data.HasFullEntity ? t.Data.FullEntity : t.Data.HasShowEntity ? t.Data.ShowEntity : t.Data.HasChangeEntity ? t.Data.ChangeEntity : null)
+                .Where(e => e != null && e.Tags.Any(t => t.Name == (int)GameTag.CARDTYPE && t.Value is 1 or 2 or 6)).Select(e => e.Entity).ToHashSet();
+            bool Cardless(int id) => cardless.Contains(id) || state.TryGetValue(id, out var known) && known.Type is 1 or 2 or 6;
+            foreach (var task in segment.Tasks)
+            {
+                var data = task.Data;
+                var snapshot = data.HasFullEntity ? data.FullEntity : data.HasShowEntity ? data.ShowEntity : data.HasChangeEntity ? data.ChangeEntity : null;
+                int entity = snapshot?.Entity ?? (data.HasTagChange ? data.TagChange.Entity : data.HasHideEntity ? data.HideEntity.Entity : 0);
+                if (oldHeroes.Contains(entity)) continue;
+                if (data.HasFullEntity && data.FullEntity.Entity != start.Source)
+                {
+                    if (!Cardless(data.FullEntity.Entity))
+                        faults.Add(new("R7", task.Row, start.Source, data.FullEntity.Entity, "card created in the predicted PLAY list", played.Card));
+                    zones[data.FullEntity.Entity] = data.FullEntity.Tags.Where(t => t.Name == (int)GameTag.ZONE).Select(t => t.Value).DefaultIfEmpty(0).Last();
+                }
+                else if (data.HasTagChange && data.TagChange.Entity != start.Source && !Cardless(data.TagChange.Entity)
+                    && data.TagChange.Tag is (int)GameTag.ZONE or (int)GameTag.CONTROLLER)
+                {
+                    // A weapon replaced by the played weapon leaves in this list (live-checked, #83; the client's weapon zone owns it).
+                    if (played.Type == (int)CardType.WEAPON && data.TagChange.Tag == (int)GameTag.ZONE
+                        && data.TagChange.Value == (int)SabberStoneCore.Enums.Zone.GRAVEYARD
+                        && state.TryGetValue(data.TagChange.Entity, out var oldWeapon) && oldWeapon.Type == (int)CardType.WEAPON) continue;
+                    if (data.TagChange.Tag == (int)GameTag.ZONE && Zone(data.TagChange.Entity) != data.TagChange.Value)
+                        faults.Add(new("R7", task.Row, start.Source, data.TagChange.Entity, $"card moved to zone {data.TagChange.Value} in the predicted PLAY list", played.Card));
+                    else if (data.TagChange.Tag == (int)GameTag.CONTROLLER)
+                        faults.Add(new("R7", task.Row, start.Source, data.TagChange.Entity, "controller change in the predicted PLAY list", played.Card));
+                    if (data.TagChange.Tag == (int)GameTag.ZONE) zones[data.TagChange.Entity] = data.TagChange.Value;
+                }
+                else if (data.HasHideEntity && data.HideEntity.Entity != start.Source && !Cardless(data.HideEntity.Entity))
+                {
+                    faults.Add(new("R7", task.Row, start.Source, data.HideEntity.Entity, "card hidden in the predicted PLAY list", played.Card));
+                    zones[data.HideEntity.Entity] = data.HideEntity.Zone;
+                }
+                else if (snapshot != null && !data.HasFullEntity && snapshot.Entity != start.Source && !Cardless(snapshot.Entity))
+                {
+                    int zone = ZoneTag(data, snapshot.Entity);
+                    if (zone >= 0 && zone != Zone(snapshot.Entity))
+                        faults.Add(new("R7", task.Row, start.Source, snapshot.Entity, $"card revealed into zone {zone} in the predicted PLAY list", played.Card));
+                    else if (data.HasShowEntity && Zone(snapshot.Entity) is 3 or 1 or 7)
+                        faults.Add(new("R7", task.Row, start.Source, snapshot.Entity, $"card revealed in place (zone {Zone(snapshot.Entity)}) in the predicted PLAY list: its actor is not refreshed", played.Card));
+                    if (zone >= 0) zones[snapshot.Entity] = zone;
+                }
+            }
+        }
         var initializedFulls = new HashSet<PowerHistoryData>(ReferenceEqualityComparer.Instance);
         for (int i = 0; i < rows.Count; i++)
         {
@@ -173,7 +247,11 @@ internal static partial class NativeAdmission
                         initializedFulls.Add(entry);
                     }
             var data = rows[i];
-            if (segments.TryGetValue(i, out var segment)) ValidateSegment(segment, i);
+            if (segments.TryGetValue(i, out var segment))
+            {
+                ValidateSegment(segment, i);
+                ValidatePredictedPlay(segment, i);
+            }
             var create = data.CreateGame ?? data.ResetGame?.CreateGame;
             if (create != null)
             {

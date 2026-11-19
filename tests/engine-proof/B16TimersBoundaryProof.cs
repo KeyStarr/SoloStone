@@ -205,7 +205,7 @@ internal static class B16TimersBoundaryProof
                 TemporaryRules.NextTurnMana(owner);owner.BaseMana=mana;
                 End(branch);End(branch);
                 int permanent=Math.Min(10,mana+1);
-                Check(owner.BaseMana==permanent && owner.TemporaryMana==Math.Min(2,10-permanent),"stacked temporary crystals cap after normal growth");
+                Check(owner.BaseMana==permanent && owner.TemporaryMana==2,"stacked next-turn temporary crystals are not capped at maximum Mana (29.0)");
                 End(branch);End(branch);Check(owner.BaseMana==Math.Min(10,permanent+1) && owner.TemporaryMana==0,"next refill has no permanent bonus");
             }
         }

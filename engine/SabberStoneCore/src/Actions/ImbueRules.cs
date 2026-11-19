@@ -112,8 +112,15 @@ namespace SabberStoneCore.Actions
                 target = controller.Game.IdEntityDic[targetId.Value];
             }
             if (!power.IsValidPlayTarget(target as ICharacter)) return TaskState.STOP;
-            return power.Power?.PowerTask?.Process(controller.Game, controller, power, target, new TaskStack())
-                ?? TaskState.STOP;
+            var history = controller.Game.History ? controller.Game.PowerHistory : null;
+            int previous = history?.DelegatedPowerSource ?? 0;
+            if (history != null) history.DelegatedPowerSource = power.Id;
+            try
+            {
+                return power.Power?.PowerTask?.Process(controller.Game, controller, power, target, new TaskStack())
+                    ?? TaskState.STOP;
+            }
+            finally { if (history != null) history.DelegatedPowerSource = previous; }
         }
     }
 }

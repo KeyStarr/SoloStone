@@ -21,7 +21,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int repeats = kindred ? KindredRules.BeginMatchedClause((IPlayable)s) : 0;
                 if (repeats == 0) return;
                 // Snapshot after both summons; each living Cinder remains the source of its own Deathrattle.
-                var cinders = c.BoardZone.Where(m => m.Card.Id == "TLC_249" && m.HasDeathrattle && !m.Untouchable).ToArray();
+                var cinders = c.BoardZone.Interactable.Where(m => m.Card.Id == "TLC_249" && m.HasDeathrattle && !m.Untouchable).ToArray();
                 for (int i = 0; i < repeats; i++)
                     foreach (var cinder in cinders.Where(m => i == 0 || m.Zone == c.BoardZone && !m.IsDead))
                         cinder.ActivateTask(PowerActivation.DEATHRATTLE, fromDeath: false);

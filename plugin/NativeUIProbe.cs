@@ -266,8 +266,13 @@ internal static partial class NativeUIProbe
             finalizer: new HarmonyMethod(typeof(NativeUIProbe), nameof(FinishLocalReorder)));
         foreach (string name in new[] { "AddPendingDeckRename", "AddPendingDeckEdit" })
             Hook(harmony, typeof(CollectionManager), name, nameof(ReadOnly));
-        Hook(harmony, typeof(CollectionManagerDisplay), "CreateDeckFromClipboard", nameof(BlockDeckImport));
-        Hook(harmony, typeof(CollectionInputMgr), "PasteDeckInEditModeFromShareableDeck", nameof(BlockDeckImport));
+        Hook(harmony, typeof(CollectionManagerDisplay), "CreateDeckFromClipboard", nameof(PlanDeckCodeImport));
+        Hook(harmony, typeof(CollectionManagerDisplay), "OnDeckCreatedFromClipboard", nameof(ProjectImportedDeck));
+        harmony.Patch(Required(typeof(CollectionManagerDisplay), "CreateDeckFromClipboard"),
+            postfix: new HarmonyMethod(typeof(NativeUIProbe), nameof(TidyRefusedImport)));
+        harmony.Patch(Required(typeof(CollectionManagerDisplay), "Exit"),
+            prefix: new HarmonyMethod(typeof(NativeUIProbe), nameof(LeaveCollectionImportState)));
+        Hook(harmony, typeof(CollectionInputMgr), "PasteDeckInEditModeFromShareableDeck", nameof(BlockDeckEditPaste));
         harmony.Patch(Required(typeof(DeckTrayDeckListContent), "ShouldDeckBoxesBeLocked"),
             prefix: new HarmonyMethod(typeof(NativeUIProbe), nameof(UnlockLocalDeckBoxSlots)));
         harmony.Patch(Required(typeof(CollectionDeckBoxVisual), "SetDeckID"),
@@ -2201,6 +2206,7 @@ internal static partial class NativeUIProbe
             string card = entity.GetCardId();
             int zone = entity.GetTag(GAME_TAG.ZONE);
             if (string.IsNullOrEmpty(card) || (zone != 1 && zone != 4 && !(zone == 3 && entity.GetControllerId() == 1))) continue;
+            if (match.IsGhostActor(entity.GetEntityId())) continue; // a retired or burned card's old actor: its engine card has a fresh actor
             if (!NativeUIProjection.TryResolveVisibleEngineEntity(card, match.EngineReturnId(entity.GetEntityId()), id =>
                 match.Game.IdEntityDic.ContainsKey(id) ? match.Game.IdEntityDic[id] : null,
                 id => match.TransportCardId(entity.GetEntityId(), id), out SabberStoneCore.Model.Entities.IPlayable engine))
@@ -2267,6 +2273,7 @@ internal static partial class NativeUIProbe
         {
             string cardId = entity.GetCardId();
             if (string.IsNullOrEmpty(cardId)) { hiddenSkipped++; continue; }
+            if (match.IsGhostActor(entity.GetEntityId())) { hiddenSkipped++; continue; } // a retired or burned card's old actor
             if (!NativeUIProjection.TryResolveVisibleEngineEntity(cardId, match.EngineReturnId(entity.GetEntityId()), id =>
                 match.Game.IdEntityDic.ContainsKey(id) ? match.Game.IdEntityDic[id] : null,
                 id => match.TransportCardId(entity.GetEntityId(), id), out SabberStoneCore.Model.Entities.IPlayable engineEntity))

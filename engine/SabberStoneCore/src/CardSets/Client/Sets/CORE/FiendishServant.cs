@@ -16,7 +16,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Tags[DeathContextRules.CaptureDeath] = 1;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
-                var targets = c.BoardZone.Where(m => !m.Untouchable && !m.ToBeDestroyed).ToArray();
+                var targets = c.BoardZone.Interactable.Where(m => !m.Untouchable && !m.ToBeDestroyed).ToArray();
                 if (targets.Length > 0)
                     new Enchant(Effects.Attack_N(DeathContextRules.AttackAtDeath((IPlayable)s)))
                         .ActivateTo(targets[g.Random.Next(targets.Length)]);

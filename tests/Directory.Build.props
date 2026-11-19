@@ -1,3 +1,9 @@
 <Project>
   <PropertyGroup><DefineConstants>$(DefineConstants);MATCH_TESTS</DefineConstants></PropertyGroup>
+  <!-- The Python that runs the extract_*.py build steps. tests/run.py passes its own interpreter (-p:SoloStonePython=...); a plain
+       `dotnet build` uses `python` on Windows, where `python3` is often only the Microsoft Store stub, and `python3` elsewhere. -->
+  <PropertyGroup Condition="'$(SoloStonePython)' == ''">
+    <SoloStonePython Condition="'$(OS)' == 'Windows_NT'">python</SoloStonePython>
+    <SoloStonePython Condition="'$(OS)' != 'Windows_NT'">python3</SoloStonePython>
+  </PropertyGroup>
 </Project>

@@ -17,6 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.PoweredUpWhen(EmeraldDreamConditions.HoldingDarkGift);
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 if (!EmeraldDreamConditions.HoldingDarkGift((IPlayable)s)) return;
+                // untouchable-ok: occupancy and slot position only (IsFull, SlotCount), no minion is read
                 var board = c.BoardZone;
                 var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);
                 for (int i = 0; i < 2 && !board.IsFull; i++)

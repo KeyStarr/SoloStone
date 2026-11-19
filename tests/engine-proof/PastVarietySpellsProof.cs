@@ -369,7 +369,10 @@ internal static class PastVarietySpellsProof
             foreach(var fork in new[]{g,g.CloneExact(history:true),Game.LoadSnapshotWithPools(g.SaveSnapshot(),g.OfflinePools)}) {
                 var owner=fork.Player1; var student=(IPlayable)fork.IdEntityDic[pupil.Id];
                 Core2026Proof.Check(student.Card.ATK==2 && student.Card.Health==2 && PayloadRules.Entries(student,1).Single().Card.Id==id,"2/2 Pupil-local payload");
-                PlayEntity(fork,owner,student);
+                // A stored spell that needs a target is cast at the player-chosen one (#157): the Pupil offers targeted plays only.
+                var foe=id=="ICC_085" ? owner.Opponent.Hero : null;
+                PlayEntity(fork,owner,student,foe);
+                Core2026Proof.Check(foe==null || foe.Damage==20,"Pupil spell hit the chosen target");
                 Core2026Proof.Check(fork.HistoryFacts.Query.Casts().Any(c=>c.DbfId==Cards.FromId(id).AssetId && c.SpellSchool==School(export[id])),id+" Pupil casts current school");
                 Core2026Proof.Check(id switch { "DAL_256"=>owner.BoardZone.Count==beforeBoard+6 && owner.HandZone.Any(c=>c.Card.Id=="DAL_256ts"),
                     "ICC_085"=>owner.Hero.Armor==5 && owner.HandZone.Count==5 && owner.BoardZone.Any(m=>m.Card.Id=="ICC_085t"),

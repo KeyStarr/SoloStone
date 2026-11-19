@@ -226,6 +226,13 @@ namespace SabberStoneCore.EffectSystem
             return OfflineCardPools.Pick(_game, filter, Controller.HeroClass, Source.Card.AssetId, destination);
         }
 
+        /// <summary>Like PickRandomCard, but cards the caller rejects are left out of the pool first (same one Next(count) draw).</summary>
+        public Card PickRandomCard(OfflinePoolFilter filter, Func<Card, bool> exclude, int? recipeDbfId = null)
+        {
+            filter = ResolvePoolFilter(filter, PoolCostBinding.None, recipeDbfId, out var destination);
+            return OfflineCardPools.Pick(_game, filter, Controller.HeroClass, Source.Card.AssetId, destination, exclude);
+        }
+
         public Card PickAffordableSpell(OfflinePoolFilter filter, int? recipeDbfId = null)
         {
             filter = ResolvePoolFilter(filter, PoolCostBinding.None, recipeDbfId, out var destination);

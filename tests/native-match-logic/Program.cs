@@ -52,6 +52,8 @@ internal static partial class Program
     {
         DebugScenarioLanePaths();
         AcceptsHeroCardScenario();
+        DebugScenarioCorpses();
+        DebugScenarioCorpsesQuest();
         DebugScenarioFile();
         DebugScenarioNeverSettles();
         Console.WriteLine("PASS debug scenario lane paths, hero card scenario, scenario file and never-settles");

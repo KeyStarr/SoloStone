@@ -41,7 +41,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
                 var selected = new TaskStack();
-                new RandomTask(1, EntityType.ENEMIES).Process(g, c, s, t, selected);
+                if (RandomTask.Harmful(1, EntityType.ENEMIES).Process(g, c, s, t, selected) == TaskState.STOP) return;
                 new DamageTask(HeraldRules.Magnitude((IPlayable)s), EntityType.STACK).Process(g, c, s, t, selected);
             }) };
         }

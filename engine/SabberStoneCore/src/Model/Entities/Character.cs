@@ -455,7 +455,10 @@ namespace SabberStoneCore.Model.Entities
             bool healthReplaced = Actions.HealingRules.ReplaceHealthLoss(hero, amount);
             int healthBefore = Health;
             bool fatalCandidate = !ToBeDestroyed && Health > 0;
-            var poisonSource = minion != null && amount > 0 && !ToBeDestroyed
+            bool woundMarked = minion != null && NativeTags.ContainsKey(Actions.HealingRules.DamageWound);
+            // A rescue may be followed by another hit before the death check settles the old wound.
+            if (woundMarked && fatalCandidate) minion.ClearPendingDeathCause();
+            var poisonSource = minion != null && amount > 0 && (!ToBeDestroyed || woundMarked)
                 ? PoisonousDamageSource(source, combat) : null;
             if (!healthReplaced)
                 using (game.Facts.SuppressHealth()) SetDamage(Actions.DamageArithmetic.Add(Damage, amount), poisonSource == null);
@@ -470,7 +473,8 @@ namespace SabberStoneCore.Model.Entities
 				Actions.QuestRules.DamageResolved(source.Controller, new DamageResolvedFact(source, this, dealt));
 
             // Resolve the keyword before damage reactions can silence the source or test survival.
-            if (minion != null && Damage - damageBefore > 0 && !ToBeDestroyed
+            // A Poisonous hit also ends a damage-only wound (clears the mark): the death becomes final.
+            if (minion != null && Damage - damageBefore > 0 && (!ToBeDestroyed || woundMarked)
                 && minion.Zone.Type == Enums.Zone.PLAY && poisonSource != null)
             {
                 using (_history ? game.PowerHistory.PoisonousSource(poisonSource, this) : null)
@@ -816,7 +820,14 @@ namespace SabberStoneCore.Model.Entities
 			if (value < 0)
 				value = 0;
 			else if (destroyOnLethal && BaseHealth <= value)
+			{
+				// A death that comes only from damage is marked (an entity tag, so clones and snapshots keep it): until the
+				// death check, healing, a Health buff or an aura that lifts Health above 0 rescues the minion. An explicit
+				// Destroy or a Poisonous hit is not marked and stays final.
+				bool pending = ToBeDestroyed, marked = this is Minion && NativeTags.ContainsKey(Actions.HealingRules.DamageWound);
 				ToBeDestroyed = true;
+				if (this is Minion && ToBeDestroyed && (!pending || marked)) NativeTags[Actions.HealingRules.DamageWound] = 1;
+			}
 
 			if (_logging)
 				Game.Log(LogLevel.DEBUG, BlockType.TRIGGER, "Entity", !Game.Logging ? "" : $"{this} set data {GameTag.DAMAGE} to {value}");

@@ -84,7 +84,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,stack)=>{
                 for(int i=0;i<6;i++)
                 {
-                    var targets=c.BoardZone.Concat(c.Opponent.BoardZone).Where(m=>m.Id!=s.Id && !m.IsDormant && !m.ToBeDestroyed).ToArray();
+                    var targets=c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(m=>m.Id!=s.Id && !m.Untouchable && !m.IsDead).ToArray();
                     if(targets.Length==0) break;
                     Generic.DamageCharFunc((IPlayable)s,targets[g.Random.Next(targets.Length)],1,false);
                     g.DeathProcessingAndAuraUpdate();
@@ -96,7 +96,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true;card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,stack)=>{
-                var targets=c.BoardZone.Where(m=>m.Id!=s.Id && !m.IsDormant && System.Math.Abs(m.ZonePosition-((IPlayable)s).ZonePosition)==1).ToArray();
+                var targets=c.BoardZone.Interactable.Where(m=>m.Id!=s.Id && !m.Untouchable && System.Math.Abs(m.ZonePosition-((IPlayable)s).ZonePosition)==1).ToArray();
                 if(targets.Length==0) return;
                 var chosen=targets[g.Random.Next(targets.Length)];
                 Generic.AddEnchantmentBlock(g,Cards.FromId("BE_327te2"),(IPlayable)s,s,chosen.AttackDamage,chosen.Health);

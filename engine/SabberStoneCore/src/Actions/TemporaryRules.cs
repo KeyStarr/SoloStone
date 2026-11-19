@@ -24,7 +24,7 @@ namespace SabberStoneCore.Actions
         internal static void ControllerStart(Controller owner)
         {
             if (owner[PendingMana] == 0) return;
-            int granted = Math.Min(owner[PendingMana], Math.Max(0, owner[GameTag.MAXRESOURCES] - owner.BaseMana - owner.TemporaryMana));
+            int granted = owner[PendingMana]; // patch 29.0: temporary Mana is not capped at maximum Mana
             owner[PendingMana] = 0; owner[GrantedMana] = granted;
             owner.TemporaryMana += granted;
         }

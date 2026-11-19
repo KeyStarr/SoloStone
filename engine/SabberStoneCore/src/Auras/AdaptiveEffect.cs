@@ -104,7 +104,13 @@ namespace SabberStoneCore.Auras
 					else
 					{
 						new Effect(_tag, _operator, _lastValue).RemoveFrom(_owner);
+						int appliedStart = _owner.Game.History ? _owner.Game.PowerHistory.Last.Count : 0;
 						new Effect(_tag, _operator, value).ApplyTo(_owner);
+						// Publish silent SETs once; setters such as HasTaunt already send the effective value (#152).
+						if (_owner.Game.History && _owner[_tag] != _owner.Card[_tag]
+							&& _owner.Game.PowerHistory.Last.FindIndex(appliedStart, entry => entry is Kettle.PowerHistoryTagChange change
+								&& change.EntityId == _owner.Id && change.Tag == _tag && change.Value == _owner[_tag]) < 0)
+							_owner.Game.PowerHistory.Add(Kettle.PowerHistoryBuilder.TagChange(_owner.Id, _tag, _owner[_tag]));
 					}
 				}
 				else

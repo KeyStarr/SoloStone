@@ -18,7 +18,7 @@ internal static class AutomaticCastProof
             case "context": new EffectContext(g, p.Id, p.Hero.Id).CastSpell(spell.Id, HistoryCastKind.Repeat, target?.Id, mode); break;
             case "task": new PlayTask(PlayType.SPELL, true).Process(g, p, p.Hero, null,
                 new TaskStack { Playables = new[] { (IPlayable)spell } }); break;
-            case "random": new CastRandomSpellTask(c => c.Id == "EX1_287", phaseShift: false).Process(g, p, p.Hero, spell); break;
+            case "random": new CastRandomSpellTask(c => c.IsSecret, phaseShift: false).Process(g, p, p.Hero, spell); break;
             default: Generic.CastSpell(p, g, spell, target, mode); break;
         }
         g.DeathProcessingAndAuraUpdate();

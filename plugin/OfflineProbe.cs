@@ -10,7 +10,7 @@ using HarmonyLib;
 using UnityEngine;
 
 #if SOLOSTONE_RELEASE
-[BepInPlugin("solostone.plugin", "SoloStone", "0.2.1")]
+[BepInPlugin("solostone.plugin", "SoloStone", "0.3.0")]
 #else
 [BepInPlugin("local.hs.native.ui.probe", "Hearthstone Native UI Probe", "0.0.1")]
 #endif

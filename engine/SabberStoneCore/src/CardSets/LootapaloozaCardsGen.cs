@@ -197,7 +197,7 @@ namespace SabberStoneCore.CardSets
 			// [LOOT_392] Twig of the World Tree - COST:4 [ATK:1/HP:0]
 			// - Set: lootapalooza, Rarity: legendary
 			// --------------------------------------------------------
-			// Text: <b>Deathrattle:</b> Gain 10 Mana Crystals.
+			// Text: <b>Deathrattle:</b> Refresh your Mana Crystals.
 			// --------------------------------------------------------
 			// GameTag:
 			// - ELITE = 1
@@ -206,8 +206,8 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOOT_392", new CardDef(new Power
 			{
-				DeathrattleTask = new ManaCrystalFullTask(10)
-			}));
+				DeathrattleTask = new SetControllerGameTagTask(GameTag.RESOURCES_USED, 0)
+			}) { Configure = card => card.Text = "<b>Deathrattle:</b> Refresh your Mana Crystals." }); // current retail text; the card file keeps the 38377 base text
 
 		}
 

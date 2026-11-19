@@ -309,9 +309,10 @@ static partial class Program
         RejectsBecause(()=>Installer.Preflight(root,app,new string[0],false),"Linked folders","app descendant junction before extraction");
         RejectsBecause(()=>Installer.Preflight(root,app,new string[0],true),"Linked folders","app descendant junction before uninstall");
         Directory.Delete(Path.Combine(app,"nested"));
-        File.CreateSymbolicLink(Path.Combine(app,"linked.txt"),sentinel);
-        RejectsBecause(()=>Installer.Preflight(root,app,new string[0],false),"Linked folders","app linked file before extraction");
-        File.Delete(Path.Combine(app,"linked.txt"));
+        if(LinkFile(Path.Combine(app,"linked.txt"),sentinel,"app linked file before extraction")) {
+            RejectsBecause(()=>Installer.Preflight(root,app,new string[0],false),"Linked folders","app linked file before extraction");
+            File.Delete(Path.Combine(app,"linked.txt"));
+        }
         File.WriteAllText(Path.Combine(app,"foreign.txt"),"unowned");
         RejectsBecause(()=>Installer.Preflight(root,app,new string[0],false),"already contains","unowned app content before extraction");
         Check(File.ReadAllText(Path.Combine(app,"foreign.txt"))=="unowned","unowned app preserved");
@@ -458,7 +459,8 @@ static partial class Program
         RejectsBecause(()=>resolve(),"Linked folders","direct client linked reports directory rejected");
         Directory.Delete(reports); Directory.CreateDirectory(reports); File.WriteAllText(LaunchGrant.PathIn(reports),grant);
         foreach(string name in new[]{"plugin-loaded.txt","save-bound.txt.tmp","debug-scenario","pet-xp-pacing"}) {
-            string file=Path.Combine(reports,name); File.CreateSymbolicLink(file,Path.Combine(source,"Hearthstone.exe"));
+            string file=Path.Combine(reports,name);
+            if(!LinkFile(file,Path.Combine(source,"Hearthstone.exe"),"direct client linked report file rejected: "+name)) continue;
             RejectsBecause(()=>resolve(),"Linked folders","direct client linked report file rejected: "+name);
             File.Delete(file);
         }
@@ -466,8 +468,9 @@ static partial class Program
         RejectsBecause(()=>resolve(),"Linked folders","nested report directory rejected"); Directory.Delete(control);
         string clientReports=Path.Combine(installed.Client,"reports"); LinkDirectory(clientReports,source);
         RejectsBecause(()=>resolve(),"Linked folders","client report write path rejected"); Directory.Delete(clientReports);
-        string fixture=Path.Combine(installed.Root,"fixture.xml"); File.CreateSymbolicLink(fixture,Path.Combine(source,"Hearthstone.exe"));
-        RejectsBecause(()=>resolve(),"Linked folders","other runtime read/write path rejected"); File.Delete(fixture);
+        string fixture=Path.Combine(installed.Root,"fixture.xml"); if(LinkFile(fixture,Path.Combine(source,"Hearthstone.exe"),"other runtime read/write path rejected")) {
+            RejectsBecause(()=>resolve(),"Linked folders","other runtime read/write path rejected"); File.Delete(fixture);
+        }
         Check(File.Exists(Path.Combine(source,"Hearthstone.exe")),"runtime admission preserves link target");
     }
     static FirewallSnapshot RegistrySnapshot(InstallRecord record) => new FirewallSnapshot {

@@ -19,6 +19,9 @@ internal static class QuestLifecycleProof
     {
         var game = new Game(new GameConfig { RandomSeed = 19, StartPlayer = 1, Shuffle = false,
             SkipMulligan = true, History = history, Logging = false, FormatType = FormatType.FT_WILD,
+            // These cases are about secret and quest capacity, driven by Paladin/Mage legacy secrets; the Standard pool
+            // holds no Paladin secret, so keep the frozen lists they were written against.
+            UnversionedRandomPoolReplay = true,
             Player1HeroClass = CardClass.PALADIN, Player2HeroClass = CardClass.MAGE,
             Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList(),
             Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList() });

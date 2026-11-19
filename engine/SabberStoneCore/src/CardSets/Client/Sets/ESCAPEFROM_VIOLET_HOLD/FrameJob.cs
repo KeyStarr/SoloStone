@@ -15,7 +15,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new DecisionSpellTask("client/CAP_403/v1",
                 new CustomTask((g, c, s, t, stack) => {
-                    var victims = DiscoverRealRules.Take(c.Opponent.BoardZone.Where(m => !m.IsDormant).ToList(), 2, g);
+                    var victims = DiscoverRealRules.Take(c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToList(), 2, g);
                     foreach (var victim in victims) victim.Destroy();
                     g.DeathProcessingAndAuraUpdate();
                 }), new DiscoverThenContinueTask(DiscoverEntitySource.EnemyDeckMinions, DiscoverEntityAction.PutOnTop)) };

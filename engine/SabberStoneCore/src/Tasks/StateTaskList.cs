@@ -38,6 +38,7 @@ namespace SabberStoneCore.Tasks
             foreach (var task in list)
                 if (task is SuspendableTask || task is SimpleTasks.DiscoverThenContinueTask || task is SimpleTasks.SelectEntityThenContinueTask || task is SimpleTasks.DecisionBattlecryTask || task is SimpleTasks.DecisionSpellTask)
                     throw new System.ArgumentException("Use StateTaskList.Suspendable for continuation-aware steps.");
+            SimpleTasks.RandomTask.MarkHarmfulPicks(list);
             _tasks = list;
 		}
 

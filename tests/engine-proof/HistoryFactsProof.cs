@@ -80,8 +80,9 @@ internal static class HistoryFactsProof
         var g = Fixture();
         Play(g, g.Player1, "CS2_231");
         Play(g, g.Player1, "GAME_005");
+        // The Coin at 10/10 now leaves 1 temporary Mana (patch 29.0), so TEMP_RESOURCES is in the state (pin renewed for #178).
         var state = Canonical.State(g);
-        Core2026Proof.Check(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(state))) == "AA65C2B042C32E91D1DF8FE25ADF27D3BA29C312B09B84B8790CF01AE01B00D1", "no-consumer canonical bytes changed");
+        Core2026Proof.Check(Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(state))) == "B3BBAEE1577ED177B11AD2E62CCC86EF9B533F5A32905503F5F423237B014B17", "no-consumer canonical bytes changed");
         Core2026Proof.Check(g.HistoryFacts.Query.Plays().Count() == 2, "committed plays exactly once");
         Core2026Proof.Check(g.HistoryFacts.Query.Casts().Count() == 2, "cast start and completion");
         Core2026Proof.Check(g.HistoryFacts.Query.Summons().Count() == 1, "play links one summon");

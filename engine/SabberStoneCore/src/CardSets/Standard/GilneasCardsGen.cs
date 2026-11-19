@@ -797,6 +797,7 @@ namespace SabberStoneCore.CardSets.Standard
 				PowerTask = new CustomTask((g, c, s, t, stack) =>
 				{
 					IReadOnlyList<Card> legendaries = RandomCardTask.GetCardList(s, CardType.MINION, rarity: Rarity.LEGENDARY);
+					if (legendaries.Count == 0 && !g.LegacyPoolReplay && !g.UnversionedRandomPoolReplay) return;
 
 					Util.DeepCloneableRandom rnd = g.Random;
 					DeckZone deck = c.DeckZone;

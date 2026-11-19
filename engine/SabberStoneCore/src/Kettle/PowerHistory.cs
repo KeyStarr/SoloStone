@@ -560,6 +560,33 @@ namespace SabberStoneCore.Kettle
             return new EffectSourceScope(this);
         }
 
+        // Cards whose own play effect on the client is a deck-spawn spell: it reads the DECK FULL_ENTITYs of its own POWER
+        // block (SpawnToDeckSpell.AddPowerTargets) and, with none there, never attaches, so the card's FX is lost (#153).
+        // Their generated deck cards stay directly in the POWER block, as retail sends them (Marrowslicer), and keep the
+        // FULL/SHOW/HIDE/TARGET shape without the generic sub-spell scope. Chosen from each card's play effect name in the
+        // pinned effect census; a card that is wrongly here loses only the generic flight, a card wrongly left out keeps
+        // losing its own effect. Cards with another play effect (a missile, a deck swap) keep the generic scope.
+        private static readonly HashSet<string> deckSpawnPlaySpells = new HashSet<string> {
+            "AT_035", "BOT_087", "BOT_288", "BOT_511", "BRM_007", "CFM_602b", "CFM_660", "DAL_010", "DAL_060", "DAL_565",
+            "DAL_582", "GIL_815", "GVG_056", "ICC_091", "ICC_215", "JAIL_882", "LOE_002", "LOE_019t", "LOE_079", "LOE_110",
+            "LOE_111", "LOOT_026", "LOOT_106", "LOOT_526", "OG_255", "UNG_851"
+        };
+
+        public static bool IsDeckSpawnPlaySpell(string cardId) => cardId != null && deckSpawnPlaySpells.Contains(cardId);
+
+        private bool InOwnDeckSpawnSpell(IPlayable generated)
+        {
+            var block = CurrentBlock;
+            if (block == null || block.BlockType != BlockType.POWER || block.EffectIndex.GetValueOrDefault() != 0) return false;
+            string source = block.EffectCardId;
+            if (string.IsNullOrEmpty(source))
+            {
+                if (!generated.Game.IdEntityDic.TryGetValue(block.Source, out var entity)) return false;
+                source = entity.Card.Id;
+            }
+            return IsDeckSpawnPlaySpell(source);
+        }
+
         internal bool GeneratedShuffle(IPlayable card, bool reveal)
         {
             int creation = Last.FindLastIndex(e => e is PowerHistoryFullEntity full && full.Entity.Id == card.Id
@@ -577,18 +604,18 @@ namespace SabberStoneCore.Kettle
             full.Entity.Tags = new Dictionary<GameTag, int> {
                 [GameTag.ZONE] = (int)Zone.DECK, [GameTag.CONTROLLER] = card.Controller.PlayerId, [GameTag.ENTITY_ID] = card.Id
             };
-            var presentation = new List<IPowerHistoryEntry> {
-                new PowerHistorySubSpellStart { Source = card.Controller.Hero.Id, SpellPrefabGuid = GeneratedShufflePrefab },
-                full
-            };
+            bool ownSpell = InOwnDeckSpawnSpell(card);
+            var presentation = new List<IPowerHistoryEntry>();
+            if (!ownSpell) presentation.Add(new PowerHistorySubSpellStart { Source = card.Controller.Hero.Id, SpellPrefabGuid = GeneratedShufflePrefab });
+            presentation.Add(full);
             // Random stacks and hidden deck copies must not gain identity through presentation.
             if (reveal) presentation.Add(PowerHistoryBuilder.ShowEntity(card));
             presentation.AddRange(new IPowerHistoryEntry[] {
                 PowerHistoryBuilder.HideEntity(card),
-                new PowerHistoryMetaData { Type = MetaDataType.TARGET, Data = 0, Info = new List<int> { card.Id } },
-                new PowerHistorySubSpellEnd()
+                new PowerHistoryMetaData { Type = MetaDataType.TARGET, Data = 0, Info = new List<int> { card.Id } }
             });
-            int open = JoinableShuffleEnd(card, creation);
+            if (!ownSpell) presentation.Add(new PowerHistorySubSpellEnd());
+            int open = ownSpell ? -1 : JoinableShuffleEnd(card, creation);
             if (open >= 0)
             {
                 // Retail SpawnToDeckSpell.AddPowerTargets flies every DECK FULL of one sub-spell together;
@@ -606,7 +633,8 @@ namespace SabberStoneCore.Kettle
 
         // Last index of an unflushed generated spawn scope into the same deck that this creation can join:
         // same block, and in between only the scope cards' own deck-side tag changes and enchantments attached to
-        // them (e.g. Academic Espionage's cost buff). Any other row, such as a listener's effect, keeps its own scope.
+        // them (e.g. Academic Espionage's cost buff), Choose One options, or retirement of a replaced card from that deck.
+        // Any other row, such as a listener's effect, keeps its own scope.
         private int JoinableShuffleEnd(IPlayable card, int creation)
         {
             var game = card.Game;
@@ -628,31 +656,58 @@ namespace SabberStoneCore.Kettle
             }
             if (start < 0 || !(Last[start] is PowerHistorySubSpellStart scope) || scope.SpellPrefabGuid != GeneratedShufflePrefab
                 || scope.Source != card.Controller.Hero.Id || scope.Targets.Count != 0 || scope.RequirePublicOrigin) return -1;
-            var buffs = new HashSet<int>();
-            bool Buff(int id) => game.IdEntityDic.TryGetValue(id, out var entity) && entity is Enchantment enchantment
-                && enchantment.Target != null && cards.Contains(enchantment.Target.Id);
+            var attachments = new HashSet<int>();
+            var retirements = new List<IPowerHistoryEntry>();
+            bool Attached(int id) => game.IdEntityDic.TryGetValue(id, out var entity)
+                && (entity is Enchantment enchantment && enchantment.Target != null && cards.Contains(enchantment.Target.Id)
+                    || cards.Contains(entity[GameTag.PARENT_CARD])
+                    && game.IdEntityDic.TryGetValue(entity[GameTag.PARENT_CARD], out var parent)
+                    && parent.ChooseOnePlayables?.Any(option => option.Id == id) == true);
             for (int i = end + 1; i < creation; i++)
             {
                 switch (Last[i])
                 {
-                    case PowerHistoryFullEntity full when Buff(full.Entity.Id): buffs.Add(full.Entity.Id); break;
-                    case PowerHistoryShowEntity show when buffs.Contains(show.Entity.Id): break;
-                    case PowerHistoryTagChange change when buffs.Contains(change.EntityId): break;
+                    case PowerHistoryFullEntity full when Attached(full.Entity.Id): attachments.Add(full.Entity.Id); break;
+                    case PowerHistoryShowEntity show when attachments.Contains(show.Entity.Id): break;
+                    case PowerHistoryTagChange change when attachments.Contains(change.EntityId): break;
                     case PowerHistoryTagChange change when cards.Contains(change.EntityId) && change.Tag != GameTag.CONTROLLER
                         && (change.Tag != GameTag.ZONE || change.Value == (int)Zone.DECK): break;
+                    // Alternate Reality interleaves random picks and shuffles; merge history without changing RNG order (#160).
+                    case PowerHistoryTagChange change when game.IdEntityDic.TryGetValue(change.EntityId, out var retired)
+                        && retired.Controller == card.Controller && retired.Zone == card.Controller.SetasideZone
+                        && retired[Actions.CardStateBoundary.ReplacedHiddenZone] == (int)Zone.DECK
+                        && (change.Tag == Actions.CardStateBoundary.ReplacedHiddenZone && change.Value == (int)Zone.DECK
+                            || change.Tag == GameTag.ZONE && change.Value == (int)Zone.SETASIDE):
+                        retirements.Add(change); break;
                     default: return -1;
                 }
             }
             // Both histories must hold the same unflushed run, or a merge would desynchronize them.
-            int fullEnd = Full.LastIndexOf(Last[end]);
-            if (fullEnd < 0 || fullEnd + creation - end >= Full.Count) return -1;
-            for (int i = end; i <= creation; i++)
-                if (!ReferenceEquals(Full[fullEnd + i - end], Last[i])) return -1;
-            return end;
+            int fullStart = Full.LastIndexOf(Last[start]);
+            if (fullStart < 0 || fullStart + creation - start >= Full.Count) return -1;
+            for (int i = start; i <= creation; i++)
+                if (!ReferenceEquals(Full[fullStart + i - start], Last[i])) return -1;
+            // Retired cards must stay outside SpawnToDeck's inferred targets (#160).
+            foreach (var retirement in retirements) { Full.Remove(retirement); Last.Remove(retirement); }
+            Full.InsertRange(fullStart, retirements); Last.InsertRange(start, retirements);
+            return end + retirements.Count;
         }
 
         /// <summary>The enchantment whose granted Deathrattle is resolving, for presentation recipes only.</summary>
         internal Enchantment GrantedDeathrattle { get; set; }
+
+        /// <summary>
+        /// Presentation only, set by the task processor while it resolves a Deathrattle queued by an actual death (DeathId > 0): the
+        /// block source is then in the graveyard because of this death, so a stand-in effect may start at its last board slot.
+        /// </summary>
+        internal bool DeathrattleFromDeath { get; set; }
+
+        /// <summary>
+        /// Id of an entity whose power task runs inside another entity's block (Wisprider triggering the hero power).
+        /// The hit is attributed in a TRIGGER block of that entity, which no POWER-keyed recipe matches, so the entity
+        /// keeps the recipe it has when it runs in its own block. Presentation only.
+        /// </summary>
+        internal int DelegatedPowerSource { get; set; }
 
         internal IDisposable Visual(Game game, VisualPhase phase, IPlayable source = null, IEntity target = null)
         {
@@ -680,11 +735,26 @@ namespace SabberStoneCore.Kettle
                 && source.Id == CurrentBlock.Source && SubSpellRecipes.Find(CurrentBlock, GrantedDeathrattle.Card.Id, phase) != null)
                 identity = GrantedDeathrattle;
             var recipe = SubSpellRecipes.Find(CurrentBlock, identity.Card.Id, phase);
+            if (recipe == null && source.Id == DelegatedPowerSource && CurrentBlock.BlockType == BlockType.TRIGGER
+                && CurrentBlock.EffectIndex == -1 && CurrentBlock.TriggerKeyword.GetValueOrDefault() == 0)
+                recipe = SubSpellRecipes.FindOwnPower(identity.Card.Id, phase);
             if (recipe == null || (recipe.Group ? target != null
                 : recipe.Targets == VisualTargets.Resolved && target == null)) return null;
             int visualSource = recipe.Source == VisualSource.Inherit ? 0
-                : recipe.Source == VisualSource.Hero ? source.Controller.Hero.Id : source.Id;
+                : recipe.Source == VisualSource.Hero ? source.Controller.Hero.Id
+                : recipe.Source == VisualSource.Dying ? DyingSource(source) : source.Id;
             return new VisualScope(this, game, recipe, phase, visualSource, target, requirePublicOrigin);
+        }
+
+        // The Deathrattle's own minion (or location or weapon) while the client still has its card at a board slot: in play (an explicit
+        // trigger on a living minion) or in the graveyard because of this death. Anything else (replayed from hand, deck or an old
+        // graveyard) falls back to the owner's public hero.
+        private int DyingSource(IPlayable source)
+        {
+            var type = source.Zone?.Type;
+            bool onBoard = (source is Minion || source is Weapon || source.Card.Type == CardType.LOCATION)
+                && (type == Zone.PLAY || type == Zone.GRAVEYARD && DeathrattleFromDeath && source.Id == CurrentBlock.Source);
+            return onBoard ? source.Id : source.Controller.Hero.Id;
         }
 
         private sealed class VisualScope : IDisposable
@@ -727,16 +797,8 @@ namespace SabberStoneCore.Kettle
                 {
                     var entries = _history.Full.Skip(_full).ToArray();
                     if (!_history.Last.Skip(_last).SequenceEqual(entries)) return;
-                    int groupDepth = 0;
-                    bool hit = false;
-                    foreach (var entry in entries)
-                    {
-                        if (entry is PowerHistoryBlockStart) groupDepth++;
-                        else if (entry is PowerHistoryBlockEnd) groupDepth--;
-                        else if (groupDepth == 0 && entry is PowerHistoryMetaData meta
-                            && meta.Type == MetaDataType.DAMAGE && meta.Data > 0) hit = true;
-                    }
-                    if (!hit) return;
+                    // Owner ruling 2026-11-18: an area effect plays once whenever it runs, on an empty side or with every hit prevented too
+                    // (a per-target recipe still plays nothing without a hit).
                     // A pulse before the hits avoids replaying the full-board effect after nested reactions.
                     var pulse = new IPowerHistoryEntry[] {
                         new PowerHistorySubSpellStart { Source = _source, SpellPrefabGuid = _recipe.Prefab },
@@ -935,7 +997,7 @@ namespace SabberStoneCore.Kettle
         [NonSerialized] private int _noteCard, _noteLegal = -1, _noteMode;
         [NonSerialized] private bool _noteModeRandom;
         [NonSerialized] private string _noteModeCard;
-        // legalTargets: candidates the automatic play chose from; -1 unknown; -2 the card's own rule fixed the target.
+        // legalTargets: candidates the automatic play chose from; -1 unknown; -2 rule-fixed; -3 player-chosen.
         internal void NoteAutoChoice(int card, int legalTargets, int mode, string modeCardId, bool modeRandom)
         {
             if (!_enabled) return;
@@ -953,7 +1015,7 @@ namespace SabberStoneCore.Kettle
             _noteCard = 0;
         }
         /// <summary>What an automatic play chose from (null: not recorded, e.g. a reloaded or cloned history). LegalTargets: candidates it chose
-        /// among (-1 unknown, -2 fixed by the card's own rule); Mode: the Choose One mode it picked (0 none) and that option's card id.</summary>
+        /// among (-1 unknown, -2 fixed by the card's own rule, -3 player-chosen); Mode: the Choose One mode it picked (0 none) and that option's card id.</summary>
         public (int LegalTargets, int Mode, string ModeCardId, bool ModeRandom)? AutoChoiceOf(IPowerHistoryEntry entry) =>
             _autoChoices != null && entry != null && _autoChoices.TryGetValue(entry, out var note) ? ((int, int, string, bool))note : ((int, int, string, bool)?)null;
         internal void ClearAutoChoice() { _noteCard = 0; }
@@ -1034,6 +1096,27 @@ namespace SabberStoneCore.Kettle
 			Full.Add(entry);
 			Last.Add(entry);
 		}
+
+        // Moves the anonymous DECK FULL_ENTITYs recorded from fullFrom/lastFrom on (the deck preparations) in front of the opening
+        // block start, in order, in both lists. The client creates entities that precede the first block during game creation, as
+        // it does the original deck; one created inside the block is placed at the deck zone's transform, and a copy drawn into the
+        // opening hand is then shown face up there until the mulligan deal moves it. The match event log's per-entry RNG draw
+        // stamps (diagnostics) move with their entries, so the preparation's draws show before the block.
+        internal void HoistOpeningDeckEntities(PowerHistoryBlockStart opening, int fullFrom, int lastFrom)
+        {
+            if (!_enabled) return;
+            foreach (var (list, from) in new[] { (Full, fullFrom), (Last, lastFrom) })
+            {
+                int at = list.FindIndex(e => ReferenceEquals(e, opening));
+                if (at < 0 || from <= at) continue;
+                var deck = list.Skip(from).Where(e => e is PowerHistoryFullEntity full && string.IsNullOrEmpty(full.Entity.Name)
+                    && full.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) && zone == (int)Zone.DECK).ToList();
+                if (deck.Count == 0) continue;
+                var moved = new HashSet<IPowerHistoryEntry>(deck);
+                list.RemoveAll(moved.Contains);
+                list.InsertRange(at, deck);
+            }
+        }
 
         // The enclosing block's effect flag before a child opens.
         internal bool CurrentBlockHasEffects => _blocks.Count > 0 && _blocks.Peek().HasEffects;

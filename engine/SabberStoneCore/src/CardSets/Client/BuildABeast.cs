@@ -32,7 +32,8 @@ namespace SabberStoneCore.CardSets.Client
         internal static void BeginStorm(Spell source)
         {
             var c = source.Controller; var g = source.Game;
-            var standard = c.Game.FormatType == FormatType.FT_STANDARD;
+            // Pool policy, not FormatType: a live match is FT_WILD yet plays the Standard pool.
+            var standard = g.PoolFormat != Config.GenerationFormat.Wild;
             var first = StormOffers(g, c, standard ? PoolScope.Standard : PoolScope.Wild, true);
             var second = StormOffers(g, c, PoolScope.Wild, false);
             if (first.Length == 0 || second.Length == 0) return;

@@ -19,6 +19,7 @@ using System.Text;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
+using SabberStoneCore.Model.RandomPools;
 using SabberStoneCore.Model.Entities;
 
 namespace SabberStoneCore.Tasks.SimpleTasks
@@ -77,10 +78,9 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 	public class DiscoverTask : SimpleTask
 	{
-		// Criteria pools depend only on (format, criteria, class). Typed pools also read the controller's
-		// class, hero, opponent and RNG, so they are rebuilt per call instead of cached process-wide.
-		private static readonly ConcurrentDictionary<(FormatType, DiscoverCriteria, CardClass), Card[][]>
-			CachedDiscoverySetsByCriteria = new ConcurrentDictionary<(FormatType, DiscoverCriteria, CardClass), Card[][]>();
+		// Criteria pools depend only on (match pool, criteria, class). They are memoised on the MatchRandomPool
+		// instance, which is per manifest and pool policy, so no game's pool can leak into another's. Typed pools
+		// also read the controller's class, hero, opponent and RNG, so they are rebuilt per call.
 
 		private readonly DiscoverType _discoverType;
 		//private readonly Card _enchantmentCard;
@@ -141,10 +141,11 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 		{
 			Card[][] cardsToDiscover;
 			ChoiceAction choiceAction;
+			var pool = Cards.RandomPool(game, PoolDestination.Hand, source);
 
 			// Sets of cards to discover.
 			if (_discoverType != DiscoverType.INVALID)
-				cardsToDiscover = Discover(in game, controller, in _discoverType, out choiceAction);
+				cardsToDiscover = Discover(pool, controller, source, in _discoverType, out choiceAction);
 			else
 			{
 				CardClass cls = Criteria.CardClass == CardClass.OP_CLASS
@@ -159,8 +160,23 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 						cls = (CardClass) game.Random.Next(2, 11);
 				}
 
-				cardsToDiscover = Discover(game.FormatType, in _discoverCriteria, cls);
+				cardsToDiscover = Discover(pool, in _discoverCriteria, cls);
 				choiceAction = _choiceAction;
+			}
+
+			// Random Discover cannot offer its source; copies from existing zones and fixed choices are exempt.
+			if (!pool.Legacy && IsDiscover && _discoverType != DiscoverType.BASIC_HEROPOWERS
+				&& _discoverType != DiscoverType.ARTIFACT && _discoverType != DiscoverType.DECK_MINION
+				&& _discoverType != DiscoverType.OP_DECK_MINION && _discoverType != DiscoverType.OP_DECK
+				&& _discoverType != DiscoverType.OWN_SPELL && _discoverType != DiscoverType.DIED_THIS_GAME)
+			{
+				var discoverSource = source;
+				// Keep the memo's sets intact for other sources. WithoutSource only copies a set containing the source.
+				cardsToDiscover = cardsToDiscover.Select(set => (Card[])pool.WithoutSource(set, discoverSource)).ToArray();
+				// Source exclusion may leave a tri-class set empty or fewer than three distinct choices.
+				if (cardsToDiscover.Length == 3 && (cardsToDiscover.Any(set => set.Length == 0)
+					|| cardsToDiscover.SelectMany(set => set).Distinct().Count() < 3))
+					cardsToDiscover = new[] { cardsToDiscover.SelectMany(set => set).Distinct().ToArray() };
 			}
 
 			if (cardsToDiscover.Length == 1)
@@ -267,31 +283,29 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 		//	});
 		//}
 
-		private Card[][] Discover(in Game game, Controller controller, in DiscoverType discoverType,
+		private Card[][] Discover(MatchRandomPool pool, Controller controller, IEntity source, in DiscoverType discoverType,
 			out ChoiceAction choiceAction)
 		{
-			FormatType format = game.FormatType;
-
 			switch (discoverType)
 			{
 				case DiscoverType.DRUID_ROGUE_SHAMAN:
 				{
 					choiceAction = ChoiceAction.HAND;
 					Card[][] cardSets =
-						GetTriClass(in format, CardClass.DRUID, CardClass.ROGUE, CardClass.SHAMAN);
+						GetTriClass(pool, CardClass.DRUID, CardClass.ROGUE, CardClass.SHAMAN);
 					return cardSets;
 				}
 				case DiscoverType.MAGE_PRIEST_WARLOCK:
 				{
 					choiceAction = ChoiceAction.HAND;
 					Card[][] cardSets =
-						GetTriClass(in format, CardClass.MAGE, CardClass.PRIEST, CardClass.WARLOCK);
+						GetTriClass(pool, CardClass.MAGE, CardClass.PRIEST, CardClass.WARLOCK);
 					return cardSets;
 				}
 				case DiscoverType.HUNTER_PALADIN_WARRIOR:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetTriClass(in format, CardClass.HUNTER, CardClass.PALADIN,
+					Card[][] cardSets = GetTriClass(pool, CardClass.HUNTER, CardClass.PALADIN,
 						CardClass.WARRIOR);
 					return cardSets;
 				}
@@ -308,21 +322,21 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.DRAGON:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.DRAGON)));
 					return cardSets;
 				}
 				case DiscoverType.OVERLOAD:
 				{
 					choiceAction = ChoiceAction.HAND;
-					IEnumerable<Card> cardSet = Cards.FormatTypeCards(game.FormatType);
+					IEnumerable<Card> cardSet = pool.All;
 					Card[][] cardSets = {cardSet.Where(p => p.HasOverload).ToArray()};
 					return cardSets;
 				}
 				case DiscoverType.TAUNT:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p[GameTag.TAUNT] == 1));
 					return cardSets;
 				}
@@ -335,42 +349,42 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 						|| controller.BaseClass == CardClass.HUNTER
 							? controller.BaseClass
 							: CardClass.PALADIN;
-					Card[][] cardSets = GetClassCard(in format, classForSecret,
+					Card[][] cardSets = GetClassCard(pool, classForSecret,
 						list => list.Where(p => p[GameTag.SECRET] == 1));
 					return cardSets;
 				}
 				case DiscoverType.BEAST:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.BEAST)));
 					return cardSets;
 				}
 				case DiscoverType.MURLOC:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.MURLOC)));
 					return cardSets;
 				}
 				case DiscoverType.ELEMENTAL:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.ELEMENTAL)));
 					return cardSets;
 				}
 				case DiscoverType.MECHANICAL:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.MECHANICAL)));
 					return cardSets;
 				}
 				case DiscoverType.DEMON:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.IsRace(Race.DEMON)));
 					return cardSets;
 				}
@@ -378,7 +392,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				{
 					choiceAction = ChoiceAction.HAND;
 					Card[][] cardSets =
-						GetFilter(in format, in controller, list => list.Where(p => p.Cost >= 0));
+						GetFilter(pool, in controller, list => list.Where(p => p.Cost >= 0));
 					return cardSets;
 				}
 				case DiscoverType.ARTIFACT:
@@ -402,7 +416,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.MINION:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Type == CardType.MINION));
 					return cardSets;
 				}
@@ -423,21 +437,21 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.DEATHRATTLE:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p[GameTag.DEATHRATTLE] == 1));
 					return cardSets;
 				}
 				case DiscoverType.DEATHRATTLE_MINIONS:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p[GameTag.DEATHRATTLE] == 1 && p.Type == CardType.MINION));
 					return cardSets;
 				}
 				case DiscoverType.BATTLECRY:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p[GameTag.BATTLECRY] == 1 && p.Type == CardType.MINION));
 					return cardSets;
 				}
@@ -445,41 +459,41 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				{
 					choiceAction = ChoiceAction.HAND;
 					Card[][] cardSets =
-						GetFilter(in format, in controller, list => list.Where(p => p.Cost == 1));
+						GetFilter(pool, in controller, list => list.Where(p => p.Cost == 1));
 					return cardSets;
 				}
 				case DiscoverType.THREE_COST:
 				{
 					choiceAction = ChoiceAction.HAND;
 					Card[][] cardSets =
-						GetFilter(in format, in controller, list => list.Where(p => p.Cost == 3));
+						GetFilter(pool, in controller, list => list.Where(p => p.Cost == 3));
 					return cardSets;
 				}
 				case DiscoverType.SIX_COST_SUMMON:
 				{
 					choiceAction = ChoiceAction.SUMMON;
 					Card[][] cardSets =
-						GetFilter(in format, in controller, list => list.Where(p => p.Cost == 6 && p.Type == CardType.MINION));
+						GetFilter(pool, in controller, list => list.Where(p => p.Cost == 6 && p.Type == CardType.MINION));
 					return cardSets;
 				}
 				case DiscoverType.SPELL:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Type == CardType.SPELL));
 					return cardSets;
 				}
 				case DiscoverType.SPELL_COSTS_5_OR_MORE:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Type == CardType.SPELL && p.Cost >= 5));
 					return cardSets;
 				}
 				case DiscoverType.SPELL_RANDOM:
 				{
 					choiceAction = ChoiceAction.SPELL_RANDOM;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Type == CardType.SPELL && !p.HideStat));
 					return cardSets;
 				}
@@ -502,7 +516,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.COST_8_MORE_SUMMON:
 				{
 					choiceAction = ChoiceAction.SUMMON;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Cost >= 8 && p.Type == CardType.MINION));
 					return cardSets;
 				}
@@ -515,7 +529,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.OP_HERO:
 				{
 					choiceAction = ChoiceAction.HAND;
-					Card[][] cardSets = GetClassCard(in format, controller.Opponent.HeroClass, list => list);
+					Card[][] cardSets = GetClassCard(pool, controller.Opponent.HeroClass, list => list);
 					return cardSets;
 				}
 				case DiscoverType.DIED_THIS_GAME:
@@ -540,14 +554,14 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				case DiscoverType.LEGENDARY_MINIONS:
 				{
 					choiceAction = ChoiceAction.SUMMON;
-					Card[][] cardSets = GetFilter(in format, in controller,
+					Card[][] cardSets = GetFilter(pool, in controller,
 						list => list.Where(p => p.Rarity == Rarity.LEGENDARY && p.Type == CardType.MINION));
 					return cardSets;
 				}
 				case DiscoverType.WEAPON_ANOTHERCLASS:
 				{
 					choiceAction = ChoiceAction.HAND;
-					return GetAnotherClassWeapons(controller.HeroClass, format);
+					return GetAnotherClassWeapons(controller.HeroClass, pool);
 				}
 				case DiscoverType.HEISTBARON_TOGWAGGLE:
 				{
@@ -563,43 +577,50 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			}
 		}
 
-		private Card[][] GetClassCard(in FormatType formatType, CardClass heroClass,
+		private Card[][] GetClassCard(MatchRandomPool pool, CardClass heroClass,
 			in Func<IEnumerable<Card>, IEnumerable<Card>> filter)
 		{
-			Dictionary<CardClass, IReadOnlyList<Card>> cardSet = Cards.FormatTypeClassCards(formatType);
-			IEnumerable<Card> classCards =
-				filter.Invoke(cardSet[heroClass].Where(p => (p.Class == heroClass || heroClass == CardClass.DEATHKNIGHT && p[GameTag.MULTIPLE_CLASSES] != 0) && !p.IsQuest));
+			IEnumerable<Card> classCards = filter.Invoke(ClassPart(pool, heroClass));
 			return new[] {classCards.ToArray()};
 		}
 
-		private Card[][] GetTriClass(in FormatType formatType, CardClass class1, CardClass class2, CardClass class3)
+		// The class side of a class pool. Legacy replays keep the frozen predicate verbatim.
+		private static IEnumerable<Card> ClassPart(MatchRandomPool pool, CardClass heroClass) => pool.Legacy
+			? Cards.FormatTypeClassCards(pool.LegacyFormat)[heroClass].Where(p => (p.Class == heroClass || heroClass == CardClass.DEATHKNIGHT && p[GameTag.MULTIPLE_CLASSES] != 0) && !p.IsQuest)
+			: pool.ClassOnly(heroClass).Where(p => !p.IsQuest);
+
+		private static IEnumerable<Card> TriClassPart(MatchRandomPool pool, CardClass cls) => pool.Legacy
+			? Cards.FormatTypeClassCards(pool.LegacyFormat)[cls].Where(p => (p.Class == cls || p.MultiClassGroup != 0) && !p.IsQuest)
+			: pool.ClassOnly(cls).Where(p => !p.IsQuest);
+
+		private Card[][] GetTriClass(MatchRandomPool pool, CardClass class1, CardClass class2, CardClass class3)
 		{
-			Dictionary<CardClass, IReadOnlyList<Card>> cardSet = Cards.FormatTypeClassCards(formatType);
 			return new[]
 			{
-				cardSet[class1].Where(p => (p.Class == class1 || p.MultiClassGroup != 0) && !p.IsQuest).ToArray(),
-				cardSet[class2].Where(p => (p.Class == class2 || p.MultiClassGroup != 0) && !p.IsQuest).ToArray(),
-				cardSet[class3].Where(p => (p.Class == class3 || p.MultiClassGroup != 0) && !p.IsQuest).ToArray()
+				TriClassPart(pool, class1).ToArray(),
+				TriClassPart(pool, class2).ToArray(),
+				TriClassPart(pool, class3).ToArray()
 			};
 		}
 
-		private Card[][] GetFilter(in FormatType formatType, in Controller controller,
+		private Card[][] GetFilter(MatchRandomPool pool, in Controller controller,
 			in Func<IEnumerable<Card>, IEnumerable<Card>> filter)
 		{
-			Dictionary<CardClass, IReadOnlyList<Card>> cardSet = Cards.FormatTypeClassCards(formatType);
 			CardClass heroClass = controller.BaseClass != CardClass.NEUTRAL
 				? controller.BaseClass
 				: Util.Choose(Cards.HeroClasses, controller.Game.Random);
-			IEnumerable<Card> nonClassCards = filter.Invoke(cardSet[heroClass].Where(p => p.Class != heroClass && (heroClass != CardClass.DEATHKNIGHT || p[GameTag.MULTIPLE_CLASSES] == 0)));
-			IEnumerable<Card> classCards =
-				filter.Invoke(cardSet[heroClass].Where(p => (p.Class == heroClass || heroClass == CardClass.DEATHKNIGHT && p[GameTag.MULTIPLE_CLASSES] != 0) && !p.IsQuest));
+			IEnumerable<Card> nonClassSide = pool.Legacy
+				? Cards.FormatTypeClassCards(pool.LegacyFormat)[heroClass].Where(p => p.Class != heroClass && (heroClass != CardClass.DEATHKNIGHT || p[GameTag.MULTIPLE_CLASSES] == 0))
+				: pool.NonClass(heroClass);
+			IEnumerable<Card> nonClassCards = filter.Invoke(nonClassSide);
+			IEnumerable<Card> classCards = filter.Invoke(ClassPart(pool, heroClass));
 			return new[] {nonClassCards.ToArray(), classCards.ToArray()};
 		}
 
-		private Card[][] GetAnotherClassWeapons(CardClass myClass, FormatType format)
+		private Card[][] GetAnotherClassWeapons(CardClass myClass, MatchRandomPool pool)
 		{
 			if (myClass == CardClass.DEMONHUNTER || myClass == CardClass.DEATHKNIGHT)
-				return new[] { Cards.FormatTypeCards(format).Where(p => p.Collectible && p.Implemented &&
+				return new[] { pool.All.Where(p => p.Collectible && p.Implemented &&
 					p.Type == CardType.WEAPON && Cards.HeroClasses.Contains(p.Class)).ToArray() };
 
 			switch (myClass)
@@ -619,36 +640,35 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			}
 
 			return new[] {
-				Cards.FormatTypeCards(format)
-					.Where(p => p.Type == CardType.WEAPON && p.Class != myClass)
+				pool.All
+					.Where(p => p.Type == CardType.WEAPON && (pool.Legacy ? p.Class != myClass : !pool.InClass(p, myClass)))
 					.ToArray()
 			};
 		}
 
-		private Card[][] Discover(FormatType format, in DiscoverCriteria criteria, CardClass cls)
+		private Card[][] Discover(MatchRandomPool pool, in DiscoverCriteria criteria, CardClass cls)
 		{
 			Card[][] cards;
 			if (criteria.CardClass != CardClass.INVALID && criteria.CardClass != CardClass.ANOTHER_CLASS && criteria.CardClass != CardClass.OP_CLASS)
 				cls = CardClass.INVALID;
 
-			if (CachedDiscoverySetsByCriteria.TryGetValue((format, criteria, cls), out cards))
+			if (pool.DiscoverMemo.TryGetValue((criteria, cls), out cards))
 				return cards;
 
 			if (criteria.CardClass == CardClass.INVALID || criteria.CardClass == CardClass.OP_CLASS)
 			{ // Use the player's Class
-				IReadOnlyList<Card> allCards = Cards.FormatTypeClassCards(format)[cls];
+				IReadOnlyList<Card> allCards = pool.ClassAndNeutral(cls);
 				List<Card> classCards = new List<Card>();
 				List<Card> neutralCards = new List<Card>();
 				foreach (Card card in allCards)
 				{
 					if (!criteria.Evaluate(card)) continue;
 
-					if (card.Class == cls || cls == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0)
+					if (pool.Legacy ? card.Class == cls || cls == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0 : pool.InClass(card, cls))
 						classCards.Add(card);
 					else
 						neutralCards.Add(card);
 				}
-				//IReadOnlyList<Card> neutralCards = Cards.FormatTypeClassCards(format)[CardClass.NEUTRAL];
 
 				cards = new[]
 				{
@@ -659,13 +679,13 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			else if
 				(criteria.CardClass == CardClass.ANOTHER_CLASS)
 			{
-				IEnumerable<Card> allCards = Cards.FormatTypeCards(format);
+				IEnumerable<Card> allCards = pool.All;
 				List<Card> matching = new List<Card>();
 				foreach (Card card in allCards)
 				{
 					if (!criteria.Evaluate(card)) continue;
 
-					if (card.Class != cls && ((cls != CardClass.DEMONHUNTER && cls != CardClass.DEATHKNIGHT) ||
+					if ((pool.Legacy ? card.Class != cls : !pool.InClass(card, cls)) && ((cls != CardClass.DEMONHUNTER && cls != CardClass.DEATHKNIGHT) ||
 						card.Implemented && Cards.HeroClasses.Contains(card.Class)))
 						matching.Add(card);
 				}
@@ -674,22 +694,21 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			}
 			else
 			{	// Use the given class criterion
-				IReadOnlyList<Card> allCards = Cards.FormatTypeClassCards(format)[criteria.CardClass];
+				IReadOnlyList<Card> allCards = pool.Legacy ? Cards.FormatTypeClassCards(pool.LegacyFormat)[criteria.CardClass] : pool.ClassOnly(criteria.CardClass);
 
 				List<Card> classCards = new List<Card>();
 				foreach (Card card in allCards)
 				{
 					if (!criteria.Evaluate(card)) continue;
 
-					if (card.Class == criteria.CardClass || criteria.CardClass == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0)
+					if (!pool.Legacy || card.Class == criteria.CardClass || criteria.CardClass == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0)
 						classCards.Add(card);
 				}
 
 				cards = new[] {classCards.ToArray(), new Card[0]};
-				//cls = CardClass.INVALID;
 			}
 
-			CachedDiscoverySetsByCriteria.TryAdd((format, criteria, cls), cards);
+			pool.DiscoverMemo.TryAdd((criteria, cls), cards);
 
 			return cards;
 		}
@@ -759,9 +778,12 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 					for (int i = 0; i < result.Length; i++)
 					{
 						Card pick;
-						bool contains = false;
+						bool contains;
 						do
 						{
+							// Reset per attempt: a card listed in two of the three class sets (a gang card) used to
+							// make this loop spin forever once it had been drawn twice.
+							contains = false;
 							pick = cardsToDiscover[i][rnd.Next(cardsToDiscover[i].Length)];
 							for (int j = 0; j < i; j++)
 								if (result[j] == pick)

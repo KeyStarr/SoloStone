@@ -19,7 +19,7 @@ static partial class Program
 
     // Cards the engine rewrites after load (Configure hooks) so that their text no longer says what the card file's English says:
     // the plugin shows these in English. A new entry here is a decision; a new mismatch outside it fails.
-    static readonly string[] EngineRewrittenText={"AT_051","DRG_403e","EX1_155a","EX1_155b","EX1_165","EX1_165a","EX1_165t1","EX1_248","NEW1_008","NEW1_008a","NEW1_008b","NEW1_027e","OG_044a","UNG_028t","UNG_067t1","UNG_067t1e","UNG_067t1e2","UNG_817","UNG_920t1","UNG_999t5","UNG_999t5e"};
+    static readonly string[] EngineRewrittenText={"AT_051","DRG_403e","EX1_155a","EX1_155b","EX1_165","EX1_165a","EX1_165t1","EX1_248","LOOT_392","NEW1_008","NEW1_008a","NEW1_008b","NEW1_027e","OG_044a","UNG_028t","UNG_067t1","UNG_067t1e","UNG_067t1e2","UNG_817","UNG_920t1","UNG_999t5","UNG_999t5e"};
 
     static void LocalizedTextTests(string temp) {
         var originalOpen=LocalizedCardText.Open;

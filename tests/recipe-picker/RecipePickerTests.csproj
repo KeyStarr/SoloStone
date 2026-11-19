@@ -7,6 +7,8 @@
   <ItemGroup>
     <Compile Include="../../plugin/NativeRecipePickerModel.cs" />
     <Compile Include="../../plugin/NativeRecipeProfile.cs" />
+    <Compile Include="../../plugin/NativeDeckCodeProfile.cs" />
+    <Compile Include="../../plugin/NativeDeckCodeImport.cs" />
     <Compile Include="../../plugin/NativeRecipeLibrary.cs" />
     <Compile Include="../../plugin/NativeRecipeGuideText.cs" />
     <Compile Include="../../plugin/NativeDeckGuideText.cs" />

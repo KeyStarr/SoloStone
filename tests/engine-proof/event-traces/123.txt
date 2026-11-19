@@ -51,5 +51,5 @@ PlayCardTrigger|1|5:SabberStoneCore.Triggers.Trigger.Process|_owner=11,_sourceId
 AfterSummonTrigger|0|4:SabberStoneCore.Triggers.Trigger.Process|_owner=29,_sourceId=29,Game=1
 PlayCardTrigger|0|3:SabberStoneCore.Triggers.Trigger.Process|_owner=58,_sourceId=58,Game=1
 PlayCardTrigger|1|5:SabberStoneCore.Triggers.Trigger.Process|_owner=11,_sourceId=11,Game=1
-history=4015876433c6feda899d3dbec1fe05673a0ee13f698b33b658e57d16e83bfd0a
+history=70de593ab9268c50b123bb7bf31ce4b524ad38d8e46768077314d77cbd57a05b
 clone=127f7108af4024d8cf64f3622be9d9562ffe4fd5a13f8e318c5b02e7931bd879

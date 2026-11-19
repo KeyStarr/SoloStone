@@ -1,7 +1,7 @@
 # Installing SoloStone (Windows)
 
 > [!WARNING]
-> **Alpha 0.2.1.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
+> **Alpha 0.3.0.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
 > if anything goes wrong, tell us on [Discord](https://discord.gg/e45QgKHmC2) or open an
 > [issue](https://github.com/KeyStarr/SoloStone/issues).
 

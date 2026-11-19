@@ -720,6 +720,7 @@ M	Assembly-CSharp	AchievementCategoryDbfRecord	get_Subcategories	System.Collecti
 M	Assembly-CSharp	AchievementSubcategoryDbfRecord	get_Icon	System.String()
 M	Assembly-CSharp	AchievementSubcategoryDbfRecord	get_SortOrder	System.Int32()
 M	Assembly-CSharp	Actor	Destroy	System.Void()
+M	Assembly-CSharp	Actor	GetEntity	Entity()
 M	Assembly-CSharp	Actor	GetEntityDef	EntityDef()
 M	Assembly-CSharp	Actor	GetMeshRenderer	UnityEngine.MeshRenderer(System.Boolean)
 M	Assembly-CSharp	Actor	GetPortraitMaterial	UnityEngine.Material()
@@ -727,6 +728,8 @@ M	Assembly-CSharp	Actor	GetPremium	TAG_PREMIUM()
 M	Assembly-CSharp	Actor	GetSpell	*
 M	Assembly-CSharp	Actor	IsColliderEnabled	System.Boolean()
 M	Assembly-CSharp	Actor	IsShown	System.Boolean()
+M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
+M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -1012,6 +1015,8 @@ M	Assembly-CSharp	CollectionManager	OnDeckDeletedWhileOffline	*
 M	Assembly-CSharp	CollectionManager	OnInitialClientStateDeckContents	System.Void(NetCache+NetCacheDecks,System.Collections.Generic.List`1<PegasusUtil.DeckContents>)
 M	Assembly-CSharp	CollectionManager	OnInitialCollectionReceived	NetCache+NetCacheCollection(PegasusUtil.Collection)
 M	Assembly-CSharp	CollectionManager	OnMassDisenchantResponse	*
+M	Assembly-CSharp	CollectionManager	RegisterDeckCreatedListener	System.Void(CollectionManager+DelOnDeckCreated)
+M	Assembly-CSharp	CollectionManager	RemoveDeckCreatedListener	System.Boolean(CollectionManager+DelOnDeckCreated)
 M	Assembly-CSharp	CollectionManager	RequestDeckContentsForDecksWithoutContentsLoaded	*
 M	Assembly-CSharp	CollectionManager	SendCreateDeck	*
 M	Assembly-CSharp	CollectionManager	SetShowDeckTemplatePageForClass	System.Void(TAG_CLASS,System.Boolean)
@@ -1024,6 +1029,9 @@ M	Assembly-CSharp	CollectionManager+OnMassDisenchant	Invoke	System.Void(System.I
 M	Assembly-CSharp	CollectionManagerDisplay	CreateDeckFromClipboard	*
 M	Assembly-CSharp	CollectionManagerDisplay	Exit	*
 M	Assembly-CSharp	CollectionManagerDisplay	GetPhoneDeckTemplateTray	DeckTemplatePicker()
+M	Assembly-CSharp	CollectionManagerDisplay	OnDeckCreatedByPlayer	*
+M	Assembly-CSharp	CollectionManagerDisplay	OnDeckCreatedFromClipboard	*
+M	Assembly-CSharp	CollectionManagerDisplay	RejectDeckFromClipboard	*
 M	Assembly-CSharp	CollectionManagerDisplay	ShowDeck	*
 M	Assembly-CSharp	CollectionPageManager	GetDeckTemplatePicker	DeckTemplatePicker()
 M	Assembly-CSharp	CollectionPageManager	UpdateFiltersForDeck	System.Void(CollectionDeck,System.Collections.Generic.List`1<TAG_CLASS>,System.Boolean,BookPageManager+DelOnPageTransitionComplete,System.Object)
@@ -1160,9 +1168,12 @@ M	Assembly-CSharp	DeckTrayReorderableContent	StopDragToReorder	*
 M	Assembly-CSharp	DeckTrayReorderableContent	get_DraggingDeckBox	IDraggableCollectionVisual()
 M	Assembly-CSharp	DefLoader	Get	DefLoader()
 M	Assembly-CSharp	DefLoader	GetAllEntityDefs	System.Collections.Generic.Dictionary`2<System.String,EntityDef>()
+M	Assembly-CSharp	DefLoader	GetCardDef	DefLoader+DisposableCardDef(System.Int32)
 M	Assembly-CSharp	DefLoader	GetEntityDef	EntityDef(System.Int32,System.Boolean)
 M	Assembly-CSharp	DefLoader	GetEntityDef	EntityDef(System.String)
 M	Assembly-CSharp	DefLoader	HasLoadedEntityDefs	System.Boolean()
+M	Assembly-CSharp	DefLoader+DisposableCardDef	Dispose	System.Void()
+M	Assembly-CSharp	DefLoader+DisposableCardDef	get_CardDef	CardDef()
 M	Assembly-CSharp	DialogBase	AddHideListener	System.Void(DialogBase+HideCallback)
 M	Assembly-CSharp	DialogBase	HandleKeyboardInput	()
 M	Assembly-CSharp	DialogBase	Hide	System.Void()
@@ -2193,6 +2204,9 @@ M	Assembly-CSharp	SceneMgr	SetNextMode	System.Void(SceneMgr+Mode,SceneMgr+Transi
 M	Assembly-CSharp	SceneMgr	get_LoadingScreen	LoadingScreen()
 M	Assembly-CSharp	ScreenEffectsHandle	StopEffect	System.Void(System.Action)
 M	Assembly-CSharp	SellableDeckProductPage	GetFirstVariantToDisplay	*
+M	Assembly-CSharp	ShareableDeck	get_DeckContents	PegasusUtil.DeckContents()
+M	Assembly-CSharp	ShareableDeck	get_DeckName	System.String()
+M	Assembly-CSharp	ShareableDeck	get_HeroCardDbId	System.Int32()
 M	Assembly-CSharp	Shared.Scripts.Game.Shop.Product.Attribute	CreateFrom	Shared.Scripts.Util.Maybe`1<Shared.Scripts.Game.Shop.Product.Attribute>(System.String,System.String)
 M	Assembly-CSharp	Shared.Scripts.Game.Shop.Product.AttributeSet	AddAttributeIfValid	System.Void(Shared.Scripts.Util.Maybe`1<Shared.Scripts.Game.Shop.Product.Attribute>)
 M	Assembly-CSharp	Shared.Scripts.Util.ValueTypes.Record	op_Equality	System.Boolean(Shared.Scripts.Util.ValueTypes.Record,Shared.Scripts.Util.ValueTypes.Record)
@@ -2332,8 +2346,10 @@ M	Assembly-CSharp	TriggerSpellController	ActivateActorTriggerSpell	(System.Int32
 M	Assembly-CSharp	TriggerSpellController	ActivateTriggerSpell	(System.Int32)
 M	Assembly-CSharp	TriggerSpellController	InitEffect	(Card)
 M	Assembly-CSharp	TriggerSpellController	InitTriggerSpell	(CardEffect,Card)
-M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	HasSeenTutorial	System.Boolean(GameSaveKeySubkeyId)
-M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	SetTutorialSeen	System.Void(GameSaveKeySubkeyId)
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	HasSeenTutorial	(GameSaveKeySubkeyId)
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	HasSeenTutorial	*
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	SetTutorialSeen	(GameSaveKeySubkeyId)
+M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	SetTutorialSeen	*
 M	Assembly-CSharp	TutorialDeathKnightDeckBuilding	ShowTutorial	System.Void(UIVoiceLinesManager+TriggerType)
 M	Assembly-CSharp	TutorialEntity	GetTextScale	UnityEngine.Vector3()
 M	Assembly-CSharp	UIBButton	Flip	System.Void(System.Boolean,System.Boolean)
@@ -2348,6 +2364,8 @@ M	Assembly-CSharp	UIBScrollableItem	GetWorldBounds	System.Void(UnityEngine.Vecto
 M	Assembly-CSharp	UIBScrollableItem	IsActive	System.Boolean()
 M	Assembly-CSharp	UIEvent	GetElement	PegUIElement()
 M	Assembly-CSharp	UIEvent+Handler	Invoke	System.Void(UIEvent)
+M	Assembly-CSharp	UIStatus	AddInfo	System.Void(System.String)
+M	Assembly-CSharp	UIStatus	Get	UIStatus()
 M	Assembly-CSharp	UnityTouchScreenService	GetBatteryMode	*
 M	Assembly-CSharp	UniversalInputManager	CancelTextInput	System.Void(UnityEngine.GameObject,System.Boolean)
 M	Assembly-CSharp	UniversalInputManager	Get	UniversalInputManager()
@@ -2531,6 +2549,7 @@ M	UnityEngine.CoreModule	UnityEngine.Rect	get_y	System.Single()
 M	UnityEngine.CoreModule	UnityEngine.Rect	get_yMax	System.Single()
 M	UnityEngine.CoreModule	UnityEngine.Rect	get_yMin	System.Single()
 M	UnityEngine.CoreModule	UnityEngine.Rect	get_zero	UnityEngine.Rect()
+M	UnityEngine.CoreModule	UnityEngine.Rect	set_y	System.Void(System.Single)
 M	UnityEngine.CoreModule	UnityEngine.RenderTexture	GetTemporary	UnityEngine.RenderTexture(System.Int32,System.Int32,System.Int32,UnityEngine.RenderTextureFormat)
 M	UnityEngine.CoreModule	UnityEngine.RenderTexture	ReleaseTemporary	System.Void(UnityEngine.RenderTexture)
 M	UnityEngine.CoreModule	UnityEngine.RenderTexture	get_active	UnityEngine.RenderTexture()
@@ -2741,6 +2760,7 @@ M	blizzard.bgsclient	PegasusGame.PowerHistoryData	set_ShuffleDeck	System.Void(Pe
 M	blizzard.bgsclient	PegasusGame.PowerHistoryData	set_SubSpellEnd	System.Void(PegasusGame.PowerHistorySubSpellEnd)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryData	set_SubSpellStart	System.Void(PegasusGame.PowerHistorySubSpellStart)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryData	set_TagChange	System.Void(PegasusGame.PowerHistoryTagChange)
+M	blizzard.bgsclient	PegasusGame.PowerHistoryEntity	get_DefTags	System.Collections.Generic.List`1<PegasusGame.Tag>()
 M	blizzard.bgsclient	PegasusGame.PowerHistoryEntity	get_Entity	System.Int32()
 M	blizzard.bgsclient	PegasusGame.PowerHistoryEntity	get_Name	System.String()
 M	blizzard.bgsclient	PegasusGame.PowerHistoryEntity	get_Tags	System.Collections.Generic.List`1<PegasusGame.Tag>()
@@ -2814,6 +2834,7 @@ M	blizzard.bgsclient	PegasusGame.UserUI	set_MouseInfo	System.Void(PegasusGame.Mo
 M	blizzard.bgsclient	PegasusGame.UserUI	set_PlayerId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.BnetId	set_Hi	System.Void(System.UInt64)
 M	blizzard.bgsclient	PegasusShared.BnetId	set_Lo	System.Void(System.UInt64)
+M	blizzard.bgsclient	PegasusShared.CardDef	get_Asset	System.Int32()
 M	blizzard.bgsclient	PegasusShared.CardDef	set_Asset	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.CardDef	set_Premium	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.CardStack	set_CardDef	System.Void(PegasusShared.CardDef)
@@ -2826,14 +2847,20 @@ M	blizzard.bgsclient	PegasusShared.Date	set_Min	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.Date	set_Month	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.Date	set_Sec	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.Date	set_Year	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusShared.DeckCardData	get_Def	PegasusShared.CardDef()
+M	blizzard.bgsclient	PegasusShared.DeckCardData	get_Qty	System.Int32()
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Def	System.Void(PegasusShared.CardDef)
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Qty	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Tuple	System.Void(System.Collections.Generic.List`1<PegasusShared.GameSaveKey>)
 M	blizzard.bgsclient	PegasusShared.GameSaveKey	set_Id	System.Void(System.Int64)
+M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_Def	PegasusShared.CardDef()
+M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_LinkedCardDbId	System.Int32()
+M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_Qty	System.Int32()
 M	blizzard.bgsclient	PegasusUtil.CardBackModification	set_AssetCardBackId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.CardBackModifications	get_CardBackModifications_	System.Collections.Generic.List`1<PegasusUtil.CardBackModification>()
 M	blizzard.bgsclient	PegasusUtil.Collection	get_Stacks	System.Collections.Generic.List`1<PegasusShared.CardStack>()
 M	blizzard.bgsclient	PegasusUtil.DeckContents	get_Cards	System.Collections.Generic.List`1<PegasusShared.DeckCardData>()
+M	blizzard.bgsclient	PegasusUtil.DeckContents	get_SideboardCards	System.Collections.Generic.List`1<PegasusShared.SideBoardCardData>()
 M	blizzard.bgsclient	PegasusUtil.DeckContents	set_DeckId	System.Void(System.Int64)
 M	blizzard.bgsclient	PegasusUtil.DeckContents	set_Success	System.Void(System.Boolean)
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_BestStarLevel	System.Void(System.Int32)
@@ -2938,6 +2965,7 @@ T	Assembly-CSharp	CardBackManager
 T	Assembly-CSharp	CardBackRewardData		
 T	Assembly-CSharp	CardChangeDbfRecord		
 T	Assembly-CSharp	CardDbfRecord		
+T	Assembly-CSharp	CardDef		
 T	Assembly-CSharp	CardEffect		
 T	Assembly-CSharp	CardHeroDbfRecord		
 T	Assembly-CSharp	CardListPanel		
@@ -2968,6 +2996,7 @@ T	Assembly-CSharp	CollectionManager
 T	Assembly-CSharp	CollectionManager+CardModification		
 T	Assembly-CSharp	CollectionManager+CardModification+ModificationType		
 T	Assembly-CSharp	CollectionManager+DelOnAllDeckContents		
+T	Assembly-CSharp	CollectionManager+DelOnDeckCreated		
 T	Assembly-CSharp	CollectionManager+OnMassDisenchant		
 T	Assembly-CSharp	CollectionManager+TemplateDeck		
 T	Assembly-CSharp	CollectionManagerDisplay		
@@ -3014,6 +3043,7 @@ T	Assembly-CSharp	DeckTrayHeroSkinContent
 T	Assembly-CSharp	DeckTrayPetContent		
 T	Assembly-CSharp	DeckTrayReorderableContent		
 T	Assembly-CSharp	DefLoader		
+T	Assembly-CSharp	DefLoader+DisposableCardDef		
 T	Assembly-CSharp	DialogBase		
 T	Assembly-CSharp	DialogBase+HideCallback		
 T	Assembly-CSharp	DialogManager		
@@ -3372,6 +3402,7 @@ T	Assembly-CSharp	UIBScrollableItem
 T	Assembly-CSharp	UIEvent		
 T	Assembly-CSharp	UIEvent+Handler		
 T	Assembly-CSharp	UIEventType		
+T	Assembly-CSharp	UIStatus		
 T	Assembly-CSharp	UIVoiceLinesManager		
 T	Assembly-CSharp	UIVoiceLinesManager+TriggerType		
 T	Assembly-CSharp	UnityTouchScreenService		
@@ -3515,6 +3546,7 @@ T	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate
 T	blizzard.bgsclient	PegasusShared.GameSaveKey		
 T	blizzard.bgsclient	PegasusShared.GameType		
 T	blizzard.bgsclient	PegasusShared.RuneType		
+T	blizzard.bgsclient	PegasusShared.SideBoardCardData		
 T	blizzard.bgsclient	PegasusUtil.CardBackModification		
 T	blizzard.bgsclient	PegasusUtil.CardBackModifications		
 T	blizzard.bgsclient	PegasusUtil.Collection		

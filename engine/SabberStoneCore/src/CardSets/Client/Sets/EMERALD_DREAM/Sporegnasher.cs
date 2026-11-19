@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
                 stack = stack ?? new TaskStack();
-                if (new RandomTask(1, EntityType.OP_MINIONS).Process(g, c, s, t, stack) == TaskState.STOP) return;
+                if (RandomTask.Harmful(1, EntityType.OP_MINIONS).Process(g, c, s, t, stack) == TaskState.STOP) return;
                 var target = (Minion)stack.Playables[0];
                 Generic.DamageCharFunc((IPlayable)s, target, 1, false);
             }) };

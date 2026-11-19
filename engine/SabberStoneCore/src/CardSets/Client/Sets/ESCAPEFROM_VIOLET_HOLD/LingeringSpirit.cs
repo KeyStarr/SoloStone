@@ -17,12 +17,12 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
-                int healing = 3 * (int)Math.Pow(2, c.ControllerAuraEffects[GameTag.ALL_HEALING_DOUBLE]);
+                int healing = HealingRules.Amount((IPlayable)s, 3, c);
                 int excess = c.RestoreToDamage ? 0 : Math.Max(0, healing - c.Hero.Damage);
                 c.Hero.TakeHeal((IPlayable)s, 3);
                 if (excess == 0) return;
                 stack = new TaskStack();
-                if (new RandomTask(1, EntityType.ENEMIES).Process(g, c, s, t, stack) == TaskState.STOP) return;
+                if (RandomTask.Harmful(1, EntityType.ENEMIES).Process(g, c, s, t, stack) == TaskState.STOP) return;
                 var enemy = (ICharacter)stack.Playables[0];
                 Generic.DamageCharFunc((IPlayable)s, enemy, excess, false);
             }) };

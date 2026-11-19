@@ -59,7 +59,7 @@ namespace SabberStoneCore.Actions
                     tags[GameTag.ATTACKABLE_BY_RUSH] = 0;
                 }
                 foreach (GameTag tag in new List<GameTag>(tags.Keys))
-                    if (PayloadRules.IsInternalTag(tag)) tags.Remove(tag);
+                    if (PayloadRules.IsInternalTag(tag) || tag == HealingRules.DamageWound) tags.Remove(tag);
                 if (preserveCapturedState && targetZone == Zone.SETASIDE) tags[PayloadRules.Stored] = 1;
                 tags[GameTag.DISPLAYED_CREATOR] = creator.Id;
                 if (source.Card.Id == "EDR_950")

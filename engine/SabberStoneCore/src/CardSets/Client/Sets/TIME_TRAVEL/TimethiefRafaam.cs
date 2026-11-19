@@ -45,7 +45,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
-                foreach(var rafaam in c.HandZone.Concat(c.BoardZone).Where(p=>p.Id!=s.Id && Family(p.Card)).ToArray())
+                foreach(var rafaam in c.HandZone.Concat(c.BoardZone.Interactable).Where(p=>p.Id!=s.Id && Family(p.Card)).ToArray())
                     Generic.AddEnchantmentBlock(g,Cards.FromId("TIME_005t2e"),(IPlayable)s,rafaam);
             }) };
         }
@@ -86,7 +86,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
-                var victims=c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray();
+                var victims=c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(p=>!Family(p.Card)&&!p.Untouchable).ToArray();
                 using (g.History ? g.PowerHistory.DamageWave(victims.Length) : null)
                 using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.DamageGroup,(IPlayable)s) : null)
                     foreach(var victim in victims)
@@ -122,7 +122,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new CustomTask((g,c,s,t,k)=> {
                 var ctx=new EffectContext(g,c.Id,s.Id);
-                foreach(var victim in c.BoardZone.Concat(c.Opponent.BoardZone).Where(p=>!Family(p.Card)).ToArray()) ctx.Transform(victim.Id,"TIME_005t9t");
+                foreach(var victim in c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(p=>!Family(p.Card)&&!p.Untouchable).ToArray()) ctx.Transform(victim.Id,"TIME_005t9t");
             }) };
         }
         [StandardCard("TIME_005t9t",119562)]

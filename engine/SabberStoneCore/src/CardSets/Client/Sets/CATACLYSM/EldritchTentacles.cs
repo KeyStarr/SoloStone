@@ -25,7 +25,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 {
                     int damage = SpellDamageRules.Amount((IPlayable)s, 3 - wave);
                     if (damage <= 0) break;
-                    var targets = c.BoardZone.Concat(c.Opponent.BoardZone).Where(m => !m.Untouchable).Select(m => m.Id).ToArray();
+                    var targets = c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(m => !m.Untouchable).Select(m => m.Id).ToArray();
                     new EffectContext(g, c.Id, s.Id).DamageBatch(targets, damage);
                     g.DeathProcessingAndAuraUpdate();
                     if (c.Hero.ToBeDestroyed || c.Opponent.Hero.ToBeDestroyed) break;

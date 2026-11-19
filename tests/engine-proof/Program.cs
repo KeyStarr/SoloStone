@@ -6,6 +6,9 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
 
 if (args.Contains("--ai-frontier-only")) { AiFrontierProof.Run(); return; }
+if (args.Contains("--renew-replay")) { Environment.Exit(PinnedReplayEngineProof.Renew(args)); return; }
+if (args.Contains("--rerecord-replay")) { Environment.Exit(PinnedReplayEngineProof.Rerecord(args)); return; }
+if (args.Contains("--renew-replay-selftest")) { PinnedReplayEngineProof.RenewSelfTest(); return; }
 if (args.Contains("--pinned-replays-only")) { PinnedReplayEngineProof.Run(); return; }
 if (args.Contains("--canonical-policy-only")) { CanonicalPolicyChecks.Run(); return; }
 if (args.Contains("--shadow-trial-only")) { ShadowTrialProof.Run(); return; }
@@ -98,17 +101,31 @@ if (args.Contains("--rewind-retry-discount-only")) { RewindProof.KarovClockswort
 if (args.Contains("--rewind-smoke-only")) { StandardSetsProof.Run(rewindSmokeOnly: true); return; }
 if (args.Length >= 1 && args[0] == "--rewind-round-two") { RewindProof.RunRoundTwo(args.ElementAtOrDefault(1)); return; }
 if (args.Contains("--rewind-only")) { RewindProof.Run(); return; }
+if (args.Length >= 1 && args[0] == "--rewind-reports") { RewindProof.ReportRegressions(args.ElementAtOrDefault(1)); return; }
 if (args.Contains("--rewind-cards-only")) { StandardSetsProof.Run(rewindOnly: true); return; }
 if (args.Contains("--clone-only")) { CloneProof.Run(); return; }
 if (args.Contains("--time-travel-s2-only")) { StandardSetsProof.Run(timeTravelS2Only: true); return; }
 if (args.Length > 0 && args[0] == "--split-effects-only") { SplitEffectProof.Run(args.Length > 1 ? args[1] : null); return; }
 
 if (args.Contains("--pool-caches-only")) { PoolCacheIsolationProof.Run(); return; }
+if (args.Contains("--match-random-pools-only")) { MatchRandomPoolProof.Run(); return; }
+if (args.Contains("--match-random-regressions-only")) { MatchRandomRegressionProof.Run(); return; }
+if (args.Contains("--match-random-percard-only")) { MatchRandomSamplerProof.PerCardOnly(); return; }
+if (args.Length >= 1 && args[0] == "--match-random-sampler-only") { MatchRandomSamplerProof.Run(args.Skip(1).ToArray()); return; }
 if (args.Length == 2 && args[0] == "--pool-criteria-child") { PoolCacheIsolationProof.CriteriaChild(int.Parse(args[1])); return; }
 if (args.Contains("--b13-forced-cards-only")) { StandardSetsProof.Run(selectedProofs: new Action[] { MythicalTerrorProof.Run, RampagingHoundProof.Run, IllidariInquisitorProof.Run, WarmaulChallengerProof.Run, TREEEESProof.Run, HighCultistHerennProof.Run, HoundsOfFuryProof.Run, BefuddledSummonerProof.Run, AnkylodonProof.Run }); return; }
 if (args.Contains("--enemy-board-copy-only")) { EnemyBoardCopyProof.Run(); return; }
 if (args.Contains("--forced-attack-only")) { ForcedAttackBudgetProof.Run(); return; }
 if (args.Contains("--poisonous-only")) { PoisonousDamageProof.Run(); return; }
+if (args.Contains("--targeting-only")) { TargetingRulesProof.Run(); return; }
+if (args.Contains("--untouchable-only"))
+{
+    var untouchableFailures = new List<string>();
+    foreach (var step in new Action[] { UntouchableBoardProof.Run, UntouchableBoardSourceCheck.Run })
+        try { step(); } catch (Exception e) { untouchableFailures.Add(e.Message); }
+    if (untouchableFailures.Count != 0) throw new Exception(string.Join("\n", untouchableFailures));
+    return;
+}
 if (args.Contains("--floop-taunt-only")) { FloopTauntProof.Run(); return; }
 if (args.Contains("--weapon-keywords-only")) { WeaponKeywordProof.Run(); return; }
 if (args.Contains("--weapon-damage-only")) { DamageWeaponTaskProof.Run(); return; }
@@ -454,6 +471,9 @@ OfflinePoolReplayProof.Run();
 LegacyPoolEligibilityProof.Run();
 OfflinePoolLegacyCompatibilityProof.Run();
 PoolCacheIsolationProof.Run();
+MatchRandomPoolProof.Run();
+MatchRandomRegressionProof.Run();
+MatchRandomSamplerProof.Run(quick: true);
 PoolInitOrderProof.Run();
 
 static void Check(bool condition, string message)
@@ -596,6 +616,9 @@ for (int i = 0; i < parallel.Length; i++)
 Console.WriteLine("PASS parallel seeded game isolation");
 DeathAuraTimingProof.Run();
 PoisonousDamageProof.Run();
+TargetingRulesProof.Run();
+UntouchableBoardProof.Run();
+UntouchableBoardSourceCheck.Run();
 DamageWeaponTaskProof.Run();
 WeaponKeywordProof.Run();
 MultiAuraCleanupProof.Run();
@@ -656,5 +679,6 @@ CanonicalPolicyChecks.Run();
 ShadowTrialProof.Run();
 AiFrontierProof.Run();
 PinnedReplayEngineProof.Run();
+PinnedReplayEngineProof.RenewSelfTest();
 ClientExport.PrintSkips();
 Console.WriteLine("engine-proof: PASS");

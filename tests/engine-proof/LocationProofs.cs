@@ -42,6 +42,8 @@ internal static class LocationProofs
         LocationCardSetProof.Run();
         LocationTransformProof.Run();
         LocationActivationProof.Run();
+        LocationCooldownProof.Run();
+        ReturnToHandResetProof.Run();
         LocationDeathProof.Run();
         LocationSnapshotProof.Run();
         SanguineDepthsProof.Run();

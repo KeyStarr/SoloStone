@@ -174,9 +174,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     break;
                 case 15: Buff(g,s,c.Opponent,"TTN_075t2e"); break;
                 case 16:
-                    foreach (var enemy in c.Opponent.BoardZone.Where(m=>!m.IsDormant).ToArray()) Buff(g,s,enemy,"TTN_858t3e"); break;
+                    foreach (var enemy in c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable).ToArray()) Buff(g,s,enemy,"TTN_858t3e"); break;
                 case 17:
-                    foreach (var ally in c.BoardZone.Where(m=>m.Id!=s.Id && !m.IsDormant).ToArray()) Buff(g,s,ally,"TTN_858t2e1"); break;
+                    foreach (var ally in c.BoardZone.Interactable.Where(m=>m.Id!=s.Id && !m.Untouchable).ToArray()) Buff(g,s,ally,"TTN_858t2e1"); break;
                 case 18:
                     for (int i=0;i<2;i++) {
                         var minions=c.DeckZone.OfType<Minion>().ToArray(); if (minions.Length==0) break;
@@ -199,18 +199,19 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     } break;
                 case 22:
                     Buff(g,s,s,"TTN_721te");
-                    var enemies=c.Opponent.BoardZone.Where(m=>!m.IsDormant).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
+                    var enemies=c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).Where(e=>!e.IsDead).ToArray();
+                    if (enemies.Length==0) break;
                     ctx.Damage(enemies[g.Random.Next(enemies.Length)].Id,4); break;
                 case 23: Buff(g,s,s,"TTN_721t1e"); Generic.Draw(c); break;
                 case 24: Buff(g,s,s,"TTN_721t2e2"); break;
                 case 26: if (t != null && t.Id != s.Id) ctx.Damage(t.Id,20); break;
                 case 27:
-                    foreach (var enemy in c.Opponent.BoardZone.Where(m=>!m.IsDormant).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray()) ctx.Damage(enemy.Id,3);
-                    foreach (var ally in c.BoardZone.Where(m=>!m.IsDormant).Cast<ICharacter>().Append(c.Hero).ToArray()) ctx.Heal(ally.Id,6);
+                    foreach (var enemy in c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray()) ctx.Damage(enemy.Id,3);
+                    foreach (var ally in c.BoardZone.Interactable.Where(m=>!m.Untouchable).Cast<ICharacter>().Append(c.Hero).ToArray()) ctx.Heal(ally.Id,6);
                     break;
                 case 28: for (int i=0;i<2;i++) ctx.Summon("TTN_960t5"); break;
                 case 29:
-                    foreach (var minion in c.BoardZone.Concat(c.Opponent.BoardZone).Where(m=>m.Id!=s.Id && !m.IsDormant).ToArray()) Banish(minion); break;
+                    foreach (var minion in c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(m=>m.Id!=s.Id && !m.Untouchable).ToArray()) Banish(minion); break;
                 case 30: Buff(g,s,s,"TTN_415t2e2"); c.Hero.Armor+=5; break;
                 case 31: Buff(g,s,s,"TTN_415t2e"); Effects.Attack_N(5).ApplyTo(c.Hero,true); break;
                 case 32:
@@ -218,10 +219,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 case 33:
                     while (!c.HandZone.IsFull) Generic.DrawCard(c,Cards.FromId("YOG_514")); break;
                 case 34:
-                    var cohort=c.Opponent.BoardZone.Where(m=>!m.IsDormant).OrderBy(m=>m.OrderOfPlay).ToArray();
+                    var cohort=c.Opponent.BoardZone.Interactable.Where(m=>!m.Untouchable).OrderBy(m=>m.OrderOfPlay).ToArray();
                     foreach (var attacker in cohort) {
-                        if (attacker.Zone!=c.Opponent.BoardZone || attacker.IsDead || attacker.IsDormant) continue;
-                        var defenders=c.Opponent.BoardZone.Where(m=>m.Id!=attacker.Id && !m.IsDead && !m.IsDormant).ToArray();
+                        if (attacker.Zone!=c.Opponent.BoardZone || attacker.IsDead || attacker.Untouchable) continue;
+                        var defenders=c.Opponent.BoardZone.Interactable.Where(m=>m.Id!=attacker.Id && !m.IsDead && !m.Untouchable).ToArray();
                         if (defenders.Length==0) continue;
                         new AttackTask(EntityType.SOURCE,EntityType.TARGET).Process(g,attacker.Controller,attacker,defenders[g.Random.Next(defenders.Length)]);
                         g.DeathProcessingAndAuraUpdate();

@@ -14,7 +14,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 var targets = new TaskStack();
-                if (new RandomTask(2, EntityType.ENEMIES).Process(g, c, s, null, targets) == TaskState.STOP) return;
+                if (RandomTask.Harmful(2, EntityType.ENEMIES).Process(g, c, s, null, targets) == TaskState.STOP) return;
                 new DamageTask(4, EntityType.STACK, spellDmg: true).Process(g, c, s, null, targets);
             }) };
         }

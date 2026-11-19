@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             var history = source.Game.HistoryFacts.Query;
             return Math.Max(0,2 - history.Casts(history.Residence(source.Id,Zone.HAND)).Count(f =>
-                f.ControllerId == source.Controller.Id && (f.SpellSchool == 6 || f.SpellSchool == 0 && CrystalsmithCultist.IsLegacyShadowSpell(f.DbfId)) && f.CasterKind == HistoryCastKind.Player && f.Outcome == HistoryCastOutcome.Completed));
+                f.ControllerId == source.Controller.Id && f.SpellSchool == 6 && f.CasterKind == HistoryCastKind.Player && f.Outcome == HistoryCastOutcome.Completed));
         }
         private static bool Ready(IPlayable source) => Remaining(source) == 0;
         internal static void Configure(Card card)

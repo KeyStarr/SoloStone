@@ -53,10 +53,8 @@ namespace SabberStoneCore.Actions
 		public static Func<Controller, int, bool> AddTempMana
 			=> delegate (Controller c, int amount)
 			{
-				if (c.RemainingMana + amount > c[GameTag.MAXRESOURCES])
-					c.TemporaryMana += c[GameTag.MAXRESOURCES] - c.RemainingMana;
-				else
-					c.TemporaryMana += amount;
+				// Patch 29.0: temporary Mana may go above maximum Mana (The Coin at 10/10 gives 11/10).
+				c.TemporaryMana += amount;
 				return true;
 			};
 
@@ -424,7 +422,11 @@ namespace SabberStoneCore.Actions
                             else p.AppliedEnchantments[i].Remove();
 
 					if (p is Minion m)
+					{
+						// Same-type transform of a mortally wounded minion: unchanged from main, it still dies (retail rule unsettled).
+						m.NativeTags.Remove(HealingRules.DamageWound);
 						m.ResetAttributes();
+					}
 					else
 						((Playable) p).ResetCost();
 				}
@@ -502,6 +504,8 @@ namespace SabberStoneCore.Actions
 
 					c.Game.Facts.AdmitDefinition(newCard);
 					p.Card = newCard;
+					// Detaching the old auras above read Attack and Health, which cached the old card's printed values.
+					if (removeEnchantments && p is Minion fresh) fresh.DropCachedStats();
 					Playable pp = (Playable)p;
 					if (pp._costManager != null)
 						pp._modifiedCost = pp._costManager.EntityChanged(newCard.Cost);
@@ -509,6 +513,7 @@ namespace SabberStoneCore.Actions
 				else
 				{
 					Playable entity;
+					p.NativeTags.Remove(HealingRules.DamageWound); // a changed-type entity is a fresh one, never mortally wounded
 					switch (newCard.Type)
 					{
                         case CardType.LOCATION:

@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { DeathrattleTask = Transfer() };
         }
         private static CustomTask Transfer() => new CustomTask((g,c,s,t,stack) => {
-            var candidates = c.BoardZone.Where(m => !m.IsDead && !m.Untouchable && m.Id != s.Id).ToArray();
+            var candidates = c.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable && m.Id != s.Id).ToArray();
             if (candidates.Length == 0) return;
             var target = candidates[g.Random.Next(candidates.Length)];
             BonusEffects.GiveRandom(target, (IPlayable)s, 1);

@@ -1193,10 +1193,12 @@ namespace SabberStoneCore.Model
                 var beast = new Card("ICC_828t", 46119, raw, new Dictionary<PlayReq,int>(result.PlayRequirements),
                     result.Entourage, result.RefTags.Select(x => new Tag(x.Key,x.Value)).ToArray(), preserveText:true);
                 beast.Power = result.Power; beast.Implemented = true; beast.ExcludeFromLegacyRandomPools = true;
+                beast.Dormant = result.Dormant; // Unpinned (owner ruling 2026-11-18, #181): Creation carries a Dormant part's definition.
                 beast.UseGeneratedTargeting();
                 return beast;
             }
             Card zombeast = firstCard.Clone();
+			zombeast.Dormant = firstCard.Dormant ?? secondCard.Dormant; // Unpinned (owner ruling 2026-11-18, #181): the first part's Dormant by clone, else the second's.
 			zombeast.ATK += secondCard.ATK;
 			zombeast.Health += secondCard.Health;
 			zombeast.Cost += secondCard.Cost;

@@ -207,7 +207,8 @@ namespace SabberStoneCore.Model.Entities
 				if (removedHealth > 0)
 					Damage -= removedHealth;
 				BaseHealth = cardBaseHealth;
-				if (Damage >= BaseHealth) ToBeDestroyed = true;
+				// A damage-only mark stays a mark (the minion can still be rescued); anything else keeps main's explicit destroy.
+				if (Damage >= BaseHealth && !NativeTags.ContainsKey(Actions.HealingRules.DamageWound)) ToBeDestroyed = true;
 			}
 			else if (Health > cardBaseHealth)
 				Health = cardBaseHealth;
@@ -234,6 +235,23 @@ namespace SabberStoneCore.Model.Entities
 			Game.Log(LogLevel.INFO, BlockType.PLAY, "Minion", !Game.Logging? "":$"{this} got silenced!");
 		}
 
+        private bool IsAuraPresentation(Enchantment enchantment)
+        {
+            if (enchantment.Creator == null) return false;
+            bool Matches(SabberStoneCore.Auras.IAura aura)
+            {
+                if (aura is SabberStoneCore.Auras.MultiAura multi)
+                {
+                    foreach (var inner in multi) if (Matches(inner)) return true;
+                    return false;
+                }
+                var card = (aura as SabberStoneCore.Auras.Aura)?.EnchantmentCard ?? (aura as SabberStoneCore.Auras.AdjacentAura)?.EnchantmentCard;
+                return aura.Owner == enchantment.Creator && card != null && card.AssetId == enchantment.Card.AssetId;
+            }
+            foreach (var aura in Game.Auras) if (Matches(aura)) return true;
+            return false;
+        }
+
         public override void Reset()
         {
             this[GameTag.NUM_TURNS_IN_PLAY] = 0;
@@ -241,14 +259,19 @@ namespace SabberStoneCore.Model.Entities
             NativeTags.Remove(Actions.LifecycleRules.RecruitAppliedPlayer1);
             NativeTags.Remove(Actions.LifecycleRules.RecruitAppliedPlayer2);
             if (OngoingEffect is SabberStoneCore.Auras.EnrageEffect enrage) { enrage.Remove(); enrage.Update(); }
-            if (Actions.BonusEffects.HasState(this)) _modifiedCantBeTargetedBySpells = null;
+            // Elusive granted (Schism) or lost (Silence) is not part of the fresh card. The Show for the hand lists the targeting tag
+            // only when it differs from the printed card, so the client must be told that Elusive is gone.
+            bool wasUntargetable = _modifiedCantBeTargetedBySpells ?? Card.CantBeTargetedBySpells;
+            _modifiedCantBeTargetedBySpells = null;
+            if (_history && wasUntargetable != Card.CantBeTargetedBySpells)
+                Game.PowerHistory.Add(SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(Id, GameTag.CANT_BE_TARGETED_BY_SPELLS, Card.CantBeTargetedBySpells ? 1 : 0));
             bool resetCost = Actions.CostRules.RemoveNumericEnchantments(this) || Card.Id == "JAIL_453";
-            // shortcut: retain legacy stat-only attachments for frozen replays; purge when movement policy is versioned.
+            // Leaving the board or the deck makes a fresh copy: every enchantment goes (retail "Return to hand": damage,
+            // enchantments and Silences are removed). Only ongoing-aura presentations stay; their aura owns them and
+            // re-applies or drops them as the minion's location changes (Crystal Core keeps working in hand).
             if (AppliedEnchantments != null)
                 for (int i = AppliedEnchantments.Count - 1; i >= 0; i--)
-                    if (AppliedEnchantments[i].Power?.Trigger != null || Actions.BonusEffects.RetainActor(AppliedEnchantments[i].Card)
-                        || AppliedEnchantments[i][Actions.DiscoverRealRules.BoundEntity] != 0
-                        || (AppliedEnchantments[i].Card.Id is "CATA_487e" or "CATA_487e1" or "MEND_044e4" or "TIME_024e" or "MEND_801e2" or "EDR_780e1"))
+                    if (i < AppliedEnchantments.Count && !IsAuraPresentation(AppliedEnchantments[i]))
                         AppliedEnchantments[i].Remove();
             base.Reset();
             ClearHistoryDeathCause();
@@ -375,6 +398,36 @@ namespace SabberStoneCore.Model.Entities
             }
 
         }
+
+		/// <summary>The pending death comes from damage alone and Health is above 0 again: the death check spares it.</summary>
+		internal bool RescuedFromDamageWound => NativeTags.ContainsKey(Actions.HealingRules.DamageWound) && base.ToBeDestroyed && Health > 0;
+
+		/// <summary>Called by the death check: drops the damage mark (and the pending death when it was rescued).</summary>
+		internal void SettleDamageWound()
+		{
+			bool rescued = RescuedFromDamageWound;
+			NativeTags.Remove(Actions.HealingRules.DamageWound);
+			if (rescued)
+			{
+				base.ToBeDestroyed = false;
+				ClearPendingDeathCause();
+			}
+		}
+
+		internal void ClearPendingDeathCause()
+		{
+			ClearHistoryDeathCause();
+			NativeTags.Remove(Actions.DeathContextRules.PendingTracker);
+			NativeTags.Remove(Actions.DeathContextRules.FatalOrdinal);
+			NativeTags.Remove(Actions.DeathContextRules.FatalSource);
+		}
+
+		/// <summary>Forgets cached Attack and Health so the next read takes them from the current card.</summary>
+		internal void DropCachedStats()
+		{
+			_modifiedATK = null;
+			_modifiedHealth = null;
+		}
 
 		internal void ResetAttributes()
 		{
@@ -626,11 +679,14 @@ namespace SabberStoneCore.Model.Entities
 
 		public override bool ToBeDestroyed
 		{
-			get => base.ToBeDestroyed;
+			// A damage wound lifted above 0 Health before the death check no longer counts as pending.
+			get => base.ToBeDestroyed && !RescuedFromDamageWound;
 
 			set
 			{
 				if (value && IsDormant) return;
+				// Destroying it explicitly, or resetting it, ends the damage-only wound.
+				NativeTags.Remove(Actions.HealingRules.DamageWound);
 				if (value == base.ToBeDestroyed)
 					return;
 				base.ToBeDestroyed = value;

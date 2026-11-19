@@ -482,6 +482,7 @@ public sealed class NativeMatch
 #if !ENGINE_SOURCE
     internal int WireReturnId(int id) => id;
     internal int EngineReturnId(int id) => id;
+    internal bool IsGhostActor(int wireId) => false;
 #endif
 
     public NativeMatch(Action<int, IProtoBuf> send)
@@ -779,12 +780,18 @@ public sealed class NativeMatch
             History = true,
 #if ENGINE_SOURCE
             EnableCorpses = true,
+            // The live match is FT_WILD (the client shows the format), but random effects play the Standard pool.
+            // The pool policy is set explicitly; the Wild mode will set it from the deck's format.
+            PoolFormat = SabberStoneCore.Config.GenerationFormat.Standard,
             Player1Sideboards = playerDeck?.Sideboards,
             Player2Sideboards = opponentDeck?.Sideboards,
 #endif
             Logging = false
         };
         Game = new EngineGame(config);
+#if ENGINE_SOURCE
+        Game.RewindBoundaryDiagnostic = message => BotTrace?.Invoke("REWIND_BOUNDARY " + message);
+#endif
         OpponentPlateName = NpcMemoryText.Plate(OpponentName, npcProfile != null ? NpcMemory : null);
 
         if (premiumDeckCards != null)
@@ -820,6 +827,7 @@ public sealed class NativeMatch
             // recreate from the same seed/decks, whose original entity IDs also preserve the premium assignments.
             config.Player2HeroCard = ordinaryBotHero; config.Player2HeroClass = ordinaryBotHero.Class;
             Game = new EngineGame(config);
+            Game.RewindBoundaryDiagnostic = message => BotTrace?.Invoke("REWIND_BOUNDARY " + message);
             Game.StartGame();
         }
 #endif
@@ -943,6 +951,9 @@ public sealed class NativeMatch
         Process(task);
 #endif
         humanChoices = null;
+#if ENGINE_SOURCE
+        NoteGuessResult(choices, choices.Entities, ChoiceEngineId, picks);
+#endif
         SendChosen(choices, acknowledged);
 
         if (Game.Step == Step.BEGIN_MULLIGAN &&
@@ -1039,9 +1050,10 @@ public sealed class NativeMatch
     private double opposingShownAt = -1, opposingRevealedAt = -1, opposingHoldStarted = -1;
     // EntitiesChosen waiting for the client to process its EntityChoices. GameState processes an EntitiesChosen at once
     // when no choice of that player is mapped; arriving before its EntityChoices it would leave that choice mapped
-    // forever and queue every later choice (the human's too) behind it. Each entry also retires its spent picks.
-    private readonly List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies)> deferredOpposing =
-        new List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies)>();
+    // forever and queue every later choice (the human's too) behind it. Each entry also retires its spent picks, and
+    // carries a guess's result row (NoteGuessResult), which must not reach the client before its EntitiesChosen.
+    private readonly List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies, (int Source, int Target)? Guess)> deferredOpposing =
+        new List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies, (int Source, int Target)? Guess)>();
     internal const double OpposingDealWaitMilliseconds = 3000;
     // Native ChoiceCardMgr has dealt (revealed) the opposing choice with this id. Null headless: shown counts as dealt.
     internal Func<int, bool> NativeOpposingChoiceRevealed { get; set; }
@@ -1084,13 +1096,18 @@ public sealed class NativeMatch
         var picks = (opposingPicks ?? new List<int>())
             .Select(id => toClient.TryGetValue(id, out int proxy) ? proxy : id).Where(shown.Entities.Contains).Distinct().ToList();
         var proxies = new HashSet<int>(picks.Where(opposingProxies.ContainsKey));
+        NoteGuessResult(shown, shown.Entities, id => opposingProxies.TryGetValue(id, out int engine) ? engine : id, (opposingPicks ?? new List<int>()));
         opposingChoices = null; opposingChoiceSource = null; opposingChoiceOriginals = null; opposingPicks = null;
         opposingProxies.Clear(); opposingShownAt = opposingRevealedAt = opposingHoldStarted = -1;
         // Game over: the native OnGameOver cancels every shown choice itself.
         if (Game.State == State.COMPLETE) { deferredOpposing.Clear(); return (null, null, null); }
         if (deferredOpposing.Count > 0 || !OpposingChoiceReceived(shown.Index))
         {
-            deferredOpposing.Add((shown, picks, proxies));
+            // A slow client (the Steam Deck) may not have this EntityChoices yet when the NPC answers. Client code reading, not seen
+            // live: a choice queued behind an earlier opponent choice does not hold the power queue, so a result row sent with the
+            // answer's history could be replayed before the conceal spell exists. The row follows the released EntitiesChosen instead.
+            deferredOpposing.Add((shown, picks, proxies, guessResult));
+            guessResult = null;
             return (null, null, null);
         }
         SendChosen(shown, picks);
@@ -1103,13 +1120,29 @@ public sealed class NativeMatch
     {
         if (deferredOpposing.Count == 0) return;
         if (Game == null || Game.State == State.COMPLETE) { deferredOpposing.Clear(); return; }
-        while (deferredOpposing.Count > 0 && OpposingChoiceReceived(deferredOpposing[0].Choices.Index))
+        if (!OpposingChoiceReceived(deferredOpposing[0].Choices.Index)) return;
+        // SendPowerHistory places a pending guessResult (the human's, answered in this same batch) into any packet: set it aside
+        // while these releases send their own rows and retire packets, so it reaches the human's own answer history.
+        var pending = guessResult;
+        guessResult = null;
+        try
         {
-            var entry = deferredOpposing[0];
-            deferredOpposing.RemoveAt(0);
-            SendChosen(entry.Choices, entry.Picks);
-            RetireChosenChoiceActors(entry.Choices, entry.Picks, entry.Proxies, new HashSet<int>());
+            while (deferredOpposing.Count > 0 && OpposingChoiceReceived(deferredOpposing[0].Choices.Index))
+            {
+                var entry = deferredOpposing[0];
+                deferredOpposing.RemoveAt(0);
+                SendChosen(entry.Choices, entry.Picks);
+                if (entry.Guess.HasValue)
+                {
+                    // The answer's Battlecry block went out already: the row follows its EntitiesChosen on its own, loose.
+                    var result = new NativePowerHistory();
+                    InsertGuessRow(result, entry.Guess.Value.Source, entry.Guess.Value.Target);
+                    SendPowerHistory(result);
+                }
+                RetireChosenChoiceActors(entry.Choices, entry.Picks, entry.Proxies, new HashSet<int>());
+            }
         }
+        finally { guessResult = pending; }
     }
 
     // After a history batch: retire a spent SETASIDE pick (Adapt, refresh token, proxy), then show a pending choice.
@@ -1302,6 +1335,8 @@ public sealed class NativeMatch
                 picks.Add(remaining[index]); remaining.RemoveAt(index);
             }
         }
+        // Watchdog recovery and choices on a shortened NPC turn also invalidate the player's pending send.
+        expiredHumanChoices.Add(humanChoices.Index);
         CompleteHumanChoice(humanChoices.Index, picks, drive: false);
         return true;
     }
@@ -1746,7 +1781,8 @@ public sealed class NativeMatch
             pendingTrade.engineHistory=NormalizeTradeEngineHistory(Game.PowerHistory.Last,pendingTrade.source,pendingTrade.player);
         }
 #endif
-        if (playedCard != null && playedCard != "GAME_005")
+        if (playedCard != null && playedCard != "GAME_005" && Game.PowerHistory.Last.OfType<PowerHistoryBlockStart>()
+            .Any(block => block.Source == task.Source.Id && NativePetReactions.IsCardPlay(block)))
             playedCardIds.Add(playedCard);
         ObserveRewardHistory(Game.PowerHistory.Last);
         minimumHealth = Math.Min(minimumHealth, Math.Max(0, Game.Player1.Hero.Health));
@@ -2036,6 +2072,9 @@ public sealed class NativeMatch
                 task = ChooseBotTask(Game.Player2.Options());
             }
             Process(task);
+#if ENGINE_SOURCE
+            DebugScenario?.NpcPlayProcessed(task, DebugScenarioLog);
+#endif
             if (mulliganChoice != null) SendOpposingChosen(mulliganChoice, ((ChooseTask)task).Choices);
 #if ENGINE_SOURCE
             if (rewindChoice != null) SendChosen(rewindChoice, ((ChooseTask)task).Choices);
@@ -2109,6 +2148,10 @@ public sealed class NativeMatch
     internal IGoldenDecisionJob BeginNpcDecision(GoldenContext context)
     {
         var tasks = NpcTasks();
+#if ENGINE_SOURCE
+        var scripted = DebugScenario?.NextNpcPlay(Game, tasks, DebugScenarioLog);
+        if (scripted != null) return new ReadyNpcDecision(DriverTrace.Forced("npc-play-next-scenario", scripted));
+#endif
         if (DebugScenario?.HeroAttack == "npc")
         {
             var attack = tasks.FirstOrDefault(t => t.PlayerTaskType == PlayerTaskType.HERO_ATTACK && t.Target == Game.Player1.Hero);
@@ -2206,6 +2249,9 @@ public sealed class NativeMatch
         npcDiagnosticDecision = decision;
         try { Process(task); }
         finally { npcDiagnosticDecision = null; }
+#if ENGINE_SOURCE
+        DebugScenario?.NpcPlayProcessed(task, DebugScenarioLog);
+#endif
 #if ENGINE_SOURCE
         if (rewindChoice != null) SendChosen(rewindChoice, ((ChooseTask)task).Choices);
 #endif
@@ -2415,6 +2461,20 @@ public sealed class NativeMatch
     private PlayerTask ChooseBotTask(List<PlayerTask> tasks)
     {
         npcDiagnosticDecision = null;
+#if ENGINE_SOURCE
+        var scripted = DebugScenario?.NextNpcPlay(Game, tasks, DebugScenarioLog);
+        if (scripted != null)
+        {
+            // Same journal row the frame-sliced path writes (the recorder never reads the profile, so a plain bot's can be null).
+            try
+            {
+                matchRecorder.OnDecision(new GoldenContext(Game.Turn, ++decisionIndex, unchecked(997 * Game.Turn + decisionIndex * 31), npcProfile),
+                    new ReadyNpcDecision(DriverTrace.Forced("npc-play-next-scenario", scripted)).Result, "forced", false, 0, 0, 0);
+            }
+            catch (Exception error) when (!(error is OutOfMemoryException)) { BotTrace?.Invoke("npc-play-next-scenario journal fault=" + error.GetType().Name); }
+            return scripted;
+        }
+#endif
         if (DebugScenario?.HeroAttack == "npc")
         {
             var attack = tasks.FirstOrDefault(t => t.PlayerTaskType == PlayerTaskType.HERO_ATTACK && t.Target == Game.Player1.Hero);
@@ -2859,7 +2919,7 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
         if (Game.State != State.COMPLETE && (deferredOpposing.Count > 0 || !OpposingChoiceReceived(choices.Index)))
         {
-            deferredOpposing.Add((choices, picks.ToList(), new HashSet<int>()));
+            deferredOpposing.Add((choices, picks.ToList(), new HashSet<int>(), null));
             return;
         }
 #endif
@@ -3390,6 +3450,7 @@ public sealed class NativeMatch
 #endif
         SendPowerHistory(packet);
 #if ENGINE_SOURCE
+        guessResult = null;
         PublishOpposingChoice(concealedOpposing);
         RecordUnpublishedNpcChoice();
         if (Game.Rewind == null) { rewindPrivacy = null; rewindDerivedPremiums = null; rewindHighlights = null; rewindChoiceOffers = null; rewindAnonymousEntities = null; }
@@ -4241,13 +4302,20 @@ public sealed class NativeMatch
     // HAS_DIAMOND_QUALITY, HAS_SIGNATURE_QUALITY.
     private static readonly int[] DeckFlightQualityTags = { 1932, 2589 };
 
+    // Opposing actors the client holds burned (DECK -> GRAVEYARD): Card.MillCard marks them as being drawn by the opponent for
+    // good, so any later zone or controller change, SHOW or reset diff of that actor stalls the client's power queue (#80).
+    private readonly HashSet<int> milledOpposingActors = new HashSet<int>();
+
     private void TrackClientState(PowerHistoryData data)
     {
         void Merge(int id, IEnumerable<NativeTag> values)
         {
             if (!clientTransportTags.TryGetValue(id, out var tags))
                 clientTransportTags[id] = tags = new Dictionary<int, int>();
+            bool fromDeck = tags.TryGetValue((int)GameTag.ZONE, out int before) && before == (int)EngineZone.DECK;
             foreach (var tag in values) tags[tag.Name] = tag.Value;
+            if (fromDeck && tags.TryGetValue((int)GameTag.ZONE, out int after) && after == (int)EngineZone.GRAVEYARD
+                && tags.TryGetValue((int)GameTag.CONTROLLER, out int owner) && owner == BotPlayerId) milledOpposingActors.Add(id);
         }
         var create = data.HasCreateGame ? data.CreateGame : data.HasResetGame ? data.ResetGame.CreateGame : null;
         if (create != null)
@@ -4449,7 +4517,6 @@ public sealed class NativeMatch
     private void NormalizePublicIdentity(NativePowerHistory packet)
     {
         var list = packet.List;
-        NormalizeHeroPowerOwnership(list);
         // New FULLs initialize logical tags on receipt (Entity.OnRealTimeFullEntity); SHOWs do not.
         var receivedFulls = new HashSet<PowerHistoryData>(WireEntryComparer.Instance);
         foreach (var data in list)
@@ -4732,8 +4799,14 @@ public sealed class NativeMatch
         bool Typed(int id) => wireEntities.TryGetValue(id, out var entity) && entity.CardType is not (0 or 1 or 2 or 6)
             && entity.Zone != (int)EngineZone.REMOVEDFROMGAME
             && (segment.Sub == null || !retiring.Contains(id));
+        // A card's own deck-spawn spell (SpawnToDeckSpell) targets the DECK FULL_ENTITYs it creates; those anonymous
+        // targets are the spawn's own and are never an impact target, so they are not rewritten to a typed anchor (#153).
+        var spawned = (segment.Sub?.Tasks ?? segment.Tasks).Where(t => t.HasFullEntity
+            && t.FullEntity.Tags.Any(tag => tag.Name == (int)GameTag.ZONE && tag.Value == (int)EngineZone.DECK))
+            .Select(t => t.FullEntity.Entity).ToHashSet();
         var metadata = (segment.Sub?.Tasks ?? segment.Tasks).Where(t => t.HasMetaData && (int)t.MetaData.Type == 0
-            && (t.MetaData.Data == 0 || t.MetaData.Data == start.Source)).ToArray();
+            && (t.MetaData.Data == 0 || t.MetaData.Data == start.Source)
+            && !(t.MetaData.Info.Count > 0 && t.MetaData.Info.All(spawned.Contains))).ToArray();
         // Native scans the whole segment, not just tasks before the first hidden tag. Preserve valid late TARGETs.
         if (segment.Sub == null && metadata.Any(t => t.MetaData.Info.Any(Typed))
             && metadata.All(t => t.MetaData.Info.All(Typed))) return null;
@@ -4791,51 +4864,6 @@ public sealed class NativeMatch
         return new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
             Type = (HistoryMeta.Type)0, Data = 0, Info = safe
         } };
-    }
-
-    // A played hero's replacement power is constructed before its battlecry POWER. Put that FULL in
-    // the hero's own effect list: strict native scanners (JaraxxusHeroSpell) cannot see the enclosing PLAY's FULL.
-    // Cross only unrelated tags under the same-source PLAY; never cross a use of the new entity.
-    private void NormalizeHeroPowerOwnership(List<PowerHistoryData> list)
-    {
-        var heroes = wireEntities.Where(p => p.Value.CardType == (int)CardType.HERO)
-            .ToDictionary(p => p.Key, p => p.Value.Controller);
-        var blocks = new Stack<PowerHistoryStart>();
-        for (int i = 0; i < list.Count; i++)
-        {
-            var data = list[i];
-            var snapshot = data.HasFullEntity ? data.FullEntity : data.HasShowEntity ? data.ShowEntity : data.HasChangeEntity ? data.ChangeEntity : null;
-            if (snapshot != null)
-            {
-                var type = snapshot.Tags.FirstOrDefault(t => t.Name == (int)GameTag.CARDTYPE);
-                if (type != null && type.Value != (int)CardType.HERO) heroes.Remove(snapshot.Entity);
-                else if (type?.Value == (int)CardType.HERO || heroes.ContainsKey(snapshot.Entity))
-                    heroes[snapshot.Entity] = snapshot.Tags.FirstOrDefault(t => t.Name == (int)GameTag.CONTROLLER)?.Value
-                        ?? (heroes.TryGetValue(snapshot.Entity, out int owner) ? owner : 0);
-            }
-            if (data.HasTagChange && data.TagChange.Tag == (int)GameTag.CONTROLLER && heroes.ContainsKey(data.TagChange.Entity))
-                heroes[data.TagChange.Entity] = data.TagChange.Value;
-            if (data.HasFullEntity && snapshot.Tags.Any(t => t.Name == (int)GameTag.CARDTYPE && t.Value == (int)CardType.HERO_POWER)
-                && blocks.Count > 0)
-            {
-                int nextIndex = i + 1;
-                while (nextIndex < list.Count && list[nextIndex].HasTagChange
-                    && list[nextIndex].TagChange.Entity != snapshot.Entity && list[nextIndex].TagChange.Value != snapshot.Entity
-                    && !(list[nextIndex].TagChange.Entity == blocks.Peek().Source && list[nextIndex].TagChange.Tag == (int)GameTag.CONTROLLER)) nextIndex++;
-                if (nextIndex >= list.Count || !list[nextIndex].HasPowerStart) continue;
-                var next = list[nextIndex].PowerStart;
-                var parent = blocks.Peek();
-                if ((int)next.Type == (int)BlockType.POWER && (int)parent.Type == (int)BlockType.PLAY
-                    && parent.Source == next.Source && heroes.TryGetValue(next.Source, out int owner)
-                    && owner != 0 && snapshot.Tags.Any(t => t.Name == (int)GameTag.CONTROLLER && t.Value == owner))
-                {
-                    list.RemoveAt(i); list.Insert(nextIndex, data);
-                    data = list[i];
-                }
-            }
-            if (data.HasPowerStart) blocks.Push(data.PowerStart);
-            else if (data.HasPowerEnd && blocks.Count > 0) blocks.Pop();
-        }
     }
 
     private static int HistoryEntity(PowerHistoryData data) => data.HasFullEntity ? data.FullEntity.Entity
@@ -5025,6 +5053,20 @@ public sealed class NativeMatch
         var cards = new Dictionary<int, string>(clientTransportCards);
         if (rewindAnonymousEntities == null)
             rewindAnonymousEntities = new HashSet<int>(cards.Where(pair => string.IsNullOrEmpty(pair.Value)).Select(pair => pair.Key));
+        // An opposing card the client holds burned stays in GRAVEYARD for good. When the restored state needs it elsewhere (burned
+        // during the discarded attempt), its engine ID gets a fresh anonymous actor, as a Godfrey return does.
+        var milledBefore = new HashSet<int>(milledOpposingActors);
+        var stillMilled = new HashSet<int>();
+        foreach (var full in fulls)
+        {
+            int id = full.Entity.Id;
+            if (!milledBefore.Contains(id) || !previous.TryGetValue(id, out var held)
+                || !held.TryGetValue((int)GameTag.ZONE, out int heldZone) || heldZone != (int)EngineZone.GRAVEYARD) continue;
+            if (full.Entity.Tags.TryGetValue(GameTag.ZONE, out int restoredZone) && restoredZone == (int)EngineZone.GRAVEYARD) { stillMilled.Add(id); continue; }
+            NewBurnedActorAlias(id);
+            previous.Remove(id); wireEntities.Remove(id);
+        }
+        milledOpposingActors.Clear(); milledOpposingActors.UnionWith(stillMilled);
         revealedEntities.Clear(); visibleTransportTags.Clear(); clientTransportTags.Clear(); clientTransportCards.Clear();
         historicalControllers.Clear(); historicalZones.Clear(); historicalPositions.Clear(); historicalTemporaryVisuals.Clear(); temporaryDiscardVisuals.Clear();
         privacyTargets.Clear(); retiredChoiceActors.Clear(); opposingProxies.Clear(); deckChoiceOriginals.Clear(); privateDeckOffers.Clear(); privateChoiceOffers.Clear(); visibleSubSpells.Clear(); visualBlockSources.Clear(); revealedTriggerScopes.Clear(); pendingTriggerReveals.Clear(); lastSpellPower.Clear(); poweredUpHighlights.Clear();
@@ -5066,8 +5108,13 @@ public sealed class NativeMatch
         // Retire discarded actors before the native reset filters the old timeline.
         foreach (var pair in previous.OrderBy(pair => pair.Key))
         {
-            if (resetEntities.ContainsKey(pair.Key) || pair.Key == cosmeticPetEntityId || OpponentPetCard != null && pair.Key == opponentPetEntityId ||
-                pair.Value.TryGetValue((int)GameTag.ZONE, out int zone) && zone == (int)EngineZone.REMOVEDFROMGAME) continue;
+            if (resetEntities.ContainsKey(pair.Key) || pair.Key == cosmeticPetEntityId || OpponentPetCard != null && pair.Key == opponentPetEntityId) continue;
+            int zone = pair.Value.TryGetValue((int)GameTag.ZONE, out int held) ? held : 0;
+            if (zone == (int)EngineZone.REMOVEDFROMGAME) continue;
+            // An opposing actor burned from the deck (public display or the card itself): Card.MillCard leaves m_beingDrawnByOpponent
+            // set and ZoneChangeList waits on it forever, so moving it here wedges the power queue before GAME_RESET (#80). It has
+            // no visible actor, so leaving it in GRAVEYARD stays invisible. See AppendRetainedOverdraw.
+            if (zone == (int)EngineZone.GRAVEYARD && milledBefore.Contains(pair.Key)) continue;
             packet.List.Add(new PowerHistoryData { TagChange = new PegasusGame.PowerHistoryTagChange {
                 Entity = pair.Key, Tag = (int)GameTag.ZONE, Value = (int)EngineZone.REMOVEDFROMGAME
             } });
@@ -5793,11 +5840,13 @@ public sealed class NativeMatch
     {
         if (packet.List.Count == 0) return;
 #if ENGINE_SOURCE
+        PlaceGuessResult(packet);
         SuppressEmptyTriggers(packet);
         NormalizeBoardTransit(packet);
         NormalizePublicIdentity(packet);
         NormalizeBurnTransitions(packet);
         NormalizeBurnedCards(packet);
+        NestPredictedPlayCreations(packet);
         // PowerProcessor.BuildTaskList: END as a packet's last row falls out of its switch, enqueues the list twice and
         // replays the prefab. Blocks stay open across choices, so any recipe can reach this; zero SLUSH_TIME is inert.
         if (packet.List.Count > 0 && packet.List[packet.List.Count - 1].HasSubSpellEnd)
@@ -5807,6 +5856,103 @@ public sealed class NativeMatch
         NormalizeDormantVisuals(packet);
         if (packet.List.Count > 0) send(19, packet);
     }
+
+#if ENGINE_SOURCE
+    // #118 (Ido's Call of the Threshfleet), Twinspell twins: a card the human drops from the hand is moved locally first
+    // (InputManager.DropHeldMinionLikeCard / DropHeldSpellLikeCard -> ZoneMgr.AddLocalZoneChange). When a task list of the PLAY block
+    // (its own rows between nested blocks) moves that card to PLAY at the predicted position, ZoneMgr.CheckAndIgnoreServerChangeList
+    // marks the whole list ignored and ZoneChangeList.ShouldIgnoreZoneChange then skips every card zone change in it: a card created
+    // into the hand there is registered but never placed, so it has no actor and the queue can wait on it (live: Ido by real drag
+    // never settled, Call of the Threshfleet invisible). Retail keeps such effects in their own blocks; so each run of rows that
+    // creates, moves or hides another card in that list gets its own player TRIGGER block (EffectIndex -1, as Shatter and overdraw
+    // use), a separate task list the client processes in full.
+    private void NestPredictedPlayCreations(NativePowerHistory packet)
+    {
+        var list = packet.List;
+        for (int start = 0; start < list.Count; start++)
+        {
+            if (!list[start].HasPowerStart || (int)list[start].PowerStart.Type != (int)BlockType.PLAY) continue;
+            int source = list[start].PowerStart.Source;
+            if (!wireEntities.TryGetValue(source, out var played) || played.Controller != HumanPlayerId
+                || played.CardType is 1 or 2 or 6) continue;
+            // The block's own task lists: rows outside nested blocks and sub-spells, split at each of them and after metadata 21.
+            var lists = new List<List<int>>();
+            List<int> open = null;
+            int depth = 0, subSpells = 0;
+            for (int at = start + 1; at < list.Count; at++)
+            {
+                var row = list[at];
+                if (row.HasPowerStart) { depth++; open = null; continue; }
+                if (row.HasPowerEnd) { open = null; if (depth == 0) break; depth--; continue; }
+                if (row.HasSubSpellStart) { subSpells++; open = null; continue; }
+                if (row.HasSubSpellEnd) { subSpells = Math.Max(0, subSpells - 1); open = null; continue; }
+                if (depth > 0 || subSpells > 0) continue;
+                if (open == null) lists.Add(open = new List<int>());
+                open.Add(at);
+                if (row.HasMetaData && (int)row.MetaData.Type == 21) open = null;
+            }
+            var runs = new List<(int From, int To)>();
+            foreach (var rows in lists)
+            {
+                bool entersPlay = false;
+                var cardless = new HashSet<int>();
+                foreach (int at in rows)
+                {
+                    var row = list[at];
+                    var snapshot = row.HasFullEntity ? row.FullEntity : row.HasShowEntity ? row.ShowEntity : row.HasChangeEntity ? row.ChangeEntity : null;
+                    if (snapshot != null)
+                    {
+                        if (snapshot.Tags.Any(t => t.Name == (int)GameTag.CARDTYPE && (t.Value is 1 or 2 or 6 || t.Value == 3 && played.CardType == (int)CardType.HERO))) cardless.Add(snapshot.Entity);
+                        if (snapshot.Entity == source && snapshot.Tags.Any(t => t.Name == (int)GameTag.ZONE && t.Value == (int)EngineZone.PLAY)) entersPlay = true;
+                    }
+                    if (row.HasTagChange && row.TagChange.Entity == source && row.TagChange.Tag == (int)GameTag.ZONE
+                        && row.TagChange.Value == (int)EngineZone.PLAY) entersPlay = true;
+                }
+                if (!entersPlay) continue;
+                // A hero card's swap rows (the old and the new hero) stay in PLAY: the client handles the retiring hero there even
+                // during a predicted drop. Its power rows do not: the retired primary power's zone change and the replacement power's
+                // FULL (in that order) go to a processed child list, or the old power actor stays and the new one is never placed.
+                bool Cardless(int id) => cardless.Contains(id) || wireEntities.TryGetValue(id, out var known)
+                    && (known.CardType is 1 or 2 or 6 || known.CardType == 3 && played.CardType == (int)CardType.HERO);
+                var moved = new HashSet<int>();
+                foreach (int at in rows)
+                {
+                    var row = list[at];
+                    int id = HistoryEntity(row);
+                    if (id == 0 || id == source || Cardless(id)) continue;
+                    // The weapon a new weapon replaces leaves in this list today (live-checked: Twig, #83); the client's weapon zone owns it.
+                    if (played.CardType == (int)CardType.WEAPON && row.HasTagChange && row.TagChange.Tag == (int)GameTag.ZONE
+                        && row.TagChange.Value == (int)EngineZone.GRAVEYARD
+                        && wireEntities.TryGetValue(id, out var replaced) && replaced.CardType == (int)CardType.WEAPON) continue;
+                    if (row.HasFullEntity || row.HasHideEntity
+                        || row.HasTagChange && (row.TagChange.Tag == (int)GameTag.ZONE || row.TagChange.Tag == (int)GameTag.CONTROLLER))
+                        moved.Add(id);
+                    else if (row.HasShowEntity || row.HasChangeEntity)
+                    {
+                        var tags = (row.HasShowEntity ? row.ShowEntity : row.ChangeEntity).Tags;
+                        int zone = tags.Where(t => t.Name == (int)GameTag.ZONE).Select(t => t.Value).DefaultIfEmpty(-1).Last();
+                        if (moved.Contains(id) || zone >= 0 && zone != (int)EngineZone.HAND && zone != (int)EngineZone.DECK) moved.Add(id);
+                    }
+                }
+                if (moved.Count == 0) continue;
+                int previous = -2;
+                foreach (int at in rows)
+                {
+                    if (!moved.Contains(HistoryEntity(list[at]))) { previous = -2; continue; }
+                    if (previous == at - 1 && runs.Count > 0) runs[runs.Count - 1] = (runs[runs.Count - 1].From, at);
+                    else runs.Add((at, at));
+                    previous = at;
+                }
+            }
+            for (int run = runs.Count - 1; run >= 0; run--)
+            {
+                list.Insert(runs[run].To + 1, new PowerHistoryData { PowerEnd = new PowerHistoryEnd() });
+                list.Insert(runs[run].From, new PowerHistoryData { PowerStart = new PowerHistoryStart {
+                    Type = HistoryBlock.Type.TRIGGER, Source = Game.Player1.Id, EffectIndex = -1, SubOption = -1 } });
+            }
+        }
+    }
+#endif
 
     private void NormalizeDormantVisuals(NativePowerHistory packet)
     {
@@ -5862,6 +6008,12 @@ public sealed class NativeMatch
                     Entity = id, Tag = (int)GameTag.DORMANT, Value = 0 } });
             bool entering = !sleeping && dormant && snapshot == null && row.HasTagChange;
             int insert = entering && row.TagChange.Tag == (int)GameTag.DORMANT ? index : index + 1;
+            // The client picks the Taunt frame when TAUNT arrives and its Immune check counts UNTOUCHABLE at that moment, so a
+            // wake that restores keywords before UNTOUCHABLE=0 leaves the translucent frame: restore after those rows.
+            if (wake)
+                while (insert < rows.Count && rows[insert].HasTagChange && rows[insert].TagChange.Entity == id
+                    && (rows[insert].TagChange.Tag == (int)GameTag.DORMANT_VISUAL || rows[insert].TagChange.Tag == (int)GameTag.UNTOUCHABLE))
+                { insert++; index++; }
             if (entering || wake || snapshotWake)
                 foreach (var tag in tags.Where(t => IsDormantVisualTag((GameTag)t.Key) && t.Value != 0).OrderBy(t => t.Key))
                 {
@@ -5938,6 +6090,19 @@ public sealed class NativeMatch
         return alias;
     }
 
+    // The engine ID names a card the client holds burned in GRAVEYARD. Point it at a fresh actor and leave the burned one alone:
+    // it is not a retired SETASIDE actor, because any move of it stalls the client.
+    private readonly HashSet<int> burnedActorAliases = new HashSet<int>();
+    private void NewBurnedActorAlias(int original)
+    {
+        int alias = nextDeckChoiceId--;
+        if (alias <= Game.IdEntityDic.Values.Max(entity => entity.Id))
+            throw new InvalidOperationException("Burned actor alias IDs exhausted.");
+        privateReturnOriginals.Remove(WireReturnId(original));
+        privateReturnIds[original] = alias; privateReturnOriginals[alias] = original;
+        burnedActorAliases.Add(original);
+    }
+
     private static PowerHistoryData AnonymousReturnActor(int id, int owner) => new PowerHistoryData {
         FullEntity = new PegasusGame.PowerHistoryEntity {
             Entity = id, Name = "", Tags = new List<NativeTag> {
@@ -5948,6 +6113,8 @@ public sealed class NativeMatch
             }
         }
     };
+    // A client actor whose engine card now has another wire actor (a retired return or a burned card's old actor): a ghost.
+    internal bool IsGhostActor(int wireId) => WireReturnId(EngineReturnId(wireId)) != wireId;
     internal int WireReturnId(int id) => privateReturnIds.TryGetValue(id, out int alias) ? alias : id;
     internal int EngineReturnId(int id) => privateReturnOriginals.TryGetValue(id, out int original) ? original : id;
 
@@ -5982,7 +6149,7 @@ public sealed class NativeMatch
             {
                 var row = history.List[index];
                 // Full replay starts a new client graph. Reset snapshots keep the existing anonymous identities.
-                if (row.HasCreateGame) { privateReturnIds.Clear(); privateReturnOriginals.Clear(); retiredReturnActors.Clear(); publicReturnReferences.Clear(); }
+                if (row.HasCreateGame) { privateReturnIds.Clear(); privateReturnOriginals.Clear(); retiredReturnActors.Clear(); publicReturnReferences.Clear(); burnedActorAliases.Clear(); milledOpposingActors.Clear(); }
                 if (row.HasResetGame)
                 {
                     // Reset snapshots are simultaneous; ordinary replay must retain historical visibility order.
@@ -5993,11 +6160,13 @@ public sealed class NativeMatch
                         if (!string.IsNullOrEmpty(snapshot.Name)) publicReturnReferences.Add(snapshot.Entity);
                     }
                 }
-                if ((row.HasResetGame || row.HasCreateGame) && privateReturnIds.Count == 0
+                if ((row.HasResetGame || row.HasCreateGame) && privateReturnIds.Keys.All(burnedActorAliases.Contains)
                     && !history.List.Any(r => r.HasSubSpellStart && r.SubSpellStart.SpellPrefabGuid == SabberStoneCore.Actions.DrawReplacementRules.ReturnPrefab))
                 {
                     // A reconnect can start with snapshots instead of replaying the return pulses.
                     retainedOverdrawEntities.UnionWith(Game.PowerHistory.Full.OfType<PowerHistoryRetainedOverdraw>().Select(burn => burn.Entity.Id));
+                    // Only a client with no alias at all reconstructs the returns; burn aliases alone must not re-alias a returned card.
+                    if (privateReturnIds.Count == 0)
                     foreach (int original in Game.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistorySubSpellStart>()
                         .Where(s => s.SpellPrefabGuid == SabberStoneCore.Actions.DrawReplacementRules.ReturnPrefab
                             && Game.IdEntityDic.TryGetValue(s.Source, out var source) && source.Controller.PlayerId != HumanPlayerId)
@@ -6053,7 +6222,7 @@ public sealed class NativeMatch
             }
             // Snapshot order must be wire-ID order, never engine-ID order with aliases substituted in place.
             for (int i = 0; i < rows.Count; i++)
-                if (retiredReturnActors.Count > 0 && (rows[i].HasResetGame || rows[i].HasCreateGame))
+                if ((retiredReturnActors.Count > 0 || burnedActorAliases.Count > 0) && (rows[i].HasResetGame || rows[i].HasCreateGame))
                 {
                     int end = i + 1;
                     while (end < rows.Count && rows[end].HasFullEntity) end++;
@@ -6199,6 +6368,55 @@ public sealed class NativeMatch
                     && appendages.Contains(entity.Name)) return;
             }
         start.TriggerKeyword = (int)GameTag.TRIGGER_VISUAL;
+    }
+
+    // Cards whose choice is a guess at a card in the opponent's hand (DiscoverEntitySource.EnemyHandGuess). The client gives them a
+    // CustomChoiceConcealSpell (Card.GetCustomChoiceConcealSpell, CardDef.m_CustomChoiceConcealSpellPath): DoEffects loops
+    // `while (!FindResultOfChoice()) yield return null` and only then finishes the choice. FindResultOfChoice scans the current and
+    // every queued task list for a META_DATA of type TARGET (0) whose Info[0] is one of the choice cards; that card is the correct one,
+    // and the guess was right when it was chosen. Without that row the spell never ends: the choice stays (clientChoiceId,
+    // mustWaitForChoices) and the power queue stays stalled (#115, lane 1 2026-11-15). The row may only exist in the ANSWER's history:
+    // earlier it would give the correct card away.
+    private static readonly HashSet<string> GuessChoiceSources = new HashSet<string>(StringComparer.Ordinal) { "TIME_041", "UNG_035", "CORE_UNG_035" };
+    private (int Source, int Target)? guessResult;
+
+    // Offers are client ids; toEngine maps one to its engine entity; picks are engine ids. With no correct offer (the enemy hand was
+    // empty, so every offer is a decoy) the client still needs a card to reveal: name an unchosen one, which plays the wrong-guess
+    // reveal and matches the engine (no bonus).
+    private void NoteGuessResult(PowerEntityChoices choices, IReadOnlyList<int> offers, Func<int, int> toEngine, IEnumerable<int> picks)
+    {
+        guessResult = null;
+        if (choices == null || choices.ChoiceType != ChoiceType.GENERAL || offers == null || offers.Count == 0
+            || !Game.IdEntityDic.TryGetValue(choices.SourceId, out var source) || !GuessChoiceSources.Contains(source.Card.Id)) return;
+        var chosen = new HashSet<int>(picks ?? Enumerable.Empty<int>());
+        // Curious Glimmerroot (legacy ChoiceAction.GLIMMERROOT, same client conceal spell, lane 1 2026-11-15): the correct offer is the
+        // card that started in the opponent's deck; Forefather marks it with CorrectAnswer.
+        var opponentDeck = source.Controller.Opponent.DeckCards.Select(card => card.Id).ToHashSet(StringComparer.Ordinal);
+        bool glimmerroot = source.Card.Id.EndsWith("UNG_035", StringComparison.Ordinal);
+        int target = offers.FirstOrDefault(id => Game.IdEntityDic.TryGetValue(toEngine(id), out var offer)
+            && (glimmerroot ? opponentDeck.Contains(offer.Card.Id) : offer[SabberStoneCore.Actions.DiscoverRealRules.CorrectAnswer] == 1));
+        if (target == 0) target = offers.FirstOrDefault(id => !chosen.Contains(toEngine(id)));
+        if (target != 0) guessResult = (choices.SourceId, target);
+    }
+
+    // Inside the answer's resumed Battlecry block of that source, first: a TARGET row sits at the start of a block in retail traces,
+    // and the client reads it from any queued task list. Without such a block it goes loose at the head of the packet.
+    private void PlaceGuessResult(NativePowerHistory packet)
+    {
+        if (!guessResult.HasValue) return;
+        var (source, target) = guessResult.Value;
+        guessResult = null;
+        InsertGuessRow(packet, source, target);
+    }
+
+    private void InsertGuessRow(NativePowerHistory packet, int source, int target)
+    {
+        var row = new PowerHistoryData { MetaData = new PegasusGame.PowerHistoryMetaData {
+            Type = HistoryMeta.Type.TARGET, Data = source, Info = new List<int> { target } } };
+        int at = packet.List.FindIndex(r => r.HasPowerStart && (int)r.PowerStart.Type == (int)HistoryBlock.Type.POWER && r.PowerStart.Source == source);
+        packet.List.Insert(at >= 0 ? at + 1 : 0, row);
+        TrackVisibility(row);
+        BotTrace?.Invoke("guess result: META_DATA TARGET " + target + " source " + source + (at >= 0 ? " inside the resumed block" : " loose"));
     }
 
     private void SuppressEmptyTriggers(NativePowerHistory packet)
@@ -6354,7 +6572,14 @@ public sealed class NativeMatch
     private PegasusGame.PowerHistoryEntity ToNativeHistoryEntity(EngineHistoryEntity entity, bool revealToHuman = false, bool completeSnapshot = true,
         IReadOnlyDictionary<int, EngineHistoryEntity> resetEntities = null, bool currentHealthSnapshot = false)
     {
+        // A Watfin offer with one changed stat is shown as its original card, whose printed stats the client compares the
+        // shown ones with: send the shown stats as the definition too, so no stat is coloured and the answer is not given away.
+        bool changedOffer = false;
 #if ENGINE_SOURCE
+        // Only while it is an offer: once picked, the card keeps its real stats, and a later buff colours normally. A partial
+        // snapshot (a delta) carries no ZONE and must not rewrite the definition.
+        changedOffer = completeSnapshot && entity.Name == "JAIL_EVENT_100t" && entity.Tags != null && entity.Tags.ContainsKey(GameTag.MODULAR_ENTITY_PART_1)
+            && (!entity.Tags.TryGetValue(GameTag.ZONE, out int offerZone) || offerZone == (int)SabberStoneCore.Enums.Zone.SETASIDE);
         entity = SabberStoneCore.Actions.DiscoverRealRules.ProjectOfferForNative(entity);
 #endif
         // Callers supply an entry snapshot, IdentityAt result, checkpoint, or endpoint-only snapshot.
@@ -6541,9 +6766,27 @@ public sealed class NativeMatch
                 && raceDefinition.Id.StartsWith("CFM_712_t", StringComparison.Ordinal)
                 ? new[] { GameTag.ATK, GameTag.HEALTH, GameTag.COST }.Select(tag =>
                     new NativeTag { Name = (int)tag, Value = raceDefinition[tag] }).ToList()
-                : new List<NativeTag>(),
+                : changedOffer && !hidden && name.Length > 0
+                ? new[] { GameTag.ATK, GameTag.HEALTH, GameTag.COST }.Select(tag => new NativeTag { Name = (int)tag,
+                    Value = tags.FirstOrDefault(shown => shown.Name == (int)tag)?.Value ?? 0 }).ToList()
+                : CreationBuilderDefTags(name, hidden, tags),
             Tags = tags.OrderBy(tag => tag.Name).ToList()
         };
+    }
+
+    // Nefarian's Creation's text (#119): the client picks a card's text builder from its EntityDef (EntityDef.GetCardTextBuilder reads the
+    // definition's tag 782, else the card database), never from the entity's own tags, and only a FULL_ENTITY or CHANGE_ENTITY DefTags
+    // list reaches the definition. The engine's builder tag (Zombeast, which formats both parts from tags 471/472) therefore goes out
+    // as a definition tag too; without it the Creation keeps its database builder and shows an empty text box.
+    internal static List<NativeTag> CreationBuilderDefTags(string name, bool hidden, IEnumerable<NativeTag> tags)
+    {
+        var result = new List<NativeTag>();
+        if (hidden || name != "CATA_470t1") return result;
+        var list = tags.ToList();
+        var builder = list.FirstOrDefault(tag => tag.Name == 782);
+        if (builder != null && list.Any(tag => tag.Name == (int)GameTag.MODULAR_ENTITY_PART_1 && tag.Value != 0))
+            result.Add(new NativeTag { Name = builder.Name, Value = builder.Value });
+        return result;
     }
 
     internal static void ValidateHistoryEntityIdentity(PegasusGame.PowerHistoryEntity entity)

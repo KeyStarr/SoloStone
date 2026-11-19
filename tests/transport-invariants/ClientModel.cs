@@ -20,6 +20,10 @@ internal sealed class ClientEntity
     internal readonly Dictionary<int, int> Tags = new();
     internal int Get(GameTag tag) => Tags.GetValueOrDefault((int)tag);
     internal int CardZone, CardController, CardPosition;
+    internal int Id;
+    // Card.MillCard marks an opposing actor moved DECK -> GRAVEYARD as being drawn by the opponent and nothing clears it;
+    // ZoneChangeList.ProcessChanges then waits forever on any later zone or controller change, or SHOW, of that actor (#80).
+    internal bool MillLocked;
 }
 
 internal sealed class ClientModel
@@ -105,6 +109,10 @@ internal sealed class ClientModel
         InputRestoreCount++;
     }
     internal readonly Dictionary<int, ClientEntity> Entities = new();
+    // Every later move, SHOW or reset diff of a mill-locked opposing actor: the native power queue never finishes that task list.
+    internal readonly List<string> MillFaults = new();
+    // A fixture that moves a spell back into the deck by hand (no real game does) opts out of the mill lock.
+    internal bool IgnoreMillLock;
     // shortcut: ordered server moves only; add prediction/auto-correction before using as a general board oracle.
     // Zone.CardSortComparison sorts actor positions first, then entity positions.
     internal int[] BoardOrder(int owner) => Entities.Where(p => p.Value.CardZone == (int)EngineZone.PLAY &&
@@ -188,22 +196,23 @@ internal sealed class ClientModel
     {
         var copy = new ClientModel(rewindPriorityTags) { WireId = WireId, EngineId = EngineId, HasRewound = HasRewound,
             InputEnabled = InputEnabled, InputRestoreCount = InputRestoreCount, clickedRewindChoice = clickedRewindChoice,
-            RemoveTombstonedEntities = RemoveTombstonedEntities, RepairNullToPlayActors = RepairNullToPlayActors };
+            RemoveTombstonedEntities = RemoveTombstonedEntities, RepairNullToPlayActors = RepairNullToPlayActors, IgnoreMillLock = IgnoreMillLock };
         foreach (var pair in Entities)
         {
-            var entity = new ClientEntity { DeckEntries = pair.Value.DeckEntries, DeckSummons = pair.Value.DeckSummons, VisibilityRepairs = pair.Value.VisibilityRepairs, CardId = pair.Value.CardId, ActorCardId = pair.Value.ActorCardId, HiddenByNullZone = pair.Value.HiddenByNullZone, LastActorZone = pair.Value.LastActorZone, CardZone = pair.Value.CardZone,
+            var entity = new ClientEntity { Id = pair.Value.Id, MillLocked = pair.Value.MillLocked, DeckEntries = pair.Value.DeckEntries, DeckSummons = pair.Value.DeckSummons, VisibilityRepairs = pair.Value.VisibilityRepairs, CardId = pair.Value.CardId, ActorCardId = pair.Value.ActorCardId, HiddenByNullZone = pair.Value.HiddenByNullZone, LastActorZone = pair.Value.LastActorZone, CardZone = pair.Value.CardZone,
                 CardController = pair.Value.CardController, CardPosition = pair.Value.CardPosition };
             foreach (var tag in pair.Value.Tags) entity.Tags.Add(tag.Key, tag.Value);
             copy.Entities.Add(pair.Key, entity);
         }
         foreach (var pair in EntryCounts) copy.EntryCounts.Add(pair.Key, pair.Value);
+        copy.MillFaults.AddRange(MillFaults);
         copy.IgnoredCardZoneChanges.UnionWith(IgnoredCardZoneChanges);
         copy.LateIdentities.AddRange(LateIdentities);
         return copy;
     }
     private ClientEntity Entity(int id)
     {
-        if (!Entities.TryGetValue(id, out var value)) Entities.Add(id, value = new());
+        if (!Entities.TryGetValue(id, out var value)) Entities.Add(id, value = new() { Id = id });
         return value;
     }
 
@@ -212,6 +221,8 @@ internal sealed class ClientModel
         bool created = !Entities.ContainsKey(id);
         var entity = Entity(id);
         int type = entity.Get(GameTag.CARDTYPE), premium = entity.Get(GameTag.PREMIUM);
+        if (!full && !change && entity.MillLocked && !IgnoreMillLock)
+            MillFaults.Add($"SHOW on mill-locked opposing actor {id} waits forever in ZoneChangeList");
         if (card != null) entity.CardId = card;
         foreach (var tag in tags) entity.Tags[tag.Name] = tag.Value;
         bool moved = MoveCard(entity, entity.Get(GameTag.ZONE), entity.Get(GameTag.CONTROLLER), entity.Get(GameTag.ZONE_POSITION));
@@ -225,8 +236,12 @@ internal sealed class ClientModel
         // a pure zero position does not move it. Rewind's direct SetTag calls never move Card.
         int previousZone = entity.CardZone;
         bool moved = zone.HasValue && zone != entity.CardZone || owner.HasValue && owner != entity.CardController;
+        if (moved && entity.MillLocked && !IgnoreMillLock)
+            MillFaults.Add($"zone/controller move {previousZone}->{zone ?? entity.CardZone} on mill-locked opposing actor {entity.Id} waits forever in ZoneChangeList");
         if (zone.HasValue) entity.CardZone = zone.Value;
         if (owner.HasValue) entity.CardController = owner.Value;
+        if (moved && previousZone == (int)EngineZone.DECK && entity.CardZone == (int)EngineZone.GRAVEYARD && entity.CardController == 2)
+            entity.MillLocked = true;
         if (moved || position > 0) entity.CardPosition = position ?? 0;
         // Card.TransitionToZone(null) hides the existing actor. A new PLAY actor from null only
         // spawns when the old actor was absent or already the same PLAY actor; otherwise the native

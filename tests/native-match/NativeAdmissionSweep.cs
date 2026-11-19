@@ -44,7 +44,7 @@ internal static partial class Program
         var lines = new List<string> { "# Native admission sweep — 2026-10-30", "",
             "Outgoing NativeMatch PowerHistory (R1-R4, R6) and engine zone admission (R5). R1: logical type at native segment entry for pinned DH/Frost impacts; unknown FX may consume untyped-only inferred or authored targets, missing explicit IDs and mixed typed/untyped inference remain violations; complete-list metadata resolution, TAG_CHANGE fallback and explicit subspell IDs. Blocks, subspell boundaries, FLUSH and packets split lists; parent/previous-list metadata never protects a continuation. R2: hidden opposing PLAY must be SPELL + SECRET. R3: hidden public PLAY / own HAND or SECRET transitions require identity first. R4: Core Jaraxxus POWER owns HERO_POWER + WEAPON FULL_ENTITY. R5: every engine HAND/DECK/PLAY admission must have CONTROLLER equal to Controller.PlayerId; historyless search clones do not maintain transport tags and are excluded. R6: after every packet, public PLAY entities have identity and minion/location actors have no hidden null-zone transit; both viewer orientations.", "",
             $"Fixtures: {admissionResults.Count}; Standard={admissionResults.Count(r => r.Family == "standard")}, automatic={admissionResults.Count(r => r.Family == "automatic")}. Both seats. Source-card counts identify the card whose block violates admission, not every fixture containing that card (automatic fixtures cast common school spells first). Fixture-card counts and repeated block/target faults are separate. When a block source is anonymous, its fixture card ID is the diagnostic fallback; this never supplies identity to the client.", "" };
-        foreach (string rule in new[] { "R1", "R2", "R3", "R4", "R5", "R6" })
+        foreach (string rule in new[] { "R1", "R2", "R3", "R4", "R5", "R6", "R7" })
         {
             var affected = admissionResults.Where(r => r.Faults.Any(f => f.Rule == rule)).ToArray();
             string Card(AdmissionResult result, NativeAdmission.Fault fault) => string.IsNullOrEmpty(fault.SourceCard) ? result.Card : fault.SourceCard;
@@ -68,6 +68,6 @@ internal static partial class Program
         if (!string.IsNullOrEmpty(output)) { Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(output))); File.WriteAllLines(output, lines); }
         Check(admissionResults.All(r => r.Faults.Count == 0), "native admission violations; set HS_NATIVE_ADMISSION_REPORT for full card/seat list");
         NativeAdmissionTransportControls();
-        Console.WriteLine($"PASS native admission: {admissionResults.Count} fixtures, R1/R2/R3/R4/R5/R6; {ControllerAdmissionInvariant.Admissions} engine HAND/DECK/PLAY admissions observed");
+        Console.WriteLine($"PASS native admission: {admissionResults.Count} fixtures, R1/R2/R3/R4/R5/R6/R7; {ControllerAdmissionInvariant.Admissions} engine HAND/DECK/PLAY admissions observed");
     }
 }

@@ -37,7 +37,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power {
                 PowerTask = new CustomTask((g,c,s,t,stack) => {
-                    var enemies = c.Opponent.BoardZone.GetAll().Where(m => !m.IsDormant && !m.Untouchable && !m.ToBeDestroyed)
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.ToBeDestroyed)
                         .Cast<ICharacter>().Append(c.Opponent.Hero).Where(e => !e.ToBeDestroyed).ToArray();
                     if (enemies.Length != 0) Generic.DamageCharFunc((IPlayable)s, enemies[g.Random.Next(enemies.Length)], 2 + s[Upgrades], false);
                 }),

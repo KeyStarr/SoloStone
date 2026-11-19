@@ -65,6 +65,7 @@ namespace SabberStoneCore.Actions
 
         internal static void Destroying(Minion victim)
         {
+            if (victim.RescuedFromDamageWound) victim.ClearPendingDeathCause();
             if (victim.ToBeDestroyed) return;
             var frame = victim.Game.Resolution.Current;
             bool direct = frame.Kind == Model.Events.ResolutionKind.TaskResolution
@@ -83,6 +84,7 @@ namespace SabberStoneCore.Actions
 
         public static void RecordDestroy(IPlayable victim, IEntity source)
         {
+            if (victim is Minion rescued && rescued.RescuedFromDamageWound) rescued.ClearPendingDeathCause();
             if(!victim.ToBeDestroyed) victim.Game.Facts.CaptureDestroy(victim,source);
             if (victim is Minion minion && !minion.ToBeDestroyed && minion[CaptureDeath] != 0)
                 minion[FatalSource] = source?.Id ?? 0;

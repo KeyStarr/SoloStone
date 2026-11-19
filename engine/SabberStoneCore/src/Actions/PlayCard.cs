@@ -276,10 +276,12 @@ namespace SabberStoneCore.Actions
 				//c[GameTag.HERO_ENTITY] = hero.Id;
 				hero.Weapon = oldHero.Weapon;
 				c.SetasideZone.Add(oldHero.HeroPower);
-				hero.HeroPower = (HeroPower) Entity.FromCard(c, Cards.GetHeroPower(hero.Card[GameTag.HERO_POWER]));
+				hero.HeroPower = (HeroPower) Entity.FromCard(c, Cards.GetHeroPower(hero.Card[GameTag.HERO_POWER]),
+                    new EntityData { [GameTag.CREATOR] = hero.Id });
 				hero.HeroPower.Power?.Trigger?.Activate(hero.HeroPower);
 
 				c.Hero = hero;
+                c.HeroId = hero.Id;
                 if (overdrawPortal != 0) hero[(GameTag)4717] = overdrawPortal;
                 void RebindHeroAura(IAura aura)
                 {

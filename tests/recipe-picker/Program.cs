@@ -208,4 +208,5 @@ try
         "incomplete recipe edit and guide provenance survive restart");
 }
 finally { Directory.Delete(root, true); }
+checks += DeckCodeChecks.Run();
 Console.WriteLine($"{checks} checks passed");

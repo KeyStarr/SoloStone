@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using SabberStoneCore.Enums;
 using SabberStoneCore.Loader;
 using SabberStoneCore.Model;
 
@@ -47,7 +48,9 @@ internal static class CardFactsProof
         var xmlOverlay = ClientOverlay.Read(File.OpenRead(DataPath + "ClientOverlay.xml"));
         var facts = CardFacts.Read(File.OpenRead(FilePath), CardFacts.Meta);
 
-        var expected = ClientOverlay.AddTo(CardLoader.LoadDefinitions(xmlBase), xmlOverlay);
+        var baseCards = CardLoader.LoadDefinitions(xmlBase);
+        AddSpellSchools(baseCards);
+        var expected = ClientOverlay.AddTo(baseCards, xmlOverlay);
         var actual = ClientOverlay.AddTo(facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray(), facts.Overlay);
         Check(expected.Length == 8333 + 2381 && actual.Length == expected.Length, "card count " + actual.Length);
         var differences = new List<string>();
@@ -58,6 +61,24 @@ internal static class CardFactsProof
         CheckEmpty(differences, "overlay rows");
         ComparatorSeesEveryDifference(xmlOverlay);
         Console.WriteLine($"PASS card file: {actual.Length} cards and {facts.Overlay.Cards.Length} overlay rows equal the XML path, {CardFields.Length} fields each");
+    }
+
+    /// <summary>The generator's one input besides the XMLs (private/tools/gen_card_facts.py): the base rows come from a card build that
+    /// predates spell schools, so a base row without tag 1635 takes the client export's school. Nothing else is taken from the export.</summary>
+    private static void AddSpellSchools(Card[] baseCards)
+    {
+        var export = ClientExport.RequireCards();
+        int added = 0;
+        foreach (var card in baseCards)
+        {
+            if (card.Tags.ContainsKey(GameTag.SPELL_SCHOOL) || !export.TryGetValue(card.Id, out var row)
+                || !row.GetProperty("tags").TryGetProperty("1635", out var school)) continue;
+            var tags = card.Tags.Concat(new[] { new KeyValuePair<GameTag, int>(GameTag.SPELL_SCHOOL, school.GetInt32()) }).OrderBy(pair => (int)pair.Key).ToList();
+            card.Tags.Clear();
+            foreach (var pair in tags) card.Tags[pair.Key] = pair.Value;
+            added++;
+        }
+        Check(added == 579, "the export adds a spell school to 579 base rows: " + added);
     }
 
     private static void Compare(Card expected, Card actual, List<string> differences)

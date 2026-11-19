@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var ctx = new EffectContext(g, c.Id, s.Id);
                 for (int i = 0; i < 2; i++)
                 {
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable).Cast<ICharacter>()
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable).Cast<ICharacter>()
                         .Append(c.Opponent.Hero).Where(e => !e.IsDead).ToArray();
                     if (enemies.Length == 0) break;
                     int health = enemies.Min(e => e.Health);

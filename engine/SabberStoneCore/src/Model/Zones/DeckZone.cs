@@ -110,7 +110,7 @@ namespace SabberStoneCore.Model.Zones
 
 		public void Fill(IReadOnlyCollection<string> excludeIds = null)
 		{
-			IReadOnlyList<Card> cards = Game.FormatType == FormatType.FT_STANDARD ? Controller.Standard : Controller.Wild;
+			IReadOnlyList<Card> cards = Cards.RandomPool(Game, PoolDestination.Deck).ClassAndNeutral(Controller.HeroClass);
 			int cardsToAdd = StartingCards - _count;
 
 			Game.Log(LogLevel.INFO, BlockType.PLAY, "Deck", !Game.Logging ? "" :

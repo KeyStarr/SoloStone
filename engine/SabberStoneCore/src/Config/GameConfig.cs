@@ -19,6 +19,9 @@ using System.Collections.Generic;
 
 namespace SabberStoneCore.Config
 {
+	/// <summary>Pool policy of a match for random generation.</summary>
+	public enum GenerationFormat { Standard, Wild }
+
 	/// <summary>
 	/// Holds all configuration values to create a new <see cref="Game"/> instance.
 	/// </summary>
@@ -202,6 +205,17 @@ namespace SabberStoneCore.Config
 
 		// Only schema-2 replay hosts may select this; MemberwiseClone preserves it.
 		internal bool LegacyPoolReplay { get; set; }
+
+		/// <summary>
+		/// Which card pool this match's random effects (random minions, random cards, random spells, Discover)
+		/// draw from. It is the match's pool policy and is deliberately not derived from <see cref="FormatType"/>,
+		/// which also reaches the client. Wild is Standard plus an empty extension hook until Wild pools exist.
+		/// </summary>
+		public GenerationFormat PoolFormat { get; set; } = GenerationFormat.Standard;
+
+		// Replay hosts set this for records written before the random pool policy was recorded: they keep the
+		// frozen legacy lists, like UnversionedDarkGiftReplay does for gifts. MemberwiseClone preserves it.
+		internal bool UnversionedRandomPoolReplay { get; set; }
 
 		// Replay hosts supply verified historical membership; ordinary games use the installed catalog.
 		[field: NonSerialized]

@@ -22,7 +22,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { Aura=new Aura(AuraType.HAND,Effects.ReduceCost(2)) {
                 Restless=true, Condition=new SelfCondition(p=>p is Spell && p.Card[GameTag.SPELL_SCHOOL]==1
-                    && p.Controller.BoardZone.Count(m=>m.Card.IsRace(Race.DRAGON) && !m.IsDormant && !m.ToBeDestroyed)>1)
+                    && p.Controller.BoardZone.CountInteractable(m=>m.Card.IsRace(Race.DRAGON) && !m.ToBeDestroyed)>1)
             } };
         }
         [StandardCard("TIME_852t1",119527)]

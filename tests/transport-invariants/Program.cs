@@ -37,6 +37,33 @@ internal static class Program
                 return 0;
             }
             if (args is ["--card-state-only"]) { TransportHooks.Install(); CardStateChecks.Run(); return 0; }
+            if (args.Length >= 1 && args[0] == "--renew-replay-tail") { TransportHooks.Install(); return ReplayRenewal.Run(args); }
+            if (args is ["--replay-tail-renew-only"]) { TransportHooks.Install(); ReplayRenewProof.Run(); return 0; }
+            if (args.Length >= 1 && args[0] == "--search-deathrattle-replay")
+            {
+                // Looks for a game on the current engine that holds the Felhunter case: Ravenous Felhunter (EDR_891) in a deck, exactly the accepted
+                // finding, no violation. Same pair first, then the other pairs holding the card; seeds 0.. up to the cap (default 200 games).
+                TransportHooks.Install();
+                int cap = args.Length > 1 ? int.Parse(args[1]) : 200, tried = 0;
+                var ids = HsSim.Simulation.DeckIds("standard-batch-1").Where(id => HsSim.Simulation.Deck(id).Cards.Contains("EDR_891")).ToArray();
+                var pairs = new List<(string, string)> { ("standard-batch-1-21", "standard-batch-1-25") };
+                foreach (string a in HsSim.Simulation.DeckIds("standard-batch-1")) foreach (string b in HsSim.Simulation.DeckIds("standard-batch-1"))
+                    if ((ids.Contains(a) || ids.Contains(b)) && !pairs.Contains((a, b))) pairs.Add((a, b));
+                for (int seed = 0; seed < 400 && tried < cap; seed++)
+                foreach (var (first, second) in pairs.Take(seed == 0 ? pairs.Count : 1))
+                {
+                    if (tried++ >= cap) break;
+                    var candidate = new TransportReplay { Game = new() { Id = $"standard-batch-1-{first}-vs-{second}-s{seed}-random", Suite = "standard-batch-1", Player = first, Opponent = second, Seed = seed } };
+                    try
+                    {
+                        var trial = new Runner(); var shape = trial.Run(candidate, verify: false);
+                        bool hit = trial.ViolationCount == 0 && trial.Completed.Values.Sum() == 1 && DeathrattleReplayProof.FelhunterDeathrattleBlocks(trial.LastGame) >= 2;
+                        Console.WriteLine($"{(hit ? "HIT " : "miss")} {first} vs {second} s{seed}: violations={trial.ViolationCount} findings={shape.Findings.Count} {string.Join(",", shape.Findings.Select(f => f.Rule + "/" + f.Card))}");
+                    }
+                    catch (Exception e) when (e is InvalidOperationException or HsSim.InvariantException) { Console.WriteLine($"error {first} vs {second} s{seed}: {e.Message}"); }
+                }
+                return 0;
+            }
             if (args is ["--deathrattle-replay-only"])
             {
                 TransportHooks.Install();
@@ -153,6 +180,7 @@ internal static class Program
                 GodfreyHistoryProof.Run();
                 PrivateReturnProof.Run();
                 DeathrattleReplayProof.Run();
+                ReplayRenewProof.Run();
                 AutoCastProof.Run();
                 CenariusProof.Run();
                 ResultSettlementObserverProof.Run();

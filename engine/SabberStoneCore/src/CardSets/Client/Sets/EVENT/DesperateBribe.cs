@@ -30,7 +30,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         Generic.SummonBlock(g, body, owner.BoardZone.SlotCount, s);
                         g.DeathProcessingAndAuraUpdate();
                     }
-                foreach (var minion in c.BoardZone.Where(m => !m.IsDormant && !m.ToBeDestroyed).ToArray())
+                foreach (var minion in c.BoardZone.Interactable.Where(m => !m.Untouchable && !m.ToBeDestroyed).ToArray())
                 {
                     if (minion.Zone != c.BoardZone || minion.ToBeDestroyed) continue;
                     var chosen = EventCardPools.PickMinion(g, c, s, minion.Card.Cost + 1, PoolDestination.Transform);

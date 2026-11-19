@@ -8,6 +8,7 @@ using SabberStoneCore.Kettle;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Model.Events;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCore.Tasks.SimpleTasks;
 
 namespace SabberStoneCore.Model.Rewind
 {
@@ -47,14 +48,41 @@ namespace SabberStoneCore.Model.Rewind
                 ((Entity)source).GetNativeGameTag(GameTag.REWIND) == 1 && source[GameTag.USED_REWIND] < Budget(source.Card.Id);
         }
 
-        public static bool TryBegin(Game game, PlayerTask task)
+        internal static bool IsLegalTask(Game game, PlayerTask task) => game.CurrentPlayer.Options().Any(option =>
+            option.PlayerTaskType == task.PlayerTaskType &&
+            (option.Source?.Id ?? game.CurrentPlayer.Hero.HeroPower.Id) == (task.Source?.Id ?? game.CurrentPlayer.Hero.HeroPower.Id) &&
+            option.ActionTarget?.Id == task.ActionTarget?.Id && Math.Max(0, option.ChooseOne) == Math.Max(0, task.ChooseOne) &&
+            (task is not PlayCardTask play || play.ZonePosition == -1 || play.ZonePosition == ((PlayCardTask)option).ZonePosition));
+
+        public static bool TryBegin(Game game, PlayerTask task) => TryBegin(game, task, out _);
+
+        internal static bool TryBegin(Game game, PlayerTask task, out bool settled)
         {
+            settled = false;
             if (!WouldBegin(game, task)) return false;
+            // Deathrattles can append summons after cleanup's summon catch-up. Settle them before taking the baseline.
+            if (!game.IsSnapshotBoundary && !game.ResolvingPlayerAction && game.Resolution.IsQuiescent && game.TaskQueue.IsQuiescent)
+            {
+                if (!IsLegalTask(game, task)) return false;
+                settled = true;
+                game.WarnRewindBoundary($"Settling source={task.Source?.Id ?? game.CurrentPlayer.Hero.HeroPower.Id}: {game.SnapshotBoundaryError}");
+                int iterations = 0;
+                do { game.DeathProcessingAndAuraUpdate(); iterations++; }
+                while (game.SummonedMinions.Count != 0 && game.State == State.RUNNING &&
+                    game.Player1.Choice == null && game.Player2.Choice == null &&
+                    !game.Resolution.HasSuspendedEffect && game.SpellCompletion == null && iterations < 64);
+                if (iterations == 64 && game.SummonedMinions.Count != 0)
+                    game.WarnRewindBoundary($"Settlement limit=64 source={task.Source?.Id ?? game.CurrentPlayer.Hero.HeroPower.Id}: {game.SnapshotBoundaryError}");
+                if (game.Resolution.HasSuspendedEffect || game.SpellCompletion != null ||
+                    game.State != State.RUNNING || game.Player1.Choice != null || game.Player2.Choice != null || !IsLegalTask(game, task)) return false;
+            }
             if (!game.IsSnapshotBoundary)
             {
                 SkippedNonQuiescentBoundaries++;
+                game.WarnRewindBoundary($"Skipped source={task.Source?.Id ?? game.CurrentPlayer.Hero.HeroPower.Id}: {game.SnapshotBoundaryError}");
                 return false;
             }
+            if (!WouldBegin(game, task)) return false;
             bool heroPower = task is HeroPowerTask;
             var source = heroPower ? task.Source ?? game.CurrentPlayer.Hero.HeroPower : game.IdEntityDic[task.Source.Id];
             game.Rewind = new RewindTransaction {
@@ -178,9 +206,18 @@ namespace SabberStoneCore.Model.Rewind
                 source is Spell ? ResolutionKind.SpellText : ResolutionKind.Battlecry, source.Id);
             using var cast = source is Spell spell ? game.Facts.Cast(spell, HistoryCastKind.Effect) : null;
             if (cast != null) cast.AllowBodyClaim = true;
-            // TaskProcessor opens the repeat's own POWER; a manual wrapper would nest same-source POWERs (no VFX targets).
+            // Queued effects own their POWER; direct decision recipes open theirs below.
             game.TaskQueue.StartEvent();
-            source.ActivateTask(PowerActivation.POWER, target, transaction.ChooseOne);
+            // Morchie's effect-only repeat owns normal decisions, without a second hand-play completion.
+            var recipe = (source.Power?.PowerTask as DecisionBattlecryTask)?.Recipe ??
+                (source.Power?.PowerTask as DecisionSpellTask)?.Recipe;
+            if (recipe != null)
+            {
+                if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.POWER, source.Id, "", -1, target?.Id ?? 0));
+                recipe.Process(game, source.Controller, source, target);
+                if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            }
+            else source.ActivateTask(PowerActivation.POWER, target, transaction.ChooseOne);
             game.ProcessTasks();
             game.TaskQueue.EndEvent();
             game.DeathProcessingAndAuraUpdate();
@@ -209,6 +246,7 @@ namespace SabberStoneCore.Model.Rewind
             // Logging is receiver policy; exact clones retain baseline bytes from their logging source.
             if (baseline.FormatType != game.FormatType || baseline.History != game.History ||
                 baseline.EnableCorpses != game.EnableCorpses ||
+                baseline.PoolFormat != game.PoolFormat || baseline.UnversionedRandomPoolReplay != game.UnversionedRandomPoolReplay ||
                 baseline.State != State.RUNNING || baseline.Step != Step.MAIN_ACTION ||
                 baseline.CurrentPlayer.Id != t.ControllerId || baseline.Player1.Choice != null || baseline.Player2.Choice != null ||
                 source == null ||

@@ -16,7 +16,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);
-                var minions = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).ToArray();
+                var minions = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToArray();
                 var locations = c.Opponent.BoardZone.GetLocations().ToArray();
                 if (minions.Length > 0) {
                     int selected = g.Random.Next(minions.Length); g.OnRandomHappened(true);

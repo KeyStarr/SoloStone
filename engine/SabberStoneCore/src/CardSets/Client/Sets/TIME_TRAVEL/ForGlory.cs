@@ -13,7 +13,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power {
-                Aura = new AdaptiveCostEffect(p => p.Controller.Opponent.BoardZone.Count),
+                Aura = new AdaptiveCostEffect(p => p.Controller.Opponent.BoardZone.CountExceptUntouchables),
                 PowerTask = new DrawTask(2)
             };
         }

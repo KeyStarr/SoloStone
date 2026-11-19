@@ -20,7 +20,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 EitherTurn = true,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     if (!(s is Minion source) || source.IsDead || source.Zone != c.BoardZone || source.Untouchable) return;
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable)
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable)
                         .Cast<IPlayable>().Append(c.Opponent.Hero).ToArray();
                     var enemy = enemies[g.Random.Next(enemies.Length)];
                     g.OnRandomHappened(true);

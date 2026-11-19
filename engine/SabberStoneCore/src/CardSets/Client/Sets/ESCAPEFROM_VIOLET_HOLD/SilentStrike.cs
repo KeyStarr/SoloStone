@@ -23,7 +23,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 ctx.GiveBuff(t.Id, "CAP_001e");
                 if (!minion.HasStealth) return;
                 var targets = new TaskStack();
-                if (new RandomTask(1, EntityType.OP_MINIONS).Process(g, c, s, t, targets) == TaskState.STOP) return;
+                if (RandomTask.Harmful(1, EntityType.OP_MINIONS).Process(g, c, s, t, targets) == TaskState.STOP) return;
                 ctx.Damage(targets.Playables[0].Id, minion.AttackDamage, spellDamage: true);
             }) };
         }

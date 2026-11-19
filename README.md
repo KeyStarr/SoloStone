@@ -3,7 +3,7 @@
 # SoloStone
 
 > [!WARNING]
-> **Alpha 0.2.1.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
+> **Alpha 0.3.0.** SoloStone is in early playtesting, so bugs and blockers can happen. Feedback is very welcome:
 > if anything goes wrong, tell us on [Discord](https://discord.gg/e45QgKHmC2) or open an
 > [issue](https://github.com/KeyStarr/SoloStone/issues).
 
@@ -25,7 +25,7 @@ casual matches, deck building, packs and progress, all kept on your machine.
 You need Windows 10 or 11 (64-bit), Hearthstone installed through Battle.net, and about 12.5 GB free.
 
 1. **Quit Battle.net**: right-click its icon in the tray, choose **Quit**. Do this every time before you play.
-2. Download **`SoloStone-Setup-0.2.1.exe`** from the [latest release](https://github.com/KeyStarr/SoloStone/releases/latest).
+2. Download **`SoloStone-Setup-0.3.0.exe`** from the [latest release](https://github.com/KeyStarr/SoloStone/releases/latest).
 3. Run it. Windows shows a blue **"Windows protected your PC"** page, because the installer has no paid code-signing
    certificate. Click **More info**, then **Run anyway**.
 4. Follow the five setup steps. When Windows asks for permission (for the firewall rules), click **Yes**.

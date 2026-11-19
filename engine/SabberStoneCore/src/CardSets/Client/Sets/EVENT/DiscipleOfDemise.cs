@@ -23,8 +23,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int attempts = 1 + c.HandZone.Count(p => p.Card.Type == CardType.MINION && p.Card.IsRace(Race.DRAGON));
                 for (int i = 0; i < attempts; i++)
                 {
-                    var victims = c.BoardZone.Concat(c.Opponent.BoardZone)
-                        .Where(m => m.Id != s.Id && !m.IsDormant && !m.ToBeDestroyed).ToArray();
+                    var victims = c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable)
+                        .Where(m => m.Id != s.Id && !m.Untouchable && !m.IsDead).ToArray();
                     if (victims.Length == 0) break;
                     new DestroyTask(EntityType.TARGET, true).Process(g, c, s, victims[g.Random.Next(victims.Length)], stack);
                 }

@@ -12,6 +12,7 @@ namespace SabberStoneCore.Tasks
         internal static SuspendableTask FromDefinitionKey(string key) => new SuspendableTask(key);
         internal SuspendableTask(string key, ISimpleTask[] steps)
         {
+            SimpleTasks.RandomTask.MarkHarmfulPicks(steps);
             EffectFrameRecipes.Register(key, steps);
             RecipeKey = key;
         }
