@@ -19,8 +19,13 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g,c,s,t,stack) => {
-                if (c.AppliedEnchantments?.Any(e => e.Card.Id == "TIME_618e") != true)
-                    Enchantment.GetInstance(c, (IPlayable)s, c, Cards.FromId("TIME_618e"));
+                if (c.AppliedEnchantments?.Any(e => e.Card.Id == "TIME_618e") == true) return;
+                Enchantment.GetInstance(c, (IPlayable)s, c, Cards.FromId("TIME_618e"));
+                // The client draws the hero Deathrattle skull from the hero's PLAYER_DEATHRATTLE tag, whose value is
+                // the entity id of the set-aside "Eternal Life" card it shows on hover.
+                var life = Entity.FromCard(c, Cards.FromId("TIME_618t"),
+                    new EntityData { [GameTag.CREATOR] = s.Id }, zone: c.SetasideZone);
+                c.Hero[CorpseRules.PlayerDeathrattle] = life.Id;
             }) };
         }
         [StandardCard("TIME_618e", 126656)]

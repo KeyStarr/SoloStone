@@ -10,6 +10,8 @@ namespace SabberStoneCore.Actions
     {
         // Pinned RLK_008t/RLK_061t restriction; the client supplies no trustworthy enum name.
         private const GameTag NoCorpse = (GameTag)2217;
+        /// <summary>Hero tag PLAYER_DEATHRATTLE: entity id of the card the client shows beside the hero's Deathrattle skull.</summary>
+        internal const GameTag PlayerDeathrattle = (GameTag)4398;
         public static int Available(Controller controller) =>
             Math.Max(0, checked(controller[GameTag.CORPSES] - controller[GameTag.CORPSES_SPENT_THIS_GAME]));
 
@@ -41,6 +43,16 @@ namespace SabberStoneCore.Actions
             return TrySpend(controller, amount) ? amount : 0;
         }
 
+        /// <summary>The skull follows the player-level grant, so a replacement hero takes it over from the old one.</summary>
+        internal static void CarryPlayerDeathrattle(Hero oldHero, Hero newHero)
+        {
+            if (oldHero == null || oldHero == newHero) return;
+            int linked = oldHero[PlayerDeathrattle];
+            if (linked == 0) return;
+            oldHero[PlayerDeathrattle] = 0;
+            newHero[PlayerDeathrattle] = linked;
+        }
+
         internal static void ResurrectHeroes(Model.Game game)
         {
             if (game.State == State.COMPLETE) return;
@@ -50,6 +62,7 @@ namespace SabberStoneCore.Actions
                 var grant = owner.AppliedEnchantments?.FirstOrDefault(e => e.Card.Id == "TIME_618e");
                 if (grant == null) continue;
                 grant.Remove();
+                owner.Hero[PlayerDeathrattle] = 0;
                 int paid = SpendUpTo(owner, 20);
                 if (paid == 0) continue;
                 owner.Hero.ToBeDestroyed = false;

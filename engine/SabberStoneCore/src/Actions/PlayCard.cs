@@ -283,6 +283,7 @@ namespace SabberStoneCore.Actions
 				c.Hero = hero;
                 c.HeroId = hero.Id;
                 if (overdrawPortal != 0) hero[(GameTag)4717] = overdrawPortal;
+                CorpseRules.CarryPlayerDeathrattle(oldHero, hero);
                 void RebindHeroAura(IAura aura)
                 {
                     if (aura is MultiAura multiple)

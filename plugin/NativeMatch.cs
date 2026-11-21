@@ -118,6 +118,7 @@ public sealed class NativeMatch
         (GameTag)1077, // CASTS_WHEN_DRAWN: TooltipPanelManager reads the Casts When Drawn keyword.
         (GameTag)4706, // Exported either-side placement companion flag.
         (GameTag)4717, // Hero spell 330: Godfrey's persistent deck portal.
+        (GameTag)4398, // PLAYER_DEATHRATTLE: hero tag holding the entity id of the card PlayerDeathrattle shows beside the hero skull.
         (GameTag)3128, // SUMMONED_WHEN_DRAWN: exported Tortollan Ninja keyword.
         GameTag.DISPLAY_CARD_ON_MOUSEOVER, // Card and DisplayCardsInToolip show related cards.
         GameTag.REBORN, // EntityBase.HasReborn and Card death presentation.
