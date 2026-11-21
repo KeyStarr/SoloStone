@@ -1,7 +1,9 @@
+using SabberStoneCore.Actions;
 using SabberStoneCore.Conditions;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
+using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
 using SabberStoneCore.Triggers;
@@ -18,7 +20,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.AFTER_ATTACK) {
                 TriggerSource = TriggerSource.SELF,
                 Condition = SelfCondition.IsNotDead,
-                SingleTask = ComplexTask.Create(new DrawTask(), new MoveToSetaside(EntityType.SOURCE))
+                SingleTask = ComplexTask.Create(new DrawTask(), new CustomTask((g, c, s, t, stack) => { if (s is Minion m && m.Zone == m.Controller.BoardZone) Generic.RemoveMinionFromGame(m); }))
             } };
         }
     }

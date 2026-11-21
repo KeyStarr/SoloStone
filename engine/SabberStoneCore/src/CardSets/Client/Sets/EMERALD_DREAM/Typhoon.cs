@@ -30,7 +30,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         minion.Controller = destination;
                         minion[GameTag.CONTROLLER] = destination.PlayerId;
                     }
-                    if (!Generic.ShuffleIntoDeck(destination, s, minion)) destination.GraveyardZone.Add(minion);
+                    if (!Generic.ShuffleFromBoardIntoDeck(destination, s, minion)) destination.GraveyardZone.Add(minion);
                 }
             }) };
         }

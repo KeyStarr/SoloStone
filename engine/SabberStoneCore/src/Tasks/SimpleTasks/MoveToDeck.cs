@@ -40,6 +40,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			{
 				if (p.Zone?.Type == Zone.DECK)
 					continue;
+				bool fromPlay = p.Zone?.Type == Zone.PLAY;
 				IPlayable removedEntity = p.Zone?.Remove(p) ?? p;
 				removedEntity.Reset();
 				if (removedEntity.Controller != c)
@@ -51,7 +52,8 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				game.Log(LogLevel.INFO, BlockType.PLAY, "MoveToDeck",
 					!game.Logging ? "" : $"{controller.Name} is taking control of {p} and shuffled into his deck.");
 
-				Generic.ShuffleIntoDeck(c, source, p);
+				if (fromPlay) Generic.ShuffleFromBoardIntoDeck(c, source, p);
+				else Generic.ShuffleIntoDeck(c, source, p);
 			}
 			return TaskState.COMPLETE;
 		}

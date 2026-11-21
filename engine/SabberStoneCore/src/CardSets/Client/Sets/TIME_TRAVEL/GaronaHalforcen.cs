@@ -44,7 +44,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var llane=(Minion)s;
                 if(llane.Zone!=c.BoardZone) return;
                 c.BoardZone.Remove(llane); llane.Reset();
-                Generic.ShuffleIntoDeck(c,s,llane);
+                Generic.ShuffleFromBoardIntoDeck(c,s,llane);
             }) };
         }
         [StandardCard("TIME_875t1",119816)]

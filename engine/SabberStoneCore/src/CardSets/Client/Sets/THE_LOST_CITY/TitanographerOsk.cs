@@ -142,9 +142,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static void Banish(Minion minion)
         {
             var owner = minion.Controller;
-            owner.BoardZone.Remove(minion); minion.Reset(); owner.SetasideZone.Add(minion);
-            minion[GameTag.ZONE] = (int)Zone.REMOVEDFROMGAME;
-            if (owner.Game.History) owner.Game.PowerHistory.Add(new PowerHistoryHideEntity { EntityID=minion.Id, Zone=Zone.REMOVEDFROMGAME });
+            Generic.RemoveMinionFromGame(minion);
             owner.Game.AuraUpdate();
         }
         private static void Execute(int ability, Game g, Controller c, IEntity s, IPlayable t, TaskStack stack)

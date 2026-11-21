@@ -111,6 +111,8 @@ internal static partial class Program
         if (args.Contains("--hidden-hand-only")) { NativeMatch.ClockFreeBot = true; HiddenHandCardHistory(); return; }
         if (args.Contains("--morchie-rewind-only")) { NativeMatch.ClockFreeBot = true; MorchieRewindChoices(); return; }
         if (args.Contains("--rewind-settlement-only")) { NativeMatch.ClockFreeBot = true; RewindSettlementNoOp(args.ElementAtOrDefault(1)); return; }
+        if (args.Contains("--leave-board-only")) { NativeMatch.ClockFreeBot = true; LeaveBoardHistory(); return; }
+        if (args.Contains("--escape-artist-only")) { NativeMatch.ClockFreeBot = true; EscapeArtistLeavesHistory(); return; }
         if (args.Contains("--king-llane-only")) { NativeMatch.ClockFreeBot = true; KingLlanePlayHistory(); return; }
         if (args.Contains("--vanguard-only")) { NativeMatch.ClockFreeBot = true; VanguardDrawHistory(); return; }
         if (args.Contains("--broxigar-only")) { NativeMatch.ClockFreeBot = true; BroxigarReturnHistory(); return; }
@@ -292,6 +294,8 @@ internal static partial class Program
             return;
         }
         ForcedAttackReadinessIsPublished();
+        LeaveBoardHistory();
+        EscapeArtistLeavesHistory();
         TransformCopyReadinessIsPublished();
         BefuddledCopyStateIsPublished();
         if (args.Contains("--reveal-animation-only"))
