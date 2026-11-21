@@ -571,7 +571,7 @@ namespace SabberStoneCore.Model.Entities
 						{
 							if (SecretZone.IsFull) // REQ_SECRET_CAP
 								return;
-							if (SecretZone.Any(p => p.Card.AssetId == card.AssetId)) // REQ_UNIQUE_SECRET
+							if (SecretZone.HasSameCard(card)) // REQ_UNIQUE_SECRET, a reprint counts as the same Secret (#225)
 								return;
 						}
 

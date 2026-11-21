@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System.Linq;
 using SabberStoneCore.Conditions;
 using SabberStoneCore.Enchants;
@@ -20,7 +21,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.PLAY_MINION) {
                 TriggerSource = TriggerSource.MINIONS,
                 Condition = new SelfCondition(p => p.Game.HistoryFacts.Query.Plays()
-                    .Count(f => f.ControllerId == p.Controller.Id && f.DbfId == p.Card.AssetId && f.CardType == CardType.MINION) >= 2),
+                    .Count(f => f.ControllerId == p.Controller.Id && CardIdentity.OfDbf(f.DbfId) == p.Card.Identity && f.CardType == CardType.MINION) >= 2),
                 SingleTask = new DrawTask(1)
             } };
         }

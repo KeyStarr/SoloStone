@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
                 if (c.BoardZone.IsFull) return;
                 var pool = c.GraveyardZone.OfType<Minion>()
-                    .Where(m => m.ToBeDestroyed && m.Card.Deathrattle && m.Card.Cost >= 5 && m.Card.Id != s.Card.Id).ToArray();
+                    .Where(m => m.ToBeDestroyed && m.Card.Deathrattle && m.Card.Cost >= 5 && !m.Card.IsSameCardAs(s.Card)).ToArray();
                 if (pool.Length == 0) return;
                 var selected = pool.Length == 1 ? pool[0] : pool[g.Random.Next(pool.Length)];
                 if (pool.Length > 1) g.OnRandomHappened(true);

@@ -69,8 +69,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static Card[] Offers(Game g, Controller c, IEntity s, TaskStack k)
         {
             if (!g.IdEntityDic.TryGetValue(k.Number, out var ship) || ship.Zone != c.BoardZone) return Array.Empty<Card>();
-            var repeated = PayloadRules.Entries(ship, Crew).GroupBy(p => p.Card.Id).Where(group => group.Count() >= 2).Select(group => group.Key).ToHashSet();
-            var candidates = OfflineCardPools.Candidates(g,c.HeroClass,Pirates(),74894,sourceClassMask:OfflineCardPools.PrintedClassMask(s.Card)).Where(card => !repeated.Contains(card.Id)).ToList();
+            var repeated = PayloadRules.Entries(ship, Crew).GroupBy(p => p.Card.Identity).Where(group => group.Count() >= 2).Select(group => group.Key).ToHashSet();
+            var candidates = OfflineCardPools.Candidates(g,c.HeroClass,Pirates(),74894,sourceClassMask:OfflineCardPools.PrintedClassMask(s.Card)).Where(card => !repeated.Contains(card.Identity)).ToList();
             var offers = new List<Card>();
             while (candidates.Count > 0 && offers.Count < 3) {
                 int index = g.Random.Next(candidates.Count); offers.Add(candidates[index]); candidates.RemoveAt(index);

@@ -190,12 +190,12 @@ namespace SabberStoneCore.Actions
         {
             var zone = controller.SecretZone;
             if (card[(GameTag)1192] != 0) return zone.OccupiedSecretSlots + (zone.Quest != null && !zone.ModernQuests.Any(q => q.Card[(GameTag)1192] != 0) ? 1 : 0) < 5
-                && !zone.ModernQuests.Any(q => q.Card.Id == card.Id) && zone.Quest?.Card.Id != card.Id;
+                && !zone.ModernQuests.Any(q => q.Card.IsSameCardAs(card)) && !(zone.Quest != null && zone.Quest.Card.IsSameCardAs(card));
             if (zone.Quest != null) return false;
             if (zone.ModernQuests.Any(q => q.Card[(GameTag)1192] != 0) && zone.IsFull) return false;
             if (zone.ModernQuests.Any(q => q.Card[(GameTag)1192] == 0))
                 return ComponentGroups.TryGetValue(card.AssetId, out int group) && !zone.IsFull
-                    && zone.ModernQuests.Where(q => q.Card[(GameTag)1192] == 0).All(q => q.Card.AssetId != card.AssetId
+                    && zone.ModernQuests.Where(q => q.Card[(GameTag)1192] == 0).All(q => !q.Card.IsSameCardAs(card)
                         && ComponentGroups.TryGetValue(q.Card.AssetId, out int other) && other == group);
             if (Groups.TryGetValue(card.AssetId, out var components)) return zone.FreeSpace >= components.Length;
             // Legacy-only games retain their independent quest slot.

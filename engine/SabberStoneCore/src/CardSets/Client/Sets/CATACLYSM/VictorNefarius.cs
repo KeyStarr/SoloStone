@@ -90,7 +90,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         internal static Card[] Candidates(Game game, Controller controller, bool dragon, int budget = 10) =>
             new[] { PoolScope.Wild }.SelectMany(scope =>
                 OfflineCardPools.Candidates(game, controller.HeroClass, Components(scope, dragon).WithMaxCost(budget), 122778, PoolDestination.Other))
-                .GroupBy(c => c.Id, StringComparer.Ordinal).Select(group => group.First()).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
+                .GroupBy(c => c.Identity).Select(group => group.First()).OrderBy(c => c.Id, StringComparer.Ordinal).ToArray();
         private static Card[] Dragons(Game g, Controller c, IEntity s, TaskStack stack) =>
             AssembleRules.Take(g, Candidates(g,c,true).ToList(), 3);
         private static Card[] Undead(Game g, Controller c, IEntity s, TaskStack stack) => stack.Number == 0 ? Array.Empty<Card>() :

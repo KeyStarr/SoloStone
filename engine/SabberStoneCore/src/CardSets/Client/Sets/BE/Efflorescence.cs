@@ -16,7 +16,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented=true;
             card.ExcludeFromLegacyRandomPools=true;
             card.Power = new Power { PowerTask = new CustomTask((g,c,s,t,k) => {
-                var drawn = new EffectContext(g,c.Id,s.Id).DrawWhere(x => x.Card.Type == CardType.SPELL && x.Card.Id != s.Card.Id);
+                var drawn = new EffectContext(g,c.Id,s.Id).DrawWhere(x => x.Card.Type == CardType.SPELL && !x.Card.IsSameCardAs(s.Card));
                 if (drawn != null && drawn.Zone == c.HandZone && drawn.Card[GameTag.SPELL_SCHOOL] == 4)
                     RepeatRules.Mark(drawn,(IPlayable)s,"BE_801e");
             }) };

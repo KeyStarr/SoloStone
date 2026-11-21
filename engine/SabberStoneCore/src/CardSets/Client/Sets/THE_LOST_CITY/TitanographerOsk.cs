@@ -169,7 +169,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 case 14:
                     if (c.SecretZone.Count >= 5) break;
                     var secrets = OfflineCardPools.Candidates(g,c.HeroClass,Secrets,DbfId, PoolDestination.Other)
-                        .Where(card => !c.SecretZone.Any(active => active.Card.Id == card.Id)).ToArray();
+                        .Where(card => !c.SecretZone.HasSameCard(card)).ToArray();
                     if (secrets.Length > 0) AutoPlayRules.Play(Entity.FromCard(c,secrets[g.Random.Next(secrets.Length)]),s);
                     break;
                 case 15: Buff(g,s,c.Opponent,"TTN_075t2e"); break;

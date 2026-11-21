@@ -25,6 +25,14 @@ namespace SabberStoneCore.Model.Zones
 	{
 		public const int SecretZoneMaxSize = 5;
 
+		/// <summary>Whether a Secret that is the same card as <paramref name="card"/> (a reprint counts, #225) is active here.</summary>
+		public bool HasSameCard(Card card)
+		{
+			foreach (Spell secret in this)
+				if (secret.Card.IsSameCardAs(card)) return true;
+			return false;
+		}
+
 		/// <summary>
 		/// An unique field for Quest.
 		/// Gets or sets the quest in this SecretZone.

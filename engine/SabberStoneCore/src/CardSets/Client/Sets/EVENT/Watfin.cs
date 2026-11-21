@@ -38,7 +38,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             if (!Compatible(original,kind)) {
                 var compatible = candidates.Where(card => Compatible(card,kind)).ToArray();
                 var replacement = compatible[g.Random.Next(compatible.Length)];
-                int existing = Array.FindIndex(offers,card => card.Id == replacement.Id);
+                int existing = Array.FindIndex(offers,card => card.IsSameCardAs(replacement));
                 if (existing >= 0) offers[existing] = original;
                 original = replacement;
             }

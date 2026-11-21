@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System;
 using System.Linq;
 using SabberStoneCore.Actions;
@@ -37,7 +38,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             OldGodRules.Branch("engine/old-god/nzoth/army/v1",1,
                 OldGodRules.Power((g,c,s,t,stack) => {
                     var dead = g.HistoryFacts.Query.Deaths().Where(f => f.ControllerId == c.Id && f.Definition.ReadDefinition().Deathrattle)
-                        .GroupBy(f => f.DbfId).Select(group => group.First().Definition.Materialize()).OrderBy(card => card.AssetId).ToList();
+                        .GroupBy(f => CardIdentity.OfDbf(f.DbfId)).Select(group => group.First().Definition.Materialize()).OrderBy(card => card.AssetId).ToList();
                     var ctx = new EffectContext(g,c.Id,stack.Number2);
                     for (int i = 0; i < 4 && dead.Count > 0 && !c.BoardZone.IsFull; i++) {
                         int pick = g.Random.Next(dead.Count); var card = dead[pick]; dead.RemoveAt(pick); ctx.Summon(card.Id);

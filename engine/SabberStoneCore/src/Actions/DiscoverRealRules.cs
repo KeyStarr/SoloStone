@@ -197,7 +197,7 @@ namespace SabberStoneCore.Actions
                 chooser.Opponent.HandZone.AsEnumerable()).ToList();
             bool distinct = source == DiscoverEntitySource.Deck || source == DiscoverEntitySource.EnemyDeckMinions || source == DiscoverEntitySource.EnemyDeck;
             if (!distinct) return Take(cards, count, chooser.Game).ToArray();
-            var groups = cards.GroupBy(p => p.Card.Id, StringComparer.Ordinal).Select(g => g.ToList()).ToList();
+            var groups = cards.GroupBy(p => p.Card.Identity).Select(g => g.ToList()).ToList();
             return Take(groups, count, chooser.Game).Select(g => g.Count == 1 ? g[0] : g[chooser.Game.Random.Next(g.Count)]).ToArray();
         }
 

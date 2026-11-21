@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System.Linq;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enchants;
@@ -12,11 +13,11 @@ namespace SabberStoneCore.CardSets.Client.Sets
     {
         internal const int DbfId = 121672;
         private static int[] Plays(IPlayable source) => source.Game.HistoryFacts.Query.Plays()
-            .Where(p => p.ControllerId == source.Controller.Id && p.DefinitionKnown).Select(p => p.DbfId).ToArray();
+            .Where(p => p.ControllerId == source.Controller.Id && p.DefinitionKnown).Select(p => CardIdentity.OfDbf(p.DbfId)).ToArray(); // a played reprint counts as its original (#225)
         private static int Count(IPlayable source)
         {
             var played = Plays(source).ToHashSet();
-            return source.Controller.DeckZone.Count(c => played.Contains(c.Card.AssetId));
+            return source.Controller.DeckZone.Count(c => played.Contains(c.Card.Identity));
         }
         [StandardCard("TIME_103",DbfId)]
         internal static void Configure(Card card)
@@ -27,7 +28,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { DeathrattleTask = new CustomTask((g,c,s,t,stack) => {
                 foreach (int dbf in Plays((IPlayable)s))
                 {
-                    var matches = c.DeckZone.Where(x => x.Card.AssetId == dbf).ToArray();
+                    var matches = c.DeckZone.Where(x => x.Card.Identity == dbf).ToArray();
                     if (matches.Length == 0) continue;
                     g.OnRandomHappened(true);
                     Generic.Draw(c,matches[g.Random.Next(matches.Length)]);

@@ -28,7 +28,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static IEnumerable<IPlayable> MatchingEnemies(IPlayable source) => source.Controller.Opponent.DeckZone.IsFull
             ? Enumerable.Empty<IPlayable>()
             : source.Controller.Opponent.HandZone
-                .Where(enemy => source.Controller.HandZone.Any(own => own.Id != source.Id && own.Card.Id == enemy.Card.Id));
+                .Where(enemy => source.Controller.HandZone.Any(own => own.Id != source.Id && own.Card.IsSameCardAs(enemy.Card)));
         private static bool HasSharedCard(IPlayable source) => MatchingEnemies(source).Any();
     }
 }

@@ -126,6 +126,7 @@ if (args.Contains("--untouchable-only"))
     if (untouchableFailures.Count != 0) throw new Exception(string.Join("\n", untouchableFailures));
     return;
 }
+if (args.Contains("--reprint-identity-only")) { ReprintIdentityProof.Run(); ReprintIdentitySourceCheck.Run(); return; }
 if (args.Contains("--floop-taunt-only")) { FloopTauntProof.Run(); return; }
 if (args.Contains("--weapon-keywords-only")) { WeaponKeywordProof.Run(); return; }
 if (args.Contains("--weapon-damage-only")) { DamageWeaponTaskProof.Run(); return; }
@@ -621,6 +622,8 @@ PoisonousDamageProof.Run();
 TargetingRulesProof.Run();
 UntouchableBoardProof.Run();
 UntouchableBoardSourceCheck.Run();
+ReprintIdentityProof.Run();
+ReprintIdentitySourceCheck.Run();
 DamageWeaponTaskProof.Run();
 WeaponKeywordProof.Run();
 MultiAuraCleanupProof.Run();
