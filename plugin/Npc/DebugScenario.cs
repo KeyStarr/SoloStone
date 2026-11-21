@@ -13,6 +13,10 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 // One-shot debug scenario (docs/agent-workflows/steam-deck.md, `deck.py scenario`): stages the NEXT match so a live run can
 // show a specific situation (the NPC drawing Illusion first, a human with Fyrakk on turn 1, ...). The file is key=value lines:
 //   npcDeckTop=ID,ID   humanDeckTop=ID,...   (new hidden deck entities, drawn in the listed order)
+//   humanStartOfGame=ID,... npcStartOfGame=ID,... (up to three sources each, added at deck bottom; effects use MainBegin).
+//       Eligibility is checked when applied: after the deal, mulligans and humanDeckTop, not before the deal. Godfrey (JAIL_509) has no condition.
+//       Staged cards are not added to the controller's recorded starting deck (DeckCards), so starting/opening-deck conditions can differ from retail:
+//       Nozdormu reads the opponent's DeckCards; Mug'Zee reads DeckCards when it resolves.
 //   humanOpeningHand=ID,... npcOpeningHand=ID,... (replace opening slots before mulligan offers; Coin excluded)
 //   npcHand=ID,...     humanHand=ID,...      (new cards added to the hand before turn 1)
 //   npcBoard=ID,...    humanBoard=ID,...     (up to seven minions/locations before turn 1)
@@ -73,10 +77,12 @@ public sealed class DebugScenario
     public static Outcome LastOutcome { get; private set; }
     internal static void RecordOutcome(string status, string detail, string runId) =>
         LastOutcome = new Outcome { Status = status, Detail = detail, RunId = runId };
-    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanOpeningHand", "npcOpeningHand", "npcHand", "npcPlayNext", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanCorpses", "npcCorpses", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
+    private static readonly string[] Keys = { "npcDeckTop", "humanDeckTop", "humanStartOfGame", "npcStartOfGame", "humanOpeningHand", "npcOpeningHand", "npcHand", "npcPlayNext", "humanHand", "npcBoard", "humanBoard", "npcBoardStats", "humanBoardStats", "npcSummonStats", "humanHandMods", "humanHandHealth", "humanHandHealthWing", "humanHandClear", "humanManaRaw", "npcManaRaw", "npcMana", "humanMana", "humanCorpses", "npcCorpses", "humanSkin", "npcSkin", "heroAttack", "heroPower", "heroPowerUpgrade", "attackSecret", "attackArmor", "attackWeapon", "attackLethal", "humanSeat", "overdraw", "runId" };
 
     public IReadOnlyList<string> NpcDeckTop { get; private set; } = new string[0];
     public IReadOnlyList<string> HumanDeckTop { get; private set; } = new string[0];
+    public IReadOnlyList<string> HumanStartOfGame { get; private set; } = new string[0];
+    public IReadOnlyList<string> NpcStartOfGame { get; private set; } = new string[0];
     public IReadOnlyList<string> NpcHand { get; private set; } = new string[0];
     // One scripted NPC play: the card and an optional target kind (see npcPlayNext in the header).
     public sealed class NpcPlay
@@ -234,6 +240,7 @@ public sealed class DebugScenario
             AttackWeapon = Choice(values, "attackWeapon", "none", "TLC_478", "CS2_106"),
             AttackArmor = Number(values, "attackArmor", 0, 30), AttackLethal = Number(values, "attackLethal", 0, 1) == 1,
             NpcDeckTop = Cards(values, "npcDeckTop", MaxDeckTop, known), HumanDeckTop = Cards(values, "humanDeckTop", MaxDeckTop, known),
+            HumanStartOfGame = Cards(values, "humanStartOfGame", 3, known), NpcStartOfGame = Cards(values, "npcStartOfGame", 3, known),
             HumanOpeningHand = Cards(values, "humanOpeningHand", 4, known), NpcOpeningHand = Cards(values, "npcOpeningHand", 4, known),
             NpcHand = Cards(values, "npcHand", MaxHand, known), HumanHand = humanHand, NpcPlayNext = NpcPlays(values, known),
             HumanHandMods = HandMods(values, "humanHandMods", humanHand, known),
@@ -403,6 +410,10 @@ public sealed class DebugScenario
             if (key.EndsWith("Board", StringComparison.Ordinal) && type != "MINION" && type != "LOCATION")
                 throw new ArgumentException(key + ": " + id + " is not a board minion or location.");
             if (known != null && !known(id)) throw new ArgumentException(key + ": " + id + " has no native client definition.");
+#if ENGINE_SOURCE
+            if (key.EndsWith("StartOfGame", StringComparison.Ordinal) && !SabberStoneCore.Actions.StartOfGameRules.HasEffect(EngineCards.FromId(id)))
+                throw new ArgumentException(key + ": " + id + " has no Start of Game effect.");
+#endif
         }
         return ids;
     }
@@ -420,6 +431,7 @@ public sealed class DebugScenario
         var lines = new List<string>();
         void Add(string key, IReadOnlyList<string> ids) { if (ids.Count > 0) lines.Add(key + "=" + string.Join(",", ids)); }
         Add("npcDeckTop", NpcDeckTop); Add("humanDeckTop", HumanDeckTop); Add("npcHand", NpcHand); Add("humanHand", HumanHand);
+        Add("humanStartOfGame", HumanStartOfGame); Add("npcStartOfGame", NpcStartOfGame);
         if (NpcPlayNext.Count > 0) lines.Add("npcPlayNext=" + string.Join(",", NpcPlayNext));
         Add("humanOpeningHand", HumanOpeningHand); Add("npcOpeningHand", NpcOpeningHand);
         Add("npcBoard", NpcBoard); Add("humanBoard", HumanBoard);
@@ -545,7 +557,7 @@ public sealed class DebugScenario
             if (hand > 0 && player.HandZone.FreeSpace < hand + 1) return name + " hand has no room for " + hand + " more cards plus its draw.";
             return null;
         }
-        foreach (string id in NpcDeckTop.Concat(HumanDeckTop).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard))
+        foreach (string id in NpcDeckTop.Concat(HumanDeckTop).Concat(HumanStartOfGame).Concat(NpcStartOfGame).Concat(NpcHand).Concat(HumanHand).Concat(HumanOpeningHand).Concat(NpcOpeningHand).Concat(NpcBoard).Concat(HumanBoard))
             if (EngineCards.FromId(id) == null) return "unknown card " + id;
         if (HumanCorpses.HasValue && (!game.EnableCorpses || game.Player1.Hero.Card.Class != SabberStoneCore.Enums.CardClass.DEATHKNIGHT))
             return "humanCorpses needs a Death Knight with Corpses enabled.";
@@ -556,7 +568,8 @@ public sealed class DebugScenario
         if (HumanSkin != null && HeroSkinData.All[HumanSkin].BaseHero != game.Player1.Hero.Card.Id) return "humanSkin class mismatch";
         if (NpcSkin != null && HeroSkinData.All[NpcSkin].BaseHero != game.Player2.Hero.Card.Id) return "npcSkin class mismatch";
         if (game.Player2.BoardZone.FreeSpace < NpcBoard.Count || game.Player1.BoardZone.FreeSpace < HumanBoard.Count) return "Board has no room for scenario bodies.";
-        return Fit(game.Player2, "NPC", NpcDeckTop.Count, NpcHand.Count) ?? Fit(game.Player1, "Human", HumanDeckTop.Count, HumanHand.Count);
+        return Fit(game.Player2, "NPC", NpcDeckTop.Count + NpcStartOfGame.Count, NpcHand.Count)
+            ?? Fit(game.Player1, "Human", HumanDeckTop.Count + HumanStartOfGame.Count, HumanHand.Count);
     }
 
     // The NPC's next scripted play, or null (queue empty, or the NPC is not at a main-action decision: choices consume nothing).
@@ -671,6 +684,15 @@ public sealed class DebugScenario
             for (int i = ids.Count - 1; i >= 0; i--) EngineEntity.FromCard(player, EngineCards.FromId(ids[i]), zone: player.DeckZone);
             applied.Add(name + "=" + string.Join(",", ids) + " (deck " + player.DeckZone.Count + ")");
         }
+        void StartOfGame(EngineController player, IReadOnlyList<string> ids, string name)
+        {
+            foreach (string id in ids)
+            {
+                var source = EngineEntity.FromCard(player, EngineCards.FromId(id), zone: player.DeckZone, zonePos: 0);
+                bool fires = SabberStoneCore.Actions.StartOfGameRules.Stage(source);
+                applied.Add(name + "=" + id + (fires ? " (fires)" : " (not eligible)"));
+            }
+        }
         var humanPlaced = new List<SabberStoneCore.Model.Entities.IPlayable>();
         void Hand(EngineController player, IReadOnlyList<string> ids, string name)
         {
@@ -721,6 +743,7 @@ public sealed class DebugScenario
             applied.Add("humanHandClear=" + dealt.Length);
         }
         Top(game.Player2, NpcDeckTop, "npcDeckTop"); Top(game.Player1, HumanDeckTop, "humanDeckTop");
+        StartOfGame(game.Player1, HumanStartOfGame, "humanStartOfGame"); StartOfGame(game.Player2, NpcStartOfGame, "npcStartOfGame");
         Hand(game.Player2, NpcHand, "npcHand"); Hand(game.Player1, HumanHand, "humanHand");
         foreach (var mod in HumanHandMods)
         {

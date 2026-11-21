@@ -18,6 +18,7 @@ internal static partial class Program
     {
         DebugScenarioParsing();
         DebugScenarioMatch();
+        DebugScenarioStartOfGame();
         DebugScenarioBoardStats();
         DebugScenarioSummonStats();
         DebugScenarioHandMods();
@@ -39,6 +40,23 @@ internal static partial class Program
         Check(scenario.NpcDeckTop.SequenceEqual(new[] { "EDR_260t", "EDR_260t" }) && scenario.HumanDeckTop.SequenceEqual(new[] { "CS2_182" })
             && scenario.NpcMana == 10 && scenario.HumanMana == 3 && scenario.NpcHand.Count == 1 && scenario.HumanHand.Count == 0,
             "scenario fields parse");
+        foreach (string key in new[] { "humanStartOfGame", "npcStartOfGame" })
+        {
+            string text = key + "=JAIL_509,JAIL_509,JAIL_509";
+            var start = DebugScenario.Parse(text);
+            Check((key == "humanStartOfGame" ? start.HumanStartOfGame : start.NpcStartOfGame).Count == 3
+                && start.Canonical() == text && DebugScenario.Parse(start.Canonical()).Canonical() == text,
+                key + " accepts three sources and round-trips");
+            RejectsScenario(key + "=JAIL_509\n" + key + "=JAIL_509", "duplicate Start of Game key");
+            RejectsScenario(key + "=NOPE_000", "unknown Start of Game card");
+            RejectsScenario(key + "=JAIL_509", "no native client definition", _ => false);
+            RejectsScenario(key + "=" + string.Join(",", Enumerable.Repeat("JAIL_509", 4)), "Start of Game limit");
+            try { DebugScenario.Parse(key + "=CS2_182"); throw new Exception("non-Start of Game card accepted"); }
+            catch (ArgumentException error) {
+                Check(error.Message.Contains(key) && error.Message.Contains("CS2_182") && error.Message.Contains("no Start of Game effect"),
+                    "Start of Game rejection names the key, card and missing effect");
+            }
+        }
         foreach (string mode in new[] { "human", "npc", "human-godfrey", "npc-godfrey" })
         {
             var burn = DebugScenario.Parse("overdraw=" + mode);
@@ -284,6 +302,99 @@ internal static partial class Program
     }
 
     private const string RunA = "0b5e3a7e-2f64-4a43-8c3f-4f8b8d2f9a10", RunB = "1c6f4b8f-3a75-4b54-9d40-5a9c9e3ab021";
+
+    private static void DebugScenarioStartOfGame()
+    {
+        foreach (bool npc in new[] { false, true })
+        {
+            string key = npc ? "npcStartOfGame" : "humanStartOfGame";
+            string text = key + "=JAIL_509\nhumanDeckTop=CS2_182,CS2_187\nnpcDeckTop=CS2_182,CS2_187";
+            NativeMatch Start(out Capture capture)
+            {
+                capture = new Capture();
+                var match = new NativeMatch(capture.Send, "mage", "warrior", 4242) {
+                    StartingPlayer = 1, DebugScenario = DebugScenario.Parse(text)
+                };
+                match.Start();
+                Check(match.Game.Player1.Hero[(GameTag)4717] == 0 && match.Game.Player2.Hero[(GameTag)4717] == 0,
+                    key + " waits for mulligans");
+                match.SendChoices(capture.Last<EntityChoices>(17).Id, new List<int>());
+                return match;
+            }
+            var match = Start(out var run);
+            var owner = npc ? match.Game.Player2 : match.Game.Player1;
+            var source = owner.DeckZone.Single(c => c.Card.Id == "JAIL_509");
+            Check(match.DebugScenarioApplied.Contains(key + "=JAIL_509 (fires)"), key + " logs eligibility");
+            Check(owner.Hero[(GameTag)4717] == 1 && owner.AppliedEnchantments.Any(e => e.Card.Id == "JAIL_509e"),
+                key + " resolves Godfrey's real hero tag and player effect");
+            Check(owner.Opponent.Hero[(GameTag)4717] == 0, key + " affects only its owner");
+            Check(source.Zone == owner.DeckZone && owner.DeckZone[0] == source,
+                key + " source stays at deck bottom");
+            Check(match.Game.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryBlockStart>()
+                .Any(b => b.BlockType == BlockType.TRIGGER && b.Source == source.Id),
+                key + " resolves in a TRIGGER sourced by the staged entity");
+            Check(match.Game.Player1.HandZone.Last().Card.Id == "CS2_182"
+                && match.Game.Player1.DeckZone.TopCard.Card.Id == "CS2_187", "humanDeckTop draw order stays intact");
+            var twin = Start(out var twinRun);
+            Check(EngineIdentity(match.Game) == EngineIdentity(twin.Game), key + " stages deterministically from serialized text");
+            if (npc)
+            {
+                var history = SogHistory(run);
+                int reveal = history.FindIndex(x => x.HasShowEntity && x.ShowEntity.Entity == source.Id);
+                Check(reveal >= 0 && history.Take(reveal).Any(x => x.HasFullEntity && x.FullEntity.Entity == source.Id),
+                    "staged NPC source is created before its reveal");
+                Check(history.Take(reveal).Where(x => SnapshotEntity(x) == source.Id)
+                    .All(x => string.IsNullOrEmpty(SnapshotName(x))), "staged NPC identity stays hidden before reveal");
+                SogAssertPresentation(match, run, new[] { source.Id });
+                var firstDraw = owner.DeckZone.TopCard;
+                Check(firstDraw.Card.Id == "CS2_182", "NPC first draw remains its staged deck top");
+                SendEndTurn(match, run);
+                Check(firstDraw.Zone != owner.DeckZone && source.Zone == owner.DeckZone,
+                    "NPC drew its deck top and left Godfrey in deck");
+            }
+            run.SerializeAll(); twinRun.SerializeAll();
+        }
+
+        var baselineRun = new Capture();
+        var baseline = new NativeMatch(baselineRun.Send, "mage", "warrior", 4242) { StartingPlayer = 1 };
+        baseline.Start();
+        baseline.SendChoices(baselineRun.Last<EntityChoices>(17).Id, new List<int>());
+        Check(baseline.Game.Player1.Hero[(GameTag)4717] == 0 && baseline.Game.Player2.Hero[(GameTag)4717] == 0,
+            "match without Start of Game keys has no Godfrey tag");
+
+        var pendingRun = new Capture();
+        var pending = new NativeMatch(pendingRun.Send, "mage", "warrior", 4242) { StartingPlayer = 1 };
+        pending.Start();
+        var player = pending.Game.Player1;
+        var handSource = SabberStoneCore.Model.Entities.Entity.FromCard(player, Cards.FromId("JAIL_509"), zone: player.HandZone);
+        try { SabberStoneCore.Actions.StartOfGameRules.Stage(handSource); throw new Exception("hand source accepted"); }
+        catch (ArgumentException) { }
+        var ordinary = SabberStoneCore.Model.Entities.Entity.FromCard(player, Cards.FromId("CS2_029"), zone: player.DeckZone);
+        try { SabberStoneCore.Actions.StartOfGameRules.Stage(ordinary); throw new Exception("non-Start of Game source accepted"); }
+        catch (ArgumentException) { }
+        player.DeckZone.Add(player.HandZone.Remove(handSource), 0);
+        Check(SabberStoneCore.Actions.StartOfGameRules.Stage(handSource)
+            && SabberStoneCore.Actions.StartOfGameRules.Stage(handSource), "staging preserves an already eligible source");
+        handSource[SabberStoneCore.Actions.StartOfGameRules.Pending] = -1;
+        Check(!SabberStoneCore.Actions.StartOfGameRules.Stage(handSource), "staging does not rearm a resolved source");
+        var ineligible = DebugScenario.Parse("humanStartOfGame=EDR_845");
+        Check(ineligible.Apply(pending.Game).Contains("humanStartOfGame=EDR_845 (not eligible)"), "ineligible source is logged");
+        var hamuul = player.DeckZone.Single(c => c.Card.Id == "EDR_845");
+        Check(hamuul.NativeTags[SabberStoneCore.Actions.StartOfGameRules.Pending] == -1, "non-Nature spell disqualifies staged Hamuul");
+        foreach (var spell in player.DeckZone.Where(c => c.Card.Type == CardType.SPELL).ToArray())
+            player.SetasideZone.Add(player.DeckZone.Remove(spell));
+        Check(!SabberStoneCore.Actions.StartOfGameRules.Stage(hamuul), "staging preserves captured ineligibility after deck changes");
+
+        while (player.DeckZone.FreeSpace > 1)
+            SabberStoneCore.Model.Entities.Entity.FromCard(player, Cards.FromId("CS2_182"), zone: player.DeckZone);
+        var full = DebugScenario.Parse("humanDeckTop=CS2_182\nhumanStartOfGame=JAIL_509");
+        int entities = pending.Game.IdEntityDic.Count;
+        Check(full.Validate(pending.Game)?.Contains("Human deck") == true, "deck capacity includes both keys");
+        try { full.Apply(pending.Game); throw new Exception("overfull deck accepted"); }
+        catch (InvalidOperationException) { }
+        Check(pending.Game.IdEntityDic.Count == entities, "capacity failure creates no entities");
+        Console.WriteLine("PASS debug scenario Start of Game: both seats, real effects and TRIGGER, bottom order, eligibility, deterministic replay, baseline");
+    }
 
     private static void DebugScenarioMatch()
     {

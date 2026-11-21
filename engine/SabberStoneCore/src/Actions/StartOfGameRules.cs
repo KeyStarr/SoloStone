@@ -27,6 +27,20 @@ namespace SabberStoneCore.Actions
 
         public static bool HasEffect(Card card) => card != null && Definitions.ContainsKey(card.AssetId);
 
+        /// <summary>Only for debug scenario staging between the deal and MainBegin.</summary>
+        public static bool Stage(IPlayable source)
+        {
+            if (source == null) throw new ArgumentNullException(nameof(source));
+            if (source.Zone != source.Controller.DeckZone)
+                throw new ArgumentException("Start of Game source must be in its controller's deck.", nameof(source));
+            if (!Definitions.TryGetValue(source.Card.AssetId, out var definition))
+                throw new ArgumentException("Card has no Start of Game definition: " + source.Card.Id, nameof(source));
+            // The entity indexer clamps -1 to zero; read the saved phase without that clamp.
+            if (!source.NativeTags.TryGetValue(Pending, out int pending) || pending == 0)
+                source[Pending] = definition.Eligible == null || definition.Eligible(source.Controller) ? 1 : -1;
+            return source[Pending] == 1;
+        }
+
         internal static void Capture(Game game)
         {
             foreach (var owner in new[]{game.Player1,game.Player2})
