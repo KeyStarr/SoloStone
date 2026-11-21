@@ -861,6 +861,7 @@ M	Assembly-CSharp	CameraUtils	FindFirstByLayerMask	UnityEngine.Camera(UnityEngin
 M	Assembly-CSharp	Card	EnableAttacking	System.Void(System.Boolean)
 M	Assembly-CSharp	Card	GetActor	Actor()
 M	Assembly-CSharp	Card	GetEntity	Entity()
+M	Assembly-CSharp	Card	GetPlaySpell	Spell(System.Int32,System.Boolean)
 M	Assembly-CSharp	Card	GetZone	Zone()
 M	Assembly-CSharp	Card	IsActorLoading	System.Boolean()
 M	Assembly-CSharp	Card	IsActorReady	System.Boolean()

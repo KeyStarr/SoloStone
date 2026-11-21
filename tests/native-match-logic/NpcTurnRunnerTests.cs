@@ -7,6 +7,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Config;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCore.Tasks.SimpleTasks;
 
 internal static class NpcTurnRunnerTests
 {
@@ -38,6 +39,7 @@ internal static class NpcTurnRunnerTests
         IdleBoardHasNoWaitOverhead();
         FreshTurnChecksIdle();
         ActionLimitEndsTheTurn();
+        OpposingChoicePacingRules();
         foreach (var profile in NpcCatalog.All)
         {
             var sync = new Rig(profile); sync.Run(true);
@@ -1044,6 +1046,104 @@ internal static class NpcTurnRunnerTests
         public string LethalResult => "none";
         public bool PlanReused => false;
         public void StepNode() { IsDone = true; }
+    }
+
+    // #238: the NPC's pick of an opposing choice waits for the client, not for the runner's artificial-delay budget.
+    private static void OpposingChoicePacingRules()
+    {
+        const double beat = 1500;
+        double inf = double.PositiveInfinity;
+        // Dealt, quiet client: the pick goes only after a full beat from the deal, whatever else happened.
+        var dealt = new OpposingChoicePacing();
+        Check(dealt.Hold(100, 100, beat, true, true, null, inf) == beat, "dealt: full beat");
+        Check(Math.Abs(dealt.Hold(700, 100, beat, true, true, null, inf) - (beat - 600)) < 1e-9, "dealt: time since the deal counts");
+        Check(dealt.Hold(100 + beat, 100, beat, true, true, null, inf) == 0, "dealt: beat over");
+        // The deal wait needs 3 s of unbroken idle; any busy frame resets it.
+        var busy = new OpposingChoicePacing();
+        for (double t = 0; t < 20000; t += 100)
+            if (busy.Hold(t, -1, beat, false, true, null, inf) != 100 && t < OpposingChoicePacing.WaitCapMilliseconds)
+                throw new Exception("OpposingChoicePacing: a busy client released the pick at " + t);
+        Check(busy.Hold(OpposingChoicePacing.WaitCapMilliseconds, -1, beat, false, true, null, inf) == 0, "busy forever: released at the hard cap");
+        var idleLater = new OpposingChoicePacing();
+        Check(idleLater.Hold(0, -1, beat, false, true, null, inf) == 100 && idleLater.Hold(4900, -1, beat, false, true, null, inf) == 100, "busy: holds past the old 3 s");
+        Check(idleLater.Hold(5000, -1, beat, true, true, null, inf) == 100 && idleLater.Hold(7999, -1, beat, true, true, null, inf) == 100,
+            "idle clock starts when the client goes idle");
+        Check(idleLater.Hold(8000, -1, beat, true, true, null, inf) == 0, "idle for 3 s without a deal: goes");
+        var interrupted = new OpposingChoicePacing();
+        interrupted.Hold(0, -1, beat, true, true, null, inf);
+        interrupted.Hold(2000, -1, beat, false, true, null, inf);
+        Check(interrupted.Hold(2100, -1, beat, true, true, null, inf) == 100
+            && interrupted.Hold(5099, -1, beat, true, true, null, inf) == 100, "busy frame resets the idle wait");
+        Check(interrupted.Hold(5100, -1, beat, true, true, null, inf) == 0, "release after 3 s of unbroken idle");
+        // A busy spell of the source holds a dealt pick, bounded; a throwing probe counts as ended.
+        var spell = new OpposingChoicePacing(); bool active = true;
+        Check(spell.Hold(0, 0, beat, true, true, () => active, inf) == 100 && spell.Hold(3999, 0, beat, true, true, () => active, inf) == 100, "source spell active: holds");
+        active = false;
+        Check(spell.Hold(4000, 0, beat, true, true, () => active, inf) == 0, "source spell ended: goes");
+        var never = new OpposingChoicePacing();
+        Check(never.Hold(0, 0, beat, true, true, () => true, inf) == 100 && never.Hold(OpposingChoicePacing.SpellWaitMilliseconds, 0, beat, true, true, () => true, inf) == 0,
+            "a spell that never ends holds only for its cap");
+        var throws = new OpposingChoicePacing();
+        Check(throws.Hold(0, 0, beat, true, true, () => throw new InvalidOperationException("probe"), inf) == beat, "a throwing probe counts as ended");
+        // Near the turn's deadline the waits give way; the beat remains.
+        var late = new OpposingChoicePacing();
+        Check(late.Hold(0, -1, beat, false, true, () => true, OpposingChoicePacing.DeadlineMarginMilliseconds) == 0, "turn deadline: no wait for the deal");
+        Check(late.Released == "deadline", "turn deadline: release reason");
+        // A beat that would end past the deadline is skipped: the NPC's own pick is submitted, not the timer's default.
+        var tight = new OpposingChoicePacing();
+        Check(tight.Hold(0, 0, beat, true, true, () => true, 100) == 0 && tight.Released == "deadline", "turn deadline: no wait for the spell, no beat");
+        var roomy = new OpposingChoicePacing();
+        Check(roomy.Hold(0, 0, beat, true, true, null, 4000) == beat, "a beat that fits before the deadline stays");
+        var edge = new OpposingChoicePacing();
+        Check(edge.Hold(0, 0, beat, true, true, null, beat + OpposingChoicePacing.BeatDeadlineMarginMilliseconds - 1) == 0, "a beat ending inside the margin is skipped");
+        // Gate by the engine's decision recipe, including hero and weapon battlecries, not by card type.
+        foreach (var (cardId, expected) in new[] { ("TLC_100", true), ("CAP_405", true), ("CATA_470", true),
+            ("CATA_190h", true), ("JAIL_458", true), ("UNG_941", false), ("LOE_006", false) })
+        {
+            bool decision = Cards.FromId(cardId).Power?.PowerTask is DecisionBattlecryTask;
+            Check(decision == expected, cardId + " decision-battlecry classification");
+            var pacing = new OpposingChoicePacing(); int probes = 0;
+            Func<bool> probe = () => { probes++; return true; };
+            Check(pacing.Hold(0, 0, beat, true, decision, probe, inf) == (expected ? 100 : beat), cardId + " spell wait gate");
+            Check(probes == (expected ? 1 : 0), cardId + " probes only decision battlecries");
+            Check(pacing.Hold(beat, 0, beat, true, decision, probe, inf) == (expected ? 100 : 0), cardId + " hold after beat");
+            Check(expected || pacing.SpellWaitedMilliseconds == 0, cardId + " skips spell wait entirely");
+        }
+        // Release reasons and waits, for the NPC_CHOICE_HOLD log line.
+        var byDeal = new OpposingChoicePacing();
+        byDeal.Hold(0, 0, beat, true, true, null, inf); byDeal.Hold(beat, 0, beat, true, true, null, inf);
+        Check(byDeal.Released == "deal" && byDeal.WaitedMilliseconds == beat && byDeal.SpellWaitedMilliseconds == 0, "release reason deal");
+        var bySpell = new OpposingChoicePacing(); bool on = true;
+        bySpell.Hold(0, 0, beat, true, true, () => on, inf); bySpell.Hold(1000, 0, beat, true, true, () => on, inf); on = false;
+        Check(bySpell.Hold(3000, 0, beat, true, true, () => on, inf) == 0 && bySpell.Released == "spell" && bySpell.SpellWaitedMilliseconds == 3000, "release reason spell, spell wait");
+        var byCap = new OpposingChoicePacing();
+        byCap.Hold(0, 0, beat, true, true, () => true, inf);
+        Check(byCap.Hold(OpposingChoicePacing.SpellWaitMilliseconds, 0, beat, true, true, () => true, inf) == 0 && byCap.Released == "cap"
+            && byCap.SpellWaitedMilliseconds == OpposingChoicePacing.SpellWaitMilliseconds, "release reason cap");
+        var gone = new OpposingChoicePacing(); gone.Hold(0, -1, beat, false, true, null, inf); gone.Abandon(700);
+        Check(gone.Released == "canact" && gone.WaitedMilliseconds == 700, "release reason canact");
+
+        // Through the runner with the 4 s artificial-delay budget spent: the beat is not cut by it.
+        foreach (bool spellEnds in new[] { false, true })
+        {
+            var profile = WithLiveBudget(NpcCatalog.All[0], 5, 0);
+            double now = 0, dealt0 = 500, spellEnd = 3000, acted = -1; bool actedNow = false;
+            var pacing = new OpposingChoicePacing();
+            var game = new SabberStoneCore.Model.Game(new GameConfig { Player1HeroClass = CardClass.MAGE, Player2HeroClass = CardClass.MAGE });
+            var action = BotAction.From(EndTurnTask.Any(game.Player2));
+            var runner = new NpcTurnRunner(profile, "choice-pacing", () => now, () => !actedNow, () => new GoldenContext(2, 1, 71, profile),
+                ctx => new LoopJob(action), reason => new GoldenDecision(action, 0, 0, 0, "Forced", reason, null, "fallback"),
+                decision => { actedNow = true; acted = now; }, () => true, null, turnNodes: 2000000,
+                actedCardDwell: act => 0,
+                actHold: act => pacing.Hold(now, now >= dealt0 ? dealt0 : -1, beat, true, true, () => spellEnds && now < spellEnd, inf));
+            runner.Start();
+            typeof(NpcTurnRunner).GetProperty(nameof(NpcTurnRunner.ArtificialDelayMilliseconds)).SetValue(runner, 4000.0);
+            for (int i = 0; runner.Active && i < 100000; i++) { now += 20; runner.Tick(); }
+            Check(acted >= dealt0 + beat && (!spellEnds || acted >= spellEnd), "runner at an exhausted budget still waits: spell=" + spellEnds + " acted=" + acted);
+            Check(acted < Math.Max(dealt0 + beat, spellEnds ? spellEnd : 0) + 1500, "the hold is bounded: acted=" + acted);
+            Check(runner.ArtificialDelayMilliseconds == 4000, "the choice wait spends no budget");
+        }
+        Console.WriteLine("PASS opposing choice pacing: unbroken idle deal wait, decision-battlecry spell gate, beat outside the budget, all bounded");
     }
 
     private sealed class Job : IGoldenDecisionJob

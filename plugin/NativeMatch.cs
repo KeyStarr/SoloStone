@@ -1047,14 +1047,14 @@ public sealed class NativeMatch
     // Presentation-only nameless SETASIDE stand-ins (client id -> engine id) for offers outside SETASIDE or already
     // named on the client: ChoiceCardMgr forces hand actors on every offer and hides the unchosen ones.
     private readonly Dictionary<int, int> opposingProxies = new Dictionary<int, int>();
-    private double opposingShownAt = -1, opposingRevealedAt = -1, opposingHoldStarted = -1;
+    private double opposingShownAt = -1, opposingRevealedAt = -1;
+    private OpposingChoicePacing opposingPacing;
     // EntitiesChosen waiting for the client to process its EntityChoices. GameState processes an EntitiesChosen at once
     // when no choice of that player is mapped; arriving before its EntityChoices it would leave that choice mapped
     // forever and queue every later choice (the human's too) behind it. Each entry also retires its spent picks, and
     // carries a guess's result row (NoteGuessResult), which must not reach the client before its EntitiesChosen.
     private readonly List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies, (int Source, int Target)? Guess)> deferredOpposing =
         new List<(PowerEntityChoices Choices, List<int> Picks, HashSet<int> Proxies, (int Source, int Target)? Guess)>();
-    internal const double OpposingDealWaitMilliseconds = 3000;
     // Native ChoiceCardMgr has dealt (revealed) the opposing choice with this id. Null headless: shown counts as dealt.
     internal Func<int, bool> NativeOpposingChoiceRevealed { get; set; }
     // Native GameState has processed the opposing EntityChoices with this id. Null headless: sent counts as processed.
@@ -1097,8 +1097,9 @@ public sealed class NativeMatch
             .Select(id => toClient.TryGetValue(id, out int proxy) ? proxy : id).Where(shown.Entities.Contains).Distinct().ToList();
         var proxies = new HashSet<int>(picks.Where(opposingProxies.ContainsKey));
         NoteGuessResult(shown, shown.Entities, id => opposingProxies.TryGetValue(id, out int engine) ? engine : id, (opposingPicks ?? new List<int>()));
+        LogOpposingHold(true);
         opposingChoices = null; opposingChoiceSource = null; opposingChoiceOriginals = null; opposingPicks = null;
-        opposingProxies.Clear(); opposingShownAt = opposingRevealedAt = opposingHoldStarted = -1;
+        opposingProxies.Clear(); opposingShownAt = opposingRevealedAt = -1; opposingPacing = null;
         // Game over: the native OnGameOver cancels every shown choice itself.
         if (Game.State == State.COMPLETE) { deferredOpposing.Clear(); return (null, null, null); }
         if (deferredOpposing.Count > 0 || !OpposingChoiceReceived(shown.Index))
@@ -1184,7 +1185,7 @@ public sealed class NativeMatch
         SendPowerHistory(proxies);
         opposingChoices = shown; opposingChoiceSource = choice; opposingChoiceOriginals = new List<int>(choice.Choices);
         opposingPicks = null;
-        opposingShownAt = NpcClock(); opposingHoldStarted = -1;
+        opposingShownAt = NpcClock(); opposingPacing = new OpposingChoicePacing();
         opposingRevealedAt = NativeOpposingChoiceRevealed == null ? opposingShownAt : -1;
         send(17, ToNativeChoice(shown));
     }
@@ -1199,28 +1200,53 @@ public sealed class NativeMatch
         if (revealed) opposingRevealedAt = NpcClock();
     }
 
-    // Before the NPC commits a pick: wait (outside the runner's 4 s pacing budget) until the client has dealt this
-    // choice's backs, at most 3 s from the first time the pick is ready. A late deal is still safe: EntitiesChosen waits.
-    internal double OpposingChoiceHold(BotAction action)
-    {
-        if (opposingChoices == null || action == null || action.Type != PlayerTaskType.CHOOSE) return 0;
-        ObserveOpposingChoiceReveal();
-        if (opposingRevealedAt >= 0) return 0;
-        double now = NpcClock();
-        if (opposingHoldStarted < 0) opposingHoldStarted = now;
-        return now - opposingHoldStarted < OpposingDealWaitMilliseconds ? 100 : 0;
-    }
-
-    // A human-plausible look at the dealt backs before the pick (within the pacing budget); thinking time counts.
+    // A human-plausible look at the dealt backs before the pick; thinking time counts.
     internal static double OpposingChoiceBeatMilliseconds(Personality personality) => personality == null ? 1200
         : Math.Min(2500, Math.Max(1200, 1000 * (personality.ActionMinSeconds + personality.ActionMaxSeconds)));
 
-    internal double OpposingChoiceDwell(BotAction action)
+    // Native power queue has nothing running or waiting. Null headless: idle.
+    internal Func<bool> NativeNpcPowerIdle { get; set; }
+    // The choice source's play spell (a minion's, say) has not ended on the client. Null headless: ended.
+    internal Func<int, bool> NativeOpposingSourceSpellActive { get; set; }
+
+    // Before the NPC commits a pick, in milliseconds still to hold (0: go). All of it sits outside the runner's 4 s
+    // artificial-delay budget and every wait is bounded (OpposingChoicePacing): the client has dealt this choice's backs
+    // (3 s of unbroken power-queue idle before giving up), the decision-battlecry source's play spell
+    // has ended (an answer that lands on a running spell restarts it, #238), then the beat. A late deal is still safe:
+    // EntitiesChosen waits for it.
+    internal double OpposingChoiceHold(BotAction action)
     {
-        if (opposingChoices == null || action == null || action.Type != PlayerTaskType.CHOOSE) return 0;
+        if (opposingChoices == null || opposingPacing == null || action == null || action.Type != PlayerTaskType.CHOOSE) return 0;
         ObserveOpposingChoiceReveal();
-        if (opposingRevealedAt < 0) return 0;
-        return Math.Max(0, OpposingChoiceBeatMilliseconds(npcProfile?.Personality) - (NpcClock() - opposingRevealedAt));
+        bool powerIdle;
+        try { powerIdle = NativeNpcPowerIdle?.Invoke() ?? true; } catch (Exception) { powerIdle = true; }
+        int sourceId = opposingChoiceSource?.SourceId ?? 0;
+        bool sourceIsDecisionBattlecry = false;
+        try { sourceIsDecisionBattlecry = sourceId > 0 && Game.IdEntityDic.TryGetValue(sourceId, out var sourceEntity)
+            && sourceEntity.Power?.PowerTask is SabberStoneCore.Tasks.SimpleTasks.DecisionBattlecryTask; }
+        catch (Exception) { }
+        Func<bool> spell = NativeOpposingSourceSpellActive == null ? (Func<bool>)null
+            : () => NativeOpposingSourceSpellActive(sourceId);
+        double hold = opposingPacing.Hold(NpcClock(), opposingRevealedAt, OpposingChoiceBeatMilliseconds(npcProfile?.Personality),
+            powerIdle, sourceIsDecisionBattlecry, spell, NpcTurnDeadlineLeft());
+        if (hold <= 0) LogOpposingHold(false);
+        return hold;
+    }
+
+    // One line per opposing choice, when its hold ends: why (deal, spell, cap, deadline, canact) and for how long, so a live
+    // check can tell a release at the spell's end from one at a cap.
+    private void LogOpposingHold(bool abandoned)
+    {
+        var pacing = opposingPacing;
+        if (pacing == null || !pacing.Started || pacing.Logged) return;
+        if (abandoned) pacing.Abandon(NpcClock());
+        if (pacing.Released == null) return;
+        pacing.Logged = true;
+        string card = null;
+        try { card = Game?.IdEntityDic.TryGetValue(opposingChoiceSource?.SourceId ?? 0, out var source) == true ? source.Card.Id : null; } catch (Exception) { }
+        BotTrace?.Invoke(string.Format(System.Globalization.CultureInfo.InvariantCulture,
+            "NPC_CHOICE_HOLD card={0} released={1} waited={2:F2} spellWait={3:F2}",
+            card ?? "?", pacing.Released, pacing.WaitedMilliseconds / 1000, pacing.SpellWaitedMilliseconds / 1000));
     }
 #else
     internal int OpposingChoiceId => -1;
@@ -2100,6 +2126,9 @@ public sealed class NativeMatch
             + " reuse=0 lethal=forced slice=0 ms=0 nodes=0 timeout=1 action=" + decision.Action);
     }
 
+    private double NpcTurnDeadlineLeft() =>
+        timedTurn == Game.Turn && turnDeadline != long.MaxValue ? turnDeadline - MonotonicMilliseconds : double.PositiveInfinity;
+
     private bool NpcCanAct() => !npcStopped && Game != null && Game.State != State.COMPLETE
         && Game.Turn == npcTurn && Game.Player1.Choice == null
         && (Game.CurrentPlayer == Game.Player2 || Game.Player2.Choice != null);
@@ -2127,16 +2156,11 @@ public sealed class NativeMatch
             () => new GoldenContext(Game.Turn, ++decisionIndex, unchecked(997 * Game.Turn + decisionIndex * 31), npcProfile),
             BeginNpcDecision, NpcFallback, ActNpc, () => NativeNpcIdle?.Invoke() ?? true,
             line => BotTrace?.Invoke(line), matchRecorder, () => publicEventIndex, NpcTurnNodes,
-            action => Math.Max(npcPresentation?.ActedCardDwell(action.Source,
+            action => npcPresentation?.ActedCardDwell(action.Source,
                 new HashSet<int>(Game.Player2.HandZone.Concat(Game.Player2.BoardZone).Select(card => card.Id))) ?? 0,
-#if ENGINE_SOURCE
-                OpposingChoiceDwell(action)),
-#else
-                0),
-#endif
             () => NativeNpcBusyReason?.Invoke(),
             // Nozdormu-style finite turn deadline (monotonic clock), so elite+ never searches into a timed-out turn.
-            () => timedTurn == Game.Turn && turnDeadline != long.MaxValue ? turnDeadline - MonotonicMilliseconds : double.PositiveInfinity,
+            NpcTurnDeadlineLeft,
 #if ENGINE_SOURCE
             OpposingChoiceHold);
 #else
@@ -5074,7 +5098,7 @@ public sealed class NativeMatch
         revealedEntities.Clear(); visibleTransportTags.Clear(); clientTransportTags.Clear(); clientTransportCards.Clear();
         historicalControllers.Clear(); historicalZones.Clear(); historicalPositions.Clear(); historicalTemporaryVisuals.Clear(); temporaryDiscardVisuals.Clear();
         privacyTargets.Clear(); retiredChoiceActors.Clear(); opposingProxies.Clear(); deckChoiceOriginals.Clear(); privateDeckOffers.Clear(); privateChoiceOffers.Clear(); visibleSubSpells.Clear(); visualBlockSources.Clear(); revealedTriggerScopes.Clear(); pendingTriggerReveals.Clear(); lastSpellPower.Clear(); poweredUpHighlights.Clear();
-        opposingChoices = null; opposingChoiceSource = null; opposingChoiceOriginals = null; opposingPicks = null; deferredOpposing.Clear();
+        opposingChoices = null; opposingChoiceSource = null; opposingChoiceOriginals = null; opposingPicks = null; opposingPacing = null; deferredOpposing.Clear();
         decisionHandTargetSource = 0;
         substitutedTargetSource = 0;
         leylineTextEntities.Clear();
