@@ -7,7 +7,9 @@
 
 One JSON file per meta. The engine embeds the file and loads every card from it, in file order. A file is frozen once shipped, so a meta reads and plays the same on any client. One exception, approved by the owner on 2026-11-15 (#117): the shipped `violet-hold-2026-09` file gained the spell-school tag (1635) on 579 base spell rows that predate spell schools, so a card shows and counts its school in a match.
 
-The file is generated from the client's card definitions by private tooling that is not in the public repository (`tools/gen_card_facts.py`, run after `tools/gen_card_overlay.py`; `--check` fails on a stale file). Base rows come from the client's card definitions (build 38377), which predate spell schools; the spell school (tag 1635) of a base row without one is taken from the client card export the overlay was generated from (its SHA-256 is the overlay's `exportSha256`, and the generator refuses any other file). Nothing else is taken from the export.
+A second owner-approved exception (2026-11-20): rows move to the 37.0 definition, so the meta matches retail of September 2026. Base rows are the 38377 definitions except the ids listed in `clientRows` of the drift file (below), which are rebuilt from the 37.0 client export.
+
+The file is generated from the client's card definitions by private tooling that is not in the public repository (`tools/gen_card_facts.py`, run after `tools/gen_card_overlay.py`; `--check` fails on a stale file). Base rows come from the client's card definitions (build 38377), which predate spell schools; the spell school (tag 1635) of a base row without one is taken from the client card export the overlay was generated from (its SHA-256 is the overlay's `exportSha256`, and the generator refuses any other file). Apart from that tag and the `clientRows`, nothing is taken from the export.
 
 ## Schema, version 1
 
@@ -32,6 +34,23 @@ The file is generated from the client's card definitions by private tooling that
 | `snapshot` | no | Overlay only: a private token definition, never added to the card list |
 
 `cards` and `overlay.cards` keep their source order: it sets the order of the card list, and so of random pools and the first card per `dbf`. Overlay rows get the overlay rules in `CardLoader.Build`.
+
+## Drift file
+
+`facts/drift/<meta>.json` (a subfolder, so nothing that lists `facts/<meta>*.json`, such as the locale loaders, the plugin's embedded locale files and the launcher staging, ever sees it). It holds ids, classes and field keys only: no card text and no export values.
+
+```text
+{ "schemaVersion": 1, "meta": "<label>", "clientBuild": "<client build>", "exportSha256": "<= overlay.exportSha256>",
+  "clientRows": [ "<id>", ... ],
+  "allowlist":  [ { "id": "<id>", "class": "<class>", "fields": [ "tag:48", ... ], "reason": "<short>" }, ... ] }
+```
+
+- `clientRows`: base rows the generator rebuilds in place from the client export (id, dbf, name, text, tags minus zero values with a weapon's tag 45 as 187, referenced tags). The row keeps its own tag 183 and its `reqs`/`entourage`. The id must be a base row, not a non-snapshot overlay id, and its dbf and type tag (202) must equal the export's. Translations of such a row come from hsdata like an overlay row. Sorted, unique.
+- `allowlist`: base rows in scope that still differ from the export and are held. `fields` is the exact set of differing fields (`dbf`, `name`, `text`, `tag:N`, `ref:N`, or `absent` when the export has no card with that id), sorted. Sorted by id. Classes: `rework` (type or identity change), `script` (text or effect changed; the engine script changes with the row), `balance-held` (a stat change the data could carry, held), `tags-held` (an engine-read tag change, held), `text-layout` (text differs only in layout; held until the hsdata 254477 locale source is available), `export-quirk` (the export encodes it differently from what the engine plays), `absent` (no 37.0 card with this id).
+
+The comparison (`private/tools/card_drift.py`): for each base row without a non-snapshot overlay row, against the export card of the same id: `dbf`; `name` and `text` exact (absent equals empty); integer `tags` as a map with value 0 equal to absent, tag 183 (card set) ignored, and a weapon's tag 45 counting as 187 when the export has no 187; referenced tags likewise. Not compared: the export's tag lists, referenced tag lists and string tags; base `reqs` and `entourage`. Out of scope (not compared): export sets TB, BATTLEGROUNDS, CREDITS, MISSIONS and set 1143, and ids with the prefixes TB, FB, BGS, BG, TBA, TBST, EVILBRM, BRMA, BRMC, NAX, NAXM, LOEA, KARA, ICCA, LOOTA, GILA, TRLA, BOTA, DALA, ULDA, CRED, TU, WE, TOT, HRW, unless the export marks the card collectible.
+
+The guard (`card_drift.py --check`, part of the private gate): an in-scope row that differs and is not allowlisted fails; so does an allowlisted row whose differing fields are not exactly its `fields`, or that now matches or is out of scope, a `clientRows` id that still differs, and any growth of the allowlist (a new id, or a new field on an id) against newest merge-base(s) with `main` and `origin/main`. The allowlist may only shrink. CI has no client export, so it runs only the structural suite `facts-drift` (`python3 tests/run.py --suite facts-drift`).
 
 ## What is left out
 

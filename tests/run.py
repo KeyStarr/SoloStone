@@ -148,6 +148,7 @@ SUITES = [
     Suite('launcher', 'dotnet', 'the launcher and installer logic (some checks skip without a Hearthstone client)',
           'installer/SoloStone.Launcher.Tests/SoloStone.Launcher.Tests.csproj', artifacts='launcher', release_launcher=True),
     Suite('run-tool', 'python', 'this runner: --client never loses the copy already in references/game', folder='tests/run-tool'),
+    Suite('facts-drift', 'python', 'the card drift file (facts/drift/) is well formed and agrees with the card file', folder='tests/facts-drift'),
     Suite('installer-python', 'python', 'the installer build tools (stage and loader checks; not on Windows)', folder='installer',
           unix_only=True),
 ]

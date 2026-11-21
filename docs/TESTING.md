@@ -140,6 +140,7 @@ compiled hooks against your client. That needs `references/bepinex/BepInEx.dll` 
 | `fuzz` | 200 random games: no crash, the same result twice, no broken invariant |
 | `launcher` | The launcher and installer logic. The runner builds the release launcher first, so its scans run. Some checks skip without a Hearthstone client, and so does the scan of the release plugin (that build needs the client's libraries; `installer/test-all.sh` builds and scans it) |
 | `run-tool` | This runner: `--client` refuses `references/game` itself, a link to it, or files that link into it, and a failed copy keeps the earlier copy |
+| `facts-drift` | The card drift file `facts/drift/<meta>.json`: header equals the card file's overlay header, `clientRows` and allowlist ids are base rows (no overlay id, none in both), sorted and unique, classes and field keys well formed. The comparison with the client export is private tooling (CI has no export) |
 | `installer-python` | The installer build tools (`installer/stage.py`, `installer/loader_inputs.py`). Not on Windows: these tests use unix paths and tools, so the runner skips them there and says so |
 
 ## The client suites
@@ -233,6 +234,7 @@ These need no R7 case, because the client loses nothing there:
 | Native screens, the match flow or the client calls the plugin patches (`plugin/Native*.cs`, `plugin/client-bindings.txt`) | `native-bindings-logic`; with a client also `native-bindings`, `native-match`, `transport-invariants` |
 | What a play sends to the client (the history of a PLAY block, `plugin/NativeMatch.cs`) | As above (`native-match` runs admission rule R7), plus a live check with a real drag: see [Client drop prediction](#client-drop-prediction) |
 | Ranked ladder (`plugin/LadderRules.cs`) or rank rewards | `ladder-rules`, `tier-presentation`, `ladder`, `ladder-extended` |
+| Card data (`facts/`, including `facts/drift/`) | `facts-drift`, `cards`, `goldens`, `engine-proof`, `ai-golden`, `launcher` (locale files) |
 | The launcher, installer or their scripts (`installer/`) | `launcher`, `installer-python` |
 | The shared test code (`tests/shared/`, `tests/run.py`) | Everything (for `tests/run.py`, at least `run-tool`) |
 
