@@ -129,6 +129,9 @@ static partial class Program
         Check(Settings.Load(root).CheckForUpdates,"update checks default on");
         Settings.Save(root,new Settings { CheckForUpdates=false }); Check(!Settings.Load(root).CheckForUpdates,"off switch persists");
         Settings.Save(root,new Settings { CheckForUpdates=true }); Check(Settings.Load(root).CheckForUpdates,"on switch persists");
+        Settings.SaveSkipped(root,"0.3.0"); Check(Settings.Load(root).SkippedVersion=="0.3.0" && Settings.Load(root).CheckForUpdates,"a skipped version persists");
+        Settings.SaveChecks(root,false); Check(Settings.Load(root).SkippedVersion=="0.3.0" && !Settings.Load(root).CheckForUpdates,"the switch keeps the skipped version");
+        Settings.SaveChecks(root,true);
         File.WriteAllText(Path.Combine(root,"state","settings.json"),"garbage"); Check(!Settings.Load(root).CheckForUpdates,"damaged settings never turn checks on");
     }
 }

@@ -372,7 +372,7 @@ namespace SoloStone
         [DataMember(Name="before")] public InstallRecord Before;
         [DataMember(Name="after")] public InstallRecord After;
     }
-    public enum UpdateOutcome { Nothing, Swapped, Held, NeedsConfirmation, Refused, Failed }
+    public enum UpdateOutcome { Nothing, Swapped, Held, NeedsConfirmation, Refused, Failed, NewerOffered }
     public sealed class UpdateResult
     {
         public UpdateOutcome Outcome; public string Version, Message; public Verdict Verdict;

@@ -172,10 +172,12 @@ namespace SoloStone
             bool isHeld=held!=null && SemVer.Valid(installed) && SemVer.Newer(manifest.Latest.Version,installed);
             return new UpdateStatus { State=isHeld?UpdateState.Held:UpdateState.UpToDate, Installed=installed, Latest=manifest.Latest, Message=problem };
         }
-        public UpdateResult Apply(bool acceptWarning,CancellationToken cancel) {
+        public UpdateResult Apply(bool acceptWarning,CancellationToken cancel,string offeredVersion=null) {
             var status=Check(cancel);
             if(status.State!=UpdateState.Available) return new UpdateResult { Outcome=status.State==UpdateState.Held?UpdateOutcome.Held:UpdateOutcome.Nothing, Message=status.Message };
             var latest=status.Latest;
+            // The player agreed to one version. A newer release that appeared since is offered, not installed.
+            if(offeredVersion!=null && latest.Version!=offeredVersion) return new UpdateResult { Outcome=UpdateOutcome.NewerOffered, Version=latest.Version, Message=status.Message };
             try {
                 string zip=engine.AssetPath(latest.Version);
                 if(!File.Exists(zip) || new FileInfo(zip).Length!=latest.Asset.Size || !Safety.Same(Hashes.FileHash(zip),latest.Asset.Sha256))
