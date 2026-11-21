@@ -474,6 +474,7 @@ F	Assembly-CSharp	Hearthstone.UI.SpawnableLibrary	m_itemData	*
 F	Assembly-CSharp	Hearthstone.UI.StateActionImplementation	<StateAction>k__BackingField	*
 F	Assembly-CSharp	Hearthstone.UI.VisualController	m_stateCollection	*
 F	Assembly-CSharp	Hearthstone.UI.WeakAssetReference	AssetString	System.String
+F	Assembly-CSharp	HighlightState	m_forceRerender	*
 F	Assembly-CSharp	HistoryItem	m_mainCardActor	Actor
 F	Assembly-CSharp	HistoryManager	m_currentBigCard	*
 F	Assembly-CSharp	HistoryManager	m_pendingBigCardEntry	*
@@ -728,8 +729,10 @@ M	Assembly-CSharp	Actor	GetPremium	TAG_PREMIUM()
 M	Assembly-CSharp	Actor	GetSpell	*
 M	Assembly-CSharp	Actor	IsColliderEnabled	System.Boolean()
 M	Assembly-CSharp	Actor	IsShown	System.Boolean()
+M	Assembly-CSharp	Actor	OnSpellStateStarted	*
 M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
 M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
+M	Assembly-CSharp	Actor	UpdateHighlights	System.Void()
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -1241,6 +1244,7 @@ M	Assembly-CSharp	EntityBase	GetTag	System.Int32(GAME_TAG)
 M	Assembly-CSharp	EntityBase	HasReferencedTag	(GAME_TAG)
 M	Assembly-CSharp	EntityBase	HasReferencedTag	*
 M	Assembly-CSharp	EntityBase	HasTag	System.Boolean(GAME_TAG)
+M	Assembly-CSharp	EntityBase	HasTaunt	System.Boolean()
 M	Assembly-CSharp	EntityBase	IsHero	System.Boolean()
 M	Assembly-CSharp	EntityDef	GetFlavorText	System.String()
 M	Assembly-CSharp	EntityDef	GetReferencedTag	(System.Int32)
@@ -1653,6 +1657,8 @@ M	Assembly-CSharp	HeroSkinUtils	GetCollectionManagerHeroSkinPurchaseProductData	
 M	Assembly-CSharp	HeroSkinUtils+HeroSkinProductData	set_CurrencyType	System.Void(Assets.CardHero+PortraitCurrency)
 M	Assembly-CSharp	HeroSkinUtils+HeroSkinProductData	set_IsDelayedRelease	System.Void(System.Boolean)
 M	Assembly-CSharp	HeroSkinUtils+HeroSkinProductData	set_ProductId	System.Void(System.Int32)
+M	Assembly-CSharp	HighlightState	ChangeState	(ActorStateType)
+M	Assembly-CSharp	HighlightState	get_CurrentState	ActorStateType()
 M	Assembly-CSharp	HistoryCard	GetDisplayTimeMS	System.Int32()
 M	Assembly-CSharp	HistoryCard	HasBigCardPostTransformedEntity	System.Boolean()
 M	Assembly-CSharp	HistoryItem	GetEntity	Entity()
@@ -2262,7 +2268,9 @@ M	Assembly-CSharp	Spell	AddSinglePowerTarget	*
 M	Assembly-CSharp	Spell	AttachPowerTaskList	(PowerTaskList)
 M	Assembly-CSharp	Spell	ChangeStateImpl	*
 M	Assembly-CSharp	Spell	ForceDeactivate	()
+M	Assembly-CSharp	Spell	GetActiveState	()
 M	Assembly-CSharp	Spell	GetSourceCard	()
+M	Assembly-CSharp	Spell	GetSpellType	()
 M	Assembly-CSharp	Spell	IsActive	()
 M	Assembly-CSharp	Spell	ReleaseSpell	()
 M	Assembly-CSharp	Spell	RemoveStateFinishedCallback	*
@@ -2909,6 +2917,7 @@ T	Assembly-CSharp	AbsDeckPickerTrayDisplay
 T	Assembly-CSharp	AchievementCategoryDbfRecord		
 T	Assembly-CSharp	AchievementSubcategoryDbfRecord		
 T	Assembly-CSharp	Actor		
+T	Assembly-CSharp	ActorStateType		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		
 T	Assembly-CSharp	AlertPopup+PopupInfo		
@@ -3175,6 +3184,7 @@ T	Assembly-CSharp	HeraldCardTextBuilder
 T	Assembly-CSharp	HeroSkinInfoManager		
 T	Assembly-CSharp	HeroSkinUtils		
 T	Assembly-CSharp	HeroSkinUtils+HeroSkinProductData		
+T	Assembly-CSharp	HighlightState		
 T	Assembly-CSharp	HistoryCard		
 T	Assembly-CSharp	HistoryItem		
 T	Assembly-CSharp	HistoryManager		

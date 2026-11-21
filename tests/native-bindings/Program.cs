@@ -1360,6 +1360,36 @@ catch (Exception error) { failures.Add("ChoiceCardMgr.ChoiceState opposing revea
         || !StaticOwners(plugin, pluginMetadata, loanerPath).Contains("NativeUIProjection"))
         failures.Add("OfflineProbe.ConfigureLoanerGroupPath no longer isolates the card catalog initialization");
 }
+// #239: the highlight refresh (NativeHighlightRefresh) prefixes HighlightState.ChangeState, sets its private force flag, and postfixes Actor.OnSpellStateStarted.
+try
+{
+    MethodSignature(gameMetadata, "HighlightState", "ChangeState", new[] { "ActorStateType" }, "Boolean", signatures);
+    MethodSignature(gameMetadata, "HighlightState", "get_CurrentState", Array.Empty<string>(), "ActorStateType", signatures);
+    MethodSignature(gameMetadata, "Actor", "UpdateHighlights", Array.Empty<string>(), "Void", signatures);
+    MethodSignature(gameMetadata, "Actor", "GetEntity", Array.Empty<string>(), "Entity", signatures);
+    MethodSignature(gameMetadata, "EntityBase", "HasTaunt", Array.Empty<string>(), "Boolean", signatures);
+    var started = MethodSignature(gameMetadata, "Actor", "OnSpellStateStarted", new[] { "Spell", "SpellStateType", "Object" }, "Void", signatures);
+    if ((started.Attributes & MethodAttributes.MemberAccessMask) != MethodAttributes.Private) throw new Exception("OnSpellStateStarted is no longer private");
+    if (Field(gameMetadata, "HighlightState", "m_forceRerender").DecodeSignature(signatures, (object)null) != "Boolean")
+        throw new Exception("HighlightState.m_forceRerender is no longer a Boolean");
+    MethodSignature(gameMetadata, "Spell", "GetSpellType", Array.Empty<string>(), "SpellType", signatures);
+    MethodSignature(gameMetadata, "Spell", "GetActiveState", Array.Empty<string>(), "SpellStateType", signatures);
+}
+catch (Exception error) { failures.Add("highlight refresh: client contract changed: " + error.Message); }
+foreach (var contract in new[] { ("BeforeChangeState", new[] { "HighlightState", "ActorStateType" }, new[] { "__instance", "__0" }),
+    ("AfterSpellStateStarted", new[] { "Actor", "Object" }, new[] { "__instance", "__0" }) })
+{
+    var patch = Method(pluginMetadata, "NativeHighlightRefresh", contract.Item1);
+    var patchSignature = patch.DecodeSignature(signatures, (object)null);
+    var patchParameters = Parameters(pluginMetadata, patch);
+    if (patchSignature.ReturnType != "Void" || !patchSignature.ParameterTypes.SequenceEqual(contract.Item2)
+        || !patchParameters.Select(p => pluginMetadata.GetString(p.Name)).SequenceEqual(contract.Item3))
+        failures.Add("NativeHighlightRefresh." + contract.Item1 + ": invalid Harmony patch signature");
+}
+if (!File.ReadAllText(Path.Combine(root, "plugin/NativeHighlightRefresh.cs")).Contains("prefix: new HarmonyMethod(typeof(NativeHighlightRefresh)")
+    || !File.ReadAllText(Path.Combine(root, "plugin/NativeHighlightRefresh.cs")).Contains("postfix: new HarmonyMethod(typeof(NativeHighlightRefresh)")
+    || !File.ReadAllText(Path.Combine(root, "plugin/ClientBridge.cs")).Contains("NativeHighlightRefresh.Initialize(harmony, logger)"))
+    failures.Add("NativeHighlightRefresh is not registered");
 PackHookIlChecks.Run(root, (ok, message) => { if (!ok) failures.Add(message); });
 if (failures.Count != 0) throw new Exception(string.Join("\n", failures));
 Console.WriteLine("PASS native pack, deck, reward, crafting and onboarding hooks, scoped login sites, card audit APIs and reconcile contract against pinned metadata");

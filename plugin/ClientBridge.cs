@@ -84,6 +84,7 @@ internal static class ClientBridge
         NativeBigCardWatchdog.Initialize(harmony);
         NativeSpellWatchdog.Initialize(harmony);
         NativeSigilGuard.Initialize(harmony, logger);
+        NativeHighlightRefresh.Initialize(harmony, logger);
         ProfileStartupStatus.ClearBound(reports);
         NativeMatchmaking.Initialize(harmony, logger);
         StartupTiming.Mark("bridge-matchmaking");
