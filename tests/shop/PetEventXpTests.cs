@@ -320,7 +320,7 @@ internal static class PetEventXp
                 check(done.PetXpBefore == 100 && done.PetXpAfter == 120 && done.PetRules.StartsWith("rule=3;") && p.PetXp("PET_3_1") == 120, "a V14 pending match settles under the event rules after the upgrade");
             }
             using (var p = new LocalProfile(v14settle)) check(p.PetXp("PET_3_1") == 120 && p.History.Count == 2, "mixed rule 1 (V14) and rule 2 history reopens");
-            check(Read(v14).Version == 15 && v14Bytes.SequenceEqual(File.ReadAllBytes(v14 + ".v14.bak")), "V14 upgrade is in place with a byte-exact .v14.bak");
+            check(Read(v14).Version == 16 && v14Bytes.SequenceEqual(File.ReadAllBytes(v14 + ".v14.bak")), "V14 upgrade is in place with a byte-exact .v14.bak");
             var upgradedData = Read(v14); upgradedData.Version = 14;
             using (var before = new MemoryStream()) using (var after = new MemoryStream())
             {

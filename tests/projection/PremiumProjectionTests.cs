@@ -91,7 +91,7 @@ internal static class PremiumProjectionTests
             // Start-time ownership spans versions: a deck whose copies are all Golden must pass (IsDeckComplete checks versions).
             var goldenOnly = LocalClassRewards.Rewards.First(row => row.Hero == "HERO_08" && row.Premium == 1 && row.Copies == 2
                 && profile.OwnedCount(row.CardId) == 0 && profile.OwnedCount(row.CardId, 1) == 2);
-            var startIds = LocalDecks.Get("mage").CardIds.Take(28).Concat(new[] { goldenOnly.CardId, goldenOnly.CardId }).ToArray();
+            var startIds = StandardDeckFixture.Deck(profile, "HERO_08").Take(28).Concat(new[] { goldenOnly.CardId, goldenOnly.CardId }).ToArray();
             var startDeck = new LocalCustomDeck { Id = profile.CustomDecks.First().Id, Name = "Golden only", Hero = "HERO_08", Cards = startIds.ToList() };
             var startResolved = LocalProfile.LedgerDeck(startDeck.Name, startDeck.Hero, startIds, null, false);
             NativeUIProjection.ValidateCustomStart(profile, startDeck.Id, startDeck, startResolved);

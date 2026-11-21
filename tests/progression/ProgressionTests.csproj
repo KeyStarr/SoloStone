@@ -10,7 +10,7 @@
     <Compile Include="../../plugin/FpsCounterSettings.cs" />
     <Compile Include="../../plugin/DeckInferenceSettings.cs" />
     <Compile Include="../shared/BepInExStandIns.cs" Link="BepInExStandIns.cs" />
-    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
+    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /><Compile Include="../shared/StandardDeckFixture.cs" Link="StandardDeckFixture.cs" />
     <Compile Include="../shared/StandardBatchData.cs" Link="StandardBatchData.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" />
     <Compile Include="../../plugin/LocalDeckRecord.cs" />

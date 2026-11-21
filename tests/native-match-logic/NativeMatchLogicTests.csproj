@@ -14,6 +14,7 @@
     <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/StandardDeckFixture.cs" Link="StandardDeckFixture.cs" />
     <Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" />
     <Compile Include="../shared/ControllerAdmissionInvariant.cs" Link="ControllerAdmissionInvariant.cs" />
     <Compile Include="../shared/AdmissionFault.cs" Link="AdmissionFault.cs" />

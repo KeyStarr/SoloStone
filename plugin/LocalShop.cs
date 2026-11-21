@@ -566,12 +566,14 @@ public sealed class LocalShop
         new HashSet<string>(LocalCardCatalog.ActiveMetaExtraCards, StringComparer.Ordinal));
     internal static bool IsActiveExtraCard(string id) => activeExtraIds.Value.Contains(id);
 #endif
+    // #87: the one Standard rule (active-meta sets, Core 1637, listed extras). A CORE_ prefix alone is not Standard: hidden
+    // Core copies (CORE_HIDDEN, e.g. CORE_CS2_231) and Legacy reprints (CORE_EDR_004) are not in the meta.
     internal static bool IsStandardCard(EngineCard card) => card != null && card.Collectible && card.Implemented
-        && (LocalCardCatalog.IsCore(card.Id) || standardSets.Value.Contains(card.Set)
 #if ENGINE_SOURCE
-            || activeExtraIds.Value.Contains(card.Id)
+        && LocalCardCatalog.IsStandard(card);
+#else
+        && (LocalCardCatalog.IsCore(card.Id) || standardSets.Value.Contains(card.Set));
 #endif
-        );
     internal static IEnumerable<EngineCard> StandardCollectionCards =>
         FairPackRules.Eligible(FairPackRules.Standard, FairPackRules.RuleVersion)
 #if ENGINE_SOURCE
@@ -1046,7 +1048,10 @@ public sealed partial class LocalProfile
     private static readonly Lazy<Dictionary<string, EngineCard>> ledgerCardIndex = new Lazy<Dictionary<string, EngineCard>>(() =>
         ledgerCards.Value.ToDictionary(card => card.Id, StringComparer.Ordinal));
     private static Dictionary<string, EngineCard> LedgerCardIndex => ledgerCardIndex.Value;
-    internal static bool KnownLedgerCard(string id) => id != null && (LedgerCardIndex.ContainsKey(id) || LocalCoreProgression.IsAvailable(id));
+    // A collectible CORE_ id stays known even when it is not Standard (#87): an older save may hold one (the old creation
+    // cheat put hidden and Legacy Core copies in CoreGrants, and a Legend deck snapshot can name it), and must keep loading.
+    internal static bool KnownLedgerCard(string id) => id != null && (LedgerCardIndex.ContainsKey(id) || LocalCoreProgression.IsAvailable(id)
+        || id.StartsWith("CORE_", StringComparison.OrdinalIgnoreCase) && IsCollectibleCard(id));
     // Premium receipts must keep loading after a meta change: any collectible definition is a valid sold card.
     private static bool IsCollectibleCard(string id) {
         try { return Cards.FromId(id)?.Collectible == true; } catch (KeyNotFoundException) { return false; }

@@ -41,7 +41,7 @@ internal static class BackupChecks
     static void Committed(string path, string reason)
     {
         var entry = LocalProfileBackups.List(path)[0];
-        Check(entry.Reason == reason && entry.ProfileVersion == 15, "Missing " + reason + " backup");
+        Check(entry.Reason == reason && entry.ProfileVersion == 16, "Missing " + reason + " backup");
         Exact(path, entry, File.ReadAllBytes(path));
     }
     static void Restart(string path)
@@ -98,7 +98,7 @@ internal static class BackupChecks
             Test("strict manifest fields, missing pairs and reparse files rejected", () => Manifests(root));
             foreach (string stage in new[] { "data-written", "data-renamed", "manifest-written" })
                 Test("mandatory pre-restore failure at " + stage + " leaves live bytes", () => Mandatory(root, stage));
-            Test("corrupt or absent live profile restores current V15 bytes", () => CorruptAndMissing(root));
+            Test("corrupt or absent live profile restores current V16 bytes", () => CorruptAndMissing(root));
             Test("delete failures log and do not block writes; unverifiable pairs stay untouched", () => CleanupFailures(root));
             Test("transiently unreadable pairs stay untouched and uncounted", () => Unreadable(root));
             Test("restore temp fault consumes request and leaves live save loadable", () => RestoreFault(root, false));
@@ -227,7 +227,7 @@ internal static class BackupChecks
         byte[] original = File.ReadAllBytes(path);
         using (var profile = new LocalProfile(path)) { }
         var entry = LocalProfileBackups.List(path).Single();
-        Check(entry.ProfileVersion == 15 && entry.Reason == "startup", "Current startup metadata");
+        Check(entry.ProfileVersion == 16 && entry.Reason == "startup", "Current startup metadata");
         Exact(path, entry, original);
         Check(Read(path).CoreScheduleVersion != 0, "Grant fixture did not trigger a write");
         using (var profile = new LocalProfile(path)) { }
@@ -237,7 +237,7 @@ internal static class BackupChecks
         string validation = ProfilePath(root, "validate");
         File.Copy(path, validation);
         LocalProfile.ValidateFile(validation);
-        Check(Read(validation).Version == 15 && !Directory.Exists(DirectoryFor(validation)), "Validation changed current bytes or took backups");
+        Check(Read(validation).Version == 16 && !Directory.Exists(DirectoryFor(validation)), "Validation changed current bytes or took backups");
         string snapshot = ProfilePath(root, "snapshot");
         File.Copy(path, snapshot);
         var ctor = typeof(LocalProfile).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null,
@@ -517,7 +517,7 @@ internal static class BackupChecks
             Reject(() => LocalProfileBackups.Restore(path, bad));
         foreach (string bad in new[] { "<broken", "<!DOCTYPE x [<!ENTITY evil 'x'>]><LocalProfileData/>",
             System.Text.Encoding.UTF8.GetString(live).Replace("<GoldBalance>1000</GoldBalance>", "<GoldBalance>-1</GoldBalance>"),
-            System.Text.Encoding.UTF8.GetString(live).Replace("<Version>15</Version>", "<Version>999</Version>") })
+            System.Text.Encoding.UTF8.GetString(live).Replace("<Version>16</Version>", "<Version>999</Version>") })
         {
             byte[] bytes = System.Text.Encoding.UTF8.GetBytes(bad);
             string invalid = LocalProfileBackups.Create(path, bytes, "match", 9);

@@ -36,6 +36,7 @@ try {
     FavoriteCardBackTests.Run(Check, Reject, Fresh);
     V13FixtureMigrationTests.Run(Check, root);
     V14BackupFailureTests.Run(Check, root);
+    V16ClassicMigrationTests.Run(Check, root);
     QuoteMemoTests.Run(Check, Reject, Fresh);
     ShopJsonTests.Run(Check, Reject);
     PendingCosmeticsTests.Run(root);
@@ -216,9 +217,15 @@ try {
     }
     Write(corePath, purchased);
     using (var p = new LocalProfile(corePath)) {
-        var match = p.Begin("mage", "priest", 1);
-        var result = p.Settle(match.Id, "Won", 10, false); p.AcknowledgeRewardPresentation(match.Id);
-        Check(result.UnlockedCardIds.Contains("CORE_BAR_541") && p.Collection["CORE_BAR_541"] == 2, "level unlock of a bought Core card does not double-grant");
+        // Win until Mage reaches the level that unlocks Blizzard (CORE_CS2_028), bought above as a locked Core card.
+        int unlockedIn = 0;
+        for (int win = 1; win <= 6 && unlockedIn == 0; win++) {
+            var match = p.Begin("mage", "priest", win);
+            var result = p.Settle(match.Id, "Won", 10, false); p.AcknowledgeRewardPresentation(match.Id);
+            if (result.UnlockedCardIds.Contains("CORE_CS2_028")) unlockedIn = win;
+            Check(p.Collection["CORE_CS2_028"] == 2, "a bought locked Core card keeps its two copies while levelling");
+        }
+        Check(unlockedIn > 0 && p.Collection["CORE_CS2_028"] == 2, "level unlock of a bought Core card does not double-grant");
         Check(p.IsDeckComplete(coreDeckId), "deck stays complete after a class unlock");
     }
     var coreSaved = Read(corePath);

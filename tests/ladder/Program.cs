@@ -52,6 +52,17 @@ static void WriteProfile(string path, LocalProfileData profile)
     using var stream = File.Create(path);
     new XmlSerializer(typeof(LocalProfileData)).Serialize(stream, profile);
 }
+// Classic cards are Wild and a new profile no longer owns them (#87). The legacy compatibility editor (LocalCollectionUI)
+// still seeds from the Classic loaner lists, so its fixtures give the profile the old Classic starter collection first.
+static void SeedClassicStarter(string path)
+{
+    using (var seed = new LocalProfile(path)) seed.CreateDraft("Seed", "HERO_08");
+    var data = ReadProfile(File.ReadAllBytes(path));
+    data.CustomDecks.Clear();
+    foreach (var pair in LocalEconomy.StarterCollection)
+        data.Collection.Add(new LocalCardCount { Id = pair.Key, Count = pair.Value, Acquired = pair.Value });
+    WriteProfile(path, data);
+}
 static string MatchSignature(LocalMatchRecord match) => string.Join("|", new object[] {
     match.Id, match.Deck, match.Opponent, match.Seed, match.StartedUtc, match.Result, match.Turns,
     match.Conceded, match.Gold, match.RewardVersion, match.BonusGold, match.PackReward,
@@ -147,12 +158,12 @@ try
     {
         Check(store.Gold == 0 && store.UnopenedPacks == 0 && store.Stars == 0 && store.Rank == "Bronze 10"
             && store.LastPack == null && !store.PackRevealPending, "fresh zero-pack profile has no receipt to resume");
-        CheckCollection(store, 93, 186, "fresh seeded collection plus exact Core grants");
+        CheckCollection(store, 0, 0, "fresh collection: no Classic starter (Wild since #87), exact Core grants");
         var exposed = (Dictionary<string, int>)store.Collection;
         exposed.Clear();
-        CheckCollection(store, 93, 186, "collection escaped by reference");
+        CheckCollection(store, 0, 0, "collection escaped by reference");
         var pending = store.Begin("mage", "priest", 123);
-        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>15</Version>"), "new profile is not the current version with rolled rewards");
+        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>16</Version>"), "new profile is not the current version with rolled rewards");
         Reject(() => store.Begin("mage", "warrior", 124), "second pending match");
         var result = store.Settle(pending.Id, "Won", 12, false);
         var rolled = Rolled(pending, "Won"); freshGold = rolled.Gold;
@@ -631,7 +642,9 @@ try
     string deckPath = Path.Combine(root, "deck.xml");
     using (var store = new LocalProfile(deckPath))
     {
-        var input = mageCards.ToList();
+        // Classic cards are Wild (#87), so the playable saved deck is built from the Standard cards a new profile owns.
+        var stdMage = StandardDeckFixture.Deck(store, "HERO_08");
+        var input = stdMage.ToList();
         store.SaveDeck("🔥 Mage", "HERO_08", input);
         input[0] = "bad";
         var saved = store.CustomDeck;
@@ -640,23 +653,23 @@ try
         store.SaveDeck("Frost", "HERO_08", LocalDecks.Get("mage-frost").CardIds);
         Check(!store.IsDeckComplete(store.CustomDeck.Id), "unowned deck saved incomplete");
         Reject(() => store.Begin("custom", "priest", 1), "incomplete deck match");
-        store.SaveDeck("🔥 Mage", "HERO_08", mageCards);
-        Reject(() => store.SaveDeck(new string('x', 33), "HERO_08", mageCards), "long name");
+        store.SaveDeck("🔥 Mage", "HERO_08", stdMage);
+        Reject(() => store.SaveDeck(new string('x', 33), "HERO_08", stdMage), "long name");
 
-        var replacement = mageCards.AsEnumerable().Reverse().ToList();
+        var replacement = stdMage.AsEnumerable().Reverse().ToList();
         var beforeCollection = store.Collection.ToDictionary(pair => pair.Key, pair => pair.Value);
         ReplaceFileWithDirectory(deckPath, out var originalDeckBytes);
         bool failed = false;
         try { store.SaveDeck("Arcane Retry", "HERO_08", replacement); } catch (IOException) { failed = true; }
         catch (UnauthorizedAccessException) { failed = true; }
         Check(failed && store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Hero == "HERO_08" &&
-            store.CustomDeck.Cards.SequenceEqual(mageCards) && replacement.SequenceEqual(mageCards.AsEnumerable().Reverse()) &&
+            store.CustomDeck.Cards.SequenceEqual(stdMage) && replacement.SequenceEqual(stdMage.AsEnumerable().Reverse()) &&
             store.Collection.OrderBy(pair => pair.Key).SequenceEqual(beforeCollection.OrderBy(pair => pair.Key)),
             "failed replacement save mutated profile or caller draft");
         var exposedAfterFailure = store.CustomDeck;
         exposedAfterFailure.Name = "bad";
         exposedAfterFailure.Cards.Clear();
-        Check(store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Cards.SequenceEqual(mageCards),
+        Check(store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Cards.SequenceEqual(stdMage),
             "failed replacement deck escaped by reference");
         RestoreFile(deckPath, originalDeckBytes);
         Check(File.ReadAllBytes(deckPath).SequenceEqual(originalDeckBytes), "failed replacement changed disk profile");
@@ -666,7 +679,8 @@ try
     }
     using (var store = new LocalProfile(deckPath))
     {
-        var replacement = mageCards.AsEnumerable().Reverse().ToList();
+        var stdMage = StandardDeckFixture.Deck(store, "HERO_08");
+        var replacement = stdMage.AsEnumerable().Reverse().ToList();
         Check(store.CustomDeck.Name == "Arcane Retry" && store.CustomDeck.Hero == "HERO_08" &&
             store.ResolveCustomDeck().CardIds.SequenceEqual(replacement), "replacement retry restart");
         var ui = new LocalCollectionUI(store);
@@ -695,6 +709,7 @@ try
     }
 
     string ambiguousUiPath = Path.Combine(root, "ui-ambiguous.xml");
+    SeedClassicStarter(ambiguousUiPath);
     using (var store = new LocalProfile(ambiguousUiPath))
     {
         store.CreateDraft("One", "HERO_08");
@@ -725,6 +740,7 @@ try
     }
 
     string uiFreshPath = Path.Combine(root, "ui-fresh.xml");
+    SeedClassicStarter(uiFreshPath);
     using (var store = new LocalProfile(uiFreshPath))
     {
         var ui = new LocalCollectionUI(store);
@@ -758,7 +774,7 @@ try
     Check(LocalProfile.NextStars(150, "Lost") == 150, "Legend floor");
 
     string missingVersionPath = Path.Combine(root, "missing-version.xml");
-    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>15</Version>", "");
+    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>16</Version>", "");
     Check(!missingVersion.Contains("<Version>"), "missing-version fixture still has a version");
     File.WriteAllText(missingVersionPath, missingVersion);
     Reject(() => { using var ignored = new LocalProfile(missingVersionPath); }, "missing profile version");

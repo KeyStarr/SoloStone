@@ -243,7 +243,7 @@ internal static class RematchTests
     {
         using (var profile = new LocalProfile(path, new ProfileOptions { AllCards = true }))
         {
-            string[] cards = LocalDecks.Get("mage").CardIds.ToArray();
+            string[] cards = StandardDeckFixture.Deck(profile, "HERO_08").ToArray(); // Classic cards are Wild (#87)
             var draft = profile.CreateDraft("Rematch Mage", "HERO_08");
             profile.SaveDraft(draft.Id, draft.Name, draft.Hero, cards, draft.SortOrder);
             string selected = "custom:" + draft.Id;
@@ -271,7 +271,7 @@ internal static class RematchTests
             Check(LocalRematch.Encounter(profile, mm, selected, out refusal) != null, "unchanged personal deck rematches: " + refusal);
 
             string[] edited = cards.ToArray();
-            edited[0] = LocalDecks.Get("mage-frost").CardIds.First(id => !cards.Contains(id));
+            edited[0] = LocalCoreProgression.Unlocks.First(card => card.Hero == "HERO_08" && !cards.Contains(card.Id)).Id;
             profile.SaveDraft(draft.Id, draft.Name, draft.Hero, edited, draft.SortOrder);
             Check(LocalRematch.Encounter(profile, mm, selected, out refusal) == null && refusal == "deck changed since the match",
                 "an edited personal deck is refused: " + refusal);

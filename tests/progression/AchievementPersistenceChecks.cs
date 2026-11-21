@@ -32,10 +32,10 @@ internal static class AchievementPersistenceChecks
         {
             profile.CommitChange(next => true);
             var state = profile.Achievements;
-            Check(Read(fresh).Version == 15 && state.CatalogVersion == 1 && state.Unlocks.Count == 0 && state.Grants.Count == 0
+            Check(Read(fresh).Version == 16 && state.CatalogVersion == 1 && state.Unlocks.Count == 0 && state.Grants.Count == 0
                 && state.Career.EligibleWins == 0 && state.Career.ClassWins.Count == 11
                 && state.Career.ClassWins.All(row => row.Wins == 0) && profile.PendingNonMatchAchievementNoticeId == null,
-                "fresh V15 achievement defaults");
+                "fresh V16 achievement defaults");
             state.Career.ClassWins[0].Wins = 9;
             Check(profile.Achievements.Career.ClassWins[0].Wins == 0, "achievement state escaped by reference");
         }
@@ -44,8 +44,8 @@ internal static class AchievementPersistenceChecks
         var v12 = Read(fresh); v12.Version = 12; Write(old, v12); byte[] oldBytes = File.ReadAllBytes(old);
         Reject(() => { using var ignored = new LocalProfile(old); }, "old debug profile");
         Check(File.ReadAllBytes(old).SequenceEqual(oldBytes) && !File.Exists(old + ".v12.bak"), "old profile rejection changed bytes");
-        string future = Path.Combine(root, "achievement-v16.xml");
-        var v16 = Read(fresh); v16.Version = 16; Write(future, v16); byte[] futureBytes = File.ReadAllBytes(future);
+        string future = Path.Combine(root, "achievement-v17.xml");
+        var v17 = Read(fresh); v17.Version = 17; Write(future, v17); byte[] futureBytes = File.ReadAllBytes(future);
         Reject(() => { using var ignored = new LocalProfile(future); }, "future profile");
         Check(File.ReadAllBytes(future).SequenceEqual(futureBytes), "future profile rejection changed bytes");
 

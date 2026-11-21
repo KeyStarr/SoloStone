@@ -8,8 +8,8 @@ internal static class CatalogueIndexTests
         var all = Cards.All.ToArray();
         var standard = FairPackRules.Eligible(FairPackRules.Standard, FairPackRules.RuleVersion);
         var extras = LocalCardCatalog.ActiveMetaExtraCards;
-        bool IsStandard(SabberStoneCore.Model.Card card) => card.Collectible && card.Implemented
-            && (LocalCardCatalog.IsCore(card.Id) || standard.Any(eligible => eligible.Set == card.Set) || extras.Contains(card.Id));
+        // #87: the engine's Standard rule (active-meta sets incl. Core 1637 and listed extras); a CORE_ prefix alone is not enough.
+        bool IsStandard(SabberStoneCore.Model.Card card) => card.Collectible && card.Implemented && LocalCardCatalog.IsStandard(card);
         var ledger = LocalCardCatalog.Current.Concat(standard)
             .Concat(OfflinePoolPolicy.Load().Members.Where(row => row.Scope == "Standard").Select(row => row.CardId)
                 .Concat(SabberStoneCore.CardSets.Client.StandardSets.CollectibleIds).Select(Cards.FromId).Where(IsStandard))
@@ -26,7 +26,8 @@ internal static class CatalogueIndexTests
             .Where(LocalCardCatalog.InActiveMeta).ToArray();
         foreach (var card in all) {
             check(LocalShop.IsStandardCard(card) == IsStandard(card), "Standard admission unchanged: " + card.Id);
-            check(LocalProfile.KnownLedgerCard(card.Id) == (ledger.Contains(card.Id) || LocalCoreProgression.AvailableCards.Any(c => c.Id == card.Id)),
+            check(LocalProfile.KnownLedgerCard(card.Id) == (ledger.Contains(card.Id) || LocalCoreProgression.AvailableCards.Any(c => c.Id == card.Id)
+                    || card.Id.StartsWith("CORE_", StringComparison.OrdinalIgnoreCase) && card.Collectible),
                 "Ledger/Core admission unchanged: " + card.Id);
             check(LocalDecks.IsCustomCard(card.Id) == LocalCardCatalog.Supported.Concat(legal).Any(c => c.Id == card.Id), "Custom admission unchanged: " + card.Id);
             check(LocalDecks.IsFabledCompanion(card.Id) == SabberStoneCore.Actions.FabledRules.IsCompanion(card.Id), "Companion index unchanged: " + card.Id);

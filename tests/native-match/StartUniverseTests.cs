@@ -33,7 +33,7 @@ internal static partial class Program
             using (var fresh = new LocalProfile(path)) fresh.SelectCardBack(0);
             // Current-schema fixture: seed the two Golden First Flames explicitly; startup tests do not exercise migration.
             var setup = Read(path);
-            Check(setup.Version == 15, "fresh fixture schema drifted");
+            Check(setup.Version == 16, "fresh fixture schema drifted");
             setup.PremiumCollection.Add(new LocalCardCount { Id = "CORE_SW_108", Premium = 1, Count = 2, Acquired = 2 });
             foreach (var group in LiveCustomMage.Where(id => id != "CORE_SW_108").GroupBy(id => id))
             {

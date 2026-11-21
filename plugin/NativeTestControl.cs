@@ -2480,7 +2480,15 @@ internal static class TestControlCrafting
                     { "nativeMissing", native?.GetSlotsIncludingSideboards().Where(slot => !slot.Owned).Sum(slot => slot.Count) } };
             })) },
             { "incompleteDecks", TestControlProtocol.List(profile.CustomDecks.Where(deck => !profile.IsDeckComplete(deck.Id))
-                .Select(deck => (object)deck.Name)) }
+                .Select(deck => (object)deck.Name)) },
+            // #87: Standard decks still holding Wild cards, with the client's own verdict (native deck rules and format hooks).
+            { "wildDecks", TestControlProtocol.List(profile.CustomDecks.Where(deck => profile.WildCards(deck.Id).Count != 0).Select(deck => {
+                var native = CollectionManager.Get()?.GetDeck(deck.Id);
+                return (object)new JsonNode { { "id", deck.Id }, { "name", deck.Name }, { "format", deck.Format },
+                    { "wild", TestControlProtocol.List(profile.WildCards(deck.Id).Select(id => (object)id)) },
+                    { "nativeWildSlots", native?.GetSlots().Where(slot => GameUtils.IsWildCard(slot.CardID)).Sum(slot => slot.Count) },
+                    { "nativeValid", native?.IsValidForRuleset } };
+            })) }
         };
     }
 }

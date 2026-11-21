@@ -512,7 +512,7 @@ internal static class ProfileCatalogChecks
         var fresh = ProfileCatalog.Create(legacy, "Fresh V14", new ProfileOptions());
         string freshPath = ProfileCatalog.ProfilePathForId(legacy, fresh.Id);
         using (var opened = new LocalProfile(freshPath))
-            Check(Read(freshPath).Version == 15 && opened.Achievements.Unlocks.Count == 0,
+            Check(Read(freshPath).Version == 16 && opened.Achievements.Unlocks.Count == 0,
                 "picker recovery could not create a fresh V14 slot");
         Check(File.ReadAllBytes(oldPath).SequenceEqual(bytes), "fresh creation changed unsupported slot bytes");
     }

@@ -3,6 +3,7 @@
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings></PropertyGroup>
   <ItemGroup>
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/StandardDeckFixture.cs" Link="StandardDeckFixture.cs" />
     <Compile Include="../shared/UnityStandIns.cs" Link="UnityStandIns.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" Link="LocalProfile.cs" />
     <Compile Include="../../plugin/LocalAchievements.cs" Link="LocalAchievements.cs" />

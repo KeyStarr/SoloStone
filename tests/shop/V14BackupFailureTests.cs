@@ -1,5 +1,6 @@
-// EnsureBackup runs when a V13/V14 save upgrades to V15. A refused or failed backup or commit must leave the save
-// and any existing backup untouched, and a retry against a matching backup must finish the upgrade.
+// EnsureBackup runs when a V13/V14 save upgrades. A failed backup or commit must leave the save and any existing backup
+// untouched, and a retry against a matching backup must finish the upgrade. An existing backup of other bytes is never
+// overwritten: the current bytes are backed up beside it under a hash-named file and the upgrade goes on (#87 review).
 internal static class V14BackupFailureTests
 {
     static string Fixture(string root, string name, out byte[] original)
@@ -18,20 +19,28 @@ internal static class V14BackupFailureTests
 
     internal static void Run(Action<bool, string> check, string root)
     {
-        // A different existing backup is never overwritten, and the save is not upgraded.
+        // A different existing backup is never overwritten; the current bytes get their own hash-named backup.
+        string Hashed(string profile, byte[] bytes) {
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            return profile + ".v14." + Convert.ToHexString(sha.ComputeHash(bytes))[..16].ToLowerInvariant() + ".bak";
+        }
         string path = Fixture(root, "v14-bak-collision", out byte[] original);
         File.WriteAllText(path + ".v14.bak", "different");
-        check(Throws(path), "V14 upgrade refuses a conflicting backup");
-        check(original.SequenceEqual(File.ReadAllBytes(path)) && File.ReadAllText(path + ".v14.bak") == "different",
-            "a conflicting backup changed the save or the backup");
+        check(!Throws(path), "V14 upgrade with a conflicting backup goes on");
+        check(File.ReadAllText(path + ".v14.bak") == "different" && original.SequenceEqual(File.ReadAllBytes(Hashed(path, original)))
+            && !original.SequenceEqual(File.ReadAllBytes(path)), "a conflicting backup stays; the upgraded bytes are backed up beside it");
 
-        // Same length, one byte off: the length check alone must not pass it.
+        // Same length, one byte off: the length check alone must not pass it as the matching backup.
         path = Fixture(root, "v14-bak-same-length", out original);
         byte[] near = (byte[])original.Clone(); near[near.Length / 2] ^= 1;
         File.WriteAllBytes(path + ".v14.bak", near);
-        check(Throws(path), "V14 upgrade refuses a same-length backup with different bytes");
-        check(original.SequenceEqual(File.ReadAllBytes(path)) && near.SequenceEqual(File.ReadAllBytes(path + ".v14.bak")),
-            "a same-length mismatched backup changed the save or the backup");
+        check(!Throws(path) && near.SequenceEqual(File.ReadAllBytes(path + ".v14.bak")) && original.SequenceEqual(File.ReadAllBytes(Hashed(path, original))),
+            "a same-length mismatched backup stays; the current bytes get their own backup");
+        // A hash-named backup that does not match its bytes (tampered) still refuses, and changes nothing.
+        path = Fixture(root, "v14-bak-hashed-tampered", out original);
+        File.WriteAllText(path + ".v14.bak", "different");
+        File.WriteAllText(Hashed(path, original), "tampered");
+        check(Throws(path) && original.SequenceEqual(File.ReadAllBytes(path)), "a tampered hash-named backup refuses and leaves the save");
 
         // A failed backup write (a directory sits where the temporary file goes) leaves the save alone and no backup.
         path = Fixture(root, "v14-bak-write-failure", out original);
@@ -57,6 +66,6 @@ internal static class V14BackupFailureTests
         using (var retry = new LocalProfile(path)) check(retry.Gold >= 0, "the retry with a matching backup loads");
         check(original.SequenceEqual(File.ReadAllBytes(path + ".v14.bak")) && !original.SequenceEqual(File.ReadAllBytes(path)),
             "the retry kept the backup and upgraded the save");
-        Console.WriteLine("PASS V14 backup failures: conflicting and same-length backups refuse, failed backup write and failed commit keep the save");
+        Console.WriteLine("PASS V14 backup failures: conflicting backups kept and bytes backed up beside them, tampered hash backup refuses, failed backup write and failed commit keep the save");
     }
 }
