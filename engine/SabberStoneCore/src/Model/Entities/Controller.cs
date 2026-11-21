@@ -322,6 +322,7 @@ namespace SabberStoneCore.Model.Entities
 		public void AddHeroAndPower(in Card heroCard, in Card powerCard = null, in IDictionary<GameTag, int> tags = null, in int id = -1)
 		{
 			// remove hero and place it to the setaside zone
+			int[] playerbound = Hero == null ? null : Actions.PlayerboundHeroTags.Take(Hero);
 			Weapon weapon = null;
 			AuraEffects auraEffects = null;
 			if  (Hero != null)
@@ -344,6 +345,7 @@ namespace SabberStoneCore.Model.Entities
 			Hero = (Hero) FromCard(this, in heroCard, tags, null, id);
 			Hero[GameTag.ZONE] = (int) Enums.Zone.PLAY;
 			HeroId = Hero.Id;
+            if (playerbound != null) Actions.PlayerboundHeroTags.Give(Hero, playerbound);
 			Hero.HeroPower = FromCard(this, powerCard ?? Cards.FromAssetId(Hero[GameTag.HERO_POWER]),
 				new EntityData { [GameTag.CREATOR] = Hero.Id }) as HeroPower;
 			Hero.Weapon = weapon;
