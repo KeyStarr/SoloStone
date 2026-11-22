@@ -190,6 +190,25 @@ internal static class NefarianRisesProof
             && swap.Player1.HandZone.Select(p => p.Id).OrderBy(i => i).SequenceEqual(second.OrderBy(i => i)), "Bamboozle swaps hands");
         Check(swap.Player2.HandZone.All(p => p.Controller == swap.Player2), "Bamboozle: new owners");
 
+        // Uneven and full hands swap completely (live 2026-11-22: 6 and 7 cards left 3 behind).
+        foreach (var (left, right) in new[] { (6, 7), (2, 9), (10, 10), (0, 5) })
+        {
+            Game uneven = Brawl(boss: false);
+            foreach (var player in new[] { uneven.Player1, uneven.Player2 })
+                foreach (var card in player.HandZone.ToList()) player.HandZone.Remove(card);
+            for (int i = 0; i < left; i++) Add(uneven.Player1, "CS2_182");
+            for (int i = 0; i < right; i++) Add(uneven.Player2, "CS2_120");
+            var leftIds = uneven.Player1.HandZone.Select(p => p.Id).ToList();
+            var rightIds = uneven.Player2.HandZone.Select(p => p.Id).ToList();
+            var bamboozle = Cards.FromId(NefarianBoss.Bamboozle);
+            var spell = (Spell)Entity.FromCard(uneven.Player2, bamboozle);
+            new SabberStoneCore.EffectSystem.EffectContext(uneven, uneven.Player2.Id, spell.Id).CastSpell(spell.Id, HistoryCastKind.Effect);
+            Check(uneven.Player1.HandZone.Select(p => p.Id).SequenceEqual(rightIds) && uneven.Player2.HandZone.Select(p => p.Id).SequenceEqual(leftIds),
+                "Bamboozle swaps " + left + " and " + right + " cards completely, in order (" + uneven.Player1.HandZone.Count + "/" + uneven.Player2.HandZone.Count + ")");
+            Check(uneven.Player1.HandZone.All(p => p.Controller == uneven.Player1 && p[GameTag.CONTROLLER] == 1)
+                && uneven.Player2.HandZone.All(p => p.Controller == uneven.Player2 && p[GameTag.CONTROLLER] == 2), "Bamboozle: owners after " + left + "/" + right);
+        }
+
         // Cleave: 4 to a minion and its owner.
         Game cleave = Brawl(boss: false);
         var yeti = Summon(cleave.Player2, "CS2_182");

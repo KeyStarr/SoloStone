@@ -270,28 +270,36 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
 
         private static IEnumerable<int> Heroes(Game game) => new[] { game.Player1.Hero.Id, game.Player2.Hero.Id };
 
-        // Bamboozle: the players swap hands (cards keep their costs, as a hand-to-hand theft does).
+        // Bamboozle: the players swap hands (cards keep their costs and their order, as a hand-to-hand theft does). Cards move one
+        // at a time, always one whose new hand has room, so neither hand ever goes past its limit; two full hands trade one card
+        // while another crosses (live 2026-11-22: a one-way pass kept 3 of 6 cards when the other hand reached 10).
         private static void SwapHands(Game game, SpellContext ctx)
         {
-            var first = game.Player1.HandZone.ToList();
-            var second = game.Player2.HandZone.ToList();
-            Move(game, first, game.Player2, ctx.Spell);
-            Move(game, second, game.Player1, ctx.Spell);
+            var toSecond = new Queue<IPlayable>(game.Player1.HandZone.ToList());
+            var toFirst = new Queue<IPlayable>(game.Player2.HandZone.ToList());
+            while (toSecond.Count > 0 || toFirst.Count > 0)
+            {
+                if (toFirst.Count > 0 && !game.Player1.HandZone.IsFull) Move(game, toFirst.Dequeue(), game.Player1, ctx.Spell);
+                else if (toSecond.Count > 0 && !game.Player2.HandZone.IsFull) Move(game, toSecond.Dequeue(), game.Player2, ctx.Spell);
+                else if (toSecond.Count > 0 && toFirst.Count > 0)
+                    // Both hands full: one card leaves Player 1's hand, one of Player 2's takes its place, then the first lands.
+                    Move(game, toSecond.Dequeue(), game.Player2, ctx.Spell, inTransit: () => Move(game, toFirst.Dequeue(), game.Player1, ctx.Spell));
+                else break;
+            }
         }
 
-        private static void Move(Game game, List<IPlayable> cards, Controller to, IPlayable source)
+        private static void Move(Game game, IPlayable card, Controller to, IPlayable source, Action inTransit = null)
         {
-            foreach (var card in cards)
-            {
-                if (card.Zone?.Type != Zone.HAND || to.HandZone.IsFull) continue;
-                using var historyTransfer = game.Facts.CardTransfer(card, to.Id, Zone.HAND, source);
-                using var temporaryTransfer = TemporaryRules.PreserveHandTransfer(card);
-                if (card.OngoingEffect is AdaptiveCostEffect costEffect) costEffect.Remove();
-                card.Controller.HandZone.RemoveForTrade(card);
-                card.Controller = to;
-                card[GameTag.CONTROLLER] = to.PlayerId;
-                Generic.AddHandPhase(to, card);
-            }
+            if (card.Zone?.Type != Zone.HAND || card.Controller == to) return;
+            Controller from = card.Controller;
+            using var historyTransfer = game.Facts.CardTransfer(card, from.Id, Zone.HAND, source);
+            using var temporaryTransfer = TemporaryRules.PreserveHandTransfer(card);
+            if (card.OngoingEffect is AdaptiveCostEffect costEffect) costEffect.Remove();
+            from.HandZone.RemoveForTrade(card);
+            inTransit?.Invoke();
+            card.Controller = to;
+            card[GameTag.CONTROLLER] = to.PlayerId;
+            Generic.AddHandPhase(to, card);
         }
 
         // Cleave: N damage to a random minion (not Nefarian) and to its owner's hero.
