@@ -264,8 +264,12 @@ public sealed class OfflineProbe : BaseUnityPlugin
         NativeTurnTimerOption.Initialize(harmony, Logger, Config);
         NativeFpsCounter.Initialize(Logger, Config);
         NativeDeckInferenceOption.Initialize(Logger, Config);
+        MatchOverlay.Initialize(Logger, Config);
+        NativeMatchTracker.Initialize(Logger);
+        NativeTurnClock.Initialize(Logger);
+        NativeMatchTrackerOptions.Initialize(Logger);
         NativeLanguageOption.Initialize(Logger, Config);
-        // SoloStone Options: the Options plank and the panels holding the controls above.
+        // SoloStone Options and Tracker Options: the two Options planks and the panels holding the controls above.
         NativeOptionsPanels.Initialize(harmony, Logger);
         NativeReportUI.Initialize(harmony, Logger, launch);
 #if !SOLOSTONE_RELEASE
@@ -408,6 +412,9 @@ public sealed class OfflineProbe : BaseUnityPlugin
         DeckExperience.Tick();
         NativeFpsCounter.Tick();
         NativeDeckInferenceOption.Tick();
+        MatchOverlay.Tick();
+        NativeMatchTracker.Tick();
+        NativeTurnClock.Tick();
         NativeOptionsPanels.Tick();
         stage = DeckExperience.TraceStage("deck-experience", stage);
         // client.png is captured on demand: a tool drops screenshot-request.txt and waits for a fresh client.png.
@@ -440,7 +447,7 @@ public sealed class OfflineProbe : BaseUnityPlugin
         }
     }
 
-    private void OnGUI() { LocalLadder.Draw(); NativeBrandLabel.Draw(); NativeFpsCounter.Draw(); }
+    private void OnGUI() { LocalLadder.Draw(); NativeBrandLabel.Draw(); NativeFpsCounter.Draw(); NativeMatchTracker.Draw(); NativeTurnClock.Draw(); }
     private void OnApplicationPause(bool paused)
     {
         NativeSpellWatchdog.ApplicationPause(paused);
