@@ -1925,6 +1925,10 @@ namespace SabberStoneCore.Model
 		{
 			set
 			{
+				// A co-op game that ended mid-step (heroes killed by Nefarian's end-of-turn spell) stops there: the step
+				// that was running must not go on to the cleanup and a new turn, which would draw cards in a finished game.
+				// Ordinary games share the bug; fixing them too changes the recorded goldens, so that is a separate change.
+				if (State == State.COMPLETE && value != Step.FINAL_WRAPUP && value != Step.FINAL_GAMEOVER && CoopRules.IsCoop(this)) return;
 				this[GameTag.NEXT_STEP] = (int)value;
 				GamesEventManager.NextStepEvent(this, value);
 			}

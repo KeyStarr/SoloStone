@@ -67,6 +67,17 @@ internal static class NefarianRisesProof
         Check(fall.State == State.COMPLETE && fall.Player1.PlayState == PlayState.LOST && fall.Player2.PlayState == PlayState.LOST,
             "a defeated hero loses for both");
 
+        // A hero killed by an end-of-turn trigger ends the game there: no next turn, no draw (playtest 3).
+        Game endTurn = Brawl(boss: false);
+        Summon(endTurn.Player1, "EX1_298");
+        endTurn.Player2.Hero.Damage = endTurn.Player2.Hero.BaseHealth - 1;
+        int turn = endTurn.Turn, hand = endTurn.Player2.HandZone.Count;
+        endTurn.Process(EndTurnTask.Any(endTurn.Player1));
+        Check(endTurn.State == State.COMPLETE && endTurn.Player1.PlayState == PlayState.LOST && endTurn.Player2.PlayState == PlayState.LOST,
+            "end-of-turn lethal loses for both");
+        Check(endTurn.Turn == turn && endTurn.Player2.HandZone.Count == hand, "a finished game starts no new turn (turn "
+            + turn + "->" + endTurn.Turn + ", hand " + hand + "->" + endTurn.Player2.HandZone.Count + ")");
+
         // Either player concedes: both lose.
         Game concede = Brawl();
         Check(concede.Process(ConcedeTask.Any(concede.Player2)), "concede accepted");
