@@ -113,6 +113,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                         SingleTask = ComplexTask.Create(new DamageTask(9, EntityType.HERO), new DestroyTask(EntityType.SOURCE))
                     }
                 };
+                CoopRules.MarkBossSide(card);
                 NefarianRisesCards.Plain(card);
             });
 

@@ -132,6 +132,14 @@ internal static class NefarianRisesProof
         Check(graves.Contains(NefarianBoss.DontPush) && graves.Contains(NefarianBoss.Eruption), "160: Don't Push Me! and Elemental Eruption");
         Cast(game, game.Player1, NefarianBoss.Missiles10);
         Check(boss.Health == 160, "160: Immune for the rest of the turn");
+        // While he is Immune his Taunt protects nobody, but the teammate's side stays out of reach (only boss-side targets).
+        var mate = Summon(game.Player2, "CS2_120");
+        var eager = Summon(game.Player1, "CS2_182");
+        eager.IsExhausted = false;
+        Check(!eager.ValidAttackTargets.Any() && !eager.CanAttack, "Immune Nefarian: no attack on the teammate's hero or minions ("
+            + string.Join(",", eager.ValidAttackTargets.Select(t => t.Card.Id)) + ")");
+        Check(game.Player1.Hero.ValidAttackTargets.All(CoopRules.IsBossSide), "hero attacks: boss side only");
+        Kill(game, mate);
         End(game);
         Check(!boss.IsImmune, "160: Immune ends with the turn");
 
@@ -232,6 +240,17 @@ internal static class NefarianRisesProof
         int before = rune.Player1.Hero.Damage;
         End(rune); End(rune);
         Check(rune.Player1.Hero.Damage == before + 9 && runeMinion.IsDead, "Explosive Rune: 9 to its owner at the start of the turn");
+
+        // In a co-op game a Rune on the teammate's side can be attacked (it is boss-side), the teammate's hero cannot.
+        Game runeAttack = Brawl(boss: false);
+        Summon(runeAttack.Player2, NefarianBoss.RuneMinion);
+        var attacker = Summon(runeAttack.Player1, "CS2_182");
+        attacker.IsExhausted = false;
+        // untouchable-ok: proof reads the board.
+        var enemyRune = runeAttack.Player2.BoardZone.Single(m => m.Card.Id == NefarianBoss.RuneMinion);
+        Check(attacker.ValidAttackTargets.SequenceEqual(new ICharacter[] { enemyRune }), "co-op: a Rune is attackable, the teammate's hero is not");
+        Attack(runeAttack, attacker, enemyRune);
+        Check(enemyRune.Damage == 3 || enemyRune.IsDead, "co-op: the Rune takes the hit");
 
         // Explosive Runes: one per side.
         Game runes = Brawl(boss: false);

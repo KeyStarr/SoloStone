@@ -275,14 +275,14 @@ namespace SabberStoneCore.Model.Entities
 					}
 				}
 				if (tauntFlag)
-					return allTargetsTaunt;
+					return Actions.CoopRules.AttackTargets(Game, allTargetsTaunt);
 
 				Hero opHero = Controller.Opponent.Hero;
 
 				if (!(this is Minion m && m.AttackableByRush) && !CantAttackHeroes && !opHero.IsImmune && !opHero.HasStealth)
 					allTargets.Add(opHero);
 
-				return allTargets;
+				return Actions.CoopRules.AttackTargets(Game, allTargets);
 			}
 		}
 
@@ -290,6 +290,7 @@ namespace SabberStoneCore.Model.Entities
 		{
 			get
 			{
+				if (Actions.CoopRules.IsCoop(Game)) return ValidAttackTargets.Any();
 				var span = Controller.Opponent.BoardZone.GetSpan();
 				for (int i = 0; i < span.Length; i++)
 				{

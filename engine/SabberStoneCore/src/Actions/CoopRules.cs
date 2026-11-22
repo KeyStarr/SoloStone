@@ -20,6 +20,17 @@ namespace SabberStoneCore.Actions
 
         // A card that is a co-op boss: its death wins the game for the team.
         internal static void MarkBoss(Card card) => BossCards.Add(card.AssetId);
+
+        // The boss and what the boss puts on a player's side (Explosive Rune) are the only characters a co-op player may attack:
+        // the other side belongs to the teammate (playtest 2026-11-22: an Immune Nefarian's Taunt stopped applying, so the
+        // teammate's hero and minions became attackable).
+        private static readonly System.Collections.Generic.HashSet<int> BossSideCards = new System.Collections.Generic.HashSet<int>();
+        internal static void MarkBossSide(Card card) => BossSideCards.Add(card.AssetId);
+        public static bool IsBossSide(ICharacter character) =>
+            character != null && (BossCards.Contains(character.Card.AssetId) || BossSideCards.Contains(character.Card.AssetId));
+
+        internal static System.Collections.Generic.IEnumerable<ICharacter> AttackTargets(Game game, System.Collections.Generic.List<ICharacter> targets) =>
+            IsCoop(game) ? targets.Where(IsBossSide).ToList() : (System.Collections.Generic.IEnumerable<ICharacter>)targets;
         // 34712..34719: the boss's own state (NefarianRises: phase, turns in phase, spell schedule, Bamboozles cast).
         public static bool IsInternalTag(GameTag tag) => (int)tag >= 34710 && (int)tag <= 34719;
 

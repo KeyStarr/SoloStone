@@ -1174,7 +1174,9 @@ public sealed class NativeMatch
 
     private bool OpposingChoicePending(out Choice choice)
     {
-        choice = Game?.State == State.COMPLETE ? null : Game?.Player2.Choice;
+        // Hot-seat: the other seat is a person, never an NPC whose choice is shown face-down; when it owes a choice the client is
+        // handed that seat instead (playtest 2026-11-22: the local seat's own Discover went out twice, once face-down, and froze).
+        choice = Game?.State == State.COMPLETE || hotSeat ? null : Game?.Player2.Choice;
         return choice != null && choice.ChoiceType == ChoiceType.GENERAL && choice.ChoiceAction != ChoiceAction.REWIND
             && choice.Choices != null && choice.Choices.Count > 0 && choice.Choices.All(Game.IdEntityDic.ContainsKey);
     }

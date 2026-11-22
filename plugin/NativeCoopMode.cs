@@ -154,22 +154,31 @@ internal static class NativeCoopMode
     private const string HandoverPopupId = "solostone-coop-handover";
     private static Action pendingProceed;
 
-    // Test control's handover-continue: the popup's Continue, without a pointer.
+    // Test control's handover-continue: the popup's Continue, without a pointer. The popup loads asynchronously and may not be
+    // on screen yet: it is closed now, and again for a few seconds in case it appears after the swap.
     internal static bool ContinueHandoverForTest()
     {
         var proceed = pendingProceed;
         if (proceed == null) return false;
         pendingProceed = null;
-        try { AccessTools.Method(typeof(DialogManager), "DismissAlertOrRemoveFromQueue")?.Invoke(DialogManager.Get(), new object[] { HandoverPopupId }); }
-        catch (Exception error) { log?.LogWarning("COOP handover popup not dismissed: " + error.GetBaseException().Message); }
+        DismissHandoverPopup(6);
         proceed();
         return true;
+    }
+
+    private static void DismissHandoverPopup(int retries)
+    {
+        try { AccessTools.Method(typeof(DialogManager), "DismissAlertOrRemoveFromQueue")?.Invoke(DialogManager.Get(), new object[] { HandoverPopupId }); }
+        catch (Exception error) { log?.LogWarning("COOP handover popup not dismissed: " + error.GetBaseException().Message); }
+        if (retries > 0 && pendingProceed == null) Processor.ScheduleCallback(0.5f, false, _ => { if (pendingProceed == null) DismissHandoverPopup(retries - 1); });
     }
 
     private static void Handover(int seat, Action proceed)
     {
         string name = SeatName(seat);
-        Action once = () => { if (pendingProceed == null) return; pendingProceed = null; proceed(); };
+        // Each popup answers only its own handover: a stale one (a test-control continue that beat its loading) does nothing.
+        Action once = () => { if (!ReferenceEquals(pendingProceed, proceed)) return; pendingProceed = null; proceed(); };
+        DismissHandoverPopup(0);
         pendingProceed = proceed;
         var info = new AlertPopup.PopupInfo {
             m_id = HandoverPopupId, m_headerText = name + "'s turn", m_showAlertIcon = false, m_keyboardEscIsCancel = false,
