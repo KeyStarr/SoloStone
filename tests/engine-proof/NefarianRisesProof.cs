@@ -36,6 +36,10 @@ internal static class NefarianRisesProof
 
     private static Minion Boss(Game game) => NefarianBoss.Find(game);
 
+    // The MISSION_EVENT values sent on the game entity, in order, without the resets to 0.
+    private static List<int> Voices(Game game) => game.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryTagChange>()
+        .Where(t => t.EntityId == game.Id && t.Tag == GameTag.MISSION_EVENT && t.Value != 0).Select(t => t.Value).ToList();
+
     private static Game Reload(Game game) => Game.LoadSnapshot(game.SaveSnapshot());
 
     // The spell played from hand by the player (his spells cost nothing and need no target).
@@ -168,6 +172,11 @@ internal static class NefarianRisesProof
         Check(Graveyards(game).Contains(NefarianBoss.Glorious) && Graveyards(game).Contains(NefarianBoss.TwistedLight), "60: Glorious Finale, Twisted Light");
         // untouchable-ok: proof reads the whole board.
         Check(game.Player1.BoardZone.Concat(game.Player2.BoardZone).All(m => NefarianBoss.IsBoss(m)), "60: Twisted Light clears the board");
+        // His voice lines (client mission events) across both thresholds: true power + Elemental Eruption at 160, then
+        // the second Attack gain, Glorious Finale and Twisted Light at 60.
+        var voices = Voices(game);
+        Check(voices.SequenceEqual(new[] { NefarianBoss.VoiceTruePower, NefarianBoss.VoiceShaman, NefarianBoss.VoiceDestroyYou,
+            NefarianBoss.VoiceFinale, NefarianBoss.VoicePriest }), "voice lines at the thresholds (" + string.Join(",", voices) + ")");
 
         // One hit can't skip a phase: from 200 straight past 160 stops at 160.
         Game big = Brawl(health: 300);
@@ -212,6 +221,18 @@ internal static class NefarianRisesProof
         Check(swap.Player2.HandZone.Select(p => p.Id).OrderBy(i => i).SequenceEqual(first.OrderBy(i => i))
             && swap.Player1.HandZone.Select(p => p.Id).OrderBy(i => i).SequenceEqual(second.OrderBy(i => i)), "Bamboozle swaps hands");
         Check(swap.Player2.HandZone.All(p => p.Controller == swap.Player2), "Bamboozle: new owners");
+        // Each Bamboozle he casts says its line, also the second one with the tag still on the first (it passes through 0).
+        for (int seed = 1; ; seed++)
+        {
+            Check(seed < 40, "a seed with two Bamboozles in 24 turns");
+            Game talk = Brawl(seed: seed, health: 300);
+            for (int turn = 0; turn < 24 && talk.State == State.RUNNING; turn++) End(talk);
+            int casts = Graveyards(talk).Count(id => id == NefarianBoss.Bamboozle);
+            if (casts < 2) continue;
+            int lines = Voices(talk).Count(v => v == NefarianBoss.VoiceManipulated);
+            Check(lines == casts, "Bamboozle: a voice line per cast (" + lines + " for " + casts + ", seed " + seed + ")");
+            break;
+        }
 
         // Uneven and full hands swap completely (live 2026-11-22: 6 and 7 cards left 3 behind).
         foreach (var (left, right) in new[] { (6, 7), (2, 9), (10, 10), (0, 5) })

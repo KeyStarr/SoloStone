@@ -26,6 +26,8 @@ that is closed or crashes is simply over.
 - At 160 and at 60 Health a hit stops at the threshold and he is Immune for the rest of the turn. At 160 he gains 5 Attack
   and casts Elemental Eruption; at 60 he gains 5 more, casts Twisted Light (heals himself 30, 30 damage to every other
   minion) and from then on uses the stronger forms of his spells. If you take too long, he gains his Attack anyway.
+- He speaks with the voice lines in your game client: on the first turn, with every Bamboozle, Elemental Eruption, Glorious
+  Finale and Twisted Light, and each time he gains Attack.
 
 ## The brawl's cards
 
@@ -39,6 +41,9 @@ that is closed or crashes is simply over.
 
 ## Differences from retail
 
+- The brawl's game script plays a line for each of a few event numbers but names no moment for them. Which line goes with
+  which spell here follows what the lines are about (minds manipulated for Bamboozle, the Shaman's elements for Elemental
+  Eruption, the Priest's light for Twisted Light, the finale for Glorious Finale).
 - Nefarian's retail spell order was never published. His choice here is a seeded random pick from the spells the wiki lists
   for each phase, never the same twice in a row; the turn count after which he gains Attack on his own is ours.
 - The second player cannot mulligan: the game's mulligan screen opens only once, at the start, for the player at the

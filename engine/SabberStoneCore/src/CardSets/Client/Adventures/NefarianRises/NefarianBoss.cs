@@ -200,6 +200,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             if (next > 2) return;
             nefarian[AttackPhase] = next;
             nefarian[TurnsInPhase] = 0;
+            Say(game, next == 1 ? VoiceTruePower : VoiceDestroyYou);
             new EffectContext(game, nefarian.Controller.Id, nefarian.Id).GiveBuff(nefarian.Id, next == 1 ? GettingAngry : WhyWontYouDie);
         }
 
@@ -252,10 +253,32 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             return pick;
         }
 
+        // His voice: MISSION_EVENT numbers the client's brawl script (TB11_CoOpv3) answers with a line of his (the lines stay in
+        // the client). The script names no moment for them; each pairing follows what the line is about.
+        internal const int VoiceManipulated = 2;     // minds manipulated: Bamboozle
+        internal const int VoicePriest = 6;          // the Priest's light: Twisted Light
+        internal const int VoiceShaman = 7;          // the Shaman's elements: Elemental Eruption
+        internal const int VoiceDestroyYou = 97;     // a threat: his second Attack gain
+        internal const int VoiceTruePower = 98;      // his true power: his first Attack gain
+        internal const int VoiceFinale = 99;         // the finale: Glorious Finale
+
+        private static int VoiceFor(string spell) =>
+            spell == Bamboozle ? VoiceManipulated : spell == Eruption ? VoiceShaman : spell == Glorious ? VoiceFinale
+            : spell == TwistedLight ? VoicePriest : 0;
+
+        // The client acts on a change of the tag only, so the same line twice in a row (two Bamboozles) passes through 0.
+        private static void Say(Game game, int missionEvent)
+        {
+            if (missionEvent == 0 || Over(game)) return;
+            if (game[GameTag.MISSION_EVENT] == missionEvent) game[GameTag.MISSION_EVENT] = 0;
+            game[GameTag.MISSION_EVENT] = missionEvent;
+        }
+
         // Cast by the player whose side he stands on, created by him (the client shows the spell coming from Nefarian).
         private static void Cast(Game game, Minion nefarian, string id)
         {
             if (Over(game)) return;
+            Say(game, VoiceFor(id));
             Controller caster = nefarian.Controller;
             var spell = (Spell)Entity.FromCard(caster, Cards.FromId(id), new Dictionary<GameTag, int> {
                 { GameTag.CREATOR, nefarian.Id }, { GameTag.DISPLAYED_CREATOR, nefarian.Id } });
