@@ -177,6 +177,7 @@ internal static class NefarianRisesProof
         var voices = Voices(game);
         Check(voices.SequenceEqual(new[] { NefarianBoss.VoiceTruePower, NefarianBoss.VoiceShaman, NefarianBoss.VoiceDestroyYou,
             NefarianBoss.VoiceFinale, NefarianBoss.VoicePriest }), "voice lines at the thresholds (" + string.Join(",", voices) + ")");
+        Check(game[GameTag.MISSION_EVENT] == 0, "the voice tag is back at 0 (a seat swap resends the game entity)");
 
         // One hit can't skip a phase: from 200 straight past 160 stops at 160.
         Game big = Brawl(health: 300);
@@ -221,7 +222,7 @@ internal static class NefarianRisesProof
         Check(swap.Player2.HandZone.Select(p => p.Id).OrderBy(i => i).SequenceEqual(first.OrderBy(i => i))
             && swap.Player1.HandZone.Select(p => p.Id).OrderBy(i => i).SequenceEqual(second.OrderBy(i => i)), "Bamboozle swaps hands");
         Check(swap.Player2.HandZone.All(p => p.Controller == swap.Player2), "Bamboozle: new owners");
-        // Each Bamboozle he casts says its line, also the second one with the tag still on the first (it passes through 0).
+        // Each Bamboozle he casts says its line, the second one too.
         for (int seed = 1; ; seed++)
         {
             Check(seed < 40, "a seed with two Bamboozles in 24 turns");

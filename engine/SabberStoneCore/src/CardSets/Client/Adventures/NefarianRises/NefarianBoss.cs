@@ -266,12 +266,13 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             spell == Bamboozle ? VoiceManipulated : spell == Eruption ? VoiceShaman : spell == Glorious ? VoiceFinale
             : spell == TwistedLight ? VoicePriest : 0;
 
-        // The client acts on a change of the tag only, so the same line twice in a row (two Bamboozles) passes through 0.
+        // The client acts on a change of the tag, so it goes back to 0 at once (the script ignores 0): the same line can come
+        // again (two Bamboozles), and a hot-seat swap, which sends the game entity again with all its tags, carries no line.
         private static void Say(Game game, int missionEvent)
         {
             if (missionEvent == 0 || Over(game)) return;
-            if (game[GameTag.MISSION_EVENT] == missionEvent) game[GameTag.MISSION_EVENT] = 0;
             game[GameTag.MISSION_EVENT] = missionEvent;
+            game[GameTag.MISSION_EVENT] = 0;
         }
 
         // Cast by the player whose side he stands on, created by him (the client shows the spell coming from Nefarian).
