@@ -224,7 +224,7 @@ internal sealed class ControlRequest
     internal readonly string Id, Command, Hash;
     internal readonly JsonNode Fields;
     internal readonly DateTime ReceivedUtc = DateTime.UtcNow;
-    internal bool Mutation => Command == "cancel-target" || Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
+    internal bool Mutation => Command == "handover-continue" || Command == "cancel-target" || Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
         || Command == "squelch" || Command == "unsquelch" || Command == "emote" || Command == "npc-emote" || Command == "npc-concede" || Command == "human-defeat" || Command == "premium-unlock-prepare" || Command == "ui-hover" || Command == "ui-unhover" || Command == "ui-escape" || Command == "choice-click" || Command == "entity-drag" || Command == "ui-drag" || Command == "ui-scroll" || Command == "open-packs" || Command == "achievement-prime" || Command == "turn-timer-debug" || Command == "spell-stall-arm"
         || Command == "craft-token-grant" || Command == "collection-jump" || Command == "clipboard-set" || Command == "collection-paste-check";
     // Human emotes the native emote menu offers (EmoteType names); test-control plays them through the native option.
@@ -316,6 +316,7 @@ internal sealed class ControlRequest
                 extras = "matchId achievementId"; Text("matchId");
                 if (Text("achievementId") != "death-knight-grave-expenditure") throw new FormatException("Unsupported achievement fixture.");
                 break;
+            case "handover-continue": extras = "matchId"; Text("matchId"); break;
             case "npc-concede": case "human-defeat": case "premium-unlock-prepare": case "spell-stall-arm": case "cancel-target": extras = "matchId"; Text("matchId"); break;
             case "emote": case "npc-emote":
                 extras = "matchId emote"; Text("matchId");

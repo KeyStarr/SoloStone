@@ -30,6 +30,8 @@ internal static class ClientBridge
     private static bool localConnected;
     private static float stageTime;
     private static NativeMatch match;
+    // The match staged or under way (null between matches).
+    internal static NativeMatch ActiveMatch => match;
     private static string runId, matchId;
     private static PlaytestRecord playtestRecord;
     internal static bool OwnsLiveMatch => staged && requested && localConnected && match?.Game != null

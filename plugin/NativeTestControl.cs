@@ -544,6 +544,7 @@ internal sealed partial class NativeTestControl
             if (request.Command == "open-packs") { HandleOpenPacks(envelope); return; }
             if (request.Command == "craft-token-grant" || request.Command == "collection-jump") { HandleCraftingTest(envelope); return; }
             if (request.Command == "clipboard-set" || request.Command == "collection-paste-check") { HandleDeckImportTest(envelope); return; }
+            if (request.Command == "handover-continue") { HandleHandover(envelope, view); return; }
             if (request.Command == "squelch" || request.Command == "unsquelch" || request.Command == "emote" || request.Command == "npc-emote" || request.Command == "npc-concede"
                 || request.Command == "human-defeat" || request.Command == "premium-unlock-prepare" || request.Command == "achievement-prime" || request.Command == "turn-timer-debug" || request.Command == "spell-stall-arm" || request.Command == "cancel-target")
             { HandlePresence(envelope, view); return; }
@@ -643,6 +644,33 @@ internal sealed partial class NativeTestControl
         }
         OperationReply(envelope.Connection, request, operation);
     }
+    // Hot-seat (co-op brawl): answer the pending pass-the-device popup, as its Continue button does. It is the only way on while
+    // a handover holds the match, so the unresolved action that led to it does not block it.
+    private void HandleHandover(ControlEnvelope envelope, View view)
+    {
+        AssertMainThread();
+        var request = envelope.Request;
+        var operation = ledger.Accept(request, out bool added);
+        if (!added) { OperationReply(envelope.Connection, request, operation); return; }
+        if (FaultBlocks(request, view)) Reject(operation, "Mutations frozen: " + fault);
+        else if (!Enabled(out string enabledToken) || token != enabledToken) { Reject(operation, "Control flag changed"); Stop("Control flag changed"); }
+        else
+        {
+            try
+            {
+                RequireMatch(request, view);
+                if (ClientBridge.ActiveMatch?.HandoverPending != true) throw new InvalidOperationException("No handover pending");
+                operation.Detail["inputKind"] = "semantic-handover"; operation.Detail["matchId"] = view.MatchId;
+                if (!NativeCoopMode.ContinueHandoverForTest()) throw new InvalidOperationException("No handover popup");
+                mutations++;
+                operation.Detail["localSeat"] = ClientBridge.ActiveMatch?.LocalSeat ?? 0;
+                operation.Phase = "settled";
+            }
+            catch (Exception error) { Reject(operation, error.Message); }
+        }
+        OperationReply(envelope.Connection, request, operation);
+    }
+
     // Squelch/unsquelch the NPC opponent through the native EnemyEmoteHandler, or play one human emote through the
     // native emote option. Settles at once: no game packet, no engine mutation; a retry with the same ID replays the record.
     // npc-concede / human-defeat (debug instant win / plain loss) share the gate but do mutate the engine (counted in
@@ -1251,8 +1279,11 @@ internal sealed partial class NativeTestControl
         var next = ledger.Accept(request, out bool added);
         if (!added) throw new InvalidOperationException("Unexpected ledger duplicate");
         bool escape = request.Command == "press" && UiRules.IsMatchEscape(request.Text("element"));
+        // A hot-seat handover holds the match until its popup is answered: the popup's buttons are the way on.
+        bool handover = request.Command == "press" && ClientBridge.ActiveMatch?.HandoverPending == true
+            && request.Text("element").StartsWith("dialog.", StringComparison.Ordinal);
         if (fault != null && !escape) Reject(next, "Mutations frozen: " + fault);
-        else if (active != null && !active.Finished && !escape) Reject(next, "Match action unresolved: " + active.Request.Id);
+        else if (active != null && !active.Finished && !escape && !handover) Reject(next, "Match action unresolved: " + active.Request.Id);
         else if (press != null) Reject(next, "Another press unresolved: " + press.Operation.Request.Id);
         else if ((DateTime.UtcNow - request.ReceivedUtc).TotalSeconds > 10) Reject(next, "Expired before execution");
         else if (!Enabled(out string enabledToken) || token != enabledToken) { Reject(next, "Control flag changed"); Stop("Control flag changed"); }
@@ -2004,9 +2035,9 @@ internal sealed partial class NativeTestControl
                 { "state", game.State.ToString() }, { "step", game.Step.ToString() }, { "turn", game.Turn },
                 { "currentPlayerId", game.CurrentPlayer?.PlayerId ?? 0 }, { "firstPlayer", match.FirstPlayer }, { "seed", match.Seed },
                 { "botNodes", match.BotNodes }, { "botMilliseconds", match.BotMilliseconds }, { "botFallbacks", match.BotFallbacks },
-                { "human", EnginePlayer(match, game.Player1, true) }, { "opponent", EnginePlayer(match, game.Player2, false) }
+                { "human", EnginePlayer(match, match.LocalSeatController, true) }, { "opponent", EnginePlayer(match, match.OtherSeatController, false) }
             };
-            var coin = game.Player1.HandZone.FirstOrDefault(card => card.Id == match.CosmeticCoinEntityId);
+            var coin = match.LocalSeatController.HandZone.FirstOrDefault(card => card.Id == match.CosmeticCoinEntityId);
             var nativeCoin = coin == null ? null : front?.GetEntityMap()?.Values.FirstOrDefault(entity => entity.GetEntityId() == coin.Id);
             view.State["coin"] = coin == null ? null : new JsonNode {
                 { "entityId", coin.Id }, { "engineCardId", coin.Card.Id }, { "nativeCardId", nativeCoin?.GetCardId() } };
@@ -2016,6 +2047,8 @@ internal sealed partial class NativeTestControl
                 var gameEntity = front.GetGameEntity();
                 var human = front.GetFriendlySidePlayer(); var opponent = front.GetOpposingSidePlayer();
                 view.State["client"] = new JsonNode {
+                    { "gameEntityType", gameEntity.GetType().Name }, { "missionId", GameMgr.Get()?.GetMissionId() ?? 0 },
+                    { "localSeat", match.LocalSeat }, { "hotSeat", match.HotSeat }, { "handoverPending", match.HandoverPending }, { "seatSwaps", match.SeatSwaps },
                     { "state", gameEntity.GetTag(GAME_TAG.STATE) }, { "step", gameEntity.GetTag(GAME_TAG.STEP) }, { "turn", gameEntity.GetTag(GAME_TAG.TURN) },
                     { "human", ClientPlayer(front, human) }, { "opponent", ClientPlayer(front, opponent) },
                     { "boardActors", BoardActors(front) },
@@ -2028,13 +2061,13 @@ internal sealed partial class NativeTestControl
                 if (human == null || opponent == null) view.Differences.Add("playersMissing");
                 else
                 {
-                    Compare("humanCurrentPlayer", human.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == game.Player1 ? 1 : 0);
-                    Compare("opponentCurrentPlayer", opponent.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == game.Player2 ? 1 : 0);
-                    ComparePlayer(match, front, human, game.Player1, view.Differences); ComparePlayer(match, front, opponent, game.Player2, view.Differences);
+                    Compare("humanCurrentPlayer", human.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == match.LocalSeatController ? 1 : 0);
+                    Compare("opponentCurrentPlayer", opponent.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == match.OtherSeatController ? 1 : 0);
+                    ComparePlayer(match, front, human, match.LocalSeatController, view.Differences); ComparePlayer(match, front, opponent, match.OtherSeatController, view.Differences);
                     if (view.Blockers.Count == 0 || view.ChoiceBoundary)
                     {
-                        CompareBoardActors(match, human, game.Player1, view.Differences);
-                        CompareBoardActors(match, opponent, game.Player2, view.Differences);
+                        CompareBoardActors(match, human, match.LocalSeatController, view.Differences);
+                        CompareBoardActors(match, opponent, match.OtherSeatController, view.Differences);
                     }
                 }
                 // Audit only after queues drain; transient packet application is expected divergence.
@@ -2171,7 +2204,8 @@ internal sealed partial class NativeTestControl
             { "id", player.GetPlayerId() }, { "heroId", hero?.GetEntityId() ?? 0 },
             { "health", hero == null ? 0 : hero.GetTag(GAME_TAG.HEALTH) - hero.GetTag(GAME_TAG.DAMAGE) },
             { "armor", hero?.GetTag(GAME_TAG.ARMOR) ?? 0 }, { "mana", player.GetNumAvailableResources() },
-            { "handCount", Count(3) }, { "deckCount", Count(2) }, { "playState", player.GetTag(GAME_TAG.PLAYSTATE) }
+            { "handCount", Count(3) }, { "deckCount", Count(2) }, { "playState", player.GetTag(GAME_TAG.PLAYSTATE) },
+            { "local", player.IsLocalUser() }, { "teamId", player.GetTeamId() }, { "side", player.GetSide().ToString() }
         };
     }
     private static JsonList VisibleEntities(GameState front)
@@ -2204,7 +2238,7 @@ internal sealed partial class NativeTestControl
             engine.BoardZone
 #endif
             .Select(card => match.WireReturnId(card.Id)))) diff.Add("player" + engine.PlayerId + ":boardOrder");
-        if (engine.PlayerId == 1)
+        if (engine == match.LocalSeatController) // the hand audit follows the seat the client controls (hot-seat)
         {
             var cards = native.GetHandZone()?.GetCards()?.Where(card => card != null && card.GetEntity() != null).ToArray() ?? new Card[0];
             int[] hand = cards.Select(card => card.GetEntity().GetEntityId()).OrderBy(id => id).ToArray();

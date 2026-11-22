@@ -767,6 +767,7 @@ namespace SabberStoneCore.Model
 
         internal void CheckDeadHeroes()
         {
+            CoopRules.CheckBoss(this);
             Actions.CorpseRules.ResurrectHeroes(this);
             Actions.BossRules.TagInPartners(this);
 			// check dead heroes here again (TODO)
@@ -1514,6 +1515,7 @@ namespace SabberStoneCore.Model
 
             Actions.CorpseRules.ResurrectHeroes(this);
             Actions.BossRules.TagInPartners(this);
+            CoopRules.CheckBoss(this);
 
 			if (Player1.Hero.ToBeDestroyed)
 			{

@@ -30,8 +30,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
     // once he has 10 Attack or is past 60 Health.
     //
     // The retail spell schedule is not public: his choice is a seeded random pick from the phase's pool, with a turn of rest
-    // possible, never the same choice twice in a row. Losing or winning is CoopRules: the Deathrattle (invisible on the card) ends
-    // the game with the team's win.
+    // possible, never the same choice twice in a row. Losing or winning is CoopRules: his death ends the game with the team's win.
     public static class NefarianBoss
     {
         public const string BossId = "TB_CoOpv3_Boss";
@@ -89,11 +88,11 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                         new Trigger(TriggerType.TURN_END) {
                             EitherTurn = true,
                             SingleTask = new CustomTask((game, controller, source, target, stack) => EndOfTurn(game, (Minion)source))
-                        }),
-                    DeathrattleTask = new CustomTask((game, controller, source, target, stack) => CoopRules.DefeatBoss(game))
+                        })
                 };
-                // The card carries InvisibleDeathrattle (335) but not DEATHRATTLE: the client hides the icon.
-                card.SetPrintedDeathrattle();
+                // His death wins the game for the team (CoopRules.CheckBoss after each death phase). No Deathrattle: the client
+                // would show its skull under him.
+                CoopRules.MarkBoss(card);
                 NefarianRisesCards.Plain(card);
             };
             register(40259, BossId, boss);

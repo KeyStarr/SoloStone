@@ -1,0 +1,30 @@
+{
+  "schema": "solostone.coop/1",
+  "id": "nefarian-rises",
+  "version": 1,
+  "name": "Nefarian Rises!",
+  "source": "https://hearthstone.wiki.gg/wiki/Nefarian_Rises!",
+  "client": { "scenario": 1865, "board": 7 },
+  "boss": "TB_CoOpv3_Boss",
+  "seats": [
+    {
+      "name": "Anduin",
+      "hero": "HERO_09",
+      "deck": [
+        "TB_Coopv3_104", "TB_Coopv3_105", "CS1_129", "CS2_003", "CS2_235", "AT_013", "CS2_004", "CS2_004", "CS2_236", "CS2_236",
+        "GVG_011", "AT_014", "EX1_339", "AT_015", "GVG_010", "GVG_010", "ICC_213", "CFM_604", "OG_094", "OG_094",
+        "FP1_001", "EX1_049", "EX1_089", "LOE_077", "EX1_050", "EX1_014", "AT_111", "OG_147", "OG_295", "AT_132"
+      ]
+    },
+    {
+      "name": "Morgl",
+      "hero": "HERO_02",
+      "skin": "HERO_02a",
+      "deck": [
+        "TB_Coopv3_100", "TB_Coopv3_104", "TB_Coopv3_101", "TB_Coopv3_103", "CS2_041", "CS2_045", "CS2_045", "CS2_038", "CS2_038", "GVG_039",
+        "CS2_039", "CS2_039", "AT_048", "EX1_587", "CS2_046", "NEW1_010", "OG_338", "EX1_089", "EX1_050", "FP1_029",
+        "AT_129", "FP1_027", "EX1_116", "OG_200", "AT_124", "EX1_110", "OG_122", "AT_098", "AT_128", "LOE_089"
+      ]
+    }
+  ]
+}

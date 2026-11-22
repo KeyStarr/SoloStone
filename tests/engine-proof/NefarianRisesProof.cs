@@ -54,7 +54,8 @@ internal static class NefarianRisesProof
         Schedule();
         Spells();
         PlayerCards();
-        Console.WriteLine("PASS nefarian rises: team result, side switch, phases, schedule, spells, player cards");
+        Content();
+        Console.WriteLine("PASS nefarian rises: team result, side switch, phases, schedule, spells, player cards, shipped decks");
     }
 
     private static void TeamResult()
@@ -96,6 +97,7 @@ internal static class NefarianRisesProof
         var boss = Boss(game);
         Check(boss.Controller == game.Player2 && boss.AttackDamage == 0 && boss.Health == 200 && boss.HasTaunt, "0/200 Taunt on Player 2's side");
         Check(boss.CantBeTargetedBySpells, "can't be targeted by spells");
+        Check(!boss.Card.Deathrattle && boss[GameTag.DEATHRATTLE] == 0, "no Deathrattle (the client would show its skull)");
         End(game);
         Check(boss.Controller == game.Player1, "after Player 1's turn he stands on Player 1's side");
         End(game);
@@ -224,6 +226,36 @@ internal static class NefarianRisesProof
         var a = Summon(eruption.Player1, "CS2_182"); var b = Summon(eruption.Player2, "CS2_182");
         Cast(eruption, eruption.Player1, NefarianBoss.Eruption);
         Check(a.Damage >= 4 && a.Damage <= 6 && b.Damage >= 4 && b.Damage <= 6 && Boss(eruption).Damage == 0, "Elemental Eruption: 4-6, not Nefarian");
+    }
+
+    // data/coop/nefarian-rises-v1.json: both seats hold 30 cards, every card plays in this engine, the boss is Nefarian.
+    private static void Content([System.Runtime.CompilerServices.CallerFilePath] string here = "")
+    {
+        string file = null;
+        foreach (string start in new[] { System.IO.Path.GetDirectoryName(here), System.IO.Directory.GetCurrentDirectory(), AppContext.BaseDirectory })
+            for (var dir = string.IsNullOrEmpty(start) ? null : new System.IO.DirectoryInfo(start); dir != null && file == null; dir = dir.Parent)
+            {
+                string candidate = System.IO.Path.Combine(dir.FullName, "data", "coop", "nefarian-rises-v1.json");
+                if (System.IO.File.Exists(candidate)) file = candidate;
+            }
+        Check(file != null, "data/coop/nefarian-rises-v1.json not found");
+        using var json = System.Text.Json.JsonDocument.Parse(System.IO.File.ReadAllText(file));
+        var root = json.RootElement;
+        Check(root.GetProperty("schema").GetString() == "solostone.coop/1", "content: schema");
+        Check(root.GetProperty("boss").GetString() == NefarianBoss.BossId, "content: the boss is Nefarian");
+        Check(root.GetProperty("client").GetProperty("scenario").GetInt32() == 1865, "content: scenario 1865 (TB_COOPV3)");
+        var seats = root.GetProperty("seats").EnumerateArray().ToList();
+        Check(seats.Count == 2, "content: two seats");
+        foreach (var seat in seats)
+        {
+            string hero = seat.GetProperty("hero").GetString();
+            Check(Cards.FromId(hero)?.Type == CardType.HERO, "content: hero " + hero);
+            if (seat.TryGetProperty("skin", out var skin)) Check(Cards.FromId(skin.GetString()) != null, "content: skin " + skin.GetString());
+            var deck = seat.GetProperty("deck").EnumerateArray().Select(id => id.GetString()).ToList();
+            Check(deck.Count == 30, "content: " + hero + " deck has 30 cards (" + deck.Count + ")");
+            var missing = deck.Where(id => { var card = Cards.FromId(id); return card == null || !card.Implemented; }).Distinct().ToList();
+            Check(missing.Count == 0, "content: unimplemented cards in " + hero + "'s deck: " + string.Join(", ", missing));
+        }
     }
 
     private static void PlayerCards()

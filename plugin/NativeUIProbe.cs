@@ -253,6 +253,7 @@ internal static partial class NativeUIProbe
         Hook(harmony, typeof(GameSaveDataManager), "Request", nameof(Preferences), new[] { typeof(List<GameSaveKeyId>), typeof(GameSaveDataManager.OnRequestDataResponseDelegate) });
         Hook(harmony, typeof(GameSaveDataManager), "SaveSubkeys", nameof(SavePreferences));
         NativeRunModes.Install(harmony, log);
+        NativeCoopMode.Install(harmony, log);
         Hook(harmony, typeof(CollectionManager), "SendCreateDeck", nameof(CreateLocalDraft));
         InitializeCosmeticTrayBinding(harmony);
         Hook(harmony, typeof(CollectionManager), "OnDeckDeletedWhileOffline", nameof(DeleteLocalDraft));

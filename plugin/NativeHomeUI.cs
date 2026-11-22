@@ -216,6 +216,9 @@ internal static class NativeHomeUI
     // The disabled fourth-mode face says Fan-made modes (community mods, modder toolkit); it stays inert like Arena.
     // Only the native face text changes, so font, plate and size stay native; the tooltip headline reads the same text.
     internal const string FanModesLabel = "Fan-made modes";
+    // While a co-op brawl ships (NativeCoopMode) the same slot reads Tavern Brawl and starts it.
+    internal const string BrawlLabel = "Tavern Brawl";
+    internal static Func<bool> CoopModesAvailable = () => false;
     internal const string ArenaEntry = "home.arena", FanModesEntry = "home.battlegrounds";
 
     // One switch for the Fan-made modes relabel and the Arena/Fan-made modes slot swap: each follows its hidden-entry policy, so an
@@ -231,9 +234,10 @@ internal static class NativeHomeUI
     private static void LabelFanModes(Box box, Action<string> report)
     {
         var button = box?.m_BattleGroundsButton;
-        if (button == null || button.GetText() == FanModesLabel) return;
-        button.SetText(FanModesLabel);
-        report?.Invoke("NATIVE_MENU battlegrounds label -> " + FanModesLabel);
+        string label = CoopModesAvailable() ? BrawlLabel : FanModesLabel;
+        if (button == null || button.GetText() == label) return;
+        button.SetText(label);
+        report?.Invoke("NATIVE_MENU battlegrounds label -> " + label);
         FitFanModesText(box, button, report);
     }
 
@@ -325,11 +329,27 @@ internal static class NativeHomeUI
         button.SetEnabled(UIEventType.ROLLOUT, true);
     }
 
+    // The fourth-mode slot, pressable (the co-op brawl's entry while one ships).
+    internal static void EnableMode(Box box, BoxMenuButton button)
+    {
+        if (box == null || button == null) return;
+        button.gameObject.SetActive(true);
+        box.SetBoxButtonInteractions(true, button, true);
+        button.SetEnabled(UIEventType.PRESS, true);
+        button.SetEnabled(UIEventType.RELEASE, true);
+        button.SetEnabled(UIEventType.ROLLOVER, true);
+        button.SetEnabled(UIEventType.ROLLOUT, true);
+        ModeSlotEnabled?.Invoke(button);
+    }
+    // The co-op mode wires its own press listener to the enabled slot (NativeCoopMode).
+    internal static Action<BoxMenuButton> ModeSlotEnabled;
+
     // True while the Modes button opens SoloStone's run modes (set by NativeRunModes; tests leave it false).
     internal static Func<bool> RunModesAvailable = () => false;
 
     private static bool IsUnavailableMode(Box box, PegUIElement button) => box != null && button != null
-        && (button == box.m_ArenaButton || button == box.m_BattleGroundsButton || button == box.m_GameModesButton && !RunModesAvailable());
+        && (button == box.m_ArenaButton || button == box.m_BattleGroundsButton && !CoopModesAvailable()
+            || button == box.m_GameModesButton && !RunModesAvailable());
 
     internal static bool ShowModeTooltip(Box box, PegUIElement button)
     {

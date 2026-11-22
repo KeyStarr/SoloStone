@@ -1,3 +1,4 @@
+using System.Linq;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
@@ -13,6 +14,12 @@ namespace SabberStoneCore.Actions
         // Private, never sent to the client (NativeMatch and the transport invariants filter the range).
         internal const GameTag Coop = (GameTag)34710;
         internal const GameTag BossDefeated = (GameTag)34711;
+        // The boss minion's entity id, on the game entity (CoopRules.Apply finds it on the starting board).
+        internal const GameTag BossEntity = (GameTag)34717;
+        private static readonly System.Collections.Generic.HashSet<int> BossCards = new System.Collections.Generic.HashSet<int>();
+
+        // A card that is a co-op boss: its death wins the game for the team.
+        internal static void MarkBoss(Card card) => BossCards.Add(card.AssetId);
         // 34712..34719: the boss's own state (NefarianRises: phase, turns in phase, spell schedule, Bamboozles cast).
         public static bool IsInternalTag(GameTag tag) => (int)tag >= 34710 && (int)tag <= 34719;
 
@@ -22,10 +29,21 @@ namespace SabberStoneCore.Actions
 
         internal static void Apply(Game game, bool coop)
         {
-            if (coop) game[Coop] = 1;
+            if (!coop) return;
+            game[Coop] = 1;
+            foreach (var minion in game.Player1.BoardZone.GetAll().Concat(game.Player2.BoardZone.GetAll()))
+                if (BossCards.Contains(minion.Card.AssetId)) { game[BossEntity] = minion.Id; break; }
         }
 
-        // The boss died (its Deathrattle): the game ends after this action, and FinalWrapUp gives both players the win unless a
+        // After each death phase (Game.CheckDeadHeroes and the death processing's own hero check): the boss has died.
+        internal static void CheckBoss(Game game)
+        {
+            if (!IsCoop(game) || game[BossEntity] == 0 || IsBossDefeated(game) || game.State == State.COMPLETE) return;
+            if (!game.IdEntityDic.TryGetValue(game[BossEntity], out var boss)) return;
+            if (boss.Zone?.Type == Zone.GRAVEYARD || boss is Minion minion && minion.IsDead && minion.Zone?.Type != Zone.PLAY) DefeatBoss(game);
+        }
+
+        // The boss died (CheckBoss): the game ends after this action, and FinalWrapUp gives both players the win unless a
         // hero fell or a player conceded too.
         internal static void DefeatBoss(Game game)
         {

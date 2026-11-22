@@ -29,8 +29,30 @@ using NativeOption = PegasusGame.Option;
 
 public sealed class NativeMatch
 {
-    private const int HumanPlayerId = 1;
-    private const int BotPlayerId = 2;
+    // The seat this client controls: 1 in every ordinary match. A hot-seat match (two people at one client, the Nefarian Rises!
+    // co-op brawl) hands the client the other seat whenever the other player owes the next input (SwapSeat); everything the
+    // plugin does "for the human" (options, choices, privacy, concede) follows localSeat.
+    private int localSeat = 1;
+    private bool hotSeat;
+    // ReferenceHiddenFromHuman is static (it serves static projection helpers): the live match's seat, one match at a time.
+    private static int staticLocalSeat = 1;
+    private int HumanPlayerId => localSeat;
+    private int BotPlayerId => 3 - localSeat;
+    private Controller HumanSeat => localSeat == 1 ? Game.Player1 : Game.Player2;
+    private Controller OtherSeat => localSeat == 1 ? Game.Player2 : Game.Player1;
+    internal bool HotSeat => hotSeat;
+    internal int LocalSeat => localSeat;
+    // Test control compares the client's friendly side with these.
+    internal Controller LocalSeatController => Game == null ? null : HumanSeat;
+    internal Controller OtherSeatController => Game == null ? null : OtherSeat;
+    // Hot-seat handover (set by the co-op mode): called with the seat about to play and the continuation that swaps to it. The
+    // prompt (a pass-the-device popup) runs the continuation once the next player is at the screen. Null swaps at once.
+    internal Action<int, Action> HandoverPrompt;
+    // Called after each seat swap has been sent (the co-op mode refreshes the client's name banners).
+    internal Action SeatSwapped;
+    private bool handoverPending;
+    internal bool HandoverPending => handoverPending;
+    internal int SeatSwaps { get; private set; }
     private const int MaxBotActions = 128;
     private const int CurrentSpellPowerBaseTag = 291;
     // Retail summon source (see PowerHistoryBuilder); masked when its source is hidden from this seat.
@@ -768,11 +790,19 @@ public sealed class NativeMatch
             else OpponentPetCard = null;
         }
         activeEncounter = Encounter ?? DebugScenario?.Encounter;
+        hotSeat = activeEncounter?.HotSeat == true;
+#if ENGINE_SOURCE
+        hotSeat |= DebugScenario?.HotSeat == true;
+#endif
+        localSeat = 1;
+        staticLocalSeat = 1;
+        // Hot-seat: no cosmetic pets (each belongs to one seat, and the seat played changes every turn).
+        if (hotSeat) { cosmeticPet = null; OpponentPetCard = null; petLikes = null; }
         // A boss with its own deck is not the ladder opponent: no world profile, plan, pilot or presentation (the client's
         // mission entity speaks for it); the generic search plays it.
         void ResolveNpcProfile()
         {
-            npcProfile = BossDeck ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
+            npcProfile = BossDeck || hotSeat ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
             npcPilot = npcProfile != null ? NpcPilots.Create(npcProfile, line => BotTrace?.Invoke(line)) : null;
         }
         ResolveNpcProfile();
@@ -827,6 +857,7 @@ public sealed class NativeMatch
                 Player2StartingBoard = setup?.NpcBoard,
                 Player1StartingHand = setup?.PlayerHand,
                 Player1RunBossesDefeated = setup?.PlayerBossesDefeated ?? 0,
+                Coop = setup?.Coop == true,
 #endif
                 Logging = false
             };
@@ -908,7 +939,9 @@ public sealed class NativeMatch
 #endif
         var npc = BossDeck ? null : NpcCatalog.ForDeck(opponentDeck?.Id);
         // A world profile whose plan does not resolve keeps an empty mulligan (and the legacy search). A boss keeps its hand.
-        var botKeeps = BossDeck ? Game.Player2.Choice.Choices.ToList()
+        // Hot-seat: Player 2 keeps its opening hand. The client's mulligan screen is a one-time sequence at game start and does
+        // not open again for a second friendly player after a seat swap (live 2026-11-22: "Opponent Still Choosing..." stays up).
+        var botKeeps = BossDeck || hotSeat ? Game.Player2.Choice.Choices.ToList()
             : npc == null || DeckPlans.ForId(npc.PlanId) == null ? new List<int>() : new List<int>(BotDriver.Mulligan(
             new MulliganView(Game.Player2.Choice.Choices.Select(id => new MulliganCard(id,
                 Game.IdEntityDic[id].Card.Id, Game.IdEntityDic[id].Card.Cost)), Game.FirstPlayer == Game.Player1,
@@ -950,6 +983,17 @@ public sealed class NativeMatch
 #endif
         NoteHumanTimerAction();
         humanOptions = null;
+        // Hot-seat: the next player takes the client before the turn passes, so it sees an ordinary start of its own turn.
+        if (hotSeat && task is EndTurnTask && Game.State != State.COMPLETE)
+        {
+            RequestHandover(() => ProcessHumanOption(task, index, pos));
+            return;
+        }
+        ProcessHumanOption(task, index, pos);
+    }
+
+    private void ProcessHumanOption(PlayerTask task, int index, int pos)
+    {
         recorderOptionIndex = index;
 #if ENGINE_SOURCE
         // A minion or location dropped on a board slot: the client has already put it there (see AnchorPredictedDrop).
@@ -1302,7 +1346,7 @@ public sealed class NativeMatch
         npcPresentation?.Tick((NativeNpcIdle?.Invoke() ?? true) && (NativePresentationInputReady?.Invoke() ?? true), false);
         StopNpc();
         HumanConceded = true;
-        Process(ConcedeTask.Any(Game.Player1));
+        Process(ConcedeTask.Any(HumanSeat));
         SendHistory(Game.PowerHistory.Last);
     }
 
@@ -1486,6 +1530,7 @@ public sealed class NativeMatch
     internal void TickTurnTimer(long now)
     {
         if (npcStopped && npcProfile != null) { HideNpcRope(); return; }
+        if (hotSeat) return; // two people at one client: no turn timer for either seat
         if (Game == null || Game.State == State.COMPLETE) { HideNpcRope(); return; }
         if (Game.Step != Step.MAIN_ACTION) return;
         bool npcTurn = Game.CurrentPlayer == Game.Player2;
@@ -1658,6 +1703,51 @@ public sealed class NativeMatch
     private static EngineCard ResolveHero(string id) => EngineCards.FromId(id)
         ?? throw new InvalidOperationException("Missing fixed hero " + id + ".");
 
+    // Hot-seat: ask the co-op mode to bring the next player to the screen, then swap seats and continue.
+    private void RequestHandover(Action next)
+    {
+        if (handoverPending) return;
+        int seat = 3 - localSeat;
+        Action proceed = () => {
+            if (!handoverPending) return;
+            handoverPending = false;
+            if (Game == null || Game.State == State.COMPLETE && seat != localSeat) { next(); return; }
+            SwapSeat();
+            next();
+        };
+        handoverPending = true;
+        humanChoices = null; humanOptions = null;
+        if (HandoverPrompt == null) proceed();
+        else HandoverPrompt(seat, proceed);
+    }
+
+    // Hand the client the other seat: the whole state goes out again as one GAME_RESET block, built as Rewind builds its restore
+    // (RewindRules) but only for the wire (the engine's own history is untouched), and the Rewind reset path re-projects it:
+    // every per-viewer cache is cleared, the hand that is now the opponent's is sent hidden, CreateGame gives the new seat
+    // account Lo 1 and team 1, and the reset is a game-state swap, so the client re-picks its friendly side.
+    private bool sendingSeatSwap;
+    private void SwapSeat()
+    {
+        localSeat = 3 - localSeat;
+        staticLocalSeat = localSeat;
+        SeatSwaps++;
+        humanChoices = null; humanOptions = null;
+        BotTrace?.Invoke("hot-seat: client now controls Player" + localSeat + " (swap " + SeatSwaps + ", turn " + Game.Turn + ")");
+#if ENGINE_SOURCE
+        var entries = new List<IPowerHistoryEntry> { PowerHistoryBuilder.BlockStart(BlockType.GAME_RESET, Game.Id, "", -1, 0) };
+        var reset = PowerHistoryBuilder.ResetGame(Game);
+        reset.SourceIsRewind = false;
+        entries.Add(reset);
+        foreach (var entity in Game.IdEntityDic.Select(pair => pair.Value).OrderBy(entity => entity.Id))
+            entries.Add(PowerHistoryBuilder.FullEntity(entity, reset: true));
+        entries.Add(PowerHistoryBuilder.BlockEnd());
+        sendingSeatSwap = true;
+        try { SendHistory(entries); }
+        finally { sendingSeatSwap = false; }
+#endif
+        SeatSwapped?.Invoke();
+    }
+
     private void RequireHumanInput()
     {
 #if ENGINE_SOURCE
@@ -1668,7 +1758,9 @@ public sealed class NativeMatch
             throw new InvalidOperationException("Match has not started.");
         if (Game.State == State.COMPLETE)
             throw new InvalidOperationException("Match is complete.");
-        if (Game.CurrentPlayer != Game.Player1 && Game.Player1.Choice == null)
+        if (handoverPending)
+            throw new InvalidOperationException("Waiting for the next player.");
+        if (Game.CurrentPlayer != HumanSeat && HumanSeat.Choice == null)
             throw new InvalidOperationException("Waiting for bot.");
     }
 
@@ -2089,12 +2181,18 @@ public sealed class NativeMatch
         for (int count = 0; count < MaxBotActions; count++)
         {
             // Bot thinking can run ahead of the client; only native readiness starts the human clock.
-            if (Game.CurrentPlayer != Game.Player1) RefreshTurnDeadline(MonotonicMilliseconds);
+            if (Game.CurrentPlayer != HumanSeat && !hotSeat) RefreshTurnDeadline(MonotonicMilliseconds);
             if (Game.State == State.COMPLETE)
                 return;
-            if (Game.Player1.Choice != null || (Game.CurrentPlayer == Game.Player1 && Game.Player2.Choice == null))
+            // Hot-seat: the other seat is never a bot. When it owes the next input, hand the client over to it.
+            if (hotSeat && HumanSeat.Choice == null && (OtherSeat.Choice != null || Game.CurrentPlayer == OtherSeat))
             {
-                if (Game.Player1.Choice != null)
+                RequestHandover(DriveUntilHumanInput);
+                return;
+            }
+            if (HumanSeat.Choice != null || (Game.CurrentPlayer == HumanSeat && OtherSeat.Choice == null))
+            {
+                if (HumanSeat.Choice != null)
                     SendHumanChoice();
                 else
                     SendHumanOptions();
@@ -2631,7 +2729,7 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
         if (SabberStoneCore.Actions.AutonomousTurnRules.IsActive(Game)) { humanChoices = null; humanOptions = null; return; }
 #endif
-        PowerEntityChoices choices = PowerChoicesBuilder.EntityChoices(Game, Game.Player1.Choice);
+        PowerEntityChoices choices = PowerChoicesBuilder.EntityChoices(Game, HumanSeat.Choice);
         if (choices == null)
             throw new InvalidOperationException("Human choice was not available.");
         if (choices.ChoiceType == ChoiceType.MULLIGAN)
@@ -2641,7 +2739,7 @@ public sealed class NativeMatch
             choices.CountMax = choices.Entities.Count;
         }
 #if ENGINE_SOURCE
-        var decision = Game.GetPendingDecisions().Single(d => d.ControllerId == Game.Player1.Id);
+        var decision = Game.GetPendingDecisions().Single(d => d.ControllerId == HumanSeat.Id);
         humanDecisionId = decision.Id;
         humanDecisionController = decision.ControllerId;
 #endif
@@ -3016,7 +3114,7 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
         if (SabberStoneCore.Actions.AutonomousTurnRules.IsActive(Game)) { humanChoices = null; humanOptions = null; return; }
 #endif
-        List<PlayerTask> tasks = Game.Player1.Options();
+        List<PlayerTask> tasks = HumanSeat.Options();
 #if ENGINE_SOURCE
         tasks.RemoveAll(task => !NativeActionEnabled(task));
 #endif
@@ -3047,7 +3145,7 @@ public sealed class NativeMatch
         humanPlacementBoardHadLocations = Game.Player1.BoardZone.HasLocations || Game.Player2.BoardZone.HasLocations;
         if (tasks.Any(task => task is ActivateLocationTask || task is ActivateOldGodTask))
             humanDecisionId = Game.GetPendingDecisions().Single(decision =>
-                decision.Kind == SabberStoneCore.Model.Decisions.DecisionKind.Options && decision.ControllerId == Game.Player1.Id).Id;
+                decision.Kind == SabberStoneCore.Model.Decisions.DecisionKind.Options && decision.ControllerId == HumanSeat.Id).Id;
 #endif
         humanOptions = options;
         humanChoices = null;
@@ -3138,6 +3236,8 @@ public sealed class NativeMatch
 
     private void ObserveMatchEvents(List<IPowerHistoryEntry> entries)
     {
+        // A hot-seat swap re-sends the state for the other viewer: nothing happened in the game.
+        if (sendingSeatSwap) return;
         try
         {
             if (!EnsureEventLog()) return;
@@ -3976,7 +4076,7 @@ public sealed class NativeMatch
     private static bool ReferenceHiddenFromHuman(SabberStoneCore.Model.Game game, int id) =>
         !game.IdEntityDic.TryGetValue(id, out var target)
         || SabberStoneCore.Actions.PayloadRules.IsStored(target)
-            && !SabberStoneCore.Actions.PayloadRules.SharedWith(target, HumanPlayerId);
+            && !SabberStoneCore.Actions.PayloadRules.SharedWith(target, staticLocalSeat);
 
 #endif
 
@@ -5307,7 +5407,7 @@ public sealed class NativeMatch
 
     private int AppendRewindReset(NativePowerHistory packet, List<IPowerHistoryEntry> entries, int start)
     {
-        if (start + 1 >= entries.Count || !(entries[start + 1] is SabberStoneCore.Kettle.PowerHistoryResetGame reset) || !reset.SourceIsRewind)
+        if (start + 1 >= entries.Count || !(entries[start + 1] is SabberStoneCore.Kettle.PowerHistoryResetGame reset) || !reset.SourceIsRewind && !hotSeat)
             throw new InvalidOperationException("GAME_RESET requires a Rewind reset payload.");
         int end = entries.FindIndex(start + 2, entry => entry is PowerHistoryBlockEnd);
         if (end < 0 || entries.Skip(start + 2).Take(end - start - 2).Any(entry => !(entry is PowerHistoryFullEntity)))
@@ -5767,7 +5867,10 @@ public sealed class NativeMatch
 #if ENGINE_SOURCE
         if (entry is SabberStoneCore.Kettle.PowerHistoryResetGame resetGame)
             return new PowerHistoryData { ResetGame = new PegasusGame.PowerHistoryResetGame {
-                CreateGame = ToNativeCreateGame(resetGame.CreateGame, true), SourceIsRewind = resetGame.SourceIsRewind
+                CreateGame = ToNativeCreateGame(resetGame.CreateGame, true), SourceIsRewind = resetGame.SourceIsRewind,
+                // A hot-seat swap (SwapSeat): GameState.OnResetGame keeps the client's friendly TEAM number on a game-state swap,
+                // and the seat now played carries team 1 (ToNativeCreateGame).
+                SourceIsGamestateSwap = !resetGame.SourceIsRewind
             } };
 #endif
         if (entry is SabberStoneCore.Kettle.PowerHistoryCreateGame create)
@@ -6069,14 +6172,23 @@ public sealed class NativeMatch
                     // The opposing corner spell (TOP_RIGHT) reads the opponent's variant, like the friendly one reads ours.
                     entity.Tags.Add(new NativeTag { Name = 4037, Value = opponentPetVariant });
                 }
+                // Hot-seat: the client's local player is the one on account Lo 1 (Player.UpdateLocal), and a game-state-swap reset
+                // keeps the old friendly team number (GameState.OnResetGame), so the seat played now is always team 1.
+                if (hotSeat)
+                {
+                    entity.Tags.RemoveAll(tag => tag.Name == (int)GameTag.TEAM_ID);
+                    entity.Tags.Add(new NativeTag { Name = (int)GameTag.TEAM_ID, Value = player.PlayerId == HumanPlayerId ? 1 : 2 });
+                }
                 return new NativePlayer
                 {
                     Id = player.PlayerId,
                     // A mission's game entity (e.g. Dungeon Run's per-boss entity) finds its AI opponent as the player with an empty
                     // game account (GenericDungeonMissionEntity.GetOpposingHeroCardID), as retail AI opponents have.
                     GameAccountId = new NativeBnetId { Hi = 0,
-                        Lo = player.PlayerId == BotPlayerId && activeEncounter != null && activeEncounter.IsMission ? 0UL : (ulong)(index + 1) },
-                    CardBack = player.PlayerId == HumanPlayerId && cosmeticCardBack.HasValue ? cosmeticCardBack.Value : npcPresentation?.CardBack(player.PlayerId, player.CardBack) ?? player.CardBack,
+                        Lo = hotSeat ? (player.PlayerId == HumanPlayerId ? 1UL : 2UL)
+                            : player.PlayerId == BotPlayerId && activeEncounter != null && activeEncounter.IsMission ? 0UL : (ulong)(index + 1) },
+                    // Hot-seat: the player's card back stays on seat 1's deck (the seat played changes every turn).
+                    CardBack = player.PlayerId == (hotSeat ? 1 : HumanPlayerId) && cosmeticCardBack.HasValue ? cosmeticCardBack.Value : npcPresentation?.CardBack(player.PlayerId, player.CardBack) ?? player.CardBack,
                     Entity = entity
                 };
             }).ToList()
@@ -6839,6 +6951,11 @@ public sealed class NativeMatch
 
     private string PresentedHero(int id, string cardId)
     {
+        // An encounter's own hero skins (the co-op brawl's Morgl), only while the hero in play is still that seat's hero.
+        if (activeEncounter?.PlayerHeroSkin != null && id == Game.Player1.Hero.Id && cardId == activeEncounter.PlayerHero)
+            return activeEncounter.PlayerHeroSkin;
+        if (activeEncounter?.NpcHeroSkin != null && id == Game.Player2.Hero.Id && cardId == activeEncounter.NpcHero)
+            return activeEncounter.NpcHeroSkin;
         if (id == Game.Player1.Hero.Id && cardId == (cosmeticBaseHero ?? playerDeck?.Hero ?? playerHero?.Id))
             return DebugScenario?.HumanSkin ?? cosmeticHero ?? cardId;
         if (id == Game.Player2.Hero.Id && cardId == (DebugScenario?.NpcSkin != null ? HeroSkinData.All[DebugScenario.NpcSkin].BaseHero : opponentDeck?.Hero))
