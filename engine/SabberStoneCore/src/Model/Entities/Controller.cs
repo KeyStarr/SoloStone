@@ -835,12 +835,23 @@ namespace SabberStoneCore.Model.Entities
 					Array.Copy(taunts, targets, tCount);
 					attackTargets = targets;
 					isOpHeroValidAttackTarget = false;  // some brawls allow taunt heros and this should be fixed
+					CoopTargets();
 					return;
 				}
 				attackTargets = eMinions;
 
 				isOpHeroValidAttackTarget =
 					!Opponent.Hero.IsImmune && !Opponent.Hero.HasStealth;
+				CoopTargets();
+			}
+
+			// Co-op boss games: the other side is the teammate's, only boss-side characters (the boss, an Explosive Rune) may be
+			// attacked, whatever the Taunts and Immunes there (Actions.CoopRules.AttackTargets, for Character.ValidAttackTargets).
+			void CoopTargets()
+			{
+				if (!Actions.CoopRules.IsCoop(Game)) return;
+				attackTargets = attackTargets.Where(Actions.CoopRules.IsBossSide).ToArray();
+				isOpHeroValidAttackTarget = false;
 			}
 
 			Minion[] GetEnemyMinions()

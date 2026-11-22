@@ -139,6 +139,10 @@ internal static class NefarianRisesProof
         Check(!eager.ValidAttackTargets.Any() && !eager.CanAttack, "Immune Nefarian: no attack on the teammate's hero or minions ("
             + string.Join(",", eager.ValidAttackTargets.Select(t => t.Card.Id)) + ")");
         Check(game.Player1.Hero.ValidAttackTargets.All(CoopRules.IsBossSide), "hero attacks: boss side only");
+        // The options the client is offered come from Controller.Options (its own target generator).
+        var offered = game.Player1.Options().Where(t => t.PlayerTaskType == PlayerTaskType.MINION_ATTACK || t.PlayerTaskType == PlayerTaskType.HERO_ATTACK).ToList();
+        Check(offered.All(t => CoopRules.IsBossSide((ICharacter)t.Target)), "Immune Nefarian: no attack option on the teammate's side ("
+            + string.Join(",", offered.Select(t => t.Target?.Card.Id)) + ")");
         Kill(game, mate);
         End(game);
         Check(!boss.IsImmune, "160: Immune ends with the turn");
@@ -249,6 +253,11 @@ internal static class NefarianRisesProof
         // untouchable-ok: proof reads the board.
         var enemyRune = runeAttack.Player2.BoardZone.Single(m => m.Card.Id == NefarianBoss.RuneMinion);
         Check(attacker.ValidAttackTargets.SequenceEqual(new ICharacter[] { enemyRune }), "co-op: a Rune is attackable, the teammate's hero is not");
+        // A teammate's Taunt minion next to a Rune: the options offer the Rune only.
+        Summon(runeAttack.Player2, "CS2_179");
+        var runeOptions = runeAttack.Player1.Options().Where(t => t.PlayerTaskType == PlayerTaskType.MINION_ATTACK).Select(t => t.Target).ToList();
+        Check(runeOptions.Count == 1 && runeOptions[0] == enemyRune, "co-op options: a teammate Taunt minion is not attackable ("
+            + string.Join(",", runeOptions.Select(t => t.Card.Id)) + ")");
         Attack(runeAttack, attacker, enemyRune);
         Check(enemyRune.Damage == 3 || enemyRune.IsDead, "co-op: the Rune takes the hit");
 
