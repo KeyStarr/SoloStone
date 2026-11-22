@@ -7553,7 +7553,7 @@ public sealed class NativeMatch
             || SabberStoneCore.Actions.StatGainRules.IsInternalTag(tag) || SabberStoneCore.Actions.SwapRules.IsInternalTag(tag)
             || tag == SabberStoneCore.Actions.ColossalRules.RealizedFactor
             || SabberStoneCore.Actions.DormantRules.IsPrivateTag(tag) || SabberStoneCore.Actions.TemporaryRules.IsPrivateTag(tag)
-            || SabberStoneCore.Actions.PlayLockRules.IsPrivateTag(tag) || SabberStoneCore.Actions.BossRules.IsInternalTag(tag)
+            || SabberStoneCore.Actions.PlayLockRules.IsPrivateTag(tag) || SabberStoneCore.Actions.BossRules.IsInternalTag(tag) || SabberStoneCore.Actions.CoopRules.IsInternalTag(tag)
             || SabberStoneCore.Actions.PayloadRules.IsInternalTag(tag)
             || SabberStoneCore.Actions.AuraSpellRules.IsInternalTag(tag)
             || SabberStoneCore.Actions.HealingRules.IsInternalTag(tag) || SabberStoneCore.Actions.ShatterRules.IsInternalTag(tag) || SabberStoneCore.Actions.HandProgressRules.IsInternalTag(tag)

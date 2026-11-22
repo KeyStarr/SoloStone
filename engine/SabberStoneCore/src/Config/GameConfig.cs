@@ -285,6 +285,11 @@ namespace SabberStoneCore.Config
 		[field: NonSerialized]
 		public int Player1RunBossesDefeated { get; set; }
 
+		/// <summary>A co-op boss game (Nefarian Rises!): both players are one team against a boss minion and share one result
+		/// (CoopRules). Setup-only like the run knobs: the mark lives on the game entity.</summary>
+		[field: NonSerialized]
+		public bool Coop { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>

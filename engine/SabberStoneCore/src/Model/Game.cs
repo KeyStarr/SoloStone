@@ -847,6 +847,7 @@ namespace SabberStoneCore.Model
 			AddStartingBoard(Player1, _gameConfig.Player1StartingBoard);
 			AddStartingBoard(Player2, _gameConfig.Player2StartingBoard);
 			RunProgressRules.Apply(Player1, _gameConfig.Player1RunBossesDefeated);
+			CoopRules.Apply(this, _gameConfig.Coop);
 			// A starting Passive Hero Power (a boss's trigger or aura) is live from the start of the game.
 			ActivatePassivePower(Player1);
 			ActivatePassivePower(Player2);
@@ -1396,7 +1397,8 @@ namespace SabberStoneCore.Model
 			if (History)
 				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
 
-			foreach (Controller player in _players)
+			if (CoopRules.IsCoop(this)) CoopRules.WrapUp(this);
+			else foreach (Controller player in _players)
 			{
 				if (player.PlayState == PlayState.TIED)
 				{

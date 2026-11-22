@@ -26,6 +26,7 @@ namespace SabberStoneCore.CardSets.Client
 
             ClassHeroes.Apply(Register);
             Adventures.DungeonRunCards.Apply(Register);
+            Adventures.NefarianRisesCards.Apply(Register);
             Sets.Legacy.LegacyWildCards.Apply(Register);
             Sets.Legacy.LegacyLootCards.Apply(Register);
 
