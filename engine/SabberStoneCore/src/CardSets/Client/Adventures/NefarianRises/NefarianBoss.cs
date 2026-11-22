@@ -312,8 +312,8 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             ctx.Effect.DamageBatch(new[] { victim.Id, victim.Controller.Hero.Id }, amount);
         }
 
-        // Flame Missiles: N damage randomly split among all other characters (they can overkill a minion; Explosive Runes are
-        // never hit).
+        // Flame Missiles: N damage randomly split among all other characters (Explosive Runes are never hit). Like the engine's
+        // other split damage (RandomTask.Harmful), a missile skips a character already dead (a hero at 0, a minion at 0).
         private static void Missiles(Game game, SpellContext ctx, int count)
         {
             for (int i = 0; i < count; i++)
@@ -321,6 +321,8 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                 if (Over(game)) return;
                 var targets = new List<ICharacter> { game.Player1.Hero, game.Player2.Hero };
                 targets.AddRange(OtherMinions(game).Where(m => m.Card.Id != RuneMinion));
+                targets.RemoveAll(c => c.IsDead);
+                if (targets.Count == 0) return;
                 var hit = targets[DungeonRunCards.Pick(game, targets.Count)];
                 ctx.Effect.Damage(hit.Id, 1);
             }

@@ -252,6 +252,12 @@ internal static class NefarianRisesProof
         // Flame Missiles never hit it.
         Cast(rune, rune.Player1, NefarianBoss.Missiles10);
         Check(runeMinion.Damage == 0 && rune.Player1.Hero.Damage + rune.Player2.Hero.Damage == 10, "Flame Missiles: 10 on heroes, never a Rune");
+        // A hero brought to 0 takes no more missiles (playtest 5): the rest go to the living.
+        Game dying = Brawl(boss: false);
+        dying.Player2.Hero.Damage = dying.Player2.Hero.BaseHealth - 1;
+        Cast(dying, dying.Player1, NefarianBoss.Missiles10);
+        Check(dying.Player2.Hero.Health == 0 && dying.Player1.Hero.Damage == 9, "Flame Missiles: none wasted on a dead hero (P2 hp "
+            + dying.Player2.Hero.Health + ", P1 damage " + dying.Player1.Hero.Damage + ")");
         int before = rune.Player1.Hero.Damage;
         End(rune); End(rune);
         Check(rune.Player1.Hero.Damage == before + 9 && runeMinion.IsDead, "Explosive Rune: 9 to its owner at the start of the turn");
