@@ -59,7 +59,10 @@ namespace SabberStoneCore.CardSets.Client.Adventures
             // Dragonscale Warrior: Whenever any player targets this minion with a spell, that player draws a card.
             register(40377, "TB_Coopv3_100", card => {
                 card.Power = new Power {
+                    // Filtered before it fires: a trigger that fires and does nothing still flashes the card on screen.
                     Trigger = new Trigger(TriggerType.TARGET) {
+                        TriggerSource = TriggerSource.SELF_AS_TARGET,
+                        Condition = new SelfCondition(p => p is Spell),
                         SingleTask = new CustomTask((game, controller, source, target, stack) => {
                             if (!(target is Spell spell) || game.CurrentEventData?.EventTarget != source) return;
                             new DrawTask().Process(game, spell.Controller, source, null);

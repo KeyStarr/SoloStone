@@ -339,6 +339,14 @@ internal static class NefarianRisesProof
         int hand = scale.Player1.HandZone.Count;
         Play(scale, scale.Player1, "CS2_236", warrior);
         Check(scale.Player1.HandZone.Count == hand + 1, "Dragonscale Warrior: the targeting player draws");
+        // A hero power or an attack on it is no spell: the trigger stays silent (a fired trigger flashes the card on screen).
+        Game quiet = Brawl(boss: false);
+        var quietWarrior = Summon(quiet.Player2, "TB_Coopv3_100");
+        quiet.Player1.BaseMana = 10; quiet.Player1.UsedMana = 0;
+        int quietHand = quiet.Player1.HandZone.Count;
+        Check(quiet.Process(HeroPowerTask.Any(quiet.Player1, quietWarrior)), "Lesser Heal on Dragonscale Warrior accepted");
+        Check(quiet.Player1.HandZone.Count == quietHand && !quiet.PowerHistory.Full.OfType<SabberStoneCore.Kettle.PowerHistoryBlockStart>()
+            .Any(b => b.BlockType == BlockType.TRIGGER && b.Source == quietWarrior.Id), "Dragonscale Warrior: no trigger on a hero power");
 
         // Freewheeling Skulker: switches sides at the end of its owner's turn and becomes a Team Player.
         Game skulk = Brawl(boss: false);
