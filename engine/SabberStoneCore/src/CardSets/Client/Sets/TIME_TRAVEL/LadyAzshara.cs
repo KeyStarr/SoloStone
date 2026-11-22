@@ -70,7 +70,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 TargetCondition=(c,t)=>t.Controller==c,RequiresFreeSlot=true,
                 Task=new CustomTask((g,c,s,t,k)=> {
                     var copyStack=new TaskStack {Playables=new List<IPlayable>()};
-                    new SummonCopyTask(EntityType.TARGET,addToStack:true).Process(g,c,s,t,copyStack);
+                    new SummonCopyTask(EntityType.TARGET,addToStack:true,side:SummonSide.LEFT).Process(g,c,s,t,copyStack);
                     if(empowered && copyStack.Playables.LastOrDefault() is Minion copy)
                         Generic.AddEnchantmentBlock(g,Cards.FromId("TIME_211t2te"),(IPlayable)s,copy,copy.AttackDamage,copy.Health);
                     s[GameTag.LOCATION_ACTION_COOLDOWN]=1;

@@ -3,14 +3,17 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml.Linq;
+using SabberStoneCore.Enums;
 using SabberStoneCore.Loader;
 using SabberStoneCore.Model;
 
-// The card file must load to exactly what the private XMLs load to: every field of every Card, in order.
+// The card file must load to exactly what the private XMLs load to: every field of every Card, in order. The base rows listed in
+// `clientRows` of the drift file (facts/drift/<meta>.json) are the exception: they load to what the client export gives (see ClientRowsFromExport).
 internal static class CardFactsProof
 {
     private const string DataPath = "engine/SabberStoneCore/resources/Data/";
     private const string FilePath = "facts/" + CardFacts.Meta + ".json";
+    private const string DriftPath = "facts/drift/" + CardFacts.Meta + ".json";
 
     // Reflection, so a field added to Card later is compared without touching this proof.
     private static readonly FieldInfo[] CardFields = typeof(Card)
@@ -47,7 +50,10 @@ internal static class CardFactsProof
         var xmlOverlay = ClientOverlay.Read(File.OpenRead(DataPath + "ClientOverlay.xml"));
         var facts = CardFacts.Read(File.OpenRead(FilePath), CardFacts.Meta);
 
-        var expected = ClientOverlay.AddTo(CardLoader.LoadDefinitions(xmlBase), xmlOverlay);
+        var baseCards = CardLoader.LoadDefinitions(xmlBase);
+        AddSpellSchools(baseCards);
+        int fromExport = ClientRowsFromExport(baseCards, facts);
+        var expected = ClientOverlay.AddTo(baseCards, xmlOverlay);
         var actual = ClientOverlay.AddTo(facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray(), facts.Overlay);
         Check(expected.Length == 8333 + 2381 && actual.Length == expected.Length, "card count " + actual.Length);
         var differences = new List<string>();
@@ -57,7 +63,67 @@ internal static class CardFactsProof
         CompareOverlay(xmlOverlay, facts.Overlay, differences);
         CheckEmpty(differences, "overlay rows");
         ComparatorSeesEveryDifference(xmlOverlay);
-        Console.WriteLine($"PASS card file: {actual.Length} cards and {facts.Overlay.Cards.Length} overlay rows equal the XML path, {CardFields.Length} fields each");
+        Console.WriteLine($"PASS card file: {actual.Length} cards and {facts.Overlay.Cards.Length} overlay rows equal the XML path ({fromExport} base rows the export path), {CardFields.Length} fields each");
+    }
+
+    /// <summary>The generator's one input besides the XMLs (private/tools/gen_card_facts.py): the base rows come from a card build that
+    /// predates spell schools, so a base row without tag 1635 takes the client export's school. Nothing else is taken from the export.</summary>
+    private static void AddSpellSchools(Card[] baseCards)
+    {
+        var export = ClientExport.RequireCards();
+        int added = 0;
+        foreach (var card in baseCards)
+        {
+            if (card.Tags.ContainsKey(GameTag.SPELL_SCHOOL) || !export.TryGetValue(card.Id, out var row)
+                || !row.GetProperty("tags").TryGetProperty("1635", out var school)) continue;
+            var tags = card.Tags.Concat(new[] { new KeyValuePair<GameTag, int>(GameTag.SPELL_SCHOOL, school.GetInt32()) }).OrderBy(pair => (int)pair.Key).ToList();
+            card.Tags.Clear();
+            foreach (var pair in tags) card.Tags[pair.Key] = pair.Value;
+            added++;
+        }
+        Check(added == 579, "the export adds a spell school to 579 base rows: " + added);
+    }
+
+    /// <summary>The base rows named in the drift file's clientRows are built from the client export, not from the XML (the generator's
+    /// rule, private/tools/card_drift.py build_client_row): the export's integer tags without zeros and without CARD_SET, a weapon's
+    /// tag 45 as DURABILITY when the export has no 187, plus the XML row's own CARD_SET, sorted by tag number; name and text when non-empty;
+    /// referenced tags without zeros, sorted. The expected card for each such id is rebuilt here from the export, independently of the
+    /// generator, and the XML card is replaced by it. Returns how many.</summary>
+    private static int ClientRowsFromExport(Card[] baseCards, CardFacts.Document facts)
+    {
+        using var drift = System.Text.Json.JsonDocument.Parse(File.ReadAllBytes(DriftPath));
+        var root = drift.RootElement;
+        Check(root.GetProperty("meta").GetString() == CardFacts.Meta && root.GetProperty("exportSha256").GetString() == facts.Overlay.ExportSha256,
+            "the drift file belongs to this card file");
+        var ids = root.GetProperty("clientRows").EnumerateArray().Select(e => e.GetString()).ToList();
+        var export = ClientExport.RequireCards();
+        var overlayIds = new HashSet<string>(facts.Overlay.Cards.Select(d => d.CardId));
+        foreach (string id in ids)
+        {
+            Check(!overlayIds.Contains(id), "a client row is a base row: " + id);
+            int at = Array.FindIndex(baseCards, c => c.Id == id);
+            Check(at >= 0, "a client row is in the XML: " + id);
+            Check(export.TryGetValue(id, out var row), "a client row is in the export: " + id);
+            Card old = baseCards[at];
+            Check(row.GetProperty("dbfId").GetInt32() == old.AssetId, "client row dbf equals the XML's: " + id);
+            var tags = new SortedDictionary<int, int>();
+            foreach (var pair in row.GetProperty("tags").EnumerateObject())
+                if (pair.Value.GetInt32() != 0 && pair.Name != ((int)GameTag.CARD_SET).ToString()) tags[int.Parse(pair.Name)] = pair.Value.GetInt32();
+            if (row.GetProperty("cardType").GetString() == "WEAPON" && tags.ContainsKey((int)GameTag.HEALTH) && !tags.ContainsKey((int)GameTag.DURABILITY))
+            { tags[(int)GameTag.DURABILITY] = tags[(int)GameTag.HEALTH]; tags.Remove((int)GameTag.HEALTH); }
+            Check(tags.TryGetValue((int)GameTag.CARDTYPE, out int type) && old.Tags.TryGetValue(GameTag.CARDTYPE, out int oldType) && type == oldType, "client row type equals the XML's: " + id);
+            if (old.Tags.TryGetValue(GameTag.CARD_SET, out int set)) tags[(int)GameTag.CARD_SET] = set;
+            var all = tags.Select(pair => new Tag((GameTag)pair.Key, pair.Value)).ToList();
+            string name = row.GetProperty("name").GetString(), text = row.GetProperty("text").GetString();
+            if (!string.IsNullOrEmpty(name)) all.Add(new Tag(GameTag.CARDNAME, name));
+            if (!string.IsNullOrEmpty(text)) all.Add(new Tag(GameTag.CARDTEXT, text));
+            var refs = row.GetProperty("referencedTags").EnumerateObject().Where(p => p.Value.GetInt32() != 0)
+                .Select(p => new Tag((GameTag)int.Parse(p.Name), p.Value.GetInt32())).OrderBy(t => (int)t.GameTag).ToArray();
+            var entity = new CardFacts.Entity { Id = id, AssetId = old.AssetId, Tags = all.ToArray(), ReferencedTags = refs.Length > 0 ? refs : null,
+                Requirements = old.PlayRequirements?.ToDictionary(pair => pair.Key, pair => pair.Value), Entourage = old.Entourage?.ToArray() };
+            baseCards[at] = CardLoader.Build(entity, false);
+        }
+        return ids.Count;
     }
 
     private static void Compare(Card expected, Card actual, List<string> differences)

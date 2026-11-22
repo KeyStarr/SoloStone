@@ -22,7 +22,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
-                var candidates = c.BoardZone.GetAll().Where(m => !m.ToBeDestroyed && !m.IsDormant).ToArray();
+                var candidates = c.BoardZone.Interactable.Where(m => !m.ToBeDestroyed).ToArray();
                 if (candidates.Length == 0) return;
                 var recipient = candidates[g.Random.Next(candidates.Length)]; g.OnRandomHappened(true);
                 Generic.AddEnchantmentBlock(g, Cards.FromId("CATA_550e1"), (IPlayable)s, recipient);

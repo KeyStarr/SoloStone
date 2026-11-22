@@ -16,7 +16,7 @@
     <Reference Include="MonoMod.RuntimeDetour"><HintPath>$([MSBuild]::EnsureTrailingSlash('$(NuGetPackageRoot)'))monomod.runtimedetour/22.1.29.1/lib/net35/MonoMod.RuntimeDetour.dll</HintPath></Reference>
   </ItemGroup>
   <Target Name="ExtractTelemetryHooks" BeforeTargets="CoreCompile">
-    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/extract_hooks.py&quot; &quot;$(IntermediateOutputPath)FxHooks.g.cs&quot;" />
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_hooks.py&quot; &quot;$(IntermediateOutputPath)FxHooks.g.cs&quot;" />
     <ItemGroup><Compile Include="$(IntermediateOutputPath)FxHooks.g.cs" /></ItemGroup>
   </Target>
 </Project>

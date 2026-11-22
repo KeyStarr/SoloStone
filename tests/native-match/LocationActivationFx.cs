@@ -141,7 +141,7 @@ internal static partial class Program
             var shots = body.Where(e => e.HasSubSpellStart).Select(e => e.SubSpellStart).ToList();
             Check(damage.Count == (mode.StartsWith("TLC_100") ? 3 : 1), $"{label}: expected hits, got {damage.Count}");
             Check(shots.Count == damage.Count && shots.Count == body.Count(e => e.HasSubSpellEnd), $"{label}: {damage.Count} hits but {shots.Count} sub-spells");
-            Check(shots.All(s => s.SourceEntityId == owner.Hero.Id), label + ": hero origin");
+            Check(shots.All(s => s.SourceEntityId == dying.Id), label + ": Deathrattle missiles start at the minion that died (#229)");
             Check(shots.SelectMany(s => s.TargetEntityIds).SequenceEqual(damage), label + ": missile targets must be the hit targets in order");
             capture.SerializeAll();
         }

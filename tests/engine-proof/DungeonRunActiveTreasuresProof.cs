@@ -253,7 +253,10 @@ internal static class DungeonRunActiveTreasuresProof
         Game staff = Fight();
         Play(staff, staff.Player1, "LOOTA_819");
         End(staff); End(staff);
-        Check(staff.Player1.HandZone.Any(p => p.Card.Class == CardClass.MAGE && p.Card.Type == CardType.SPELL && p.Card.Id != "CS2_029"), "Archmage Staff: a Mage spell");
+        // A multi-class spell that includes Mage (Bitter End, Mage/Warrior) is a Mage spell too.
+        static bool MageCard(Card card) => card.Class == CardClass.MAGE
+            || (card[GameTag.MULTIPLE_CLASSES] & (1 << ((int)CardClass.MAGE - 1))) != 0;
+        Check(staff.Player1.HandZone.Any(p => MageCard(p.Card) && p.Card.Type == CardType.SPELL && p.Card.Id != "CS2_029"), "Archmage Staff: a Mage spell");
 
         // Gloves of Mugging: three cards move from the opponent's hand to the player's.
         Game gloves = Fight();

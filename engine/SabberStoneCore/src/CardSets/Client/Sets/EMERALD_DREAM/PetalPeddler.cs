@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_END) {
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
-                    var dragons = c.BoardZone.Where(m => m.Id != s.Id && !m.Untouchable && !m.IsDead && m.IsRace(Race.DRAGON)).ToArray();
+                    var dragons = c.BoardZone.Interactable.Where(m => m.Id != s.Id && !m.Untouchable && !m.IsDead && m.IsRace(Race.DRAGON)).ToArray();
                     if (dragons.Length == 0) return;
                     var chosen = dragons[g.Random.Next(dragons.Length)];
                     g.OnRandomHappened(true);

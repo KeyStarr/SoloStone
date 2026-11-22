@@ -30,7 +30,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 LocationActivation = new LocationActivation { Target = LocationTargetKind.Character,
                     Task = ComplexTask.Create(new DamageTask(1, EntityType.TARGET),
                         new SetGameTagTask(GameTag.LOCATION_ACTION_COOLDOWN, 1, EntityType.SOURCE)) },
-                DeathrattleTask = EffectContext.Task(ctx => { ctx.SummonRightOfLocation("CATA_527t2"); return TaskState.COMPLETE; }),
+                DeathrattleTask = EffectContext.Task(ctx => { ctx.SummonAtLocation("CATA_527t2"); return TaskState.COMPLETE; }),
                 Trigger = Fel(new CustomTask((g, c, s, t, stack) => {
                     if (s.Zone != c.BoardZone || ((IPlayable)s).ToBeDestroyed) return;
                     ((IPlayable)s).IsExhausted = false;

@@ -49,7 +49,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             Mark(card); card.Power = new Power { PowerTask = ComplexTask.Create(new TempManaTask(1),
                 new CustomTask((g,c,s,t,stack) => {
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                     if (enemies.Length != 0) new DamageTask(2, EntityType.TARGET, true).Process(g,c,s,enemies[g.Random.Next(enemies.Length)]);
                 })) };
         }
@@ -86,7 +86,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     }) }; break;
                 case "CFM_621t5":
                     card.Power = new Power { PowerTask = new CustomTask((g,c,s,t,stack) => {
-                        var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                        var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                         if (enemies.Length != 0) g.Facts.Freeze(enemies[g.Random.Next(enemies.Length)],s);
                     }) }; break;
             }

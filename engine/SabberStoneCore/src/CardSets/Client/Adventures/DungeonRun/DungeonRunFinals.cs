@@ -125,6 +125,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 
         // A random enemy minion and the ones next to it, onto the stack.
         private static ISimpleTask RandomEnemyAndNeighbours() => new CustomTask((game, controller, source, target, stack) => {
+            // untouchable-ok: the neighbours need board positions; Untouchable minions are filtered out below.
             var board = controller.Opponent.BoardZone;
             var picked = new List<IPlayable>();
             var candidates = board.Where(m => !m.Untouchable).ToList();
@@ -140,6 +141,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
         });
 
         private static int MissingChests(Controller controller) =>
+            // untouchable-ok: which of the boss's own Master Chests still stand, not an effect on them.
             Math.Max(0, 5 - controller.BoardZone.Count(m => m.Card.Id == MasterChest));
 
         private static ISimpleTask AddRandomBeam() => AddRandom(Beams);

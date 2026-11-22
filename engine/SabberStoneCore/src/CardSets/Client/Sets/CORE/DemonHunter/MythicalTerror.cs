@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         }
         internal static CustomTask ForceAll() => new CustomTask((g, c, s, t, stack) => {
             if (!(s is Minion defender)) return;
-            var attackers = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).OrderBy(m => m.OrderOfPlay).ToArray();
+            var attackers = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).OrderBy(m => m.OrderOfPlay).ToArray();
             foreach (var attacker in attackers)
             {
                 if (defender.IsDead || defender.Zone != c.BoardZone || defender.Untouchable) break;

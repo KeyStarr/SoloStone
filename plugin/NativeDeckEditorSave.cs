@@ -134,7 +134,7 @@ internal static partial class NativeUIProbe
         working.CosmeticCoinID = expected.CosmeticCoin; working.RandomCoinUseFavorite = expected.RandomCoinUseFavorite;
         working.CardBackID = expected.CardBack; working.RandomHeroUseFavorite = expected.RandomHeroUseFavorite;
         working.PetID = expected.Pet; working.PetVariantID = expected.PetVariant; working.RandomPetUseFavorite = expected.RandomPetUseFavorite;
-        prior.CopyFrom(working);
+        if (!ReferenceEquals(prior, working)) prior.CopyFrom(working);
         CopyHeader(expected, header);
     }
 

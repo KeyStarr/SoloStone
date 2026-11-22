@@ -5,6 +5,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.EffectSystem;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
+using SabberStoneCore.Tasks.SimpleTasks;
 
 namespace SabberStoneCore.Actions
 {
@@ -25,6 +26,12 @@ namespace SabberStoneCore.Actions
             CardClass.WARLOCK => "CATA_725t", CardClass.WARRIOR => "CATA_580t", _ => null
         };
         public static bool IsSoldier(Card card) => card != null && Soldier(card.Class) == card.Id;
+        // #192, read by the native transport only (never stored): tag 955 (USE_ALTERNATE_CARD_TEXT) picks the "@" text of a
+        // tiered card: 0 "Herald twice to upgrade", 1 "Herald once to upgrade", 2 the final text. Lean, derived from the card text,
+        // not from a retail trace: it follows the controller's count (upgrades at 2 and 4 Heralds).
+        public static int Variant(Controller controller) => Count(controller) >= 4 ? 2 : Count(controller) % 2;
+        /// <summary>Cards whose text and stats follow the Herald tier: Soldiers and Herald Colossal appendages.</summary>
+        public static bool IsTiered(Card card) => IsSoldier(card) || ColossalRules.IsHeraldAppendage(card);
         /// <summary>Branch (a): the controller's own Soldier class: selected profile, else current hero class.</summary>
         public static CardClass OwnClass(Controller controller)
         {
@@ -72,11 +79,12 @@ namespace SabberStoneCore.Actions
                 var minion = (Minion)Entity.FromCard(controller, Cards.FromId(token), new EntityData {
                     [GameTag.ZONE] = (int)Zone.PLAY, [GameTag.DISPLAYED_CREATOR] = source.Id });
                 ConfigureSummon(minion, tier);
-                int position = source is BoardObject location
-                    ? Math.Min(controller.BoardZone.SlotCount, location.Zone == controller.BoardZone ? location.ZonePosition + 1 : location.LastBoardPosition)
+                int alternate = 0;
+                int position = source is BoardObject
+                    ? SummonTask.GetPosition(source, SummonSide.LEFT, 0, ref alternate)
                     : EffectContext.DeathrattlePosition(controller, source);
-                // Repeated Heralds append after the source's existing Soldiers in creation order.
-                while (position < controller.BoardZone.SlotCount
+                // A location's fresh Soldier belongs immediately right of it; non-location sources retain their existing row order.
+                while (source is not BoardObject && position < controller.BoardZone.SlotCount
                     && IsSoldier(controller.BoardZone.GetSlot(position).Card)
                     && controller.BoardZone.GetSlot(position)[GameTag.DISPLAYED_CREATOR] == source.Id)
                     position++;

@@ -47,8 +47,10 @@ namespace SabberStoneCore.Auras
 
         public void Update()
         {
-            if (_owner.Zone?.Type != Zone.PLAY || _owner.ToBeDestroyed || _owner is Minion m && m.IsSilenced)
+            if (_owner.Zone?.Type != Zone.PLAY || _owner is Minion m && m.IsSilenced)
             { Remove(); return; }
+            // A pending death keeps the aura until the death step: a rescued owner must not lose it for good.
+            if (_owner.ToBeDestroyed) return;
             UpdateSecondary(_owner.Controller.HandZone.Count <= _maxHandCount ? _owner.Controller.SecondaryHeroPower?.Id ?? 0 : 0);
             var power = _owner.Controller.Hero.HeroPower;
             int desired = _owner.Controller.HandZone.Count <= _maxHandCount ? power.Id : 0;

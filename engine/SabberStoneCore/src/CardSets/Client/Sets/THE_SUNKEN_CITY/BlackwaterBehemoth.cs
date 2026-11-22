@@ -31,8 +31,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_END) {
                 SingleTask = new CustomTask((g,c,s,t,k) => {
-                    var body = c.BoardZone.Where(m => m.Card.Id == "TSC_216" && !m.IsDead && !m.IsDormant).OrderBy(m => m.OrderOfPlay).FirstOrDefault();
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).ToArray();
+                    var body = c.BoardZone.Interactable.Where(m => m.Card.Id == "TSC_216" && !m.IsDead).OrderBy(m => m.OrderOfPlay).FirstOrDefault();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToArray();
                     if (body == null || enemies.Length == 0) return;
                     PastColossalCombat.Force(enemies[g.Random.Next(enemies.Length)], body);
                 }) } };

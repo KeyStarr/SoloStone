@@ -58,6 +58,41 @@ foreach (string field in new[] { "m_leftMouseButtonIsDown", "m_touchDraggingCard
 if (Field(gameMetadata, "InputManager", "m_lastObjectMousedDown").DecodeSignature(signatures, (object)null) != "GameObject")
     throw new Exception("Drag cleanup pressed-object contract changed");
 Console.WriteLine("PASS gameplay drag native Update/pointer/cleanup and spell ChangeStateImpl contracts");
+// Deck-code import (#140): the members the plugin reads to plan a pasted code and to show its result.
+foreach (var contract in new[] {
+    ("ShareableDeck", "get_HeroCardDbId", Array.Empty<string>(), "Int32"),
+    ("ShareableDeck", "get_DeckName", Array.Empty<string>(), "String"),
+    ("GameUtils", "TranslateDbIdToCardId", new[] { "Int32", "Boolean" }, "String"),
+    ("CollectionManagerDisplay", "OnDeckCreatedFromClipboard", new[] { "Int64", "String" }, "Void"),
+    ("CollectionManagerDisplay", "CreateDeckFromClipboard", new[] { "ShareableDeck" }, "Void"),
+    ("CollectionInputMgr", "PasteDeckInEditModeFromShareableDeck", new[] { "ShareableDeck" }, "Void"),
+    ("UIStatus", "AddInfo", new[] { "String" }, "Void"),
+    // Sharing a deck (#220): the client's own Copy, observed, and the pasted-text reader every paste goes through.
+    ("DeckOptionsMenu", "OnCopyButtonReleased", new[] { "UIEvent" }, "Void"),
+    ("ShareableDeck", "ParseDataFromDeckString", new[] { "String", "String&" }, "String"),
+    ("CollectionManager", "GetEditedDeck", Array.Empty<string>(), "CollectionDeck")
+}) MethodSignature(gameMetadata, contract.Item1, contract.Item2, contract.Item3, contract.Item4, signatures);
+Method(gameMetadata, "ShareableDeck", "get_DeckContents");
+if ((Method(gameMetadata, "ShareableDeck", "ParseDataFromDeckString").Attributes & MethodAttributes.Static) == 0)
+    throw new Exception("ShareableDeck.ParseDataFromDeckString is no longer static (FindPastedDeckCode takes no instance)");
+var copyObserver = Method(pluginMetadata, "NativeUIProbe", "ObserveDeckCopy");
+var copyObserverSignature = copyObserver.DecodeSignature(signatures, (object)null);
+var copyObserverParameters = Parameters(pluginMetadata, copyObserver);
+if (copyObserverSignature.ReturnType != "Void" || copyObserverParameters.Length != 1
+    || pluginMetadata.GetString(copyObserverParameters[0].Name) != "__exception" || copyObserverSignature.ParameterTypes[0] != "Exception")
+    throw new Exception("ObserveDeckCopy: invalid Harmony finalizer signature (void, Exception __exception: observes and rethrows)");
+// DeckCodeText accepts formats 1..4 (FT_WILD..FT_TWIST), as the client's reader checks them against PegasusShared.FormatType.
+using (var pegasusFile = new PEReader(File.OpenRead(Path.Combine(root, "references/game/blizzard.bgsclient.dll"))))
+{
+    var pegasus = pegasusFile.GetMetadataReader();
+    var formats = pegasus.TypeDefinitions.Select(pegasus.GetTypeDefinition)
+        .Single(t => pegasus.GetString(t.Name) == "FormatType" && pegasus.GetString(t.Namespace) == "PegasusShared")
+        .GetFields().Select(pegasus.GetFieldDefinition).Where(f => !f.GetDefaultValue().IsNil)
+        .Select(f => pegasus.GetBlobReader(pegasus.GetConstant(f.GetDefaultValue()).Value).ReadInt32()).ToArray();
+    if (formats.Min() != 0 || formats.Max() != 4 || formats.Length != 5)
+        throw new Exception("PegasusShared.FormatType changed (" + string.Join(",", formats) + "): update DeckCodeText.MaximumFormat");
+}
+Console.WriteLine("PASS deck-code import and share client members");
 MethodSignature(gameMetadata, "Actor", "GetPremium", Array.Empty<string>(), "TAG_PREMIUM", signatures);
 Console.WriteLine("PASS Actor.GetPremium(): TAG_PREMIUM pack reveal contract");
 MethodSignature(gameMetadata, "GameMgr", "ShowTransitionPopup", new[] { "String", "Int32" }, "Void", signatures);
@@ -86,6 +121,7 @@ var hooks = new[] {
     ("PackOpeningDirector", "FinishMassPackOpen", "NativeUIProbe", "BeforeMassDone"),
     ("Gameplay", "OnBoardLoaded", "ClientBridge", "RetryBoardLoad"),
     ("ThinkEmoteManager", "Update", "ClientBridge", "AllowIdleThinkEmotes"),
+    ("Actor", "UpdatePortraitTexture", "NativeCreationPortrait", "UseFirstDragonPortrait"),
     ("GameEntity", "NotifyOfMulliganInitialized", "NativeNpcPresence", "LoadEnemyEmoteHandler"),
     ("RemoteActionHandler", "CanReceiveEnemyEmote", "NativeNpcPresence", "CanReceiveEnemyEmote"),
     ("Player", "UpdateName", "NativeNpcPresence", "UpdateOpponentName"),
@@ -110,8 +146,10 @@ var hooks = new[] {
     ("DeckTrayReorderableContent", "StopDragToReorder", "NativeUIProbe", "ReorderLocalDrafts"),
     ("CollectionManager", "AddPendingDeckRename", "NativeUIProbe", "ReadOnly"),
     ("CollectionManager", "AddPendingDeckEdit", "NativeUIProbe", "ReadOnly"),
-    ("CollectionManagerDisplay", "CreateDeckFromClipboard", "NativeUIProbe", "BlockDeckImport"),
-    ("CollectionInputMgr", "PasteDeckInEditModeFromShareableDeck", "NativeUIProbe", "BlockDeckImport"),
+    ("CollectionManagerDisplay", "CreateDeckFromClipboard", "NativeUIProbe", "PlanDeckCodeImport"),
+    ("CollectionManagerDisplay", "OnDeckCreatedFromClipboard", "NativeUIProbe", "ProjectImportedDeck"),
+    ("CollectionInputMgr", "PasteDeckInEditModeFromShareableDeck", "NativeUIProbe", "BlockDeckEditPaste"),
+    ("ShareableDeck", "ParseDataFromDeckString", "NativeUIProbe", "FindPastedDeckCode"),
     ("DeckTrayDeckListContent", "ShouldDeckBoxesBeLocked", "NativeUIProbe", "UnlockLocalDeckBoxSlots"),
     ("CollectionDeckBoxVisual", "SetDeckID", "NativeUIProbe", "LockLoanerBox"),
     ("CollectionDeckBoxVisual", "ShowDeleteButton", "NativeUIProbe", "HideLoanerDeleteButton"),
@@ -187,6 +225,37 @@ var hooks = new[] {
     ("Hearthstone.Progression.AchievementInspectionPopup", "UpdateAchievement", "NativeAchievements", "InspectionDetail")
 };
 var failures = new List<string>();
+// Creation portrait (#119): the plugin reads the texture of an AssetHandle<Texture> by reflection (its assembly is not referenced).
+// The handle has two implicit operators taking it (to the asset and to bool), so selecting one by parameter type is ambiguous; the
+// plugin must read the Asset property, which the client calls with the type argument as its return type.
+{
+    bool asset = false, toAsset = false, toBool = false;
+    foreach (var handle in gameMetadata.MemberReferences)
+    {
+        var member = gameMetadata.GetMemberReference(handle);
+        if (member.Parent.Kind != HandleKind.TypeSpecification) continue;
+        string parent = gameMetadata.GetTypeSpecification((TypeSpecificationHandle)member.Parent).DecodeSignature(signatures, (object)null);
+        if (!parent.StartsWith("AssetHandle`1<", StringComparison.Ordinal) || member.GetKind() != MemberReferenceKind.Method) continue;
+        var signature = member.DecodeMethodSignature(signatures, (object)null);
+        string name = gameMetadata.GetString(member.Name);
+        if (name == "get_Asset" && signature.ParameterTypes.Length == 0 && signature.ReturnType == "!0") asset = true;
+        if (name == "op_Implicit" && signature.ParameterTypes.Length == 1) { toAsset |= signature.ReturnType == "!0"; toBool |= signature.ReturnType == "Boolean"; }
+    }
+    if (!asset) failures.Add("AssetHandle<T>.Asset (returns T) is missing: the Creation portrait hook reads it");
+    if (!toAsset || !toBool) failures.Add("AssetHandle<T> implicit operators changed: re-check how NativeCreationPortrait converts a handle");
+    string creation = File.ReadAllText(Path.Combine(root, "plugin/NativeCreationPortrait.cs"));
+    if (creation.Contains("\"op_Implicit\"") && toBool) failures.Add("NativeCreationPortrait selects op_Implicit, ambiguous with the bool operator");
+    if (!creation.Contains("GetProperty(\"Asset\"")) failures.Add("NativeCreationPortrait must read the handle's Asset property");
+    // Golden Creation: a premium actor shows the CardDef's portrait material, which SetPortraitTexture leaves alone, so the plugin
+    // swaps in the part's material. It reads these by name; the hook is optional (a miss keeps the template's golden art), so a
+    // change here is a failure of this check, not of a launch.
+    try { if (Field(gameMetadata, "Actor", "m_usingInitialPortraitMaterial").DecodeSignature(signatures, (object)null) != "Boolean") failures.Add("Actor.m_usingInitialPortraitMaterial is no longer Boolean: re-check the golden Creation material hook"); }
+    catch (Exception error) { failures.Add("Actor.m_usingInitialPortraitMaterial is missing: re-check the golden Creation material hook (" + error.Message + ")"); }
+    try { MethodSignature(gameMetadata, "CardDef", "GetPortraitMaterial", new[] { "TAG_PREMIUM" }, "AssetHandle`1<Material>", signatures); }
+    catch (Exception error) { failures.Add("CardDef.GetPortraitMaterial(TAG_PREMIUM) returning AssetHandle<Material> is missing: re-check the golden Creation material hook (" + error.Message + ")"); }
+    foreach (string required in new[] { "\"m_usingInitialPortraitMaterial\"", "\"GetPortraitMaterial\"", "SetPortraitMaterial(material, -1)", "TAG_PREMIUM.DIAMOND ? TAG_PREMIUM.GOLDEN", "material.mainTexture == null" })
+        if (!creation.Contains(required)) failures.Add("NativeCreationPortrait golden material hook lost: " + required);
+}
 if (pluginMetadata.TypeDefinitions.Select(pluginMetadata.GetTypeDefinition).SelectMany(type => type.GetMethods())
     .Select(pluginMetadata.GetMethodDefinition).Any(method => pluginMetadata.GetString(method.Name) == "BlockPersonalSuggestionCraft"))
     failures.Add("DeckHelper missing-card preview must retain native crafting; obsolete blocker still present");
@@ -310,7 +379,10 @@ using (var unityCore = new PEReader(File.OpenRead(Path.Combine(root, "references
         failures.Add("UnityEngine.Application::set_runInBackground missing (lane background rendering)");
 }
 using (var imguiFile = new PEReader(File.OpenRead(Path.Combine(root, "references/game/UnityEngine.IMGUIModule.dll"))))
+{
     MethodSignature(imguiFile.GetMetadataReader(), "GUIUtility", "set_systemCopyBuffer", new[] { "String" }, "Void", signatures);
+    MethodSignature(imguiFile.GetMetadataReader(), "GUIUtility", "get_systemCopyBuffer", Array.Empty<string>(), "String", signatures);
+}
 foreach (var contract in new[] {
     ("GameMenu", "GameMenuHide", Array.Empty<string>(), "Void"),
     ("ButtonListMenu", "Show", new[] { "Boolean" }, "Void"),
@@ -1314,6 +1386,38 @@ catch (Exception error) { failures.Add("ChoiceCardMgr.ChoiceState opposing revea
         || (loanerPath.ImplAttributes & System.Reflection.MethodImplAttributes.NoInlining) == 0
         || !StaticOwners(plugin, pluginMetadata, loanerPath).Contains("NativeUIProjection"))
         failures.Add("OfflineProbe.ConfigureLoanerGroupPath no longer isolates the card catalog initialization");
+}
+// #146: the start-of-turn banner hold (NativeTurnBannerHold) postfixes GameState.CanProcessPowerQueue and reads the turn-start banner state.
+foreach (var contract in new[] {
+    ("GameState", "CanProcessPowerQueue", Array.Empty<string>(), "Boolean"),
+    ("GameState", "IsGameOverNowOrPending", Array.Empty<string>(), "Boolean"),
+    ("GameState", "WasRestartRequested", Array.Empty<string>(), "Boolean"),
+    ("GameState", "IsLocalSidePlayerTurn", Array.Empty<string>(), "Boolean"),
+    ("GameState", "GetPowerProcessor", Array.Empty<string>(), "PowerProcessor"),
+    ("PowerProcessor", "GetPowerQueue", Array.Empty<string>(), "PowerQueue"),
+    ("PowerTaskList", "GetBlockStart", Array.Empty<string>(), "HistBlockStart"),
+    ("PowerTaskList", "IsStartOfBlock", Array.Empty<string>(), "Boolean"),
+    ("PowerTaskList", "GetSourceEntity", new[] { "Boolean" }, "Entity"),
+    ("EntityBase", "IsSecret", Array.Empty<string>(), "Boolean"),
+    ("TurnStartManager", "Get", Array.Empty<string>(), "TurnStartManager"),
+    ("TurnStartManager", "IsListeningForTurnEvents", Array.Empty<string>(), "Boolean"),
+    ("TurnStartManager", "NotifyOfTriggerVisual", Array.Empty<string>(), "Void"),
+    ("TurnStartManager", "IsTurnStartIndicatorShowing", Array.Empty<string>(), "Boolean"),
+    ("HistBlockStart", "get_TriggerKeyword", Array.Empty<string>(), "Int32"),
+    ("HistBlockStart", "get_BlockType", Array.Empty<string>(), "Type")
+}) try { MethodSignature(gameMetadata, contract.Item1, contract.Item2, contract.Item3, contract.Item4, signatures); }
+    catch (Exception) { failures.Add("turn banner hold: client contract changed: " + contract.Item1 + "." + contract.Item2); }
+{
+    var holdPatch = Method(pluginMetadata, "NativeTurnBannerHold", "AfterCanProcessPowerQueue");
+    var holdSignature = holdPatch.DecodeSignature(signatures, (object)null);
+    var holdParameters = Parameters(pluginMetadata, holdPatch);
+    if (holdSignature.ReturnType != "Void" || holdParameters.Length != 2
+        || pluginMetadata.GetString(holdParameters[0].Name) != "__instance" || holdSignature.ParameterTypes[0] != "GameState"
+        || pluginMetadata.GetString(holdParameters[1].Name) != "__result" || holdSignature.ParameterTypes[1] != "Boolean&")
+        failures.Add("NativeTurnBannerHold.AfterCanProcessPowerQueue: invalid Harmony postfix signature");
+    if (!File.ReadAllText(Path.Combine(root, "plugin/NativeTurnBannerHold.cs")).Contains("postfix: new HarmonyMethod(typeof(NativeTurnBannerHold)")
+        || !File.ReadAllText(Path.Combine(root, "plugin/ClientBridge.cs")).Contains("NativeTurnBannerHold.Initialize(harmony, logger)"))
+        failures.Add("NativeTurnBannerHold is not registered");
 }
 PackHookIlChecks.Run(root, (ok, message) => { if (!ok) failures.Add(message); });
 if (failures.Count != 0) throw new Exception(string.Join("\n", failures));

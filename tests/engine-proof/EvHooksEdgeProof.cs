@@ -222,7 +222,7 @@ internal static class EvHooksEdgeProof
                 var candidates=OfflineCardPools.Candidates(next,c.HeroClass,WelcomeHome.Pool(),123416);Check(candidates.Count>=3,"three-cost exact bucket has at least three candidates");
                 next.SetRandomSeed(37);var rng=new Util.DeepCloneableRandom(37);var expected=new[]{candidates[rng.Next(candidates.Count)].Id,candidates[rng.Next(candidates.Count)].Id};
                 loc.Destroy();Drain(next);
-                Check(c.BoardZone.Select(m=>m.Card.Id).SequenceEqual(expected.Reverse()),"independent seeded Deathrattles use dying physical slot");
+                Check(c.BoardZone.Select(m=>m.Card.Id).SequenceEqual(expected),"independent seeded Deathrattles fill dying location slot in creation order");
             }
         }
         var full=Fixture();var o=full.Player1;var loc2=LocationProofs.Location(o);CastHome(full,o,loc2);

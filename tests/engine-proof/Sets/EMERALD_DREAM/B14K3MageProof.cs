@@ -52,7 +52,7 @@ internal static class B14K3EMERALDDREAMProof
             var shrine = (BoardObject)Play(g, p, id); p.BaseMana = 3; p.UsedMana = 0;
             LocationProofs.Use(shrine);
             Core2026Proof.Check(p.SecretZone.Any(s => s.Card.Id == "CORE_EX1_287"), "random Secret installs without firing");
-            End(g); End(g); p.BaseMana = 3; p.UsedMana = 0;
+            End(g); End(g); End(g); End(g); p.BaseMana = 3; p.UsedMana = 0; // a used location skips the owner's next turn (#193)
             LocationProofs.Use(shrine);
             Core2026Proof.Check(p.SecretZone.Count(s => s.Card.Id == "CORE_EX1_287") == 1, "duplicate automatic Secret fizzles");
         });

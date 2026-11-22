@@ -86,6 +86,7 @@ internal static class ClientBridge
         NativeBigCardWatchdog.Initialize(harmony);
         NativeSpellWatchdog.Initialize(harmony);
         NativeSigilGuard.Initialize(harmony, logger);
+        NativeTurnBannerHold.Initialize(harmony, logger);
         ProfileStartupStatus.ClearBound(reports);
         NativeMatchmaking.Initialize(harmony, logger);
         StartupTiming.Mark("bridge-matchmaking");
@@ -156,6 +157,7 @@ internal static class ClientBridge
             catch (Exception) { return null; }
         };
         Patch(harmony, typeof(Card), "OnActorChanged", nameof(RepairNullToPlayActor), new[] { typeof(Actor) });
+        NativeCreationPortrait.Install(harmony, log);
         NativeNpcPresence.Install(harmony, log, () => staged ? match : null);
         StartupTiming.Mark("bridge-npc-presence");
         try
@@ -512,6 +514,11 @@ internal static class ClientBridge
             try
             {
                 log.LogInfo("NPC_REPLY_PRIOR match=" + record.Id + " prior=" + NativeDeckInferenceOption.ThisMatch + " nextMatch=" + NativeDeckInferenceOption.Enabled);
+#if ENGINE_SOURCE
+                // Which pool this match's random effects read (the Standard policy, whatever FormatType the client shows).
+                log.LogInfo("MATCH_RANDOM_POOL match=" + record.Id + " pool=" + SabberStoneCore.Model.RandomPools.MatchRandomPool.PolicyVersion
+                    + " format=" + match.Game.PoolFormat + " formatType=" + match.Game.FormatType + " manifest=" + match.Game.OfflinePools.Hash);
+#endif
                 var npc = NpcCatalog.ForDeck(record.Opponent);
                 var humanDeck = player ?? LocalDecks.Get(record.Deck);
                 var encounterFacts = EncounterFacts(record.Opponent);

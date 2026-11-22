@@ -14,8 +14,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
+                // Index zero is the bottom of the deck.
                 for (int i = 0; i < 2 && !c.DeckZone.IsFull; i++)
-                    Entity.FromCard(c, Cards.FromId("JAIL_399t1"), new EntityData { { GameTag.DISPLAYED_CREATOR, s.Id } }, c.DeckZone, zonePos: 0, creator: s);
+                    c.DeckZone.AddGenerated(Cards.FromId("JAIL_399t1"), s, position: 0, reveal: true);
             }) };
         }
     }

@@ -14,6 +14,7 @@
 using System;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 
@@ -24,7 +25,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 		// summoning on the last position on the right side
 		DEFAULT,
 
-		// summoning left of the minion
+		// summoning at the minion's slot; locations use their shared effect-summon placement
 		LEFT,
 
 		// summoning right of the minion
@@ -141,7 +142,13 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 					summonPosition = controller.BoardZone.SlotCount;
 
 				if (summonEntity.Untouchable)
+				{
+                    var historyFrom = game.History ? (game.PowerHistory.Full.Count, game.PowerHistory.Last.Count) : default;
 					controller.BoardZone.Add(summonEntity, summonPosition);
+                    // Unlike the old Untouchable bypass, a refused fold now emits SHOW_ENTITY to reveal the minion.
+                    if (game.History && !game.PowerHistory.PublishCreatedInPlay(summonEntity, historyFrom, source?.Id ?? 0))
+                        game.PowerHistory.Add(PowerHistoryBuilder.ShowEntity(summonEntity, summonerId: source?.Id ?? 0));
+				}
 				else
 					Generic.SummonBlock.Invoke(game, summonEntity, summonPosition, source);
 			}
@@ -160,6 +167,9 @@ namespace SabberStoneCore.Tasks.SimpleTasks
                     case SummonSide.DEFAULT: case SummonSide.SPELL: return -1;
                     case SummonSide.NUMBER: position = number - 1; break;
                     case SummonSide.DEATHRATTLE: position = location.LastBoardPosition; break;
+                    case SummonSide.LEFT:
+                        if (location.Zone == location.Controller.BoardZone) position++;
+                        break; // A retired location's slot advances after each summon there.
                     case SummonSide.RIGHT: if (location.Zone == location.Controller.BoardZone) position++; break;
                     case SummonSide.ALTERNATE:
                         position += alternateCount % 2 == 0 ? -alternateCount / 2 : alternateCount / 2 + 1;

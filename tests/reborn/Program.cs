@@ -198,11 +198,16 @@ internal static class Program
         int newWhelpDamage = history.FindIndex(entry => entry is PowerHistoryTagChange tag &&
             tag.EntityId == newWhelp.Id && tag.Tag == GameTag.DAMAGE && tag.Value == 3);
         int newWhelpShow = history.FindIndex(entry => entry is PowerHistoryShowEntity show && show.Entity.Id == newWhelp.Id);
+        var whelpCreated = newWhelpFull >= 0 ? (PowerHistoryFullEntity)history[newWhelpFull] : null;
         Check(oldWhelpGrave >= 0 && oldCultistGrave >= 0 && oldWhelpGrave < newWhelpFull &&
               oldCultistGrave < newWhelpFull, "new entities appeared before both originals reached graveyard");
         Check(newWhelpFull < newCultistFull, "simultaneous Reborn order ignored original order of play");
-        Check(newWhelpFull < newWhelpDamage && newWhelpDamage < newWhelpShow,
-            "fresh entity/damage/show history order changed");
+        // Retail creates the new copy straight into PLAY, with no SHOW_ENTITY (hsreplay-test-data hslog-tests
+        // 34104_subspell.power.log:35320-35341, a reborn Colossus of the Moon: FULL_ENTITY ZONE=PLAY DAMAGE=9, no DAMAGE row).
+        Check(whelpCreated != null && whelpCreated.Entity.Tags.TryGetValue(GameTag.ZONE, out int createdZone)
+              && createdZone == (int)Zone.PLAY && whelpCreated.Entity.Tags.TryGetValue(GameTag.DAMAGE, out int createdDamage)
+              && createdDamage == 3 && newWhelpDamage < 0 && newWhelpShow < 0,
+            "the fresh copy is not created in PLAY with its damage, or still gets a DAMAGE row or SHOW_ENTITY of its own");
     }
 
     private static void CloneIsolation()

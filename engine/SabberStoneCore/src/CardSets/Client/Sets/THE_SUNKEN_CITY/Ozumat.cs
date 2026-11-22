@@ -23,8 +23,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             ColossalRules.DeclareLayout(card, new[] { 0, 0, 0, 1, 2, 3 }, "TID_711t", "TID_711t2", "TID_711t3", "TID_711t4", "TID_711t5", "TID_711t6");
             card.Power = new Power { DeathrattleTask = new CustomTask((g,c,s,t,k) => {
-                int count = c.BoardZone.Count(m => m.Card.Id.StartsWith("TID_711t", StringComparison.Ordinal) && !m.IsDead && !m.IsDormant);
-                var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).ToList();
+                int count = c.BoardZone.Interactable.Count(m => m.Card.Id.StartsWith("TID_711t", StringComparison.Ordinal) && !m.IsDead);
+                var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToList();
                 for (int i = 0; i < count && enemies.Count > 0; i++) {
                     int index = g.Random.Next(enemies.Count); enemies[index].Destroy(); enemies.RemoveAt(index);
                 }

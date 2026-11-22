@@ -10,6 +10,15 @@ For people and coding agents alike. Be direct and brief.
   [docs/BUILDING.md](docs/BUILDING.md) builds the plugin, the launcher and the installer.
 - Run the suites that cover what you changed before you open a pull request. Do not re-record a golden file to make a
   test pass; read [docs/TESTING.md](docs/TESTING.md) first.
+- A change to what a played card sends to the client must also pass admission rule R7 in the `native-match` suite and
+  a live check with a real mouse drag, because the client predicts a dragged play and silently ignores part of its
+  history. See [Client drop prediction](docs/TESTING.md#client-drop-prediction).
+- When a card asks a question many cards ask, such as which minions effects can see or which minion is left-most,
+  use the engine's shared helper (for which minions effects can see, `BoardZone.Interactable` and its
+  `Any`/`Count`/`First`/`LastInteractable` forms), not a loop of its own. If there is no helper and the same check
+  is already written out in several cards, add one helper and move them onto it, and fix a bug in such a check
+  there, not card by card. Copies drift: before #216, skipping Untouchable minions was written into some cards and
+  missing from others.
 
 ## Branches, commits and pull requests
 

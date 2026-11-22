@@ -797,6 +797,7 @@ namespace SabberStoneCore.CardSets.Standard
 				PowerTask = new CustomTask((g, c, s, t, stack) =>
 				{
 					IReadOnlyList<Card> legendaries = RandomCardTask.GetCardList(s, CardType.MINION, rarity: Rarity.LEGENDARY);
+					if (legendaries.Count == 0 && !g.LegacyPoolReplay && !g.UnversionedRandomPoolReplay) return;
 
 					Util.DeepCloneableRandom rnd = g.Random;
 					DeckZone deck = c.DeckZone;
@@ -1594,7 +1595,7 @@ namespace SabberStoneCore.CardSets.Standard
 						game.DeathProcessingAndAuraUpdate();
 						new DamageTask(2, EntityType.ALLMINIONS_NOSOURCE).Process(game, controller, source, target);
 						if (++waves < 14 && game.DeadMinions.Count > 0)
-							game.TaskQueue.Enqueue(wave, controller, source, target);
+							game.TaskQueue.Enqueue(wave, controller, source, target, separateActivation: true);
 					});
 					wave.Process(g, c, s, t, stack);
 				})
@@ -2397,7 +2398,7 @@ namespace SabberStoneCore.CardSets.Standard
 					new CountTask(EntityType.OP_HAND),
 					new AddEnchantmentTask("GIL_623e", EntityType.SOURCE, true),
 					// Health lost to 0 or less destroys it (a doubled Battlecry can exceed 12), as for Dread Leviathan.
-					new CustomTask((g, c, s, t, stack) => { if (s is Minion m && m.Zone?.Type == Zone.PLAY && m.Health <= 0) m.ToBeDestroyed = true; }))
+					new CustomTask((g, c, s, t, stack) => { if (s is Minion m && m.Zone?.Type == Zone.PLAY) SabberStoneCore.Actions.HealthLossRules.MarkIfDepleted(m); }))
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

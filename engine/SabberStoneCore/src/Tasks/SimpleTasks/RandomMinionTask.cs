@@ -61,13 +61,18 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			in IPlayable target,
 			in TaskStack stack = null)
 		{
-			List<Card> cardsList = null;
+			// The match's pool (policy GameConfig.PoolFormat, never FormatType). A summon cannot roll its own source
+			// (the modern code's rule); legacy replays keep the frozen lists and their behaviour.
+			var pool = Cards.RandomPool(game, PoolDestination.Summon, source);
+			// A local: the task instance is shared, so it must not carry per-call state.
+			int value = Value;
+			IReadOnlyList<Card> cardsList = null;
 			if (Type != EntityType.INVALID)
 			{
 				if (Type == EntityType.TARGET && Tag == GameTag.COST)
 				{
-					Value = ((IPlayable) target).Cost;
-					cardsList = Cards.CostMinionCards(game.FormatType)[Value];
+					value = ((IPlayable) target).Cost;
+					cardsList = pool.MinionsOfCost(value);
 				}
 				else
 				{
@@ -76,30 +81,28 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			}
 
 			if (cardsList == null && Tag == GameTag.COST && RelaSign == RelaSign.EQ)
-				cardsList = Cards.CostMinionCards(game.FormatType)[Value];
+				cardsList = pool.MinionsOfCost(value);
 
 			// Uncached: a source-keyed process cache leaked the first game's format and class pool.
 			if (cardsList == null)
 			{
-				IEnumerable<Card> cards;
-				if (game.FormatType == FormatType.FT_STANDARD)
-					cards = ClassAndMultiOnlyFlag ? controller.Standard : Cards.AllStandard;
-				else
-					cards = ClassAndMultiOnlyFlag ? controller.Wild : Cards.AllWild;
+				IEnumerable<Card> cards = ClassAndMultiOnlyFlag ? pool.ClassAndNeutral(controller.HeroClass) : pool.All;
 
 				if (Tag == GameTag.CARDRACE && RelaSign == RelaSign.EQ)
 				{
+					// Retail counts a dual-type minion as both types; the frozen pool read the primary race only.
 					cardsList = cards.Where(p => p.Type == CardType.MINION
-							 && p.IsRaceForLegacyRandomPool((Race)Value)).ToList();;
+							 && (pool.Legacy ? p.IsRaceForLegacyRandomPool((Race)value) : p.IsRace((Race)value))).ToList();
 				}
 				else
 				{
 					cardsList = cards.Where(p => p.Type == CardType.MINION
-												 && (RelaSign == RelaSign.EQ && p[Tag] == Value
-													 || RelaSign == RelaSign.GEQ && p[Tag] >= Value
-													 || RelaSign == RelaSign.LEQ && p[Tag] <= Value)).ToList();
+												 && (RelaSign == RelaSign.EQ && p[Tag] == value
+													 || RelaSign == RelaSign.GEQ && p[Tag] >= value
+													 || RelaSign == RelaSign.LEQ && p[Tag] <= value)).ToList();
 				}
 			}
+			cardsList = pool.WithoutSource(cardsList, source);
 
 			if (cardsList.Count == 0) return TaskState.STOP;
 
@@ -107,7 +110,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			if (Amount > 1)
 			{
 				var list = new List<Card>(cardsList);
-				while (randomMinions.Count < Amount && cardsList.Count > 0)
+				while (randomMinions.Count < Amount && (pool.Legacy ? cardsList.Count : list.Count) > 0)
 				{
 					Card card = list.Choose(game.Random);
 					list.Remove(card);

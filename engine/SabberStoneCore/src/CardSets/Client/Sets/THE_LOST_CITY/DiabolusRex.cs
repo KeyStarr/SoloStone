@@ -19,7 +19,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int repeats = KindredRules.BeginMatchedClause((IPlayable)s);
                 for (int repeat = 0; repeat < repeats; repeat++)
                 {
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && (repeat == 0 || !m.IsDead)).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && (repeat == 0 || !m.IsDead)).ToArray();
                     if (enemies.Length == 0) return;
                     var targets = new[] { enemies.First(), enemies.Last() }.Distinct().ToArray();
                     using var wave = g.History ? g.PowerHistory.DamageWave(targets.Length) : null;

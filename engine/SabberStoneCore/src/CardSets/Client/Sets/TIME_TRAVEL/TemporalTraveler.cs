@@ -20,7 +20,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int position = EffectContext.DeathrattlePosition(c, s);
                 int shadow = ctx.Summon("TIME_434t", position);
                 if (shadow == 0) return;
-                var targets = new TaskStack { Playables = c.Opponent.BoardZone
+                var targets = new TaskStack { Playables = c.Opponent.BoardZone.Interactable
                     .Where(m => !m.IsDead && !m.Untouchable).Cast<IPlayable>().ToArray() };
                 if (new RandomTask(1, EntityType.STACK).Process(g, c, s, null, targets) == TaskState.STOP) return;
                 new AttackTask(EntityType.SOURCE, EntityType.STACK).Process(g, c, g.IdEntityDic[shadow], null, targets);

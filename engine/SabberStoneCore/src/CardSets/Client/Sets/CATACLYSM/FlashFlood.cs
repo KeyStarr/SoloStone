@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int iterations = ctx.PlayedFromEdge ? 2 : 1;
                 for (int i = 0; i < iterations; i++)
                 {
-                    var minions = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                    var minions = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                     if (minions.Length == 0) break;
                     // Unpinned: keep both edge entries, including a lone minion; reselect after first-wave deaths.
                     foreach (var minion in new[] { minions[0], minions[minions.Length - 1] })

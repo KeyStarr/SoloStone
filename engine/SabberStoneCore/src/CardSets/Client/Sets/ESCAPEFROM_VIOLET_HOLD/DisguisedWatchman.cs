@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { PowerTask = new CustomTask((g,c,s,t,stack) => {
                 for (int wave = 0; wave < 2 && g.State != State.COMPLETE; wave++)
                 {
-                    var minions = c.BoardZone.Where(m => m.Id != s.Id && !m.Untouchable && !m.ToBeDestroyed).ToArray();
+                    var minions = c.BoardZone.Interactable.Where(m => m.Id != s.Id && !m.Untouchable && !m.ToBeDestroyed).ToArray();
                     using (g.History ? g.PowerHistory.DamageWave(minions.Length) : null)
                         foreach (var minion in minions)
                             Generic.DamageCharFunc((IPlayable)s, minion, 1, false);

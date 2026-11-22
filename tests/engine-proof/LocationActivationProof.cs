@@ -6,6 +6,7 @@ using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Model.Events;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCore.Tasks.SimpleTasks;
 using L = LocationProofs;
 
 internal static class LocationActivationProof
@@ -16,11 +17,12 @@ internal static class LocationActivationProof
         Pinned_ActivationTargetsElusive();
         PinnedRule_ActivationTargetsStealthImmune();
         Unpinned_FullBoardSummonActivation();
-        Unpinned_LocationSummonPosition();
+        Pinned_LocationSummonPosition();
+        Pinned_FinalChargeKhadgarSummonOrder();
         ActivationSignals();
         PureValidation();
         Rejections();
-        Console.WriteLine("PASS location activation; DurabilityDamageEncoding, CooldownTraceTiming, ActivationTraceOrder, Pinned_ActivationTargetsElusive, PinnedRule_ActivationTargetsStealthImmune, Unpinned_FullBoardSummonActivation, Unpinned_LocationSummonPosition");
+        Console.WriteLine("PASS location activation; DurabilityDamageEncoding, CooldownTraceTiming, ActivationTraceOrder, Pinned_ActivationTargetsElusive, PinnedRule_ActivationTargetsStealthImmune, Unpinned_FullBoardSummonActivation, Pinned_LocationSummonPosition, Pinned_FinalChargeKhadgarSummonOrder");
     }
     private static void CooldownTraceTiming()
     {
@@ -165,26 +167,46 @@ internal static class LocationActivationProof
         int summon = entries.FindIndex(e => e is PowerHistoryFullEntity f && f.Entity.Id == p.BoardZone.GetSlot(0).Id);
         L.Check(retire >= 0 && summon > retire, "graveyard before summoned entity");
     }
-    private static void Unpinned_LocationSummonPosition()
+    // Owner ruling 2026-11-21 from retail video.
+    private static void Pinned_LocationSummonPosition()
     {
         foreach (int pos in new[] { 0, 1, 2 })
         {
             var game = L.Game(); var p = game.Player1;
             var left = L.Minion(p); var right = L.Minion(p);
             var network = L.Location(p, "JAIL_877", pos);
+            network[GameTag.HEALTH] = 3;
             L.Use(network);
             var firstRat = p.BoardZone.Single(m => m.Card.Id == "JAIL_877t");
-            L.Check(firstRat.ZonePosition == pos + 1, "nonfinal summon immediately right");
+            L.Check(firstRat.ZonePosition == network.ZonePosition + 1 && network.ZonePosition == pos, "nonfinal summon is right of living location");
             L.End(game); L.End(game); L.End(game); L.End(game); L.Use(network);
-            var finalRat = p.BoardZone.Single(m => m.Card.Id == "JAIL_877t" && m.Id != firstRat.Id);
+            var secondRat = p.BoardZone.Single(m => m.Card.Id == "JAIL_877t" && m.Id != firstRat.Id);
+            L.Check(secondRat.ZonePosition == network.ZonePosition + 1 && firstRat.ZonePosition == network.ZonePosition + 2,
+                "repeat living-location summon is immediately right, before prior activation");
+            L.End(game); L.End(game); L.End(game); L.End(game); L.Use(network);
+            var finalRat = p.BoardZone.Single(m => m.Card.Id == "JAIL_877t" && m.Id != firstRat.Id && m.Id != secondRat.Id);
             L.Check(finalRat.ZonePosition == pos && p.BoardZone.GetSlot(pos).Id == finalRat.Id, "new final-charge Rat at former location index");
+            L.Check(secondRat.ZonePosition == pos + 1 && firstRat.ZonePosition == pos + 2, "final-charge summon preserves prior activation order");
             int[][] expected = {
-                new[] { finalRat.Id, firstRat.Id, left.Id, right.Id },
-                new[] { left.Id, finalRat.Id, firstRat.Id, right.Id },
-                new[] { left.Id, right.Id, finalRat.Id, firstRat.Id }
+                new[] { finalRat.Id, secondRat.Id, firstRat.Id, left.Id, right.Id },
+                new[] { left.Id, finalRat.Id, secondRat.Id, firstRat.Id, right.Id },
+                new[] { left.Id, right.Id, finalRat.Id, secondRat.Id, firstRat.Id }
             };
             L.Check(p.BoardZone.Slots.Select(e => e.Id).SequenceEqual(expected[pos]), "full physical Slots order after final charge");
         }
+    }
+    private static void Pinned_FinalChargeKhadgarSummonOrder()
+    {
+        var game = L.Game(); var p = game.Player1;
+        L.Minion(p, "EX1_043");
+        var network = L.Location(p, "JAIL_877", 1);
+        L.Minion(p, "CORE_DAL_575");
+        L.Minion(p, "EX1_043");
+        network.Destroy(); game.DeathProcessingAndAuraUpdate();
+        new SummonTask("CS2_182", 2, SummonSide.LEFT).Process(game, p, network, null);
+        var created = p.BoardZone.Where(m => m.Card.Id == "CS2_182").OrderBy(m => m.Id).ToArray();
+        L.Check(created.Length == 4 && p.BoardZone.Slots.Where(m => m.Card.Id == "CS2_182").Select(m => m.Id)
+                .SequenceEqual(created.Select(m => m.Id)), "final-charge location summons and Khadgar copies stay in creation order");
     }
     private static void ActivationSignals()
     {

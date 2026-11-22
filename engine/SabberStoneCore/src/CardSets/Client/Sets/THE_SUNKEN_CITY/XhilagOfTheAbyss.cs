@@ -24,7 +24,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             ColossalRules.DeclareLayout(card, new[] { 0, 0, 1, 2 }, "TSC_219t", "TSC_219t2", "TSC_219t3", "TSC_219t4");
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_START) {
                 SingleTask = new CustomTask((g,c,s,t,k) => {
-                    foreach (var stalk in c.BoardZone.Where(IsStalk).Where(m => !m.IsDead && !m.IsDormant).ToArray())
+                    foreach (var stalk in c.BoardZone.Interactable.Where(IsStalk).Where(m => !m.IsDead).ToArray())
                         Generic.AddEnchantmentBlock(g, Cards.FromId("TSC_219e"), (IPlayable)s, stalk);
                 }) } };
         }
@@ -38,7 +38,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_END) {
                 SingleTask = new CustomTask((g,c,s,t,k) => {
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
                     enemies[g.Random.Next(enemies.Length)].TakeDamage((IPlayable)s, s[GameTag.TAG_SCRIPT_DATA_NUM_1]);
                 }) } };
         }

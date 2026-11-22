@@ -31,6 +31,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     // Anchor: the previous output still in play, else the Recruiter; append if neither is in play.
                     IPlayable anchor = summoned.LastOrDefault(m => m.Zone == c.BoardZone) ?? (s.Zone == c.BoardZone ? (IPlayable)s : null);
                     int position = anchor == null ? c.BoardZone.SlotCount
+                        // untouchable-ok: physical slot position of the anchor; Untouchable minions keep their slots
                         : Enumerable.Range(0, c.BoardZone.SlotCount).First(i => c.BoardZone.GetSlot(i) == anchor) + 1;
                     c.DeckZone.Remove(minion);
                     Generic.SummonBlock(g, minion, position, s);

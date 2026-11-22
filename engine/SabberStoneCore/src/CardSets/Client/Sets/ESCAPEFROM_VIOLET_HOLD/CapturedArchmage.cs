@@ -22,7 +22,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 Trigger = new ProgressTrigger(Progress(TriggerActivation.HAND), Progress(TriggerActivation.DECK), Progress(TriggerActivation.PLAY)),
                 DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
                     if (OtherDeaths((IPlayable)s) < 4) return;
-                    var enemies = c.Opponent.BoardZone.GetAll().Cast<ICharacter>().Append(c.Opponent.Hero).ToArray();
+                    var enemies = c.Opponent.BoardZone.GetAll().Cast<ICharacter>().Append(c.Opponent.Hero).Where(e => !e.IsDead).ToArray();
+                    if (enemies.Length == 0) return;
                     var spell = (Spell)Entity.FromCard(c, Cards.FromId("CS2_029"));
                     Generic.CastSpell(c, g, spell, enemies[g.Random.Next(enemies.Length)], 0);
                 })

@@ -16,9 +16,8 @@ internal static class Unpinned_TricksyImproviserProof
         Core2026Proof.Check(PoweredUp.IsMet(held), "effect cast counts for condition without a player play");
         LostCityPoolProof.WithPool(g, id, new[] { "CORE_EX1_287" }, () => {
             PlayEntity(g, p, held);
-            var attempts = g.HistoryFacts.Query.Casts().Where(f => f.DbfId == Cards.FromId("CORE_EX1_287").AssetId).ToArray();
-            Core2026Proof.Check(p.SecretZone.Count == 1 && p.GraveyardZone.Count(c => c.Card.Id == "CORE_EX1_287") == 1
-                && attempts.Length == 4, "Unpinned_WithReplacement second duplicate fizzles without reroll");
+            Core2026Proof.Check(p.SecretZone.Count == 1 && p.SecretZone.Single().Card.Id == "CORE_EX1_287"
+                && p.GraveyardZone.All(c => c.Card.Id != "CORE_EX1_287"), "Unpinned_TricksyNoDuplicates a one-Secret pool casts once; the second pick is not a duplicate that fizzles");
         });
         End(g); End(g); ClearBoard(g, p);
         var fresh = Add(p, id); Core2026Proof.Check(!PoweredUp.IsMet(fresh), "condition expires next turn");
@@ -27,13 +26,14 @@ internal static class Unpinned_TricksyImproviserProof
         var ready = Add(p, id); Core2026Proof.Check(PoweredUp.IsMet(ready), "fizzled completed attempt satisfies cast condition");
         var replay = HistoryFactsProof.Fixture();
         AutomaticCastProof.Cast(replay, (Spell)Entity.FromCard(replay.Player1, Cards.FromId("GAME_005")));
-        LostCityPoolProof.WithPool(replay, id, new[] { "CORE_EX1_287" }, () => Play(replay, replay.Player1, id));
-        PoolPilotProof.Resume(replay, next => LostCityPoolProof.WithPool(next, id, new[] { "CORE_EX1_287" }, () => {
+        var three = Unpinned_TwigSecretsDormantProof.PoolOf(replay, id);
+        LostCityPoolProof.WithPool(replay, id, three, () => Play(replay, replay.Player1, id));
+        PoolPilotProof.Resume(replay, next => LostCityPoolProof.WithPool(next, id, three, () => {
+            Core2026Proof.Check(next.Player1.SecretZone.Count == 2, "Tricksy cast two distinct Secrets from the three-Secret pool");
             var shudder = Play(next, next.Player1, "GIL_820");
-            var attempts = next.Player1.GraveyardZone.OfType<Spell>().Where(c => c[GameTag.CREATOR] == shudder.Id).ToArray();
-            Core2026Proof.Check(attempts.Length == 2 && attempts.All(c => c.Card.Id == "CORE_EX1_287")
-                && next.Player1.SecretZone.Count == 1, "Shudderwock uses Tricksy recipe pool for both duplicate attempts");
-            foreach (var cast in attempts) AutomaticCastProof.Attempt(next, cast);
+            var added = next.Player1.SecretZone.Where(c => c[GameTag.CREATOR] == shudder.Id).ToArray();
+            Core2026Proof.Check(added.Length == 1 && next.Player1.SecretZone.Select(c => c.Card.Id).OrderBy(x => x).SequenceEqual(three.OrderBy(x => x)),
+                "Shudderwock's repeated Tricksy uses the recipe pool and casts only the Secret not yet active");
         }));
     });
 }

@@ -36,7 +36,8 @@ internal static class OfflinePoolProof
         using var stream = new MemoryStream(Convert.FromBase64String(session.Packets.Last(p => p.Id == 17).Base64));
         packet.Deserialize(stream); return packet;
     }
-    private static void Identity(Game game, NativeSession session, int id, Card card, int source, Zone zone, int? creator = null, int? cost = null)
+    private static void Identity(Game game, NativeSession session, int id, Card card, int source, Zone zone,
+        int? engineCreator = null, int? nativeCreator = null, int? nativeSummonSource = null, int? cost = null)
     {
         var entity = game.IdEntityDic[id]; var actor = session.Client.Entities[id];
         Check(entity.Card.Id == card.Id && entity.Card.AssetId == card.AssetId && actor.CardId == card.Id,
@@ -47,13 +48,22 @@ internal static class OfflinePoolProof
             ?? policy.Dependencies.Single(d => d.CardId == actor.CardId).DbfId;
         Check(dbfId == card.AssetId, "native definition dbfId");
         foreach (var pair in new[] {
-            (GameTag.CONTROLLER, entity.Controller.PlayerId), (GameTag.CREATOR, creator ?? source),
+            (GameTag.CONTROLLER, entity.Controller.PlayerId),
             (GameTag.DISPLAYED_CREATOR, source),
             (GameTag.COST, cost ?? (CostRules.HasManaNumbers(entity) ? CostRules.ManaNumbers(entity) : card.Cost)),
             (GameTag.ATK, entity is Minion m ? m.AttackDamage : card.ATK),
             (GameTag.HEALTH, entity is Minion minion ? minion.BaseHealth : card.Health), (GameTag.ZONE, (int)zone) })
             Check(entity[pair.Item1] == pair.Item2 && actor.Get(pair.Item1) == pair.Item2,
                 "generated " + zone + " " + pair.Item1 + " expected=" + pair.Item2 + " engine=" + entity[pair.Item1] + " native=" + actor.Get(pair.Item1));
+        Check(entity[GameTag.CREATOR] == (engineCreator ?? source),
+            "generated " + zone + " engine CREATOR expected=" + (engineCreator ?? source) + " actual=" + entity[GameTag.CREATOR]);
+        Check(actor.Get(GameTag.CREATOR) == (nativeCreator ?? engineCreator ?? source),
+            "generated " + zone + " native CREATOR expected=" + (nativeCreator ?? engineCreator ?? source) + " actual=" + actor.Get(GameTag.CREATOR));
+        if (nativeSummonSource is int summonSource)
+        {
+            Check(entity[(GameTag)1254] == 0, "generated " + zone + " engine 1254 unchanged");
+            Check(actor.Get((GameTag)1254) == summonSource, "generated " + zone + " native 1254");
+        }
         Check(!Invariants.Compare(game, session.Client).Any(), "generated transport invariants");
     }
     private static void Generated()
@@ -69,8 +79,9 @@ internal static class OfflinePoolProof
         Check(board.Id == OfflineCardPools.Pick(reference, OfflinePoolTestRecipes.Past, CardClass.MAGE, source.Card.AssetId).Id, "board pick");
         int boardId = context.Summon(board.Id);
         session.Flush();
-        Identity(game, session, game.Player1.HandZone.Last().Id, hand, source.Id, Zone.HAND, creator: 0);
-        Identity(game, session, boardId, board, source.Id, Zone.PLAY, creator: 0);
+        Identity(game, session, game.Player1.HandZone.Last().Id, hand, source.Id, Zone.HAND, engineCreator: 0, nativeSummonSource: 0);
+        Identity(game, session, boardId, board, source.Id, Zone.PLAY,
+            engineCreator: 0, nativeCreator: source.Id, nativeSummonSource: source.Id);
         Check(game.Random.CaptureState().Equals(reference.Random.CaptureState()), "generation exact RNG");
     }
     private static string State(Game game) => Canonical.State(game) + Canonical.History(game) +
@@ -137,7 +148,8 @@ internal static class OfflinePoolProof
             var summoned = player.BoardZone.Single(m => m[GameTag.DISPLAYED_CREATOR] == source.Id);
             Check(summoned.Card.Id == game.IdEntityDic[ids[0]].Card.Id && summoned.Id != ids[0],
                 "Story summons a fresh chosen identity instead of moving offer to hand");
-            Identity(game, session, summoned.Id, summoned.Card, source.Id, Zone.PLAY, creator: 0, cost: summoned.Cost);
+            Identity(game, session, summoned.Id, summoned.Card, source.Id, Zone.PLAY,
+                engineCreator: 0, nativeCreator: source.Id, nativeSummonSource: source.Id, cost: summoned.Cost);
         }
         else Check(game.IdEntityDic[ids[0]].Zone.Type == Zone.HAND, "selected actor moves to hand");
         Check(!Invariants.Compare(game, session.Client).Any(), "selected-card transport invariants");
@@ -155,6 +167,7 @@ internal static class OfflinePoolProof
         Pilots();
         OfflinePoolTestRecipes.WithDeclarations(() => {
             Generated();
+            foreach (bool opponent in new[] { false, true }) HiddenSummonSource(opponent);
             foreach (bool opponent in new[] { false, true })
             {
                 for (int count = 0; count <= 3; count++) Ordinary(count, opponent);
@@ -168,6 +181,35 @@ internal static class OfflinePoolProof
             }
         });
         Console.WriteLine("PASS offline pool transport: generated hand/board identity, owner/creator/cost/stats/zone; GENERAL 1-3 offers; selection/ack; ordinary/suspended privacy; invalid/stale unchanged; violations=0");
+    }
+
+    private static void HiddenSummonSource(bool opponent)
+    {
+        var (game, _, session) = Fixture(opponent); var player = game.CurrentPlayer;
+        var source = Entity.FromCard(player, Cards.FromId("CS2_231"), zone: player.HandZone);
+        var context = new EffectContext(game, player.Id, source.Id);
+        var card = context.PickRandomCard(OfflinePoolTestRecipes.Past);
+        int id = context.Summon(card.Id);
+        session.Flush();
+        Check((session.Client.Entities[source.Id].CardId == "") == opponent, "summon source hand privacy");
+        int nativeSource = opponent ? 0 : source.Id;
+        Identity(game, session, id, card, source.Id, Zone.PLAY,
+            engineCreator: 0, nativeCreator: nativeSource, nativeSummonSource: nativeSource);
+        foreach (var wire in session.Packets.Where(p => p.Id == 19))
+        {
+            var packet = new PegasusGame.PowerHistory();
+            using var stream = new MemoryStream(Convert.FromBase64String(wire.Base64));
+            packet.Deserialize(stream);
+            foreach (var entry in packet.List)
+            {
+                var snapshot = entry.FullEntity ?? entry.ShowEntity;
+                if (snapshot?.Entity == id)
+                    Check(snapshot.Tags.Where(t => t.Name is 313 or 1254).All(t => t.Value == nativeSource),
+                        "summon source snapshot privacy");
+                if (entry.TagChange is { } tag && tag.Entity == id && tag.Tag is 313 or 1254)
+                    Check(tag.Value == nativeSource, "summon source tag-change privacy");
+            }
+        }
     }
 
     private static readonly DecisionBattlecryTask OutcastRecipe = new("transport/outcast/decision/v1",
@@ -273,8 +315,11 @@ internal static class OfflinePoolProof
                     Check(actor.CardId == "" && actor.Get(GameTag.ZONE) == (int)Zone.DECK, "generated deck card stays hidden");
                     Generic.Draw(player, output); session.Flush();
                 }
+                int engineCreator = source.Card.Id is "CATA_484" or "CORE_CATA_009" or "CORE_RLK_066" or "RLK_025" ? source.Id : 0;
+                bool summoned = output is Minion && output.Zone.Type == Zone.PLAY;
                 Identity(game, session, output.Id, output.Card, output[GameTag.DISPLAYED_CREATOR], output.Zone.Type,
-                    creator: source.Card.Id is "CATA_484" or "CORE_CATA_009" or "CORE_RLK_066" or "RLK_025" ? source.Id : 0, cost: output.Cost);
+                    engineCreator: engineCreator, nativeCreator: summoned ? source.Id : engineCreator,
+                    nativeSummonSource: summoned ? source.Id : 0, cost: output.Cost);
             }
             Check(!Invariants.Compare(game, session.Client).Any(), declaration.CardId + " pilot transport");
         }

@@ -65,16 +65,16 @@ public static class PlaytestQueueTests
                 recorder.OnMulligan(2, new int[0]); recorder.OnPostAction(1, "abc");
                 Check(recorder.FlushAndWait(5000), "journal flush timed out");
                 string path = Path.Combine(directory, "match-1.jsonl");
-                Check(File.ReadAllLines(path).Length == 2, "events not flushed while match still open");
-                var bytes = File.ReadAllBytes(path);
+                Check(OpenJournalReads.Lines(path).Length == 2, "events not flushed while match still open");
+                var bytes = OpenJournalReads.Bytes(path);
                 using (var duplicate = PlaytestRecord.Open(directory, "match-1", () => null))
                 {
                     Check(duplicate.FlushAndWait(5000), "duplicate open did not complete");
                     Check(!duplicate.Enabled, "existing record overwritten");
                 }
-                Check(bytes.SequenceEqual(File.ReadAllBytes(path)), "existing record bytes changed");
+                Check(bytes.SequenceEqual(OpenJournalReads.Bytes(path)), "existing record bytes changed");
                 recorder.OnResult("Won", 12);
-                Check(recorder.Enabled && File.ReadAllLines(path).Length == 3, "result not flushed or terminal FX disabled");
+                Check(recorder.Enabled && OpenJournalReads.Lines(path).Length == 3, "result not flushed or terminal FX disabled");
                 recorder.Dispose();
                 Check(!recorder.Enabled, "bridge disposal did not close journal");
             }

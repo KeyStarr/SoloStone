@@ -33,7 +33,7 @@ namespace SabberStoneCore.Model.Entities
 			Game.Log(LogLevel.VERBOSE, BlockType.PLAY, "Spell", !Game.Logging ? "" : $"{card.Name} ({card.Class}) was created.");
 		}
 
-        // Read-only cost projection: no enrollment, entity id, history, zone insertion or triggers.
+        // Read-only spell projection: no enrollment, entity id, history, zone insertion or triggers.
         internal Spell(Controller controller, Card card, bool costProbe)
             : base(controller, card, new EntityData { [Actions.TemporaryRules.Temporary] = 1 }, 0, costProbe)
         { Zone = controller.HandZone; }

@@ -86,7 +86,7 @@ internal static class B15GameSetupExtraProof
     {
         foreach(int cap in new[]{15,10})
         foreach(var input in new[]{(mana:cap,temporary:0,excess:true),(mana:cap-1,temporary:0,excess:false),
-            (mana:10,temporary:0,excess:cap==10),(mana:cap-2,temporary:Cards.FromId("CS2_013").Cost+2,excess:true)}) {
+            (mana:10,temporary:0,excess:cap==10),(mana:cap-2,temporary:Cards.FromId("CS2_013").Cost+2,excess:false)}) { // temporary Mana is not a crystal: Excess Mana needs permanent crystals at the cap (29.0)
             var g=cap==15?Ready("EDR_000"):Ready(); var p=g.Player1;
             p.BaseMana=input.mana; p.UsedMana=0; p.TemporaryMana=input.temporary;
             var growth=Add(p,"CS2_013");

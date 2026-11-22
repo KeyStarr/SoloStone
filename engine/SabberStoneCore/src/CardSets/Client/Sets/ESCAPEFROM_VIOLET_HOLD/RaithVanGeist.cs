@@ -33,7 +33,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 foreach(var body in raised)
                 {
                     if(body.Zone!=c.BoardZone || body.IsDead || body.Untouchable) continue;
-                    var enemies=c.Opponent.BoardZone.Where(m=>!m.IsDead && !m.Untouchable).ToArray();
+                    var enemies=c.Opponent.BoardZone.Interactable.Where(m=>!m.IsDead && !m.Untouchable).ToArray();
                     if(enemies.Length==0) break;
                     var target=enemies[g.Random.Next(enemies.Length)];
                     new AttackTask(EntityType.SOURCE,EntityType.TARGET).Process(g,c,body,target);

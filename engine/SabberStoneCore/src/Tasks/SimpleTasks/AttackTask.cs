@@ -21,6 +21,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 	{
 		private readonly EntityType _aType;
 		private readonly EntityType _dType;
+		internal EntityType DefenderType => _dType;
 
 		public AttackTask(EntityType attacker, EntityType defender)
 		{

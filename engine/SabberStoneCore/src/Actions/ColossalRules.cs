@@ -10,6 +10,9 @@ namespace SabberStoneCore.Actions
     public static class ColossalRules
     {
         public const GameTag RealizedFactor = (GameTag)31010;
+        // Appendages of Herald Colossals (body tag 4538): same factor and the same three upgrade texts as Soldiers.
+        private static readonly HashSet<string> HeraldAppendages = new HashSet<string>(StringComparer.Ordinal);
+        public static bool IsHeraldAppendage(Card card) => card != null && HeraldAppendages.Contains(card.Id);
         // Immutable declarations stay outside Card's serialized history-definition layout.
         private static readonly Dictionary<string, IReadOnlyList<string>> Declarations = new Dictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal);
         private static readonly HashSet<string> RefillDeclarations = new HashSet<string>(StringComparer.Ordinal);
@@ -22,6 +25,7 @@ namespace SabberStoneCore.Actions
             if (appendageIds == null || appendageIds.Any(string.IsNullOrEmpty))
                 throw new ArgumentException("Colossal appendages must be card ids.", nameof(appendageIds));
             Declarations[card.Id] = Array.AsReadOnly((string[])appendageIds.Clone());
+            if (card[(GameTag)4538] != 0) HeraldAppendages.UnionWith(appendageIds);
         }
 
         private static readonly Dictionary<string, int[]> Layouts = new Dictionary<string, int[]>(StringComparer.Ordinal);

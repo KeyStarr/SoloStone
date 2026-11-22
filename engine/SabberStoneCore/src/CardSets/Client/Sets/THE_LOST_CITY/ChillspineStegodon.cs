@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 stack = stack ?? new TaskStack();
-                if (new RandomTask(2, EntityType.OP_MINIONS).Process(g, c, s, t, stack) == TaskState.STOP)
+                if (RandomTask.Harmful(2, EntityType.OP_MINIONS).Process(g, c, s, t, stack) == TaskState.STOP)
                 {
                     // An empty selection still activates the matched Kindred clause.
                     KindredRules.BeginMatchedClause((IPlayable)s);

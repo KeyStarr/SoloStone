@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { LocationActivation = new LocationActivation {
                 Target = LocationTargetKind.None, RequiresFreeSlot = true,
                 Task = EffectContext.Task(context => {
-                    context.SummonRightOfLocation("JAIL_877t");
+                    context.SummonAtLocation("JAIL_877t");
                     return context.RunLegacy(new SetGameTagTask(GameTag.LOCATION_ACTION_COOLDOWN, 1, EntityType.SOURCE));
                 })
             } };

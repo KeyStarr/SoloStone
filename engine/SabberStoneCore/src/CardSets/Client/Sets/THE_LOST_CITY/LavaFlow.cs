@@ -15,7 +15,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = SplitHits.Inline(3, new CustomTask((g, c, s, t, stack) => {
-                var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero)
+                var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable).Cast<ICharacter>().Append(c.Opponent.Hero)
                     .Where(e => !e.ToBeDestroyed && e.Health > 0).ToArray();
                 if (enemies.Length == 0) return;
                 int lowest = enemies.Min(e => e.Health);

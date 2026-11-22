@@ -66,8 +66,18 @@ public static class TriggerValueTests
     }
     public static void TestProbeMixIsWhatItClaims()
     {
-        var schools = TriggerProbe.Spells.Select(id => Cards.FromId(id)[GameTag.SPELL_SCHOOL]).ToArray();
+        var schools = TriggerProbe.Spells.Select(id => TriggerProbe.Printed(id)[GameTag.SPELL_SCHOOL]).ToArray();
         Check(schools.Distinct().Count() == schools.Length, "one spell per school: " + string.Join(",", schools));
+        // The probe's school-less Moonfire is a private copy: the shared card, and so a real game, still report Arcane.
+        Check(Cards.FromId("CS2_008")[GameTag.SPELL_SCHOOL] == 1 && !ReferenceEquals(Cards.FromId("CS2_008"), TriggerProbe.Printed("CS2_008")), "probe Moonfire is a copy; the shared card keeps Arcane");
+        var real = new Game(new SabberStoneCore.Config.GameConfig { StartPlayer = 1, Shuffle = false, SkipMulligan = true, Logging = false, History = true,
+            Player1HeroClass = CardClass.DRUID, Player2HeroClass = CardClass.MAGE, FormatType = FormatType.FT_WILD,
+            Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_008"), 30).ToList(), Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_024"), 30).ToList() });
+        real.StartGame(); real.Player1.BaseMana = 10; real.Player1.UsedMana = 0;
+        var moon = SabberStoneCore.Model.Entities.Entity.FromCard(real.Player1, Cards.FromId("CS2_008"), zone: real.Player1.HandZone);
+        Check(moon[GameTag.SPELL_SCHOOL] == 1 || moon.Card[GameTag.SPELL_SCHOOL] == 1, "a real-game Moonfire entity reports Arcane");
+        Check(real.Process(real.Player1.Options().First(o => o.Source == moon && (o.Target == null || o.Target == real.Player2.Hero))), "real Moonfire cast");
+        Check(real.HistoryFacts.Query.Casts().Any(f => f.DbfId == moon.Card.AssetId && f.SpellSchool == 1), "real-game Moonfire cast history records Arcane");
         Check(TriggerProbe.Spells.All(id => Cards.FromId(id).Type == CardType.SPELL) && TriggerProbe.Minions.All(id => Cards.FromId(id).Type == CardType.MINION), "mix types");
         // Every event in the mix is possible on the canonical board: a silently impossible event would read as a condition.
         foreach (var row in TriggerMeasures.Rows.Where(r => r.Id == "TIME_013" || r.Id == "BE_701"))

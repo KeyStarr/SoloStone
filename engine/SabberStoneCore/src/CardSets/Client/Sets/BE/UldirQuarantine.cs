@@ -36,7 +36,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         s[GameTag.LOCATION_ACTION_COOLDOWN]=1;
                         var ctx=new EffectContext(g,c.Id,s.Id,stack:stack);
                         var chosen=ctx.PickRandomCard(B14H4BEPools.Five(),recipeDbfId:DbfId);
-                        if(chosen!=null)ctx.Summon(chosen.Id,s.Zone==c.BoardZone?((IPlayable)s).ZonePosition+1:((BoardObject)s).LastBoardPosition);
+                        if(chosen!=null)ctx.SummonAtLocation(chosen.Id);
                     }) }
             };
         }

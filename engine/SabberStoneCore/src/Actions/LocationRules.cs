@@ -91,6 +91,8 @@ namespace SabberStoneCore.Actions
             if (source[PendingActivation] == 3 && source.Zone == controller.GraveyardZone && !game.DeadBoardObjects.Contains(source))
                 game.DeadBoardObjects.Add(source);
             if (source[PendingActivation] != 0) source[PendingActivation] = 0;
+            // Every non-final use skips the owner's next turn (pinned retail rule); card scripts that set it themselves are unchanged.
+            if (!finalCharge && !clearBeforeEffect && source.Zone == controller.BoardZone) source[GameTag.LOCATION_ACTION_COOLDOWN] = 1;
             if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
             if (!clearBeforeEffect && source.Zone == controller.BoardZone)
             {

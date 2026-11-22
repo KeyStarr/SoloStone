@@ -22,7 +22,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     int attacked = g.CurrentEventData.EventTarget.Id;
                     var enemies = c.Opponent.BoardZone.GetAll().Cast<IPlayable>().Append(c.Opponent.Hero)
-                        .Where(enemy => enemy.Id != attacked).ToArray();
+                        .Where(enemy => enemy.Id != attacked && !(enemy is ICharacter wounded && wounded.IsDead)).ToArray();
                     if (enemies.Length == 0) return;
                     var other = enemies[g.Random.Next(enemies.Length)];
                     g.OnRandomHappened(true);

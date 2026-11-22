@@ -381,6 +381,58 @@ namespace SabberStoneCore.Model.Zones
 		}
 
 		/// <summary>
+		/// The minions an effect may see: every board minion that is not Untouchable, so not Dormant and not a permanent such as
+		/// Nether Portal, in board order. Use it for every effect that picks, affects or counts board minions (retail: Untouchable
+		/// minions cannot be targeted, including random picks, and per-minion scalers do not count them). Occupancy still reads the
+		/// raw zone (Count, IsFull, FreeSpace, SlotCount): an Untouchable minion takes a board slot. A card text that names Dormant
+		/// itself, or a card's own body, may check the minion directly and says why with an "untouchable-ok:" comment.
+		/// </summary>
+		public Minion[] Interactable => GetAll();
+
+		/// <summary>True when an Interactable minion (see <see cref="Interactable"/>) satisfies the predicate (any one when null). Loops the zone without allocating, for condition and cost auras.</summary>
+		public bool AnyInteractable(Func<Minion, bool> predicate = null)
+		{
+			for (int i = 0; i < _count; i++)
+			{
+				var m = _entities[i];
+				if (!m.Untouchable && (predicate == null || predicate(m))) return true;
+			}
+			return false;
+		}
+
+		/// <summary>The left-most Interactable minion (see <see cref="Interactable"/>), or null; an Untouchable minion at the edge does not take it. Does not allocate.</summary>
+		public Minion FirstInteractable
+		{
+			get
+			{
+				for (int i = 0; i < _count; i++) if (!_entities[i].Untouchable) return _entities[i];
+				return null;
+			}
+		}
+
+		/// <summary>The right-most Interactable minion (see <see cref="Interactable"/>), or null. Does not allocate.</summary>
+		public Minion LastInteractable
+		{
+			get
+			{
+				for (int i = _count - 1; i >= 0; i--) if (!_entities[i].Untouchable) return _entities[i];
+				return null;
+			}
+		}
+
+		/// <summary>Counts the Interactable minions that satisfy the predicate (all when null), without allocating.</summary>
+		public int CountInteractable(Func<Minion, bool> predicate = null)
+		{
+			int n = 0;
+			for (int i = 0; i < _count; i++)
+			{
+				var m = _entities[i];
+				if (!m.Untouchable && (predicate == null || predicate(m))) n++;
+			}
+			return n;
+		}
+
+		/// <summary>
 		/// Gets all board minions except untouchables(dormant).
 		/// </summary>
 		/// <returns></returns>

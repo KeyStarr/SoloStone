@@ -13,6 +13,8 @@ using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
+using SabberStoneCore.Tasks;
+using SabberStoneCore.Tasks.SimpleTasks;
 using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 
 // Independent review of the match event log (2026-11-06): the log must never state a false fact. Each test below
@@ -21,12 +23,26 @@ internal static partial class Program
 {
     private static void MatchEventLogReview()
     {
-        int failed = 0;
+        int failed = 0, cases = 0;
         void Case(string name, Action body)
         {
+            cases++;
             try { body(); Console.WriteLine("PASS event-log review: " + name); }
             catch (Exception error) { failed++; Console.WriteLine("FAIL event-log review: " + name + "\n  " + error.Message.Replace("\n", "\n  ") + (error is InvalidOperationException && error.Message.StartsWith("TEST:") ? "" : "\n  at " + (error.StackTrace ?? "").Split('\n').FirstOrDefault(l => l.Contains("MatchEventLogReviewTests"))?.Trim())); }
         }
+        Case("health labels: real damage and heal stay DAMAGE and HEAL", HealthLabelsRealDamageAndHeal);
+        Case("health labels: Hunter's Mark is HEALTH_SET", HealthLabelsHuntersMarkIsHealthSet);
+        Case("health labels: Garona halving is not damage", HealthLabelsHalvingIsHealthSet);
+        Case("health labels: a DAMAGE write without a hit is HEALTH_SET", HealthLabelsDamageWriteWithoutHitIsHealthSet);
+        Case("health labels: combat on both sides", HealthLabelsCombatBothSides);
+        Case("health labels: AoE on armored hero and Divine Shield", HealthLabelsAoeArmorAndDivineShield);
+        Case("health labels: Fireball through armor", HealthLabelsFireballThroughArmor);
+        Case("health labels: fatigue twice", HealthLabelsFatigueTwice);
+        Case("health labels: Lifesteal", HealthLabelsLifesteal);
+        Case("health labels: weapon swing is DURABILITY", HealthLabelsWeaponSwingIsDurability);
+        Case("health labels: location use is DURABILITY", HealthLabelsLocationUseIsDurability);
+        Case("health labels: Health cost is HEALTH_COST", HealthLabelsHealthCostIsHealthCost);
+        Case("health labels: Reborn is REBORN", HealthLabelsRebornIsReborn);
         Case("F1 bounce + replay clears damage (no phantom HEAL)", BounceReplayDamage);
         Case("F1 polymorph resets tracked stats", PolymorphThenPing);
         Case("F1 cross-type hand transform updates the card type", CrossTypeTransform);
@@ -47,7 +63,7 @@ internal static partial class Program
         Case("sweep: no tracker drift or fault over real NPC play", NoDriftOverRealPlay);
         Case("sweep: fault mid-batch leaves no stale frames", FaultMidBatchNoStaleFrames);
         if (failed != 0) throw new InvalidOperationException("TEST: " + failed + " event-log review case(s) failed");
-        Console.WriteLine("PASS match event log review: " + 19 + " cases");
+        Console.WriteLine("PASS match event log review: " + cases + " cases");
     }
 
     private static (NativeMatch Match, Capture Capture, List<string> Lines) LoggedBoard(int seed = 1337)
@@ -65,7 +81,9 @@ internal static partial class Program
     private static void PlayAndFlush(NativeMatch match, Controller player, IPlayable card, IPlayable target = null)
     {
         player.UsedMana = 0;
-        Check(match.Game.Process(target == null ? PlayCardTask.Any(player, card) : PlayCardTask.Any(player, card, (ICharacter)target)), "play " + card.Card.Id);
+        Check(match.Game.Process(target == null
+            ? player.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == card.Id)
+            : PlayCardTask.Any(player, card, (ICharacter)target)), "play " + card.Card.Id);
         FlushHistory(match);
     }
 
@@ -184,19 +202,24 @@ internal static partial class Program
     {
         var (match, _, lines) = LoggedBoard();
         var game = match.Game; var player = game.Player1;
-        var lone = EngineEntity.FromCard(player, Cards.FromId("MEND_046t"), zone: player.HandZone);
-        var carved = PayloadRules.StoreCard(lone, 1, Cards.FromId("CS2_009")); lone[GameTag.TAG_SCRIPT_DATA_NUM_1] = carved.Id;
+        EngineEntity.FromCard(player, Cards.FromId("CS2_182"), zone: player.BoardZone);
+        void CastRandomMark()
+        {
+            var spell = EngineEntity.FromCard(player, Cards.FromId("CS2_009"));
+            new PlayTask(PlayType.SPELL, true).Process(game, player, player.Hero, null,
+                new TaskStack { Playables = new[] { spell } });
+            FlushHistory(match);
+        }
         FlushHistory(match); lines.Clear();
-        PlayAndFlush(match, player, lone);
+        CastRandomMark();
         var single = Kind(lines, "CAST").Single(l => l.Contains("card=CS2_009#"));
         Check(single.Contains("legal=1") && single.Contains("random=no"), "one legal target is not random: " + single);
         var taunt = EngineEntity.FromCard(game.Player2, Cards.FromId("CS2_179"), zone: game.Player2.BoardZone);
-        var two = EngineEntity.FromCard(player, Cards.FromId("MEND_046t"), zone: player.HandZone);
-        var carved2 = PayloadRules.StoreCard(two, 1, Cards.FromId("CS2_009")); two[GameTag.TAG_SCRIPT_DATA_NUM_1] = carved2.Id;
+        EngineEntity.FromCard(player, Cards.FromId("CS2_182"), zone: player.BoardZone);
         FlushHistory(match); lines.Clear();
-        PlayAndFlush(match, player, two);
+        CastRandomMark();
         var many = Kind(lines, "CAST").Single(l => l.Contains("card=CS2_009#"));
-        Check(many.Contains("legal=3") && many.Contains("random=yes"), "three legal targets (two Treants + Taunt): " + many);
+        Check(many.Contains("legal=3") && many.Contains("random=yes"), "three legal targets (two Yetis + Taunt): " + many);
     }
 
     private static void AutomaticChooseOneMode()
@@ -341,7 +364,13 @@ internal static partial class Program
         var bashana = Generic.DrawCard(player, Cards.FromId("MEND_046"));
         Check(game.Process(PlayCardTask.Any(player, bashana)), "Bashana");
         FlushHistory(match);
-        foreach (var treant in player.HandZone.Where(c => c.Card.Id == "MEND_046t").ToArray()) { player.UsedMana = 0; game.Process(PlayCardTask.Any(player, treant)); FlushHistory(match); }
+        foreach (var treant in player.HandZone.Where(c => c.Card.Id == "MEND_046t").ToArray())
+        {
+            player.UsedMana = 0;
+            var play = player.Options().FirstOrDefault(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == treant.Id);
+            if (play != null) Check(game.Process(play), "play available carved Treant");
+            FlushHistory(match);
+        }
         return MatchRecorder.RandomState(game) + "|" + MatchRecorder.Fingerprint(game) + "|" + game.IdEntityDic.Count + "|"
             + MatchRecorder.Hash(game.PowerHistory.Print());
     }

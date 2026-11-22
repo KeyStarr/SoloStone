@@ -67,7 +67,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             // Silence your minions (waking the Golems: no more "Can't attack", no Deathrattle).
             register(46339, "LOOTA_BOSS_20h", DungeonRunCards.Plain);
             register(46208, "LOOTA_BOSS_20p", card => {
-                card.PlayAvailabilityPredicate = (c, _) => !c.BoardZone.IsEmpty;
+                card.PlayAvailabilityPredicate = (c, _) => c.BoardZone.AnyInteractable();
                 Untargeted(card, new SilenceTask(EntityType.MINIONS));
             });
             // Stone Golem: 15/5, Can't attack (facts tags). Deathrattle: Lose a Mana Crystal.

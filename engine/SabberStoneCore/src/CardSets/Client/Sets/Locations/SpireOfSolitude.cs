@@ -21,8 +21,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 Target = LocationTargetKind.None, RequiresFreeSlot = true,
                 Task = new CustomTask((g, c, s, t, stack) => {
                     if (c.BoardZone.IsFull) return;
-                    var location = (BoardObject)s;
-                    int position = location.Zone == c.BoardZone ? location.ZonePosition + 1 : location.LastBoardPosition;
+                    int alternate = 0;
+                    int position = SummonTask.GetPosition(s, SummonSide.LEFT, 0, ref alternate);
                     int size = c.HandZone.Count;
                     var demon = (Minion)Entity.FromCard(c, Cards.FromId("JAIL_511t"),
                         new EntityData { [GameTag.DISPLAYED_CREATOR] = s.Id });
@@ -31,7 +31,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     Generic.SummonBlock(g, demon, Math.Clamp(position, 0, c.BoardZone.SlotCount), s);
                     if (demon.Health <= 0) demon.ToBeDestroyed = true;
                     g.DeathProcessingAndAuraUpdate();
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.Untouchable && !m.IsDead).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.Untouchable && !m.IsDead).ToArray();
                     if (demon.Zone == c.BoardZone && !demon.IsDead && enemies.Length != 0 && g.State != State.COMPLETE)
                     {
                         var selected = enemies[g.Random.Next(enemies.Length)];

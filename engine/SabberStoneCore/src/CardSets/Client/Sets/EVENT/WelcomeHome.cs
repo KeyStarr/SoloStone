@@ -39,7 +39,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var picked = OfflineCardPools.Pick(g, Pool(), c.HeroClass, 123416, PoolDestination.Summon);
                 if (picked == null) return;
                 var dead = (s as Model.Entities.Enchantment)?.Target as BoardObject ?? s as BoardObject;
-                int position = dead?.LastBoardPosition ?? c.BoardZone.SlotCount;
+                // Minions that died in the same batch may already have shrunk the board below the location's last slot.
+                int position = System.Math.Min(dead?.LastBoardPosition ?? c.BoardZone.SlotCount, c.BoardZone.SlotCount);
                 var minion = (Minion)Entity.FromCard(c, picked, new EntityData {
                     [GameTag.CREATOR] = s.Id, [GameTag.DISPLAYED_CREATOR] = s.Id, [GameTag.PREMIUM] = (t as Model.Entities.Enchantment)?[GameTag.PREMIUM] ?? s[GameTag.PREMIUM] });
                 Generic.SummonBlock(g,minion,position,s);

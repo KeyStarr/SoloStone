@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.AFTER_PLAY_MINION) {
                 TriggerSource = TriggerSource.FRIENDLY,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
-                    if (!(s is Minion source) || source.Zone != c.BoardZone || source.IsSilenced || source.IsDormant
+                    if (!(s is Minion source) || source.Zone != c.BoardZone || source.IsSilenced || source.Untouchable
                         || !(t is Minion minion) || minion.Id == source.Id || minion.Controller != c
                         || minion.Zone != c.BoardZone || minion.ToBeDestroyed || minion.Health <= 0) return;
                     Generic.AddEnchantmentBlock(g, Cards.FromId("JAIL_850e2"), source, minion);

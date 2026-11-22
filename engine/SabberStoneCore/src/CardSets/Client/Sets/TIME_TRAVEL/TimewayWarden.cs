@@ -18,6 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power {
                 PowerTask = new CustomTask((g, c, s, t, stack) => {
+                    // untouchable-ok: Eternal Imprisonment (TIME_442e) is a Dormant enchant the card applies and reads back; Dormant is the card's own state
                     if (!(t is Minion prisoner) || prisoner.Controller == c || prisoner.IsDormant) return;
                     if (!DormantRules.Make(prisoner, 10000, "TIME_442e", s)) return;
                     var link = PayloadRules.StoreCard(s, 1, prisoner.Card);
@@ -27,6 +28,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
                     foreach (var link in PayloadRules.Entries(s, 1))
                         if (g.IdEntityDic.TryGetValue(link[PayloadRules.Link], out var entity) && entity is Minion prisoner
+                            // untouchable-ok: Eternal Imprisonment (TIME_442e) is a Dormant enchant the card applies and reads back; Dormant is the card's own state
                             && prisoner.IsDormant && DormantRules.SleepGeneration(prisoner) == link[PayloadRules.Generation])
                             DormantRules.Awaken(prisoner);
                 })

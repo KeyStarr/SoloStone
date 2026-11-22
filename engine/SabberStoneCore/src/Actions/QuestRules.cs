@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using SabberStoneCore.Enums;
 using SabberStoneCore.EffectSystem;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks;
@@ -11,6 +12,8 @@ namespace SabberStoneCore.Actions
 {
     public static class QuestRules
     {
+        public const GameTag QuestlineTag = (GameTag)1725;
+
         private static readonly Dictionary<int, Func<IPlayable, DamageResolvedFact, ISimpleTask>> DamageListeners =
             new Dictionary<int, Func<IPlayable, DamageResolvedFact, ISimpleTask>>();
 
@@ -229,6 +232,30 @@ namespace SabberStoneCore.Actions
             return true;
         }
 
+        // Retail sends a quest's progress as a TRIGGER block at effectIndex 1 and its completion as a sibling TRIGGER
+        // block at effectIndex 0 with the QUEST or QUESTLINE trigger keyword; the client builds the
+        // quest-complete animation and the history tile from that second block (opposing_maestra, friendly_maestra and
+        // transformed_on_board, builds 88998 and 39954).
+        private static bool IsProgressBlock(PowerHistoryBlockStart block, Spell spell) =>
+            block?.BlockType == BlockType.TRIGGER && block.Source == spell.Id && !block.TriggerKeyword.HasValue;
+
+        internal static void MarkProgressBlock(Spell spell)
+        {
+            if (!spell.Game.History || spell.Zone != spell.Controller.SecretZone) return;
+            var block = spell.Game.PowerHistory.CurrentBlock;
+            if (IsProgressBlock(block, spell)) block.EffectIndex = 1;
+        }
+
+        internal static void BeginCompletionBlock(Spell spell)
+        {
+            if (!spell.Game.History) return;
+            var block = spell.Game.PowerHistory.CurrentBlock;
+            if (!IsProgressBlock(block, spell)) return;
+            spell.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+            spell.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, spell.Id, "", -1, 0, effectIndex: 0,
+                triggerKeyword: spell.Card[QuestlineTag] != 0 ? (int)QuestlineTag : (int)GameTag.QUEST));
+        }
+
         public static bool Advance(Spell spell, int amount = 1)
         {
             var state = spell?.QuestState;
@@ -240,26 +267,35 @@ namespace SabberStoneCore.Actions
             int before = spell.QuestProgress;
             int total = spell.QuestTotalProgress;
             if (before >= total) return false;
-            spell.QuestProgress = (int)Math.Min(total, (long)before + amount);
-            if (spell.QuestProgress < total) return true;
+            var block = spell.Game.PowerHistory?.CurrentBlock;
+            bool ownBlock = spell.Game.History && !IsProgressBlock(block, spell);
+            if (ownBlock) spell.Game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, spell.Id, "", -1, 0, effectIndex: 1));
+            try
+            {
+                spell.QuestProgress = (int)Math.Min(total, (long)before + amount);
+                if (spell.QuestProgress < total) { MarkProgressBlock(spell); return true; }
 
-            state.Completing = true;
-            state.RewardedGeneration = state.CompletionGeneration;
-            if (!definition.Repeatable) spell.ActivatedTrigger?.Remove();
-            GrantReward(spell, definition);
-            if (definition.Repeatable)
-            {
-                spell.QuestProgress = 0;
-                state.CompletionGeneration++;
-                state.Completing = false;
+                MarkProgressBlock(spell);
+                BeginCompletionBlock(spell);
+                state.Completing = true;
+                state.RewardedGeneration = state.CompletionGeneration;
+                if (!definition.Repeatable) spell.ActivatedTrigger?.Remove();
+                GrantReward(spell, definition);
+                if (definition.Repeatable)
+                {
+                    spell.QuestProgress = 0;
+                    state.CompletionGeneration++;
+                    state.Completing = false;
+                }
+                else
+                {
+                    spell[GameTag.REVEALED] = 1;
+                    spell.Controller.SecretZone.Remove(spell);
+                    spell.Controller.GraveyardZone.Add(spell);
+                }
+                return true;
             }
-            else
-            {
-                spell[GameTag.REVEALED] = 1;
-                spell.Controller.SecretZone.Remove(spell);
-                spell.Controller.GraveyardZone.Add(spell);
-            }
-            return true;
+            finally { if (ownBlock) spell.Game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd()); }
         }
 
         internal static void SettleHandCountChanges(Controller controller)

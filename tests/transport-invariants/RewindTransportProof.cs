@@ -133,8 +133,8 @@ internal static class RewindTransportProof
         session.Client.ResetApplied = model => {
             foreach (int id in new[] { rejected.Id, held.Id })
                 foreach (int tag in new[] { 2505, 2600 })
-                    Check(model.Entities[id].Get((GameTag)tag) == 0,
-                        $"definition-only fire absent on entity {id} tag {tag} for owner {owner}");
+                    Check(model.Entities[id].Get((GameTag)tag) == (id == held.Id && owner == 1 ? tag == 2505 ? 1 : 3 : 0),
+                        $"only visible held Smoldering has countdown fire: entity {id} tag {tag} owner {owner}");
             Check(model.Entities[active.Id].Get((GameTag)2505) == 1 && model.Entities[active.Id].Get((GameTag)2600) == 2
                 && model.Entities[inactive.Id].Get((GameTag)2505) == 0 && model.Entities[inactive.Id].Get((GameTag)2600) == 0,
                 "real instance loop state restored, discarded loop cleared");
@@ -147,13 +147,17 @@ internal static class RewindTransportProof
         session.Process(ChooseTask.Pick(player, game.Rewind.RewindEntityId));
         if (owner == 1)
             foreach (int tag in new[] { 2505, 2600 })
-                Check(match.SnapshotVisibleTransportTags(game.IdEntityDic[held.Id]).GetValueOrDefault(tag) == 0,
-                    "endpoint audit must not resurrect cleared definition-only fire");
+                Check(match.SnapshotVisibleTransportTags(game.IdEntityDic[held.Id]).GetValueOrDefault(tag) == (tag == 2505 ? 1 : 3),
+                    "endpoint audit restores the held card's countdown fire");
         var history = session.Packets.Skip(cursor).Where(w => w.Id == 19).SelectMany(w => History(w).List).ToArray();
         foreach (int id in new[] { rejected.Id, held.Id })
         {
             var snapshot = history.Single(e => e.HasFullEntity && e.FullEntity.Entity == id).FullEntity;
-            Check(!snapshot.Tags.Any(t => t.Name is 2505 or 2600), "reset wire never starts definition-only fire");
+            if (id == held.Id && owner == 1)
+                Check(snapshot.Tags.Single(t => t.Name == 2505).Value == 1 && snapshot.Tags.Single(t => t.Name == 2600).Value == 3,
+                    "reset wire restores visible hand countdown fire");
+            else
+                Check(!snapshot.Tags.Any(t => t.Name is 2505 or 2600), "reset wire never starts fire on offers or hidden hands");
             Check(!history.Any(e => e.HasTagChange && e.TagChange.Entity == id && e.TagChange.Tag is 2505 or 2600
                 && e.TagChange.Value != 0), "no follow-up tag change starts definition-only fire");
         }

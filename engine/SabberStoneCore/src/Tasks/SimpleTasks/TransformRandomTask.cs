@@ -34,11 +34,16 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			in TaskStack stack = null)
 		{
 			//System.Collections.Generic.IEnumerable<Card> cards = game.FormatType == FormatType.FT_STANDARD ? Cards.AllStandard : Cards.AllWild;
+			var pool = Cards.RandomPool(game, PoolDestination.Transform, source);
 			foreach (IPlayable p in IncludeTask.GetEntities(Type, in controller, source, target, stack?.Playables))
-				if (Cards.CostMinionCards(game.FormatType)
-						.TryGetValue(p.Card.Cost + CostChange, out List<Card> minions))
+				if (pool.TryMinionsOfCost(p.Card.Cost + CostChange, out List<Card> bucket))
+				{
+					// The pool never rolls the effect's own source (modern rule); legacy keeps the frozen bucket.
+					var minions = pool.WithoutSource(bucket, source);
+					if (minions.Count == 0) continue;
 					//Generic.TransformBlock.Invoke(p.Controller, minions.RandomElement(game.Random), p as Minion);
 					Generic.ChangeEntityBlock(controller, p, minions.RandomElement(game.Random), true);
+				}
 
 			game.OnRandomHappened(true);
 

@@ -693,6 +693,8 @@ internal static class NativeShop
         new[] { "Method", "HearthstoneTelemetry.TelemetryClient", "SendFlowPerformance", "*", "SkipIsolated", "" },
         new[] { "Method", "HearthstoneTelemetry.TelemetryClient", "SendFlowPerformanceShop", "*", "SkipIsolated", "" },
         new[] { "Method", "HearthstoneTelemetry.TelemetryClient", "SendCosmeticsRenderingFallback", "*", "SkipIsolated", "" },
+        // #220: the client's own deck Copy reports itself; offline it goes nowhere.
+        new[] { "Method", "HearthstoneTelemetry.TelemetryClient", "SendDeckCopied", "*", "SkipIsolated", "" },
         new[] { "Method", "Hearthstone.Attribution.BlizzardAttributionManager", "SendEvent_FirstShopVisit", "*", "SkipIsolated", "" },
         new[] { "Method", "Hearthstone.Attribution.BlizzardAttributionManager", "SendEvent_Purchase", "*", "SkipIsolated", "" },
         new[] { "Method", "Hearthstone.Attribution.BlizzardAttributionManager", "SendEvent_VirtualCurrencyTransaction", "*", "SkipIsolated", "" },

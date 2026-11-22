@@ -24,6 +24,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 TriggerSource = TriggerSource.FRIENDLY,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     if (!(s is Enchantment helper) || !(helper.Target is Minion parent) || parent.Controller != c
+                        // untouchable-ok: Ancient Slumber (EDR_979e) is a Dormant enchant the card applies; the parent must still be asleep
                         || g.CurrentPlayer != c || parent.Zone != c.BoardZone || !parent.IsDormant || parent.IsSilenced
                         || !parent.AppliedEnchantments.Contains(helper) || helper[GameTag.ATTACHED] != parent.Id) return;
                     c.Hero.GainArmor(parent, 3);

@@ -38,6 +38,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				return TaskState.STOP;
 
 			spell.QuestProgress++;
+			QuestRules.MarkProgressBlock(spell);
 			game.Log(LogLevel.INFO, BlockType.PLAY, "QuestProgressTask",
 				!game.Logging
 					? ""
@@ -45,6 +46,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 			if (spell.QuestProgress == spell.QuestTotalProgress)
 			{
+				QuestRules.BeginCompletionBlock(spell);
                 QuestRules.GrantCardReward(controller, _card.Id, spell.Id);
 				spell[GameTag.REVEALED] = 1;
 

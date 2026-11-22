@@ -1,3 +1,4 @@
+using System.Linq;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
@@ -12,7 +13,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
     {
         private static ISimpleTask Payload() => new CustomTask((g, c, s, t, stack) => {
             var source = (IPlayable)s;
-            var enemies = IncludeTask.GetEntities(EntityType.ENEMIES, c, s, t, stack?.Playables);
+            // A random damage effect never picks a character that is already mortally wounded or pending destruction.
+            var enemies = IncludeTask.GetEntities(EntityType.ENEMIES, c, s, t, stack?.Playables)
+                .Where(e => !(e is ICharacter wounded && wounded.IsDead)).ToList();
             if (enemies.Count != 0)
                 Generic.DamageCharFunc(source, (ICharacter)enemies[g.Random.Next(enemies.Count)], SpellDamageRules.Amount(source, 2), false);
             g.DeathProcessingAndAuraUpdate();

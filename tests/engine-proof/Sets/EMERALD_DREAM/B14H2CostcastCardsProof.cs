@@ -205,7 +205,7 @@ internal static class B14H2CostcastCardsProof
         Resume(g,next=> {
             var owner=next.Player1;var action=owner.Options().Single(t=>t.PlayerTaskType==PlayerTaskType.ACTIVATE_LOCATION && t.Source?.Id==location.Id);
             Check(next.Process(action),"Shrine activation");
-            Check(owner.BoardZone.GetSlot(2).Card.Id=="CATA_725t" && owner.BoardZone.Slots.Last().Id==right.Id && owner.DeckZone.Count==deck-1,"Herald immediately right, then draw one");
+            Check(owner.BoardZone.GetSlot(2).Card.Id=="CATA_725t" && owner.BoardZone.GetSlot(1).Id==location.Id && owner.BoardZone.Slots.Last().Id==right.Id && owner.DeckZone.Count==deck-1,"Herald immediately right of location, then draw one");
         });
     }
 }

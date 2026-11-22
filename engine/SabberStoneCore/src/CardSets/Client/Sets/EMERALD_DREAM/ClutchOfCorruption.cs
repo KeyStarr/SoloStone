@@ -24,7 +24,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     var copied = PayloadRules.Store(egg, 1, t, PayloadPolicy.Copy | PayloadPolicy.Silence | PayloadPolicy.ShowAll);
                     egg.HasDeathrattle = true;
                     egg[GameTag.TAG_SCRIPT_DATA_NUM_1] = copied.Id;
-                    Generic.SummonBlock(g, egg, s.Zone?.Type == Zone.PLAY ? ((IPlayable)s).ZonePosition + 1 : ((BoardObject)s).LastBoardPosition, s);
+                    int alternate = 0;
+                    Generic.SummonBlock(g, egg, SummonTask.GetPosition(s, SummonSide.LEFT, 0, ref alternate), s);
                 })
             } };
         }

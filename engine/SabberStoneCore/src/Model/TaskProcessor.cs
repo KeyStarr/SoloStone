@@ -44,11 +44,14 @@ namespace SabberStoneCore.Model
             public readonly bool HistoryTrigger;
             public readonly int? TriggerKeyword;
             public readonly int SubOption;
+            // History only: the source's own block that queued this task, which its rows rejoin (PowerHistory.JoinQueuedContinuation).
+            public readonly PowerHistoryBlockStart HistoryParent;
 
 			public TaskInstance(in ISimpleTask task, in Controller controller, in IEntity source, in IPlayable target, ShadowResponse observation,
                 int deathId = 0, bool orderDeathByPlay = false, int? deathOrder = null, Trigger deathTrigger = null, QueuedSpellActivation historyCast = null,
-                bool historyTrigger = false, int? triggerKeyword = null, int subOption = -1)
+                bool historyTrigger = false, int? triggerKeyword = null, int subOption = -1, PowerHistoryBlockStart historyParent = null)
 			{
+                HistoryParent = historyParent;
 				Task = task;
 				Controller = controller;
 				Source = source;
@@ -151,9 +154,10 @@ namespace SabberStoneCore.Model
 			CurrentQueue = _eventStack.Pop();
 		}
 
+		// History only: separateActivation keeps a queued repeat wave separate even when aura rows precede its DEATHS block.
 		public void Enqueue(in ISimpleTask task, in Controller controller, in IEntity source, in IPlayable target,
             int deathId = 0, bool orderDeathByPlay = false, int? deathOrder = null, Trigger deathTrigger = null, QueuedSpellActivation historyCast = null,
-            bool historyTrigger = false, int? triggerKeyword = null, int subOption = -1)
+            bool historyTrigger = false, int? triggerKeyword = null, int subOption = -1, bool separateActivation = false)
 		{
 			//if (_eventFlag)	// flag = true means Event starts and no tasks queue yet
 			//{
@@ -174,9 +178,18 @@ namespace SabberStoneCore.Model
 
 			var capturedTarget = target ?? Actions.PayloadRules.ExecutionCapture(source);
             int repeats = triggerKeyword == (int)GameTag.DEATHRATTLE ? Actions.DeathrattleRules.Repeats(controller,source) : 1;
+            // A task queued by its source's own running effect rejoins that block (PowerHistory.JoinQueuedContinuation): any
+            // same-source enqueue while its POWER or TRIGGER block is open (EnqueueTask, EnqueueNumberTask, ActivatePowerTask, a
+            // captured Deathrattle, Overkill). Never a PLAY block, whose own lists' card zone changes the client ignores (R7), nor
+            // an ATTACK block. A cast-again recast (HistoryCastKind.Repeat) or separateActivation keeps its own activation block.
+            PowerHistoryBlockStart historyParent = null;
+            if (_game.History && !separateActivation && historyCast?.Kind != HistoryCastKind.Repeat && !historyTrigger && !triggerKeyword.HasValue && !task.IsTrigger
+                && _game.PowerHistory.CurrentBlock is PowerHistoryBlockStart open
+                && (open.BlockType == BlockType.POWER || open.BlockType == BlockType.TRIGGER) && open.Source == source?.Id)
+                historyParent = open;
             for (int i = 0; i < repeats; i++)
                 queue.Enqueue(new TaskInstance(task, controller, source, capturedTarget, _game.Resolution.Queued(task), deathId, orderDeathByPlay, deathOrder, deathTrigger, historyCast,
-                    historyTrigger, triggerKeyword, subOption));
+                    historyTrigger, triggerKeyword, subOption, historyParent));
 		}
 
 		public void EnqueueBase(in ISimpleTask task, in Controller controller, in IEntity source, in IPlayable target)
@@ -283,6 +296,7 @@ namespace SabberStoneCore.Model
             bool spellBody = _game.History && !CurrentQueue.Peek().HistoryTrigger
                 && Actions.Generic.IsTrackedSpellBody(_game, source) && !_game.PowerHistory.HasPowerAncestor(source.Id);
             bool historyTrigger = CurrentQueue.Peek().HistoryTrigger;
+            var historyParent = CurrentQueue.Peek().HistoryParent;
             PowerHistoryBlockStart historyStart = null;
             bool parentHadEffects = false;
 			if (_game.History)
@@ -301,12 +315,14 @@ namespace SabberStoneCore.Model
 #endif
                 // A granted Deathrattle runs as the recipient's own block with the enchantment as target; presentation recipes need it.
                 if (_game.History) _game.PowerHistory.GrantedDeathrattle = CurrentQueue.Peek().TriggerKeyword == (int)GameTag.DEATHRATTLE ? target as Enchantment : null;
+                bool previousFromDeath = _game.History && _game.PowerHistory.DeathrattleFromDeath;
+                if (_game.History) _game.PowerHistory.DeathrattleFromDeath = CurrentQueue.Peek().TriggerKeyword == (int)GameTag.DEATHRATTLE && CurrentQueue.Peek().DeathId > 0;
                 try
                 {
 				using (_game.History ? _game.PowerHistory.Visual(_game, Presentation.VisualPhase.BoardBuff) : null)
                     success = task.Process(in _game, in controller, in source, in target);
                 }
-                finally { if (_game.History) _game.PowerHistory.GrantedDeathrattle = null; }
+                finally { if (_game.History) { _game.PowerHistory.GrantedDeathrattle = null; _game.PowerHistory.DeathrattleFromDeath = previousFromDeath; } }
 #if DEBUG
 			}
 			catch (Exception e)
@@ -320,7 +336,11 @@ namespace SabberStoneCore.Model
             // A human choice suspends this activation's history, not the invocation-local task queue.
             if (_game.History && !(spellBody && Actions.Generic.SpellBodyPending(_game))
                 && !DiscardUnfiredSecret(historyTrigger, source, historyStart, parentHadEffects))
+            {
                 _game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+                if (historyParent != null)
+                    _game.PowerHistory.JoinQueuedContinuation(historyStart, historyParent);
+            }
 
 			// reset between task execution
 			//_game.TaskStack.Reset();

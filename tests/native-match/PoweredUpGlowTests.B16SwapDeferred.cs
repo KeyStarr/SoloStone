@@ -148,9 +148,12 @@ internal static partial class PoweredUpGlowTests
         var refill = p.BoardZone.Single(c => !oldIds.Contains(c.Id));
         Check(refill.Card.Id == "CATA_550t" && p.BoardZone.Count == 7,
             "native checkpoint refills one exported Body");
-        Check(f.Entries.Any(r => r.HasShowEntity && r.ShowEntity.Entity == refill.Id && r.ShowEntity.Name == "CATA_550t"
-            && r.ShowEntity.Tags.Any(t => t.Name == (int)GameTag.CONTROLLER && t.Value == p.PlayerId)
-            && r.ShowEntity.Tags.Any(t => t.Name == (int)GameTag.DISPLAYED_CREATOR && t.Value == body.Id)),
+        // Created straight into PLAY: one FULL_ENTITY carries the refill's state, with no SHOW_ENTITY (retail mirror_entity.log:1461-1478).
+        Check(!f.Entries.Any(r => r.HasShowEntity && r.ShowEntity.Entity == refill.Id), "refill created in PLAY gets no SHOW_ENTITY");
+        Check(f.Entries.Any(r => r.HasFullEntity && r.FullEntity.Entity == refill.Id && r.FullEntity.Name == "CATA_550t"
+            && r.FullEntity.Tags.Any(t => t.Name == (int)GameTag.ZONE && t.Value == (int)SabberStoneCore.Enums.Zone.PLAY)
+            && r.FullEntity.Tags.Any(t => t.Name == (int)GameTag.CONTROLLER && t.Value == p.PlayerId)
+            && r.FullEntity.Tags.Any(t => t.Name == (int)GameTag.DISPLAYED_CREATOR && t.Value == body.Id)),
             "refill wire actor has exact identity, controller and Colossal creator");
         Check(f.Entries.Any(r => r.HasTagChange && r.TagChange.Entity == body.Id
             && r.TagChange.Tag == (int)GameTag.TAG_SCRIPT_DATA_NUM_1 && r.TagChange.Value == 92),

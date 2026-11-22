@@ -925,14 +925,14 @@ internal static class NpcTurnRunnerTests
         string run = "4d93167d-fc51-4ba0-a79f-64e524ce5a27";
         try
         {
-            var deck = OfflineGuard.ResolveLaunch(@"STEAMDECK\steamuser", "STEAMDECK",
+            var deck = OfflineGuard.ResolveHeldLaunch(@"STEAMDECK\steamuser", "STEAMDECK",
                 @"C:\hs-native-ui-"+@"prototype\client\Hearthstone.exe", @"C:\users\steamuser\AppData\Local",
                 new[] { "-hs-native-ui-run", run, "-hs-native-ui-host", "deck" }, false, true);
             GoldenPilot.ConfigureLethalHost(deck.Deck);
             Check(GoldenPilot.ParallelLethalEnabled, "validated Deck did not enable parallel lethal");
             foreach (int lane in new[] { 0, 1, 2, 3 })
             {
-                var windows = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB",
+                var windows = OfflineGuard.ResolveHeldLaunch(@"LAB\HSNativeUIProbe", "LAB",
                     OfflineGuard.LaneRoot(lane) + @"\client\Hearthstone.exe", LabTestPaths.LocalData,
                     new[] { "-hs-native-ui-run", run, "-hs-native-ui-lane", lane.ToString() }, false);
                 GoldenPilot.ConfigureLethalHost(windows.Deck);

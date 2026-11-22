@@ -82,7 +82,8 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			{
 				IReadOnlyList<Card> randCards =
 					RandomCardTask.GetCardList(source, _cardType, _cardClass, race: _race, rarity: _rarity);
-				if ((_cardClass == CardClass.DEMONHUNTER || _cardClass == CardClass.DEATHKNIGHT) && randCards.Count == 0)
+				if (randCards.Count == 0 && ((!game.LegacyPoolReplay && !game.UnversionedRandomPoolReplay)
+					|| _cardClass == CardClass.DEMONHUNTER || _cardClass == CardClass.DEATHKNIGHT))
 					return TaskState.STOP;
 				foreach (IPlayable p in IncludeTask.GetEntities(_type, in controller, source, target, stack?.Playables))
 				{

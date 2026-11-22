@@ -203,6 +203,7 @@ public static class BotDriver
             state = options?.FairViewFactory == null ? FairBotState.Create(game, botId, seed, style)
                 : options.FairViewFactory(game, botId, seed, style);
             var decision = search(state);
+            state.ReportAllDiscarded();
             var task = decision.Action.Resolve(tasks);
             return (ForGame(task), new DriverTrace("search", decision));
         }

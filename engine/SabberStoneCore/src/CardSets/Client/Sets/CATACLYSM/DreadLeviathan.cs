@@ -1,4 +1,4 @@
-using System;
+using SabberStoneCore.Actions;
 using SabberStoneCore.EffectSystem;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
@@ -22,10 +22,14 @@ namespace SabberStoneCore.CardSets.Client.Sets
             var steal = EffectContext.Task(ctx => {
                 if (ctx.LastChosenEntityId == 0) return TaskState.COMPLETE;
                 return ctx.RunLegacy(new CustomTask((g, c, s, t, stack) => {
-                    int amount = Math.Min(3, ((Minion)t).Health);
-                    ctx.GiveBuff(t.Id, "CATA_699e", amount);
-                    ctx.GiveBuff(s.Id, "CATA_699e2", amount);
-                    if (((Minion)t).Health <= 0) t.ToBeDestroyed = true;
+                    // A steal of 3, capped at the victim's current Health; the victim keeps its damage, so a damaged minion can die.
+                    int amount = HealthLossRules.StealAmount((Minion)t, 3);
+                    if (amount > 0)
+                    {
+                        ctx.GiveBuff(t.Id, "CATA_699e", amount);
+                        ctx.GiveBuff(s.Id, "CATA_699e2", amount);
+                    }
+                    HealthLossRules.MarkIfDepleted((Minion)t);
                     g.DeathProcessingAndAuraUpdate();
                 }), ctx.LastChosenEntityId);
             });

@@ -604,6 +604,7 @@ namespace SabberStoneCore.Enums
 		NUM_SPELLS_PLAYED_THIS_TURN = 430, // more or less guessed gametags: need to implement it ^^
 		SPELLS_COST_HEALTH = 431,
 		HISTORY_PROXY_NO_BIG_CARD = 432,
+		IGNORE_TAUNT = 433,
 		PROXY_CTHUN = 434,
 		TRANSFORMED_FROM_CARD = 435,
 		CTHUN = 436,

@@ -79,6 +79,9 @@ internal static class ClassHeroesProof
         var game = new Game(new GameConfig {
             RandomSeed = seed, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
             Logging = false, History = true, FormatType = format,
+            // These checks pin the frozen legacy pools (DH/DK shapes) that records written before the match random
+            // pool policy still replay. Games on the match pool are proved by MatchRandomPoolProof/MatchRandomSamplerProof.
+            UnversionedRandomPoolReplay = true,
             Player1HeroClass = heroClass, Player1HeroCard = explicitHero ? Cards.HeroCard(heroClass) : null,
             Player1Deck = Enumerable.Repeat(Cards.FromId(deckCard), 30).ToList(),
             Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_179"), 30).ToList()
@@ -335,7 +338,7 @@ internal static class ClassHeroesProof
         {
             var fill = new Game(new GameConfig { RandomSeed = 41, StartPlayer = 1, SkipMulligan = true,
                 Logging = false, Player1HeroClass = CardClass.DEATHKNIGHT, Player2HeroClass = CardClass.DEATHKNIGHT,
-                FormatType = format, FillDecks = true });
+                FormatType = format, FillDecks = true, UnversionedRandomPoolReplay = true });
             fill.StartGame();
             Check(fill.Player1.DeckCards.Count == 30 && fill.Player2.DeckCards.Count == 30
                 && fill.Player1.DeckCards.Concat(fill.Player2.DeckCards).All(c => CardClassRules.IsAllowedInDeck(c, CardClass.DEATHKNIGHT)),

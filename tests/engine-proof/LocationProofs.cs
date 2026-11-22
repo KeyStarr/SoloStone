@@ -38,10 +38,13 @@ internal static class LocationProofs
         Check(Enum.GetName(typeof(CardType), 39) == "LOCATION", "LOCATION type 39");
         Console.WriteLine("PASS location types");
         LocationReviewProof.Run();
+        LocationSummonPositionProof.Run();
         LocationBoardProof.Run();
         LocationCardSetProof.Run();
         LocationTransformProof.Run();
         LocationActivationProof.Run();
+        LocationCooldownProof.Run();
+        ReturnToHandResetProof.Run();
         LocationDeathProof.Run();
         LocationSnapshotProof.Run();
         SanguineDepthsProof.Run();

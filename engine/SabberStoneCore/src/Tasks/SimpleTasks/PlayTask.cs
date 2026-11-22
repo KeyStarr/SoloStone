@@ -73,8 +73,13 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 						if (!ImbueRules.CanAutoCast(spell)) continue;
 
                         int mode = game.SpellCompletion?.SourceId == spell.Id ? game.SpellCompletion.ChooseOne : 0;
-                        if (_randTarget && spell.ChooseOne && !Generic.UsesChooseBoth(spell, c))
+                        bool randomMode = (_randTarget || _targetType == EntityType.TARGET)
+                            && spell.ChooseOne && !Generic.UsesChooseBoth(spell, c);
+                        if (randomMode)
+                        {
                             mode = game.Random.Next(1, spell.ChooseOnePlayables.Length + 1);
+                            if (!_randTarget) game.OnRandomHappened(true);
+                        }
                         ICharacter cardTarget = null;
                         int noteLegal = -1;
                         if (_randTarget)
@@ -87,6 +92,12 @@ namespace SabberStoneCore.Tasks.SimpleTasks
                             { cardTarget = preferred; noteLegal = 1; }
                             else if (legal.Length > 0)
                                 cardTarget = legal[game.Random.Next(legal.Length)];
+                            if (cardTarget != null) spell.CardTarget = cardTarget.Id;
+                        }
+                        else if (_targetType == EntityType.TARGET)
+                        {
+                            // A Battlecry with no legal target still casts the untargeted parts of its spell.
+                            cardTarget = target as ICharacter;
                             if (cardTarget != null) spell.CardTarget = cardTarget.Id;
                         }
 						else if
@@ -105,9 +116,9 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 						if (!ImbueRules.CanCast(c, spell, cardTarget)) continue;
                         // History diagnostics only (match event log): what this automatic cast chose from; reads, draws nothing.
                         if (game.History)
-                            game.PowerHistory.NoteAutoChoice(spell.Id, _randTarget ? noteLegal : -2, mode,
+                            game.PowerHistory.NoteAutoChoice(spell.Id, _randTarget ? noteLegal : _targetType == EntityType.TARGET ? -3 : -2, mode,
                                 mode > 0 && spell.ChooseOnePlayables != null && mode <= spell.ChooseOnePlayables.Length ? spell.ChooseOnePlayables[mode - 1].Card.Id : null,
-                                _randTarget && spell.ChooseOne && !Generic.UsesChooseBoth(spell, c));
+                                randomMode);
                         // An automatic cast owns only its new choices, never its caller's pending prompt.
                         var pendingChoice = c.Choice;
                         c.Choice = null;

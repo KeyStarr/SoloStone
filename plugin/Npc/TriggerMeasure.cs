@@ -131,6 +131,7 @@ internal static class TriggerProbe
     internal const int Seeds = 8;
     private const string Yeti = "CS2_182", Axe = "CS2_106";
     // One castable spell of each school and one without, at the enemy hero when it takes a target.
+    private const string SchoolLess = "CS2_008";
     internal static readonly string[] Spells = { "CS2_008", "CORE_DS1_185", "FIR_909", "CORE_CS2_024", "CORE_EX1_238", "CORE_CS2_093", "BE_223", "CORE_BT_035" };
     // A plain body of each common tribe (no vanilla Dragon or Undead exists), a plain Battlecry and a plain Deathrattle.
     internal static readonly string[] Minions = { Yeti, "CS2_120", "CS2_168", "GVG_044", "CS2_118", "GVG_070", "CS2_065", "EX1_015", "EX1_096" };
@@ -190,10 +191,19 @@ internal static class TriggerProbe
         // A future round's swing, so a Rush minion is past its first turn.
         if (kind == TriggerKind.SelfAttack) { m.IsExhausted = false; m[GameTag.JUST_PLAYED] = 0; m.AttackableByRush = false; }
     }
+    // The probe's "no school" slot. Moonfire carries its real school (Arcane) since the card file gained the client's schools (#117), so
+    // the probe plays a private copy of the card without tag 1635; the shared card, and every real game, keep the school.
+    internal static EngineCard Printed(string id)
+    {
+        var card = EngineCards.FromId(id);
+        if (id != SchoolLess) return card;
+        card = card.Clone(); card.Tags.Remove(GameTag.SPELL_SCHOOL);
+        return card;
+    }
     private static bool Play(EngineGame g, string id)
     {
         var own = g.Player1;
-        var held = EngineEntity.FromCard(own, EngineCards.FromId(id), zone: own.HandZone);
+        var held = EngineEntity.FromCard(own, Printed(id), zone: own.HandZone);
         var option = own.Options().FirstOrDefault(o => o.Source == held && (o.Target == null || o.Target == own.Opponent.Hero));
         return option != null && g.Process(option);
     }

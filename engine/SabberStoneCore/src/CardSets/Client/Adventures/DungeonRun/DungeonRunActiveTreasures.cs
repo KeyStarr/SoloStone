@@ -178,7 +178,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 
             // Scroll of Confusion (0): Each minion randomly chooses a side of the battlefield (a full side keeps its minions).
             register(47040, "LOOTA_839", card => Spell(card, new CustomTask((game, controller, source, target, stack) => {
-                var minions = controller.BoardZone.Concat(controller.Opponent.BoardZone).Where(m => !m.ToBeDestroyed && !m.Untouchable).ToList();
+                var minions = controller.BoardZone.Interactable.Concat(controller.Opponent.BoardZone.Interactable).Where(m => !m.ToBeDestroyed).ToList();
                 foreach (var minion in minions)
                 {
                     Controller side = DungeonRunCards.Pick(game, 2) == 0 ? controller : controller.Opponent;

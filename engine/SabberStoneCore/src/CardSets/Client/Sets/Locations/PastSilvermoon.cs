@@ -24,7 +24,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { LocationActivation = new LocationActivation {
                 Task = new CustomTask((g, c, s, t, stack) => {
                     var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);
-                    var candidates = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.IsDormant && !m.Untouchable).ToArray();
+                    var candidates = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToArray();
                     if (stage == 2 && candidates.Length > 0)
                     {
                         int lowest = candidates.Min(m => m.Health);

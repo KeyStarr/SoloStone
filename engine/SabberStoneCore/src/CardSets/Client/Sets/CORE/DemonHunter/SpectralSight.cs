@@ -17,9 +17,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = ComplexTask.Create(new CustomTask((game, controller, source, target, stack) => {
-                // The impact's CARDTYPE branch cannot finish on an unrevealed deck card.
+                // The impact's CARDTYPE branch cannot finish on an unrevealed deck card. Retail targets the caster's own
+                // hero (tradeable.annotated.xml, build 88998), so the impact lands on the portrait in both seats.
                 if (game.History) game.PowerHistory.Add(new PowerHistoryMetaData {
-                    Type = MetaDataType.TARGET, Info = new List<int> { source.Id }
+                    Type = MetaDataType.TARGET, Info = new List<int> { controller.Hero.Id }
                 });
             }), EffectContext.Task(ctx => {
                 ctx.RunLegacy(new DrawTask());

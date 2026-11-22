@@ -25,6 +25,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 for (int i=0; i<budget && !c.BoardZone.IsFull && minion.Zone == c.BoardZone && !minion.IsDead; i++)
                 {
                     int position = minion.ZonePosition + 1;
+                    // untouchable-ok: physical slot scan for the position after its own copies; Untouchable minions keep their slots
                     while (position < c.BoardZone.SlotCount && c.BoardZone.GetSlot(position)[GameTag.DISPLAYED_CREATOR] == s.Id) position++;
                     Generic.Copy(c,s,minion,Zone.PLAY,zonePosition:position,preserveBoardMinionState:true);
                 }

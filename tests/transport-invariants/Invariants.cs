@@ -33,10 +33,11 @@ internal static class Invariants
     {
         foreach (var violation in Compare(game, client, true).Concat(CompareMana(game, client))) yield return violation;
         int max = game.IdEntityDic.Max(pair => pair.Key);
-        foreach (int id in client.Entities.Keys.Where(id => client.EngineId(id) > max))
+        // A mill-locked opposing actor cannot be retired without stalling the client (#80): it stays in GRAVEYARD, with no actor.
+        foreach (int id in client.Entities.Where(pair => !pair.Value.MillLocked && client.EngineId(pair.Key) > max).Select(pair => pair.Key))
             yield return new("", id, "RESET_CUTOFF", "absent", "present");
-        // Current aliases do not replace the privacy obligation on the retired original actors.
-        foreach (var pair in client.Entities.Where(pair => client.WireId(client.EngineId(pair.Key)) != pair.Key))
+        // Current aliases do not replace the privacy obligation on the retired original actors. A burned card was public.
+        foreach (var pair in client.Entities.Where(pair => !pair.Value.MillLocked && client.WireId(client.EngineId(pair.Key)) != pair.Key))
             if (pair.Value.CardId.Length > 0)
                 yield return new(pair.Value.CardId, pair.Key, "RESET_PRIVACY", "hidden retired actor", pair.Value.CardId);
         foreach (var entity in game.IdEntityDic.Values)
@@ -46,10 +47,16 @@ internal static class Invariants
                 yield return new(entity.Card.Id, entity.Id, "RESET_ENTITY", "present", "absent");
                 continue;
             }
-            // Immolate's definition defaults describe Smoldering cards; only instance tags are live loop state.
+            // Smoldering hand fire follows its live countdown; retired offers never inherit definition-only fire.
             foreach (int tag in new[] { 2505, 2600 })
             {
                 int expected = shown.CardId.Length > 0 && entity.NativeTags.TryGetValue((GameTag)tag, out int value) ? value : 0;
+                if (shown.CardId.Length > 0 && !entity.NativeTags.ContainsKey((GameTag)tag)
+                    && (entity.Card.Id is "FIR_911" or "FIR_914" or "FIR_916") && Location(entity) == Zone.HAND)
+                {
+                    int remaining = Math.Clamp(entity[GameTag.TAG_SCRIPT_DATA_NUM_2], 0, 3);
+                    expected = tag == 2505 ? (remaining > 0 ? 1 : 0) : remaining;
+                }
                 if (shown.Get((GameTag)tag) != expected)
                     yield return new(entity.Card.Id, entity.Id, "RESET_ACTOR_STATE", expected.ToString(), shown.Get((GameTag)tag).ToString());
             }
@@ -158,6 +165,14 @@ internal static class Invariants
 
     internal static IEnumerable<Violation> Compare(Game game, ClientModel client, bool reset = false)
     {
+        foreach (string fault in client.MillFaults) yield return new("", 0, "MILL_LOCK", "opposing burned card never moves again", fault);
+        foreach (string fault in HeroPowerSlotInvariant.Inspect(client))
+            yield return new("", 0, "HERO_POWER_SLOT", "one PLAY power per slot", fault);
+        foreach (var owner in new[] { game.Player1, game.Player2 })
+        foreach (var power in game.IdEntityDic.Values.OfType<HeroPower>().Where(p => p.Controller == owner))
+            if (!owner.HeroPowers.Contains(power) && client.Entities.TryGetValue(client.WireId(power.Id), out var shown)
+                && shown.CardZone == (int)Zone.PLAY)
+                yield return new(power.Card.Id, power.Id, "RETIRED_HERO_POWER", "outside PLAY", "PLAY");
         foreach (var entity in client.Entities)
             foreach (int tag in entity.Value.Tags.Keys.Where(tag => IsPrivateRuleTag((GameTag)tag)))
                 yield return new(entity.Value.CardId, entity.Key, "PRIVATE_RULE_TAG", "absent", tag.ToString());

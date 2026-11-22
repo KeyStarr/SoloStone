@@ -54,7 +54,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     var offers = PayloadRules.Entries(effect, 2).Select(e => e.Card).Distinct().ToArray();
                     var creator = effect.Creator;
                     effect.Remove();
-                    if (t is Minion minion && minion.IsDormant || offers.Length == 0) return;
+                    if (t is Minion minion && minion.Untouchable || offers.Length == 0) return;
                     Generic.CreateChoiceCards(c, creator, null, ChoiceType.GENERAL, ChoiceAction.HAND, offers, null);
                     var choice = c.Choice;
                     while (choice.NextChoice != null) choice = choice.NextChoice;

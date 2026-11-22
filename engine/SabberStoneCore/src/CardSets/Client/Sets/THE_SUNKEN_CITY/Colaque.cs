@@ -23,7 +23,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             ColossalRules.DeclareLayout(card, new[] { 1 }, "TSC_026t");
             card.Power = new Power { Aura = new AdaptiveEffect(new SelfCondition(p =>
-                p.Controller.BoardZone.Any(m => m.Card.Id == "TSC_026t" && !m.IsDead && !m.IsDormant)), GameTag.IMMUNE) };
+                p.Controller.BoardZone.AnyInteractable(m => m.Card.Id == "TSC_026t" && !m.IsDead)), GameTag.IMMUNE) };
         }
 
         [StandardCard("TSC_026t", 71828)]

@@ -12,7 +12,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
     internal static class MerryMoonkin
     {
         internal const int DbfId = 115805;
-        private static int Armor(IPlayable source) => 1 + source.Controller.BoardZone.Count(m => m.Card.Name == "Wisp");
+        private static int Armor(IPlayable source) => 1 + source.Controller.BoardZone.CountInteractable(m => m.Card.Name == "Wisp");
         internal static void Configure(Card card)
         {
             card.Implemented = true;

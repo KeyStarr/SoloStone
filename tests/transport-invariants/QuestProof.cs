@@ -62,7 +62,7 @@ internal static class QuestProof
 
     private static void Metadata(IDictionary<GameTag, int> tags)
     {
-        foreach (var pair in new[] { (462, 1), (534, 0), (535, 6), (1089, 121956), (4238, 1) })
+        foreach (var pair in new[] { ((int)GameTag.QUEST, 1), (534, 0), (535, 6), (1089, 121956), (4238, 1) })
             Check(tags.TryGetValue((GameTag)pair.Item1, out int value) && value == pair.Item2,
                 "reveal metadata " + pair.Item1);
     }
@@ -269,10 +269,29 @@ internal static class QuestProof
         var snapshots = history.Where(e => e.HasFullEntity || e.HasShowEntity)
             .Select(e => e.HasFullEntity ? e.FullEntity : e.ShowEntity).Where(e => e.Entity == reward.Id).ToArray();
         Check(reward[GameTag.DISPLAYED_CREATOR] == quest.Id, "reward attributed to completed quest");
+        // Retail: progress is a TRIGGER block at effectIndex 1, completion its sibling at effectIndex 0 with the QUEST keyword.
+        var starts = history.Where(e => e.HasPowerStart && e.PowerStart.Source == quest.Id && (int)e.PowerStart.Type == (int)BlockType.TRIGGER)
+            .Select(e => e.PowerStart).ToArray();
+        Check(starts.Length >= 2 && starts[^1].EffectIndex == 0 && starts[^1].HasTriggerKeyword
+            && starts[^1].TriggerKeyword == (int)GameTag.QUEST
+            && starts.SkipLast(1).All(b => b.EffectIndex == 1 && !b.HasTriggerKeyword),
+            "quest progress blocks at effectIndex 1, completion block at effectIndex 0 with keyword QUEST " + cardId);
+        int completion = Array.FindIndex(history, e => e.HasPowerStart && ReferenceEquals(e.PowerStart, starts[^1]));
+        Check(completion >= 0 && completion < created && created < Array.FindIndex(history, completion, e => e.HasPowerEnd),
+            "reward is created inside the completion block " + cardId);
         if (opponent)
-            Check(snapshots.All(e => e.Name == "" && e.Tags.All(t => t.Name != (int)GameTag.DISPLAYED_CREATOR)),
-                "opponent reward identity/creator follow hidden hand policy " + cardId + ": "
+        {
+            // The client's QuestCompleteSpell plays only when the reward FULL_ENTITY is the card the quest names; the
+            // reward is public through the quest, so it is named inside the block and hidden again at its end.
+            Check(snapshots.All(e => e.Name == rewardCardId),
+                "opponent reward is named by its quest's completion block " + cardId + ": "
                     + string.Join("; ", snapshots.Select(e => e.Name + " [" + string.Join(",", e.Tags.Select(t => t.Name + "=" + t.Value)) + "]")));
+            int hide = Array.FindIndex(history, e => e.HasHideEntity && e.HideEntity.Entity == reward.Id);
+            Check(hide > created && hide < Array.FindIndex(history, completion, e => e.HasPowerEnd)
+                && history.Skip(hide).Any(e => e.HasTagChange && e.TagChange.Entity == reward.Id
+                    && e.TagChange.Tag == (int)GameTag.REVEALED && e.TagChange.Value == 0),
+                "opponent reward hidden again before the completion block ends " + cardId);
+        }
         else
         {
             Check(snapshots.Any(e => e.Name == rewardCardId && e.Tags.Any(t => t.Name == (int)GameTag.DISPLAYED_CREATOR && t.Value == quest.Id)),

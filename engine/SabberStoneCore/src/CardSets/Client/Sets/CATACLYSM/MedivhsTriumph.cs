@@ -26,7 +26,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static bool ControlsLegendary(IPlayable source)
         {
             var controller = source.Controller;
-            return controller.BoardZone.Slots.Any(m => m.Id != source.Id && Entity.IsLegendary(m)) ||
+            return controller.BoardZone.AnyInteractable(m => m.Id != source.Id && Entity.IsLegendary(m)) ||
+                controller.BoardZone.GetLocations().Any(m => m.Id != source.Id && Entity.IsLegendary(m)) ||
                 controller.Hero.Id != source.Id && Entity.IsLegendary(controller.Hero) ||
                 controller.Hero.Weapon?.Id != source.Id && Entity.IsLegendary(controller.Hero.Weapon) ||
                 controller.SecretZone.Any(m => m.Id != source.Id && Entity.IsLegendary(m)) ||

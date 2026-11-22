@@ -125,6 +125,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 					    (controller != game.CurrentPlayer || minion.HasCharge || minion.IsRush))
 						tags[GameTag.EXHAUSTED] = 0;
                     tags.Remove(OutcastRules.PlayedFromEdgeTag);
+                    tags.Remove(HealingRules.DamageWound); // a living copy is never mortally wounded
 
 					if (minion.Controller != controller)
 						tags[GameTag.CONTROLLER] = controller.PlayerId;

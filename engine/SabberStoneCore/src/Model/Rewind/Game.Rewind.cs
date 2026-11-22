@@ -9,6 +9,14 @@ namespace SabberStoneCore.Model
     {
         public RewindTransaction Rewind { get; internal set; }
         public bool RewindDisabled { get; private set; }
+        [field: NonSerialized] public Action<string> RewindBoundaryDiagnostic { get; set; }
+
+        internal void WarnRewindBoundary(string message)
+        {
+            Log(LogLevel.WARNING, Enums.BlockType.PLAY, "Rewind", message);
+            try { RewindBoundaryDiagnostic?.Invoke(message); }
+            catch { } // Diagnostic sinks cannot interrupt an authoritative action.
+        }
 
         internal void BeginRewindAnswer()
         {
@@ -25,6 +33,8 @@ namespace SabberStoneCore.Model
             validated = validated ?? LoadRewindBaseline(baseline, OfflinePools, strictEvidence: false);
             long next = _nextDecisionId, options = _optionsDecisionId;
             int entity = _idIndex, oop = _oopIndex;
+            var boundaryDiagnostic = RewindBoundaryDiagnostic;
+            var cycleDiagnostic = CycleBudgetExhaustedDiagnostic;
             string evidence = HistoryFacts.EvidenceFailure ?? validated.HistoryFacts.EvidenceFailure;
             try
             {
@@ -34,6 +44,8 @@ namespace SabberStoneCore.Model
             }
             finally
             {
+                RewindBoundaryDiagnostic = boundaryDiagnostic;
+                CycleBudgetExhaustedDiagnostic = cycleDiagnostic;
                 // Even an unexpected failure must not reuse decision or entity IDs already sent to the client.
                 _nextDecisionId = Math.Max(_nextDecisionId, next);
                 _optionsDecisionId = Math.Max(_optionsDecisionId, options);

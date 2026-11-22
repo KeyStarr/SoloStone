@@ -8,8 +8,9 @@ using static PoolPilotProof;
 
 internal static class DreadLeviathanProof
 {
-    // stats-health/dread-short-health.yaml STILL-UNPINNED, owner assumption: steal min(3,current Health).
-    // A official bug-fix notes establish changed short-Health handling; exact formula remains assumed.
+    // Steal min(3, current Health), keeping damage. Lean, by analogy: the only retail trace (HSReplay gyvzAwjnwLotyqj595ZtrT,
+    // build 229238; #198) is of Bloated Leech's EDR_810e, which is the same kind of steal enchantment; there is no trace of
+    // Dread Leviathan itself. LowerHealthProof covers the damaged, undamaged and history cases.
     internal static void Run() => StandardSetsProof.Case("CATA_699", Unpinned_DreadLeviathan);
     private static void Unpinned_DreadLeviathan(Game g, Controller p, string id)
     {

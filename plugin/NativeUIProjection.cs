@@ -714,6 +714,10 @@ internal static class NativeUIProjection
     // gate must also pass, or New Deck would lead to a hero pick whose create is refused.
     internal static bool ShowNewDeckButton(bool nativeShows, int personalCount, int sessionLoanerCount) =>
         nativeShows && PersonalDeckBlocker(personalCount, sessionLoanerCount) == null;
+    // Which creation requests the local draft path serves: a plain new deck (normal source, no pasted code), or a pasted deck
+    // whose code the import already planned (the plan is what fills the draft; an unplanned paste stays unsupported).
+    internal static bool OwnsCreateSource(bool normalSource, bool pastedSource, bool hasPastedCode, bool importPlanned) =>
+        normalSource && !hasPastedCode || pastedSource && hasPastedCode && importPlanned;
     internal static bool CanCreateDraft(bool normalDeck, bool normalSource, bool supportedHero, bool standardFormat, int personalCount,
         int sessionLoanerCount) =>
         normalDeck && normalSource && supportedHero && standardFormat && CanAddPersonalDeck(personalCount, sessionLoanerCount);
@@ -849,10 +853,10 @@ internal static class NativeUIProjection
         + ErrorDetail(detail) + ". Resolve the error and retry.";
     internal static string DeckWriteFailureMessage(string operation, long id, string detail)
     {
-        if (operation != "create" && operation != "save" && operation != "delete")
+        if (operation != "create" && operation != "save" && operation != "delete" && operation != "import")
             throw new ArgumentException("Unknown deck operation.", nameof(operation));
         return "Local deck " + operation + " failed for " + id + ": "
-            + ErrorDetail(detail) + ". Fix the deck and retry.";
+            + ErrorDetail(detail) + (operation == "import" ? ". Nothing was saved. Try the import again." : ". Fix the deck and retry.");
     }
     internal static string ReorderRefreshFailureMessage(bool committed, string detail) =>
         (committed ? "Deck order was saved" : "Deck order is unchanged")

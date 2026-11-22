@@ -10,6 +10,7 @@ using EngineEntity = SabberStoneCore.Model.Entities.Entity;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading;
 using System.Linq;
 using System.Reflection;
 using SabberStoneCore.Enums;
@@ -406,6 +407,26 @@ internal static class FairHistory
             if (e is NotSupportedException && e.Message.StartsWith("Private historical ", StringComparison.Ordinal)) return true;
         return false;
     }
+    internal static string PrivateCause(Exception error)
+    {
+        for (var e = error; e != null; e = e.InnerException)
+            if (e is NotSupportedException && e.Message.StartsWith("Private historical ", StringComparison.Ordinal)) return e.Message;
+        return error.Message;
+    }
+}
+internal sealed class PrivateDiscardTally
+{
+    private int applied, discarded; private string first;
+    internal int Applied => Volatile.Read(ref applied);
+    internal int Discarded => Volatile.Read(ref discarded);
+    internal string First => first;
+    private int reported;
+    internal bool TryReport() => Interlocked.Exchange(ref reported, 1) == 0;
+    internal void Apply() => Interlocked.Increment(ref applied);
+    internal void Discard(Exception error)
+    {
+        if (Interlocked.Increment(ref discarded) == 1) first = FairHistory.PrivateCause(error);
+    }
 }
 // The planner gets this sealed view, never an authoritative EngineGame or a foreign PlayerTask.
 public sealed class FairBotState
@@ -450,6 +471,14 @@ public sealed class FairBotState
 #endif
     }
     internal Action<string> FaultReporter;
+    // Shared by every state of one decision: how many simulated actions applied, and how many a fair view discarded as private history.
+    private PrivateDiscardTally discards;
+    // A decision whose every simulated action was discarded as private history has not been searched at all; say so (#81).
+    internal void ReportAllDiscarded()
+    {
+        if (discards != null && discards.Discarded > 0 && discards.Applied == 0 && discards.TryReport())
+            FaultReporter?.Invoke("private-history-all-discarded discarded=" + discards.Discarded + " error=" + discards.First);
+    }
     // Card.HistoryDisplay targets that render a stored card's identity in its host's text.
     private static readonly GameTag[] DisplayTags = { GameTag.TAG_SCRIPT_DATA_NUM_1, GameTag.TAG_SCRIPT_DATA_NUM_2, (GameTag)2921 }; // 2921 = TAG_SCRIPT_DATA_NUM_6 (absent from the vendor engine DLL)
     internal void ReportFault(SimulationFailureException error) =>
@@ -457,6 +486,7 @@ public sealed class FairBotState
     private FairBotState InheritReporter(FairBotState state)
     {
         state.FaultReporter = FaultReporter;
+        state.discards = discards;
         state.fallbackEvaluator = fallbackEvaluator;
         state.deckRoots = deckRoots;
         state.opaqueQuestRewards = opaqueQuestRewards.Where(p => state.game.IdEntityDic.TryGetValue(p.Key, out var card)
@@ -892,6 +922,7 @@ public sealed class FairBotState
             new ReadOnlyDictionary<string, int>(new SortedDictionary<string, int>(known, StringComparer.Ordinal)),
             options?.MaterializeOwnDeckTriggers == true, secretSlots);
         result.fallbackEvaluator = options?.FallbackEvaluator;
+        result.discards = new PrivateDiscardTally();
         if (!exact && options?.TrackOwnDeck == true) {
             result.deckRoots = new[] { copy.Player1, copy.Player2 }.ToDictionary(p => p.PlayerId, p => new HashSet<int>(p.DeckZone.Select(c => c.Id)));
         }
@@ -1547,7 +1578,9 @@ public sealed class FairBotState
 #endif
         if (!clone.Process(task)) throw new InvalidOperationException("Simulation action rejected.");
         }
-        catch (Exception error) when (!(error is OutOfMemoryException) && !FairHistory.IsPrivate(error)) { throw new SimulationFailureException(action, error); }
+        catch (Exception error) when (FairHistory.IsPrivate(error)) { discards?.Discard(error); throw; }
+        catch (Exception error) when (!(error is OutOfMemoryException)) { throw new SimulationFailureException(action, error); }
+        discards?.Apply();
 #if ENGINE_SOURCE
         SabberStoneCore.Actions.DiscoverRealRules.RedactSuspiciousOffers(clone);
 #endif

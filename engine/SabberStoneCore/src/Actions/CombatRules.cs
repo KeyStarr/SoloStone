@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 
 namespace SabberStoneCore.Actions
@@ -22,8 +23,20 @@ namespace SabberStoneCore.Actions
         public static bool IsInternalTag(GameTag tag) => (int)tag >= 31360 && (int)tag <= 31369;
 
         private static bool Active(Minion minion) => !minion.IsSilenced && !minion.Untouchable;
-        public static bool IgnoresTaunt(ICharacter source) => source.Controller.BoardZone
+        public static bool IgnoresTaunt(ICharacter source) => IgnoresTaunt(source.Controller);
+        public static bool IgnoresTaunt(Controller controller) => controller.BoardZone
             .Any(m => Active(m) && m[IgnoreTauntAura] > 0);
+
+        // The client draws an enemy Taunt minion translucent when the opposing player entity carries IGNORE_TAUNT, so the
+        // player tag mirrors IgnoresTaunt. Every aura update, so it flips in the block where the source enters or leaves.
+        internal static void RefreshIgnoreTaunt(Game game)
+        {
+            foreach (var controller in new[] { game.Player1, game.Player2 })
+            {
+                int wanted = IgnoresTaunt(controller) ? 1 : 0;
+                if (controller[GameTag.IGNORE_TAUNT] != wanted) controller[GameTag.IGNORE_TAUNT] = wanted;
+            }
+        }
 
         // A hero's weapon with Mega-Windfury (Dungeon Run's Vorpal Dagger) counts like its Windfury does.
         public static int AttackLimit(ICharacter source) => source[GameTag.MEGA_WINDFURY] > 0

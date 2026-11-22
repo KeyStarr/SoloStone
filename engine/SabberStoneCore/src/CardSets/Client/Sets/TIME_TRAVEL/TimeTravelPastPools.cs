@@ -67,7 +67,8 @@ namespace SabberStoneCore.CardSets.Client
             OfflineCardPools.Pick(g,Filter(id,name),c.HeroClass,source.Card.AssetId,Requirement(id,name).Destination);
         internal static Card[] EternalHoldOffers(Game g,Controller c,IEntity source)
         {
-            if(g.FormatType!=FormatType.FT_WILD) return Offers(g,c,source,"TIME_446","demon");
+            // The match's pool policy decides, not FormatType (live matches run as FT_WILD with the Standard policy).
+            if(g.PoolFormat!=Config.GenerationFormat.Wild) return Offers(g,c,source,"TIME_446","demon");
             var candidates=OfflineCardPools.Candidates(g,c.HeroClass,Filter("TIME_446","demon"),source.Card.AssetId,sourceClassMask:OfflineCardPools.PrintedClassMask(source.Card))
                 .Concat(OfflineCardPools.Candidates(g,c.HeroClass,Filter("TIME_446","wild-demon"),source.Card.AssetId,sourceClassMask:OfflineCardPools.PrintedClassMask(source.Card)))
                 .OrderBy(card=>card.AssetId).ToArray();

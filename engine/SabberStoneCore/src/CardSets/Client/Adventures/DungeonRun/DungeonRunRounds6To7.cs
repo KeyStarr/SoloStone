@@ -36,7 +36,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             });
             // George's Divinity (2): Give all your minions Divine Shield. Karl's is The Silver Hand (AT_132_PALADIN).
             register(46170, "LOOTA_BOSS_15p", card => {
-                card.PlayAvailabilityPredicate = (c, _) => !c.BoardZone.IsEmpty;
+                card.PlayAvailabilityPredicate = (c, _) => c.BoardZone.AnyInteractable();
                 Untargeted(card, new SetGameTagTask(GameTag.DIVINE_SHIELD, 1, EntityType.MINIONS));
             });
             // Tag Team (0): Swap George and Karl (while both stand).
@@ -175,7 +175,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             // of a tie). Swallowing a Poisonous minion kills Gnosh.
             register(46243, "LOOTA_BOSS_21h", DungeonRunCards.Plain);
             register(46242, "LOOTA_BOSS_21p", card => {
-                card.PlayAvailabilityPredicate = (c, _) => !c.BoardZone.IsEmpty || !c.Opponent.BoardZone.IsEmpty;
+                card.PlayAvailabilityPredicate = (c, _) => c.BoardZone.AnyInteractable() || c.Opponent.BoardZone.AnyInteractable();
                 Untargeted(card, SwallowWhole());
             });
 
@@ -263,7 +263,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             Actions.RunDeckRules.Add(controller.Opponent, pick(game)));
 
         private static ISimpleTask SwallowWhole() => new CustomTask((game, controller, source, target, stack) => {
-            var minions = controller.BoardZone.Concat(controller.Opponent.BoardZone).Where(m => !m.ToBeDestroyed).ToList();
+            var minions = controller.BoardZone.Interactable.Concat(controller.Opponent.BoardZone.Interactable).Where(m => !m.ToBeDestroyed).ToList();
             if (minions.Count == 0) return;
             int top = minions.Max(m => m.AttackDamage);
             var tied = minions.Where(m => m.AttackDamage == top).ToList();

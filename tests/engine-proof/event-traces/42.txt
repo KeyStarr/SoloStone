@@ -67,5 +67,5 @@ PlayCardTrigger|0|6:SabberStoneCore.Triggers.Trigger.Process|_owner=38,_sourceId
 PlayCardTrigger|1|7:SabberStoneCore.Triggers.Trigger.Process|_owner=58,_sourceId=58,Game=1
 PlayCardTrigger|0|6:SabberStoneCore.Triggers.Trigger.Process|_owner=38,_sourceId=38,Game=1
 PlayCardTrigger|1|7:SabberStoneCore.Triggers.Trigger.Process|_owner=58,_sourceId=58,Game=1
-history=d2818492c76f15463cabb3a89c56590e21295686303583e413207b76057e3291
+history=f61191da34b1fa79801f2a9f02fa4c8799aa04aed0061d69b4aeecf244d9626e
 clone=470a3e19a4bccc6f4da0ee76999f922a231e20ebb154d2047582489a977c3845

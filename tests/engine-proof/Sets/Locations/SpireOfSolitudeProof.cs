@@ -32,7 +32,7 @@ internal static class SpireOfSolitudeProof
                     && demon.NumAttacksThisTurn == 0 && demon.IsExhausted,
                     "exact hand-size Demon takes retaliation, no immunity, manual budget/readiness preserved");
                 Core2026Proof.Check(branch.Player1.BoardZone.Slots.Select(e => e.Id)
-                    .SequenceEqual(new[] { left.Id, spire.Id, demon.Id, right.Id }), "Demon beside living location in physical slot");
+                    .SequenceEqual(new[] { left.Id, spire.Id, demon.Id, right.Id }), "Demon right of living location in physical slot");
                 Core2026Proof.Check(enemies.All(e => branch.IdEntityDic[e.Id][GameTag.DAMAGE] == (e.Id == expected.Id ? 4 : 0)),
                     "seeded random enemy minion, reordered board, random attack includes Stealth");
             });

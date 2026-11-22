@@ -213,7 +213,7 @@ internal static class LocationTransformProof
         Case("location summon source positions", () => {
             var game = L.Game(); var p = game.Player1; L.Minion(p); var location = L.Location(p); L.Minion(p);
             int alternate = 0;
-            L.Check(SummonTask.GetPosition(location, SummonSide.LEFT, 0, ref alternate) == 1 &&
+            L.Check(SummonTask.GetPosition(location, SummonSide.LEFT, 0, ref alternate) == 2 &&
                 SummonTask.GetPosition(location, SummonSide.RIGHT, 0, ref alternate) == 2, "location live summon positions");
             location[GameTag.DAMAGE] = location[GameTag.HEALTH]; LocationRules.RetireFinalCharge(location);
             L.Check(SummonTask.GetPosition(location, SummonSide.DEATHRATTLE, 0, ref alternate) == 1, "location death summon position");

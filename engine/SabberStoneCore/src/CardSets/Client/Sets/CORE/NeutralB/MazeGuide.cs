@@ -17,6 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var ctx = new EffectContext(g, c.Id, s.Id, stack: stack);
                 var chosen = ctx.PickRandomCard(CoreCostPools.TwoCostMinion(), recipeDbfId: DbfId);
                 if (chosen == null || c.BoardZone.IsFull) return;
+                // untouchable-ok: physical slot position of the card itself; Untouchable minions keep their slots
                 int position = Enumerable.Range(0, c.BoardZone.SlotCount).FirstOrDefault(i => c.BoardZone.GetSlot(i) == s);
                 ctx.Summon(chosen.Id, s.Zone == c.BoardZone ? position + 1 : c.BoardZone.SlotCount);
             }) };

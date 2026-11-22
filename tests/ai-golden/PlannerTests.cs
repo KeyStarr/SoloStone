@@ -176,7 +176,7 @@ public static class PlannerTests
             start.Environment["GOLDEN_DIGEST_CHILD"] = "1";
             using (var child = Process.Start(start)) {
                 string stdout = child.StandardOutput.ReadToEnd(); string stderr = child.StandardError.ReadToEnd(); child.WaitForExit();
-                Check(child.ExitCode == 0 && stdout.Split('\n').Contains("DIGEST " + digest), "cross-process mismatch " + stderr);
+                Check(child.ExitCode == 0 && stdout.Replace("\r", "").Split('\n').Contains("DIGEST " + digest), "cross-process mismatch " + stderr);
             }
         }
     }

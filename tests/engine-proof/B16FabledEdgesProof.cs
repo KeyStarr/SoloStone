@@ -137,7 +137,7 @@ internal static class B16FabledEdgesProof
     {
         var g=New();var p=g.Player1;var city=(BoardObject)Play(g,p,"TIME_211t2t");var target=Summon(p,"CS2_182");
         Core2026Proof.Check(LocationRules.Activate(p,city,target),"empowered City activation");
-        var copy=p.BoardZone.Last();Core2026Proof.Check(copy!=target && copy.AttackDamage==target.AttackDamage*2 && copy.Health==target.Health*2,"City doubles summoned copy with enchantment");
+        var copy=p.BoardZone.Single(m=>m!=target);Core2026Proof.Check(copy.ZonePosition==city.ZonePosition+1 && city.ZonePosition==0 && copy.AttackDamage==target.AttackDamage*2 && copy.Health==target.Health*2,"City doubles summoned copy right of living location with enchantment");
         copy.Silence();Core2026Proof.Check(copy.AttackDamage==target.AttackDamage && copy.Health==target.Health,"City stats are removable buff layer");
         while(!p.BoardZone.IsFull) Summon(p,"CS2_182");city[GameTag.LOCATION_ACTION_COOLDOWN]=0;int durability=city.Durability;
         Core2026Proof.Check(!LocationRules.Activate(p,city,target) && city.Durability==durability,"full board rejects City without spending durability");

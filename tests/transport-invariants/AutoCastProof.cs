@@ -402,6 +402,7 @@ public static class AutoCastProof
         game.DeathProcessingAndAuraUpdate();
         spell.Zone?.Remove(spell);
         p.DeckZone.Add(spell);
+        session.Client.IgnoreMillLock = true; // the fixture puts a cast spell back into the deck by hand, which no real game does
         var changed = Generic.ChangeEntityBlock(p, spell, Cards.FromId("CS2_029"), false);
         session.Flush(); game.PowerHistory.Last.Clear();
         Check(changed.Card.Id == "CS2_029" && changed.Zone == p.DeckZone, "fixture: cast, returned and transformed in the deck");
@@ -681,7 +682,8 @@ public static class AutoCastProof
         Check(!wire.Any(e => e.HasPowerStart && e.PowerStart.Source == top.Id && (int)e.PowerStart.Type == (int)BlockType.PLAY), name + ": no PLAY block");
         int trigger = wire.FindIndex(e => e.HasPowerStart && e.PowerStart.Source == top.Id && (int)e.PowerStart.Type == (int)BlockType.TRIGGER);
         int named = wire.FindIndex(e => e.HasShowEntity && e.ShowEntity.Entity == top.Id && e.ShowEntity.Name == card);
-        Check(trigger >= 0 && named >= 0 && (owner == 1 || named > trigger), name + ": named (the opponent's inside its TOPDECK trigger) (named=" + named + " trigger=" + trigger + ")");
+        // #195, retail SCH_307t/AT_035t: both seats name the card in its REVEALED draw SHOW, before the TOPDECK trigger.
+        Check(trigger >= 0 && named >= 0 && named < trigger, name + ": named by its draw SHOW before its TOPDECK trigger (named=" + named + " trigger=" + trigger + ")");
         return 0;
     }
 

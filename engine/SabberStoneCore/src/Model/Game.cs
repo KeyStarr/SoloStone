@@ -125,6 +125,9 @@ namespace SabberStoneCore.Model
 
 		internal void RestoreOfflinePools(OfflinePoolManifest manifest) => OfflinePools = manifest;
 		internal bool LegacyPoolReplay => _gameConfig.LegacyPoolReplay;
+		internal bool UnversionedRandomPoolReplay => _gameConfig.UnversionedRandomPoolReplay;
+		/// <summary>The match's random pool policy (see <see cref="GameConfig.PoolFormat"/>).</summary>
+		public GenerationFormat PoolFormat => _gameConfig.PoolFormat;
 
 		internal Util.DeepCloneableRandom Random { get; set; }
 
@@ -482,6 +485,7 @@ namespace SabberStoneCore.Model
 
 			foreach (BoardObject location in game.DeadBoardObjects)
                 DeadBoardObjects.Add((BoardObject)IdEntityDic[location.Id]);
+			CycleBudgetExhausted = game.CycleBudgetExhausted;
 
             // Resolve cross-entity references only after both controllers and the registry exist.
 			foreach (var pair in IdEntityDic)
@@ -607,12 +611,25 @@ namespace SabberStoneCore.Model
                  !LocationRules.CanActivate(activation.Controller, activation.Source, activation.ActionTarget))) return false;
 			if (Resolution.HasSuspendedEffect && !(gameTask is ConcedeTask)) return false;
             if (SpellCompletion != null && !(gameTask is ChooseTask) && !(gameTask is ConcedeTask)) return false;
-            bool beganRewind = RewindRules.TryBegin(this, gameTask);
+            // Rewind can settle summons left pending (after a choice) before its snapshot; keep that history with this action.
+            bool prepareRewind = RewindRules.WouldBegin(this, gameTask) && !IsSnapshotBoundary;
+            if (prepareRewind && !RewindRules.IsLegalTask(this, gameTask)) return false;
+            bool preparedHistory = !preserveHistory && prepareRewind;
+            if (preparedHistory) PowerHistory?.Last.Clear();
+            bool beganRewind = RewindRules.TryBegin(this, gameTask, out bool settled);
+            if (settled && (State != State.RUNNING || Player1.Choice != null || Player2.Choice != null ||
+                Resolution.HasSuspendedEffect || SpellCompletion != null || !RewindRules.IsLegalTask(this, gameTask)))
+            {
+                _optionsDecisionId = NextDecisionId;
+                SettleTerminalState();
+                RefreshHistoryDisplays();
+                return true;
+            }
             bool result;
 			_snapshotOperationDepth++;
 			try
 			{
-				result = ProcessCore(gameTask, preserveHistory);
+                result = ProcessCore(gameTask, preserveHistory || preparedHistory);
                 if (result)
                 {
                     if (TaskQueue.IsQuiescent) _interruptedAction = false;
@@ -806,8 +823,9 @@ namespace SabberStoneCore.Model
 			_players.ToList().ForEach(p => p.PlayState = PlayState.PLAYING);
 
 			// starting mulligan draw block
+			PowerHistoryBlockStart opening = null;
 			if (History)
-				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
+				PowerHistory.Add(opening = PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
 
 			// getting first player
 			FirstPlayer = _gameConfig.StartPlayer < 0
@@ -835,8 +853,13 @@ namespace SabberStoneCore.Model
 
 			HistoryFacts.FreezeInitial(this);
             Actions.PayloadRules.CaptureTracking(this);
+            // PowerHistory is null when History is off; opening is set only when it is on.
+            int preparedFull = opening != null ? PowerHistory.Full.Count : 0, preparedLast = opening != null ? PowerHistory.Last.Count : 0;
             CardSets.Client.Sets.AzalinaSoulsever.PrepareDecks(this);
             DeckbuildingRules.Prepare(this);
+            // Deckbuilding cards (Azalina's copies, Beatrix's sideboard copies) are starting deck cards: the client must create
+            // them with the game, before the opening block, or a copy dealt into the opening hand shows face up at the deck.
+            if (opening != null) PowerHistory.HoistOpeningDeckEntities(opening, preparedFull, preparedLast);
 
 			// Capture restrictions before any opening card leaves its deck.
 			StartOfGameRules.Capture(this);
@@ -1429,6 +1452,9 @@ namespace SabberStoneCore.Model
             using var resolution = Resolution.Enter(ResolutionKind.DeathCreation);
             // A later trigger can consume/transform a pending victim before death creation.
             DeadMinions.RemoveAll(minion => minion.Zone != minion.Controller.BoardZone);
+            // Retail: damage alone leaves a minion mortally wounded only until this step; one lifted above 0 Health by a heal,
+            // a Health buff or an aura survives. A Deathrattle heal comes after this step and cannot undo the death.
+            DeadMinions.RemoveAll(minion => { bool rescued = minion.RescuedFromDamageWound; minion.SettleDamageWound(); return rescued; });
             Actions.DeathContextRules.CaptureBatch(this);
             Actions.PayloadRules.CaptureDeaths(this);
 			if (ClearWeapons != null)
@@ -1556,6 +1582,7 @@ namespace SabberStoneCore.Model
             Actions.Generic.RefreshRetainedSpells(this);
             CardSets.Client.Sets.Isiset.Refresh(this);
             Actions.DormantRules.CheckConditions(this);
+            Actions.CombatRules.RefreshIgnoreTaunt(this);
             RefreshHistoryDisplays();
         }
 
@@ -1600,30 +1627,26 @@ namespace SabberStoneCore.Model
 		/// </summary>
 		public void DeathProcessingAndAuraUpdate()
 		{
+			// The outermost cleanup starts the cycle budget; nested cleanups spend from it.
+			if (_cleanupDepth++ == 0 && !CycleBudgetExhausted) _cleanupCycles = 0;
+			try { DeathProcessingSteps(); }
+			finally { _cleanupDepth--; }
+		}
+
+		private void DeathProcessingSteps()
+		{
             using var resolution = Resolution.Enter(ResolutionKind.Cleanup);
             using var deathContext = Actions.DeathContextRules.EnterDeaths(this);
 			//Inter-Phase steps
 			
 			AuraUpdate();
-
-			// Summon Resolution Step
-			if (TriggerManager.HasOnSummonTrigger)
-			{
-				using var summonCatchUp = Resolution.Enter(ResolutionKind.SummonOn);
-                List<Minion> minions = SummonedMinions;
-				TaskQueue.StartEvent();
-				for (int i = 0; i < minions.Count; i++)
-				{
-					TriggerManager.OnSummonTrigger(minions[i]);
-				}
-				ProcessTasks();
-				TaskQueue.EndEvent();
-			}
-			SummonedMinions.Clear();
+			SummonResolutionStep();
 
 			TaskQueue.StartEvent();
 			do
 			{
+				// Each Death Phase with deaths to resolve spends one cycle.
+				if ((DeadMinions.Count != 0 || DeadBoardObjects.Count != 0) && !SpendCleanupCycle()) break;
 				var playAuras = DeadMinions.Count != 0 || DeadBoardObjects.Count != 0 || ClearWeapons != null
 					? Auras.Where(aura => aura.Owner.Zone?.Type == Enums.Zone.PLAY
 						|| aura.Owner == Player1.Hero.Weapon || aura.Owner == Player2.Hero.Weapon).ToArray()
@@ -1643,12 +1666,87 @@ namespace SabberStoneCore.Model
 				using (Resolution.Enter(ResolutionKind.DeathResolution))
                     ProcessTasks(); // Death Resolution Phase
 				ResolveReborns();
+				// The Death Phase ends: its Deathrattle and Reborn summons resolve before the next Death Creation Step.
+				if (SummonedMinions.Count != 0)
+				{
+					if (TriggerManager.HasOnSummonTrigger) AuraUpdate();
+					SummonResolutionStep();
+				}
 			} while (DeadMinions.Count != 0 || DeadBoardObjects.Count != 0);
 			TaskQueue.EndEvent();
             if (Actions.LifecycleRules.ContinueDeaths(this)) DeathProcessingAndAuraUpdate();
 
 			AuraUpdate();	// Aura Update (Other) step(Not implemented)
             Actions.Generic.ResolveDeferredSummons(this);
+		}
+
+		/// <summary>
+		/// Death Phases plus Summon Resolution passes that one outermost cleanup may run, nested cleanups included.
+		/// </summary>
+		public const int MaxCleanupCycles = 1000;
+		// Transient: a snapshot is taken only between cleanups.
+		[NonSerialized] private int _cleanupDepth;
+		[NonSerialized] private int _cleanupCycles;
+
+		/// <summary>
+		/// True once a cleanup ran out of <see cref="MaxCleanupCycles"/>: the game is over, and later cleanups resolve nothing.
+		/// Runtime-only (never in a snapshot): it is only ever true on a finished game. Clone copies it so clones stay exact.
+		/// </summary>
+		[field: NonSerialized] public bool CycleBudgetExhausted { get; private set; }
+
+		/// <summary>Called once, with a short reason, when a cleanup runs out of its cycle budget.</summary>
+		[field: NonSerialized] public Action<string> CycleBudgetExhaustedDiagnostic { get; set; }
+
+		// The rulebook repeats Death Phases "until no new Deaths occur" and states no limit, and no source says what retail
+		// does when they never stop. So the death loop and the Summon Resolution Step share one budget per outermost cleanup.
+		// Engine choice, not a rulebook rule: when it runs out the game ends in a draw (retail's turn limit also ends an
+		// unbounded game in a draw), unless a hero already lost in this cleanup.
+		private bool SpendCleanupCycle()
+		{
+			if (!CycleBudgetExhausted && ++_cleanupCycles <= MaxCleanupCycles) return true;
+			DeadMinions.Clear();
+			DeadBoardObjects.Clear();
+			SummonedMinions.Clear();
+			if (CycleBudgetExhausted) return false;
+			CycleBudgetExhausted = true;
+			string message = $"Cleanup cycle limit={MaxCleanupCycles}";
+			Log(LogLevel.WARNING, BlockType.PLAY, "Game", !Logging ? "" : $"Cleanup stopped after {MaxCleanupCycles} Death Phases and Summon Resolution passes without settling; the game ends.");
+			if (State != State.COMPLETE)
+			{
+				bool decided = Player1.PlayState == PlayState.LOSING || Player1.PlayState == PlayState.CONCEDED
+					|| Player2.PlayState == PlayState.LOSING || Player2.PlayState == PlayState.CONCEDED;
+				if (!decided)
+				{
+					Player1.PlayState = PlayState.TIED;
+					Player2.PlayState = PlayState.TIED;
+				}
+				NextStep = Step.FINAL_WRAPUP;
+			}
+			try { CycleBudgetExhaustedDiagnostic?.Invoke(message); }
+			catch { } // Diagnostic sinks cannot interrupt an authoritative action.
+			return false;
+		}
+
+		// Summon Resolution Step: "whenever you summon" triggers for the summons of the Phase that just ended.
+		// Each batch leaves the list before it fires: a reaction can reach a nested cleanup (an overdrawn IMPFERNAL!), which
+		// must not fire the same summons again. Engine choice, not a rulebook rule (it does not cover summons made during
+		// this step): summons made by the reactions resolve in another pass of the same step, so no summon event is left
+		// pending when the action ends.
+		private void SummonResolutionStep()
+		{
+			while (SummonedMinions.Count != 0)
+			{
+				if (!TriggerManager.HasOnSummonTrigger) { SummonedMinions.Clear(); return; }
+				if (!SpendCleanupCycle()) return;
+				var batch = SummonedMinions.ToArray();
+				SummonedMinions.Clear();
+				using var summonCatchUp = Resolution.Enter(ResolutionKind.SummonOn);
+				TaskQueue.StartEvent();
+				foreach (Minion minion in batch)
+					TriggerManager.OnSummonTrigger(minion);
+				ProcessTasks();
+				TaskQueue.EndEvent();
+			}
 		}
 
 

@@ -20,6 +20,7 @@ internal static partial class PoweredUpGlowTests
         internal SabberStoneCore.Model.Game Game => Match.Game;
         internal Controller Player => Game.Player1;
         internal IEnumerable<PowerHistoryData> Entries => packets.SelectMany(packet => packet.List);
+        internal IReadOnlyList<PegasusGame.PowerHistory> Packets => packets;
 
         internal Fixture()
         {

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../../plugin/NativeTestControlBoardTrace.cs" Link="NativeTestControlBoardTrace.cs" />
+  </ItemGroup>
+  <Target Name="ExtractProtocol" BeforeTargets="CoreCompile">
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_protocol.py&quot; &quot;$(IntermediateOutputPath)Protocol.g.cs&quot;" />
+    <ItemGroup><Compile Include="$(IntermediateOutputPath)Protocol.g.cs" /></ItemGroup>
+  </Target>
+</Project>

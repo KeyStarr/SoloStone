@@ -155,7 +155,7 @@ public static class Program
 
     private sealed class UsageException(string message) : ArgumentException(message);
 
-    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run] [--allow-state-change] [--allow-behaviour-change]";
+    private const string RerecordUsage = "goldens rerecord <file> [--only <game-id>...] [--dry-run] [--allow-state-change] [--allow-behaviour-change] [--renew-random-pools]";
 
     private static void ValidateSuite(GoldenSuite data)
     {
@@ -172,10 +172,13 @@ public static class Program
     private static int Rerecord(string path, string[] rest)
     {
         var only = new List<string>();
-        bool dryRun = false, allowBehaviour = false, allowState = false;
+        bool dryRun = false, allowBehaviour = false, allowState = false, renewPools = false;
         for (int i = 0; i < rest.Length; i++)
         {
             if (rest[i] == "--dry-run") dryRun = true;
+            // Moves records that predate the random pool policy onto it (and stamps them). Without it a re-record keeps the
+            // record's own pools, so repairing a hash never changes which cards a random effect can roll.
+            else if (rest[i] == "--renew-random-pools") renewPools = true;
             else if (rest[i] == "--allow-behaviour-change") allowBehaviour = true;
             else if (rest[i] == "--allow-state-change") allowState = true;
             else if (rest[i] == "--only")
@@ -212,7 +215,11 @@ public static class Program
             GameRecord old = data.Games[i];
             if (only.Count > 0 && !only.Contains(old.Id)) continue;
             scope.Add(i);
-            if (Check(old, false, out GameRecord current))
+            if (renewPools && data.Schema == 2) throw new UsageException("--renew-random-pools: schema 2 files stay on the frozen pools");
+            // A record that predates the policy is replayed again under the new one, whether or not its old replay matches.
+            GameRecord current = null;
+            bool renewThis = renewPools && old.RandomPoolPolicyVersion == null;
+            if (!renewThis && Check(old, false, out current))
             {
                 if (old.DecisionsSha == null || old.HistorySha != null) converted[i] = current.DecisionsSha;
                 continue;
@@ -227,7 +234,7 @@ public static class Program
             }
             try
             {
-                GameRecord fresh = Recreate(old, data.Schema);
+                GameRecord fresh = Recreate(old, data.Schema, renewPools);
                 replaced[i] = fresh;
                 string line = Classify(old, fresh, out bool behaviour, out bool stateMoved);
                 if (behaviour) behavioural.Add(old.Id);
@@ -322,6 +329,8 @@ public static class Program
         var others = new List<string>();
         if (old.PoolPolicyVersion != fresh.PoolPolicyVersion) others.Add($"poolPolicyVersion {old.PoolPolicyVersion ?? "none"}->{fresh.PoolPolicyVersion ?? "none"}");
         if (old.DarkGiftPolicyVersion != fresh.DarkGiftPolicyVersion) others.Add($"darkGiftPolicyVersion {old.DarkGiftPolicyVersion ?? "none"}->{fresh.DarkGiftPolicyVersion ?? "none"}");
+        // A record written before the policy existed gets it stamped on renewal; only a different recorded version is a change.
+        if (old.RandomPoolPolicyVersion != null && old.RandomPoolPolicyVersion != fresh.RandomPoolPolicyVersion) others.Add($"randomPoolPolicyVersion {old.RandomPoolPolicyVersion ?? "none"}->{fresh.RandomPoolPolicyVersion ?? "none"}");
         if (old.Failure != null) others.Add("recorded failure dropped");
         int actions = Differing(old.Actions, fresh.Actions), legal = Differing(old.LegalShas, fresh.LegalShas);
         behaviour = actions > 0 || legal > 0 || old.Turns != fresh.Turns || old.Winner != fresh.Winner || others.Count > 0;
@@ -344,7 +353,7 @@ public static class Program
     // snapshot the old record names. Schema 2 records no pool, so it runs unpinned, under today's pool and Dark Gift rules,
     // and is stored without those fields. Replaying it later uses the legacy rules, so the whole-file re-check after
     // re-recording is what guards a schema 2 game: if the legacy replay does not reproduce it, nothing is written.
-    private static GameRecord Recreate(GameRecord old, int schema)
+    private static GameRecord Recreate(GameRecord old, int schema, bool renewPools)
     {
         GameRecord fresh = Cases(old.Suite, (old.Seed, old.Seed), old.Policy)
             .FirstOrDefault(c => c.Player == old.Player && c.Opponent == old.Opponent)
@@ -354,7 +363,8 @@ public static class Program
             throw new InvalidOperationException($"rebuilt case {fresh.Id} differs from the record {old.Id}");
         fresh.ClonePoints = old.ClonePoints;
         OfflinePoolManifest pools = schema == 3 ? PoolSnapshots.ForReplay(old.PoolManifestHash) : null;
-        Simulation.Finish(fresh, Simulation.Run(fresh, pools: pools));
+        // A record without the policy version stays on the frozen pools unless it is being renewed.
+        Simulation.Finish(fresh, Simulation.Run(fresh, pools: pools, frozenRandomPools: old.RandomPoolPolicyVersion == null && !renewPools));
         if (schema == 3)
         {
             if (fresh.PoolManifestHash != old.PoolManifestHash) throw new InvalidOperationException("pool snapshot was not used");
@@ -366,6 +376,7 @@ public static class Program
             fresh.PoolPolicyVersion = null;
             fresh.PoolManifestHash = null;
             fresh.DarkGiftPolicyVersion = null;
+            fresh.RandomPoolPolicyVersion = null;
         }
         Validate(fresh);
         return fresh;
@@ -482,6 +493,16 @@ public static class Program
         int probes = 0, completed = 0, deterministic = 0;
         var reprintsPlayed = new HashSet<string>(StringComparer.Ordinal);
         var reprintsTraded = new HashSet<string>(StringComparer.Ordinal);
+#if SOURCE_ENGINE
+        // Census of the legacy random tasks: which cards reach the match random pool, and whether any live
+        // (non-replay) game takes the frozen legacy branch. None may.
+        var poolCallers = new System.Collections.Concurrent.ConcurrentDictionary<string, int>(StringComparer.Ordinal);
+        int legacyPoolCalls = 0;
+        SabberStoneCore.Model.RandomPools.MatchRandomPool.Census = (card, legacy) => {
+            poolCallers.AddOrUpdate(card ?? "(no source)", 1, (_, n) => n + 1);
+            if (legacy) System.Threading.Interlocked.Increment(ref legacyPoolCalls);
+        };
+#endif
         for (int i = 0; i < count; i++)
         {
             string first = ids[random.Index(ids.Length)], second = ids[random.Index(ids.Length)];
@@ -536,6 +557,11 @@ public static class Program
             }
             if ((i + 1) % 25 == 0) Console.Error.WriteLine($"fuzz progress {i + 1}/{count}; failed={failures.Values.Sum()}");
         }
+#if SOURCE_ENGINE
+        SabberStoneCore.Model.RandomPools.MatchRandomPool.Census = null;
+        Console.Error.WriteLine($"fuzz pool census: legacyBranchCalls={legacyPoolCalls}; callers={poolCallers.Count} [{string.Join(",", poolCallers.OrderBy(p => p.Key, StringComparer.Ordinal).Select(p => p.Key + "x" + p.Value))}]");
+        if (legacyPoolCalls != 0) { failures["pool.legacy-branch-in-live-game"] = legacyPoolCalls; }
+#endif
         Console.Error.WriteLine($"fuzz: games={count}; failures={failures.Values.Sum()}; completed={completed}; deterministic={deterministic}; cloneProbes={cloneProbes.ToString().ToLowerInvariant()}; cloneProbesPassed={probes}; reprintsPlayed={reprintsPlayed.Count}; reprintsTraded={JsonSerializer.Serialize(reprintsTraded.Order(StringComparer.Ordinal))}; invariants={JsonSerializer.Serialize(failures)}; wall={watch.Elapsed.TotalSeconds:F3}s");
         return failures.Count == 0 ? 0 : 1;
     }

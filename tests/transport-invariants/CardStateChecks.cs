@@ -310,10 +310,18 @@ internal static class CardStateChecks
         int wake = rows.FindIndex(r => r.HasTagChange && r.TagChange.Entity == minion.Id
             && r.TagChange.Tag == (int)GameTag.DORMANT && r.TagChange.Value == 0);
         Check(wake >= 0, minion.Card.Id + " wake row exists");
-        var changes = rows.Skip(wake + 1).TakeWhile(r => r.HasTagChange && r.TagChange.Entity == minion.Id
+        // The client chooses the Taunt frame from the entity's Immune state (UNTOUCHABLE counts) when TAUNT arrives, so the
+        // restores follow the DORMANT_VISUAL/UNTOUCHABLE clears and nothing may clear them afterwards (#206, translucent frame).
+        bool Wakes(PowerHistoryData r) => r.HasTagChange && r.TagChange.Entity == minion.Id
+            && (r.TagChange.Tag == (int)GameTag.DORMANT_VISUAL || r.TagChange.Tag == (int)GameTag.UNTOUCHABLE);
+        var after = rows.Skip(wake + 1).SkipWhile(Wakes).ToList();
+        var changes = after.TakeWhile(r => r.HasTagChange && r.TagChange.Entity == minion.Id
             && NativeMatch.IsDormantVisualTag((GameTag)r.TagChange.Tag)).ToArray();
         Check(restored.All(tag => changes.Any(r => r.TagChange.Tag == (int)tag && r.TagChange.Value == minion[tag])),
-            minion.Card.Id + " keyword restores immediately after DORMANT=0 in same block");
+            minion.Card.Id + " keyword restores right after the DORMANT_VISUAL/UNTOUCHABLE clears in same block");
+        Check(rows.Skip(wake + 1).Take(rows.Count - after.Count - wake - 1).Any(r => Wakes(r) && r.TagChange.Tag == (int)GameTag.UNTOUCHABLE && r.TagChange.Value == 0),
+            minion.Card.Id + " UNTOUCHABLE=0 reaches the client before the keyword restore");
+        Check(!after.Any(Wakes), minion.Card.Id + " no UNTOUCHABLE/DORMANT_VISUAL change after the keyword restore");
         Check(restored.All(tag => session.Client.Entities[minion.Id].Get(tag) == minion[tag]), minion.Card.Id + " awake keywords visible");
     }
     private static void DormantKeywordVisuals()

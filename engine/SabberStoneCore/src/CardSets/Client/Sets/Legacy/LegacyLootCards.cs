@@ -81,7 +81,7 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
             register(2075, "GVG_107", card => {
                 card.Power = new Power { PowerTask = new CustomTask((game, controller, source, target, stack) => {
                     var keywords = new[] { GameTag.WINDFURY, GameTag.TAUNT, GameTag.DIVINE_SHIELD };
-                    foreach (Minion minion in controller.BoardZone.Where(m => m != source).ToList())
+                    foreach (Minion minion in controller.BoardZone.Interactable.Where(m => m != source).ToList())
                     {
                         game.OnRandomHappened(true);
                         new SetGameTagTask(keywords[game.Random.Next(keywords.Length)], 1, EntityType.TARGET).Process(game, controller, source, minion);
@@ -171,7 +171,7 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
                 card.Power = new Power { PowerTask = new CustomTask((game, controller, source, target, stack) => {
                     for (int i = 0; i < 80; i++)
                     {
-                        var minions = controller.BoardZone.Concat(controller.Opponent.BoardZone)
+                        var minions = controller.BoardZone.Interactable.Concat(controller.Opponent.BoardZone.Interactable)
                             .Where(m => !m.ToBeDestroyed && m.Health > 0 && !m.IsImmune).ToList();
                         if (minions.Count == 0) return;
                         game.OnRandomHappened(true);

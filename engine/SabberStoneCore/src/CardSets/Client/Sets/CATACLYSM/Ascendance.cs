@@ -26,9 +26,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 var work = new TaskStack();
-                foreach (var minion in c.BoardZone.GetAll().Where(m => !m.IsDormant).ToArray())
+                foreach (var minion in c.BoardZone.Interactable)
                 {
-                    if (minion.Zone != c.BoardZone || minion.IsDead || minion.IsDormant) continue;
+                    if (minion.Zone != c.BoardZone || minion.IsDead) continue;
                     var original = minion.Card;
                     int cost = minion.Cost;
                     work.Number = cost >= 10 ? cost : cost + 1;

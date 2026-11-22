@@ -36,7 +36,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                                 if (g.HistoryFacts.Query.Discards().Skip((int)before).Any(f => f.EntityId == chosen.Id))
                                 {
                                     PayloadRules.StoreCard(s, Discards, identity, PayloadPolicy.Copy);
-                                    new EffectContext(g, c.Id, s.Id).SummonRightOfLocation("JAIL_887t3");
+                                    new EffectContext(g, c.Id, s.Id).SummonAtLocation("JAIL_887t3");
                                 }
                             }
                             s[GameTag.LOCATION_ACTION_COOLDOWN] = 1;
@@ -48,7 +48,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         new EntityData { [GameTag.DISPLAYED_CREATOR] = s.Id }, c.SetasideZone);
                     foreach (var entry in PayloadRules.Entries(s, Discards))
                         PayloadRules.StoreCard(freed, Discards, entry.Card);
-                    int position = s.Zone == c.BoardZone ? ((BoardObject)s).ZonePosition + 1 : ((BoardObject)s).LastBoardPosition;
+                    int alternate = 0;
+                    int position = SummonTask.GetPosition(s, SummonSide.LEFT, 0, ref alternate);
                     Generic.RemoveFromZone(c, freed);
                     Generic.SummonBlock(g, freed, Math.Clamp(position, 0, c.BoardZone.SlotCount), s);
                 })

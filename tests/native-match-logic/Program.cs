@@ -40,6 +40,7 @@ internal static partial class Program
             ["--fair-view-only"] = FairViewChecks,
             ["--match-event-log-only"] = MatchEventLogChecks,
             ["--controller-admission-only"] = ControllerAdmissionControls,
+            ["--hero-replacement-only"] = HeroReplaceHistoryProof.Run,
         };
         var unknown = args.Where(arg => !slices.ContainsKey(arg)).ToArray();
         if (unknown.Length != 0) throw new ArgumentException("Unknown argument: " + string.Join(" ", unknown));
@@ -53,6 +54,8 @@ internal static partial class Program
         DebugScenarioLanePaths();
         AcceptsHeroCardScenario();
         NpcDeckScenario();
+        DebugScenarioCorpses();
+        DebugScenarioCorpsesQuest();
         DebugScenarioFile();
         DebugScenarioNeverSettles();
         Console.WriteLine("PASS debug scenario lane paths, hero card scenario, npcDeck, scenario file and never-settles");

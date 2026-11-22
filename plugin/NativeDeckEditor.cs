@@ -56,17 +56,34 @@ internal static partial class NativeUIProbe
         if (!active) return true;
         long candidateId = Profile.NextCustomDeckId;
         string hero = NativeUIProjection.CreateRequestHero(heroCardID, LocalShop.Default.HeroSkinClass);
+        // A pasted deck code is served only with the plan its import made (PlanDeckCodeImport); that plan fills the draft.
+        DeckCodePlan import = deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_PASTED_DECK && pastedDeckHashString != null
+            ? TakePendingImport() : null;
         bool allowed = NativeUIProjection.CanCreateDraft(deckType == DeckType.NORMAL_DECK,
-            deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_NORMAL && pastedDeckHashString == null,
+            NativeUIProjection.OwnsCreateSource(deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_NORMAL,
+                deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_PASTED_DECK, pastedDeckHashString != null, import != null),
             hero != null && Heroes.Contains(hero), Options.GetFormatType() == LocalDeckFormat,
             Profile.CustomDecks.Count, SessionLoanerKeys().Count());
+        // The import never switches the format: the client's own format change on paste is coerced back by NativeFormatLock.
+        if (import != null && hero != null && hero != import.Hero) allowed = false;
+        if (import != null && NativeUIProjection.OwnsCreateRequest(active, CurrentCollectionScene(), true, isHeroOverridden) && !allowed)
+        {
+            // A planned import the create gates refuse (deck cap, hero mismatch) is a refusal the player sees, not an exception in the client.
+            ReportImportRefused(ImportRefusalText(Profile.CustomDecks.Count), "refused:gate");
+            return false;
+        }
         if (!NativeUIProjection.OwnsCreateRequest(active, CurrentCollectionScene(), allowed, isHeroOverridden))
             throw new InvalidOperationException("Unsupported local deck creation request.");
 
-        if (!NativeUIProjection.TryCreateDraft(() => Profile.CreateDraft(name, hero),
-            error => ReportDeckError("create", candidateId, error), out LocalCustomDeck saved)) return false;
+        // The import's draft, cards and sideboards land in the one commit; a refusal or failure leaves no deck behind.
+        if (!NativeUIProjection.TryCreateDraft(() => import == null ? Profile.CreateDraft(name, hero)
+                : Profile.CreateDraftFromCode(ImportDeckName(name, hero, import), hero, import.Cards, import.Sideboards),
+            error => { if (import != null) { LastImportStage = "commit-failed"; LastImportError = Unwrap(error).Message; } ReportDeckError(import == null ? "create" : "import", candidateId, error); },
+            out LocalCustomDeck saved)) return false;
+        if (import != null) importCreated = true;
         try
         {
+            if (import != null) importProjections[saved.Id] = import;
             decks.Add(saved.Id, LocalProfile.LedgerDeck(saved.Name, saved.Hero, saved.Cards, saved.Sideboards, false));
             var header = ExpectedHeader(saved.Id);
             editedDraftId = saved.Id;
@@ -75,6 +92,12 @@ internal static partial class NativeUIProbe
             MethodInfo created = Required(typeof(CollectionManager), "OnDeckCreated",
                 new[] { typeof(NetCache.DeckHeader), typeof(int?) });
             Processor.ScheduleCallback(0.5f, false, _ => created.Invoke(__instance, new object[] { header, null }));
+            if (import != null)
+            {
+                // Only the report: a throw here must not hide the saved deck.
+                try { RecordImport(saved, import); }
+                catch (Exception recordError) { log.LogError("NATIVE_DECK import record failed: " + recordError); }
+            }
         }
         catch (Exception error)
         {
@@ -403,12 +426,6 @@ internal static partial class NativeUIProbe
         var error = new InvalidOperationException("Personal deck delete was not committed before native mutation: " + deckId);
         ReportDeleteFailure(deckId, error, null);
         return false;
-    }
-
-    private static bool BlockDeckImport()
-    {
-        if (active) log.LogWarning("NATIVE_DECK blocked clipboard import");
-        return !active;
     }
 
     private static bool UnlockLocalDeckBoxSlots(ref bool __result)

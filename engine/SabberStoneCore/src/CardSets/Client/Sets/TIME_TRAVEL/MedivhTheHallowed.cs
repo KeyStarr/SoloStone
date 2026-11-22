@@ -23,7 +23,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 Aura=new AdaptiveCostEffect(s=>0,EffectOperator.SET,
                     new SelfCondition(s=>s.Controller.BoardZone.GetLocations().Any(l=>l.Card.Id=="TIME_890t2"))),
                 PowerTask=new CustomTask((g,c,s,t,stack)=> {
-                    var others=c.BoardZone.Concat(c.Opponent.BoardZone).Where(m=>m.Id!=s.Id).ToArray();
+                    var others=c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(m=>m.Id!=s.Id && !m.Untouchable).ToArray();
                     foreach(var minion in others) minion.Silence();
                     foreach(var minion in others) minion.ToBeDestroyed=true;
                 }) };
@@ -33,7 +33,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true;
             card.Power=new Power {
-                Aura=new AdaptiveCostEffect(s=>0,EffectOperator.SET,new SelfCondition(s=>s.Controller.BoardZone.Any(m=>m.Card.Id=="TIME_890"))),
+                Aura=new AdaptiveCostEffect(s=>0,EffectOperator.SET,new SelfCondition(s=>s.Controller.BoardZone.AnyInteractable(m=>m.Card.Id=="TIME_890"))),
                 Trigger=new Trigger(TriggerType.EQUIP_WEAPON) { TriggerSource=TriggerSource.SELF,
                     SingleTask=new CustomTask((g,c,s,t,stack)=>new Aura(AuraType.CONTROLLER,
                         new Effect(GameTag.SPELLPOWER_DOUBLE,EffectOperator.ADD,1)).Activate((IPlayable)s)) } };
@@ -50,7 +50,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         for(int i=0;i<2 && !c.BoardZone.IsFull;i++) {
                             var chosen=OfflineCardPools.Pick(g,CombatTimeTravelPools.EightCostMinion(),c.HeroClass,120068, PoolDestination.Summon);
                             if(chosen==null) break;
-                            g.OnRandomHappened(true); ctx.Summon(chosen.Id);
+                            g.OnRandomHappened(true); ctx.SummonAtLocation(chosen.Id);
                             g.DeathProcessingAndAuraUpdate();
                         }
                     }) } };

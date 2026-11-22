@@ -50,6 +50,10 @@ namespace SabberStoneCore.Model
         [NonSerialized] private List<HistoryResolutionIndex[]> _indexChunks=new List<HistoryResolutionIndex[]>();
         [NonSerialized] private HistoryResolutionIndex[] _indexTail=new HistoryResolutionIndex[ChunkSize];
         private int _projectionOwner;
+        // The fair view's refusal to answer from private history (the same prefix the AI's FairHistory.IsPrivate matches).
+        internal static bool IsPrivateRefusal(Exception e)=>e is NotSupportedException && e.Message.StartsWith("Private historical ",StringComparison.Ordinal);
+        // Fair view: another player's cards in HAND show displays that need residence the viewer cannot know (Card.UpdateHistoryDisplays).
+        internal bool ProjectedAwayFrom(int controllerId)=>_projected && controllerId!=_projectionOwner;
         internal int ResidenceEntity(Entities.IPlayable entity,Zone zone,bool entered)
         {
             if(!_projected) return entity.Id;

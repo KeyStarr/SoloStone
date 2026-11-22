@@ -32,18 +32,22 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			in IPlayable target,
 			in TaskStack stack = null)
 		{
-			List<Card> cardsList;
+			// The match's pool; a summon never rolls its own source in the current policy.
+			var pool = Cards.RandomPool(game, PoolDestination.Summon, source);
+			IReadOnlyList<Card> cardsList;
 			if (Tag == GameTag.COST)
 			{
-				Cards.CostMinionCards(game.FormatType).TryGetValue(stack.Number, out cardsList);
+				pool.TryMinionsOfCost(stack.Number, out var bucket);
+				cardsList = bucket;
 				if (cardsList == null)
 					return TaskState.STOP;
+				cardsList = pool.WithoutSource(cardsList, source);
+				if (cardsList.Count == 0) return TaskState.STOP;
 			}
 			else
 			{
-				IEnumerable<Card> cards = game.FormatType == FormatType.FT_STANDARD ? Cards.AllStandard : Cards.AllWild;
 				int num = stack.Number;
-				cardsList = cards.Where(p => p.Type == CardType.MINION && p[Tag] == num).ToList();
+				cardsList = pool.WithoutSource(pool.All.Where(p => p.Type == CardType.MINION && p[Tag] == num).ToList(), source);
 				if (!cardsList.Any())
 					return TaskState.STOP;
 			}

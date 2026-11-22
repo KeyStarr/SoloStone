@@ -4,7 +4,8 @@ using System.IO;
 using System.Text;
 
 // SoloStone's frozen card text in the client's language (facts/README.md, "Locale files"). A translation is used only while the
-// engine still plays the English text it was made from (its Key); otherwise the card shows the engine's English. One file per non-English locale,
+// engine still plays the English text it was made from (its Key); otherwise the card shows the engine's English. For a card the engine
+// rewrites to the client's current text, the file's translation is of that text and its Key is of the engine's English. One file per non-English locale,
 // embedded in the plugin; only the running locale's file is ever read, and only on first use. Pure (no Unity, no engine types),
 // so the launcher tests run it. Keyed by engine card ID; LocalNativeText maps the client's native ID to it.
 // A closed-schema reader for the same reason CardFacts is one: Unity's Mono has no usable JSON serializer.

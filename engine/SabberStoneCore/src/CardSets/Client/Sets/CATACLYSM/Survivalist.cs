@@ -14,7 +14,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { Aura = new Aura(AuraType.SELF, new Effect(GameTag.IMMUNE, EffectOperator.ADD, 1)) {
-                Restless = true, Condition = new SelfCondition(me => me.Controller.BoardZone.Count == 1)
+                Restless = true, Condition = new SelfCondition(me => !me.Controller.BoardZone.AnyInteractable(m => m != me))
             } };
         }
     }

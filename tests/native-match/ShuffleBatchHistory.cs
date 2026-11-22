@@ -95,7 +95,8 @@ internal static partial class Program
         foreach (string[] picks in new[] { new[] { "CATA_190t13", "CATA_190t10" }, new[] { "CATA_190t10", "CATA_190t13" } })
             MultiPickEnthrall(bot, picks);
         foreach (bool bot in new[] { false, true }) FeignDeathDoctor(bot);
-        Console.WriteLine("PASS shuffle batching: Deathwing Enthrall (single and multi-pick), Azshara's Triumph, Feign Death mid-game, Chainbreaker Hogger Start of Game, both controllers; one spawn scope per effect, hidden identities");
+        foreach (bool bot in new[] { false, true }) { ImpGangStoogeBottom(bot); MeadowstriderBottom(bot); MerchSellerTop(bot); }
+        Console.WriteLine("PASS shuffle batching: Deathwing Enthrall (single and multi-pick), Azshara's Triumph, Feign Death mid-game, Imp Gang Stooge and Meadowstrider bottom inserts, Merch Seller top insert, Chainbreaker Hogger Start of Game, both controllers; one spawn scope per effect, hidden identities");
     }
 
     // Deathwing tier 1: two picks, so a Choice leaves the POWER block open across the packet holding Enthrall's scope.
@@ -152,6 +153,80 @@ internal static partial class Program
         capture.SerializeAll();
     }
 
+    // #230: a fresh card put at a fixed deck position (bottom or top) flies in with the same spawn scope as a shuffle.
+    private static void ImpGangStoogeBottom(bool bot)
+    {
+        var (match, capture) = AnimationMatch(bot);
+        var owner = match.Game.CurrentPlayer;
+        var stooge = EngineEntity.FromCard(owner, Cards.FromId("JAIL_399"), zone: owner.BoardZone);
+        var feign = EngineEntity.FromCard(owner, Cards.FromId("GVG_026"), zone: owner.HandZone);
+        feign.Cost = 0;
+        var before = owner.DeckZone.Select(c => c.Id).ToHashSet();
+        FlushFieldHistory(match);
+        int cursor = capture.Packets.Count;
+        InvokeProcess(match, owner.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == feign.Id));
+        FlushFieldHistory(match);
+        string label = "Feign Death on Imp Gang Stooge/bot=" + bot;
+        var imps = owner.DeckZone.Where(c => !before.Contains(c.Id)).ToArray();
+        Check(imps.Length == 2 && imps.All(c => c.Card.Id == "JAIL_399t1"), label + " puts two Grandmother Imps in the deck");
+        Check(owner.DeckZone[0] == imps.OrderByDescending(c => c.Id).First() && owner.DeckZone[1] == imps.OrderBy(c => c.Id).First(), label + " imps stay at the bottom of the deck, the second under the first");
+        var entries = WireHistory(capture, cursor);
+        DumpShuffleBatch("stooge-bot=" + bot, entries);
+        AssertBatchedShuffle(entries, imps, owner, stooge.Id, BlockType.TRIGGER, label, revealed: true);
+        AssertShufflePackets(capture, cursor, label);
+        AssertGeneratedShuffleAdmission(capture);
+        capture.SerializeAll();
+    }
+
+    private static void MeadowstriderBottom(bool bot)
+    {
+        var (match, capture) = AnimationMatch(bot);
+        var owner = match.Game.CurrentPlayer;
+        var strider = EngineEntity.FromCard(owner, Cards.FromId("EDR_978"), zone: owner.BoardZone);
+        var feign = EngineEntity.FromCard(owner, Cards.FromId("GVG_026"), zone: owner.HandZone);
+        feign.Cost = 0;
+        var before = owner.DeckZone.Select(c => c.Id).ToHashSet();
+        FlushFieldHistory(match);
+        int cursor = capture.Packets.Count;
+        InvokeProcess(match, owner.Options().First(t => t.PlayerTaskType == PlayerTaskType.PLAY_CARD && t.Source?.Id == feign.Id));
+        FlushFieldHistory(match);
+        string label = "Feign Death on Meadowstrider/bot=" + bot;
+        var copies = owner.DeckZone.Where(c => !before.Contains(c.Id)).ToArray();
+        Check(copies.Length == 1 && copies[0].Card.Id == "EDR_978" && copies[0].Cost == 1 && owner.DeckZone[0] == copies[0],
+            label + " puts a 1-Cost Meadowstrider at the bottom of the deck");
+        var entries = WireHistory(capture, cursor);
+        DumpShuffleBatch("meadowstrider-bot=" + bot, entries);
+        AssertBatchedShuffle(entries, copies, owner, strider.Id, BlockType.TRIGGER, label, revealed: true);
+        AssertShufflePackets(capture, cursor, label);
+        AssertGeneratedShuffleAdmission(capture);
+        capture.SerializeAll();
+    }
+
+    // The random spell goes on top of the opponent's deck and stays hidden from both seats.
+    private static void MerchSellerTop(bool bot)
+    {
+        var (match, capture) = AnimationMatch(bot);
+        var owner = match.Game.CurrentPlayer;
+        var seller = EngineEntity.FromCard(owner, Cards.FromId("CORE_ETC_111"), zone: owner.BoardZone);
+        var destination = owner.Opponent;
+        FlushFieldHistory(match);
+        int cursor = capture.Packets.Count;
+        InvokeProcess(match, owner.Options().Single(t => t.PlayerTaskType == PlayerTaskType.END_TURN));
+        FlushFieldHistory(match);
+        string label = "Merch Seller turn end/bot=" + bot;
+        var spell = match.Game.IdEntityDic.Values.OfType<IPlayable>().Where(c => c[GameTag.DISPLAYED_CREATOR] == seller.Id).ToArray();
+        Check(spell.Length == 1 && spell[0].Card.Type == CardType.SPELL && spell[0].Controller == destination, label + " puts one spell in the opponent's deck");
+        var entries = WireHistory(capture, cursor);
+        DumpShuffleBatch("merch-seller-bot=" + bot, entries);
+        // The opponent draws it at once; the spawn scope is what is checked, up to the end of that scope.
+        int scopeEnd = entries.FindIndex(e => e.HasSubSpellEnd);
+        Check(scopeEnd >= 0, label + " spawn scope present");
+        if (scopeEnd >= 0) AssertBatchedShuffle(entries.Take(scopeEnd + 1).ToList(), spell, destination, seller.Id, BlockType.TRIGGER, label);
+        AssertShufflePackets(capture, cursor, label);
+        AssertGeneratedShuffleAdmission(capture);
+        capture.SerializeAll();
+    }
+
     private static List<PowerHistoryData> WireHistory(Capture capture, int cursor = 0) =>
         capture.HistorySnapshots(cursor).SelectMany(packet => packet.List).ToList();
 
@@ -168,9 +243,10 @@ internal static partial class Program
     // One zero-target spawn scope from the destination hero, inside the causal block, holding every inserted card's
     // anonymous DECK FULL, HIDE and TARGET, and no nested block or foreign rows.
     private static void AssertBatchedShuffle(List<PowerHistoryData> entries, IPlayable[] cards, Controller destination,
-        int causal, BlockType causalType, string label)
+        int causal, BlockType causalType, string label, bool revealed = false)
     {
         var ids = cards.Select(c => c.Id).ToHashSet();
+        bool shownToOwner = revealed && destination == destination.Game.Player1;
         int full = entries.FindIndex(e => e.HasFullEntity && ids.Contains(e.FullEntity.Entity));
         int start = full < 1 ? -1 : entries.FindLastIndex(full - 1, e => e.HasSubSpellStart || e.HasSubSpellEnd);
         Check(start >= 0 && entries[start].HasSubSpellStart, label + " first insertion opens a spawn scope");
@@ -198,13 +274,16 @@ internal static partial class Program
             Check(f >= 0 && h > f && inside[h].HideEntity.Zone == (int)EngineZone.DECK && h + 1 < inside.Count && inside[h + 1].HasMetaData
                 && (int)inside[h + 1].MetaData.Type == (int)MetaDataType.TARGET && inside[h + 1].MetaData.Info.SequenceEqual(new[] { card.Id }),
                 label + " FULL, HIDE then exact TARGET for " + card.Id);
-            Check(entries.Where(e => SnapshotEntity(e) == card.Id).All(e => string.IsNullOrEmpty(SnapshotName(e))
+            Check(entries.Where(e => SnapshotEntity(e) == card.Id && !(shownToOwner && e.HasShowEntity)).All(e => string.IsNullOrEmpty(SnapshotName(e))
                 && HasOnlyHiddenTags(e.HasFullEntity ? e.FullEntity.Tags : e.ShowEntity.Tags)), label + " hidden identity and definition tags for " + card.Id);
+            // A named token is shown to its human owner inside the scope; the opponent seat gets an anonymous SHOW (checked above).
+            int shows = inside.Count(e => e.HasShowEntity && e.ShowEntity.Entity == card.Id);
+            Check(shows == (revealed ? 1 : 0), label + " SHOW of " + card.Id + " only for a revealed card");
         }
         // Rows now inside the scope stay as hidden as the cards: no name, only the hidden-row tags, on every row of a buff.
         var game = cards[0].Game;
         var buffs = game.IdEntityDic.Values.OfType<SabberStoneCore.Model.Entities.Enchantment>().Where(e => e.Target != null && ids.Contains(e.Target.Id)).ToArray();
-        foreach (var row in inside.Where(e => e.HasFullEntity || e.HasShowEntity))
+        foreach (var row in inside.Where(e => e.HasFullEntity || e.HasShowEntity && !(shownToOwner && ids.Contains(e.ShowEntity.Entity))))
             Check(string.IsNullOrEmpty(SnapshotName(row)) && HasOnlyHiddenTags(row.HasFullEntity ? row.FullEntity.Tags : row.ShowEntity.Tags),
                 label + " in-scope row " + SnapshotEntity(row) + " is anonymous with only hidden tags");
         foreach (var buff in buffs)

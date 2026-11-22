@@ -59,9 +59,14 @@ internal static partial class Program
         FlushFieldHistory(match); int cursor = capture.Packets.Count;
         var copy = (Minion)Generic.Copy(p, p.Hero, original, SabberStoneCore.Enums.Zone.PLAY);
         FlushFieldHistory(match);
-        var shown = History(capture, cursor).Last(e => e.HasShowEntity && e.ShowEntity.Entity == copy.Id);
-        Check(SnapshotTag(shown, GameTag.SILENCED) == 1 && SnapshotTag(shown, GameTag.DIVINE_SHIELD) == 1,
-            "copy reveal retains Silence and re-granted Shield using pinned client keyword tags");
+        // A copy created straight into PLAY carries its state in its FULL_ENTITY and gets no SHOW_ENTITY, as in retail
+        // (HearthSim hsreplay-test-data data/mirror_entity.log:1461-1478: Mirror Entity's copy is a FULL_ENTITY with ZONE=PLAY).
+        var copied = History(capture, cursor).ToArray();
+        Check(!copied.Any(e => e.HasShowEntity && e.ShowEntity.Entity == copy.Id), "copy created in PLAY gets no SHOW_ENTITY");
+        var shown = copied.Last(e => e.HasFullEntity && e.FullEntity.Entity == copy.Id);
+        Check(SnapshotTag(shown, GameTag.ZONE) == (int)SabberStoneCore.Enums.Zone.PLAY
+            && SnapshotTag(shown, GameTag.SILENCED) == 1 && SnapshotTag(shown, GameTag.DIVINE_SHIELD) == 1,
+            "copy's FULL_ENTITY is in PLAY and retains Silence and re-granted Shield using pinned client keyword tags");
         cursor = capture.Packets.Count;
         copy.TakeDamage(g.Player2.Hero, 1); FlushFieldHistory(match);
         Check(History(capture, cursor).Any(e => e.HasTagChange && e.TagChange.Entity == copy.Id

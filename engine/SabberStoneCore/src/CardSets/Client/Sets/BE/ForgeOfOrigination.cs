@@ -25,7 +25,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 Target = LocationTargetKind.None, RequiresFreeSlot = true,
                 Task = new CustomTask((g, c, s, t, stack) => {
                     var ctx = new EffectContext(g, c.Id, s.Id);
-                    int golem = ctx.SummonRightOfLocation("BE_561t");
+                    int golem = ctx.SummonAtLocation("BE_561t");
                     if (golem != 0 && c.Hero.Armor >= 3)
                     {
                         c.Hero.Armor -= 3;

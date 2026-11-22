@@ -78,10 +78,12 @@ internal sealed class BoardActorFaultTracker
             + (time - sinceTime).ToString("0.0", CultureInfo.InvariantCulture));
 }
 
-// No Unity/client types: no suite compiles this file; the launcher tests (installer/SoloStone.Launcher.Tests) read it as text.
+// No Unity/client types: the test-control suite compiles its request validation (tests/test-control/extract_protocol.py),
+// and the launcher tests (installer/SoloStone.Launcher.Tests) read it as text.
 internal static class TestControlProtocol
 {
     internal const int MaxLine = 64 * 1024, MaxQueue = 32, MaxResponse = 1024 * 1024, MaxLedger = 1024;
+    internal const int BoardTraceMaxFrames = 1200;
     internal const int MulliganReadyFrames = 10, MulliganSendSeconds = 15, ChoiceReadyFrames = 3, EndTurnReadyFrames = 2;
     internal static readonly UTF8Encoding Utf8 = new UTF8Encoding(false, true);
     private const string StringToken = "\"(?:[^\"\\\\\\x00-\\x1f]|\\\\(?:[\"\\\\/bfnrt]|u[0-9a-fA-F]{4}))*\"";
@@ -222,9 +224,9 @@ internal sealed class ControlRequest
     internal readonly string Id, Command, Hash;
     internal readonly JsonNode Fields;
     internal readonly DateTime ReceivedUtc = DateTime.UtcNow;
-    internal bool Mutation => Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
+    internal bool Mutation => Command == "cancel-target" || Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
         || Command == "squelch" || Command == "unsquelch" || Command == "emote" || Command == "npc-emote" || Command == "npc-concede" || Command == "human-defeat" || Command == "premium-unlock-prepare" || Command == "ui-hover" || Command == "ui-unhover" || Command == "ui-escape" || Command == "choice-click" || Command == "entity-drag" || Command == "ui-drag" || Command == "ui-scroll" || Command == "open-packs" || Command == "achievement-prime" || Command == "turn-timer-debug" || Command == "spell-stall-arm"
-        || Command == "craft-token-grant" || Command == "collection-jump";
+        || Command == "craft-token-grant" || Command == "collection-jump" || Command == "clipboard-set" || Command == "collection-paste-check";
     // Human emotes the native emote menu offers (EmoteType names); test-control plays them through the native option.
     internal static readonly string[] HumanEmotes = { "GREETINGS", "WELL_PLAYED", "THANKS", "WOW", "OOPS", "THREATEN" };
     // LocalTokenRarity names, accepted by craft-token-grant.
@@ -255,6 +257,14 @@ internal sealed class ControlRequest
                 break;
             // Native Collection page flip to one card (CollectionPageManager.JumpToPageWithCard); no click.
             case "collection-jump": extras = "cardId"; if (UiRules.CollectionCardId(Text("cardId")) == null) throw new FormatException("Invalid card ID"); break;
+            // Deck-code import live check (#140): put text on the client's clipboard, then drive the Collection's own paste entry.
+            case "clipboard-set": extras = "text"; Text("text", 4096); break;
+            case "collection-paste-check":
+                extras = "mode answer";
+                if (Has("mode") && Text("mode") != "prompt" && Text("mode") != "paste") throw new FormatException("Invalid paste mode");
+                if (Has("answer") && Text("answer") != "yes" && Text("answer") != "no") throw new FormatException("Invalid answer");
+                if (Has("mode") && Has("answer")) throw new FormatException("answer applies to the shown prompt, not to a mode");
+                break;
             case "shop-purchase":
                 extras = "productId quantity kitId";
                 ShopId("productId");
@@ -278,6 +288,8 @@ internal sealed class ControlRequest
                 if (!Has("name") && !Has("source")) throw new FormatException("name or source required");
                 Integer("seconds", 1, 600);
                 break;
+            case "board-trace-start": extras = "frames"; Integer("frames", 1, TestControlProtocol.BoardTraceMaxFrames); break;
+            case "board-trace-read": extras = ""; break;
             case "entity-drag":
                 extras = "matchId optionsId entityId target position click"; Text("matchId"); Integer("optionsId", 0); Integer("entityId", 1);
                 // click: press and release on the source itself (an untargeted board location); exclusive with a destination.
@@ -304,7 +316,7 @@ internal sealed class ControlRequest
                 extras = "matchId achievementId"; Text("matchId");
                 if (Text("achievementId") != "death-knight-grave-expenditure") throw new FormatException("Unsupported achievement fixture.");
                 break;
-            case "npc-concede": case "human-defeat": case "premium-unlock-prepare": case "spell-stall-arm": extras = "matchId"; Text("matchId"); break;
+            case "npc-concede": case "human-defeat": case "premium-unlock-prepare": case "spell-stall-arm": case "cancel-target": extras = "matchId"; Text("matchId"); break;
             case "emote": case "npc-emote":
                 extras = "matchId emote"; Text("matchId");
                 if (Array.IndexOf(HumanEmotes, Text("emote")) < 0) throw new FormatException("Unsupported emote");
@@ -402,9 +414,9 @@ internal sealed class ControlRequest
             throw new FormatException("Invalid shop ID: " + key);
     }
     internal bool Has(string key) => Fields.ContainsKey(key);
-    internal string Text(string key)
+    internal string Text(string key, int maxLength = 256)
     {
-        if (!Fields.TryGetValue(key, out object value) || !(value is string text) || text.Length == 0 || text.Length > 256)
+        if (!Fields.TryGetValue(key, out object value) || !(value is string text) || text.Length == 0 || text.Length > maxLength)
             throw new FormatException("Invalid string: " + key);
         return text;
     }

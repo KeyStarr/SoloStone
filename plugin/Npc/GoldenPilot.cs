@@ -483,6 +483,8 @@ public sealed class GoldenDecisionJob : IGoldenDecisionJob, INpcThinkingCandidat
         searchInfo.PlanNodeCap = PlanningCap; searchInfo.Interrupted = interrupted; searchInfo.Reused = PlanReused;
         searchInfo.Replan = PlanReused ? "reused" : Lethal.Outcome == LethalOutcome.Found ? "lethal" : pilot.ReplanReason;
         Result.SearchInfo = searchInfo;
+        // Workers have joined: say so if every simulated action was discarded as private history (#81).
+        view.ReportAllDiscarded();
         IsDone = true;
     }
 }

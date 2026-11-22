@@ -592,7 +592,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("BRM_027", new CardDef(new Power
 			{
-				PowerTask = new ReplaceHeroTask("BRM_027h", "BRM_027p"),
+				DeathrattleTask = new ReplaceHeroTask("BRM_027h", "BRM_027p", removeSource: false),
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

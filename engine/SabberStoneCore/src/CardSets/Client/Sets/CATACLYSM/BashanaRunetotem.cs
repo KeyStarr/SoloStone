@@ -43,12 +43,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         internal static void ConfigureTreant(Card card)
         {
             card.Implemented = true; card.HistoryDisplay(GameTag.TAG_SCRIPT_DATA_NUM_1, PayloadRules.FirstReference);
-            card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
-                var carved = PayloadRules.Entries(s, 1).FirstOrDefault(); if (carved == null) return;
-                var spell = Entity.FromCard(c, carved.Card, new EntityData { [GameTag.DISPLAYED_CREATOR] = s.Id });
-                var cast = new TaskStack(); cast.AddPlayable(spell);
-                new PlayTask(PlayType.SPELL, true).Process(g, c, s, null, cast);
-            }) };
+            TaughtSpellRules.ConfigureBattlecry(card);
         }
     }
 }

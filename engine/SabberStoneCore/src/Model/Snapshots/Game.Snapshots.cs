@@ -43,7 +43,7 @@ namespace SabberStoneCore.Model
         internal static Game LoadSnapshotWithPools(byte[] data, OfflinePoolManifest pools, GameConfig config = null)
         {
             Game game = new SnapshotCodec().Load(data, pools: pools);
-            if (config != null && (config.FormatType != game.FormatType || config.History != game.History || config.Logging != game.Logging || config.EnableCorpses != game.EnableCorpses))
+            if (config != null && (config.FormatType != game.FormatType || config.History != game.History || config.Logging != game.Logging || config.EnableCorpses != game.EnableCorpses || config.PoolFormat != game.PoolFormat))
                 throw new SerializationException("Snapshot configuration mismatch (format/history/logging/corpses).");
             game.ValidateLoadedSnapshot();
             return game;
@@ -183,7 +183,7 @@ namespace SabberStoneCore.Model
 
         internal bool IsSnapshotBoundary => SnapshotBoundaryError == null;
 
-        private string SnapshotBoundaryError
+        internal string SnapshotBoundaryError
         {
             get
             {
@@ -191,7 +191,7 @@ namespace SabberStoneCore.Model
                 if (!Resolution.IsQuiescent || _snapshotOperationDepth != 0 || !TaskQueue.IsQuiescent ||
                     (!decisionBattlecry && (DeadMinions.Count != 0 || SummonedMinions.Count != 0)) ||
                     DeadBoardObjects.Count != 0 || (ClearWeapons != null && SpellCompletion == null) || _rebornMinions.Count != 0)
-                    return "Unsupported snapshot: in-flight legacy work is not quiescent.";
+                    return $"Unsupported snapshot: in-flight legacy work is not quiescent. resolution={Resolution.IsQuiescent} depth={_snapshotOperationDepth} queue={TaskQueue.IsQuiescent} dead={DeadMinions.Count} summoned={SummonedMinions.Count} board={DeadBoardObjects.Count} weapons={ClearWeapons?.Count ?? 0} reborn={_rebornMinions.Count}";
                 if (State != State.RUNNING || (Player1.Choice == null && Player2.Choice == null && Step != Step.MAIN_ACTION))
                     return "Snapshot requires a running decision boundary.";
                 return null;

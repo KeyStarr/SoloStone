@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using SabberStoneCore.Actions;
 using SabberStoneCore.EffectSystem;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
@@ -24,6 +25,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 if (summoned == 0) return;
                 var others = c.BoardZone.GetAll().Concat(c.Opponent.BoardZone.GetAll()).Where(m => m.Id != summoned).ToArray();
                 foreach (var minion in others) {
+                    // A steal is capped at the victim's current Health: a minion already at 0 (pending death) gives nothing.
+                    if (HealthLossRules.StealAmount(minion, 1) == 0) continue;
                     ctx.GiveBuff(minion.Id, "TLC_831e");
                     if (minion.IsDead) ctx.Destroy(minion.Id);
                     ctx.GiveBuff(summoned, "TLC_831e2");

@@ -17,10 +17,11 @@ public static class HistoryShape
     // META_REF: every entity in a META_DATA's Info was already created (SHOW_BIG_CARD and CONTROLLER_AND_ZONE_CHANGE: the first
     //   slot only; the rest are parameters, as in the native client).
     // FULL_ENTITY_DUPLICATE: no FULL_ENTITY creates an id that already exists.
+    // SUMMON_CREATOR: a minion FULL_ENTITY created in PLAY names its creator with matching 1254, excluding RESET_GAME snapshots.
     // A RESET_GAME (rewind) creates the game again: the entities known before it are forgotten, and the FULL_ENTITYs that follow
     // it create them again.
     // Built against a prebuilt engine (no SOURCE_ENGINE) the check does nothing: rewinds and sub-spells are SoloStone entries.
-    public static readonly string[] Rules = { "BLOCK_BALANCE", "SUB_SPELL_BALANCE", "ENTITY_REF", "META_REF", "FULL_ENTITY_DUPLICATE" };
+    public static readonly string[] Rules = { "BLOCK_BALANCE", "SUB_SPELL_BALANCE", "ENTITY_REF", "META_REF", "FULL_ENTITY_DUPLICATE", "SUMMON_CREATOR" };
 
     public readonly record struct Violation(string Rule, int Index, string Detail)
     {
@@ -30,9 +31,9 @@ public static class HistoryShape
     // What the checks walked through, summed over games, so a run shows it checked something.
     public sealed class Totals
     {
-        public int Games, Entries, Blocks, SubSpells, Metadata, FullEntities, Resets;
+        public int Games, Entries, Blocks, SubSpells, Metadata, FullEntities, Resets, CreatedMinionsInPlay;
         public override string ToString() =>
-            $"games={Games} entries={Entries} blocks={Blocks} subSpells={SubSpells} metadata={Metadata} fullEntities={FullEntities} resets={Resets}";
+            $"games={Games} entries={Entries} blocks={Blocks} subSpells={SubSpells} metadata={Metadata} fullEntities={FullEntities} resets={Resets} createdMinionsInPlay={CreatedMinionsInPlay}";
     }
 
     public static List<Violation> Check(IReadOnlyList<IPowerHistoryEntry> history, Totals totals = null)
@@ -55,6 +56,7 @@ public static class HistoryShape
         // Each open block with the sub-spells opened inside it and still open.
         var blocks = new Stack<int>();
         int subSpells = 0;
+        bool resetSnapshot = false;
         void Flag(string rule, int index, string detail) => violations.Add(new Violation(rule, index, detail));
         void Reference(int index, int id, string what)
         {
@@ -68,6 +70,7 @@ public static class HistoryShape
         }
         for (int i = 0; i < history.Count; i++)
         {
+            if (history[i] is not PowerHistoryFullEntity) resetSnapshot = false;
             switch (history[i])
             {
                 case PowerHistoryCreateGame create:
@@ -75,8 +78,18 @@ public static class HistoryShape
                     break;
                 case PowerHistoryResetGame reset:
                     Create(reset.CreateGame);
+                    resetSnapshot = true;
                     break;
                 case PowerHistoryFullEntity full:
+                    if (!resetSnapshot && full.Entity.Tags.TryGetValue(GameTag.CARDTYPE, out int type) && type == (int)CardType.MINION
+                        && full.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) && zone == (int)Zone.PLAY)
+                    {
+                        if (totals != null) totals.CreatedMinionsInPlay++;
+                        if (!full.Entity.Tags.TryGetValue(GameTag.CREATOR, out int creator) || creator == 0)
+                            Flag("SUMMON_CREATOR", i, $"minion {full.Entity.Id} ({full.Entity.Name}) created in PLAY without CREATOR");
+                        else if (!full.Entity.Tags.TryGetValue(PowerHistoryBuilder.SummonSourceTag, out int source) || source != creator)
+                            Flag("SUMMON_CREATOR", i, $"minion {full.Entity.Id} ({full.Entity.Name}) created in PLAY without 1254 equal to CREATOR {creator}");
+                    }
                     if (!known.Add(full.Entity.Id)) Flag("FULL_ENTITY_DUPLICATE", i, $"FULL_ENTITY creates entity {full.Entity.Id} again");
                     break;
                 case PowerHistoryShowEntity show:

@@ -20,7 +20,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.AFTER_CAST) {
                 TriggerSource = TriggerSource.ENEMY,
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
-                    if (!c.Opponent.BoardZone.Any(m => !m.ToBeDestroyed && !m.Untouchable)) return;
+                    if (!c.Opponent.BoardZone.Interactable.Any(m => !m.ToBeDestroyed && !m.Untouchable)) return;
                     ComplexTask.Secret(ComplexTask.DestroyRandomTargets(1, EntityType.OP_MINIONS))
                         .Process(g, c, s, t, stack);
                 })

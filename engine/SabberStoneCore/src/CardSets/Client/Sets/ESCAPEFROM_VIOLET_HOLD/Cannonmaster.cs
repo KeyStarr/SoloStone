@@ -22,12 +22,12 @@ namespace SabberStoneCore.CardSets.Client.Sets
 
         internal static void Fire(Minion cannon)
         {
-            int shots = 1 + cannon.Controller.BoardZone.GetAll().Count(m => m.Card.Id == "CAP_106"
-                && !m.IsSilenced && !m.IsDormant && !m.IsDead);
+            int shots = 1 + cannon.Controller.BoardZone.Interactable.Count(m => m.Card.Id == "CAP_106"
+                && !m.IsSilenced && !m.IsDead);
             for (int i = 0; i < shots; i++)
             {
                 var stack = new TaskStack();
-                if (new RandomTask(1, EntityType.ENEMIES).Process(cannon.Game, cannon.Controller, cannon, null, stack) == TaskState.STOP) return;
+                if (RandomTask.Harmful(1, EntityType.ENEMIES).Process(cannon.Game, cannon.Controller, cannon, null, stack) == TaskState.STOP) return;
                 var target = (ICharacter)stack.Playables[0];
                 Generic.DamageCharFunc(cannon, target, 1, false);
                 cannon.Game.DeathProcessingAndAuraUpdate();

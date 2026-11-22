@@ -97,7 +97,7 @@ namespace SabberStoneCore.Model
         }
 
         // Native class 14 has no named value in the legacy engine enum.
-        private static string ClassName(CardClass value) => (int)value == 14 ? "DEMONHUNTER" : value.ToString();
+        internal static string ClassName(CardClass value) => (int)value == 14 ? "DEMONHUNTER" : value.ToString();
         private static int School(string school)
         {
             switch (school)
@@ -146,6 +146,13 @@ namespace SabberStoneCore.Model
             if (random == null) throw new ArgumentNullException(nameof(random));
             var candidates = Candidates(manifest, heroClass, filter, sourceDbfId, destination, false);
             return candidates.Count == 0 ? null : candidates[random.Next(candidates.Count)];
+        }
+
+        /// <summary>Pick with rejected cards left out first: the same pool and empty-pool fallback setting (off) as Pick, one Next(count) draw.</summary>
+        internal static Card Pick(Game game, OfflinePoolFilter filter, CardClass heroClass, int sourceDbfId, PoolDestination destination, Func<Card, bool> exclude)
+        {
+            var candidates = Candidates(Manifest(game), heroClass, filter, sourceDbfId, destination, false).Where(card => !exclude(card)).ToArray();
+            return candidates.Length == 0 ? null : candidates[game.Random.Next(candidates.Length)];
         }
     }
 }

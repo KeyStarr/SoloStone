@@ -20,6 +20,7 @@ internal static class SelfChecks
 
     internal static void Run()
     {
+        MillLockProof.Run();
         CardStateChecks.Run();
         HandCardStateChecks.Run();
         CostRulesChecks.Run();

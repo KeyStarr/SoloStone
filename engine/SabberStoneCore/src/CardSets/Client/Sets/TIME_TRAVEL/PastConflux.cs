@@ -26,7 +26,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 RequiresFreeSlot = true,
                 Task = EffectContext.Task(ctx => {
                     var picked = ctx.PickRandomCard(RandomPool(), recipeDbfId: 120544);
-                    if (picked != null) ctx.SummonRightOfLocation(picked.Id);
+                    if (picked != null) ctx.SummonAtLocation(picked.Id);
                     ctx.AdvanceLocationStage("TIME_436t1");
                     return ctx.RunLegacy(new SetGameTagTask(GameTag.LOCATION_ACTION_COOLDOWN, 1, EntityType.SOURCE));
                 })
@@ -48,7 +48,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         var context = new EffectContext(g, c.Id, s.Id, stack: stack);
                         if (chosen != null)
                         {
-                            context.SummonRightOfLocation(chosen.Id);
+                            context.SummonAtLocation(chosen.Id);
                             g.DeathProcessingAndAuraUpdate();
                             if (future) context.AddToHand(chosen.Id);
                         }

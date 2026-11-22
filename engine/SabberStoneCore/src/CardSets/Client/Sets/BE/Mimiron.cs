@@ -13,7 +13,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
     internal static class Mimiron
     {
         private static readonly string[] Tech = { "DRG_069", "EX1_066", "OG_254", "EX1_048", "CORE_EX1_002", "CORE_EX1_005" };
-        private static bool Ready(IPlayable source) => source.Controller.BoardZone.Any(m=>m.Card.IsRace(Race.MECHANICAL));
+        private static bool Ready(IPlayable source) => source.Controller.BoardZone.AnyInteractable(m=>m.Card.IsRace(Race.MECHANICAL));
 
         [StandardCard("BE_588",132009)]
         internal static void Configure(Card card)
@@ -33,10 +33,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         case "DRG_069": return enemy.Hero.Armor>0;
                         case "EX1_066": return enemy.Hero.Weapon!=null;
                         case "OG_254": return enemy.SecretZone.Count>0;
-                        case "EX1_048": return enemy.BoardZone.Any(m=>!m.IsSilenced &&
+                        case "EX1_048": return enemy.BoardZone.Interactable.Any(m=>!m.IsSilenced &&
                             (m.HasDeathrattle || m.AppliedEnchantments?.Any()==true));
-                        case "CORE_EX1_002": return enemy.BoardZone.Any(m=>m.HasTaunt);
-                        case "CORE_EX1_005": return enemy.BoardZone.Any(m=>m.AttackDamage>=7);
+                        case "CORE_EX1_002": return enemy.BoardZone.Interactable.Any(m=>m.HasTaunt);
+                        case "CORE_EX1_005": return enemy.BoardZone.Interactable.Any(m=>m.AttackDamage>=7);
                         default: return false;
                     }
                 }

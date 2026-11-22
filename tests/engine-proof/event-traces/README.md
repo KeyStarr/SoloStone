@@ -165,3 +165,16 @@ histories plus final states, dumped from `main` and from the change for all four
 games and their clones, are byte-identical except for that one added line.
 Seeds 1, 19 and 42 and all four clone histories are unchanged from `main`, all
 callback lines match, and the archived `clone=` hashes remain unchanged.
+
+On 2026-11-16, the spell-school fix (#117) renewed only the four `history=` hashes. The card
+file now carries the client's spell school (tag 1635) for 579 spell rows that lacked it (these
+games play EX1_277, CS2_024 and CS2_029), so entity tags in the canonical history change. All callback
+lines, including the clone callbacks, match the previous fixtures byte-for-byte; archived `clone=` hashes remain
+unchanged.
+
+| Seed | Old history prefix | New history prefix |
+|---|---|---|
+| 1 | `ced6473b896d` | `d0c748daf2ef` |
+| 19 | `0dab20f316f4` | `145e9b4b9a8d` |
+| 42 | `d2818492c76f` | `f61191da34b1` |
+| 123 | `4015876433c6` | `70de593ab926` |

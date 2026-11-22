@@ -39,7 +39,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                         case 0:
                             new SummonTask("CATA_190t14").Process(g,c,s,t,k); break;
                         case 1:
-                            var enemies = c.Opponent.BoardZone.GetAll();
+                            var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead).ToArray();
                             if (enemies.Length != 0)
                             {
                                 int max = enemies.Max(m => m.Health);
@@ -48,9 +48,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
                             }
                             break;
                         case 2:
-                            using (g.History ? g.PowerHistory.DamageWave(c.Opponent.BoardZone.Count) : null)
+                            using (g.History ? g.PowerHistory.DamageWave(c.Opponent.BoardZone.Interactable.Length) : null)
                             using (g.History ? g.PowerHistory.Visual(g,Presentation.VisualPhase.DamageGroup,(IPlayable)s) : null)
-                                foreach (var enemy in c.Opponent.BoardZone.GetAll()) enemy.TakeDamage((IPlayable)s,4);
+                                foreach (var enemy in c.Opponent.BoardZone.Interactable) enemy.TakeDamage((IPlayable)s,4);
                             break;
                         case 3:
                             var ctx = new EffectContext(g,c.Id,s.Id);

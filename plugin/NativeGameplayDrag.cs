@@ -40,6 +40,31 @@ internal static class NativeGameplayDrag
         return null;
     }
 
+    // The client's own cancel of a mode that waits for a second click (target, reverse target, Choose One panel), or a refusal when it is in none.
+    // It runs on the main thread in one step, so the mode it cancels is the mode it read.
+    internal static string CancelWaitingMode()
+    {
+        var game = GameState.Get(); var input = InputManager.Get();
+        if (game == null || input == null) throw new InvalidOperationException("No active game or input manager");
+        var mode = game.GetResponseMode();
+        switch (mode)
+        {
+            case GameState.ResponseMode.OPTION_TARGET:
+                input.CancelTargetMode(); input.ReturnHeldCardToHand(); break;
+            case GameState.ResponseMode.OPTION_REVERSE_TARGET:
+                // CancelTargetMode returns at once outside OPTION_TARGET; the client's own CancelOption calls this one for this mode. With a card
+                // still held and force false it returns without cancelling, so the held card goes back first (force true would only refresh its cost text).
+                input.ReturnHeldCardToHand(); input.CancelReverseTargetMode(false); break;
+            case GameState.ResponseMode.SUB_OPTION:
+                // May finish in a coroutine (a panel still opening, a weapon Choose One): the caller reads the state again.
+                input.CancelSubOptionMode(); return mode.ToString();
+            default: throw new InvalidOperationException("Nothing to cancel (responseMode " + mode + ")");
+        }
+        var now = game.GetResponseMode();
+        if (now == mode) throw new InvalidOperationException("The client is still in " + mode + " after its own cancel");
+        return mode.ToString();
+    }
+
     internal static void Initialize(Harmony harmony)
     {
         try

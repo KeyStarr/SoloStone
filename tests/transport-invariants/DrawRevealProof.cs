@@ -38,21 +38,34 @@ internal static class DrawRevealProof
         void Expect(bool value, string message) { if (!value) failures.Add(message); }
         foreach (string card in drawn)
         foreach (int drawer in new[] { 1, 2 })
-        foreach (string mode in new[] { "room", "full-board", "full-hand" })
+        foreach (string mode in new[] { "room", "full-board", "full-hand", "draw-trigger-fills-board" })
         {
             var (game, session, traces) = Start(drawer);
             var owner = game.CurrentPlayer;
             if (mode == "full-board")
                 for (int i = 0; i < 7; i++) Generic.SummonBlock(game, (Minion)Entity.FromCard(owner, Cards.FromId("CS2_231")), -1, null);
+            // Eredar Deceptor's draw trigger runs after the draw SHOW and fills the seventh slot: an Illusion then stays in
+            // hand, so its SHOW must not have been revealed (review of 8f678b9).
+            if (mode == "draw-trigger-fills-board")
+            {
+                for (int i = 0; i < 5; i++) Generic.SummonBlock(game, (Minion)Entity.FromCard(owner, Cards.FromId("CS2_231")), -1, null);
+                Generic.SummonBlock(game, (Minion)Entity.FromCard(owner, Cards.FromId("CORE_TTN_843")), -1, null);
+            }
             if (mode == "full-hand")
                 while (owner.HandZone.Count < 10) Entity.FromCard(owner, Cards.FromId("CS2_182"), zone: owner.HandZone);
             var top = Entity.FromCard(owner, Cards.FromId(card), zone: owner.DeckZone);
             Flush(game, session);
             string name = $"{card}-{mode}-p{drawer}";
+            int cursor = session.Packets.Count;
             try { Generic.Draw(owner, top); }
             catch (Exception error) { throw new InvalidOperationException("draw reveal fixture failed: " + name, error); }
             game.DeathProcessingAndAuraUpdate();
             Flush(game, session);
+            if (mode != "full-hand")
+            {
+                string face = FaceUpDrawViolation(Wire(session, cursor), top.Id, card, top.Zone?.Type != Zone.HAND, drawer == 2);
+                Expect(face == null, name + ": " + face);
+            }
             var violations = Invariants.ActorIdentity(game, session.Client).ToArray();
             Expect(violations.Length == 0, name + ": " + string.Join("; ", violations.Select(v => v.ToString())));
             var shown = session.Client.Entities[top.Id];
@@ -75,8 +88,100 @@ internal static class DrawRevealProof
         }
         Check(failures.Count == 0, failures.Count + " failures:\n" + string.Join("\n", failures));
         Check(revealed > 0, "opponent draws exercised");
+        FaceUpDrawRoutes();
         HiddenRetirements();
-        Console.WriteLine($"PASS draw reveal transport: {drawn.Length} when-drawn cards x both seats x room/full board/full hand = {cases} cases; opponent reveals={revealed}; no nameless public actor");
+        Console.WriteLine($"PASS draw reveal transport: {drawn.Length} when-drawn cards x both seats x room/full board/full hand/draw trigger filling the board = {cases} cases; opponent reveals={revealed}; no nameless public actor");
+    }
+
+    private static List<PowerHistoryData> Wire(NativeSession session, int cursor) => session.Packets.Skip(cursor).Where(p => p.Id == 19)
+        .SelectMany(p => { var h = new NativeHistory(); using var s = new MemoryStream(Convert.FromBase64String(p.Base64)); h.Deserialize(s); return h.List; })
+        .ToList();
+
+    // The client evaluates a drawn card's hold against the task lists it has queued, so the draw SHOW and its TOPDECK
+    // block must arrive in one native packet (#195 human-seat check).
+    private static string SplitTopdeck(NativeSession session, int cursor, int id)
+    {
+        int show = -1, trigger = -1, index = 0;
+        foreach (var packet in session.Packets.Skip(cursor).Where(p => p.Id == 19))
+        {
+            var h = new NativeHistory(); using (var s = new MemoryStream(Convert.FromBase64String(packet.Base64))) h.Deserialize(s);
+            if (show < 0 && h.List.Any(e => e.HasShowEntity && e.ShowEntity.Entity == id)) show = index;
+            if (trigger < 0 && h.List.Any(e => e.HasPowerStart && e.PowerStart.Source == id && e.PowerStart.TriggerKeyword == (int)GameTag.TOPDECK)) trigger = index;
+            index++;
+        }
+        return trigger >= 0 && show != trigger ? $"draw SHOW in packet {show}, TOPDECK block in packet {trigger}" : null;
+    }
+
+    // #195: retail draws a Casts/Summoned When Drawn card with one SHOW at ZONE=DECK that names it and carries REVEALED=1,
+    // then moves it to HAND, then opens the TOPDECK TRIGGER (Soul Fragment SCH_307t as friendly and as opponent, Nerubian
+    // Ambush AT_035t; hsreplay-test-data builds 27358, 54613, 88998). The client decides at the HAND move: an opponent card
+    // is shown face up only if REVEALED is set then (else a card back flies to the hand), and a drawn card is held up
+    // until a task of a later POWER/TRIGGER block moves it out of the hand. A held card (Illusion, no room) stays private.
+    internal static string FaceUpDrawViolation(List<PowerHistoryData> wire, int id, string card, bool leaves, bool opponent)
+    {
+        static int Value(PowerHistoryEntity e, GameTag tag) => e.Tags.FirstOrDefault(t => t.Name == (int)tag)?.Value ?? 0;
+        int show = wire.FindIndex(e => e.HasShowEntity && e.ShowEntity.Entity == id);
+        int hand = wire.FindIndex(e => e.HasTagChange && e.TagChange.Entity == id && e.TagChange.Tag == (int)GameTag.ZONE
+            && e.TagChange.Value == (int)Zone.HAND);
+        if (show < 0 || hand < show) return $"draw SHOW at {show} must precede the HAND move at {hand}";
+        var snapshot = wire[show].ShowEntity;
+        if (!leaves)
+            return Value(snapshot, GameTag.REVEALED) != 0 || opponent && !string.IsNullOrEmpty(snapshot.Name)
+                ? $"a when-drawn card that stays in hand must not be revealed, got name='{snapshot.Name}' REVEALED={Value(snapshot, GameTag.REVEALED)}" : null;
+        if (snapshot.Name != card || Value(snapshot, GameTag.REVEALED) != 1 || Value(snapshot, GameTag.ZONE) != (int)Zone.DECK)
+            return $"draw SHOW must name {card} with REVEALED=1 at ZONE=DECK before the HAND move, got name='{snapshot.Name}' "
+                + $"REVEALED={Value(snapshot, GameTag.REVEALED)} ZONE={Value(snapshot, GameTag.ZONE)}";
+        int trigger = wire.FindIndex(hand, e => e.HasPowerStart && e.PowerStart.Source == id
+            && (int)e.PowerStart.Type == (int)BlockType.TRIGGER && e.PowerStart.TriggerKeyword == (int)GameTag.TOPDECK);
+        if (trigger < 0) return "TOPDECK trigger must follow the HAND move";
+        int depth = 0;
+        for (int at = trigger + 1; at < wire.Count; at++)
+        {
+            var e = wire[at];
+            if (e.HasPowerStart) depth++;
+            if (e.HasPowerEnd && depth-- == 0) break;
+            if (e.HasTagChange && e.TagChange.Entity == id && e.TagChange.Tag == (int)GameTag.ZONE && e.TagChange.Value != (int)Zone.HAND
+                || e.HasShowEntity && e.ShowEntity.Entity == id && Value(e.ShowEntity, GameTag.ZONE) is not (0 or (int)Zone.HAND)
+                || e.HasHideEntity && e.HideEntity.Entity == id || e.HasChangeEntity && e.ChangeEntity.Entity == id)
+                return null;
+        }
+        return "TOPDECK block must move the drawn card out of the hand (the client holds the shown card until then)";
+    }
+
+    // Card-effect and turn-start draws use the same reveal (both seats): Arcane Intellect inside its POWER block, then the
+    // next turn's draw inside the turn-start TRIGGER.
+    private static void FaceUpDrawRoutes()
+    {
+        int cases = 0;
+        foreach (string card in new[] { "TLC_513t2", "EDR_260t", "SW_439t" })
+        foreach (int drawer in new[] { 1, 2 })
+        {
+            var (game, session, _) = Start(drawer);
+            var owner = game.CurrentPlayer;
+            owner.BaseMana = 10;
+            var spell = Generic.DrawCard(owner, Cards.FromId("CS2_023"));
+            var top = Entity.FromCard(owner, Cards.FromId(card), zone: owner.DeckZone);
+            Flush(game, session);
+            int cursor = session.Packets.Count;
+            session.Process(PlayCardTask.Any(owner, spell));
+            var wire = Wire(session, cursor);
+            string effect = FaceUpDrawViolation(wire, top.Id, card, top.Zone?.Type != Zone.HAND, drawer == 2) ?? SplitTopdeck(session, cursor, top.Id);
+            Check(effect == null, $"{card}-p{drawer} card-effect draw: " + effect);
+            int power = wire.FindIndex(e => e.HasPowerStart && e.PowerStart.Source == spell.Id);
+            Check(power >= 0 && power < wire.FindIndex(e => e.HasShowEntity && e.ShowEntity.Entity == top.Id),
+                $"{card}-p{drawer} card-effect draw sits inside the spell's block");
+            // Turn start: the opponent of the first drawer draws the staged card on its own turn.
+            var next = owner.Opponent;
+            var turnTop = Entity.FromCard(next, Cards.FromId(card), zone: next.DeckZone);
+            Flush(game, session);
+            cursor = session.Packets.Count;
+            session.Process(EndTurnTask.Any(owner));
+            string turn = FaceUpDrawViolation(Wire(session, cursor), turnTop.Id, card, turnTop.Zone?.Type != Zone.HAND, next == game.Player2)
+                ?? SplitTopdeck(session, cursor, turnTop.Id);
+            Check(turn == null, $"{card}-p{next.PlayerId} turn-start draw: " + turn);
+            cases += 2;
+        }
+        Console.WriteLine($"PASS face-up when-drawn routes: {cases} card-effect and turn-start draws, both seats");
     }
 
     private static void RewindDrawEntries()

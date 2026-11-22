@@ -15,7 +15,9 @@ namespace SabberStoneCore.Actions
         private const GameTag LifestealTotal = (GameTag)31281;
         private const GameTag ConvertedHeal = (GameTag)31282;
         private const GameTag MinionHealingTurn = (GameTag)31283, MinionHealingAmount = (GameTag)31284, RestorationTurn = (GameTag)31285, RestorationAmount = (GameTag)31286;
-        public static bool IsInternalTag(GameTag tag) => (int)tag >= 31280 && (int)tag <= 31289;
+        // Marks a minion whose pending death comes from damage alone; the death check spares it when Health is above 0 again.
+        internal const GameTag DamageWound = (GameTag)31420;
+        public static bool IsInternalTag(GameTag tag) => (int)tag >= 31280 && (int)tag <= 31289 || tag == DamageWound;
         public static int MinionHealingThisTurn(Controller owner) => owner[MinionHealingTurn]==owner.Game.Turn+1 ? owner[MinionHealingAmount] : 0;
         internal static void RecordMinionHealing(Controller owner,int amount)
         {

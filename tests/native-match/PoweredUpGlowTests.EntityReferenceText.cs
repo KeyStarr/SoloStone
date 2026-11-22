@@ -88,6 +88,26 @@ internal static partial class PoweredUpGlowTests
             label + ": no text rebuild trigger for a card the human cannot read");
     }
 
+    private static void AssertCreatedInPlayReference(Fixture f, IPlayable host, IPlayable stored, string label)
+    {
+        var rows = f.Entries.ToList();
+        int created = rows.FindIndex(e => e.HasFullEntity && e.FullEntity.Entity == host.Id);
+        int named = rows.FindIndex(e => e.HasFullEntity && e.FullEntity.Entity == stored.Id && e.FullEntity.Name == stored.Card.Id);
+        int reference = rows.FindIndex(e => e.HasTagChange && e.TagChange.Entity == host.Id && e.TagChange.Tag == 2 && e.TagChange.Value == stored.Id);
+        Check(created >= 0 && named > created && reference > named,
+            label + ": target is named after host creation, before its reference TAG_CHANGE");
+        Check(!rows[created].FullEntity.Tags.Any(t => t.Name == 2 && t.Value != 0),
+            label + ": host FULL_ENTITY carries no forward reference");
+        Check(rows.Skip(reference + 1).Take(1).Any(e => e.HasTagChange && e.TagChange.Entity == host.Id
+                && e.TagChange.Tag == OverrideBuilderTag && e.TagChange.Value == PayloadRules.ReferenceBuilderType(host.Card)),
+            label + ": OVERRIDECARDTEXTBUILDER follows the late reference");
+        Check(!rows.Any(e => e.HasShowEntity && e.ShowEntity.Entity == host.Id),
+            label + ": created-in-PLAY host gets no SHOW_ENTITY");
+        var wire = ArchaedasWireTags(f, host.Id);
+        Check(wire.TryGetValue(2, out int final) && final == stored.Id,
+            label + ": final tag 2 names its stored entity");
+    }
+
     private static Fixture EntityReferenceFixture(bool opponent, out Controller owner)
     {
         var f = new Fixture(); var g = f.Game;
@@ -128,12 +148,14 @@ internal static partial class PoweredUpGlowTests
             Check(!IsNamedToViewer(f, boardStored.Id), "opponent's board Treant does not reveal its carved spell");
             Check(ArchaedasWireTags(f, board.Id).TryGetValue(2, out int leaked) ? leaked == 0 : true,
                 "public opposing Treant leaks neither entity id nor dbfId");
+            Check(!f.Entries.Any(e => e.HasShowEntity && e.ShowEntity.Entity == board.Id),
+                "opposing board Treant gets no SHOW_ENTITY");
         }
         else
         {
             // The owner's Treant on the board keeps naming its spell.
             var board = Generic.Copy(owner, source, treants[1], SabberStoneCore.Enums.Zone.PLAY); g.DeathProcessingAndAuraUpdate(); f.Flush();
-            AssertReferencedBeforeShown(f, board, PayloadRules.Entries(board, 1).Single(), "board Treant");
+            AssertCreatedInPlayReference(f, board, PayloadRules.Entries(board, 1).Single(), "board Treant");
         }
         Check(f.Entries.All(e => !e.HasTagChange || !PayloadRules.IsInternalTag((GameTag)e.TagChange.Tag)),
             "payload bookkeeping tags never reach the client");
@@ -175,7 +197,7 @@ internal static partial class PoweredUpGlowTests
         var egg = owner.BoardZone.Single(m => m.Card.Id == "EDR_454t");
         var stored = PayloadRules.Entries(egg, 1).Single();
         Check(egg[GameTag.TAG_SCRIPT_DATA_NUM_1] == stored.Id && stored.Card.Id == "EX1_043", "engine Egg tag 2 is its copied Dragon's entity id");
-        AssertReferencedBeforeShown(f, egg, stored, opponent ? "opposing Egg" : "Egg");
+        AssertCreatedInPlayReference(f, egg, stored, opponent ? "opposing Egg" : "Egg");
     }
 
     private static void AnswerPick(Fixture f, int pick)

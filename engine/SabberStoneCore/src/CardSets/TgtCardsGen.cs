@@ -327,16 +327,15 @@ namespace SabberStoneCore.CardSets
 			new DiscardTask(EntityType.HAND),
 			new CustomTask((g, c, s, t, stack) =>
 				{
-					if (c.BaseMana == 10 || c.RemainingMana == 10)
+					if (c.BaseMana >= c[GameTag.MAXRESOURCES])
 					{
 						stack.Flag = true;
 						return;
 					}
 
-					int oldMaximum=c.BaseMana;c.BaseMana = 10;g.Facts.BaseManaChanged(c,oldMaximum,s);
+					SabberStoneCore.Actions.Generic.ChangeManaCrystal.Invoke(c, 10, true);
 					c.OverloadLocked = 0;
 					c.OverloadOwed = 0;
-					c.UsedMana = 0;
 					c.TemporaryMana = 0;
 				}),
 			new FlagTask(true, new AddCardTo("CS2_013t", EntityType.HAND)))

@@ -20,6 +20,7 @@ internal static partial class Program
         GrimlynxTextTracksCurrentStats();
         EnchantmentTextCapturesInstanceValues();
         DeathAndAlternateTextUpdates();
+        SmolderingBurnHistory();
         RagerTextTracksOwnTurns();
         StandardTextDefaultsReachFirstReveal();
         FormattedTextDefaultsReachFirstReveal();

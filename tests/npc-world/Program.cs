@@ -31,8 +31,6 @@ internal static class Program
             if (args.Length == 1 && args[0] == "--replacement-lethal") { ReplacementLethalSuite.Run(); return 0; }
             if (args.Length == 1 && args[0] == "--deck-library") { DeckLibrarySuite.Run(); return 0; }
             if (args.Length == 1 && args[0] == "--matchmaker") { MatchmakerSuite.Run(); return 0; }
-            if (args.Length == 1 && args[0] == "--magmaw-capped-pass") { CappedPassSuite.RunMagmaw(); return 0; }
-            if (args.Length >= 2 && args[0] == "--magmaw-renew") return CappedPassSuite.Renew(args);
             if (args.Length == 1 && args[0] == "--capped-pass") { CappedPassSuite.Run(); return 0; }
             if (args.Length == 1 && args[0] == "--plan-reuse") { PlanReuseMistakeSuite.Run(); return 0; }
             if (args.Length == 1 && args[0] == "--passivity-r3") { RoundThreeSuite.Run(); return 0; }

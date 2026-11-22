@@ -21,7 +21,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 int summoned = ctx.Summon(chosen.Id);
                 if (summoned == 0) return;
                 var targets = new TaskStack();
-                if (new RandomTask(1, EntityType.ENEMIES).Process(g, c, s, null, targets) == TaskState.STOP) return;
+                if (RandomTask.Harmful(1, EntityType.ENEMIES).Process(g, c, s, null, targets) == TaskState.STOP) return;
                 new AttackTask(EntityType.SOURCE, EntityType.STACK).Process(g, c, g.IdEntityDic[summoned], null, targets);
             }) };
         }

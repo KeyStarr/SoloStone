@@ -35,7 +35,7 @@ internal static class PrivateReturnProof
             var runner = new Runner();
             // Name the replay: a bare "fingerprint changed" does not say which of the ten moved (all are listed before failing).
             try { runner.Run(replay, verify: true); }
-            catch (InvalidOperationException error) { drifted.Add(Path.GetFileName(path) + ": " + error.Message); continue; }
+            catch (InvalidOperationException error) { drifted.Add(Path.GetFileName(path) + ": " + error.Message + (error.InnerException == null ? "" : " <- " + error.InnerException.Message)); continue; }
             SelfChecks.Check(runner.ViolationCount == 0 && runner.Completed.Values.Sum() == 1,
                 $"private return {Path.GetFileName(path)}: legal hashes, actions, engine fingerprint and findings");
         }

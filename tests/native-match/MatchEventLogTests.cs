@@ -77,9 +77,7 @@ internal static partial class Program
         {
             string carvedId = PayloadRules.Entries(treant, 1).Single().Card.Id;
             lines.Clear();
-            player.UsedMana = 0;
-            Check(game.Process(PlayCardTask.Any(player, treant)), "Treant play");
-            FlushHistory(match);
+            PlayAndFlush(match, player, treant);
             EventCheck(lines, "PLAY", "Treant played", "card=MEND_046t#" + treant.Id);
             EventCheck(lines, "CAST", "carved spell cast by the Treant", "card=" + carvedId + "#", "kind=effect", "by=MEND_046t#" + treant.Id);
         }
@@ -119,14 +117,15 @@ internal static partial class Program
         Check(player.DeckZone.Count == deckBefore - 2, "both draws left the deck");
 
         lines.Clear(); player.UsedMana = 0;
-        Check(game.Process(PlayCardTask.Any(player, markTreant)), "mark Treant play");
+        Check(game.Process(PlayCardTask.Any(player, markTreant, (ICharacter)taunt)), "mark Treant play");
         FlushHistory(match);
-        var cast = EventLines(lines, "CAST", "card=CS2_009#", "by=MEND_046t#" + markTreant.Id, "pick=auto").Single();
+        var cast = EventLines(lines, "CAST", "card=CS2_009#", "by=MEND_046t#" + markTreant.Id).Single();
+        Check(cast.Contains("pick=chosen"), "the carried cast reports its player-chosen target: " + cast);
         var target = Regex.Match(cast, @"target=\S+?#(\d+)\(").Groups[1].Value;
-        Check(target == taunt.Id.ToString() || target == markTreant.Id.ToString(), "Mark of the Wild picked one of the two legal minions: " + cast);
+        Check(target == taunt.Id.ToString(), "Mark of the Wild keeps the chosen Battlecry target: " + cast);
         EventCheck(lines, "ENCHANT", "Mark of the Wild buff", "target=", "#" + target + "(", "ench=CS2_009e#");
         EventCheck(lines, "STATS", "stat change result", "#" + target + "(", "->", "by=CS2_009#");
-        Check(cast.Contains("random=yes") && cast.Contains("rng="), "the automatic cast reports that its target was random: " + cast);
+        Check(cast.Contains("random=no"), "the carried cast reports its supplied target as non-random: " + cast);
     }
 
     // One position, many effect kinds: each must leave a line naming the source, the card and the result.
@@ -151,7 +150,12 @@ internal static partial class Program
         var copy = (Minion)player.BoardZone.Single(minion => minion != yeti && minion.Card.Id == "CS2_182");
         copy.PeekStats(out int atk, out int maxHealth, out int damage);
         Check(atk == 4 && maxHealth - damage == 7, "the copy carries the buff in the engine");
-        EventCheck(lines, "CREATE", "copy created with its real stats", "CS2_182#" + copy.Id, "stats=4/7");
+        // Copied enchantments are realized before board entry; their stats fold into FULL_ENTITY.
+        var created = EventLines(lines, "CREATE").Where(l => l.Contains("CS2_182#" + copy.Id)).ToArray();
+        Check(created.Length == 1 && created[0].Contains("stats=4/7"),
+            "copy logged CREATE with real 4/7 stats:\n" + string.Join("\n", lines));
+        Check(!EventLines(lines, "STATS").Any(l => l.Contains("target=CS2_182#" + copy.Id)),
+            "no spurious STATS after folded CREATE:\n" + string.Join("\n", lines));
         Check(EventLines(lines, "RESYNC").Length == 0, "no RESYNC for an enchanted copy:\n" + string.Join("\n", lines));
     }
 
@@ -236,7 +240,7 @@ internal static partial class Program
             FlushHistory(match);
             foreach (var treant in player.HandZone.Where(c => c.Card.Id == "MEND_046t").ToArray())
             {
-                player.UsedMana = 0; game.Process(PlayCardTask.Any(player, treant)); FlushHistory(match);
+                PlayAndFlush(match, player, treant);
             }
             return MatchRecorder.RandomState(game) + "|" + MatchRecorder.Fingerprint(game) + "|" + game.IdEntityDic.Count;
         }

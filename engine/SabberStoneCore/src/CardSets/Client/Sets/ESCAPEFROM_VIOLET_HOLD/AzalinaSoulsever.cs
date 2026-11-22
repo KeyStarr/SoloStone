@@ -34,11 +34,12 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 for(int i=0;i<count;i++)
                 {
                     int index=game.Random.Next(candidates.Count);var original=candidates[index];candidates.RemoveAt(index);
-                    var copy=Entity.FromCard(owner,original.Card,new EntityData {
+                    // Created straight into the deck, like every other starting deck card: an anonymous DECK FULL_ENTITY.
+                    // A copy made outside a zone is sent with its card id, and the client draws it face up at the deck.
+                    Entity.FromCard(owner,original.Card,new EntityData {
                         [PayloadRules.CopySourceController]=original.Controller.PlayerId,
                         [GameTag.CREATOR]=source.Id,[GameTag.DISPLAYED_CREATOR]=source.Id
-                    });
-                    owner.DeckZone.Add(copy);
+                    },owner.DeckZone);
                 }
             }
         }

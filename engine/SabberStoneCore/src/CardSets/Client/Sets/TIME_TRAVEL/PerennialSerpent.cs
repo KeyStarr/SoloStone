@@ -17,7 +17,9 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Aura = new AdaptiveCostEffect(Discount) };
         }
 
+        // untouchable-ok: card text: "Costs (4) less if a minion is Dormant", it looks for sleepers on purpose
         private static int Discount(IPlayable source) => source.Controller.BoardZone
+            // untouchable-ok: card text: "Costs (4) less if a minion is Dormant", it looks for sleepers on purpose
             .Concat(source.Controller.Opponent.BoardZone).Any(m => m.IsDormant) ? 4 : 0;
     }
 }

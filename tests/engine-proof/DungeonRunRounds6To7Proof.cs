@@ -53,6 +53,7 @@ internal static class DungeonRunRounds6To7Proof
         {
             Game tad = Boss("LOOTA_BOSS_22h", TadDeck);
             Check(tad.Player2.Hero.Health == 20 && tad.Player2.HandZone.Count == 0 && tad.Player2.DeckZone.Count == 10, "Tad: 20 Health, no hand");
+            int fished = 0;
             for (int turn = 1; turn <= 10; turn++)
             {
                 End(tad);
@@ -60,9 +61,15 @@ internal static class DungeonRunRounds6To7Proof
                 Check(tad.Player2.HandZone.Count == 0 && tad.Player2.Hero.Damage == (damageOnTurn != 0 && turn > damageOnTurn ? 1 : 0),
                     "Tad: no draw on turn " + turn);
                 Check(tad.Player2.BaseMana == turn, "Tad: " + turn + " mana");
-                Use(tad);
-                var caught = tad.Player2.BoardZone.Last();
-                Check(caught.Card.Cost == turn, "Catch and Release: the " + turn + "-cost minion (" + caught.Card.Id + ")");
+                // The deck's costs follow the card data (37.0: Swamp King Dred costs 6, so turn 7 has nothing to fish).
+                if (tad.Player2.DeckZone.Any(p => p is Minion && p.Cost == turn))
+                {
+                    Use(tad);
+                    var caught = tad.Player2.BoardZone.Last();
+                    Check(caught.Card.Cost == turn, "Catch and Release: the " + turn + "-cost minion (" + caught.Card.Id + ")");
+                    fished++;
+                }
+                else Check(Power(tad.Player2) == null, "Catch and Release: nothing to fish on turn " + turn);
                 foreach (var m in tad.Player2.BoardZone.ToList()) Kill(tad, m);
                 End(tad);
                 if (turn == damageOnTurn)
@@ -74,7 +81,9 @@ internal static class DungeonRunRounds6To7Proof
                 }
             }
             End(tad);
-            Check(tad.Player2.DeckZone.Count == 0, "Tad: his deck is fished out");
+            int costs = TadDeck.Select(id => Cards.FromId(id).Cost).Where(cost => cost >= 1 && cost <= 10).Distinct().Count();
+            Check(fished == costs && tad.Player2.DeckZone.Count == TadDeck.Length - costs,
+                "Tad: one minion fished per cost his mana reached (" + fished + " of " + costs + "), the rest stays in his deck");
             if (damageOnTurn != 0) { Check(Power(tad.Player2) == null, "a damaged Tad brings no Sunken Chest"); continue; }
             Use(tad);
             var chest = tad.Player2.BoardZone.Single();

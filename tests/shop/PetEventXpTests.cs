@@ -234,14 +234,14 @@ internal static class PetEventXp
             // with a valid knob file carrying the right run id sitting where a test lane would read it.
             string launchRun = "4d93167d-fc51-4ba0-a79f-64e524ce5a27", elsewhere = Path.Combine(root, "valid-knob-elsewhere");
             File.WriteAllText(elsewhere, "runId=" + launchRun + "\npercent=5000\n");
-            var deckLaunch = OfflineGuard.ResolveLaunch(@"STEAMDECK\steamuser", "STEAMDECK", @"C:\hs-native-ui-"+@"prototype\client\Hearthstone.exe",
+            var deckLaunch = OfflineGuard.ResolveHeldLaunch(@"STEAMDECK\steamuser", "STEAMDECK", @"C:\hs-native-ui-"+@"prototype\client\Hearthstone.exe",
                 @"C:\users\steamuser\AppData\Local", new[] { "-hs-native-ui-run", launchRun, "-hs-native-ui-host", "deck" }, false, true);
             check(deckLaunch.Deck && PetPacingKnob.PathFor(deckLaunch.LaneId, deckLaunch.Deck, deckLaunch.Reports) == null, "a -hs-native-ui-host deck launch gets no pacing path");
             check(PetPacingKnob.Take(PetPacingKnob.PathFor(deckLaunch.LaneId, deckLaunch.Deck, deckLaunch.Reports), true, launchRun) == null && File.Exists(elsewhere),
                 "the Deck never arms the knob, even with test control live and a valid file with the right run id");
             foreach (int lane in new[] { 0, 1, 2, 3 })
             {
-                var windows = OfflineGuard.ResolveLaunch(@"LAB\HSNativeUIProbe", "LAB", OfflineGuard.LaneRoot(lane) + @"\client\Hearthstone.exe",
+                var windows = OfflineGuard.ResolveHeldLaunch(@"LAB\HSNativeUIProbe", "LAB", OfflineGuard.LaneRoot(lane) + @"\client\Hearthstone.exe",
                     @"C:\Us"+@"ers\HSNative"+@"UIProbe\AppData\Local", new[] { "-hs-native-ui-run", launchRun, "-hs-native-ui-lane", lane.ToString() }, false);
                 string lanePath = PetPacingKnob.PathFor(windows.LaneId, windows.Deck, windows.Reports);
                 check(!windows.Deck && (lane == 0 ? lanePath == null : lanePath == windows.Reports + @"\pet-xp-pacing"), "launch context lane " + lane + (lane == 0 ? " has no pacing path" : " reads its own reports directory"));

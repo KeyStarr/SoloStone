@@ -232,7 +232,7 @@ namespace SabberStoneCore.Model.Entities
 			Controller = controller;
 
 			if (_history)
-				tags[GameTag.CONTROLLER] = controller.PlayerId;
+				_data[GameTag.CONTROLLER] = controller.PlayerId;
 		}
 
 		/// <inheritdoc />

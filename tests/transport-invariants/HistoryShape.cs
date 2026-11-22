@@ -204,6 +204,11 @@ internal sealed class HistoryShape
     private GroundBlock GroundStart(PowerHistoryStart start)
     {
         if (groundBlocks.Count == 0) return null;
+        // NativeMatch.NestPredictedPlayCreations wraps cards another card creates or moves, inside a human PLAY block, in a player
+        // TRIGGER (EffectIndex -1) the engine never emitted. Matching it would discard every queued engine block up to the next
+        // block of that source, so it takes the next engine block only when that one is its own.
+        if ((int)start.Type == 5 && start.HasEffectIndex && start.EffectIndex == -1 && Entity(start.Source).Get(GameTag.CARDTYPE) == (int)CardType.PLAYER
+            && (int?)Current?.Start.Type == 7 && groundBlocks.Peek().Source != start.Source) return null;
         // Fixtures can discard unsent engine history; match block signatures in emission order.
         while (groundBlocks.Count > 0)
         {

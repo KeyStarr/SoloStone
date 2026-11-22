@@ -90,7 +90,6 @@ internal static class AuraTransportBridge
     private static bool IsPublicDestination(IPlayable entity)
     {
         EngineZone zone = entity?.Zone?.Type ?? EngineZone.INVALID;
-        return zone == EngineZone.PLAY
-            || zone == EngineZone.HAND && entity.Controller?.PlayerId == 1;
+        return ReplayVisibility.IsPublicPlace(zone, entity?.Controller?.PlayerId ?? 0, 1);
     }
 }

@@ -35,6 +35,7 @@ internal static class NpcWorldIntegrationTests
             PendingDeckSurvivesRestart(world);
             GuardFallsBackToPlainPilot();
             WorldEncounterRunsTheSkilledBrain(world);
+            LedgerlineForefatherGuess();
         }
         finally { NpcWorldRuntime.Uninstall(); NpcWorldHooks.Reset(); LocalDecks.ExternalDecks = null; PlaytestQueue.WorldProfileResolver = null; }
         Console.WriteLine("PASS NPC world integration: boot fallback, world playtest knob -> NativeMatch profile, pending deck after restart, "
@@ -227,6 +228,66 @@ internal static class NpcWorldIntegrationTests
             public bool IsDone => done;
             public void StepNode() { if (pilot.fail == "lethal") throw new NotImplementedException(); done = true; }
         }
+    }
+
+    // #115: the report's opponent. Futuristic Forefather's guess against the world NPC Ledgerline (its real deck supplies the decoys),
+    // on the skilled brain with presentation on: every offer, then End Turn must hand the board to the NPC and back.
+    internal static void LedgerlineForefatherGuess()
+    {
+        var world = Generate();
+        Check(NpcWorldRuntime.TryInstallClient(() => world, deck => null, null), "world install");
+        try
+        {
+            var npc = world.All.Single(n => n.Id == "npc.n.ledgerline");
+            var profile = NpcWorldRuntime.PlaytestProfile(npc.Id);
+            Check(profile != null, "Ledgerline resolves");
+            foreach (int pick in new[] { 0, 1, 2 })
+            foreach (string premium in new[] { "-", "golden" })
+            {
+                var encounter = NpcWorldRuntime.PlaytestEncounter(profile, 3, 9001);
+                NpcWorldRuntime.Begin(encounter);
+                var packets = new List<object>(); var log = new List<string>();
+                double now = 0;
+                var scenario = DebugScenario.Parse("humanHand=TIME_041,CS2_182" + (premium == "-" ? "" : "\nhumanHandMods=TIME_041,-,-,-," + premium) + "\nhumanSeat=first");
+                var match = new NativeMatch((id, packet) => packets.Add(packet), LocalDecks.All[0].Id, encounter.Deck.Id, 8427) {
+                    MatchId = "ledgerline-guess", NativeNpcStartingTaunt = () => false, NativeNpcUserUI = packet => true,
+                    PresentationSettings = NpcPresentationSettings.LadderDefaults(encounter.Profile), NpcTurnNodes = 3000,
+                    SynchronousNpc = true, NpcClock = () => now, NativeNpcIdle = () => true, BotTrace = log.Add,
+                    DebugScenario = scenario, StartingPlayer = scenario.FirstPlayer };
+                match.Start();
+                string name = "Ledgerline Forefather guess (pick " + pick + ", premium " + premium + ")";
+                try
+                {
+                    match.SendChoices(packets.OfType<PegasusGame.EntityChoices>().Last(p => p.PlayerId == 1).Id, new List<int>());
+                    var game = match.Game; var player = game.Player1;
+                    player.BaseMana = 10; player.UsedMana = 0;
+                    var forefather = player.HandZone.Single(c => c.Card.Id == "TIME_041");
+                    var optionsField = typeof(NativeMatch).GetField("humanOptions", BindingFlags.NonPublic | BindingFlags.Instance);
+                    typeof(NativeMatch).GetMethod("SendHumanOptions", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(match, null);
+                    var before = packets.OfType<PegasusGame.AllOptions>().Last();
+                    int play = before.Options.FindIndex(o => o.MainOption?.Id == match.WireReturnId(forefather.Id) && o.MainOption.PowerKeyword == 0);
+                    Check(play >= 0, name + ": playable");
+                    match.SendOption(before.Id, play, 0, -1, 1);
+                    Check(player.Choice != null, name + ": guess offered");
+                    var offer = packets.OfType<PegasusGame.EntityChoices>().Last(p => p.PlayerId == 1);
+                    match.SendChoices(offer.Id, new List<int> { offer.Entities[pick] });
+                    Check(player.Choice == null, name + ": settled");
+                    var after = packets.OfType<PegasusGame.AllOptions>().Last();
+                    var held = optionsField.GetValue(match) as SabberStoneCore.Kettle.PowerAllOptions;
+                    Check(held != null && held.Index == after.Id, name + ": the match accepts the options it published after the guess");
+                    int turn = game.Turn, logStart = log.Count;
+                    match.SendOption(after.Id, after.Options.FindIndex(o => o.Type_ == PegasusGame.Option.Type.END_TURN), 0, -1, 0);
+                    for (int i = 0; match.NpcRunner?.Active == true && i < 10000; i++) { now += 100; match.TickNpc(); }
+                    Check(match.NpcRunner?.Active != true, name + ": NPC runner finished");
+                    Check(game.Turn >= turn + 2 || game.State == SabberStoneCore.Enums.State.COMPLETE, name + ": the turn came back to the human (turn " + turn + " -> " + game.Turn + ")");
+                    var decisions = log.Skip(logStart).Where(l => l.StartsWith("npc=" + encounter.Profile.Id + " turn=", StringComparison.Ordinal)).ToList();
+                    Check(decisions.Count > 0 && !log.Skip(logStart).Any(l => l.Contains("rror") || l.Contains("fault")), name + ": the NPC decided: " + string.Join(" | ", log.Skip(logStart).Take(3)));
+                }
+                finally { match.StopNpc(); NpcWorldRuntime.End(); }
+            }
+            Console.WriteLine("PASS Futuristic Forefather guess against Ledgerline: every offer, End Turn hands the board over and back (#115)");
+        }
+        finally { NpcWorldRuntime.Uninstall(); }
     }
 
     // A ladder-style world encounter in a NativeMatch decides on the golden search (nodes > 0) through the skill

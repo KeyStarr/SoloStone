@@ -437,6 +437,10 @@ static partial class Program
         File.WriteAllText(saved,text.Substring(0,text.Length-1)+"!"); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"so is the same size with other bytes"); File.WriteAllText(saved,text+" "); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"and another size"); File.WriteAllText(saved,text);
         string moved=Path.Combine(c.Saves,"renamed.xml"); File.Move(saved,moved); Check(!cBackups.SavesUnchanged(manifest,c.Saves),"and another path"); File.Move(moved,saved);
         if(RunsAsRoot()) Skip("an unreadable save counts as changed: root can read a file with no permissions");
+        else if(OperatingSystem.IsWindows()) {
+            // Windows has no Unix file modes; a file another handle holds with no sharing cannot be read either.
+            using(new FileStream(saved,FileMode.Open,FileAccess.ReadWrite,FileShare.None)) Check(!cBackups.SavesUnchanged(manifest,c.Saves),"an unreadable save counts as changed");
+        }
         else {
             File.SetUnixFileMode(saved,UnixFileMode.None);
             try { Check(!cBackups.SavesUnchanged(manifest,c.Saves),"an unreadable save counts as changed"); } finally { File.SetUnixFileMode(saved,UnixFileMode.UserRead|UnixFileMode.UserWrite); }

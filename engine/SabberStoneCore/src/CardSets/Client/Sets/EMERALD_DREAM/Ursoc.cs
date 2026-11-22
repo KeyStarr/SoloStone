@@ -26,7 +26,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                     Generic.SummonBlock(g, body, position++, s);
                 }
             }), PowerTask = new CustomTask((g, c, s, t, stack) => {
-                var victims = c.BoardZone.Concat(c.Opponent.BoardZone).Where(m => m != s && !m.Untouchable).ToArray();
+                var victims = c.BoardZone.Interactable.Concat(c.Opponent.BoardZone.Interactable).Where(m => m != s && !m.Untouchable).ToArray();
                 for (int i = victims.Length - 1; i > 0; i--)
                 { int j = g.Random.Next(i + 1); var swap = victims[i]; victims[i] = victims[j]; victims[j] = swap; }
                 foreach (var victim in victims)

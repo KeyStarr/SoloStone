@@ -20,6 +20,9 @@ public sealed class GameRecord
     public string PoolManifestHash { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string DarkGiftPolicyVersion { get; set; }
+    // Records written before the random pool policy existed carry none and replay on the frozen legacy lists.
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string RandomPoolPolicyVersion { get; set; }
     public string Id { get; set; }
     public string Suite { get; set; }
     public string Player { get; set; }
@@ -192,7 +195,10 @@ public static class Simulation
 #if SOURCE_ENGINE
         , OfflinePoolManifest pools = null
 #endif
-        , DeckSpec playerDeck = null, DeckSpec opponentDeck = null
+        , DeckSpec playerDeck = null, DeckSpec opponentDeck = null,
+        // Records a fresh game on the frozen pools without stamping the policy version: repairing the hashes of a record
+        // that predates the random pool policy must not move it onto the new pools.
+        bool frozenRandomPools = false
         )
     {
         if (replay && record.ReplaySchema is not (2 or 3))
@@ -207,6 +213,8 @@ public static class Simulation
                 throw new InvariantException("replay.pool", "offline pool policy/manifest mismatch");
             if (record.DarkGiftPolicyVersion != null && record.DarkGiftPolicyVersion != DarkGifts.PolicyVersion)
                 throw new InvariantException("replay.dark-gift", "Dark Gift policy mismatch");
+            if (record.RandomPoolPolicyVersion != null && record.RandomPoolPolicyVersion != SabberStoneCore.Model.RandomPools.MatchRandomPool.PolicyVersion)
+                throw new InvariantException("replay.random-pool", "random pool policy mismatch");
             pools = manifest;
         }
 #else
@@ -237,6 +245,10 @@ public static class Simulation
 #if SOURCE_ENGINE
             EnableCorpses = true, // matches NativeMatch.Start: Corpses are tracked in every game (owner, 2026-10-21)
             LegacyPoolReplay = replay && record.ReplaySchema == 2,
+            // An unversioned record replays on the frozen legacy lists, like unversioned Dark Gifts below. Live matches
+            // run as FT_WILD yet play the Standard pool, so the pool policy is set explicitly (the default).
+            UnversionedRandomPoolReplay = frozenRandomPools || replay && record.ReplaySchema == 3 && record.RandomPoolPolicyVersion == null,
+            PoolFormat = SabberStoneCore.Config.GenerationFormat.Standard,
             ReplayPools = pools,
             Player1Sideboards = Sideboards(first), Player2Sideboards = Sideboards(second),
 #endif
@@ -253,6 +265,7 @@ public static class Simulation
             record.PoolPolicyVersion = game.OfflinePools.PolicyVersion;
             record.PoolManifestHash = game.OfflinePools.Hash;
             record.DarkGiftPolicyVersion = DarkGifts.PolicyVersion;
+            record.RandomPoolPolicyVersion = frozenRandomPools ? null : SabberStoneCore.Model.RandomPools.MatchRandomPool.PolicyVersion;
         }
 #else
         if (!replay)
@@ -310,6 +323,7 @@ public static class Simulation
 #if SOURCE_ENGINE
         , OfflinePoolManifest pools = null
 #endif
+        , bool frozenRandomPools = false
         )
     {
         if (record.Policy is not ("random" or "first")) throw new ArgumentException("policy must be random or first");
@@ -318,7 +332,7 @@ public static class Simulation
 #if SOURCE_ENGINE
             , pools
 #endif
-            );
+            , frozenRandomPools: frozenRandomPools);
         started?.Invoke(game);
         // The XOR salts (0x485353494D = "HSSIM" here, 0x434C4F4E45 = "CLONE" for fuzz clone points) derive separate PRNG streams from
         // the game seed, so the policy and the clone-point choice never consume the game's own randomness.

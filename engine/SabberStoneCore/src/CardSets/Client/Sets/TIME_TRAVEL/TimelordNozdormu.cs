@@ -29,6 +29,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 Condition = new SelfCondition(e => (int)e.Card.Set == e.Game.OfflinePools.NewestSetId && e.Card[(GameTag)2088] == 0),
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     if (s is Enchantment helper && helper.Target is Minion m && m.Controller == c &&
+                        // untouchable-ok: card text and its own enchant: Dormant minions awaken sooner, they are the target of the effect
                         m.Zone == c.BoardZone && m.IsDormant && !m.IsSilenced && t?.Id != m.Id &&
                         m.AppliedEnchantments.Contains(helper) && helper[GameTag.ATTACHED] == m.Id)
                         DormantRules.Accelerate(m, 1);

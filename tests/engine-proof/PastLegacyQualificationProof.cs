@@ -20,7 +20,7 @@ internal static class PastLegacyQualificationProof
     internal static Game New(int seed=11)
     {
         var g = new Game(new GameConfig { RandomSeed=seed, StartPlayer=1, Shuffle=false, SkipMulligan=true,
-            History=true, Logging=false, FormatType=FormatType.FT_WILD, Player1Deck=Enumerable.Repeat(Cards.FromId("CS2_182"),30).ToList(),
+            History=true, Logging=false, FormatType=FormatType.FT_WILD, PoolFormat=SabberStoneCore.Config.GenerationFormat.Wild, Player1Deck=Enumerable.Repeat(Cards.FromId("CS2_182"),30).ToList(),
             Player2Deck=Enumerable.Repeat(Cards.FromId("CS2_182"),30).ToList() });
         g.StartGame();
         foreach(var p in new[]{g.Player1,g.Player2})

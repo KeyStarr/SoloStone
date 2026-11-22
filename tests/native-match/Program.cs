@@ -81,7 +81,11 @@ internal static partial class Program
         foreach (string moved in new[] { "--rematch-only", "--canonical-privacy-assertions-only" })
             if (args.Contains(moved)) throw new ArgumentException(moved + " moved to the native-match-logic suite");
         ControllerAdmissionInvariant.Install();
+        if (args.Contains("--choice-timeout-only")) { NativeMatch.ClockFreeBot = true; TimedChoiceCompletionNative(); return; }
+        if (args.Contains("--softlock-only")) { NativeMatch.ClockFreeBot = true; ForefatherGuessNative(); AnnouncerRewindDeathKnightNative(); ForefatherFromDiscoverNative(); ForefatherNpcGuessNative(); NpcGuessForcedPicksNative(); NpcGuessTwoHeldNative(); NpcGuessHeldThenHumanGuessNative(); GlimmerrootGuessNative(); TimedChoiceCompletionNative(); return; }
+        if (args.Contains("--ledgerline-only")) { NativeMatch.ClockFreeBot = true; NpcWorldIntegrationTests.LedgerlineForefatherGuess(); return; }
         if (args.Contains("--match-event-log-review-only")) { NativeMatch.ClockFreeBot = true; MatchEventLogReview(); return; }
+        if (args.Contains("--event-log-corrections-only")) { NativeMatch.ClockFreeBot = true; EventLogFollowsTransportCorrections(); return; }
         if (args.Contains("--match-event-log-only")) { NativeMatch.ClockFreeBot = true; MatchEventLogNative(); return; }
         if (args.Contains("--held-form-overlay-only")) { NativeMatch.ClockFreeBot = true; HeldFormOverlayHistory(); return; }
         if (args.Contains("--temporary-only")) { NativeMatch.ClockFreeBot = true; TemporaryVisualHistory(args.ElementAtOrDefault(1)); return; }
@@ -97,12 +101,19 @@ internal static partial class Program
         if (args.Contains("--locations-only")) { NativeMatch.ClockFreeBot = true; LocationActivationHistory(); LocationOptions(); return; }
         if (args.Contains("--plague-only")) { NativeMatch.ClockFreeBot = true; PlagueAttackShuffle(); FreshDeckShuffleHistory(); ArrivalCastsWhenDrawn(); return; }
         if (args.Contains("--shuffle-choice-only")) { NativeMatch.ClockFreeBot = true; DiscoveredShuffleCompletion(); return; }
+        if (args.Contains("--adaptive-tag-only")) { NativeMatch.ClockFreeBot = true; AdaptiveTagHistory(); return; }
         if (args.Contains("--shuffle-only")) { NativeMatch.ClockFreeBot = true; GeneratedShuffleHistory(); return; }
         if (args.Contains("--shuffle-batch-only")) { NativeMatch.ClockFreeBot = true; ShuffleBatchHistory(); return; }
         if (args.Contains("--hero-skin-only")) { HeroSkinPresentationTests(); return; }
         if (args.Contains("--board-identity-only")) { NativeMatch.ClockFreeBot = true; BoardIdentityHistory(); return; }
         if (args.Contains("--rewind-presentation-only")) { RewindPresentationTags(); return; }
+        if (args.Contains("--opposing-burn-rewind-only")) { NativeMatch.ClockFreeBot = true; RewindAfterOpposingBurn(); RewindAfterAttemptBurn(); return; }
         if (args.Contains("--announcer-rewind-only")) { NativeMatch.ClockFreeBot = true; AnnouncerRewindHistory(); return; }
+        if (args.Contains("--hidden-hand-only")) { NativeMatch.ClockFreeBot = true; HiddenHandCardHistory(); return; }
+        if (args.Contains("--morchie-rewind-only")) { NativeMatch.ClockFreeBot = true; MorchieRewindChoices(); return; }
+        if (args.Contains("--rewind-settlement-only")) { NativeMatch.ClockFreeBot = true; RewindSettlementNoOp(args.ElementAtOrDefault(1)); return; }
+        if (args.Contains("--play-effect-once-only")) { NativeMatch.ClockFreeBot = true; PlayEffectOnceHistory(); return; }
+        if (args.Contains("--effect-summon-slot-only")) { NativeMatch.ClockFreeBot = true; EffectSummonSlotHistory(); return; }
         if (args.Contains("--king-llane-only")) { NativeMatch.ClockFreeBot = true; KingLlanePlayHistory(); return; }
         if (args.Contains("--vanguard-only")) { NativeMatch.ClockFreeBot = true; VanguardDrawHistory(); return; }
         if (args.Contains("--broxigar-only")) { NativeMatch.ClockFreeBot = true; BroxigarReturnHistory(); return; }
@@ -111,10 +122,13 @@ internal static partial class Program
             ChillmawHistory(args.Contains("--dump-chillmaw"), args.Contains("--require-no-empty-effect")); return;
         }
         if (args.Contains("--trigger-visual-only")) { NativeMatch.ClockFreeBot = true; TriggerVisualKeywordHistory(); return; }
+        if (args.Contains("--watfin-defs-only")) { NativeMatch.ClockFreeBot = true; PoweredUpGlowTests.WatfinOfferDefTags(); Console.WriteLine("PASS Watfin offer DefTags"); return; }
+        if (args.Contains("--delegated-fx-only")) { NativeMatch.ClockFreeBot = true; DelegatedPowerFx(); return; }
         if (args.Contains("--wisp-fx-only")) { NativeMatch.ClockFreeBot = true; WispHeroPowerHistory(); return; }
         if (args.Contains("--godfrey-only")) { GodfreyPortalHistory(); return; }
         if (args.Contains("--coin-flip-only")) { CoinFlipTests(); return; }
-        if (args.Contains("--hero-replacement-only")) { NativeMatch.ClockFreeBot = true; HeroReplacementHistory(args.Contains("--dump-hero-replacement")); return; }
+        if (args.Contains("--hero-power-contract-only")) { NativeMatch.ClockFreeBot = true; HeroPowerReplacementContract(args.Contains("--dump-hero-replacement")); return; }
+        if (args.Contains("--hero-replacement-only")) { NativeMatch.ClockFreeBot = true; HeroReplacementHistory(args.Contains("--dump-hero-replacement")); HeroPowerReplacementContract(args.Contains("--dump-hero-replacement")); return; }
         if (args.Length == 2 && args[0] == "--admission-card") { NativeMatch.ClockFreeBot = true; NativeAdmissionSweep(args[1]); return; }
         if (args.Contains("--admission-only")) { NativeMatch.ClockFreeBot = true; NativeAdmissionSweep(); return; }
         if (args.Contains("--empty-triggers-only")) { EmptyTriggerPresentation(); return; }
@@ -191,6 +205,7 @@ internal static partial class Program
         if (args.Contains("--auto-cast-only")) { AutomaticQuestHistory(); AutomaticSecretHistory(); FacelessEnigmaHistory(); return; }
         if (args.Contains("--overdraw-only")) { OverdrawHistory(); return; }
         if (args.Contains("--draw-spell-only")) { DrawSpellHistory(); return; }
+        if (args.Contains("--quest-complete-only")) { NativeMatch.ClockFreeBot = true; QuestCompleteHistory(); return; }
         if (args.Contains("--subspell-only")) { ModernSubSpellHistory(); return; }
         if (args.Contains("--spell-vfx-only")) { SpellVfxHistory(); return; }
         if (args.Contains("--defile-only")) { DefilePrivateTagsNeverReachWire(); return; }
@@ -220,6 +235,8 @@ internal static partial class Program
         AutomaticSecretHistory();
         FacelessEnigmaHistory();
         HeroReplacementHistory();
+        HiddenHandCardHistory();
+        HeroPowerReplacementContract();
         EnchantmentVisibilityHistory();
         BoardPositionContract();
         DiscoverSpellLifecycle("CORE_WON_350",scheduledRepeat:true);
@@ -228,10 +245,12 @@ internal static partial class Program
         ChillmawHistory();
         TriggerVisualKeywordHistory();
         DrawSpellHistory();
+        QuestCompleteHistory();
         OverdrawHistory();
         ChaosStrikeHistory();
         CthunNativeProof();
         HolyBolaHistory();
+        AdaptiveTagHistory();
         GeneratedShuffleHistory();
         ShuffleBatchHistory();
         ModernSubSpellHistory();
@@ -247,7 +266,20 @@ internal static partial class Program
         VanguardDrawHistory();
         BroxigarReturnHistory();
         KingLlanePlayHistory();
+        PlayEffectOnceHistory();
+        EffectSummonSlotHistory();
         AnnouncerRewindHistory();
+        RewindAfterOpposingBurn();
+        RewindAfterAttemptBurn();
+        ForefatherGuessNative();
+        AnnouncerRewindDeathKnightNative();
+        ForefatherFromDiscoverNative();
+        ForefatherNpcGuessNative();
+        NpcGuessForcedPicksNative(); NpcGuessTwoHeldNative(); NpcGuessHeldThenHumanGuessNative();
+        GlimmerrootGuessNative();
+        TimedChoiceCompletionNative();
+        MorchieRewindChoices();
+        RewindSettlementNoOp();
         GroupProofs.Run(ProofKind.Native);
         if (args.Contains("--hand-buff-only")) return;
         OverloadManaParity();
@@ -325,6 +357,7 @@ internal static partial class Program
         TestLoanerReachesDecisionPaths();
         StandardBatchLoanerTransport();
         AutomaticAdmissionFixtures();
+        LegacyHeroAdmission();
         FinishAdmissionSweep();
         ExpandedCatalogTransportSmoke();
         ExpandedMechanismTransport();
@@ -347,6 +380,7 @@ internal static partial class Program
         AuraQueuedCallerPathsRestoreCosts();
         AuraCorrectionOrderAndLifetime();
         AuraCorrectionsRespectReplayVisibility();
+        EventLogFollowsTransportCorrections();
         Console.WriteLine("PASS native match contract");
     }
 
@@ -1483,6 +1517,7 @@ internal static partial class Program
             capture.SerializeAll();
         }
         JadeCoinSequence();
+        HeraldDefinitionHistory();
         Check(NativeMatch.TransportCardId("CFM_712_t31") == "CFM_712_t31" && NativeMatch.TransportCardId(null) == "", "Jade mapping is bounded to legacy identities");
         Console.WriteLine("PASS Jade Golem projection: 30 legacy sizes, four pinned native identities, exact printed and current stats");
     }
@@ -1620,7 +1655,9 @@ internal static partial class Program
                 var discoverOwner = discoverGame.CurrentPlayer;
                 Check(new DiscoverTask().Process(discoverGame, discoverOwner, discoverGame.IdEntityDic[source.Id], null) == TaskState.COMPLETE
                     && discoverOwner.Choice?.Choices.Count > 0
-                    && discoverOwner.Choice.Choices.All(entity => discoverOwner.Wild.Contains(discoverGame.IdEntityDic[entity].Card)),
+                    // Discover reads the match's pool (the Standard policy), not the frozen legacy lists.
+                    && discoverOwner.Choice.Choices.All(entity => Cards.RandomPool(discoverGame, PoolDestination.Hand)
+                        .ClassAndNeutral(discoverOwner.HeroClass).Contains(discoverGame.IdEntityDic[entity].Card)),
                     "INVALID source Discover resolves controller class: " + id + "/" + loaner.Hero);
                 // Quest spells are deliberately absent from random pools; admitted dual-class cards use export membership.
                 bool admitted = game.OfflinePools.Standard.Any(member => member.CardId == id);
@@ -1661,6 +1698,7 @@ internal static partial class Program
                     int pick = owner.Choice.ChoiceAction == SabberStoneCore.Model.ChoiceAction.REWIND
                         ? owner.Choice.Choices.First(c => c != game.Rewind.RewindEntityId) : owner.Choice.Choices[0];
                     InvokeProcess(match, ChooseTask.Pick(owner, pick)); FlushFieldHistory(match);
+                    owner = game.ControllerById(owner.Id);
                 }
             }
             else
@@ -1696,8 +1734,10 @@ internal static partial class Program
                 {
                     var choice = capture.Last<EntityChoices>(17);
                     match.SendChoices(choice.Id, choice.Entities.Take(Math.Max(1, choice.CountMin)).ToList());
+                    owner = game.ControllerById(owner.Id);
                 }
             }
+            source = game.IdEntityDic[source.Id];
             Check(owner.Choice == null && !game.Resolution.HasSuspendedEffect, "Standard play resolves pending choices: " + id);
             Check(!owner.HandZone.Contains(source), "Standard option accepted by engine: " + id);
             if (dualIds.Contains(id))
@@ -3213,6 +3253,57 @@ internal static partial class Program
         return (capture, match, game, owner, aura, spell);
     }
 
+    // The real hook-up: NativeMatch hands the match event log the corrections recorded for the batch and position it observes, and
+    // consumes them after the log has read them. The log follows a correction the client is sent (a public human minion), skips one
+    // it is not (an opponent's hand card), ignores one recorded for another batch, and never sees one twice.
+    private static void EventLogFollowsTransportCorrections()
+    {
+        var capture = new Capture();
+        var match = StartFixture(capture, "CS2_231", null);
+        var lines = new List<string>();
+        match.EventTrace = lines.Add;
+        EngineGame game = match.Game;
+        var yeti = (Minion)SabberStoneCore.Model.Entities.Entity.FromCard(game.Player1, Cards.FromId("CS2_182"), zone: game.Player1.BoardZone);
+        var hidden = SabberStoneCore.Model.Entities.Entity.FromCard(game.Player2, Cards.FromId("CS2_182"), zone: game.Player2.HandZone);
+        SendHistoryEntries(match, new List<SabberStoneCore.Kettle.IPowerHistoryEntry> {
+            SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(game.Id, GameTag.TURN, 1),   // past the log's setup phase
+            SabberStoneCore.Kettle.PowerHistoryBuilder.FullEntity(yeti), SabberStoneCore.Kettle.PowerHistoryBuilder.FullEntity(hidden) });
+        lines.Clear();
+        var a6 = new Dictionary<GameTag, int> { [GameTag.ATK] = 6 };   // made-up: the engine's Yeti keeps 4 Attack
+        List<SabberStoneCore.Kettle.IPowerHistoryEntry> Batch() => new List<SabberStoneCore.Kettle.IPowerHistoryEntry> {
+            SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(game.Id, GameTag.NEXT_STEP, (int)Step.MAIN_ACTION) };
+        // The made-up 6 Attack reaches the log as a stat change, or as the RESYNC against the engine's 4 that follows it.
+        bool Followed(int id) => lines.Any(l => l.Contains("#" + id + "(") && (l.Contains(" STATS ") && l.Contains("->6/") || l.Contains(" RESYNC ") && l.Contains("tracked=6/")));
+
+        var other = Batch();
+        match.RecordTransportCorrection(other, 1, yeti.Id, a6, true);
+        SendHistoryEntries(match, Batch());
+        Check(!Followed(yeti.Id), "a correction recorded for another batch reached the log:\n" + string.Join("\n", lines));
+
+        var batch = Batch();
+        match.RecordTransportCorrection(batch, 1, yeti.Id, a6, true);
+        match.RecordTransportCorrection(batch, 1, hidden.Id, new Dictionary<GameTag, int> { [GameTag.ARMOR] = 3 }, true);   // ARMOR is logged in any zone
+        SendHistoryEntries(match, batch);
+        Check(Followed(yeti.Id), "the log did not follow a public correction:\n" + string.Join("\n", lines));
+        Check(!lines.Any(l => l.Contains("#" + hidden.Id + "(")), "the log followed a correction on an opponent's hand card:\n" + string.Join("\n", lines));
+
+        // The consumed correction sits at index 1; the same list grows by one entry, so the log reads position 1 again: it must
+        // find nothing there.
+        lines.Clear();
+        batch.Add(SabberStoneCore.Kettle.PowerHistoryBuilder.TagChange(game.Id, GameTag.NEXT_STEP, (int)Step.MAIN_ACTION));
+        SendHistoryEntries(match, batch);
+        Check(!Followed(yeti.Id), "a consumed correction reached the log twice:\n" + string.Join("\n", lines));
+
+        // An entity the transport never revealed (a card in the human's hand, no history sent for it) gets no correction line.
+        var unrevealed = SabberStoneCore.Model.Entities.Entity.FromCard(game.Player1, Cards.FromId("CS2_182"), zone: game.Player1.HandZone);
+        lines.Clear();
+        var third = Batch();
+        match.RecordTransportCorrection(third, 1, unrevealed.Id, new Dictionary<GameTag, int> { [GameTag.ARMOR] = 3 }, true);
+        SendHistoryEntries(match, third);
+        Check(!lines.Any(l => l.Contains("#" + unrevealed.Id + "(")), "the log followed a correction on an unrevealed entity:\n" + string.Join("\n", lines));
+        Console.WriteLine("PASS event log follows the transport's corrections: public followed, hidden and foreign skipped, consumed once");
+    }
+
     private static void AuraCorrectionsRespectReplayVisibility()
     {
         var capture = new Capture();
@@ -3355,11 +3446,11 @@ internal static partial class Program
             "Mirror fixture no longer carries the pinned source identity defect");
         List<PowerHistoryData> native = History(capture, cursor);
         PowerHistoryData full = native.Single(entry => entry.HasFullEntity && entry.FullEntity.Entity == copy.Id);
-        PowerHistoryData show = native.Single(entry => entry.HasShowEntity && entry.ShowEntity.Entity == copy.Id);
         Check(full.FullEntity.Name == "CS2_200" && SnapshotTag(full, GameTag.ENTITY_ID) == copy.Id,
             "Mirror FULL did not normalize embedded identity to its destination");
-        Check(show.ShowEntity.Name == "CS2_200" && SnapshotTag(show, GameTag.ENTITY_ID) == copy.Id,
-            "Mirror SHOW did not normalize embedded identity to its destination");
+        // Created straight into PLAY: the FULL_ENTITY is the only snapshot, as in retail (mirror_entity.log:1461-1478).
+        Check(SnapshotTag(full, GameTag.ZONE) == (int)EngineZone.PLAY && !native.Any(entry => entry.HasShowEntity && entry.ShowEntity.Entity == copy.Id),
+            "Mirror copy is created in PLAY with no SHOW_ENTITY");
         foreach (PowerHistoryData entry in native)
         {
             var snapshot = entry.HasFullEntity ? entry.FullEntity

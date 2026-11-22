@@ -13,6 +13,23 @@ internal static class CombatNativeProof
 {
     private static void Check(bool condition,string message)
     { if(!condition) throw new Exception("combat projection: "+message); }
+    // Retail draws enemy Taunt frames translucent from the opposing player entity's IGNORE_TAUNT (433): it must reach the wire.
+    private static void IgnoreTauntPlayerTag()
+    {
+        foreach(bool human in new[]{true,false})
+        {
+            var f=new PoweredUpGlowTests.Fixture();
+            var owner=human?f.Game.Player1:f.Game.Player2; var other=owner.Opponent;
+            int cursor=f.Entries.Count();
+            var kayn=f.Summon("CORE_BT_187",owner); f.Game.DeathProcessingAndAuraUpdate(); f.Flush();
+            Func<Controller,int,bool> sent=(c,v)=>f.Entries.Skip(cursor).Any(e=>e.HasTagChange && e.TagChange.Entity==c.Id
+                && e.TagChange.Tag==(int)GameTag.IGNORE_TAUNT && e.TagChange.Value==v);
+            Check(sent(owner,1) && !sent(other,1),"Kayn on seat "+(human?1:2)+" sends IGNORE_TAUNT=1 on its own player entity only");
+            cursor=f.Entries.Count();
+            kayn.Silence(); f.Game.DeathProcessingAndAuraUpdate(); f.Flush();
+            Check(sent(owner,0),"Silence on Kayn sends IGNORE_TAUNT=0");
+        }
+    }
     [GroupProof("b14-f4-combat-native",ProofKind.Native)]
     internal static void Run()
     {
@@ -45,6 +62,7 @@ internal static class CombatNativeProof
                 || t.Name==(int)GameTag.ZONE || t.Name==(int)GameTag.ZONE_POSITION)),"opponent hidden card never exposes identity, stats or combat markers");
         Unpinned_FyrakkSecretPrivacy(f);
         StackedRushProjection();
+        IgnoreTauntPlayerTag();
         Console.WriteLine("PASS combat native keyword/enchantment/internal-tag projection");
     }
 

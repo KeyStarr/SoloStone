@@ -19,7 +19,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 { PlayReq.REQ_TARGET_TO_PLAY, 0 }, { PlayReq.REQ_MINION_TARGET, 0 }
             });
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
-                if (!(t is Minion minion) || minion.Zone != minion.Controller.BoardZone || minion.IsDormant
+                if (!(t is Minion minion) || minion.Zone != minion.Controller.BoardZone || minion.Untouchable
                     || minion.ToBeDestroyed || minion.Health <= 0) return;
                 if (minion.Controller == c && minion.IsRace(Race.DEMON))
                     Generic.AddEnchantmentBlock(g, Cards.FromId("JAIL_997e1"), (IPlayable)s, minion);

@@ -241,7 +241,10 @@ internal static class ImbueProof
         foreach (var cls in new[] { CardClass.ROGUE, CardClass.PRIEST, CardClass.WARLOCK })
         {
             var g = Make(cls); var p = g.Player1;
-            PlayEntity(g, p, Generic.DrawCard(p, Cards.FromId("BRM_027"))); // the legacy definition resolves Ragnaros on play
+            var majordomo = (Minion)Generic.DrawCard(p, Cards.FromId("BRM_027"));
+            PlayEntity(g, p, majordomo);
+            majordomo.Destroy();
+            g.DeathProcessingAndAuraUpdate();
             Check(p.Hero.Card.Id == "BRM_027h" && p.HeroClass == cls, $"{cls}: Majordomo's Ragnaros keeps the class: {p.Hero.Card.Id}/{p.HeroClass}");
             p.BaseMana = 10; p.UsedMana = 0;
             var test = (Spell)Generic.DrawCard(p, Consumer(true));

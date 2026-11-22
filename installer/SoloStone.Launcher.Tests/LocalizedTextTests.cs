@@ -17,9 +17,15 @@ static partial class Program
     static Dictionary<string,(string Key,string Text)> JsonEntries(JsonElement element) { var result=new Dictionary<string,(string,string)>(); foreach(var member in element.EnumerateObject()) result.Add(member.Name,(member.Value[0].GetString(),member.Value[1].GetString())); return result; }
     static List<string> JsonList(JsonElement element) => element.EnumerateArray().Select(e=>e.GetString()).ToList();
 
-    // Cards the engine rewrites after load (Configure hooks) so that their text no longer says what the card file's English says:
-    // the plugin shows these in English. A new entry here is a decision; a new mismatch outside it fails.
-    static readonly string[] EngineRewrittenText={"AT_051","DRG_403e","EX1_155a","EX1_155b","EX1_165","EX1_165a","EX1_165t1","EX1_248","NEW1_008","NEW1_008a","NEW1_008b","NEW1_027e","OG_044a","UNG_028t","UNG_067t1","UNG_067t1e","UNG_067t1e2","UNG_817","UNG_920t1","UNG_999t5","UNG_999t5e"};
+    // Cards the engine rewrites after load (Configure hooks) so that their text no longer says what the card file's English says.
+    // A new entry here is a decision; a new mismatch outside it fails. Each is either in EngineRetailText (below) or shows English.
+    static readonly string[] EngineRewrittenText={"AT_051","DRG_403e","EX1_155a","EX1_155b","EX1_165","EX1_165a","EX1_165t1","EX1_248","LOOT_392","NEW1_008","NEW1_008a","NEW1_008b","NEW1_027e","OG_044a","UNG_028t","UNG_067t1","UNG_067t1e","UNG_067t1e2","UNG_817","UNG_920t1","UNG_999t5","UNG_999t5e"};
+
+    // The part of EngineRewrittenText whose engine text is the client's current retail English (hsdata 254477, layout marks aside): the
+    // locale files translate these from hsdata and list them in "retailText", keyed to the engine's English, so they read in every
+    // locale that has a text for them. The rest of EngineRewrittenText (a SoloStone rewording that matches neither build) shows English.
+    // Today every rewritten card is retail text.
+    static readonly string[] EngineRetailText=EngineRewrittenText;
 
     static void LocalizedTextTests(string temp) {
         var originalOpen=LocalizedCardText.Open;
@@ -69,18 +75,21 @@ static partial class Program
             Check(english.Count>9000,"the card file has English text for thousands of distinct ids");
             var allFiles=Directory.GetFiles(Path.Combine(AppContext.BaseDirectory,"facts"),"violet-hold-2026-09*.json").Select(Path.GetFileName).OrderBy(n=>n,StringComparer.Ordinal).ToArray();
             Check(allFiles.SequenceEqual(new[]{"violet-hold-2026-09.json"}.Concat(locales.Select(l=>"violet-hold-2026-09."+l+".json")).OrderBy(n=>n,StringComparer.Ordinal)),"one file per non-English client locale, next to the card file");
-            var all=new Dictionary<string,Dictionary<string,(string Key,string Text)>>();
+            var all=new Dictionary<string,Dictionary<string,(string Key,string Text)>>(); var retail=new Dictionary<string,List<string>>();
             foreach(string locale in locales) {
                 using var doc=JsonDocument.Parse(File.ReadAllBytes(FactsFile("violet-hold-2026-09."+locale+".json")));
                 var root=doc.RootElement;
                 Check(root.GetProperty("locale").GetString()==locale && root.GetProperty("meta").GetString()=="violet-hold-2026-09" && root.GetProperty("schemaVersion").GetInt32()==2,"the file says which locale it is: "+locale);
                 var expected=JsonEntries(root.GetProperty("text")); all[locale]=expected;
-                var excluded=JsonList(root.GetProperty("excluded")); var missing=JsonList(root.GetProperty("missing")); var tokens=JsonList(root.GetProperty("tokenMismatch"));
+                var excluded=JsonList(root.GetProperty("excluded")); var missing=JsonList(root.GetProperty("missing")); var tokens=JsonList(root.GetProperty("tokenMismatch")); Check(root.TryGetProperty("retailText",out var retailElement),"the file lists the ids that took hsdata's retail text (retailText): "+locale); var retailText=JsonList(retailElement); retail[locale]=retailText;
+                Check(retailText.OrderBy(i=>i,StringComparer.Ordinal).SequenceEqual(EngineRetailText.OrderBy(i=>i,StringComparer.Ordinal)),"the ids that took hsdata's retail text are exactly the engine-retail list: "+locale);
                 Check(excluded.Count==0,"no id is excluded from every locale: "+locale);
                 Check(english.Keys.Except(excluded).Except(missing).Except(tokens).OrderBy(i=>i,StringComparer.Ordinal).SequenceEqual(expected.Keys.OrderBy(i=>i,StringComparer.Ordinal)),"covers every id with English text, minus this locale's gaps and placeholder mismatches: "+locale);
                 Check(missing.Concat(tokens).All(english.ContainsKey) && missing.Count<60 && tokens.Count<20 && expected.Values.All(v=>v.Text.Length!=0),"the gaps are few, real ids; no empty text: "+locale);
-                // Staleness without hsdata: every translation is keyed to the English the card file has now.
-                Check(expected.All(p=>p.Value.Key==LocalizedCardText.Key(english[p.Key])),"every translation's key matches the card file's English text (regenerate the locale files after a card file change): "+locale);
+                // Staleness without hsdata: every translation is keyed to the English the card file has now, except a retail-text id, which is
+                // keyed to the engine's English (checked against the engine below).
+                Check(expected.All(p=>retailText.Contains(p.Key) || p.Value.Key==LocalizedCardText.Key(english[p.Key])),"every translation's key matches the card file's English text, except a retail-text id's (regenerate the locale files after a card file change): "+locale);
+                Check(retailText.All(id=>english.ContainsKey(id)),"a retail-text id is a card the card file has: "+locale);
                 var ours=LocalizedCardText.Load(locale);
                 Check(ours!=null && ours.Count==expected.Count && expected.All(p=>ours.TryGetValue(p.Key,out var v) && v.Text==p.Value.Text && v.Key==p.Value.Key),"the plugin's reader agrees with System.Text.Json on every entry: "+locale);
             }
@@ -88,22 +97,33 @@ static partial class Program
 
             // The real engine: a translation is only good while the engine plays the English it was made from.
             var rewritten=new SortedSet<string>(StringComparer.Ordinal); int compared=0;
-            foreach(var pair in all["ruRU"]) {
+            foreach(var pair in english) {
                 var card=SabberStoneCore.Model.Cards.FromId(pair.Key);
-                if(card==null) continue;
+                if(card==null || !all["ruRU"].ContainsKey(pair.Key)) continue;
                 compared++;
-                if(!LocalizedCardText.SameEnglish(pair.Value.Key,card.Text)) rewritten.Add(pair.Key);
+                if(!LocalizedCardText.SameEnglish(LocalizedCardText.Key(pair.Value),card.Text)) rewritten.Add(pair.Key);
             }
             Check(compared>9000,"the engine has the cards the locale files translate");
             foreach(string id in new[]{"CORE_CS2_024","CORE_EX1_007","CORE_EX1_011","CORE_LOOT_413","TLC_226"})
                 foreach(string locale in locales)
                     Check(LocalizedCardText.Lookup(locale,id,SabberStoneCore.Model.Cards.FromId(id).Text,out string _)==LocalizedCardText.Status.Localized,"a card module's raw-layout English still takes the translation: "+id+" "+locale);
             Check(rewritten.SequenceEqual(EngineRewrittenText.OrderBy(i=>i,StringComparer.Ordinal)),"ids whose engine text differs from the card file's English must be exactly the known list; new drift fails. Now: "+string.Join(",",rewritten));
+            Check(EngineRetailText.All(EngineRewrittenText.Contains),"every retail-text id is an engine-rewritten one");
             foreach(string locale in locales) {
-                var drift=all[locale].Where(p=>{ var card=SabberStoneCore.Model.Cards.FromId(p.Key); return card!=null && !LocalizedCardText.SameEnglish(p.Value.Key,card.Text); }).Select(p=>p.Key).ToList();
-                Check(drift.All(rewritten.Contains),"no locale has drift the others do not: "+locale);
-                foreach(string id in drift) Check(LocalizedCardText.Lookup(locale,id,SabberStoneCore.Model.Cards.FromId(id).Text,out string never)==LocalizedCardText.Status.Stale && never==null,"a rewritten card falls back to English: "+locale+" "+id);
+                foreach(var p in all[locale]) {
+                    var card=SabberStoneCore.Model.Cards.FromId(p.Key);
+                    if(card==null) continue;
+                    bool fileKey=p.Value.Key==LocalizedCardText.Key(english[p.Key]), engineKey=LocalizedCardText.SameEnglish(p.Value.Key,card.Text);
+                    // The check that catches a rewritten card whose locale text is of neither the card file's English nor the engine's.
+                    Check(fileKey || (retail[locale].Contains(p.Key) && engineKey),"a translation is keyed to the card file's English, or for a retail-text id to the engine's English: "+locale+" "+p.Key);
+                    Check(!retail[locale].Contains(p.Key) || (engineKey && LocalizedCardText.Lookup(locale,p.Key,card.Text,out string retailRaw)==LocalizedCardText.Status.Localized && retailRaw==p.Value.Text),"a retail-text id reads from the locale file: "+locale+" "+p.Key);
+                    if(!retail[locale].Contains(p.Key) && !engineKey) Check(LocalizedCardText.Lookup(locale,p.Key,card.Text,out string never)==LocalizedCardText.Status.Stale && never==null,"a rewritten card that is not retail text falls back to English: "+locale+" "+p.Key);
+                }
+                foreach(string id in EngineRetailText)
+                    Check(all[locale].ContainsKey(id) || JsonList(JsonDocument.Parse(File.ReadAllBytes(FactsFile("violet-hold-2026-09."+locale+".json"))).RootElement.GetProperty("missing")).Concat(JsonList(JsonDocument.Parse(File.ReadAllBytes(FactsFile("violet-hold-2026-09."+locale+".json"))).RootElement.GetProperty("tokenMismatch"))).Contains(id),"a retail-text id has a translation unless hsdata has none for this locale: "+locale+" "+id);
             }
+            foreach(string locale in locales)
+                Check(LocalizedCardText.Lookup(locale,"LOOT_392",SabberStoneCore.Model.Cards.FromId("LOOT_392").Text,out string twig)==LocalizedCardText.Status.Localized && twig!=SabberStoneCore.Model.Cards.FromId("LOOT_392").Text,"Twig of the World Tree reads in "+locale+", not English (#227)");
             var engineBolt=SabberStoneCore.Model.Cards.FromId("AT_001");
             Check(LocalizedCardText.Lookup("ruRU","AT_001",engineBolt.Text,out string boltRu)==LocalizedCardText.Status.Localized && boltRu.Any(c=>c>='\u0400' && c<='\u04ff'),"an untouched card reads in Russian (the engine text carries its @spelldmg suffix; the key ignores it)");
 
@@ -170,7 +190,7 @@ static partial class Program
         string russian=(string)raw.Invoke(null,new object[]{"HERO_08bp","ruRU"});
         var fireblast=LocalizedCardText.Load("ruRU")["CS2_034"];
         Check(english==SabberStoneCore.Model.Cards.FromId("CS2_034").Text && russian==fireblast.Text && russian!=english,"Fireblast (native HERO_08bp) reads from the file's CS2_034 entry in Russian, engine English otherwise");
-        Check((string)raw.Invoke(null,new object[]{"UNG_067t1","ruRU"})==(string)raw.Invoke(null,new object[]{"UNG_067t1",null}),"a card the engine rewrites shows English even in Russian");
+        Check((string)raw.Invoke(null,new object[]{"UNG_067t1","ruRU"})==LocalizedCardText.Load("ruRU")["UNG_067t1"].Text && (string)raw.Invoke(null,new object[]{"UNG_067t1","ruRU"})!=(string)raw.Invoke(null,new object[]{"UNG_067t1",null}),"a card the engine rewrites to retail text reads in Russian");
 
         // The client locale is remembered once settled, and not while the client says English but Options started another language.
         var clientLocale=type.GetMethod("ClientLocale",any,null,new[]{typeof(Func<string>),typeof(Func<string>)},null);

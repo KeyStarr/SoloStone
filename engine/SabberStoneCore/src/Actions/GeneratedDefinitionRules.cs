@@ -57,6 +57,7 @@ namespace SabberStoneCore.Actions
                     ? PlayReq.REQ_TARGET_TO_PLAY : PlayReq.REQ_TARGET_IF_AVAILABLE] = 0;
             var result = Build(template, tags, dragon.Text + "\n" + undead.Text, requirements);
             result.UseGeneratedTargeting();
+            result.Dormant = dragon.Dormant ?? undead.Dormant; // Unpinned (owner ruling 2026-11-18, #181): a Dormant part makes the creation Dormant.
             result.Entourage = dragon.Entourage.Concat(undead.Entourage).Distinct().ToArray();
             var first = dragon.Power ?? new Power(); var second = undead.Power ?? new Power();
             var triggers = new[] { first.Trigger, second.Trigger }.Where(t => t != null).ToArray();

@@ -14,5 +14,6 @@ NativeCrafting.RunHookTests();
 NativeStringsTests.Run();
 NativeHomeTests.Run();
 StatusRoutineTests.Run();
+TurnBannerHoldTests.Run();
 PluginSourcePins.Run(root);
 Console.WriteLine("PASS native-bindings-logic");

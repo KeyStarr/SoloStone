@@ -18,7 +18,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { Trigger = new Trigger(TriggerType.TURN_END) {
                 SingleTask = new CustomTask((g, c, s, t, stack) => {
                     if (c.BoardZone.IsFull) return;
-                    var enemies = c.Opponent.BoardZone.Where(m => !m.IsDead && !m.Untouchable).ToArray();
+                    var enemies = c.Opponent.BoardZone.Interactable.Where(m => !m.IsDead && !m.Untouchable).ToArray();
                     if (enemies.Length == 0) return;
                     var original = enemies[g.Random.Next(enemies.Length)]; g.OnRandomHappened(true);
                     var copy = (Minion)Generic.Copy(c, s, original, Zone.PLAY, preserveBoardMinionState: true);
