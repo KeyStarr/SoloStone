@@ -322,8 +322,10 @@ namespace SabberStoneCore.Model.Entities
 		public void AddHeroAndPower(in Card heroCard, in Card powerCard = null, in IDictionary<GameTag, int> tags = null, in int id = -1)
 		{
 			// remove hero and place it to the setaside zone
+			int[] playerbound = Hero == null ? null : Actions.PlayerboundHeroTags.Take(Hero);
 			Weapon weapon = null;
 			AuraEffects auraEffects = null;
+			Hero previousHero = Hero;
 			if  (Hero != null)
 			{
 				SetasideZone.MoveTo(Hero, SetasideZone.Count);
@@ -344,10 +346,12 @@ namespace SabberStoneCore.Model.Entities
 			Hero = (Hero) FromCard(this, in heroCard, tags, null, id);
 			Hero[GameTag.ZONE] = (int) Enums.Zone.PLAY;
 			HeroId = Hero.Id;
+            if (playerbound != null) Actions.PlayerboundHeroTags.Give(Hero, playerbound);
 			Hero.HeroPower = FromCard(this, powerCard ?? Cards.FromAssetId(Hero[GameTag.HERO_POWER]),
 				new EntityData { [GameTag.CREATOR] = Hero.Id }) as HeroPower;
 			Hero.Weapon = weapon;
 			Hero.AuraEffects = auraEffects;
+			Actions.CorpseRules.CarryPlayerDeathrattle(previousHero, Hero);
 		}
 
 		/// <summary>
@@ -571,7 +575,7 @@ namespace SabberStoneCore.Model.Entities
 						{
 							if (SecretZone.IsFull) // REQ_SECRET_CAP
 								return;
-							if (SecretZone.Any(p => p.Card.AssetId == card.AssetId)) // REQ_UNIQUE_SECRET
+							if (SecretZone.HasSameCard(card)) // REQ_UNIQUE_SECRET, a reprint counts as the same Secret (#225)
 								return;
 						}
 

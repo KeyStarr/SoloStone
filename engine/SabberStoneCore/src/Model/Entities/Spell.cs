@@ -72,7 +72,7 @@ namespace SabberStoneCore.Model.Entities
 			get
 			{
 				// check if we can play this secret
-				if (IsSecret && (Controller.SecretZone.IsFull || Controller.SecretZone.Any(p => p.Card.Id == Card.Id)))
+				if (IsSecret && (Controller.SecretZone.IsFull || Controller.SecretZone.HasSameCard(Card)))
 				{
 					Game.Log(LogLevel.VERBOSE, BlockType.PLAY, "Playable",
 						!Game.Logging? "":$"{this} isn't playable, because secret already active on controller.");

@@ -4,6 +4,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../shared/RepoRoot.cs" Link="RepoRoot.cs" />
+    <Compile Include="../../plugin/arena/ArenaContract.cs" />
+    <Compile Include="../../plugin/arena/ArenaStubService.cs" />
+    <Compile Include="../shared/NativeArenaBoundaryMocks.cs" Link="NativeArenaBoundaryMocks.cs" />
     <Compile Include="../../plugin/NativeHomeUI.cs" Link="NativeHomeUI.cs" />
     <Compile Include="../../plugin/NativeStrings.cs" Link="NativeStrings.cs" />
     <Compile Include="../../plugin/StatusRoutine.cs" Link="StatusRoutine.cs" />
@@ -11,10 +14,12 @@
     <Compile Include="../../plugin/TurnBannerHoldRules.cs" Link="TurnBannerHoldRules.cs" />
   </ItemGroup>
   <Target Name="ExtractCraftingBatch" BeforeTargets="CoreCompile">
+    <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_arena.py&quot; &quot;$(IntermediateOutputPath)Arena.g.cs&quot;" />
     <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_crafting.py&quot; &quot;$(IntermediateOutputPath)CraftingBatch.g.cs&quot;" />
     <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_matchmaking.py&quot; &quot;$(IntermediateOutputPath)Matchmaking.g.cs&quot;" />
     <Exec Command="&quot;$(SoloStonePython)&quot; -X utf8 &quot;$(MSBuildProjectDirectory)/extract_gameplay_rank.py&quot; &quot;$(IntermediateOutputPath)GameplayRank.g.cs&quot;" />
     <ItemGroup>
+      <Compile Include="$(IntermediateOutputPath)Arena.g.cs" />
       <Compile Include="$(IntermediateOutputPath)CraftingBatch.g.cs" />
       <Compile Include="$(IntermediateOutputPath)Matchmaking.g.cs" />
       <Compile Include="$(IntermediateOutputPath)GameplayRank.g.cs" />

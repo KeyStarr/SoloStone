@@ -18,7 +18,7 @@ internal static class V10ReservationTests
             }
         }
         var data = Read(path);
-        Check(data.Version == 15 && data.DeckKits.Single().Id == "kit:floor:gold-10"
+        Check(data.Version == LocalProfile.SaveVersion && data.DeckKits.Single().Id == "kit:floor:gold-10"
             && data.DeckKits[0].GoldCap == 3200 && data.MilestoneCatchUp == null,
             "current profile earns a receipt-backed deck kit");
         data.GoldBalance = 10000;
@@ -128,7 +128,7 @@ internal static class V10ReservationTests
             var r = p.Settle(matchId, "Won", 10, false);
             int firstWin = LadderRules.Fresh().Multiplier; // ladder rules: the first win pays the placement multiplier
             int rolledDust = GrindTiers.Find(r.GrindTier).Dust(LocalEconomy.RewardV6("Won", 10, false, LocalEconomy.RewardRollSeed(matchId, 1)).Dust);
-            Check(r.RewardVersion == 6 && r.DustReward == rolledDust && p.DustBalance == rolledDust && r.Ladder.StarsBefore == 0 && r.Ladder.StarsAfter == firstWin && r.Ladder.StarsGained == firstWin
+            Check(r.RewardVersion == LocalEconomy.RollRewardVersion && r.DustReward == rolledDust && p.DustBalance == rolledDust && r.Ladder.StarsBefore == 0 && r.Ladder.StarsAfter == firstWin && r.Ladder.StarsGained == firstWin
                 && r.Ladder.MultiplierBefore == firstWin && r.Ladder.StreakBefore == 0 && r.Ladder.StreakAfter == 1
                 && r.Ladder.RatingBefore == LadderRules.StartRating && r.Ladder.RatingAfter > LadderRules.StartRating && !r.Ladder.LegendReached
                 && r.Ladder.FloorsReached.Count == 0 && r.Ladder.LadderRuleVersion == LadderRules.RuleVersion

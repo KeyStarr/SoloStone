@@ -189,7 +189,7 @@ internal static class NativeCoopMode
         var info = new AlertPopup.PopupInfo {
             m_id = HandoverPopupId, m_headerText = name + "'s turn", m_showAlertIcon = false, m_keyboardEscIsCancel = false,
             m_text = "Hand the screen to " + name + ".\n\n" + name + ", press Continue when you are ready.",
-            m_responseDisplay = AlertPopup.ResponseDisplay.OK, m_okText = "CONTINUE",
+            m_responseDisplay = AlertPopup.ResponseDisplay.OK, m_okText = NativeStrings.Get("GLOBAL_CONTINUE", "CONTINUE"),
             m_responseCallback = (response, data) => {
                 try { once(); }
                 catch (Exception error) { log?.LogError("COOP handover failed: " + error); }

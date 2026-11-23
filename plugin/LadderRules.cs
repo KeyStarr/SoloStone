@@ -19,6 +19,7 @@ public sealed class LadderStep
     public LadderPosition Before, After;
     public LadderOutcome Outcome;
     public double OpponentRating;
+    public double? PlacementRatingAfter;
     public bool Placement, StreakBonus, StoppedAtDiamondFive, LegendReachedNow;
     public int StarsGained;
     public int[] FloorsReached;
@@ -139,7 +140,8 @@ public static class LadderRules
         return p;
     }
 
-    public static LadderStep Apply(LadderPosition before, LadderOutcome outcome, double opponentRating, LadderPace pace = null)
+    public static LadderStep Apply(LadderPosition before, LadderOutcome outcome, double opponentRating, LadderPace pace = null,
+        double? placementRating = null, double? placementOpponentRating = null)
     {
         Validate(before);
         pace = pace ?? LadderPace.Standard;
@@ -147,11 +149,12 @@ public static class LadderRules
         var after = before.Copy();
         var step = new LadderStep { Before = before.Copy(), Outcome = outcome, OpponentRating = opponentRating,
             Placement = before.PlacementGames < PlacementLength, FloorsReached = new int[0] };
+        if (step.Placement && (placementRating.HasValue || placementOpponentRating.HasValue))
+            step.PlacementRatingAfter = UpdateRating(placementRating ?? before.Rating, placementOpponentRating ?? opponentRating, outcome, PlacementK);
         // Ties change nothing: stars, streak, rating, placement count and multiplier stay (retail counts non-drawn games).
         if (outcome == LadderOutcome.Tie) { step.After = after; return step; }
-        double score = outcome == LadderOutcome.Win ? 1 : 0;
         double k = step.Placement ? PlacementK : before.LegendReached ? SettledK * pace.LegendKScale : SettledK;
-        after.Rating = Math.Round(before.Rating + k * (score - Expected(before.Rating, opponentRating)), 3);
+        after.Rating = UpdateRating(before.Rating, opponentRating, outcome, k);
         if (step.Placement) after.PlacementGames++;
 
         if (outcome == LadderOutcome.Win)
@@ -177,7 +180,7 @@ public static class LadderRules
         after.LegendReached = after.StarIndex == LegendIndex;
         // Stars use the multiplier before this game; floors crossed by it decay the next win (SoloStone choice).
         after.Multiplier = step.Placement
-            ? Multiplier(StartMultiplier(after.Rating), after.BestStarIndex, after.StarIndex)
+            ? Multiplier(StartMultiplier(step.PlacementRatingAfter ?? after.Rating), after.BestStarIndex, after.StarIndex)
             : after.StarIndex >= DiamondFiveIndex ? 1
             : Math.Max(1, before.Multiplier - (FloorsReached(after.BestStarIndex) - FloorsReached(before.BestStarIndex)));
         step.StarsGained = after.StarIndex - before.StarIndex;
@@ -186,6 +189,10 @@ public static class LadderRules
         step.After = Validate(after);
         return step;
     }
+
+    private static double UpdateRating(double rating, double opponent, LadderOutcome outcome, double k) =>
+        outcome == LadderOutcome.Tie ? rating
+            : Math.Round(rating + k * ((outcome == LadderOutcome.Win ? 1 : 0) - Expected(rating, opponent)), 3);
 
     public static string RankName(int index)
     {
@@ -224,6 +231,20 @@ public static class LadderRules
 // #37 Standard Casual (owner 2026-10-28): a hidden matchmaking rating, never shown and never read by the ladder. Seeded from
 // the ranked hidden rating at the first Casual game, then moved by Elo on Casual results only. Ties change nothing, as on
 // the ladder; an abandoned Casual match is a loss.
+// Arena (#6): a run's matches. Mode only marks the record; a run's progress lives in the save's ArenaRun. Arena matches never
+// touch the ladder or the hidden Casual rating and pay no per-match gold, dust, pack, rival gold, achievement or Feat.
+public static class ArenaRules
+{
+    public const string Mode = "Arena";
+    public static bool IsArena(string mode) => mode == Mode;
+    // A match that moves the ladder: every mode except Casual and Arena (Ranked records carry no mode).
+    public static bool IsRanked(string mode) => !CasualRules.IsCasual(mode) && !IsArena(mode);
+    // Arena has no rivals: an Arena opponent never brings Ranked/Casual head-to-head memory (rival emotes and lines).
+    public static bool CarriesNpcMemory(string mode) => !IsArena(mode);
+    public static string DeckKey(string runId) => "arena:" + runId;
+    public static bool IsDeckKey(string key) => key != null && key.StartsWith("arena:", System.StringComparison.Ordinal);
+}
+
 public static class CasualRules
 {
     public const string Mode = "Casual";

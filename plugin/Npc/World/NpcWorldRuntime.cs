@@ -13,6 +13,9 @@ public static class NpcWorldRuntime
     public static NpcEncounter Active { get; private set; }
     // #37 Standard Casual queue; null when no Casual catalog loaded (Casual then plays legacy opponents, still unranked).
     public static CasualMatchmaker Casual { get; private set; }
+    // Arena (#6) opponents: drafted decks met by run record; null when no Arena catalog loaded (Arena matches then refuse to start).
+    public static ArenaMatchmaker Arena { get; private set; }
+    public const string ArenaReason = "arena";
 
     private static readonly object planGate = new object();
     private static readonly Dictionary<string, DeckPlan> plans = new Dictionary<string, DeckPlan>(StringComparer.Ordinal);
@@ -29,7 +32,7 @@ public static class NpcWorldRuntime
     {
         if (world == null) throw new ArgumentNullException(nameof(world));
         if (matchmaker == null) throw new ArgumentNullException(nameof(matchmaker));
-        World = world; Matchmaker = matchmaker; Active = null; Casual = null;
+        World = world; Matchmaker = matchmaker; Active = null; Casual = null; Arena = null;
         Legend = (matchmaker as LadderMatchmaker)?.Legend ?? new NpcLegendField(world);
         lock (planGate) plans.Clear();
         deckResolver = world.Catalogs.Decks.LocalDeckResolver(NameForDeck, true, IsReferencedDeck);
@@ -40,6 +43,7 @@ public static class NpcWorldRuntime
         // Lazy: built on first use by an inferred-prior brain only, so boot never depends on it.
         var population = new Lazy<IReadOnlyList<PopulationDeck>>(() => world.Catalogs.Decks.Population());
         NpcWorldHooks.Population = () => population.Value;
+        NpcWorldHooks.ArenaPopulation = null;
     }
 
     // The Casual catalog's decks must already be in World.Catalogs.Decks (CasualDeckCatalog.MergeInto): plans and
@@ -53,6 +57,17 @@ public static class NpcWorldRuntime
         Casual = new CasualMatchmaker(World, catalog, Legend);
     }
 
+    // The Arena catalog's decks must already be in World.Catalogs.Decks (ArenaDeckCatalog.MergeInto), like Casual's.
+    public static void InstallArena(ArenaDeckCatalog catalog)
+    {
+        if (World == null) throw new InvalidOperationException("NpcWorldRuntime.Install must run first.");
+        if (catalog == null) throw new ArgumentNullException(nameof(catalog));
+        var missing = catalog.Decks.FirstOrDefault(d => !ReferenceEquals(World.Catalogs.Decks.Find(d.Id), d));
+        if (missing != null) throw new InvalidOperationException("Arena deck not merged into the world library: " + missing.Id);
+        Arena = new ArenaMatchmaker(World, catalog);
+        var population = catalog.Library.ArenaPopulation(); NpcWorldHooks.ArenaPopulation = () => population;
+    }
+
     // Tests and failed boot: back to the golden-only behaviour.
     public static void Uninstall()
     {
@@ -63,8 +78,8 @@ public static class NpcWorldRuntime
             PlaytestQueue.WorldProfileResolver = null;
             clientSeams = false;
         }
-        PendingNpcForDeck = null; DecorationLog = null;
-        World = null; Matchmaker = null; Legend = null; Active = null; Casual = null; deckResolver = null;
+        PendingNpcForDeck = null; DecorationLog = null; DifficultyLog = null; difficultyLogged = null;
+        World = null; Matchmaker = null; Legend = null; Active = null; Casual = null; Arena = null; deckResolver = null;
         lock (planGate) plans.Clear();
     }
 
@@ -83,7 +98,7 @@ public static class NpcWorldRuntime
     // library deck resolves through LocalDecks.Get and builds exactly as the native side will use it. Any failure
     // uninstalls everything, so ladder play keeps LocalDecks.NextOpponent and playtests keep the golden ids.
     public static bool TryInstallClient(Func<NpcWorld> generate, Func<string, string> pendingNpcForDeck, Action<string> log,
-        CasualDeckCatalog casual = null)
+        CasualDeckCatalog casual = null, ArenaDeckCatalog arena = null)
     {
         try
         {
@@ -92,12 +107,14 @@ public static class NpcWorldRuntime
             Install(world, new LadderMatchmaker(world));
             InstallClientSeams(pendingNpcForDeck);
             DecorationLog = RateLimited(log);
+            DifficultyLog = log;   // one line per match, never rate limited: the log must show every match's level
             // Prefer a library-only deck: golden decks also live in LocalDecks.NpcDecks and would not exercise the seam.
             var admitted = world.Catalogs.Decks.Admitted.ToList();
             var sample = admitted.FirstOrDefault(d => !LocalDecks.NpcDecks.Any(deck => deck.Id == d.Id)) ?? admitted.FirstOrDefault()
                 ?? throw new InvalidOperationException("The NPC deck library has no admitted deck.");
             LocalDecks.Get(sample.Id).Build();
             if (casual != null) TryInstallCasual(casual, log);
+            if (arena != null) TryInstallArena(arena, log);
             Say(log, "npc-world installed: " + Summary());
             return true;
         }
@@ -124,6 +141,21 @@ public static class NpcWorldRuntime
         catch (Exception failure) { Casual = null; Say(log, "npc-world casual queue unavailable: " + failure.Message); }
     }
 
+    // A broken Arena catalog never blocks ranked or Casual play: a deck that collided or does not build is dropped alone; with too
+    // few left, Arena matches are unavailable (the run itself, draft and rewards need no opponent catalog).
+    internal static void TryInstallArena(ArenaDeckCatalog arena, Action<string> log)
+    {
+        try
+        {
+            InstallArena(arena.Keep(deck => {
+                if (!ReferenceEquals(World.Catalogs.Decks.Find(deck.Id), deck)) { Say(log, "npc-world arena deck dropped (id taken): " + deck.Id); return false; }
+                try { NpcDeckLibrary.ToLocalDeck(deck, deck.Name).Build(); return true; }
+                catch (Exception error) { Say(log, "npc-world arena deck dropped: " + deck.Id + ": " + error.Message); return false; }
+            }));
+        }
+        catch (Exception failure) { Arena = null; Say(log, "npc-world arena queue unavailable: " + failure.Message); }
+    }
+
     // One boot line: NPC count, admitted decks, Legend field size (match index 0).
     public static string Summary()
     {
@@ -132,7 +164,7 @@ public static class NpcWorldRuntime
         var decks = world.Catalogs.Decks;
         return world.All.Count + " NPCs (" + world.All.Count(n => n.Notable) + " notables), decks admitted "
             + decks.Admitted.Count() + "/" + decks.Decks.Count + ", Legend field " + (Legend?.Field(0).Count ?? 0)
-            + ", casual decks " + (Casual?.Catalog.Decks.Count ?? 0);
+            + ", casual decks " + (Casual?.Catalog.Decks.Count ?? 0) + ", arena decks " + (Arena?.Catalog.Decks.Count ?? 0);
     }
 
     private static void Say(Action<string> log, string message)
@@ -181,7 +213,16 @@ public static class NpcWorldRuntime
             inferred = false;
             Say(DecorationLog, "npc deck inference unavailable; class prior for this match: " + error.GetType().Name + ": " + error.Message);
         }
-        Active = inferred ? encounter.WithReplyPrior(ReplyPrior.Inferred) : encounter;
+        // Arena: the opponent's deck was drafted, so the NPC predicts its hand from the drafted decks, not constructed lists.
+        // Only an Arena encounter (Reason "arena") gets it; every other match keeps its own prior and the same encounter object.
+        Active = encounter.Reason == ArenaReason && ArenaReplyTable.DeckCount() > 0 ? encounter.WithReplyPrior(ReplyPrior.Arena)
+            : inferred ? encounter.WithReplyPrior(ReplyPrior.Inferred) : encounter;
+        // One line per match: a start begins the same encounter twice (deck resolve, then the start itself).
+        if (ReferenceEquals(encounter, difficultyLogged)) return;
+        difficultyLogged = encounter;
+        Say(DifficultyLog, "NPC_DIFFICULTY level=" + (encounter.Difficulty ?? NpcDifficultyIds.Hard) + " position=" + encounter.DifficultyPosition
+            + " npc=" + encounter.Npc?.Id + " deck=" + encounter.Deck?.Id + " core=" + NpcDifficultyShaper.IsCoreDeck(encounter.Deck)
+            + " skill=" + encounter.Skill?.Id + " planNodes=" + encounter.Profile?.Budget.PlanNodes + " rating=" + encounter.Rating.ToString("F0", System.Globalization.CultureInfo.InvariantCulture));
     }
 
     public static void End() { Active = null; }
@@ -248,6 +289,9 @@ public static class NpcWorldRuntime
 
     // Host log for DecoratePilot fallbacks (the live plugin sets it at boot; null in the harness).
     public static Action<string> DecorationLog { get; set; }
+    // Host log for the NPC_DIFFICULTY line every Begin writes (the live plugin sets it at boot; null in the harness).
+    public static Action<string> DifficultyLog { get; set; }
+    private static NpcEncounter difficultyLogged;
 
     internal static MulliganPolicy MulliganFor(NpcProfile profile, DeckPlan plan)
     {

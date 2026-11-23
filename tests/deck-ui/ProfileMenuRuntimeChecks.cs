@@ -125,7 +125,7 @@ static partial class ProfileMenuRuntimeHarness
         private readonly List<Action> beforeLayout = new();
         private readonly Dictionary<PegUIElement, string> controls = new();
         private readonly HashSet<PegUIElement> selectedControls = new();
-        private bool wizard, pacePage, startup = false, loading = false, ownsNativeDialog = true, editing;
+        private bool wizard, pacePage, difficultyPage, startup = false, loading = false, ownsNativeDialog = true, editing;
         private int nextCount, commits;
         private string committed;
         private object nameText, nameColor;
@@ -159,6 +159,7 @@ static partial class ProfileMenuRuntimeHarness
         private void RaiseTooltip(TooltipZone zone, int layer) { if (zone.GetTooltipObject() != null) Raised.Add(layer); }
         private void BuildSlots(bool kit) => AddRows();
         private void BuildWizard(bool kit) => AddRows();
+        private void BuildDifficulty(bool kit) => BuildPace(kit);
         private void BuildPace(bool kit) { AddRows(); AddPaceRows(); }
         private void AddRows()
         {

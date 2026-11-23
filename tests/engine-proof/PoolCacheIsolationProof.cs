@@ -3,6 +3,7 @@ using System.Reflection;
 using SabberStoneCore.Config;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
+using SabberStoneCore.Identity;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks;
 using SabberStoneCore.Tasks.SimpleTasks;
@@ -150,7 +151,8 @@ internal static class PoolCacheIsolationProof
         Exact("Discover SPELL", s => FilterSets(s, CardClass.MAGE, p => p.Type == CardType.SPELL),
             g => Offer(g, new DiscoverTask(DiscoverType.SPELL)), (sets, rng) => DiscoverTask.GetChoices(sets, 3, rng));
         Exact("Discover WEAPON_ANOTHERCLASS",
-            s => new[] { PoolOf(s, hero: CardClass.ROGUE).All.Where(p => p.Type == CardType.WEAPON && (s.Legacy ? p.Class != CardClass.ROGUE : !PoolOf(s, hero: CardClass.ROGUE).InClass(p, CardClass.ROGUE))).ToArray() },
+            // A reprint is the same card in a pinned match pool (#225); a legacy pool keeps its frozen draws.
+            s => new[] { new Func<Card[], Card[]>(a => s.Legacy ? a : CardIdentity.Distinct(a))(PoolOf(s, hero: CardClass.ROGUE).All.Where(p => p.Type == CardType.WEAPON && (s.Legacy ? p.Class != CardClass.ROGUE : !PoolOf(s, hero: CardClass.ROGUE).InClass(p, CardClass.ROGUE))).ToArray()) },
             g => Offer(g, new DiscoverTask(DiscoverType.WEAPON_ANOTHERCLASS)),
             (sets, rng) => DiscoverTask.GetChoices(new[] { sets[0].Distinct().ToArray() }, 3, rng), CardClass.ROGUE);
     }
@@ -398,11 +400,13 @@ internal static class PoolCacheIsolationProof
     private static void BuildABeast()
     {
         // Named, curated lists stay frozen and are keyed by FormatType, as they always were.
-        Card[][] Pools(Setting s)
+        // Both Build-A-Beast implementations sample different cards: a reprint is the same card in a pinned match pool (#225); a legacy pool keeps its frozen draws.
+        Func<Setting, Card[][]> PoolsOf(bool differentCards) => s =>
         {
             string prefix = LegacyGenerationV1.Format(s.Format);
-            return new[] { LegacyGenerationV1.Get(prefix + "/Beasts/First").ToArray(), LegacyGenerationV1.Get(prefix + "/Beasts/Second").ToArray() };
-        }
+            Card[] Of(string name) => differentCards && !s.Legacy ? CardIdentity.Distinct(LegacyGenerationV1.Get(prefix + name).ToArray()) : LegacyGenerationV1.Get(prefix + name).ToArray();
+            return new[] { Of("/Beasts/First"), Of("/Beasts/Second") };
+        };
         Card[] Offers(Game game, ISimpleTask task)
         {
             var player = game.Player1;
@@ -412,7 +416,7 @@ internal static class PoolCacheIsolationProof
         }
         Card[] Sample(Card[][] sets, Util.DeepCloneableRandom rng) => sets[0].ChooseNElements(3, rng).Concat(sets[1].ChooseNElements(3, rng)).ToArray();
         var formats = new[] { LegacyStandard, Installed };
-        Exact("Build-A-Beast legacy", Pools, g => Offers(g, SpecificTask.BuildABeast), Sample, CardClass.HUNTER, formats);
-        Exact("Build-A-Beast module", Pools, g => Offers(g, Cards.FromId("ICC_828p").Power.PowerTask), Sample, CardClass.HUNTER, formats);
+        Exact("Build-A-Beast legacy", PoolsOf(true), g => Offers(g, SpecificTask.BuildABeast), Sample, CardClass.HUNTER, formats);
+        Exact("Build-A-Beast module", PoolsOf(true), g => Offers(g, Cards.FromId("ICC_828p").Power.PowerTask), Sample, CardClass.HUNTER, formats);
     }
 }

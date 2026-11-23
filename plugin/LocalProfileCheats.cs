@@ -55,7 +55,7 @@ public sealed partial class LocalProfile
         LocalClassRewardGrant reward = null;
         CommitChange(next => {
             var match = next.Pending;
-            if (match == null || match.Id != matchId || match.DebugScenario || CasualRules.IsCasual(match.Mode)
+            if (match == null || match.Id != matchId || match.DebugScenario || !ArenaRules.IsRanked(match.Mode)
                 || !LocalCoreProgression.Heroes.Contains(match.DeckHero) || next.PackRevealPending)
                 throw new InvalidOperationException("A live Ranked class match is required.");
             var xp = next.ClassXp.Single(row => row.Hero == match.DeckHero);
@@ -89,6 +89,17 @@ public sealed partial class LocalProfile
             return true;
         });
     }
+    internal const int MaximumTestGoldGrant = 100000;
+    // Test control only (gold-grant, lab builds): add gold to this disposable save for shop live checks (multi-pack buy).
+    internal void GrantGoldForTest(int amount)
+    {
+        if (amount < 1 || amount > MaximumTestGoldGrant) throw new ArgumentOutOfRangeException(nameof(amount));
+        CommitChange(next => {
+            if (next.Pending != null || next.PackRevealPending) throw new InvalidOperationException("Finish the pending match or pack reveal first.");
+            next.GoldBalance = checked(next.GoldBalance + amount);
+            return true;
+        });
+    }
 #endif
 
     internal void PersistNewProfile(ProfileOptions options)
@@ -96,6 +107,8 @@ public sealed partial class LocalProfile
         if (FileExists()) throw new InvalidOperationException("Creation cheats apply only to a new save.");
         var next = Snapshot();
         next.GrindTier = options.GrindTier ?? GrindTiers.Default.Id;
+        // NPC difficulty chosen on the Create save form (owner 2026-11-15: new saves start at Medium).
+        next.NpcDifficulty = options.NpcDifficulty ?? NpcDifficultyIds.NewSaveDefault;
         // #57: every new save, cheats included, gets the welcome gift in this same creation commit.
         ApplyWelcome(next);
         if (options.AllCards)
@@ -216,6 +229,9 @@ public sealed partial class LocalProfile
         WelcomeSkipped = EarlierSaveTrace(path);
         if (WelcomeSkipped != null) return false;
         var next = Snapshot();
+        // A brand-new player save made without the Create form (first launch) starts at the new-save difficulty, like the form's
+        // default; an existing save never reaches this branch, so it never gains the field (absent = Hard).
+        next.NpcDifficulty = profileOptions?.NpcDifficulty ?? NpcDifficultyIds.NewSaveDefault;
         ApplyWelcome(next);
         Commit(next);
         return true;

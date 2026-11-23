@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "entryGold": 150,
+  "deckSize": 30,
+  "offerSize": 3,
+  "maxWins": 12,
+  "maxLosses": 3,
+  "classWeight": 3,
+  "heroes": ["HERO_01", "HERO_02", "HERO_03", "HERO_04", "HERO_05", "HERO_06", "HERO_07", "HERO_08", "HERO_09", "HERO_10", "HERO_11"],
+  "rarities": [{"rarity": "COMMON", "weight": 70}, {"rarity": "RARE", "weight": 20}, {"rarity": "EPIC", "weight": 10}],
+  "denyIds": ["TLC_248", "ETC_080", "TOY_330", "REV_018", "BOT_914", "TOY_700", "DAL_800", "GIL_692", "GIL_826", "CORE_GIL_692", "CORE_GIL_826"],
+  "rewards": [
+    {"wins": 0, "packs": 1, "gold": 0, "dust": 0},
+    {"wins": 1, "packs": 1, "gold": 75, "dust": 28},
+    {"wins": 2, "packs": 1, "gold": 150, "dust": 56},
+    {"wins": 3, "packs": 2, "gold": 225, "dust": 84},
+    {"wins": 4, "packs": 2, "gold": 300, "dust": 112},
+    {"wins": 5, "packs": 2, "gold": 375, "dust": 140},
+    {"wins": 6, "packs": 2, "gold": 450, "dust": 168},
+    {"wins": 7, "packs": 3, "gold": 525, "dust": 196},
+    {"wins": 8, "packs": 3, "gold": 600, "dust": 224},
+    {"wins": 9, "packs": 3, "gold": 675, "dust": 252},
+    {"wins": 10, "packs": 4, "gold": 750, "dust": 280},
+    {"wins": 11, "packs": 4, "gold": 825, "dust": 308},
+    {"wins": 12, "packs": 5, "gold": 1100, "dust": 336}
+  ]
+}

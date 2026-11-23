@@ -69,7 +69,7 @@ internal static class MilestoneLedgerChecks
         string path = Path.Combine(root, "milestone-climb.xml");
         LocalMatchRecord legend;
         using (var p = new LocalProfile(path)) {
-            p.SaveDeck("Winning Mage", "HERO_08", LocalDecks.Get("mage").CardIds);
+            p.SaveDeck("Winning Mage", "HERO_08", StandardDeckFixture.Deck(p, "HERO_08"));
             bool multiFloor = false;
             // Copies of the save taken before real wins: the branch cases below replay one match from them.
             string prev = path + ".prev", silver = path + ".silver", at149 = path + ".149";
@@ -171,7 +171,7 @@ internal static class MilestoneLedgerChecks
             string matchId; int packs;
             using (var p = new LocalProfile(path)) {
                 packs = p.UnopenedPacks;
-                p.SaveDeck("First Mage", "HERO_08", LocalDecks.Get("mage").CardIds);
+                p.SaveDeck("First Mage", "HERO_08", StandardDeckFixture.Deck(p, "HERO_08"));
                 matchId = p.Begin("custom", "priest", 100).Id;
                 // Begin requires one complete deck; the library can grow while that match is pending.
                 p.CreateDraft("Second Mage", "HERO_08");
@@ -206,7 +206,7 @@ internal static class MilestoneLedgerChecks
             path = Branch(root, at149, "legend-" + deck.Replace(' ', '-'));
             string matchId;
             using (var p = new LocalProfile(path)) {
-                p.SaveDeck("First Mage", "HERO_08", LocalDecks.Get("mage").CardIds);
+                p.SaveDeck("First Mage", "HERO_08", StandardDeckFixture.Deck(p, "HERO_08"));
                 matchId = p.Begin(deck, "priest", 100).Id;
                 p.CreateDraft("Second Mage", "HERO_08");
                 var receipt = p.Settle(matchId, "Won", 10, false);

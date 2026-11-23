@@ -37,6 +37,8 @@ internal static class ClientBridge
     internal static bool OwnsLiveMatch => staged && requested && localConnected && match?.Game != null
         && SceneMgr.IsInitialized() && SceneMgr.Get()?.GetMode() == SceneMgr.Mode.GAMEPLAY;
     internal static string DiagnosticMatchId => matchId;
+    // Show Plain Cards as the live match began with it; null outside a match.
+    internal static bool? PlainCardsThisMatch => OwnsLiveMatch ? match.PlainCards : (bool?)null;
     internal static string DiagnosticProfilePath { get; private set; }
     internal static bool MatchJournalEnabled => playtestRecord?.Enabled == true;
     internal static void RecordFx(Dictionary<string, object> row) => playtestRecord?.OnFx(row);
@@ -425,17 +427,22 @@ internal static class ClientBridge
         IReadOnlyList<LocalDeckCard> premiumEntries = null)
     {
         EnsureCanStart();
-        NativeUIProjection.ValidateMatchDeckBinding(deck, player);
+        // Arena (#6): the drafted deck is served by LocalDecks.ArenaDeck under its own key and has no saved-deck binding.
+        bool arena = ArenaRules.IsDeckKey(deck);
+        if (arena && (player != null || LocalDecks.ArenaDeck == null || LocalDecks.ArenaDeck.Id != deck))
+            throw new InvalidOperationException("Arena deck is not staged.");
+        if (!arena) NativeUIProjection.ValidateMatchDeckBinding(deck, player);
         var prepared = player == null
             ? new NativeMatch(Send, deck, opponent, seed, stars)
             : new NativeMatch(Send, player, opponent, seed, stars, premiumEntries) { CosmeticDeckId = PersonalDeckId(deck) };
+        prepared.PlainCards = NativePlainCardsOption.Enabled;
         var defs = DefLoader.Get().GetAllEntityDefs();
         log.LogInfo("LOCAL_HERO_DEFS Fireblast=" + defs.ContainsKey("HERO_08bp"));
         foreach (string id in RequiredPaladinDefinitions)
             if (!defs.ContainsKey(id)) throw new InvalidOperationException("Required Paladin definition missing: " + id);
         var decks = LocalDecks.All.Concat(LocalDecks.TestLoaners).Concat(LocalDecks.TestOpponents)
             .Concat(LocalDecks.PlayerStarterDecks).Concat(LocalDecks.NpcDecks);
-        foreach (var checkedDeck in player == null ? decks : decks.Concat(new[] { player }))
+        foreach (var checkedDeck in player != null ? decks.Concat(new[] { player }) : arena ? decks.Concat(new[] { LocalDecks.ArenaDeck }) : decks)
         {
             foreach (var card in checkedDeck.Build())
                 if (!defs.ContainsKey(card.Id)) throw new InvalidOperationException("Current card definition missing: " + card.Id);
@@ -486,14 +493,25 @@ internal static class ClientBridge
                 match.DebugScenarioLog = line => log.LogInfo(line);
             }
 #endif
-            // The NPC's own cosmetic pet (PROPOSED, docs/design/npc-pets.md): wire-only, never recorded or settled.
-            try { match.OpponentPetCard = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0)?.CardId; }
-            catch (Exception error) { log.LogWarning("NPC pet unavailable: " + error.Message); }
+            // The NPC's own cosmetic pet (PROPOSED, docs/design/npc-pets.md): wire-only, never recorded or settled. Options > Show
+            // Opponents' Pets off starts the match without it (NativeOpponentPetsOption.Gate).
+            try
+            {
+                string ownedPet = null;
+#if ENGINE_SOURCE
+                ownedPet = scenario?.NpcPet; // debug scenario npcPet: the NPC owns this pet this match
+#endif
+                if (ownedPet == null) ownedPet = NpcPetSeats.For(record, LocalShop.Default, LocalLadder.Profile?.Ladder.StarIndex ?? 0,
+                    LocalLadder.Profile?.Ladder.Rating ?? 0)?.CardId;
+                match.OpponentPetCard = NativeOpponentPetsOption.Gate(ownedPet);
+            }
+            catch (Exception error) { match.OpponentPetCard = NativeOpponentPetsOption.Gate(null); log.LogWarning("NPC pet unavailable: " + error.Message); }
             // NPC deck finishes follow the rank the opponent's medal shows (NativeGameplayRank reads the same rating);
             // Casual has no medal, so the player's ladder rank (NpcPremiums.SeatStarIndex).
             if (!string.IsNullOrEmpty(record.NpcId) && record.NpcRating is double npcRating)
                 match.OpponentPremiumSeat = new NpcPremiumSeat(record.NpcId, record.NpcDeckId ?? record.Opponent,
-                    NpcPremiums.SeatStarIndex(record.Mode, npcRating, LocalLadder.Profile?.Ladder.StarIndex ?? 0),
+                    NpcPremiums.SeatStarIndex(record.Mode, NpcPetSeats.ShownRating(record, npcRating, LocalLadder.Profile?.Ladder.StarIndex ?? 0,
+                        LocalLadder.Profile?.Ladder.Rating ?? 0), LocalLadder.Profile?.Ladder.StarIndex ?? 0),
                     NpcWorldRuntime.World?.Find(record.NpcId)?.PersonalityId);
             if (playtest != null)
             {
@@ -517,6 +535,7 @@ internal static class ClientBridge
             try
             {
                 log.LogInfo("NPC_REPLY_PRIOR match=" + record.Id + " prior=" + NativeDeckInferenceOption.ThisMatch + " nextMatch=" + NativeDeckInferenceOption.Enabled);
+                log.LogInfo("PLAIN_CARDS match=" + record.Id + " thisMatch=" + match.PlainCards + " nextMatch=" + NativePlainCardsOption.Enabled);
 #if ENGINE_SOURCE
                 // Which pool this match's random effects read (the Standard policy, whatever FormatType the client shows).
                 log.LogInfo("MATCH_RANDOM_POOL match=" + record.Id + " pool=" + SabberStoneCore.Model.RandomPools.MatchRandomPool.PolicyVersion
@@ -567,6 +586,8 @@ internal static class ClientBridge
         match.NativeNpcBusyReason = NpcClientBusyReason;
 #if ENGINE_SOURCE
         match.NativeOpposingChoiceRevealed = OpposingChoiceRevealed;
+        match.NativeNpcPowerIdle = NpcPowerIdle;
+        match.NativeOpposingSourceSpellActive = OpposingSourceSpellActive;
         match.NativeOpposingChoiceReceived = id => GameState.Get()?.GetOpponentEntityChoices()?.ID == id;
         match.NativeHumanChoicePresentation = HumanChoicePresentation;
 #endif
@@ -656,7 +677,7 @@ internal static class ClientBridge
         string missing = cards.FirstOrDefault(id => !ClientKnowsCard(id));
         if (missing != null) throw new InvalidOperationException("Current card definition missing: " + missing);
         // The ladder deck ids only fill the constructor: the encounter replaces both sides before the game is built.
-        return new NativeMatch(Send, RunPlaceholderDeck, RunPlaceholderDeck, seed) { Encounter = encounter };
+        return new NativeMatch(Send, RunPlaceholderDeck, RunPlaceholderDeck, seed) { Encounter = encounter, PlainCards = NativePlainCardsOption.Enabled };
     }
 
     private const string RunPlaceholderDeck = "warrior";
@@ -701,7 +722,9 @@ internal static class ClientBridge
             return new Dictionary<string, object> {
                 { "npcId", active.Npc?.Id }, { "deckId", active.Deck.Id }, { "skill", active.Skill?.Id },
                 { "skillTier", active.Skill?.Tier }, { "personality", active.Personality?.Id },
-                { "rating", active.Rating }, { "reason", active.Reason }, { "replyPrior", NativeDeckInferenceOption.ThisMatch } };
+                { "rating", active.Rating }, { "reason", active.Reason }, { "replyPrior", NativeDeckInferenceOption.ThisMatch },
+                { "difficulty", active.Difficulty ?? NpcDifficultyIds.Hard }, { "difficultyPosition", active.DifficultyPosition },
+                { "coreDeck", NpcDifficultyShaper.IsCoreDeck(active.Deck) }, { "planNodes", active.Profile?.Budget.PlanNodes } };
         }
         catch (Exception) { return null; }
     }
@@ -718,8 +741,32 @@ internal static class ClientBridge
             && !processor.HasTaskLists() && !processor.IsHistoryBlocking();
     }
 
+    // No task list runs or waits in the client's power queue (the NPC's own preview is not looked at here: it holds the
+    // queue, and the deal cannot come before it ends). NativeMatch.OpposingChoiceHold counts its deal wait only while this holds.
+    private static bool NpcPowerIdle()
+    {
+        var processor = GameState.Get()?.GetPowerProcessor();
+        return processor != null && processor.GetCurrentTaskList() == null
+            && processor.GetPowerQueue()?.Count == 0 && !processor.HasTaskLists();
+    }
+
+    private static readonly System.Reflection.FieldInfo SpellActiveState = AccessTools.Field(typeof(Spell), "m_activeStateType");
+
+    // The play spell of the choice's source card (Elise the Navigator's leaves, say) is not at NONE. The client runs that
+    // one shared spell again for every POWER block of the card; an answer that starts one while the last still plays restarts
+    // the spell and leaves a fullscreen part of it on screen (#238). Never loads a spell. A card without a loaded play spell,
+    // or a state the plugin cannot read, counts as ended.
+    private static bool OpposingSourceSpellActive(int sourceEntityId)
+    {
+        var card = GameState.Get()?.GetEntity(sourceEntityId)?.GetCard();
+        object spell = card?.GetPlaySpell(0, false);
+        if (spell == null || spell is UnityEngine.Object native && native == null || SpellActiveState == null) return false;
+        var state = SpellActiveState.GetValue(spell);
+        return state != null && Convert.ToInt32(state, System.Globalization.CultureInfo.InvariantCulture) != 0; // SpellStateType.NONE = 0
+    }
+
     // ChoiceCardMgr has dealt the opponent's choice cards (card backs) for this EntityChoices id. Until then the NPC
-    // briefly holds its pick (bounded by NativeMatch.OpposingChoiceDwell), so the backs are seen before EntitiesChosen.
+    // briefly holds its pick (bounded by NativeMatch.OpposingChoiceHold), so the backs are seen before EntitiesChosen.
     private static bool OpposingChoiceRevealed(int choiceId)
     {
         var opposing = GameState.Get()?.GetOpposingSidePlayer();
@@ -824,6 +871,7 @@ internal static class ClientBridge
 #if !SOLOSTONE_RELEASE
 // Test control only (compiled out of a public build): reads, recovery and option validation for the endpoint.
     internal static NativeTestControl.View ReadTestControlView() => NativeTestControl.ReadView(match, matchId);
+    internal static MiniJSON.JsonNode OpponentPetsTestState() => NativeOpponentPetsOption.State(match);
     internal static Dictionary<string, object> TestControlEntities(string requestedMatch, int[] ids)
     {
         NativeTestControl.AssertMainThread();

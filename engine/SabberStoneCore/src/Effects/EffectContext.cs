@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -329,7 +330,16 @@ namespace SabberStoneCore.EffectSystem
 
         /// <summary>Exact ChooseNElements consumption, including rejection draws. Like BuildABeast,
         /// this helper does not introduce a RandomHappened notification.</summary>
-        public T[] SampleDistinct<T>(IReadOnlyList<T> pool, int count) => pool.ChooseNElements(count, _game.Random);
+        public T[] SampleDistinct<T>(IReadOnlyList<T> pool, int count)
+        {
+            // Two printings of one card are one pick (#225). Pools without a reprint pass through unchanged.
+            if (pool is IReadOnlyList<Card> cards && !Cards.RandomPool(_game).Legacy)
+            {
+                Card[] distinct = CardIdentity.Distinct(cards as Card[] ?? cards.ToArray());
+                if (distinct.Length != cards.Count) pool = (IReadOnlyList<T>)(object)distinct;
+            }
+            return pool.ChooseNElements(count, _game.Random);
+        }
 
     }
 }

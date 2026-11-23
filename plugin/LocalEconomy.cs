@@ -11,6 +11,10 @@ public sealed class LocalRewardFacts
     public int DistinctCardsPlayed;
     public int EnemyMinionsDefeated;
     public int MinimumHealth = 30;
+    public int ActiveTurns;
+    public int PlayMilliseconds;
+    public bool ShouldSerializeActiveTurns() => ActiveTurns != 0;
+    public bool ShouldSerializePlayMilliseconds() => PlayMilliseconds != 0;
 }
 
 public sealed class LocalPackCard
@@ -132,8 +136,11 @@ public static class LocalEconomy
     // No time input: the roll is a pure function of the match Id and Seed (Begin).
     // Expected win, counting 1 dust as 1 gold: 0.5*60 + 0.25*60 + 0.25*(45+45) = 67.5, plus the bonus (typically 5-10)
     // ~ 72-78; V2 paid a typical win 50 + 10-20 = 60-70. A V3 loss pays 0 where V2 paid 25 + bonus.
-    public const int RollRewardVersion = 6;
-    public static bool IsRolled(int version) => version == 4 || version == 5 || version == 6;
+    internal const int ParticipationRewardVersion = 7;
+    public const int RollRewardVersion = ParticipationRewardVersion;
+    internal const int FullLossMilliseconds = 9 * 60 * 1000;
+    internal const int FullLossActiveTurns = 5;
+    public static bool IsRolled(int version) => version >= 4 && version <= RollRewardVersion;
 
     internal static int RewardRollSeed(string matchId, int seed)
     {
@@ -192,12 +199,39 @@ public static class LocalEconomy
     internal static LocalReward RewardV6(string result, int turns, bool conceded, int rollSeed)
     {
         if (conceded || turns < 4 || (result != "Won" && result != "Lost" && result != "Tied")) return new LocalReward();
+        return CurrencyRoll(result == "Won", rollSeed);
+    }
+
+    private static LocalReward CurrencyRoll(bool won, int rollSeed)
+    {
         int gold = 40 + StableSeed.Index(StableSeed.Derive(rollSeed, 2), 31);
         int dust = 10 + StableSeed.Index(StableSeed.Derive(rollSeed, 3), 21);
         return new LocalReward {
-            Gold = result == "Won" ? gold : GrindTiers.Scale(gold, 1d / 3),
-            Dust = result == "Won" ? dust : GrindTiers.Scale(dust, 1d / 3)
+            Gold = won ? gold : GrindTiers.Scale(gold, 1d / 3),
+            Dust = won ? dust : GrindTiers.Scale(dust, 1d / 3)
         };
+    }
+
+    internal static LocalReward RewardV7(string result, int turns, bool conceded, LocalRewardFacts facts, int rollSeed, GrindTier tier)
+    {
+        var reward = result == "Lost" ? CurrencyRoll(false, rollSeed) : RewardV6(result, turns, conceded, rollSeed);
+        int progress = result == "Lost" ? LossRewardProgress(facts) : FullLossMilliseconds;
+        // Scale the full receipt first. Round down so short losses never exceed their share of the full payout.
+        return new LocalReward {
+            Gold = (int)((long)tier.Gold(reward.Gold) * progress / FullLossMilliseconds),
+            Dust = (int)((long)tier.Dust(reward.Dust) * progress / FullLossMilliseconds)
+        };
+    }
+
+    private static int LossRewardProgress(LocalRewardFacts facts) =>
+        Math.Min(facts.PlayMilliseconds, Math.Max(0, facts.ActiveTurns - 1) * (FullLossMilliseconds / (FullLossActiveTurns - 1)));
+
+    internal static string LossRewardDetails(LocalRewardFacts facts)
+    {
+        if (facts.ActiveTurns < 2) return "Make a move on at least two turns to earn a loss reward.";
+        int percent = 100 * LossRewardProgress(facts) / FullLossMilliseconds;
+        return percent == 100 ? "Full loss reward earned."
+            : percent + "% of a full loss reward. Full rewards take 9 minutes and 5 turns with a move.";
     }
 
     // V3 great-win pack set: one of the Standard sets, weighted by the playable copies still missing from its pack pool at
@@ -224,7 +258,9 @@ public static class LocalEconomy
     {
         if (facts == null || facts.DistinctCardsPlayed < 0 || facts.DistinctCardsPlayed > 1000000
             || facts.EnemyMinionsDefeated < 0 || facts.EnemyMinionsDefeated > 1000000
-            || facts.MinimumHealth < 0 || facts.MinimumHealth > 30)
+            || facts.MinimumHealth < 0 || facts.MinimumHealth > 30
+            || facts.ActiveTurns < 0 || facts.ActiveTurns > FullLossActiveTurns
+            || facts.PlayMilliseconds < 0 || facts.PlayMilliseconds > FullLossMilliseconds)
             throw new InvalidOperationException("Invalid local reward facts.");
     }
 
@@ -300,7 +336,8 @@ internal sealed class LocalResultPanel
         var panel = new LocalResultPanel {
             Total = !saved ? "Reward pending" : gold == 0 && dust == 0 ? "No gold or dust"
                 : Currency(gold, dust) + (bonus > 0 ? " · bonus +" + bonus + (gold > 0 ? " gold" : " dust") : ""),
-            Gate = conceded ? "No rewards: conceded" : outcome == "Abandoned" ? "No rewards: interrupted"
+            Gate = rewardVersion == LocalEconomy.ParticipationRewardVersion && outcome == "Lost" ? LocalEconomy.LossRewardDetails(facts)
+                : conceded ? "No rewards: conceded" : outcome == "Abandoned" ? "No rewards: interrupted"
                 : turns < 4 ? "No rewards: fewer than four engine turns"
                 : rewardVersion >= 5 && (outcome == "Lost" || outcome == "Tied")
                     ? (outcome == "Tied" ? "Draw" : "Loss") + " reward: 1/3 of a victory roll"

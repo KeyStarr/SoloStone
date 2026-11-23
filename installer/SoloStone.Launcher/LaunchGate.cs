@@ -168,23 +168,25 @@ namespace SoloStone
             var attempts=engine.Attempts();
             var until=problem==null && attempts!=null && attempts.Version==manifest.Latest.Version && attempts.From==installed?attempts.WaitsUntil(DateTime.UtcNow):null;
             if(until!=null) return new UpdateStatus { State=UpdateState.Held, Installed=installed, Latest=manifest.Latest, Message="SoloStone "+manifest.Latest.Version+" could not be installed twice, so SoloStone tries again after "+until.Value.ToLocalTime().ToString("g",System.Globalization.CultureInfo.CurrentCulture)+". Your version keeps working." };
-            if(problem==null) return new UpdateStatus { State=UpdateState.Available, Installed=installed, Latest=manifest.Latest, Message="SoloStone "+manifest.Latest.Version+" is available." };
+            if(problem==null) return new UpdateStatus { State=UpdateState.Available, Installed=installed, Latest=manifest.Latest, Message="SoloStone "+manifest.Latest.Version+" is available" };
             bool isHeld=held!=null && SemVer.Valid(installed) && SemVer.Newer(manifest.Latest.Version,installed);
             return new UpdateStatus { State=isHeld?UpdateState.Held:UpdateState.UpToDate, Installed=installed, Latest=manifest.Latest, Message=problem };
         }
-        public UpdateResult Apply(bool acceptWarning,CancellationToken cancel) {
+        public UpdateResult Apply(bool acceptWarning,CancellationToken cancel,string offeredVersion=null,Action committing=null) {
             var status=Check(cancel);
             if(status.State!=UpdateState.Available) return new UpdateResult { Outcome=status.State==UpdateState.Held?UpdateOutcome.Held:UpdateOutcome.Nothing, Message=status.Message };
             var latest=status.Latest;
+            // The player agreed to one version. A newer release that appeared since is offered, not installed.
+            if(offeredVersion!=null && latest.Version!=offeredVersion) return new UpdateResult { Outcome=UpdateOutcome.NewerOffered, Version=latest.Version, Message=status.Message };
             try {
                 string zip=engine.AssetPath(latest.Version);
                 if(!File.Exists(zip) || new FileInfo(zip).Length!=latest.Asset.Size || !Safety.Same(Hashes.FileHash(zip),latest.Asset.Sha256))
                     NewClient().Download(latest.Version,latest.Asset,zip,cancel);
                 engine.Stage(zip,latest,cancel);
-                return engine.Apply(latest,acceptWarning);
+                return engine.Apply(latest,acceptWarning,cancel,committing);
             }
             catch(OperationCanceledException) { throw; }
-            catch(Exception e) when(e is InvalidOperationException || e is IOException || e is UnauthorizedAccessException || e is System.Net.WebException) {
+            catch(Exception e) when(e is InvalidOperationException || e is IOException || e is UnauthorizedAccessException || e is System.Net.WebException || e is System.ComponentModel.Win32Exception) {
                 return new UpdateResult { Outcome=UpdateOutcome.Failed, Version=latest.Version, Message="The update did not install. The current version keeps working. "+Tls.Describe(e) };
             }
         }

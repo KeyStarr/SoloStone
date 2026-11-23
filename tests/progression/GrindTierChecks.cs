@@ -45,9 +45,9 @@ internal static class GrindTierChecks
         foreach (var product in products)
             Check(fresh.PurchasePrice(product.Id) == expected[product.RecipeId], "Python equals production PurchasePrice: " + product.Id);
         var prices = products.Select(p => fresh.PurchasePrice(p.Id)).OrderBy(price => price).ToArray();
-        Check(prices.Length == 72 && (prices[35] + prices[36]) / 2d == 4080 && prices[0] == 940 && prices[71] == 9360,
+        Check(prices.Length == 72 && (prices[35] + prices[36]) / 2d == 4030 && prices[0] == 780 && prices[71] == 9620,
             "fresh-profile shop quote median/min/max");
-        Console.WriteLine("PASS Python/production fresh-profile PurchasePrice: all 72 decks, median 4080 gold, range 940-9360");
+        Console.WriteLine("PASS Python/production fresh-profile PurchasePrice: all 72 decks, median 4030 gold, range 780-9620");
     }
 
     internal static void Run(string root)

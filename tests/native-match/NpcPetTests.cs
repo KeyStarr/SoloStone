@@ -16,6 +16,7 @@ internal static partial class Program
     private static void NpcPets_()
     {
         NpcPetTransport();
+        OpponentPetsHidden();
         Console.WriteLine("PASS npc pets transport: both pet entities, player links, rewind, opposing reactions, profile isolation");
     }
 

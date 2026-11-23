@@ -142,9 +142,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
         private static void Banish(Minion minion)
         {
             var owner = minion.Controller;
-            owner.BoardZone.Remove(minion); minion.Reset(); owner.SetasideZone.Add(minion);
-            minion[GameTag.ZONE] = (int)Zone.REMOVEDFROMGAME;
-            if (owner.Game.History) owner.Game.PowerHistory.Add(new PowerHistoryHideEntity { EntityID=minion.Id, Zone=Zone.REMOVEDFROMGAME });
+            Generic.RemoveMinionFromGame(minion);
             owner.Game.AuraUpdate();
         }
         private static void Execute(int ability, Game g, Controller c, IEntity s, IPlayable t, TaskStack stack)
@@ -169,7 +167,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 case 14:
                     if (c.SecretZone.Count >= 5) break;
                     var secrets = OfflineCardPools.Candidates(g,c.HeroClass,Secrets,DbfId, PoolDestination.Other)
-                        .Where(card => !c.SecretZone.Any(active => active.Card.Id == card.Id)).ToArray();
+                        .Where(card => !c.SecretZone.HasSameCard(card)).ToArray();
                     if (secrets.Length > 0) AutoPlayRules.Play(Entity.FromCard(c,secrets[g.Random.Next(secrets.Length)]),s);
                     break;
                 case 15: Buff(g,s,c.Opponent,"TTN_075t2e"); break;

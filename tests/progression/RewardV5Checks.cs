@@ -17,8 +17,9 @@ internal static class RewardV5Checks
 
     internal static void Run(string root)
     {
-        Check(LocalEconomy.RollRewardVersion == 6 && LocalEconomy.IsRolled(4) && LocalEconomy.IsRolled(5)
-            && LocalEconomy.IsRolled(6) && !LocalEconomy.IsRolled(3) && !LocalEconomy.IsRolled(7), "rolled versions are exactly V4/V5/V6");
+        Check(LocalEconomy.RollRewardVersion == 7 && LocalEconomy.IsRolled(4) && LocalEconomy.IsRolled(5)
+            && LocalEconomy.IsRolled(6) && LocalEconomy.IsRolled(7) && !LocalEconomy.IsRolled(3) && !LocalEconomy.IsRolled(8),
+            "rolled versions are exactly V4 through V7");
         var kinds = new HashSet<int>();
         for (int seed = 0; seed < 1024; seed++)
         {
@@ -88,11 +89,12 @@ internal static class RewardV5Checks
         {
             LocalMatchRecord settled;
             int goldBefore; long dustBefore;
+            using (var profile = new LocalProfile(path)) profile.Begin("mage", "priest", 81);
+            var old = Read(path); old.Pending.RewardVersion = 6; Write(path, old);
             using (var profile = new LocalProfile(path))
             {
-                var pending = profile.Begin("mage", "priest", 81);
-                Check(pending.RewardVersion == 6 && pending.GrindTier == tier.Id && Read(path).Pending.RewardVersion == 6,
-                    "Begin persists V6 and grind tier");
+                var pending = profile.Pending;
+                Check(pending.RewardVersion == 6 && pending.GrindTier == tier.Id, "loaded V6 pending keeps its version and pace");
                 goldBefore = profile.Gold; dustBefore = profile.DustBalance;
                 if (scenario.Item1 == "Lost" && !scenario.Item3 && scenario.Item2 == 4)
                 {
@@ -133,7 +135,7 @@ internal static class RewardV5Checks
                 {
                     Check(summary.Body.Contains("1/3 of a victory roll"), "loss/draw summary explains payment");
                     var panel = LocalResultPanel.Rolled(settled.Result, settled.Turns, false, settled.RewardFacts,
-                        true, settled.Gold, settled.DustReward, 0, false);
+                        true, settled.Gold, settled.DustReward, 0, false, settled.RewardVersion);
                     Check(panel.Gate.Contains("1/3 of a victory roll") && panel.Total != "No gold or dust", "IMGUI paid loss/draw text");
                 }
                 Check(!eligible || scenario.Item1 == "Won" || !LocalCardMastery.EligibleWin(settled), "paid loss is not a mastery win");
@@ -162,7 +164,7 @@ internal static class RewardV5Checks
         foreach (var tamper in new Action<LocalProfileData>[] {
             d => d.Matches.First(m => m.RewardVersion == 6 && m.Result == "Lost" && !m.Conceded).Gold++,
             d => d.Matches.First(m => m.RewardVersion == 6 && m.Result == "Tied").DustReward++,
-            d => d.Matches.First(m => m.RewardVersion == 6).RewardVersion = 7 })
+            d => d.Matches.First(m => m.RewardVersion == 6).RewardVersion = 8 })
         {
             var bad = Read(path); tamper(bad);
             string corrupt = path + ".bad"; Write(corrupt, bad); byte[] before = File.ReadAllBytes(corrupt);
@@ -170,5 +172,7 @@ internal static class RewardV5Checks
             try { using var ignored = new LocalProfile(corrupt); } catch (InvalidOperationException) { rejected = true; }
             Check(rejected && File.ReadAllBytes(corrupt).SequenceEqual(before), "forged V6 receipt rejected without writes");
         }
+
+        RewardV7Checks.Profile(path, tier, Read(path).Matches);
     }
 }

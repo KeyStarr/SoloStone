@@ -51,7 +51,7 @@
     <Compile Include="../../plugin/OfflineGuard.cs" Link="OfflineGuard.cs" />
     <Compile Include="../../plugin/ClientBindings.cs" Link="ClientBindings.cs" />
     <Compile Include="../../plugin/ProfileCatalog.cs" Link="ProfileCatalog.cs" />
-    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
+    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" />
     <Compile Include="../../plugin/LadderRules.cs" Link="LadderRules.cs" />
     <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
     <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />

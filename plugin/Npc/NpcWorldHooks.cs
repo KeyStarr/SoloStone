@@ -24,9 +24,13 @@ public static class NpcWorldHooks
     // BrainOptions ask for the inferred reply prior.
     public static Func<IReadOnlyList<PopulationDeck>> Population { get; set; }
 
+    // Seam: ArenaReplyTable. The Arena NPC decks (drafted lists) as the public population of what a drafted deck holds, else null
+    // = no Arena table (the class prior). Read only by profiles whose BrainOptions ask for ReplyPrior.Arena (Arena matches).
+    public static Func<IReadOnlyList<PopulationDeck>> ArenaPopulation { get; set; }
+
     // Clears every hook (tests, shutdown).
     public static void Reset()
     {
-        ProfileForDeck = null; PlanForId = null; DecoratePilot = null; MulliganFor = null; Population = null;
+        ProfileForDeck = null; PlanForId = null; DecoratePilot = null; MulliganFor = null; Population = null; ArenaPopulation = null;
     }
 }

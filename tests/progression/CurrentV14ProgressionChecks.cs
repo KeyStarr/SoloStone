@@ -3,6 +3,7 @@ internal static class CurrentV14ProgressionChecks
     internal static void Run()
     {
         ActiveMetaChecks.Run();
+        ClassicWildChecks.Run();
         PlayerDefaultChecks.Run();
         ShowcaseChecks.Run();
         AchievementCatalogChecks.Run();

@@ -110,7 +110,10 @@ namespace SoloStone
             for(int hops=0;;hops++) {
                 cancel.ThrowIfCancellationRequested();
                 if(!Allowed(url)) throw new InvalidOperationException("Update download tried to use a host SoloStone does not trust.");
-                var reply=http.Get(url,max,sink,cancel);
+                HttpReply reply;
+                try { reply=http.Get(url,max,sink,cancel); }
+                catch(WebException) { cancel.ThrowIfCancellationRequested(); throw; }
+                cancel.ThrowIfCancellationRequested();
                 if(reply.Status==200) return reply;
                 if(reply.Status!=301 && reply.Status!=302 && reply.Status!=303 && reply.Status!=307 && reply.Status!=308)
                     throw new InvalidOperationException("Update server answered "+reply.Status+".");
@@ -143,6 +146,8 @@ namespace SoloStone
     [DataContract] public sealed class Settings
     {
         [DataMember(Name="checkForUpdates")] public bool CheckForUpdates=true;
+        // The release the player chose to skip. Any newer release is offered again.
+        [DataMember(Name="skippedVersion")] public string SkippedVersion;
         static string PathOf(string root) => Path.Combine(root,"state","settings.json");
         // Absent means on. A damaged file means off, so a player's "off" is never overridden by accident.
         public static Settings Load(string root) {
@@ -152,5 +157,8 @@ namespace SoloStone
             return Atomic.TryRead<Settings>(path)??new Settings { CheckForUpdates=false };
         }
         public static void Save(string root,Settings value) => Atomic.Save(PathOf(root),value);
+        // The switch changes only itself: a skipped version stays.
+        public static void SaveChecks(string root,bool on) { var s=Load(root); s.CheckForUpdates=on; Save(root,s); }
+        public static void SaveSkipped(string root,string version) { var s=Load(root); s.SkippedVersion=version; Save(root,s); }
     }
 }

@@ -17,7 +17,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true; card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 foreach (var aura in c.DeckZone.OfType<Spell>().Where(a => a.IsAura)
-                    .GroupBy(a => a.Card.Id).Select(group => group.First()).ToArray())
+                    .GroupBy(a => a.Card.Identity).Select(group => group.First()).ToArray())
                     AuraSpellRules.Install(aura);
             }) };
         }

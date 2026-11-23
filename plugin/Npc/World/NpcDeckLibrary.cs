@@ -58,7 +58,7 @@ public sealed class NpcDeckEntry
     public string Class { get; }            // CardClass name, e.g. "WARRIOR"
     public string Hero { get; }             // base hero card id, e.g. "HERO_01"
     public string Origin { get; }           // "golden" | "recipe:<id>" | "candidate:<id>" | "batch-3:<id>" | "casual-curated"
-    public string Admission { get; }        // "admitted" | "casual" | "rejected" (from admission-report-v1.json)
+    public string Admission { get; }        // "admitted" | "casual" | "rejected" (from admission-report-v1.json) | "core" (NpcCoreDecks)
     public string PlanId { get; }           // optional hand-written overlay id (DeckPlans.ForId); null = AutoDeckPlan only
     public NpcDeckTags Tags { get; }
     public NpcDeckSource Source { get; }
@@ -108,6 +108,17 @@ public sealed class NpcDeckLibrary
     {
         var result = new List<PopulationDeck>();
         foreach (var deck in Admitted) {
+            SabberStoneCore.Enums.CardClass heroClass;
+            if (Enum.TryParse(deck.Class, true, out heroClass))
+                result.Add(new PopulationDeck(deck.Id, heroClass, deck.Cards.SelectMany(card => Enumerable.Repeat(card.Id, card.Count))));
+        }
+        return GoldenData.Copy(result);
+    }
+    // NpcWorldHooks.ArenaPopulation body: the drafted Arena lists (admission "arena"), one entry per copy, for the Arena reply table.
+    public IReadOnlyList<PopulationDeck> ArenaPopulation()
+    {
+        var result = new List<PopulationDeck>();
+        foreach (var deck in Decks.Where(d => d.Admission == "arena")) {
             SabberStoneCore.Enums.CardClass heroClass;
             if (Enum.TryParse(deck.Class, true, out heroClass))
                 result.Add(new PopulationDeck(deck.Id, heroClass, deck.Cards.SelectMany(card => Enumerable.Repeat(card.Id, card.Count))));
@@ -184,7 +195,7 @@ public sealed class NpcDeckLibrary
         }
     }
 
-    public static readonly IReadOnlyList<string> Admissions = Array.AsReadOnly(new[] { "admitted", "casual", "rejected", "pending" });
+    public static readonly IReadOnlyList<string> Admissions = Array.AsReadOnly(new[] { "admitted", "casual", "rejected", "pending", "core" });
 
     // Structural validation: shared deck-size rule, copy limits, tags in range,
     // no Black Empire cards (engine-aware checks — card existence, meta, Build() — live in tests/npc-world DeckLibrarySuite).
@@ -202,7 +213,8 @@ public sealed class NpcDeckLibrary
             if (!Admissions.Contains(deck.Admission)) problems.Add(at + "unknown admission " + deck.Admission);
             if (deck.Origin == null || !(deck.Origin == "golden" || deck.Origin.StartsWith("recipe:", StringComparison.Ordinal)
                 || deck.Origin.StartsWith("candidate:", StringComparison.Ordinal) || deck.Origin.StartsWith("batch-3:", StringComparison.Ordinal)
-                || (deck.Origin == "casual-curated" && deck.Admission == "casual")))
+                || (deck.Origin == "casual-curated" && deck.Admission == "casual")
+                || ((deck.Origin == NpcCoreDecks.Origin || deck.Origin == NpcBeginnerDecks.Origin) && deck.Admission == NpcCoreDecks.Admission)))
                 problems.Add(at + "bad origin " + deck.Origin);
             int total = deck.Cards.Sum(c => c.Count);
             int size = LocalDecks.DeckSize(deck.Cards.Select(c => c.Id));

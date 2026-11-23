@@ -14,8 +14,8 @@ internal static partial class PoweredUpGlowTests
                 f.Process(PlayCardTask.SpellTarget(f.Player, f.Draw("CS2_029"), f.Game.Player2.Hero));
         }, (f, card) => PlayCardTask.Minion(f.Player, (Minion)card),
             (f, card) => {
-                Check(card.Zone == f.Player.BoardZone && f.Player.RemainingMana == 8 + f.Player.TemporaryMana,
-                    "Felwood Treant pays two Mana and grants one usable crystal");
+                Check(card.Zone == f.Player.BoardZone && f.Player.RemainingMana == 10 - card.Card.Cost + 1,
+                    "Felwood Treant grants one usable Mana after paying its cost, even at the cap");
                 return f.Player.TemporaryMana == 0;
             });
     }

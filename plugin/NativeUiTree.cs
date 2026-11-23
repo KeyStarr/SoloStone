@@ -78,6 +78,7 @@ internal static class NativeUiTree
         HashSet<PegUIElement> pressDisabled = null;
         if (box != null)
         {
+            Name(box.m_ArenaButton, "home.arena");
             Name(box.m_PlayButton, "home.play"); Name(box.m_OpenPacksButton, "home.packs"); Name(box.m_CollectionButton, "home.collection");
             if (NativeShop.HomeStoreReady) Name(box.m_StoreButton, "home.store");
             Name(NativeHelpUI.HomeButton, NativeHelpText.HomeId);
@@ -112,10 +113,13 @@ internal static class NativeUiTree
         foreach (var control in NativeOptionsPanels.Controls) Name(control.Key, control.Value);
         Name(NativeStarterDecks.OptionsButton, NativeStarterText.OptionsId);
         Name(NativeOptionsPace.OptionsButton, NativeOptionsPaceText.Id);
+        Name(NativeOptionsDifficulty.OptionsButton, NativeOptionsDifficulty.Id);
         Name(NativeTurnTimerOption.Checkbox, NativeTurnTimerOption.Id);
         Name(HandheldUi.Checkbox, OptionsPanelText.HandheldId);
         Name(NativeFpsCounter.Checkbox, NativeFpsCounterText.Id);
         Name(NativeDeckInferenceOption.Checkbox, NativeDeckInferenceText.Id);
+        Name(NativePlainCardsOption.Checkbox, PlainCardsSettings.Id);
+        Name(NativeOpponentPetsOption.Checkbox, NativeOpponentPetsOption.Id);
         Name(NativeLanguageOption.OptionsButton, GameLanguage.Id);
         Name(NativeTurnTimerOption.Dismiss, "options.dismiss");
         Name(NativePackFlip.Button, PackFlipText.ButtonId);
@@ -156,6 +160,8 @@ internal static class NativeUiTree
         // Name and walk local roots before collecting hitboxes, so reviewed collider-less buttons get fallback bounds.
         var shopControls = new List<PegUIElement>();
         var shopProxies = new List<PegUIElementProxy>();
+        try { NativeArena.NameControls(Name, shopControls, shopProxies); }
+        catch (Exception error) { snapshot.Elements.Add(new UiElement { Id = "diag:arenaNameFault", Type = "NativeArena", Path = "", Diag = "NameControls " + error.GetType().Name + ": " + error.Message + " @ " + (error.StackTrace ?? "").Split('\n').FirstOrDefault()?.Trim() }); }
         var packDetails = NativePackTestUi.Name(snapshot, Name, shopControls, shopProxies);
         if (NativeShop.Active)
         {
@@ -252,6 +258,8 @@ internal static class NativeUiTree
             {
                 if (element == null || !element.gameObject.activeInHierarchy && !packDetails.ContainsKey(element)) continue;
                 visited.Add(element);
+                try
+                {
                 var colliders = element.GetComponents<Collider>().Where(collider => collider.enabled).ToList();
                 if (proxies.TryGetValue(element, out List<Collider> extra)) colliders.AddRange(extra);
                 var bounds = colliders.Select(collider => collider.bounds).ToList();
@@ -304,7 +312,7 @@ internal static class NativeUiTree
                 }
                 if (item.Id == null && collectionMode != null) item.Id = CollectionTileId(element, collectionMode.Value);
                 if (item.Id == null && element is RewardPackage) item.Id = "rewards.package";
-                if (item.Id == "rewards.done" && !doneShown) item.Enabled = false;
+                if ((item.Id == "rewards.done" || item.Id == "arena.rewards.claim") && !doneShown) item.Enabled = false;
                 Rect pixels = default;
                 if (bounds.Count == 0) item.HitBy = "noHitbox";  // listed off screen so a missing hitbox is visible
                 else Project(item, bounds, camera, out pixels, element.GetComponentInParent<PopupRoot>()?.PrimaryRenderPass);
@@ -328,6 +336,14 @@ internal static class NativeUiTree
                 else if (item.Hit && selectorBlocks && NativeProfileSelector.InputBlock(element, dialog) is string covered)
                 { item.Hit = false; item.HitBy = covered; }
                 snapshot.Elements.Add(item);
+                }
+                catch (Exception error) when (!(error is OutOfMemoryException))
+                {
+                    // One bad element (destroyed owner, missing part) must never blank the whole tree: it becomes a diagnostic row.
+                    snapshot.Elements.Add(new UiElement { Id = "diag:readFault:" + element.GetInstanceID(), Type = element.GetType().Name,
+                        Instance = element.GetInstanceID(), Handle = element, Path = "", Diag = "readFault " + error.GetType().Name + ": " + error.Message
+                        + " @ " + (error.StackTrace ?? "").Split('\n').FirstOrDefault()?.Trim() });
+                }
             }
         }
         finally { if (MousePosition != null && input != null) MousePosition.SetValue(input, mouse); }
@@ -515,7 +531,7 @@ internal static class NativeUiTree
         }
     }
 
-    private static string Label(PegUIElement element)
+    internal static string Label(PegUIElement element)
     {
         if (UberTextText == null) return null;
         foreach (Component text in element.GetComponentsInChildren(UberTextText.DeclaringType, false))
@@ -603,6 +619,23 @@ internal static class NativeUiTree
     {
         NativeTestControl.AssertMainThread();
         ((PegUIElement)item.Handle).TriggerOut();
+    }
+
+    // Double click (PegUI.UpdateMouseLeftClick): the first click's down/tap/release and the second mouse-down on the press
+    // frame; the second mouse-up (within 0.7 s) sends DOUBLECLICK instead of tap/release, then release-all and out.
+    internal static bool DoubleClickable(UiElement item) =>
+        item?.Handle is PegUIElement element && element != null && element.IsEnabled() && element.DoubleClickEnabled;
+    internal static void DoublePress(UiElement item)
+    {
+        NativeTestControl.AssertMainThread();
+        var element = (PegUIElement)item.Handle;
+        element.TriggerOver(); element.TriggerPress(); element.TriggerTap(); element.TriggerRelease(); element.TriggerPress();
+    }
+    internal static void DoubleRelease(UiElement item)
+    {
+        NativeTestControl.AssertMainThread();
+        var element = (PegUIElement)item.Handle;
+        element.TriggerDoubleClick(); element.TriggerReleaseAll(true); element.TriggerOut();
     }
 
     // Mouse-up frame: tap (short click), release, release-all over the element, then the cursor leaves it.

@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System.Linq;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Auras;
@@ -26,7 +27,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
                 var ctx = new EffectContext(g, c.Id, s.Id);
                 var dragons = ctx.History.Deaths().Where(f => f.ControllerId == c.Id
                     && (f.Races.Contains(Race.DRAGON) || f.Races.Contains(Race.ALL)))
-                    .GroupBy(f => f.DbfId).Select(group => group.First().Definition.Materialize()).ToArray();
+                    .GroupBy(f => CardIdentity.OfDbf(f.DbfId)).Select(group => group.First().Definition.Materialize()).ToArray();
                 if (ctx.Discover(ctx.SampleDistinct(dragons, 3), ChoiceAction.SUMMON))
                     foreach (int offer in c.Choice.Choices)
                         g.IdEntityDic[offer][Generic.PrivateDecisionOfferTag] = c.PlayerId;

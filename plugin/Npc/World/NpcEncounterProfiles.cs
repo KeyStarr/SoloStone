@@ -39,12 +39,17 @@ public sealed class NpcEncounter
     public double Rating { get; }               // passed to LocalProfile.Settle(opponentRating)
     public int MatchSeed { get; }               // mistake/emote stream root; also the engine seed source
     public string Reason { get; }               // "hidden-rating" | "fixed-field" | "legend-field" | "playtest" (logs, tests)
+    // NPC difficulty (NpcDifficulties): null = Hard, the matchmaker's own encounter. Position = the shifted ladder position in
+    // stars (negative at the Core step); 0 when Hard.
+    public string Difficulty { get; }
+    public int DifficultyPosition { get; }
+    public NpcDifficultyLevel Level => NpcDifficulties.Find(Difficulty);
     public NpcEncounter(NpcIdentity npc, NpcDeckEntry deck, SkillProfile skill, PersonalityArchetype personality,
-        NpcProfile profile, double rating, int matchSeed, string reason)
+        NpcProfile profile, double rating, int matchSeed, string reason, string difficulty = null, int difficultyPosition = 0)
     { Npc = npc; Deck = deck; Skill = skill; Personality = personality; Profile = profile; Rating = rating;
-      MatchSeed = matchSeed; Reason = reason; }
+      MatchSeed = matchSeed; Reason = reason; Difficulty = difficulty; DifficultyPosition = difficultyPosition; }
     // Same encounter, its NPC searching with this reply prior: identity, deck, skill, node budgets and clocks stay.
     // Live pilots run Profile.Budget (SkilledPilot's live path keeps the inner pilot's budget), so Skill stays as loaded.
     public NpcEncounter WithReplyPrior(ReplyPrior prior) => new NpcEncounter(Npc, Deck, Skill, Personality,
-        NpcEncounterProfiles.WithReplyPrior(Profile, prior), Rating, MatchSeed, Reason);
+        NpcEncounterProfiles.WithReplyPrior(Profile, prior), Rating, MatchSeed, Reason, Difficulty, DifficultyPosition);
 }

@@ -260,7 +260,7 @@ namespace SabberStoneCore.Tasks
 						do
 						{
 							IPlayable pick = ((List<IPlayable>)stack).Choose(c.Game.Random);
-							if (c.SecretZone.Any(p => p.Card.AssetId == pick.Card.AssetId))
+							if (c.SecretZone.HasSameCard(pick.Card))
 							{
 								stack.Remove(pick);
 								continue;

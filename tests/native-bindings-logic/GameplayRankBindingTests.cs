@@ -85,6 +85,14 @@ internal static class GameplayRankBindingTests
         Check(ordinary.IsDisplayable() && ordinary.GetCurrentMedal(FormatType.FT_STANDARD).starLevel == 75
             && ordinary.GetCurrentMedal(FormatType.FT_STANDARD).legendIndex == 0,
             "non-Legend opponent receives ordinary native rank translator");
+        // Easy/Medium: the opponent medal reads the shown rating at the player's rank, never the stored real rating.
+        int calls = NpcPetSeats.Calls;
+        profile.Pending.NpcDifficulty = "easy"; profile.Pending.NpcRating = 1010;
+        var shown = Rank(new Player(Player.Side.OPPOSING), native);
+        Check(NpcPetSeats.Calls > calls && shown.GetCurrentMedal(FormatType.FT_STANDARD).starLevel
+            == Rank(new Player(Player.Side.FRIENDLY), native).GetCurrentMedal(FormatType.FT_STANDARD).starLevel,
+            "an Easy opponent is shown at the player's rank");
+        profile.Pending.NpcDifficulty = null; profile.Pending.NpcRating = 1300;
         profile.Pending.NpcRating = double.NaN;
         Check(ReferenceEquals(Rank(new Player(Player.Side.OPPOSING), native), native) && log.Warnings.Count == 1,
             "invalid opponent snapshot fails closed to native translator");
@@ -106,7 +114,19 @@ internal static class GameplayRankBindingTests
         Check(!Ranked(false) && ReferenceEquals(Rank(new Player(Player.Side.FRIENDLY), native), native)
             && ReferenceEquals(Rank(new Player(Player.Side.OPPOSING), native), native),
             "Casual match keeps the native unranked result and translators");
+        profile.Pending.Mode = "Arena";
+        Check(!Ranked(false) && ReferenceEquals(Rank(new Player(Player.Side.FRIENDLY), native), native)
+            && ReferenceEquals(Rank(new Player(Player.Side.OPPOSING), native), native),
+            "an Arena pending match never shows a rank: native unranked presentation with VS_AI transport");
         profile.Pending.Mode = null;
+        Check(Ranked(false), "a Ranked pending match is still projected");
+        var arenaPending = profile.Pending;
+        profile.Pending = null;
+        NativeArena.MatchActive = true;
+        Check(!Ranked(false) && ReferenceEquals(Rank(new Player(Player.Side.FRIENDLY), native), native),
+            "after settlement the Arena post-game keeps native unranked presentation");
+        NativeArena.MatchActive = false;
+        profile.Pending = arenaPending;
         Check(ReferenceEquals(Rank(new Player(Player.Side.INVALID), native), native),
             "unknown player side keeps native translator");
         Check(log.Infos.Any(line => line.Contains("side=FRIENDLY") && line.Contains("legend=9") && line.Contains("showOpponent=True"))
@@ -138,6 +158,7 @@ internal sealed class ManualLogSource
     internal void LogInfo(string value) => Infos.Add(value);
     internal void LogWarning(string value) => Warnings.Add(value);
 }
+internal static class NativeArena { internal static bool MatchActive; }
 internal static class GameUtils { internal static bool IsGameTypeRanked() => false; }
 internal sealed class Player
 {
@@ -165,13 +186,22 @@ internal sealed class LocalProfile
 }
 internal sealed class GrindTier { internal LadderPace Ladder = new(); }
 internal sealed class LadderPace { }
-internal sealed class LocalMatchRecord { internal string Id; internal double? NpcRating; internal string Mode; internal string GrindTier; }
+internal sealed class LocalMatchRecord { internal string Id; internal double? NpcRating; internal string Mode; internal string GrindTier; internal string NpcDifficulty; }
+// Stand-in for the production shown-rating rule (NpcDifficultyLevel.DisplayRating, tested in npc-world): an Easy/Medium NPC is
+// shown at the player's rank, a Hard one at its real rating. Records each call so the hook is proven to pass the player's rank.
+internal static class NpcPetSeats
+{
+    internal static int Calls;
+    internal static double ShownRating(LocalMatchRecord record, double real, int playerStarIndex, double playerRating)
+    { Calls++; return record?.NpcDifficulty == null ? real : 1000 + playerStarIndex * 4; }
+}
 internal static class GrindTiers
 {
     private static readonly Dictionary<string, GrindTier> Rows = new();
     internal static GrindTier Find(string id) { id ??= "standard"; if (!Rows.TryGetValue(id, out var tier)) Rows[id] = tier = new GrindTier(); return tier; }
 }
 internal static class CasualRules { internal static bool IsCasual(string mode) => mode == "Casual"; }
+internal static class ArenaRules { internal static bool IsArena(string mode) => mode == "Arena"; }
 internal sealed class MatchRow { internal string Result; }
 internal sealed class LadderPosition { internal int StarIndex, BestStarIndex; internal double Rating; internal bool LegendReached; }
 internal sealed class LadderRankRow { internal int StarLevel, Stars; internal bool Legend; }

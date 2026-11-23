@@ -94,7 +94,7 @@ internal static class DeathKnightChecks
             Check(File.ReadAllBytes(invalidPath).SequenceEqual(invalidBytes), "invalid stored rune validation rewrote bytes");
             Reject(() => profile.SaveDraft(draft.Id, "Invalid", "HERO_11", illegal, draft.SortOrder), "InvalidRuneSaveLeavesProfileBytesUnchanged");
             var neutrals = profile.Collection.Where(pair => pair.Value >= 2 && Cards.FromId(pair.Key).Class == CardClass.NEUTRAL
-                && !LocalCardCatalog.IsCore(pair.Key)).Select(pair => pair.Key).ToList();
+                && LocalCardCatalog.IsStandardId(pair.Key)).Select(pair => pair.Key).ToList();
             var thirty = illegal.Concat(neutrals.Where(id => !illegal.Contains(id)).Take(14).SelectMany(id => new[] { id, id })).ToArray();
             Check(thirty.Length == 30, "atomic complete fixture");
             Reject(() => profile.SaveDeck("Invalid", "HERO_11", thirty), "InvalidRuneSaveDoesNotConsumeDeckId");
@@ -154,18 +154,18 @@ internal static class DeathKnightChecks
         using (var profile = new LocalProfile(path)) profile.CreateDraft("Schedule", "HERO_08");
         var saved = Read(path);
         saved.CoreScheduleVersion = 3;
-        // Shaman level 9 now earns Fire Elemental (threshold 10 -> 9); Warlock level 4 earned Hellfire under 3 (4 -> 5).
+        // Shaman level 9 earns the threshold-9 legendary Core Shaman card (earlier by one level under schedule 4); a Warlock threshold-5 epic is not yet earned at level 4 but was granted under 3.
         saved.ClassXp.Single(entry => entry.Hero == "HERO_02").Xp = LocalCoreProgression.LevelThresholds[8];
         saved.ClassXp.Single(entry => entry.Hero == "HERO_07").Xp = LocalCoreProgression.LevelThresholds[3];
         var owned = LocalCoreProgression.Owned(saved.ClassXp.ToDictionary(entry => entry.Hero, entry => entry.Xp), false);
-        Check(owned.ContainsKey("CORE_CS2_042") && !owned.ContainsKey("CORE_CS2_062"), "schedule 4 fixture thresholds");
-        saved.CoreGrants = owned.Where(pair => pair.Key != "CORE_CS2_042")
+        Check(owned.ContainsKey("CORE_CATA_004") && !owned.ContainsKey("CORE_ULD_165"), "schedule 4 fixture thresholds");
+        saved.CoreGrants = owned.Where(pair => pair.Key != "CORE_CATA_004")
             .Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList();
-        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_CS2_062", Count = 2 });
+        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_ULD_165", Count = 2 });
         Write(path, saved);
         using (var profile = new LocalProfile(path)) { }
         saved.CoreScheduleVersion = LocalCoreProgression.ScheduleVersion;
-        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_CS2_042", Count = 2 });
+        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_CATA_004", Count = 1 });
         string expected = path + ".expected"; Write(expected, saved);
         byte[] migrated = File.ReadAllBytes(path);
         Check(migrated.SequenceEqual(File.ReadAllBytes(expected)), "ScheduleThreeToFour grants lowered threshold, keeps raised one, changes nothing else");
@@ -184,11 +184,11 @@ internal static class DeathKnightChecks
         saved.CoreScheduleVersion = 4;
         saved.ClassXp.Single(entry => entry.Hero == "HERO_09").Xp = LocalCoreProgression.LevelThresholds[3];
         var owned = LocalCoreProgression.Owned(saved.ClassXp.ToDictionary(entry => entry.Hero, entry => entry.Xp), false);
-        string[] additions = { "CORE_BAR_311", "CORE_BT_480", "CORE_WON_350" };
-        Check(additions.All(owned.ContainsKey) && !owned.ContainsKey("CORE_EX1_391"), "schedule 5 fixture thresholds");
+        string[] additions = { "CORE_CFM_604", "CORE_EX1_197", "CORE_BAR_313" };
+        Check(additions.All(owned.ContainsKey) && !owned.ContainsKey("CORE_SCH_512"), "schedule 5 fixture thresholds");
         saved.CoreGrants = owned.Where(pair => !additions.Contains(pair.Key))
             .Select(pair => new LocalCardCount { Id = pair.Key, Count = pair.Value }).ToList();
-        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_EX1_391", Count = 2 });
+        saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_SCH_512", Count = 2 });
         saved.CoreGrants.Add(new LocalCardCount { Id = "CORE_UNKNOWN_EARNED", Count = 2 });
         Write(path, saved);
         using (var profile = new LocalProfile(path)) { }
@@ -205,7 +205,7 @@ internal static class DeathKnightChecks
 
     private static void ScheduleFiveToCurrent(string root, int previous)
     {
-        Check(LocalCoreProgression.ScheduleVersion == 8, "schedule 8 is current");
+        Check(LocalCoreProgression.ScheduleVersion == 9, "schedule 9 is current");
         string[] additions = "CORE_BAR_313 CORE_BT_035 CORE_BT_120 CORE_CATA_002 CORE_CATA_004 CORE_CATA_006 CORE_CATA_007 CORE_EDR_003 CORE_ETC_111 CORE_REV_946 CORE_RLK_086 CORE_RLK_087 CORE_RLK_116 CORE_RLK_118 CORE_RLK_506 CORE_RLK_567 CORE_SCH_717 CORE_TRL_345 CORE_TTN_866 CORE_WON_141 CORE_WW_374 CORE_YOD_026 CS3_020 Core_UNG_072 RLK_048 RLK_060 RLK_061 TTN_851".Split(' ');
         additions = (previous == 5 ? additions : Array.Empty<string>()).Concat(new[] { "CORE_WON_145", "CS3_022", "CS3_035" }).ToArray();
         additions = additions.Concat("CORE_BT_781 CORE_AT_037 Core_LOE_115 CORE_EX1_160 CORE_EX1_154 CORE_OG_047 CORE_TSC_650 CORE_ONY_018 CORE_EX1_250 CORE_BT_187 CORE_ETC_523 CORE_BT_156 CORE_SCH_605".Split(' ')).ToArray();
@@ -232,7 +232,7 @@ internal static class DeathKnightChecks
         byte[] migrated = File.ReadAllBytes(path);
         Check(migrated.SequenceEqual(File.ReadAllBytes(expected)), "Core migration adds only new grants, retains prior and unknown grants, changes nothing else");
         using (var profile = new LocalProfile(path)) { }
-        Check(File.ReadAllBytes(path).SequenceEqual(migrated), "ScheduleEight stable reload");
-        Console.WriteLine("PASS Core schedule " + previous + " -> 8: " + additions.Length + " additions, prior/unknown grants retained, exact other state and stable reload");
+        Check(File.ReadAllBytes(path).SequenceEqual(migrated), "ScheduleNine stable reload");
+        Console.WriteLine("PASS Core schedule " + previous + " -> 9: " + additions.Length + " additions, prior/unknown grants retained, exact other state and stable reload");
     }
 }

@@ -70,10 +70,17 @@ C	Assembly-CSharp	NetCache+NetCacheProfileNotices	.ctor	System.Void()
 C	Assembly-CSharp	NetCache+NetCacheProfileProgress	.ctor	System.Void()
 C	Assembly-CSharp	NetCache+PetInfo	.ctor	System.Void()
 C	Assembly-CSharp	NetCache+PetVariantInfo	.ctor	System.Void()
+C	Assembly-CSharp	Network+BeginDraft	.ctor	System.Void()
 C	Assembly-CSharp	Network+Bundle	.ctor	System.Void()
 C	Assembly-CSharp	Network+BundleItem	.ctor	System.Void()
+C	Assembly-CSharp	Network+CardChoice	.ctor	System.Void()
 C	Assembly-CSharp	Network+CardSaleResult	.ctor	System.Void()
+C	Assembly-CSharp	Network+CardUserData	.ctor	System.Void()
+C	Assembly-CSharp	Network+DraftChoicesAndContents	.ctor	System.Void()
+C	Assembly-CSharp	Network+DraftChosen	.ctor	System.Void()
+C	Assembly-CSharp	Network+DraftRetired	.ctor	System.Void()
 C	Assembly-CSharp	Network+MassDisenchantResponse	.ctor	System.Void()
+C	Assembly-CSharp	Network+RewardChest	.ctor	System.Void()
 C	Assembly-CSharp	Network+ShopSection	.ctor	System.Void()
 C	Assembly-CSharp	Network+UserUI	.ctor	System.Void()
 C	Assembly-CSharp	Network+UserUI+EmoteInfo	.ctor	System.Void()
@@ -142,20 +149,37 @@ C	blizzard.bgsclient	PegasusGame.Tag	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusGame.TargetOption	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusGame.TurnTimer	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusGame.UserUI	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusShared.ArenaSeasonSpec	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.BnetId	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.CardDef	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.CardStack	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.Date	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.DeckCardData	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveDataValue	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveKey	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaRatingInfoResponse	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencySlot	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaRewardLevel	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaRewardSlot	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaRewardSpecificBoosterSlot	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaSession	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.CardBackModification	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.CardBackModifications	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.Collection	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.DeckContents	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.DraftError	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.MedalInfoData	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusUtil.SaveArenaDeckResponse	.ctor	System.Void()
+E	Assembly-CSharp	ArenaLandingPageManager	NotifySceneLoadedWhenReady	*
 E	Assembly-CSharp	DeckTrayDeckListContent	DeleteDeckAnimation	*
+E	Assembly-CSharp	DraftDisplay	InitializeDraftScreen	*
+E	Assembly-CSharp	DraftDisplay	NotifySceneLoadedWhenReady	*
+E	Assembly-CSharp	DraftScene	NotifySceneLoadedWhenReady	*
 E	Assembly-CSharp	PackOpeningDirector	NewHighlightsReadyImpl	*
 E	Assembly-CSharp	ShopBrowser	LoadSectionsCoroutine	()
 F	*	UberText	m_RenderQueue	*
@@ -169,6 +193,8 @@ F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroName	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerActor	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerContainer	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_playButton	*
+F	Assembly-CSharp	AdjustBuyingAmount	m_decrementClickable	*
+F	Assembly-CSharp	AdjustBuyingAmount	m_incrementClickable	*
 F	Assembly-CSharp	AdventureDungeonCrawlDeckTray	m_deck	*
 F	Assembly-CSharp	AdventureDungeonCrawlDisplay	m_dungeonCrawlDeckTray	AdventureDungeonCrawlDeckTray
 F	Assembly-CSharp	AlertPopup	m_alertText	*
@@ -193,6 +219,17 @@ F	Assembly-CSharp	AlertPopup+PopupInfo	m_responseDisplay	AlertPopup+ResponseDisp
 F	Assembly-CSharp	AlertPopup+PopupInfo	m_responseUserData	System.Object
 F	Assembly-CSharp	AlertPopup+PopupInfo	m_showAlertIcon	System.Boolean
 F	Assembly-CSharp	AlertPopup+PopupInfo	m_text	System.String
+F	Assembly-CSharp	ArenaLandingPage	m_getMoreTicketsButtonWidget	*
+F	Assembly-CSharp	ArenaLandingPage	m_playButtonActiveRun	*
+F	Assembly-CSharp	ArenaLandingPage	m_playButtonNoActiveRun	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_FTUECoroutine	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_arenaLandingPageDataModel	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_arenaNormalLandingPageDataModel	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_arenaUndergroundLandingPageDataModel	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_isNormalWidgetLoaded	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_isUndergroundWidgetLoaded	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_isWidgetDoneInitialStateChanging	*
+F	Assembly-CSharp	ArenaLandingPageManager	m_tavernTicketDisplay	*
 F	Assembly-CSharp	AttackSpellController	m_attackType	*
 F	Assembly-CSharp	AttackSpellController	m_sourceAttackSpell	*
 F	Assembly-CSharp	BaseHeroSkinInfoManager	m_currentEntityDef	*
@@ -210,7 +247,6 @@ F	Assembly-CSharp	BnetBar	m_menuButton	BnetBarMenuButton
 F	Assembly-CSharp	BnetBar	m_socialToastBone	UnityEngine.GameObject
 F	Assembly-CSharp	BnetBar	m_tutorialSkipButton	*
 F	Assembly-CSharp	BnetBar	m_tutorialSkipPopup	*
-F	Assembly-CSharp	Box	m_ArenaButton	*
 F	Assembly-CSharp	Box	m_ArenaButton	BoxMenuButton
 F	Assembly-CSharp	Box	m_BattleGroundsButton	*
 F	Assembly-CSharp	Box	m_BattleGroundsButton	BoxScrollButton
@@ -381,6 +417,12 @@ F	Assembly-CSharp	DialogManager	m_currentDialog	*
 F	Assembly-CSharp	DialogManager	m_dialogRequests	*
 F	Assembly-CSharp	DialogManager+DialogRequest	m_info	*
 F	Assembly-CSharp	DialogManager+DialogRequest	m_info	System.Object
+F	Assembly-CSharp	DraftDisplay	m_arenaLandingPageManagerWidget	*
+F	Assembly-CSharp	DraftDisplay	m_confirmButton	*
+F	Assembly-CSharp	DraftDisplay	m_currentMode	*
+F	Assembly-CSharp	DraftDisplay	m_heroPower	*
+F	Assembly-CSharp	DraftDisplay	m_netCacheReady	*
+F	Assembly-CSharp	DraftScene	m_arenaLandingPageWidget	*
 F	Assembly-CSharp	DropdownControl	m_button	UIBButton
 F	Assembly-CSharp	EditableDeckTray	m_doneButton	UIBButton
 F	Assembly-CSharp	EmoteHandler	m_availableEmotes	*
@@ -502,6 +544,7 @@ F	Assembly-CSharp	MultiSliceElement+Slice	m_useWidgetTransform	System.Boolean
 F	Assembly-CSharp	NetCache	FavoritePetChanged	*
 F	Assembly-CSharp	NetCache	FavoritePetVariantChanged	*
 F	Assembly-CSharp	NetCache	PetsXpLevelChanged	*
+F	Assembly-CSharp	NetCache	m_netCache	*
 F	Assembly-CSharp	NetCache+NetCacheBatchRequest	m_requests	*
 F	Assembly-CSharp	NetCache+NetCacheCollection	TotalCardsOwned	System.Int32
 F	Assembly-CSharp	NetCache+NetCacheMedalInfo	MedalData	Blizzard.T5.Core.Map`2<PegasusShared.FormatType,PegasusUtil.MedalInfoData>
@@ -509,6 +552,7 @@ F	Assembly-CSharp	NetCache+Request	m_reload	*
 F	Assembly-CSharp	Network	CosmeticVersion	*
 F	Assembly-CSharp	Network+Bundle+CostInfo	CurrentCost	System.Int64
 F	Assembly-CSharp	Network+Bundle+CostInfo	OriginalCost	System.Int64
+F	Assembly-CSharp	Network+CardChoice	CardDef	NetCache+CardDefinition
 F	Assembly-CSharp	Network+UserUI	emoteInfo	Network+UserUI+EmoteInfo
 F	Assembly-CSharp	Network+UserUI	mouseInfo	Network+UserUI+MouseInfo
 F	Assembly-CSharp	Network+UserUI	playerId	System.Nullable`1<System.Int32>
@@ -592,6 +636,7 @@ F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardGold	UnityEngine.GameObje
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardPackage	UnityEngine.GameObject
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbButtonWidget	*
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbRibbon	*
+F	Assembly-CSharp	SceneMgr	m_scene	*
 F	Assembly-CSharp	SellableDeckProductPage	m_firstVariant	*
 F	Assembly-CSharp	Shop	m_browser	*
 F	Assembly-CSharp	Shop	m_browserScroller	*
@@ -641,6 +686,7 @@ F	Assembly-CSharp	StorePurchaseAuth	m_transaction	*
 F	Assembly-CSharp	StoreQuantityPrompt	m_clickCatcherClickable	Hearthstone.UI.Clickable
 F	Assembly-CSharp	SubSpellController+SubSpellInstance	SpellInstance	*
 F	Assembly-CSharp	SubSpellController+SubSpellInstance	SubSpellStartTask	*
+F	Assembly-CSharp	TavernTicketDisplay	m_widget	Hearthstone.UI.Widget
 F	Assembly-CSharp	TooltipPanel	BOX_SCALE	PlatformDependentValue`1<System.Single>
 F	Assembly-CSharp	TooltipZone	m_tooltipDirection	TooltipZone+TooltipLayoutDirection
 F	Assembly-CSharp	TooltipZone	m_tooltipDirectionMobile	TooltipZone+TooltipLayoutDirection
@@ -723,6 +769,9 @@ M	Assembly-CSharp	AbsDeckPickerTrayDisplay	OnPlayGameButtonReleased	*
 M	Assembly-CSharp	AbsDeckPickerTrayDisplay	PlayGame	*
 M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetHeroButtonsEnabled	*
 M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetPlayButtonEnabled	*
+M	Assembly-CSharp	AchieveManager	Get	AchieveManager()
+M	Assembly-CSharp	AchieveManager	IsReady	*
+M	Assembly-CSharp	AchieveManager	IsReady	System.Boolean()
 M	Assembly-CSharp	AchievementCategoryDbfRecord	get_Icon	System.String()
 M	Assembly-CSharp	AchievementCategoryDbfRecord	get_Subcategories	System.Collections.Generic.List`1<AchievementSubcategoryDbfRecord>()
 M	Assembly-CSharp	AchievementSubcategoryDbfRecord	get_Icon	System.String()
@@ -747,6 +796,7 @@ M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnBackButtonPress	*
 M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnRewardOptionSelected	*
 M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
 M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
+M	Assembly-CSharp	AdjustBuyingAmount	RefreshQuantity	()
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -756,6 +806,20 @@ M	Assembly-CSharp	AnimatedLowPolyPack	Init	System.Void(System.Int32,UnityEngine.
 M	Assembly-CSharp	AnimationUtil	ShowWithPunch	System.Void(UnityEngine.GameObject,UnityEngine.Vector3,UnityEngine.Vector3,UnityEngine.Vector3,System.String,System.Boolean,UnityEngine.GameObject,System.Object,AnimationUtil+DelOnShownWithPunch)
 M	Assembly-CSharp	ArcaneDustAmount	UpdateCurrentDustAmount	System.Void()
 M	Assembly-CSharp	ArcaneDustRewardData	get_Amount	System.Int32()
+M	Assembly-CSharp	ArenaLandingPageManager	Awake	*
+M	Assembly-CSharp	ArenaLandingPageManager	CheckForFTUXPopup	*
+M	Assembly-CSharp	ArenaLandingPageManager	Get	ArenaLandingPageManager()
+M	Assembly-CSharp	ArenaLandingPageManager	GetArenaLandingPage	ArenaLandingPage()
+M	Assembly-CSharp	ArenaLandingPageManager	GetWidget	Hearthstone.UI.Widget()
+M	Assembly-CSharp	ArenaLandingPageManager	IsLoadingComplete	System.Boolean()
+M	Assembly-CSharp	ArenaLandingPageManager	NotifySceneLoadedWhenReady	*
+M	Assembly-CSharp	ArenaLandingPageManager	ShowArenaDisclaimer	*
+M	Assembly-CSharp	ArenaLandingPageManager	SpendTicket	*
+M	Assembly-CSharp	ArenaLandingPageManager	Start	*
+M	Assembly-CSharp	ArenaLandingPageManager	StartMatchmaking	*
+M	Assembly-CSharp	ArenaLandingPageManager	ToggleUndergroundState	*
+M	Assembly-CSharp	ArenaLandingPageManager	UpdateArenaRatingValues	*
+M	Assembly-CSharp	ArenaModeToggleButton	DetermineStartingState	*
 M	Assembly-CSharp	AssetLoader	Get	*
 M	Assembly-CSharp	AssetLoader	InstantiatePrefab	*
 M	Assembly-CSharp	AssetLoader	IsRuntimeAssetVariantAvailable	*
@@ -791,6 +855,8 @@ M	Assembly-CSharp	BnetBar	Update	*
 M	Assembly-CSharp	BnetBar	UpdateLayout	*
 M	Assembly-CSharp	BnetBarMenuButton	UpdateHighlight	()
 M	Assembly-CSharp	BnetBarMenuButton	UpdateHighlight	*
+M	Assembly-CSharp	BnetPresenceMgr	SetGameFieldBlob	*
+M	Assembly-CSharp	BnetPresenceMgr	SetGameFieldBlob	System.Boolean(System.UInt32,IProtoBuf)
 M	Assembly-CSharp	BoardDbfRecord	get_NoteDesc	System.String()
 M	Assembly-CSharp	BoardDbfRecord	get_Prefab	System.String()
 M	Assembly-CSharp	BoosterDbfRecord	get_ArenaPrefab	System.String()
@@ -881,6 +947,7 @@ M	Assembly-CSharp	CameraUtils	FindFirstByLayerMask	UnityEngine.Camera(UnityEngin
 M	Assembly-CSharp	Card	EnableAttacking	System.Void(System.Boolean)
 M	Assembly-CSharp	Card	GetActor	Actor()
 M	Assembly-CSharp	Card	GetEntity	Entity()
+M	Assembly-CSharp	Card	GetPlaySpell	Spell(System.Int32,System.Boolean)
 M	Assembly-CSharp	Card	GetZone	Zone()
 M	Assembly-CSharp	Card	IsActorLoading	System.Boolean()
 M	Assembly-CSharp	Card	IsActorReady	System.Boolean()
@@ -1020,6 +1087,7 @@ M	Assembly-CSharp	CollectionManager	GetDecks	System.Collections.Generic.List`1<C
 M	Assembly-CSharp	CollectionManager	GetDecks	System.Collections.Generic.SortedDictionary`2<System.Int64,CollectionDeck>()
 M	Assembly-CSharp	CollectionManager	GetDisplayableCardSets	System.Collections.Generic.List`1<TAG_CARD_SET>()
 M	Assembly-CSharp	CollectionManager	GetEditedDeck	CollectionDeck()
+M	Assembly-CSharp	CollectionManager	GetHeroPremium	(TAG_CLASS)
 M	Assembly-CSharp	CollectionManager	GetNonStarterTemplateDecks	(PegasusShared.FormatType,TAG_CLASS)
 M	Assembly-CSharp	CollectionManager	GetNonStarterTemplateDecks	*
 M	Assembly-CSharp	CollectionManager	GetNumCopiesInCollection	System.Int32(System.String,TAG_PREMIUM)
@@ -1216,6 +1284,38 @@ M	Assembly-CSharp	DialogManager	ShowingDialog	System.Boolean()
 M	Assembly-CSharp	DialogManager	add_OnDialogHidden	System.Void(System.Action)
 M	Assembly-CSharp	DialogManager	remove_OnDialogHidden	System.Void(System.Action)
 M	Assembly-CSharp	DisenchantButton	OnRelease	*
+M	Assembly-CSharp	DraftDisplay	Awake	*
+M	Assembly-CSharp	DraftDisplay	Get	DraftDisplay()
+M	Assembly-CSharp	DraftDisplay	HandleGameStartupFailure	*
+M	Assembly-CSharp	DraftDisplay	InitializeDraftScreen	*
+M	Assembly-CSharp	DraftDisplay	IsLoadingComplete	System.Boolean()
+M	Assembly-CSharp	DraftDisplay	NotifySceneLoadedWhenReady	*
+M	Assembly-CSharp	DraftDisplay	PlayButtonPress	*
+M	Assembly-CSharp	DraftDisplay	Start	*
+M	Assembly-CSharp	DraftDisplay	get_IsRewardsFlowPending	System.Boolean()
+M	Assembly-CSharp	DraftManager	FindGame	*
+M	Assembly-CSharp	DraftManager	Get	DraftManager()
+M	Assembly-CSharp	DraftManager	GetArenaState	PegasusShared.ArenaSessionState(System.Boolean)
+M	Assembly-CSharp	DraftManager	GetCurrentClientState	ArenaClientStateType()
+M	Assembly-CSharp	DraftManager	GetDraftPremium	*
+M	Assembly-CSharp	DraftManager	GetLosses	System.Int32()
+M	Assembly-CSharp	DraftManager	GetMaxLosses	()
+M	Assembly-CSharp	DraftManager	GetMaxLosses	(System.Boolean)
+M	Assembly-CSharp	DraftManager	GetMaxWins	()
+M	Assembly-CSharp	DraftManager	GetMaxWins	(System.Boolean)
+M	Assembly-CSharp	DraftManager	GetNumTicketsOwned	*
+M	Assembly-CSharp	DraftManager	GetWins	System.Int32()
+M	Assembly-CSharp	DraftManager	HasAlreadySeenPhaseMessage	*
+M	Assembly-CSharp	DraftManager	OnAckRewards	*
+M	Assembly-CSharp	DraftManager	OnArenaSessionResponsePacket	(PegasusUtil.ArenaSessionResponse,System.Boolean)
+M	Assembly-CSharp	DraftManager	OnArenaSessionResponsePacket	System.Void(PegasusUtil.ArenaSessionResponse)
+M	Assembly-CSharp	DraftManager	OnBegin	*
+M	Assembly-CSharp	DraftManager	OnLoggedIn	*
+M	Assembly-CSharp	DraftManager	OnLoggedIn	System.Void()
+M	Assembly-CSharp	DraftManager	SetUndergroundState	*
+M	Assembly-CSharp	DraftManager	SetUndergroundState	System.Void(System.Boolean)
+M	Assembly-CSharp	DraftScene	NotifySceneLoadedWhenReady	*
+M	Assembly-CSharp	DraftScene	OnUIScreenLoaded	*
 M	Assembly-CSharp	EmoteHandler	Get	EmoteHandler()
 M	Assembly-CSharp	EmoteHandler	IsValidEmoteTypeForOpponent	System.Boolean(EmoteType)
 M	Assembly-CSharp	EndGameScreen	Awake	*
@@ -1251,6 +1351,8 @@ M	Assembly-CSharp	Entity	IsControlledByOpposingSidePlayer	System.Boolean()
 M	Assembly-CSharp	Entity	IsLoadingAssets	System.Boolean()
 M	Assembly-CSharp	EntityBase	GetATK	System.Int32()
 M	Assembly-CSharp	EntityBase	GetCardId	System.String()
+M	Assembly-CSharp	EntityBase	GetCardSet	()
+M	Assembly-CSharp	EntityBase	GetCardSet	*
 M	Assembly-CSharp	EntityBase	GetCardSet	TAG_CARD_SET()
 M	Assembly-CSharp	EntityBase	GetCardType	TAG_CARDTYPE()
 M	Assembly-CSharp	EntityBase	GetClass	TAG_CLASS()
@@ -1319,6 +1421,7 @@ M	Assembly-CSharp	GameMgr	Get	GameMgr()
 M	Assembly-CSharp	GameMgr	GetGameSetup	Network+GameSetup()
 M	Assembly-CSharp	GameMgr	GetGameType	PegasusShared.GameType()
 M	Assembly-CSharp	GameMgr	GetMissionId	System.Int32()
+M	Assembly-CSharp	GameMgr	GetPostGameSceneMode	*
 M	Assembly-CSharp	GameMgr	GetTransitionPopup	TransitionPopup()
 M	Assembly-CSharp	GameMgr	IsAI	System.Boolean()
 M	Assembly-CSharp	GameMgr	IsBattlegroundsMatchOrTutorial	System.Boolean()
@@ -1385,6 +1488,7 @@ M	Assembly-CSharp	GameUtils	GetCardTagValue	(System.String,GAME_TAG)
 M	Assembly-CSharp	GameUtils	GetCardTagValue	*
 M	Assembly-CSharp	GameUtils	GetCardTagValue	System.Int32(System.String,GAME_TAG)
 M	Assembly-CSharp	GameUtils	GetFakePackCount	*
+M	Assembly-CSharp	GameUtils	GetHeroPowerCardIdFromHero	System.String(System.String)
 M	Assembly-CSharp	GameUtils	GetStandardSets	TAG_CARD_SET[]()
 M	Assembly-CSharp	GameUtils	Instantiate	UnityEngine.Object(UnityEngine.GameObject,UnityEngine.GameObject,System.Boolean)
 M	Assembly-CSharp	GameUtils	InstantiateGameObject	UnityEngine.Object(System.String,UnityEngine.GameObject,System.Boolean)
@@ -1393,11 +1497,22 @@ M	Assembly-CSharp	GameUtils	IsCardCollectible	*
 M	Assembly-CSharp	GameUtils	IsCardGameplayEventActive	(EntityDef)
 M	Assembly-CSharp	GameUtils	IsCardGameplayEventActive	(System.String)
 M	Assembly-CSharp	GameUtils	IsCardGameplayEventActive	*
+M	Assembly-CSharp	GameUtils	IsCardRotated	(EntityDef,System.DateTime)
+M	Assembly-CSharp	GameUtils	IsCardRotated	*
+M	Assembly-CSharp	GameUtils	IsCardValidForFormat	(PegasusShared.FormatType,EntityDef)
+M	Assembly-CSharp	GameUtils	IsCardValidForFormat	*
 M	Assembly-CSharp	GameUtils	IsFakePackOpeningEnabled	*
 M	Assembly-CSharp	GameUtils	IsGameTypeRanked	()
 M	Assembly-CSharp	GameUtils	IsLegacySet	System.Boolean(TAG_CARD_SET)
 M	Assembly-CSharp	GameUtils	IsMatchmadeGameType	System.Boolean(PegasusShared.GameType,System.Nullable`1<System.Int32>)
+M	Assembly-CSharp	GameUtils	IsSetRotated	(TAG_CARD_SET,System.DateTime)
+M	Assembly-CSharp	GameUtils	IsSetRotated	*
 M	Assembly-CSharp	GameUtils	IsSetRotated	System.Boolean(TAG_CARD_SET)
+M	Assembly-CSharp	GameUtils	IsStandardCard	(EntityDef)
+M	Assembly-CSharp	GameUtils	IsStandardCard	*
+M	Assembly-CSharp	GameUtils	IsWildCard	(EntityDef)
+M	Assembly-CSharp	GameUtils	IsWildCard	*
+M	Assembly-CSharp	GameUtils	IsWildCard	System.Boolean(EntityDef)
 M	Assembly-CSharp	GameUtils	ReplayTraditionalTutorial	*
 M	Assembly-CSharp	GameUtils	TranslateCardIdToDbId	System.Int32(System.String,System.Boolean)
 M	Assembly-CSharp	GameUtils	TranslateDbIdToCardId	System.String(System.Int32,System.Boolean)
@@ -1467,6 +1582,10 @@ M	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryDataModel	set_Sec
 M	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryDataModel	set_Stats	System.Void(Hearthstone.DataModels.AchievementStatsDataModel)
 M	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryListDataModel	get_Subcategories	Hearthstone.UI.DataModelList`1<Hearthstone.DataModels.AchievementSubcategoryDataModel>()
 M	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryListDataModel	set_Subcategories	System.Void(Hearthstone.UI.DataModelList`1<Hearthstone.DataModels.AchievementSubcategoryDataModel>)
+M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageDataModel	set_isUndergroundUnlocked	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageDataModel	set_rating	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageDataModel	set_undergroundRating	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel	set_rating	System.Void(System.String)
 M	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel	get_CardBackId	System.Int32()
 M	Assembly-CSharp	Hearthstone.DataModels.CardDataModel	get_CardId	System.String()
 M	Assembly-CSharp	Hearthstone.DataModels.EventDataModel	get_Payload	System.Object()
@@ -1616,6 +1735,7 @@ M	Assembly-CSharp	Hearthstone.UI.StateAction	get_TargetGameObject	UnityEngine.Ga
 M	Assembly-CSharp	Hearthstone.UI.StateAction	get_Type	Hearthstone.UI.StateAction+ActionType()
 M	Assembly-CSharp	Hearthstone.UI.UIContext	DismissPopup	System.Void(UnityEngine.GameObject)
 M	Assembly-CSharp	Hearthstone.UI.UIContext	GetRoot	Hearthstone.UI.UIContext()
+M	Assembly-CSharp	Hearthstone.UI.VisualController	get_HasPendingActions	System.Boolean()
 M	Assembly-CSharp	Hearthstone.UI.VisualController	get_Label	System.String()
 M	Assembly-CSharp	Hearthstone.UI.VisualController	get_RequestedState	System.String()
 M	Assembly-CSharp	Hearthstone.UI.VisualController	get_State	System.String()
@@ -1627,7 +1747,11 @@ M	Assembly-CSharp	Hearthstone.UI.Widget	RegisterReadyListenerDoOnce	System.Void(
 M	Assembly-CSharp	Hearthstone.UI.Widget	RemoveReadyListener	System.Void(System.Action`1<System.Object>)
 M	Assembly-CSharp	Hearthstone.UI.Widget	Show	System.Void()
 M	Assembly-CSharp	Hearthstone.UI.Widget	TriggerEvent	System.Boolean(System.String,Hearthstone.UI.TriggerEventParameters)
+M	Assembly-CSharp	Hearthstone.UI.Widget	get_InitState	Hearthstone.UI.Widget+InitializationState()
+M	Assembly-CSharp	Hearthstone.UI.Widget	get_IsActive	System.Boolean()
+M	Assembly-CSharp	Hearthstone.UI.Widget	get_IsChangingStates	System.Boolean()
 M	Assembly-CSharp	Hearthstone.UI.Widget	get_IsInitialized	System.Boolean()
+M	Assembly-CSharp	Hearthstone.UI.WidgetBehavior	get_IsChangingStates	System.Boolean()
 M	Assembly-CSharp	Hearthstone.UI.WidgetBehavior	get_Owner	Hearthstone.UI.WidgetTemplate()
 M	Assembly-CSharp	Hearthstone.UI.WidgetBehaviorState	get_Actions	System.Collections.Generic.IEnumerable`1<Hearthstone.UI.StateAction>()
 M	Assembly-CSharp	Hearthstone.UI.WidgetBehaviorState	get_Name	System.String()
@@ -1869,6 +1993,8 @@ M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ArenaCardDenylist	System.Void(Sy
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ConstructedCardDenylist	System.Void(System.Collections.Generic.List`1<System.Int32>)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_ContinuousQuickOpenEnabled	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_DuelsCardDenylist	System.Void(System.Collections.Generic.List`1<System.Int32>)
+M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableArenaPhaseMessageFTUXTracking	System.Void(System.Boolean)
+M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableArenaPhaseMessages	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_EnableUpgradeToGolden	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_MassCatchupPackOpeningEnabled	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures	set_MassPackOpeningEnabled	System.Void(System.Boolean)
@@ -1889,7 +2015,9 @@ M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheCollection	set_Crafting	System.
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheCollection	set_DeckReordering	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheCollection	set_Manager	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheCollection	set_MultipleFavoriteCardBacks	System.Void(System.Boolean)
+M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	get_Forge	System.Boolean()
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	set_Casual	System.Void(System.Boolean)
+M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	set_Forge	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	set_RankedStandard	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	set_RankedWild	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+NetCacheFeatures+CacheGames	set_Tournament	System.Void(System.Boolean)
@@ -1925,6 +2053,7 @@ M	Assembly-CSharp	NetCache+PetVariantInfo	set_IsBgFavorite	System.Void(System.Bo
 M	Assembly-CSharp	NetCache+PetVariantInfo	set_IsHsFavorite	System.Void(System.Boolean)
 M	Assembly-CSharp	NetCache+PetVariantInfo	set_PetVariantId	System.Void(System.Int32)
 M	Assembly-CSharp	Network	AckCardSeenBefore	*
+M	Assembly-CSharp	Network	AckDraftRewards	*
 M	Assembly-CSharp	Network	AckNotice	*
 M	Assembly-CSharp	Network	CancelBlizzardPurchase	*
 M	Assembly-CSharp	Network	Concede	*
@@ -1932,25 +2061,45 @@ M	Assembly-CSharp	Network	ConfirmPurchase	*
 M	Assembly-CSharp	Network	CraftingTransaction	*
 M	Assembly-CSharp	Network	DeleteDeck	*
 M	Assembly-CSharp	Network	DisconnectFromGameServer	*
+M	Assembly-CSharp	Network	DraftBegin	*
+M	Assembly-CSharp	Network	DraftRequestDisablePremiums	*
+M	Assembly-CSharp	Network	DraftRetire	*
+M	Assembly-CSharp	Network	FakeHandleType	System.Boolean(System.Int32)
 M	Assembly-CSharp	Network	FlushVirtualCurrencyPending	*
 M	Assembly-CSharp	Network	Get	Network()
+M	Assembly-CSharp	Network	GetArenaRatingInfoResponse	*
+M	Assembly-CSharp	Network	GetArenaSessionResponse	*
+M	Assembly-CSharp	Network	GetBeginDraft	*
+M	Assembly-CSharp	Network	GetDraftChoicesAndContents	*
+M	Assembly-CSharp	Network	GetDraftChosen	*
+M	Assembly-CSharp	Network	GetDraftError	*
+M	Assembly-CSharp	Network	GetDraftRemovePremiumsResponse	*
 M	Assembly-CSharp	Network	GetGameState	*
 M	Assembly-CSharp	Network	GetMassDisenchantResponse	*
+M	Assembly-CSharp	Network	GetRetiredDraft	*
+M	Assembly-CSharp	Network	GetRewardsAckDraftID	*
+M	Assembly-CSharp	Network	GetSaveArenaDeckResponse	*
 M	Assembly-CSharp	Network	IsLoggedIn	*
 M	Assembly-CSharp	Network	IsLoggedIn	System.Boolean()
+M	Assembly-CSharp	Network	MakeDraftChoice	*
 M	Assembly-CSharp	Network	MassDisenchant	*
 M	Assembly-CSharp	Network	MercenariesCollectionRequest	*
 M	Assembly-CSharp	Network	MercenariesMythicTreasureScalarsRequest	*
 M	Assembly-CSharp	Network	MercenariesPlayerInfoRequest	*
 M	Assembly-CSharp	Network	MercenariesTeamListRequest	*
+M	Assembly-CSharp	Network	RedraftBegin	*
 M	Assembly-CSharp	Network	RenameDeck	*
 M	Assembly-CSharp	Network	ReportBlizzardCheckoutStatus	*
 M	Assembly-CSharp	Network	RequestAccountLicensesUpdate	*
+M	Assembly-CSharp	Network	RequestArenaRatingInfo	*
 M	Assembly-CSharp	Network	RequestDeckContents	*
+M	Assembly-CSharp	Network	RequestDraftChoicesAndContents	*
 M	Assembly-CSharp	Network	RequestLuckyDrawBoxState	*
 M	Assembly-CSharp	Network	RequestLuckyDrawBoxStateInGracePeriod	*
 M	Assembly-CSharp	Network	RequestNetCacheObject	*
 M	Assembly-CSharp	Network	RequestNetCacheObjectList	*
+M	Assembly-CSharp	Network	SaveArenaDeck	*
+M	Assembly-CSharp	Network	SendArenaSessionRequest	*
 M	Assembly-CSharp	Network	SendChoices	*
 M	Assembly-CSharp	Network	SendDeckData	*
 M	Assembly-CSharp	Network	SendEmote	*
@@ -1972,6 +2121,13 @@ M	Assembly-CSharp	Network	SetShouldBeConnectedToAurora	System.Void(System.Boolea
 M	Assembly-CSharp	Network	ShouldBeConnectedToAurora	*
 M	Assembly-CSharp	Network	ValidateAchieve	*
 M	Assembly-CSharp	Network	get_QueueDispatcher	Networking.IDispatcher()
+M	Assembly-CSharp	Network+BeginDraft	get_Heroes	System.Collections.Generic.List`1<NetCache+CardDefinition>()
+M	Assembly-CSharp	Network+BeginDraft	set_DeckID	System.Void(System.Int64)
+M	Assembly-CSharp	Network+BeginDraft	set_MaxSlot	System.Void(System.Int32)
+M	Assembly-CSharp	Network+BeginDraft	set_Session	System.Void(PegasusUtil.ArenaSession)
+M	Assembly-CSharp	Network+BeginDraft	set_SlotType	System.Void(PegasusShared.DraftSlotType)
+M	Assembly-CSharp	Network+BeginDraft	set_UniqueSlotTypesForDraft	System.Void(System.Collections.Generic.List`1<PegasusShared.DraftSlotType>)
+M	Assembly-CSharp	Network+BeginDraft	set_Wins	System.Void(System.Int32)
 M	Assembly-CSharp	Network+Bundle	get_GoldCost	System.Nullable`1<Network+Bundle+CostInfo>()
 M	Assembly-CSharp	Network+Bundle	get_PMTProductID	System.Nullable`1<System.Int64>()
 M	Assembly-CSharp	Network+Bundle	set_Attributes	System.Void(Shared.Scripts.Game.Shop.Product.AttributeSet)
@@ -1990,6 +2146,31 @@ M	Assembly-CSharp	Network+CardSaleResult	set_Action	System.Void(Network+CardSale
 M	Assembly-CSharp	Network+CardSaleResult	set_AssetID	System.Void(System.Int32)
 M	Assembly-CSharp	Network+CardSaleResult	set_AssetName	System.Void(System.String)
 M	Assembly-CSharp	Network+CardSaleResult	set_Premium	System.Void(TAG_PREMIUM)
+M	Assembly-CSharp	Network+CardUserData	set_Count	System.Void(System.Int32)
+M	Assembly-CSharp	Network+CardUserData	set_DbId	System.Void(System.Int32)
+M	Assembly-CSharp	Network+CardUserData	set_Premium	System.Void(TAG_PREMIUM)
+M	Assembly-CSharp	Network+DeckContents	get_Cards	System.Collections.Generic.List`1<Network+CardUserData>()
+M	Assembly-CSharp	Network+DeckContents	set_Deck	System.Void(System.Int64)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	get_Choices	System.Collections.Generic.List`1<Network+CardChoice>()
+M	Assembly-CSharp	Network+DraftChoicesAndContents	get_DeckInfo	Network+DeckContents()
+M	Assembly-CSharp	Network+DraftChoicesAndContents	get_Hero	NetCache+CardDefinition()
+M	Assembly-CSharp	Network+DraftChoicesAndContents	get_HeroPower	NetCache+CardDefinition()
+M	Assembly-CSharp	Network+DraftChoicesAndContents	get_UniqueSlotTypesForDraft	System.Collections.Generic.List`1<PegasusShared.DraftSlotType>()
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_Chest	System.Void(Network+RewardChest)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_Losses	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_MaxLosses	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_MaxSlot	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_MaxWins	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_RedraftSlot	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_Session	System.Void(PegasusUtil.ArenaSession)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_Slot	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_SlotType	System.Void(PegasusShared.DraftSlotType)
+M	Assembly-CSharp	Network+DraftChoicesAndContents	set_Wins	System.Void(System.Int32)
+M	Assembly-CSharp	Network+DraftChosen	set_ChosenCard	System.Void(Network+CardChoice)
+M	Assembly-CSharp	Network+DraftChosen	set_NextChoices	System.Void(System.Collections.Generic.List`1<Network+CardChoice>)
+M	Assembly-CSharp	Network+DraftChosen	set_SlotType	System.Void(PegasusShared.DraftSlotType)
+M	Assembly-CSharp	Network+DraftRetired	set_Chest	System.Void(Network+RewardChest)
+M	Assembly-CSharp	Network+DraftRetired	set_Deck	System.Void(System.Int64)
 M	Assembly-CSharp	Network+EntityChoices	get_ChoiceType	CHOICE_TYPE()
 M	Assembly-CSharp	Network+EntityChoices	get_CountMin	System.Int32()
 M	Assembly-CSharp	Network+EntityChoices	get_Entities	System.Collections.Generic.List`1<System.Int32>()
@@ -2006,6 +2187,7 @@ M	Assembly-CSharp	Network+HistBlockStart	get_TriggerKeyword	System.Int32()
 M	Assembly-CSharp	Network+MassDisenchantResponse	get_Amount	System.Int32()
 M	Assembly-CSharp	Network+MassDisenchantResponse	set_Amount	System.Void(System.Int32)
 M	Assembly-CSharp	Network+Options	get_ID	System.Int32()
+M	Assembly-CSharp	Network+RewardChest	get_Rewards	System.Collections.Generic.List`1<RewardData>()
 M	Assembly-CSharp	Network+ShopSection	set_Attributes	System.Void(Shared.Scripts.Game.Shop.Product.AttributeSet)
 M	Assembly-CSharp	Network+ShopSection	set_InternalName	System.Void(System.String)
 M	Assembly-CSharp	Network+ShopSection	set_Label	System.Void(DbfLocValue)
@@ -2038,6 +2220,7 @@ M	Assembly-CSharp	Options	GetFloatImpl	*
 M	Assembly-CSharp	Options	GetFormatType	PegasusShared.FormatType()
 M	Assembly-CSharp	Options	GetInt	System.Int32(Option)
 M	Assembly-CSharp	Options	HasOption	System.Boolean(Option)
+M	Assembly-CSharp	Options	SetBool	System.Void(Option,System.Boolean)
 M	Assembly-CSharp	Options	SetFormatType	(PegasusShared.FormatType)
 M	Assembly-CSharp	Options	SetFormatType	System.Void(PegasusShared.FormatType)
 M	Assembly-CSharp	Options	SetInRankedPlayMode	(System.Boolean)
@@ -2126,6 +2309,9 @@ M	Assembly-CSharp	PetsManager	GetRewardPresenter	Hearthstone.Progression.RewardP
 M	Assembly-CSharp	PetsManager	ShowNextReward	System.Boolean(System.Action)
 M	Assembly-CSharp	PlatformDependentValue`1	op_Implicit	!0(PlatformDependentValue`1<!0>)
 M	Assembly-CSharp	PlayButton	Disable	System.Void(System.Boolean)
+M	Assembly-CSharp	PlayButton	SetSecondaryText	System.Void(System.String)
+M	Assembly-CSharp	PlayButton	SetTertiaryText	System.Void(System.String)
+M	Assembly-CSharp	PlayButton	SetText	System.Void(System.String)
 M	Assembly-CSharp	Player	GetPlayerId	System.Int32()
 M	Assembly-CSharp	Player	GetRank	()
 M	Assembly-CSharp	Player	GetSide	Player+Side()
@@ -2157,10 +2343,17 @@ M	Assembly-CSharp	PowerTaskList	IsComplete	System.Boolean()
 M	Assembly-CSharp	PowerTaskList	IsStartOfBlock	System.Boolean()
 M	Assembly-CSharp	PowerTaskList	OnTaskCompleted	*
 M	Assembly-CSharp	PrefabInstanceLoadTracker	InstantiatePrefab	*
+M	Assembly-CSharp	PresenceMgr	SetPrevStatus	*
+M	Assembly-CSharp	PresenceMgr	SetPrevStatus	System.Boolean()
+M	Assembly-CSharp	PresenceMgr	SetStatus	*
+M	Assembly-CSharp	PresenceMgr	SetStatus	System.Boolean(System.Enum[])
+M	Assembly-CSharp	PresenceMgr	get_CurrentStatus	Assets.Global+PresenceStatus()
 M	Assembly-CSharp	ProductCatalog	Job_PopulateData	*
 M	Assembly-CSharp	ProductCatalog	MarkProductDataAsDirty	System.Void()
 M	Assembly-CSharp	ProductCatalog	UpdateProductStatus	*
 M	Assembly-CSharp	ProductCatalog	get_Products	System.Collections.Generic.List`1<Hearthstone.DataModels.ProductDataModel>()
+M	Assembly-CSharp	ProductExtensions	GetMaxBulkPurchaseCount	*
+M	Assembly-CSharp	ProductExtensions	ProductSupportsQuantitySelect	*
 M	Assembly-CSharp	ProductPage	GetSelectedVariant	Hearthstone.DataModels.ProductDataModel()
 M	Assembly-CSharp	ProductPage	get_IsOpen	System.Boolean()
 M	Assembly-CSharp	ProductPageContainer	GetCurrentProductPage	ProductPage()
@@ -2227,9 +2420,11 @@ M	Assembly-CSharp	SPJEntryButton	ShowButton	*
 M	Assembly-CSharp	SPJEntryButton	ShowSpj	*
 M	Assembly-CSharp	SceneMgr	Get	SceneMgr()
 M	Assembly-CSharp	SceneMgr	GetMode	SceneMgr+Mode()
+M	Assembly-CSharp	SceneMgr	GetNextMode	SceneMgr+Mode()
 M	Assembly-CSharp	SceneMgr	GetPrevMode	SceneMgr+Mode()
 M	Assembly-CSharp	SceneMgr	IsInitialized	System.Boolean()
 M	Assembly-CSharp	SceneMgr	IsModeRequested	System.Boolean(SceneMgr+Mode)
+M	Assembly-CSharp	SceneMgr	IsSceneLoaded	System.Boolean()
 M	Assembly-CSharp	SceneMgr	IsTransitionNowOrPending	System.Boolean()
 M	Assembly-CSharp	SceneMgr	IsTransitioning	System.Boolean()
 M	Assembly-CSharp	SceneMgr	NotifySceneLoaded	System.Void()
@@ -2357,6 +2552,7 @@ M	Assembly-CSharp	SubSpellController	GetSubSpellInstanceForTasklist	(PowerTaskLi
 M	Assembly-CSharp	SubSpellController	OnSubSpellFinished	(Spell,System.Object)
 M	Assembly-CSharp	SubSpellController	OnSubSpellLoadAttempted	*
 M	Assembly-CSharp	SubSpellController	OnSubSpellStateFinished	*
+M	Assembly-CSharp	TavernTicketDisplay	OpenTavernTicketProductPage	*
 M	Assembly-CSharp	TextUtils	GetDefaultTextVariant	System.String(System.String)
 M	Assembly-CSharp	TextUtils	TransformCardText	System.String(System.String,TextUtils+TransformCardTextParams)
 M	Assembly-CSharp	ThinkEmoteManager	Update	()
@@ -2503,6 +2699,7 @@ M	UnityEngine.CoreModule	UnityEngine.GameObject	AddComponent	!!0()
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponent	!!0()
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponent	UnityEngine.Component(System.Type)
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponentInChildren	!!0()
+M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponentInChildren	!!0(System.Boolean)
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponentInParent	!!0()
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponents	!!0[]()
 M	UnityEngine.CoreModule	UnityEngine.GameObject	GetComponentsInChildren	!!0[]()
@@ -2874,6 +3071,7 @@ M	blizzard.bgsclient	PegasusGame.UserUI	get_PlayerId	System.Int32()
 M	blizzard.bgsclient	PegasusGame.UserUI	set_Emote	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusGame.UserUI	set_MouseInfo	System.Void(PegasusGame.MouseInfo)
 M	blizzard.bgsclient	PegasusGame.UserUI	set_PlayerId	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusShared.ArenaSeasonSpec	set_GameContentSeason	System.Void(PegasusShared.GameContentSeasonSpec)
 M	blizzard.bgsclient	PegasusShared.BnetId	set_Hi	System.Void(System.UInt64)
 M	blizzard.bgsclient	PegasusShared.BnetId	set_Lo	System.Void(System.UInt64)
 M	blizzard.bgsclient	PegasusShared.CardDef	get_Asset	System.Int32()
@@ -2893,6 +3091,8 @@ M	blizzard.bgsclient	PegasusShared.DeckCardData	get_Def	PegasusShared.CardDef()
 M	blizzard.bgsclient	PegasusShared.DeckCardData	get_Qty	System.Int32()
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Def	System.Void(PegasusShared.CardDef)
 M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Qty	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	set_EndSecondsFromNow	System.Void(System.UInt64)
+M	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	set_SeasonId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Tuple	System.Void(System.Collections.Generic.List`1<PegasusShared.GameSaveKey>)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Value	System.Void(PegasusShared.GameSaveDataValue)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataValue	set_IntValue	System.Void(System.Collections.Generic.List`1<System.Int64>)
@@ -2900,6 +3100,39 @@ M	blizzard.bgsclient	PegasusShared.GameSaveKey	set_Id	System.Void(System.Int64)
 M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_Def	PegasusShared.CardDef()
 M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_LinkedCardDbId	System.Int32()
 M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_Qty	System.Int32()
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_NormalLosses	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_NormalMaxLosses	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_NormalMaxWins	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_NormalWins	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_UndergroundMaxLosses	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	set_UndergroundMaxWins	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRatingInfoResponse	set_PlayerInfo	System.Void(PegasusUtil.ArenaPlayerInfo)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencySlot	set_CurrencyType	System.Void(PegasusUtil.ArenaRewardCurrencyType)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencySlot	set_MaxAmount	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencySlot	set_MinAmount	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardLevel	get_Rewards	System.Collections.Generic.List`1<PegasusUtil.ArenaRewardSlot>()
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardLevel	set_Losses	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardLevel	set_Wins	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardSlot	get_CurrencyRewards	System.Collections.Generic.List`1<PegasusUtil.ArenaRewardCurrencySlot>()
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardSlot	get_SpecificBoosterRewards	System.Collections.Generic.List`1<PegasusUtil.ArenaRewardSpecificBoosterSlot>()
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardSpecificBoosterSlot	set_BoosterType	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardSpecificBoosterSlot	set_MaxBoosterCount	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaRewardSpecificBoosterSlot	set_MinBoosterCount	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo	get_NormalRewards	System.Collections.Generic.List`1<PegasusUtil.ArenaRewardLevel>()
+M	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo	set_CurrentSeasonDisplayId	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo	set_IsDualClass	System.Void(System.Boolean)
+M	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo	set_Season	System.Void(PegasusShared.ArenaSeasonSpec)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_Info	System.Void(PegasusUtil.ArenaSeasonInfo)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_IsActive	System.Void(System.Boolean)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_IsInRewards	System.Void(System.Boolean)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_IsUnderground	System.Void(System.Boolean)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_Losses	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_State	System.Void(PegasusShared.ArenaSessionState)
+M	blizzard.bgsclient	PegasusUtil.ArenaSession	set_Wins	System.Void(System.Int32)
+M	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse	set_CurrentSeason	System.Void(PegasusUtil.ArenaSeasonInfo)
+M	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse	set_ErrorCode	System.Void(PegasusShared.ErrorCode)
+M	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse	set_Session	System.Void(PegasusUtil.ArenaSession)
+M	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse	set_UndergroundSession	System.Void(PegasusUtil.ArenaSession)
 M	blizzard.bgsclient	PegasusUtil.CardBackModification	set_AssetCardBackId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.CardBackModifications	get_CardBackModifications_	System.Collections.Generic.List`1<PegasusUtil.CardBackModification>()
 M	blizzard.bgsclient	PegasusUtil.Collection	get_Stacks	System.Collections.Generic.List`1<PegasusShared.CardStack>()
@@ -2907,6 +3140,7 @@ M	blizzard.bgsclient	PegasusUtil.DeckContents	get_Cards	System.Collections.Gener
 M	blizzard.bgsclient	PegasusUtil.DeckContents	get_SideboardCards	System.Collections.Generic.List`1<PegasusShared.SideBoardCardData>()
 M	blizzard.bgsclient	PegasusUtil.DeckContents	set_DeckId	System.Void(System.Int64)
 M	blizzard.bgsclient	PegasusUtil.DeckContents	set_Success	System.Void(System.Boolean)
+M	blizzard.bgsclient	PegasusUtil.DraftError	set_ErrorCode_	System.Void(PegasusUtil.DraftError+ErrorCode)
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_BestStarLevel	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_FormatType	System.Void(PegasusShared.FormatType)
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_LeagueId	System.Void(System.Int32)
@@ -2919,6 +3153,7 @@ M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_Stars	System.Void(System.Int3
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_StarsPerWin	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.MedalInfoData	set_Streak	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusUtil.RewardTrackXpChange	get_RewardTrackType	System.Int32()
+M	blizzard.bgsclient	PegasusUtil.SaveArenaDeckResponse	set_Decks	System.Void(PegasusUtil.DeckContents)
 P	*	UberText	Alignment	*
 P	*	UberText	Height	*
 P	*	UberText	RenderOnObject	*
@@ -2950,9 +3185,11 @@ T	*	UnityEngine.AudioClip
 T	*	UnityEngine.AudioSource		
 T	*	iTween		
 T	Assembly-CSharp	AbsDeckPickerTrayDisplay		
+T	Assembly-CSharp	AchieveManager		
 T	Assembly-CSharp	AchievementCategoryDbfRecord		
 T	Assembly-CSharp	AchievementSubcategoryDbfRecord		
 T	Assembly-CSharp	Actor		
+T	Assembly-CSharp	AdjustBuyingAmount		
 T	Assembly-CSharp	AdventureConfig		
 T	Assembly-CSharp	AdventureDbId		
 T	Assembly-CSharp	AdventureDeckDbfRecord		
@@ -2974,6 +3211,10 @@ T	Assembly-CSharp	AnimationUtil
 T	Assembly-CSharp	AnimationUtil+DelOnShownWithPunch		
 T	Assembly-CSharp	ArcaneDustAmount		
 T	Assembly-CSharp	ArcaneDustRewardData		
+T	Assembly-CSharp	ArenaClientStateType		
+T	Assembly-CSharp	ArenaLandingPage		
+T	Assembly-CSharp	ArenaLandingPageManager		
+T	Assembly-CSharp	ArenaModeToggleButton		
 T	Assembly-CSharp	AssetLoader		
 T	Assembly-CSharp	Assets.AdventureData		
 T	Assembly-CSharp	Assets.AdventureData+Adventuresubscene		
@@ -2984,6 +3225,7 @@ T	Assembly-CSharp	Assets.CardHero+PortraitCurrency
 T	Assembly-CSharp	Assets.DeckTemplate		
 T	Assembly-CSharp	Assets.DeckTemplate+SourceType		
 T	Assembly-CSharp	Assets.Global		
+T	Assembly-CSharp	Assets.Global+PresenceStatus		
 T	Assembly-CSharp	Assets.Global+RewardTrackType		
 T	Assembly-CSharp	AttackSpellController		
 T	Assembly-CSharp	BannerManager		
@@ -2991,6 +3233,7 @@ T	Assembly-CSharp	BaseHeroSkinInfoManager
 T	Assembly-CSharp	BasePhoneDeckTray		
 T	Assembly-CSharp	BnetBar		
 T	Assembly-CSharp	BnetBarMenuButton		
+T	Assembly-CSharp	BnetPresenceMgr		
 T	Assembly-CSharp	BoardDbfRecord		
 T	Assembly-CSharp	BookPageManager		
 T	Assembly-CSharp	BookPageManager+DelOnPageTransitionComplete		
@@ -3106,6 +3349,9 @@ T	Assembly-CSharp	DialogManager
 T	Assembly-CSharp	DialogManager+DialogProcessCallback		
 T	Assembly-CSharp	DialogManager+DialogRequest		
 T	Assembly-CSharp	DisenchantButton		
+T	Assembly-CSharp	DraftDisplay		
+T	Assembly-CSharp	DraftManager		
+T	Assembly-CSharp	DraftScene		
 T	Assembly-CSharp	DropdownControl		
 T	Assembly-CSharp	EditableDeckTray		
 T	Assembly-CSharp	EmoteHandler		
@@ -3157,6 +3403,8 @@ T	Assembly-CSharp	Hearthstone.DataModels.AchievementSectionListDataModel
 T	Assembly-CSharp	Hearthstone.DataModels.AchievementStatsDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryListDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.CardDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.EventDataModel		
@@ -3220,6 +3468,7 @@ T	Assembly-CSharp	Hearthstone.UI.UIContext
 T	Assembly-CSharp	Hearthstone.UI.VisualController		
 T	Assembly-CSharp	Hearthstone.UI.WeakAssetReference		
 T	Assembly-CSharp	Hearthstone.UI.Widget		
+T	Assembly-CSharp	Hearthstone.UI.Widget+InitializationState		
 T	Assembly-CSharp	Hearthstone.UI.WidgetBehavior		
 T	Assembly-CSharp	Hearthstone.UI.WidgetBehaviorState		
 T	Assembly-CSharp	Hearthstone.UI.WidgetBehaviorStateCollection		
@@ -3288,17 +3537,25 @@ T	Assembly-CSharp	NetCache+NetCacheProfileProgress
 T	Assembly-CSharp	NetCache+PetInfo		
 T	Assembly-CSharp	NetCache+PetVariantInfo		
 T	Assembly-CSharp	Network		
+T	Assembly-CSharp	Network+BeginDraft		
 T	Assembly-CSharp	Network+Bundle		
 T	Assembly-CSharp	Network+Bundle+CostInfo		
 T	Assembly-CSharp	Network+BundleItem		
+T	Assembly-CSharp	Network+CardChoice		
 T	Assembly-CSharp	Network+CardSaleResult		
 T	Assembly-CSharp	Network+CardSaleResult+SaleResult		
+T	Assembly-CSharp	Network+CardUserData		
+T	Assembly-CSharp	Network+DeckContents		
 T	Assembly-CSharp	Network+DisconnectReason		
+T	Assembly-CSharp	Network+DraftChoicesAndContents		
+T	Assembly-CSharp	Network+DraftChosen		
+T	Assembly-CSharp	Network+DraftRetired		
 T	Assembly-CSharp	Network+EntityChoices		
 T	Assembly-CSharp	Network+GameSetup		
 T	Assembly-CSharp	Network+HistBlockStart		
 T	Assembly-CSharp	Network+MassDisenchantResponse		
 T	Assembly-CSharp	Network+Options		
+T	Assembly-CSharp	Network+RewardChest		
 T	Assembly-CSharp	Network+ShopSection		
 T	Assembly-CSharp	Network+UserUI		
 T	Assembly-CSharp	Network+UserUI+EmoteInfo		
@@ -3344,6 +3601,7 @@ T	Assembly-CSharp	PowerSpellController
 T	Assembly-CSharp	PowerTask		
 T	Assembly-CSharp	PowerTaskList		
 T	Assembly-CSharp	PrefabInstanceLoadTracker		
+T	Assembly-CSharp	PresenceMgr		
 T	Assembly-CSharp	ProductAvailability		
 T	Assembly-CSharp	ProductCatalog		
 T	Assembly-CSharp	ProductPage		
@@ -3434,6 +3692,7 @@ T	Assembly-CSharp	TAG_CLASS
 T	Assembly-CSharp	TAG_PREMIUM		
 T	Assembly-CSharp	TAG_RARITY		
 T	Assembly-CSharp	TAG_ZONE		
+T	Assembly-CSharp	TavernTicketDisplay		
 T	Assembly-CSharp	TextUtils		
 T	Assembly-CSharp	TextUtils+TransformCardTextParams		
 T	Assembly-CSharp	ThinkEmoteManager		
@@ -3591,6 +3850,8 @@ T	blizzard.bgsclient	PegasusGame.Tag
 T	blizzard.bgsclient	PegasusGame.TargetOption		
 T	blizzard.bgsclient	PegasusGame.TurnTimer		
 T	blizzard.bgsclient	PegasusGame.UserUI		
+T	blizzard.bgsclient	PegasusShared.ArenaSeasonSpec		
+T	blizzard.bgsclient	PegasusShared.ArenaSessionState		
 T	blizzard.bgsclient	PegasusShared.BattlePayProvider		
 T	blizzard.bgsclient	PegasusShared.BnetId		
 T	blizzard.bgsclient	PegasusShared.CardDef		
@@ -3599,17 +3860,33 @@ T	blizzard.bgsclient	PegasusShared.Date
 T	blizzard.bgsclient	PegasusShared.DeckCardData		
 T	blizzard.bgsclient	PegasusShared.DeckSourceType		
 T	blizzard.bgsclient	PegasusShared.DeckType		
+T	blizzard.bgsclient	PegasusShared.DraftSlotType		
+T	blizzard.bgsclient	PegasusShared.ErrorCode		
 T	blizzard.bgsclient	PegasusShared.FormatType		
+T	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec		
 T	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate		
 T	blizzard.bgsclient	PegasusShared.GameSaveDataValue		
 T	blizzard.bgsclient	PegasusShared.GameSaveKey		
 T	blizzard.bgsclient	PegasusShared.GameType		
 T	blizzard.bgsclient	PegasusShared.RuneType		
 T	blizzard.bgsclient	PegasusShared.SideBoardCardData		
+T	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo		
+T	blizzard.bgsclient	PegasusUtil.ArenaRatingInfoResponse		
+T	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencySlot		
+T	blizzard.bgsclient	PegasusUtil.ArenaRewardCurrencyType		
+T	blizzard.bgsclient	PegasusUtil.ArenaRewardLevel		
+T	blizzard.bgsclient	PegasusUtil.ArenaRewardSlot		
+T	blizzard.bgsclient	PegasusUtil.ArenaRewardSpecificBoosterSlot		
+T	blizzard.bgsclient	PegasusUtil.ArenaSeasonInfo		
+T	blizzard.bgsclient	PegasusUtil.ArenaSession		
+T	blizzard.bgsclient	PegasusUtil.ArenaSessionResponse		
 T	blizzard.bgsclient	PegasusUtil.CardBackModification		
 T	blizzard.bgsclient	PegasusUtil.CardBackModifications		
 T	blizzard.bgsclient	PegasusUtil.Collection		
 T	blizzard.bgsclient	PegasusUtil.DeckContents		
+T	blizzard.bgsclient	PegasusUtil.DraftError		
+T	blizzard.bgsclient	PegasusUtil.DraftError+ErrorCode		
 T	blizzard.bgsclient	PegasusUtil.MedalInfoData		
 T	blizzard.bgsclient	PegasusUtil.ProductType		
 T	blizzard.bgsclient	PegasusUtil.RewardTrackXpChange		
+T	blizzard.bgsclient	PegasusUtil.SaveArenaDeckResponse		

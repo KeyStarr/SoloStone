@@ -278,6 +278,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
         }
 
         private static List<int> RunesInPlay(Game game) =>
+            // untouchable-ok: names every Rune entity for the spell effect's aim, never a target or a count of the rules
             game.Player1.BoardZone.Concat(game.Player2.BoardZone).Where(m => m.Card.Id == RuneMinion).Select(m => m.Id).ToList();
 
         internal static int SpellEffect(string spell) =>

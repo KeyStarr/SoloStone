@@ -128,7 +128,7 @@ namespace SabberStoneCore.Model.Zones
 					continue;
 
 				// don't add cards that have already reached max occurence in deck.
-				if (this.Count(c => c.Card == card) >= card.MaxAllowedInDeck)
+				if (this.Count(c => c.Card.IsSameCardAs(card)) >= card.MaxAllowedInDeck)
 					continue;
 
 				Controller.DeckCards.Add(card);

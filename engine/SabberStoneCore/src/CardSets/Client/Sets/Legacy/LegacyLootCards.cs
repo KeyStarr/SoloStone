@@ -49,8 +49,8 @@ namespace SabberStoneCore.CardSets.Client.Sets.Legacy
                     {
                         game.OnRandomHappened(true);
                         IPlayable pick = secrets[game.Random.Next(secrets.Count)];
-                        secrets.RemoveAll(p => p.Card.AssetId == pick.Card.AssetId);
-                        if (controller.SecretZone.Any(p => p.Card.AssetId == pick.Card.AssetId)) continue;
+                        secrets.RemoveAll(p => p.Card.IsSameCardAs(pick.Card));
+                        if (controller.SecretZone.Any(p => p.Card.IsSameCardAs(pick.Card))) continue;
                         controller.DeckZone.Remove(pick);
                         pick.Power.Trigger?.Activate(pick);
                         controller.SecretZone.Add((Spell)pick);

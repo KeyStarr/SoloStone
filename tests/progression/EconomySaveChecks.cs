@@ -35,7 +35,7 @@ internal static class EconomySaveChecks
             int gold = profile.Gold; long dust = profile.DustBalance;
             settled = profile.Settle(pending.Id, "Won", 8, false);
             var roll = LocalEconomy.RewardV6("Won", 8, false, LocalEconomy.RewardRollSeed(pending.Id, pending.Seed));
-            Check(settled.RewardVersion == 6 && settled.GrindTier == GrindTiers.Relaxed6xId
+            Check(settled.RewardVersion == LocalEconomy.RollRewardVersion && settled.GrindTier == GrindTiers.Relaxed6xId
                 && settled.Gold == 6 * roll.Gold && settled.DustReward == 6 * roll.Dust
                 && settled.Gold > 0 && settled.DustReward > 0, "V6 both-currency win under new tier");
             Check(profile.Gold == gold + settled.Gold && profile.DustBalance == dust + settled.DustReward,

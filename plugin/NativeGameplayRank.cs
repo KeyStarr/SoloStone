@@ -23,8 +23,8 @@ internal static class NativeGameplayRank
     {
         profile = LocalLadder.Profile;
         pending = profile?.Pending;
-        // #37: a Casual match shows no rank in game (the native unranked GT_VS_AI presentation applies).
-        if (pending != null && CasualRules.IsCasual(pending.Mode)) return false;
+        // Casual and Arena keep the native unranked GT_VS_AI presentation: never a rank in an Arena match.
+        if (pending != null ? CasualRules.IsCasual(pending.Mode) || ArenaRules.IsArena(pending.Mode) : NativeArena.MatchActive) return false;
         return NativeUIProbe.OwnsGameplayRank(LocalLadder.Screen, LocalLadder.MatchId, pending?.Id,
             ClientBridge.DiagnosticMatchId);
     }
@@ -54,7 +54,8 @@ internal static class NativeGameplayRank
             }
             else if (__instance.GetSide() == Player.Side.OPPOSING && pending.NpcRating.HasValue)
             {
-                rating = pending.NpcRating.Value;
+                // Easy/Medium NPCs are shown at the player's rank (NpcDifficultyLevel.DisplayRating); Hard shows the real rating.
+                rating = NpcPetSeats.ShownRating(pending, pending.NpcRating.Value, profile.Ladder.StarIndex, profile.Ladder.Rating);
                 position = NativeUIProbe.ProjectOpponentLadder(rating);
                 wins = 0;
                 arrivedByWin = false;

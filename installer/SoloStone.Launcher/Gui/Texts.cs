@@ -40,6 +40,9 @@ namespace SoloStone
         public const string OpenSoloStone = "Open SoloStone";
         public const string Play = "Play";
         public const string Skip = "Skip update";
+        public const string UpdateNow = "Update now";
+        public const string Later = "Later";
+        public const string SkipVersion = "Skip this version";
         public const string InstallUpdate = "Install this update";
         public const string RollBack = "Roll back";
         public const string RestoreBackup = "Restore backup";

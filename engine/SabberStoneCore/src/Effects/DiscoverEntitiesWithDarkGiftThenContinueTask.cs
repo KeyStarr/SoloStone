@@ -33,7 +33,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
             var offers = _selector(controller);
             if (offers == null || offers.Any(p => !(p is Minion) || p.Game != game ||
                     p.Controller != controller || p.Zone != controller.DeckZone) ||
-                offers.Select(p => p.Card.Id).Distinct(StringComparer.Ordinal).Count() != offers.Count)
+                offers.Select(p => p.Card.Identity).Distinct().Count() != offers.Count)
                 throw new ArgumentException("Dark Gift deck offers require own-deck minions with distinct card IDs.");
             stack.Playables?.Clear();
             new EffectContext(game, controller.Id, source.Id, target?.Id, stack)

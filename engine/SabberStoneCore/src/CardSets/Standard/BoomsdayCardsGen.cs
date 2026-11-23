@@ -3193,8 +3193,8 @@ namespace SabberStoneCore.CardSets.Standard
 					Dictionary<int, Spell> secrets = new Dictionary<int, Spell>();
 					ReadOnlySpan<IPlayable> deck = source.Controller.DeckZone.GetSpan();
 					for (int i = 0; i < deck.Length; i++)
-						if (deck[i] is Spell s && s.IsSecret && !secrets.ContainsKey(s.Card.AssetId))
-							secrets.Add(s.Card.AssetId, s);
+						if (deck[i] is Spell s && s.IsSecret && !secrets.ContainsKey(s.Card.Identity)) // one per card, a reprint is the same card (#225)
+							secrets.Add(s.Card.Identity, s);
 					foreach (KeyValuePair<int, Spell> item in secrets)
 						Generic.DrawBlock.Invoke(source.Controller, item.Value);
 					return 0;

@@ -15,9 +15,11 @@
     <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
     <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/arena/ArenaMatchmaker.cs" LinkBase="arena" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
   </ItemGroup>
-<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" /></ItemGroup>
 </Project>

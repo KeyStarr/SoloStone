@@ -104,6 +104,13 @@ static partial class Program
         Refuses(()=>client.FetchText("absent",100,none),"404 refuses");
         var cancelled=new CancellationTokenSource(); cancelled.Cancel();
         Throws<OperationCanceledException>(()=>client.FetchText("f.json",100,cancelled.Token),"cancel respected");
+        using(var duringRequest=new CancellationTokenSource()) {
+            http.Routes[RawBase+"cancel.json"]=()=>{
+                duringRequest.Cancel();
+                throw new System.Net.WebException("request aborted",System.Net.WebExceptionStatus.RequestCanceled);
+            };
+            Throws<OperationCanceledException>(()=>client.FetchText("cancel.json",100,duringRequest.Token),"aborting a live request reports cancellation");
+        }
         // Download.
         string folder=Path.Combine(temp,"dl"); Directory.CreateDirectory(folder); string zip=Path.Combine(folder,"asset.zip");
         byte[] asset=Utf8("zip bytes");
@@ -129,6 +136,9 @@ static partial class Program
         Check(Settings.Load(root).CheckForUpdates,"update checks default on");
         Settings.Save(root,new Settings { CheckForUpdates=false }); Check(!Settings.Load(root).CheckForUpdates,"off switch persists");
         Settings.Save(root,new Settings { CheckForUpdates=true }); Check(Settings.Load(root).CheckForUpdates,"on switch persists");
+        Settings.SaveSkipped(root,"0.3.0"); Check(Settings.Load(root).SkippedVersion=="0.3.0" && Settings.Load(root).CheckForUpdates,"a skipped version persists");
+        Settings.SaveChecks(root,false); Check(Settings.Load(root).SkippedVersion=="0.3.0" && !Settings.Load(root).CheckForUpdates,"the switch keeps the skipped version");
+        Settings.SaveChecks(root,true);
         File.WriteAllText(Path.Combine(root,"state","settings.json"),"garbage"); Check(!Settings.Load(root).CheckForUpdates,"damaged settings never turn checks on");
     }
 }

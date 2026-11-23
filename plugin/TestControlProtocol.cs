@@ -226,7 +226,8 @@ internal sealed class ControlRequest
     internal readonly DateTime ReceivedUtc = DateTime.UtcNow;
     internal bool Mutation => Command == "handover-continue" || Command == "cancel-target" || Command == "recover-choice" || Command == "act" || Command == "end-turn" || Command == "mulligan-confirm" || Command == "concede" || Command == "choose" || Command == "press" || Command == "shop-purchase"
         || Command == "squelch" || Command == "unsquelch" || Command == "emote" || Command == "npc-emote" || Command == "npc-concede" || Command == "human-defeat" || Command == "premium-unlock-prepare" || Command == "ui-hover" || Command == "ui-unhover" || Command == "ui-escape" || Command == "choice-click" || Command == "entity-drag" || Command == "ui-drag" || Command == "ui-scroll" || Command == "open-packs" || Command == "achievement-prime" || Command == "turn-timer-debug" || Command == "spell-stall-arm"
-        || Command == "craft-token-grant" || Command == "collection-jump" || Command == "clipboard-set" || Command == "collection-paste-check";
+        || Command == "craft-token-grant" || Command == "collection-jump" || Command == "gold-grant" || Command == "shop-quantity-type"
+        || Command == "clipboard-set" || Command == "collection-paste-check";
     // Human emotes the native emote menu offers (EmoteType names); test-control plays them through the native option.
     internal static readonly string[] HumanEmotes = { "GREETINGS", "WELL_PLAYED", "THANKS", "WOW", "OOPS", "THREATEN" };
     // LocalTokenRarity names, accepted by craft-token-grant.
@@ -255,6 +256,10 @@ internal sealed class ControlRequest
                 if (Array.IndexOf(CraftTokenRarities, Text("rarity")) < 0) throw new FormatException("Invalid token rarity");
                 Integer("count", 1, 4);
                 break;
+            // Lab builds only: add gold to the disposable save (shop live checks: multi-pack buy).
+            case "gold-grant": extras = "amount"; Integer("amount", 1, 100000); break;
+            // Lab builds only: type TEXT and Enter into the shop's open type-a-number box (StoreQuantityPrompt).
+            case "shop-quantity-type": extras = "text"; if (!Regex.IsMatch(Text("text"), @"\A-?[0-9]{1,7}\z")) throw new FormatException("Invalid quantity text"); break;
             // Native Collection page flip to one card (CollectionPageManager.JumpToPageWithCard); no click.
             case "collection-jump": extras = "cardId"; if (UiRules.CollectionCardId(Text("cardId")) == null) throw new FormatException("Invalid card ID"); break;
             // Deck-code import live check (#140): put text on the client's clipboard, then drive the Collection's own paste entry.
@@ -308,6 +313,8 @@ internal sealed class ControlRequest
             case "hero-skin-spells": extras = "cardId"; Text("cardId"); break;
             // Read-only: the text SoloStone gives the client for one card ID (its frozen text in the client's language), and the language.
             case "card-raw-text": extras = "cardId"; Text("cardId"); break;
+            // Read-only: what the client's actors render, by premium (Show Plain Cards, NativePlainCardsOption.Render).
+            case "plain-cards-render": extras = ""; break;
             case "options": case "choices": case "concede": extras = "matchId"; Text("matchId"); break;
             // Native squelch of the NPC opponent (EnemyEmoteHandler) and one human emote: local presentation, no game send.
             case "squelch": case "unsquelch": extras = "matchId"; Text("matchId"); break;
@@ -359,7 +366,11 @@ internal sealed class ControlRequest
                 if (Has("screen")) Text("screen");
                 break;
             case "press":
-                extras = "element snapshot timeoutMs button"; UiRules.RequireElementId(Text("element"));
+                extras = "element snapshot timeoutMs button holdMs double"; UiRules.RequireElementId(Text("element"));
+                if (Has("double") && (Integer("double", 0, 1) == 1) && (Has("holdMs") || (Has("button") && Text("button") == "right")))
+                    throw new FormatException("double is a plain left double click");
+                // A held left press: mouse-up after holdMs (at most 5 s), e.g. the shop quantity stepper's hold-to-repeat.
+                if (Has("holdMs")) { Integer("holdMs", 0, 5000); if (Has("button") && Text("button") == "right") throw new FormatException("holdMs is for the left button"); }
                 if (Has("snapshot") && !Regex.IsMatch(Text("snapshot"), @"\A[0-9a-f]{12}\z")) throw new FormatException("Invalid snapshot");
                 if (Has("timeoutMs")) Integer("timeoutMs", 0, UiRules.MaxPressWaitMs);
                 if (Has("button") && Text("button") != "left" && Text("button") != "right") throw new FormatException("Invalid button");
@@ -776,6 +787,7 @@ internal static class UiRules
     private static readonly HashSet<string> LocalShopIds = new HashSet<string>(StringComparer.Ordinal) {
         "home.store", "shop.buy", "shop.ack", "shop.back", "shop.page.close", "shop.quantity.cancel", "dialog.confirm", "dialog.cancel",
         "shop.kit.use", "shop.kit.full", // #57 deck kit question (NativeShopKitText)
+        "shop.amount.more", "shop.amount.less", "shop.amount.type", // Pack quantity stepper and its count (NativeShopAmountText)
         "shop.tab.cards", "shop.tab.decks_1", "shop.tab.decks_2", "shop.tab.skins", "shop.tab.themes", // Categories (NativeShopTabs.Ids), then their sub-tabs.
         "shop.tab.packs", "shop.tab.deck_deathknight", "shop.tab.deck_demonhunter", "shop.tab.deck_druid", "shop.tab.deck_hunter", "shop.tab.deck_mage", "shop.tab.deck_paladin",
         "shop.tab.deck_priest", "shop.tab.deck_rogue", "shop.tab.deck_shaman", "shop.tab.deck_warlock", "shop.tab.deck_warrior", "shop.tab.hero_skins", "shop.tab.card_backs",
@@ -938,7 +950,11 @@ internal static class UiRules
         foreach (var group in elements.GroupBy(element => element.Id).Where(group => group.Count() > 1).ToList())
         {
             int index = 1;
-            foreach (UiElement element in group.OrderByDescending(element => element.Id == "shop.back" && element.Hit).ThenBy(element => element.Y).ThenBy(element => element.X).ThenBy(element => element.Instance))
+            // Arena and Draft controls exist in several native variants (landing, tray, off-screen pages): the pressable on-screen one is the bare id.
+            bool arena = group.Key.StartsWith("arena.", StringComparison.Ordinal) || group.Key.StartsWith("draft.", StringComparison.Ordinal);
+            foreach (UiElement element in group.OrderByDescending(element => element.Id == "shop.back" && element.Hit)
+                .ThenByDescending(element => arena && element.Hit).ThenByDescending(element => arena && element.OnScreen)
+                .ThenByDescending(element => arena && element.Enabled).ThenBy(element => element.Y).ThenBy(element => element.X).ThenBy(element => element.Instance))
                 if (index++ > 1) element.Id += "#" + (index - 1);
         }
     }

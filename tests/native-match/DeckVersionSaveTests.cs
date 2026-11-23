@@ -353,7 +353,7 @@ internal static class DeckVersionSaveTests
         using (var profile = Open(path, options))
         {
             var draft = profile.CreateDraft("Stale Golden", "HERO_08");
-            profile.SaveDraft(draft.Id, draft.Name, draft.Hero, LocalDecks.Get("mage").CardIds.ToArray(), draft.SortOrder);
+            profile.SaveDraft(draft.Id, draft.Name, draft.Hero, LocalDecks.Get("player-core-mage").CardIds, draft.SortOrder);
             id = draft.Id;
             stale = profile.GetDraft(id).Cards.First();
             Check(profile.IsDeckComplete(id) && profile.OwnedCount(stale, 1) == 0, "fixture: complete deck, no Golden copy owned");

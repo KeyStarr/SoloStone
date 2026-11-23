@@ -25,17 +25,23 @@ public sealed partial class LocalProfile
     };
 
     internal LocalAchievementPendingContext AchievementContextFor(LocalDeck deck, bool personal,
-        string npcId, double npcRating, string npcBand, IEnumerable<LocalDeckCard> premiumEntries = null, IEnumerable<LocalSideboard> premiumSideboards = null)
+        string npcId, double npcRating, string npcBand, IEnumerable<LocalDeckCard> premiumEntries = null, IEnumerable<LocalSideboard> premiumSideboards = null, bool ownedCardsOnly = false)
     {
         if (deck == null) throw new ArgumentNullException(nameof(deck));
         var owned = new HashSet<string>(RealOwnedCollection(data).Where(row => row.Value > 0)
             .Select(row => LocalCardCatalog.CopyGroup(row.Key)), StringComparer.Ordinal);
+        var main = AchievementCards(deck.CardIds, premiumEntries);
+        // Arena (owner 2026-11-15, owned cards only): the frozen deck lists only cards the player owned in the real collection (normal or
+        // premium copies, no loaners) when the match started, so mastery never counts a drafted card the player does not own. Arena records
+        // feed mastery only (no achievement reads this list for Arena). Earlier Arena records froze the whole deck and stay valid (shape only).
+        if (ownedCardsOnly)
+            main = main.Where(row => owned.Contains(LocalCardCatalog.CopyGroup(row.BaseCardId))).ToList();
         return new LocalAchievementPendingContext {
             EligibleWorldMatch = true,
             PersonalDeck = personal,
             StartingHero = deck.Hero,
             StartingHeroClass = Cards.FromId(deck.Hero).Class.ToString(),
-            MainDeck = AchievementCards(deck.CardIds, premiumEntries),
+            MainDeck = main,
             Sideboards = AchievementCards(deck.Sideboards.SelectMany(row => row.Value), premiumSideboards?.SelectMany(row => row.CardEntries)),
             CraftedAndOwnedBaseCardIds = data.Achievements.Career.CraftedBaseCardIds
                 .Where(owned.Contains).Distinct(StringComparer.Ordinal).OrderBy(id => id, StringComparer.Ordinal).ToList(),
@@ -70,6 +76,8 @@ public sealed partial class LocalProfile
     private static void SettleAchievements(LocalProfileData next, LocalMatchRecord match, LocalAchievementMatchEvidence evidence)
     {
         var pending = match.AchievementContext;
+        // Arena (#6) earns no achievement or Feat: its frozen context only feeds card mastery, so the evidence is not evaluated.
+        if (ArenaRules.IsArena(match.Mode)) { match.AchievementEvidenceFingerprint = evidence?.Fingerprint; return; }
         if (pending == null) {
             if (evidence != null) throw new InvalidOperationException("Ineligible match supplied achievement evidence.");
             return;
@@ -378,7 +386,10 @@ public sealed partial class LocalProfile
         } else if (match.Result == "Abandoned") {
             if (match.AchievementEvidenceFingerprint != null || match.AchievementGrants.Count != 0) throw new InvalidOperationException("Abandoned match has achievement grants.");
         } else if (match.AchievementContext != null) {
-            if (!ValidFingerprint(match.AchievementEvidenceFingerprint)) throw new InvalidOperationException("Eligible match lacks achievement fingerprint.");
+            // Arena (#6) evaluates no evidence: its fingerprint is kept when the match supplied one, never required.
+            bool arena = ArenaRules.IsArena(match.Mode);
+            if (arena ? match.AchievementEvidenceFingerprint != null && !ValidFingerprint(match.AchievementEvidenceFingerprint)
+                : !ValidFingerprint(match.AchievementEvidenceFingerprint)) throw new InvalidOperationException("Eligible match lacks achievement fingerprint.");
         } else if (match.AchievementEvidenceFingerprint != null || match.AchievementGrants.Count != 0) {
             throw new InvalidOperationException("Ineligible match has achievement receipt.");
         }
@@ -394,7 +405,7 @@ public sealed partial class LocalProfile
     {
         if (!context.EligibleWorldMatch || context.MatchId != match.Id || context.StartingHero != match.DeckHero
             || !ValidStartingHeroClass(context.StartingHero, context.StartingHeroClass)
-            || context.PersonalDeck != (match.Deck == "custom" || match.Deck.StartsWith("custom:", StringComparison.Ordinal))
+            || context.PersonalDeck != (match.Deck == "custom" || match.Deck.StartsWith("custom:", StringComparison.Ordinal) || ArenaRules.IsDeckKey(match.Deck))
             || context.QueuedNpcId != match.NpcId
             || context.QueuedNpcRating != match.NpcRating || (context.QueuedNpcBand != "Bronze" && context.QueuedNpcBand != "Silver"
                 && context.QueuedNpcBand != "Gold" && context.QueuedNpcBand != "Platinum"

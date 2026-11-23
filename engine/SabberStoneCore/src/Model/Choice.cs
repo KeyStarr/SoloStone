@@ -140,7 +140,7 @@ namespace SabberStoneCore.Model
 			if (_cardSets == null) return;
 
 			using var historyOffers = Controller.Game.Facts.ChoiceOffers();
-			Card[] cards = DiscoverTask.GetChoices(_cardSets, 3, Controller.Game.Random);
+			Card[] cards = DiscoverTask.GetChoices(_cardSets, 3, Controller.Game.Random, !Cards.RandomPool(Controller.Game).Legacy);
 			var choices = new List<int>(3);
 			foreach (Card card in cards)
 				choices.Add(Entity.FromCard(Controller, card,  new EntityData

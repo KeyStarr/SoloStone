@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System;
 using System.Linq;
 using SabberStoneCore.Actions;
@@ -23,7 +24,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power {
                 PowerTask = new DecisionBattlecryTask("client/DINO_430/v1",
                     new DiscoverThenContinueTask((g,c,s,stack) => OfflineCardPools.Candidates(g,c.HeroClass,Filter(),DbfId, PoolDestination.Summon)
-                        .Where(x => x.ColossalAppendageIds == null && x[(GameTag)2247] == 0).ToArray().ChooseNElements(3,g.Random), DiscoverRealRules.PrepareDiscover),
+                        .Where(x => x.ColossalAppendageIds == null && x[(GameTag)2247] == 0).ToArray().Distinct(CardIdentity.Comparer).ToArray().ChooseNElements(3,g.Random), DiscoverRealRules.PrepareDiscover),
                     new CustomTask((g,c,s,t,stack) => {
                         var chosen = stack.Playables.SingleOrDefault(); if (chosen == null) return;
                         Generic.AddEnchantmentBlock(g,Cards.FromId("DINO_430e"),(IPlayable)s,s,chosen.Card.ATK,chosen.Card.Health);

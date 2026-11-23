@@ -16,8 +16,10 @@ namespace SoloStone
         readonly WrapText headline = new WrapText("launcher.verdict"), detail = new WrapText("launcher.detail");
         readonly CheckBox accept = Ui.Check("launcher.accept", Texts.PlayWarning);
         readonly WrapText update = new WrapText("launcher.update") { MaxHeight = 160 };
+        readonly Font updateStatusFont, updateOfferFont;
         readonly ProgressBar bar = new ProgressBar { Name = "launcher.progress", Style = ProgressBarStyle.Marquee, Height = 16 };
-        readonly Button skip = Ui.Button("launcher.skip", Texts.Skip), installUpdate = Ui.Button("launcher.update-confirm", Texts.InstallUpdate);
+        readonly Button skip = Ui.Button("launcher.skip", Texts.Skip), installUpdate = Ui.Button("launcher.update-confirm", Texts.InstallUpdate),
+            updateNow = Ui.Button("launcher.update-now", Texts.UpdateNow), later = Ui.Button("launcher.update-later", Texts.Later), skipVersion = Ui.Button("launcher.update-skip-version", Texts.SkipVersion);
         readonly FlowLayoutPanel updateButtons = new FlowLayoutPanel { Name = "launcher.update-buttons", AutoSize = true, AutoSizeMode = AutoSizeMode.GrowAndShrink, WrapContents = true };
         readonly WrapText notice = new WrapText("launcher.message") { MaxHeight = 240 };
         readonly CheckBox switchBox = Ui.Check("launcher.updates-switch", Texts.UpdatesSwitch);
@@ -30,6 +32,7 @@ namespace SoloStone
             firewall = Ui.Button("launcher.firewall", Texts.FixFirewall), uninstall = Ui.Button("launcher.uninstall", Texts.Uninstall);
         readonly System.Windows.Forms.Timer retryTimer = new System.Windows.Forms.Timer { Interval = 2000 };
         readonly CancellationTokenSource skipUpdate = new CancellationTokenSource();
+        CancellationTokenSource applying;
         bool updating, confirmingUninstall, retrying;
         internal string UninstallerPath;
         internal bool DeleteSavesChosen;
@@ -46,13 +49,14 @@ namespace SoloStone
             var logo = new PictureBox { Name = "launcher.icon", Image = Icon.ToBitmap(), SizeMode = PictureBoxSizeMode.Zoom, Size = new Size(44, 44), Location = new Point(20, 12) };
             title.Location = new Point(76, 20); header.Controls.Add(logo); header.Controls.Add(title);
             headline.Font = new Font(Font, FontStyle.Bold);
-            update.ForeColor = SystemColors.GrayText; update.Font = new Font(Font.FontFamily, Font.Size * 0.9f);
+            updateStatusFont = new Font(Font.FontFamily, Font.Size * 0.9f);
+            updateOfferFont = new Font(Font.FontFamily, Font.Size * 1.35f, FontStyle.Bold);
             play.AutoSize = false; play.Size = new Size(180, 48); play.MinimumSize = play.Size;
             play.Font = new Font(Font.FontFamily, Font.Size * 1.15f, FontStyle.Bold); play.FlatStyle = FlatStyle.Flat;
             play.BackColor = Color.FromArgb(35, 97, 169); play.ForeColor = Color.White; play.UseVisualStyleBackColor = false;
             uninstall.FlatStyle = FlatStyle.Flat; uninstall.FlatAppearance.BorderSize = 0; uninstall.ForeColor = Color.FromArgb(65, 90, 120);
             uninstall.MinimumSize = Size.Empty; uninstall.Padding = Padding.Empty;
-            updateButtons.Controls.AddRange(new Control[] { skip, installUpdate });
+            updateButtons.Controls.AddRange(new Control[] { skip, updateNow, later, skipVersion, installUpdate });
             uninstallButtons.Controls.AddRange(new Control[] { uninstallGo, uninstallKeep });
             var fanNotice = new WrapText("launcher.fan-notice") { ForeColor = SystemColors.GrayText, Font = new Font(Font.FontFamily, Font.Size * 0.9f) }; fanNotice.SetText(Texts.FanNotice);
             stack.Controls.AddRange(new Control[] { headline, tested, yours, release, detail, accept, play, update, bar, updateButtons, notice, switchBox, uninstall, uninstallText, deleteSaves, uninstallButtons, fanNotice });
@@ -88,12 +92,15 @@ namespace SoloStone
         }
         void Wire() {
             accept.CheckedChanged += (s, e) => { if (!updating) { model.ConfirmWarning(accept.Checked); Render(); } };
-            skip.Click += (s, e) => { skipUpdate.Cancel(); skip.Enabled = false; };
+            skip.Click += (s, e) => { (model.Update == UpdateUi.Applying ? applying : skipUpdate).Cancel(); skip.Enabled = false; };
             installUpdate.Click += (s, e) => {
-                if (!model.CanConfirmUpdate) return;
-                model.Busy("Installing the update…"); Render();
-                Background(() => runner.ConfirmUpdate(CancellationToken.None));
+                if (model.CanConfirmUpdate) BeginApply(runner.ConfirmUpdate);
             };
+            updateNow.Click += (s, e) => {
+                if (model.CanOffer) BeginApply(runner.UpdateNow);
+            };
+            later.Click += (s, e) => { if (model.CanOffer) { runner.Later(); } };
+            skipVersion.Click += (s, e) => { if (model.CanSkipVersion) { model.Busy("Saving your choice…"); Render(); Background(() => runner.SkipVersion()); } };
             play.Click += (s, e) => Play();
             rollback.Click += (s, e) => { if (model.CanRollback) { model.Busy("Rolling back…"); Render(); Background(() => runner.RollBack()); } };
             restore.Click += (s, e) => { if (model.CanRestoreBackup) { string id = model.BackupId; model.Busy("Restoring your saves…"); Render(); Background(() => { runner.RestoreBackup(id); }); } };
@@ -105,6 +112,16 @@ namespace SoloStone
         }
         void BeginStart() {
             Background(() => { runner.Start(skipUpdate.Token); });
+        }
+        void BeginApply(Func<CancellationToken, Action, bool> apply) {
+            applying?.Dispose();
+            applying = new CancellationTokenSource();
+            var token = applying.Token;
+            model.Busy("Installing the update…"); Render();
+            // Close the cancellation window on the UI thread before the helper can take over.
+            Background(() => apply(token, () => Invoke(new Action(() => {
+                if (!token.IsCancellationRequested) { model.UpdateCommitting(); Render(); }
+            }))));
         }
         void Play() {
             if (!model.CanPlay) return;
@@ -144,10 +161,19 @@ namespace SoloStone
                 headline.ForeColor = WrapText.VerdictColor(model.Kind);
                 detail.Visible = installed && model.Detail.Length != 0; detail.SetText(model.Detail);
                 accept.Visible = model.ShowWarning; accept.Enabled = model.CanConfirmWarning; accept.Checked = model.WarningConfirmed;
+                bool offeringUpdate = model.CanOffer;
+                update.Font = offeringUpdate ? updateOfferFont : updateStatusFont;
+                update.ForeColor = offeringUpdate
+                    ? (SystemInformation.HighContrast ? SystemColors.ControlText : Color.FromArgb(24, 104, 59))
+                    : SystemColors.GrayText;
+                update.GapAfter = offeringUpdate ? 2 : (int?)null;
                 update.Visible = model.UpdateText.Length != 0; update.SetText(model.UpdateText);
                 bar.Visible = model.UpdateBusy;
-                updateButtons.Visible = model.CanSkip || model.CanConfirmUpdate;
-                skip.Visible = model.UpdateBusy; skip.Enabled = model.CanSkip && !skipUpdate.IsCancellationRequested;
+                updateButtons.Visible = model.CanSkip || model.CanConfirmUpdate || offeringUpdate;
+                skip.Visible = model.CanSkip; skip.Enabled = model.CanSkip && !(model.Update == UpdateUi.Applying ? applying : skipUpdate).IsCancellationRequested;
+                updateNow.Visible = offeringUpdate; updateNow.Enabled = offeringUpdate;
+                later.Visible = offeringUpdate; later.Enabled = offeringUpdate;
+                skipVersion.Visible = offeringUpdate; skipVersion.Enabled = model.CanSkipVersion;
                 installUpdate.Visible = model.CanConfirmUpdate; installUpdate.Enabled = model.CanConfirmUpdate;
                 notice.Visible = model.Notice.Length != 0; notice.SetText(model.Notice);
                 notice.ForeColor = model.NoticeIsProblem ? Color.Firebrick : SystemColors.ControlText;
@@ -164,8 +190,9 @@ namespace SoloStone
             stack.PerformLayout();
         }
         protected override void Dispose(bool disposing) {
-            if (disposing) skipUpdate.Dispose();
+            if (disposing) { skipUpdate.Dispose(); applying?.Dispose(); }
             base.Dispose(disposing);
+            if (disposing) { updateStatusFont?.Dispose(); updateOfferFont?.Dispose(); }
         }
     }
 }

@@ -3,6 +3,7 @@ internal static class TriggerValueData
 {
     internal const string HeroPowerAttack = "AT_132_DRUID AT_132_ROGUE CATA_190p CS2_017 CS2_083b HERO_10bp HERO_10bp2";
     internal const string Rows = @"
+AT_014|OwnDraw|Priced|1|0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0
 AT_026|SelfDamage|Priced|1|0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0
 AT_027|OwnDraw|NoEffect|0|
 AT_031|SelfAttack|Partial|0.333|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
@@ -146,6 +147,9 @@ OG_308|SelfAttack|NoEffect|0|
 OG_313|OwnMinion|Priced|1|0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 OG_318|SelfDamage|Priced|1|1,2,2,2,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 OG_321|SelfDamage|NoEffect|0|
+TB_CoOpv3_Boss|SelfDamage|NoEffect|0|
+TB_CoOpv3_Boss_FB|SelfDamage|NoEffect|0|
+TB_CoOpv3_Boss_NewClasses|SelfDamage|NoEffect|0|
 TIME_013|OwnSpell|Priced|1|0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0,0,0,0
 TIME_050|SelfDamage|Priced|1|0,4,-4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 TIME_055|SelfDamage|Priced|1|0,0.25,1.125,2,0.125,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0

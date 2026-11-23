@@ -1,4 +1,3 @@
-using System.IO.Compression;
 using System.Text.Json;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
@@ -7,9 +6,6 @@ using SabberStoneCore.Model;
 internal static class OfflinePoolExpectations
 {
     private static readonly Lazy<(JsonElement Card, bool Standard)[]> Export = new(() => {
-        using var file = File.OpenRead("data/carddb/37.0.0.254477/cards.json.gz");
-        using var gzip = new GZipStream(file, CompressionMode.Decompress);
-        using var cards = JsonDocument.Parse(gzip);
         using var records = JsonDocument.Parse(File.ReadAllText("data/pools/pool-eligibility-v1.json"));
         using var overrides = JsonDocument.Parse(File.ReadAllText("data/carddb/37.0.0.254477/set-overrides.json"));
         using var policy = JsonDocument.Parse(File.ReadAllText("data/pools/offline-standard-v1.json"));
@@ -19,7 +15,7 @@ internal static class OfflinePoolExpectations
         var extras = active.GetProperty("extraCards").EnumerateArray().Select(s => s.GetString()).ToHashSet();
         var knownExtras = metas.SelectMany(m => m.GetProperty("extraCards").EnumerateArray()).Select(s => s.GetString()).ToHashSet();
         var inactive = metas.SelectMany(m => m.GetProperty("sets").EnumerateArray()).Select(s => s.GetString()).Except(sets).ToHashSet();
-        var byId = cards.RootElement.GetProperty("cards").EnumerateArray().ToDictionary(c => c.GetProperty("cardId").GetString());
+        var byId = ClientExport.RequireCards();
         var identities = records.RootElement.GetProperty("records").EnumerateArray().Select(r =>
             (Id: r.GetProperty("cardId").GetString(), DbfId: r.GetProperty("dbfId").GetInt32()))
             .Concat(OfflinePoolPolicy.Load().Members.Where(m => knownExtras.Contains(m.CardId)).Select(m => (Id: m.CardId, DbfId: m.DbfId))).Distinct();
@@ -29,9 +25,25 @@ internal static class OfflinePoolExpectations
             string set = card.GetProperty("cardSet").GetProperty("name").GetString();
             if (set == "INVALID") set = overrides.RootElement.GetProperty("overrides").GetProperty(card.GetProperty("dbfId").ToString()).GetProperty("set").GetString();
             bool standard = sets.Contains(set) || extras.Contains(r.Id);
-            return (Card: card.Clone(), Standard: standard, Inactive: !standard && (inactive.Contains(set) || knownExtras.Contains(r.Id)));
+            return (Card: card, Standard: standard, Inactive: !standard && (inactive.Contains(set) || knownExtras.Contains(r.Id)));
         }).Where(c => !c.Inactive).Select(c => (c.Card, c.Standard)).ToArray();
     });
+
+    // Derive collectible reprint groups from the export. Hero skins can share names without sharing identity.
+    private static readonly Lazy<Dictionary<int, int[]>> ReprintGroups = new(() => {
+        var groups = ClientExport.RequireCards().Values
+            .Where(c => c.GetProperty("collectible").GetBoolean() && c.GetProperty("cardType").GetString() != "HERO")
+            .GroupBy(c => (c.GetProperty("name").GetString(), c.GetProperty("cardType").GetString()));
+        var byDbf = new Dictionary<int, int[]>();
+        foreach (var group in groups)
+        {
+            var printings = group.Select(c => Number(c, "dbfId")).ToArray();
+            if (printings.Length > 1)
+                foreach (int dbf in printings) byDbf.Add(dbf, printings);
+        }
+        return byDbf;
+    });
+
     internal static string[] Ids(PoolScope scope) => Export.Value.Where(c => scope == PoolScope.Wild || c.Standard == (scope == PoolScope.Standard))
         .OrderBy(c => c.Card.GetProperty("dbfId").GetInt32()).Select(c => c.Card.GetProperty("cardId").GetString()).ToArray();
 
@@ -40,8 +52,12 @@ internal static class OfflinePoolExpectations
 
     internal static string[] Ids(OfflinePoolFilter filter, string hero, int source, PoolDestination destination = PoolDestination.Hand)
     {
+        var printings = source == 0 ? null : ReprintGroups.Value.GetValueOrDefault(source);
         var rows = Export.Value.Where(c => filter.Scope == PoolScope.Wild || c.Standard == (filter.Scope == PoolScope.Standard)).Select(c => c.Card)
-            .Where(c => c.GetProperty("dbfId").GetInt32() != source);
+            .Where(c => {
+                int dbf = Number(c, "dbfId");
+                return dbf != source && printings?.Contains(dbf) != true;
+            });
         // Printed Colossals cannot enter play directly; Herald Colossals cannot be generated off-board either.
         rows = rows.Where(c => !c.GetProperty("tags").TryGetProperty("2247", out var colossal) || colossal.GetInt32() <= 0
             || (destination == PoolDestination.Hand || destination == PoolDestination.Deck)

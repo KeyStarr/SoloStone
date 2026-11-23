@@ -49,7 +49,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             foreach (var colour in Colours)
             {
                 var candidates = OfflineCardPools.Candidates(g, c.HeroClass, Filter(colour), s.Card.AssetId)
-                    .Where(card => Colours.Sum(tag => card[tag]) <= 2 && !offers.Any(prior => prior.Id == card.Id)).ToArray();
+                    .Where(card => Colours.Sum(tag => card[tag]) <= 2 && !offers.Any(prior => prior.IsSameCardAs(card))).ToArray();
                 if (candidates.Length != 0) offers.Add(candidates[g.Random.Next(candidates.Length)]);
             }
             return offers.ToArray();

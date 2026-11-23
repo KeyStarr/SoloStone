@@ -200,8 +200,10 @@ internal static class NativeRunModes
         RunState run = profile.RunOf(definition);
         if (run == null || run.Status != RunStatus.Active)
         {
-            // A new run with the class of the hero picked in the client (its base hero plays; skins stay cosmetic).
-            var hero = SabberStoneCore.Model.Cards.FromAssetId(heroCardDbId) ?? throw new ArgumentException("Unknown hero " + heroCardDbId);
+            // A new run with the class of the hero picked in the client (its base hero plays; skins stay cosmetic). The class
+            // picker shows each class's favourite hero, so a skin's card can arrive, and the engine's card data lacks most skins.
+            var hero = SabberStoneCore.Model.Cards.FromAssetId(heroCardDbId) ?? SkinClassHero(heroCardDbId)
+                ?? throw new ArgumentException("Unknown hero " + heroCardDbId);
             string cls = hero.Class.ToString();
             string baseHero = SabberStoneCore.Model.Cards.HeroCard(hero.Class).Id;
             run = profile.StartRun(engine, cls, baseHero, Environment.TickCount & 0x7fffffff);
@@ -218,6 +220,18 @@ internal static class NativeRunModes
         scenario = DebugScenario.Read(null, message => log?.LogWarning(message), ClientBridge.ClientKnowsCard, DebugScenario.RunId, NativeTestControl.DiagnosticsEnabled);
 #endif
         ClientBridge.StartRunMatch(prepared, "run:" + fight.Id, scenario);
+    }
+
+    // The class hero of a hero skin's card (as a new deck maps it), or null for any other card.
+    private static SabberStoneCore.Model.Card SkinClassHero(int heroCardDbId)
+    {
+        string skin;
+        try { skin = heroCardDbId > 0 ? GameUtils.TranslateDbIdToCardId(heroCardDbId, false) : null; }
+        catch (Exception) { return null; }
+        string classHero = skin == null ? null : NativeUIProjection.CreateRequestHero(skin, LocalShop.Default.HeroSkinClass);
+        if (classHero == null) return null;
+        Trace("run hero skin " + skin + " plays as " + classHero);
+        return SabberStoneCore.Model.Cards.FromId(classHero);
     }
 
     // ClientBridge.Update, every frame: a finished fight settles into its run once (Won, Lost, or a tie).

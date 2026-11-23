@@ -182,9 +182,10 @@ namespace SabberStoneCore.Model.RandomPools
         public IReadOnlyList<Card> WithoutSource(IReadOnlyList<Card> cards, IEntity source)
         {
             if (Legacy || source?.Card == null) return cards;
-            int id = source.Card.AssetId;
+            // The source's reprints are the source too (#225).
+            Card self = source.Card;
             for (int i = 0; i < cards.Count; i++)
-                if (cards[i].AssetId == id) return cards.Where(c => c.AssetId != id).ToArray();
+                if (cards[i].IsSameCardAs(self)) return cards.Where(c => !c.IsSameCardAs(self)).ToArray();
             return cards;
         }
 

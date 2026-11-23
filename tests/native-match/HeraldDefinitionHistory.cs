@@ -75,8 +75,10 @@ internal static partial class Program
         {
             int factor = Math.Max(1, soldier[HeraldRules.RealizedFactor]);
             Check(factor == new[] { 1, 1, 2, 2, 4 }[soldiers.IndexOf(soldier)], "Soldier factor follows the tier at its summon");
+            int scaledAttack = soldier.Card.ATK * factor, scaledHealth = soldier.Card.Health * factor;
             var definition = new Dictionary<int, int>();
             int scaledAt = -1, definedAt = -1;
+            bool? summonedScaled = null;
             var variants = new List<int>();
             for (int i = 0; i < wire.Count; i++)
             {
@@ -87,19 +89,27 @@ internal static partial class Program
                     definition.Clear();
                     foreach (var tag in identity.DefTags) definition[tag.Name] = tag.Value;
                     if (identity.DefTags.Any(tag => tag.Name == (int)GameTag.ATK)) definedAt = i;
+                    // A fresh summon can publish the scaled current and printed stats together in its first FULL_ENTITY.
+                    if (identity.Name.Length > 0)
+                        summonedScaled ??= row.HasFullEntity
+                            && identity.Tags.Any(tag => tag.Name == (int)GameTag.ATK && tag.Value == scaledAttack)
+                            && identity.Tags.Any(tag => tag.Name == (int)GameTag.HEALTH && tag.Value == scaledHealth)
+                            && definition.GetValueOrDefault((int)GameTag.ATK) == scaledAttack
+                            && definition.GetValueOrDefault((int)GameTag.HEALTH) == scaledHealth;
                     var text = identity.Tags.FirstOrDefault(tag => tag.Name == 955);
                     if (text != null && (variants.Count == 0 || variants[^1] != text.Value)) variants.Add(text.Value);
                 }
                 if (!row.HasTagChange || row.TagChange.Entity != soldier.Id) continue;
                 if (row.TagChange.ChangeDef) { definition[row.TagChange.Tag] = row.TagChange.Value; definedAt = i; continue; }
-                if (row.TagChange.Tag == (int)GameTag.ATK && row.TagChange.Value == soldier.Card.ATK * factor && scaledAt < 0) scaledAt = i;
+                if (row.TagChange.Tag == (int)GameTag.ATK && row.TagChange.Value == scaledAttack && scaledAt < 0) scaledAt = i;
                 if (row.TagChange.Tag == 955 && (variants.Count == 0 || variants[^1] != row.TagChange.Value)) variants.Add(row.TagChange.Value);
             }
-            Check(definition.GetValueOrDefault((int)GameTag.ATK, soldier.Card.ATK) == soldier.Card.ATK * factor
-                && definition.GetValueOrDefault((int)GameTag.HEALTH, soldier.Card.Health) == soldier.Card.Health * factor,
+            Check(definition.GetValueOrDefault((int)GameTag.ATK, soldier.Card.ATK) == scaledAttack
+                && definition.GetValueOrDefault((int)GameTag.HEALTH, soldier.Card.Health) == scaledHealth,
                 $"Soldier {soldier.Id} (factor {factor}): the client definition holds the scaled printed stats");
             if (factor > 1 && soldier != top)
-                Check(scaledAt >= 0 && definedAt > scaledAt, $"Soldier {soldier.Id}: the scaled definition (DefTags or ChangeDef) comes after the stat change that scaled it: scaled={scaledAt} defined={definedAt} rows="
+                Check(scaledAt >= 0 ? definedAt > scaledAt : summonedScaled == true,
+                    $"Soldier {soldier.Id}: scaled stats and definition arrive together on summon or definition follows the stat change: scaled={scaledAt} defined={definedAt} rows="
                     + string.Join(" | ", wire.Select((row, i) => (row, i)).Where(x => x.row.HasTagChange && x.row.TagChange.Entity == soldier.Id
                         || x.row.HasFullEntity && x.row.FullEntity.Entity == soldier.Id || x.row.HasShowEntity && x.row.ShowEntity.Entity == soldier.Id)
                         .Select(x => x.i + ":" + (x.row.HasTagChange ? $"TC {x.row.TagChange.Tag}={x.row.TagChange.Value}{(x.row.TagChange.ChangeDef ? "D" : "")}"

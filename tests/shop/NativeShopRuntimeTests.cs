@@ -265,6 +265,10 @@ partial class NativeBundleHarness
     private static void RefreshWallet() { }
     private static bool ready = true, committed, successSent, resultShown;
     private static long sequence, purchasePrice;
+    private static int purchaseQuantity = 1;
+    // Production RefreshPackStepperAfterPurchase asks the open page's native stepper again; the double counts the asks.
+    private static int stepperRefreshes;
+    private static void RefreshPackStepperAfterPurchase() => stepperRefreshes++;
     private static float purchaseBegan;
     private static string purchaseFailure;
     private static LocalPurchaseReceipt purchaseReceipt;
@@ -472,6 +476,7 @@ partial class NativeBundleHarness
         RunDeckCompletion(check, fresh);
         RunCollectionPurchases(check, fresh);
         RunClicks(check, fresh);
+        RunPackQuantity(check, fresh);
         RunKits(check, fresh);
         RunControlCache(check);
         Profile = null;
@@ -739,7 +744,8 @@ partial class NativeBundleHarness
             "an after-kit amount without an answered kit question is refused by the order guard");
         check(NativeShopDecks.KitLine(price, 0) == "" && !DeckDetails(next, profile.PurchasePrice(next.Id)).Contains("deck kit"), "no kit, no kit line");
     }
-    // Owner 2026-10-25: pack tile = one buy click; other kinds open native details, then one buy click; never a confirmation.
+    // Theme, board and pet tiles buy (or equip) on the tile click; every other kind, packs included, opens the native details
+    // page, then one buy click (a pack page with its quantity stepper); never a confirmation.
     private static void Reseed(LocalProfile profile)
     {
         Profile = profile; products = new Service(); RecoverUI();
@@ -757,13 +763,17 @@ partial class NativeBundleHarness
     }
     // Press on one frame (Clickable.OnClick), release on a later one at the same cursor position.
     private static bool Tap(ShopSlot slot) { NoteTilePress(slot.Clickable); return Release(slot); }
-    private static (bool details, PurchaseManager manager) Click(LocalShopProduct product)
+    private static (bool details, PurchaseManager manager) Click(LocalShopProduct product, int quantity = 1)
     {
         var model = products.GetProductDataModel(NativeShopPurchase.PmtId(product));
         bool details = Tap(Tile(product));
-        if (details) ServiceManager.Manager.PurchaseProduct(model, model.Prices[0], 1); // details page price button (ProductPage.TryBuy)
+        // Details page price button: ProductPage.TryBuy orders the catalogue model at its unit price and the stepper's quantity.
+        if (details) ServiceManager.Manager.PurchaseProduct(model, model.Prices[0], quantity);
         return (details, ServiceManager.Manager);
     }
+    // A paid board the save does not own yet: its tile click buys it (the tile-click guards).
+    private static LocalShopProduct UnownedTile(LocalProfile profile) => NativeShopPurchase.Products.First(p =>
+        p.Kind == "Board" && profile.PurchasePrice(p.Id) > 0 && !NativeShopPurchase.Owned(profile, p, profile.PurchasePrice(p.Id)));
     // Commit, then the native success window acknowledgement.
     private static void Finish()
     {
@@ -790,7 +800,7 @@ partial class NativeBundleHarness
                 int gold = profile.Gold, price = profile.PurchasePrice(product.Id), popups = dialogs.Shown.Count;
                 long receipts = profile.PurchaseSequence; int started = manager.Started, bought = manager.Bought;
                 var (details, _) = Click(product);
-                check(details == (kind != "Pack" && kind != "HubTheme" && kind != "Board" && kind != "Pet"), kind + ": pack, theme and board tiles buy at once; other kinds open the native details page");
+                check(details == (kind != "HubTheme" && kind != "Board" && kind != "Pet"), kind + ": theme, board and pet tiles buy at once; other kinds (packs too) open the native details page");
                 check(manager.Confirmations == 0 && manager.Bought == bought + 1 && transaction != null && auth != null, kind + ": one click starts one transaction, no confirmation");
                 check(manager.Current == null, kind + ": finished purchase routine leaves no stale native handle");
                 var tx = transaction;
@@ -903,28 +913,31 @@ partial class NativeBundleHarness
                 "freshness needs the same profile, ledger, shop, service and catalogue version");
             state.Invalidate(); check(!state.IsFresh(p1, l1, s1, v1, 3), "invalidated until the next complete rebuild");
 
-            // Drag-scroll release on a pack tile: no order, no details page, whichever release listener runs first.
+            // A pack tile opens the native page (its stepper buys); the tile itself never orders.
             Time.realtimeSinceStartup += 1; Time.frameCount++;
             int calls = manager.Calls;
-            var dragged = Tile(pack); NoteTilePress(dragged.Clickable); dragged.Clickable.m_dragged = true;
+            check(Tap(Tile(pack)) && manager.Calls == calls && transaction == null, "pack tile: native details page, no order");
+            // Drag-scroll release on a buying tile (board): no order, whichever release listener runs first.
+            var board = UnownedTile(profile);
+            var dragged = Tile(board); NoteTilePress(dragged.Clickable); dragged.Clickable.m_dragged = true;
             check(!Release(dragged) && manager.Calls == calls && transaction == null, "drag release (tile listener first): no purchase or details page");
-            dragged = Tile(pack); NoteDragRelease(dragged.Clickable); check(dragReleaseClickable == null, "plain release records no drag");
+            dragged = Tile(board); NoteDragRelease(dragged.Clickable); check(dragReleaseClickable == null, "plain release records no drag");
             NoteTilePress(dragged.Clickable); Time.frameCount++;
             dragged.Clickable.m_dragged = true; NoteDragRelease(dragged.Clickable); dragged.Clickable.m_dragged = false; // native reset
             check(!BuyPackTile(dragged) && manager.Calls == calls && transaction == null, "drag release (Clickable listener first): no purchase");
             ClearTilePress(dragged.Clickable);
             // The drag decision uses this tile's own press position, never PegUI's last mouse-down.
-            var moved = Tile(pack); InputCollection.Mouse = new Point { x = 400, y = 300 }; NoteTilePress(moved.Clickable);
+            var moved = Tile(board); InputCollection.Mouse = new Point { x = 400, y = 300 }; NoteTilePress(moved.Clickable);
             InputCollection.Mouse = new Point { x = 400, y = 311 }; // 11 px > 5 px tolerance x dpi 2
             check(!Release(moved) && manager.Calls == calls && transaction == null, "release beyond the tile's drag tolerance from its press: no purchase");
             InputCollection.Mouse = new Point { x = 400, y = 300 };
             check(!Release(moved) && manager.Calls == calls, "press consumed by its release: a second release is not a click");
-            check(!Release(Tile(pack)) && manager.Calls == calls && transaction == null, "release with no press on this tile: no purchase");
-            var tileA = Tile(pack); var tileB = Tile(pack); NoteTilePress(tileA.Clickable);
+            check(!Release(Tile(board)) && manager.Calls == calls && transaction == null, "release with no press on this tile: no purchase");
+            var tileA = Tile(board); var tileB = Tile(board); NoteTilePress(tileA.Clickable);
             check(!Release(tileB) && manager.Calls == calls && transaction == null, "press on tile A, release on tile B: no purchase");
             ClearTilePress(tileB.Clickable); check(pressClickable == tileA.Clickable, "release-all of another tile keeps tile A's press");
             ClearTilePress(tileA.Clickable); check(pressClickable == null, "tile A release-all clears its press");
-            var axis = Tile(pack); axis.Clickable.Peg.Tolerance = new Point { x = 0, y = 0 }; NoteTilePress(axis.Clickable);
+            var axis = Tile(board); axis.Clickable.Peg.Tolerance = new Point { x = 0, y = 0 }; NoteTilePress(axis.Clickable);
             InputCollection.Mouse = new Point { x = 900, y = 700 };
             check(NativeShopClicks.BeyondDragTolerance(10, 0, 5, 0, 1) && !NativeShopClicks.BeyondDragTolerance(10, 10, 0, 0, 1)
                 && !NativeShopClicks.BeyondDragTolerance(9, -10, 5, 5, 2) && NativeShopClicks.BeyondDragTolerance(0, -11, 5, 5, 2),
@@ -937,23 +950,24 @@ partial class NativeBundleHarness
             check(transaction != null && manager.Calls == calls + 1 && pressClickable == null, "semantic press and release at one position buys");
             Finish();
             check(profile.PurchaseSequence == before + 1, "drag guard leaves exactly one purchase");
+            board = UnownedTile(profile);
             InputCollection.Mouse = new Point { x = 123, y = 459 }; // within tolerance
             Time.realtimeSinceStartup += 1; Time.frameCount++; before = profile.PurchaseSequence;
-            var jitter = Tile(pack); NoteTilePress(jitter.Clickable); InputCollection.Mouse = new Point { x = 126, y = 450 };
+            var jitter = Tile(board); NoteTilePress(jitter.Clickable); InputCollection.Mouse = new Point { x = 126, y = 450 };
             Release(jitter);
             check(transaction != null && manager.Calls == calls + 2, "release within tolerance of the press buys");
             Finish();
-            check(profile.PurchaseSequence == before + 1, "exactly one pack per click");
+            check(profile.PurchaseSequence == before + 1, "exactly one purchase per click");
 
             // The tile must show the charged quote.
-            Time.realtimeSinceStartup += 1; calls = manager.Calls;
-            var catalogue = products.GetProductDataModel(NativeShopPurchase.PmtId(pack));
+            Time.realtimeSinceStartup += 1; calls = manager.Calls; board = UnownedTile(profile);
+            var catalogue = products.GetProductDataModel(NativeShopPurchase.PmtId(board));
             var stale = new ProductDataModel { PmtId = catalogue.PmtId, Items = catalogue.Items,
                 Prices = new() { new PriceDataModel { Currency = CurrencyType.GOLD, Amount = catalogue.Prices[0].Amount + 1 } } };
-            check(!Tap(Tile(pack, stale)) && manager.Calls == calls && transaction == null, "tile price differing from catalogue refused before an order");
+            check(!Tap(Tile(board, stale)) && manager.Calls == calls && transaction == null, "tile price differing from catalogue refused before an order");
             var same = new ProductDataModel { PmtId = catalogue.PmtId, Items = catalogue.Items,
                 Prices = new() { new PriceDataModel { Currency = CurrencyType.GOLD, Amount = catalogue.Prices[0].Amount } } };
-            Tap(Tile(pack, same));
+            Tap(Tile(board, same));
             check(transaction != null && manager.Calls == calls + 1, "tile copy with the catalogue quote buys");
             Finish();
 
@@ -962,38 +976,38 @@ partial class NativeBundleHarness
             Click(pack);
             var pendingTx = transaction; var pendingAuth = auth; int errorsBefore = errors.Count, acks = store.Acks, failuresNow = store.Failures;
             long pendingReceipts = profile.PurchaseSequence; int pendingGold = profile.Gold, packPrice = profile.PurchasePrice(pack.Id);
-            check(!Tap(new ShopSlot { BrowserButtonDataModel = Tile(pack).BrowserButtonDataModel, Broken = true })
+            check(!Tap(new ShopSlot { BrowserButtonDataModel = Tile(board).BrowserButtonDataModel, Broken = true })
                 && transaction == pendingTx && auth == pendingAuth && errors.Count == errorsBefore
-                && refusals.Last().StartsWith("pack click while a purchase is pending"), "exception while pending: logged only, purchase kept");
+                && refusals.Last().StartsWith("tile click while a purchase is pending"), "exception while pending: logged only, purchase kept");
             Finish();
             check(profile.PurchaseSequence == pendingReceipts + 1 && profile.Gold == pendingGold - packPrice && store.Acks == acks
                 && store.Failures == failuresNow && transaction == null, "pending purchase completes; no failure acknowledgement");
             Time.realtimeSinceStartup += 1;
-            Tap(new ShopSlot { BrowserButtonDataModel = Tile(pack).BrowserButtonDataModel, Broken = true });
+            Tap(new ShopSlot { BrowserButtonDataModel = Tile(board).BrowserButtonDataModel, Broken = true });
             check(errors.Count == errorsBefore + 1 && transaction == null, "same exception with nothing pending fails closed");
 
-            // Owner 2026-10-25: pack clicks within 0.5 s of the success window opening or its acknowledgement do nothing.
-            Time.realtimeSinceStartup += 1;
+            // Owner 2026-10-25: tile clicks within 0.5 s of the success window opening or its acknowledgement do nothing.
+            Time.realtimeSinceStartup += 1; board = UnownedTile(profile); int boardPrice = profile.PurchasePrice(board.Id);
             Click(pack); var cooled = transaction; TickPurchase(); TickPurchase();
             float opened = Time.realtimeSinceStartup; SuccessShown(cooled, true);
             Time.realtimeSinceStartup = opened + 0.2f; calls = manager.Calls;
-            Tap(Tile(pack));
+            Tap(Tile(board));
             check(manager.Calls == calls && transaction == cooled, "+0.2 s after the success window opens: ignored before any order");
             Time.realtimeSinceStartup = opened + 0.8f;
-            Tap(Tile(pack));
+            Tap(Tile(board));
             check(manager.Calls == calls && transaction == cooled, "tile click while the success window is still open: no order queued");
             Time.realtimeSinceStartup = opened + 0.9f; float acked = Time.realtimeSinceStartup;
             auth.Response(true, cooled);
             int coolGold = profile.Gold, coolPopups = dialogs.Shown.Count; long coolReceipts = profile.PurchaseSequence;
             Time.realtimeSinceStartup = acked + 0.2f;
-            Tap(Tile(pack));
+            Tap(Tile(board));
             check(manager.Calls == calls && transaction == null && profile.Gold == coolGold && profile.PurchaseSequence == coolReceipts
                 && dialogs.Shown.Count == coolPopups, "+0.2 s after acknowledgement: no order, transaction, debit or popup");
             Time.realtimeSinceStartup = acked + 0.6f;
-            Tap(Tile(pack));
+            Tap(Tile(board));
             check(manager.Calls == calls + 1 && transaction != null, "+0.6 s after acknowledgement: the click buys");
             Finish();
-            check(profile.PurchaseSequence == coolReceipts + 1 && profile.Gold == coolGold - packPrice, "exactly one more pack after the cooldown");
+            check(profile.PurchaseSequence == coolReceipts + 1 && profile.Gold == coolGold - boardPrice, "exactly one more purchase after the cooldown");
             check(NativeShopClicks.PackCooldownSeconds == 0.5f, "pack click cooldown is the owner's 0.5 s");
         }
         using (var poor = new LocalProfile(fresh("native-clicks-poor", 50)))
@@ -1034,6 +1048,129 @@ partial class NativeBundleHarness
         var retail = new Clickable(); NoteTilePress(retail); check(!ReferenceEquals(pressClickable, retail), "press hook inert outside isolation");
         Isolated = true;
         ServiceManager.Manager = null;
+    }
+    // Several packs in one order (Discord request): the native page stepper's answers, its cap, one order of N, one ledger
+    // commit (all or nothing on a failed save), the native order carrying N, and the counts after a restart.
+    private static void RunPackQuantity(Action<bool, string> check, Func<string, int, string> fresh)
+    {
+        var store = StoreManager.Get(); var dialogs = DialogManager.Get();
+        string path = fresh("native-pack-quantity", 100);
+        var profile = new LocalProfile(path);
+        try
+        {
+            // Lab test-control gold-grant (live checks need a balance): one ledger commit, bounded, refused mid pack reveal.
+            bool Throws(Action action) { try { action(); return false; } catch (ArgumentOutOfRangeException) { return true; } catch (InvalidOperationException) { return true; } }
+            check(Throws(() => profile.GrantGoldForTest(0)) && Throws(() => profile.GrantGoldForTest(LocalProfile.MaximumTestGoldGrant + 1)) && profile.Gold == 100,
+                "gold grant refuses 0 and above the maximum");
+            profile.GrantGoldForTest(950);
+            profile.Dispose(); profile = new LocalProfile(path);
+            check(profile.Gold == 1050, "gold grant is saved: 100 + 950 after reopening");
+            Reseed(profile);
+            var manager = ServiceManager.Manager = new PurchaseManager();
+            var pack = NativeShopPurchase.Products.First(p => p.Kind == "Pack" && profile.PurchasePrice(p.Id) == 100);
+            var deck = NativeShopPurchase.Products.First(p => p.Kind == "Deck");
+            long pmt = NativeShopPurchase.PmtId(pack);
+            var model = products.GetProductDataModel(pmt);
+            var deckModel = products.GetProductDataModel(NativeShopPurchase.PmtId(deck));
+            check(NativeShopPurchase.SupportsQuantity(pack) && pack.MaxQuantity == 50
+                && NativeShopPurchase.Products.Where(p => p.Kind != "Pack").All(p => !NativeShopPurchase.SupportsQuantity(p)), "only packs take a quantity");
+            check(NativeShopPurchase.QuantityAllowed(pack, 1) && NativeShopPurchase.QuantityAllowed(pack, 50) && !NativeShopPurchase.QuantityAllowed(pack, 0)
+                && !NativeShopPurchase.QuantityAllowed(pack, 51) && NativeShopPurchase.QuantityAllowed(deck, 1) && !NativeShopPurchase.QuantityAllowed(deck, 2),
+                "pack orders 1-50, every other kind exactly 1");
+            check(NativeShopPurchase.AffordableQuantity(pack, 1050, 100) == 10 && NativeShopPurchase.AffordableQuantity(pack, 99, 100) == 1
+                && NativeShopPurchase.AffordableQuantity(pack, 1000000, 100) == 50 && NativeShopPurchase.AffordableQuantity(deck, 1000000, 100) == 1,
+                "stepper cap: what the balance covers, at least 1, at most the catalogue maximum");
+            // Production ProductExtensions postfixes: local packs get the native stepper and the ledger cap; others keep native answers.
+            bool select = false; PackQuantitySelect(model, ref select);
+            bool deckSelect = false; PackQuantitySelect(deckModel, ref deckSelect);
+            int cap = 1, deckCap = 1; PackBuyCap(model, ref cap); PackBuyCap(deckModel, ref deckCap);
+            var foreign = new ProductDataModel { PmtId = 42, Prices = new() { new PriceDataModel { Currency = CurrencyType.GOLD, Amount = 100 } } };
+            bool foreignSelect = false; int foreignCap = 7; PackQuantitySelect(foreign, ref foreignSelect); PackBuyCap(foreign, ref foreignCap);
+            check(select && !deckSelect && cap == 10 && deckCap == 1 && !foreignSelect && foreignCap == 7, "stepper only on local packs, capped at 1050 / 100 gold");
+            bool nativeYes = true; PackQuantitySelect(deckModel, ref nativeYes); bool foreignYes = true; PackQuantitySelect(foreign, ref foreignYes);
+            check(!nativeYes && foreignYes, "a local non-pack never gets the stepper, even when the native answer was yes; retail answers stay");
+            // The page's mutable variant shows N times the unit price under the same PMT: the cap still comes from the ledger quote.
+            var shown = new ProductDataModel { PmtId = pmt, Prices = new() { new PriceDataModel { Currency = CurrencyType.GOLD, Amount = 500 } } };
+            int shownCap = 1; PackBuyCap(shown, ref shownCap);
+            check(shownCap == 10, "cap from the ledger unit quote, not the page's running total");
+            // Control identity of that page copy: N packs at exactly N times the quote, nothing else.
+            ProductDataModel Selection(int n, float amount) => new ProductDataModel { PmtId = pmt,
+                Prices = new() { new PriceDataModel { Currency = CurrencyType.GOLD, Amount = amount } },
+                Items = new() { new Item { ItemType = model.Items[0].ItemType, ItemId = model.Items[0].ItemId, Booster = model.Items[0].Booster, Quantity = n } } };
+            check(!LocalModel(Selection(5, 500)) && LocalPackSelection(Selection(5, 500)) && LocalPackSelection(Selection(1, 100))
+                && LocalPackSelection(Selection(50, 5000)) && !LocalPackSelection(Selection(51, 5100)) && !LocalPackSelection(Selection(5, 499))
+                && !LocalPackSelection(Selection(0, 0)) && !LocalPackSelection(deckModel), "page copy of N packs is local only at N x quote, N 1-50");
+            int gold = profile.Gold, packs = profile.UnopenedPacks, popups = dialogs.Shown.Count; long receipts = profile.PurchaseSequence;
+            // Over the balance: the native not-enough-gold alert names the batch total, no order.
+            Time.realtimeSinceStartup += 1;
+            var (details, _) = Click(pack, 11);
+            check(details && transaction == null && manager.Started == 0 && dialogs.Shown.Count == popups + 1
+                && dialogs.Shown.Last().m_text.EndsWith(gold + " / 1100 gold"), "11 packs over 1050 gold: native not-enough-gold, no order");
+            // Quantities no page offers are refused before an order: a deck of 2, 51 packs; Buy refuses them too.
+            manager.PurchaseProduct(deckModel, deckModel.Prices[0], 2);
+            check(manager.Started == 0 && transaction == null && refusals.Last().StartsWith("purchase click quantity 2"), "deck quantity 2 refused at the click");
+            manager.PurchaseProduct(model, model.Prices[0], 51);
+            check(manager.Started == 0 && transaction == null && refusals.Last().StartsWith("purchase click quantity 51"), "51 packs refused at the click");
+            foreach (var (refusedPmt, quantity) in new[] { (pmt, 51), (pmt, 0), (NativeShopPurchase.PmtId(deck), 2) })
+            {
+                Buy(store, new BuyProductEventArgs(refusedPmt, CurrencyType.GOLD, quantity, true));
+                check(transaction == null && profile.PurchaseSequence == receipts, "Buy refuses quantity " + quantity + " of " + refusedPmt);
+            }
+            // An order at the page copy's running total (N x unit as the unit price) never reaches Buy: the guard wants the quote.
+            Time.realtimeSinceStartup += 1;
+            int cancelled = manager.Cancelled, shownBefore = dialogs.Shown.Count;
+            manager.PurchaseProduct(model, new PriceDataModel { Currency = CurrencyType.GOLD, Amount = 200 }, 2);
+            check(manager.Bought == 0 && manager.Cancelled == cancelled + 1 && dialogs.Shown.Count == shownBefore && transaction == null
+                && profile.PurchaseSequence == receipts, "order priced at the page total (2 x 100 as unit) refused by the order guard");
+            // A failed save takes nothing and grants nothing: no partial batch.
+            Time.realtimeSinceStartup += 1;
+            int failures = store.Failures;
+            Click(pack, 10);
+            check(transaction != null && manager.Bought == 1, "10 packs: one native order, one transaction");
+            profile.CommitFailure = _ => throw new IOException("save failed");
+            TickPurchase(); profile.CommitFailure = null;
+            check(store.Failures == failures + 1 && profile.Gold == gold && profile.UnopenedPacks == packs && profile.PurchaseSequence == receipts,
+                "failed save: no packs, no debit, no receipt");
+            auth.Response(false, transaction);
+            check(transaction == null && auth == null, "failure acknowledged");
+            // Success: one receipt grants 10 packs and takes 1000 gold; the native pending order carries the quantity.
+            Time.realtimeSinceStartup += 1;
+            Click(pack, 10);
+            var tx = transaction;
+            check(tx != null && store.Pending is BuyProductEventArgs pending && pending.Quantity == 10 && purchaseQuantity == 10 && purchasePrice == 1000,
+                "native pending order and ledger expectation carry 10 packs at 1000 gold");
+            TickPurchase(); TickPurchase();
+            var receipt = profile.Purchases.Last();
+            check(profile.PurchaseSequence == receipts + 1 && receipt.ProductId == pack.Id && receipt.Quantity == 10 && receipt.GoldPaid == 1000
+                && receipt.PriceBeforeKit == 1000 && receipt.Granted.Packs.Single().PackType == pack.PackType && receipt.Granted.Packs.Single().Count == 10
+                && profile.Gold == gold - 1000 && profile.UnopenedPacks == packs + 10, "one commit: 10 packs, 1000 gold, one receipt");
+            int refreshesBefore = stepperRefreshes;
+            auth.Response(true, tx);
+            check(stepperRefreshes == refreshesBefore + 1, "a successful acknowledgement re-asks the open page's stepper for its limit");
+            int after = 1; PackBuyCap(model, ref after);
+            check(transaction == null && after == 1, "acknowledged; the cap follows the new balance");
+            // The pack page stays open under the purchase window: the press that dismisses it must not order the batch again.
+            float acked = Time.realtimeSinceStartup; int startedNow = manager.Started, popupsNow = dialogs.Shown.Count;
+            Time.realtimeSinceStartup = acked + 0.2f;
+            manager.PurchaseProduct(model, model.Prices[0], 10);
+            check(manager.Started == startedNow && transaction == null && dialogs.Shown.Count == popupsNow && profile.PurchaseSequence == receipts + 1,
+                "page Buy within 0.5 s of the window closing: ignored, no order or popup");
+            Time.realtimeSinceStartup = acked + 0.6f;
+            manager.PurchaseProduct(model, model.Prices[0], 1);
+            check(manager.Started == startedNow && dialogs.Shown.Count == popupsNow + 1 && profile.PurchaseSequence == receipts + 1,
+                "after the cooldown the page Buy is live again (here: 50 gold short of one pack, native alert)");
+            // Restart: the saved counts stand, and replaying the same request grants nothing more.
+            profile.Dispose();
+            profile = new LocalProfile(path);
+            check(profile.Gold == gold - 1000 && profile.UnopenedPacks == packs + 10 && profile.PurchaseSequence == receipts + 1
+                && profile.PackInventory.Single(row => row.PackType == pack.PackType).Count >= 10, "restart keeps 10 packs and the 1000 gold debit");
+            var replay = purchases.Commit(profile, tx.ID, pmt, "XSH", 10, 1000);
+            check(replay.Sequence == receipt.Sequence && profile.Gold == gold - 1000 && profile.UnopenedPacks == packs + 10, "replayed request after restart grants nothing more");
+            bool conflict = false;
+            try { purchases.Commit(profile, tx.ID, pmt, "XSH", 9, 900); } catch (InvalidOperationException) { conflict = true; }
+            check(conflict && profile.UnopenedPacks == packs + 10 && profile.PurchaseSequence == receipts + 1, "same request with another quantity is refused, nothing granted");
+        }
+        finally { profile.Dispose(); ServiceManager.Manager = null; RecoverUI(); }
     }
     // Production NativeShopControlCache: one identity computation per frame/shop/page/variant/catalogue version.
     private static void RunControlCache(Action<bool, string> check)

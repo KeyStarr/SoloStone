@@ -65,6 +65,19 @@ namespace SabberStoneCore.Model
             return !Metas.SelectMany(m => m.SetIds).Any(pair => pair.Value == (int)card.Set && !sets.Contains(pair.Key));
         }
 
+        // Standard format (#87): the active meta's own sets and its listed extra cards, nothing else. Unlike AllowsCard,
+        // a set that no meta lists (Basic, Classic, Hall of Fame, Vanilla, older expansions) is Wild, as on retail.
+        // Deck legality only: game pools keep using AllowsCard.
+        public bool IsStandard(Card card)
+        {
+            var meta = Metas.SingleOrDefault(m => m.Sets.SequenceEqual(Sets));
+            return card != null && meta != null && (meta.SetIds.Values.Contains((int)card.Set) || meta.ExtraCards.Contains(card.Id));
+        }
+        public bool IsStandardSet(int setId) =>
+            Metas.SingleOrDefault(m => m.Sets.SequenceEqual(Sets))?.SetIds.Values.Contains(setId) == true;
+        // A set some meta lists but the active one does not yet (a future expansion such as BE): not Wild, just unreleased.
+        public bool IsUnreleasedMetaSet(int setId) => inactiveSetIds.Contains(setId);
+
         public bool IsPackEligible(Card card) => card != null && !Metas.Any(m => m.ExtraCards.Contains(card.Id))
             && (Metas.SingleOrDefault(m => m.Id == ActiveMetaId)?.SetIds.Any(p => p.Key != "CORE" && p.Value == (int)card.Set)
                 ?? Members.Any(m => m.CardId == card.Id && PackEligibleSets.Contains(m.Set)));

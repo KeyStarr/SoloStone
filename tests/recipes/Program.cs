@@ -288,7 +288,9 @@ try
     using var profile = new LocalProfile(temp);
     var owned = RecipeLibrary.OwnedCount(profile.Collection);
     Check(owned("CORE_DRG_107") == 2, "current profile Core grants count as owned");
-    Check(owned("CORE_CS2_024") == 0, "current profile locked Core stays missing");
+    // Core commons are owned from the start (threshold 1); a class rare/epic/legendary stays locked until its class level.
+    string lockedCore = LocalCoreProgression.Unlocks.First(card => card.Hero == "HERO_08" && card.Threshold > 1).Id;
+    Check(owned("CORE_CS2_024") == 2 && owned(lockedCore) == 0, "current profile locked Core stays missing");
     Check(owned("CS2_024") == 2, "profile free exemption");
 }
 finally

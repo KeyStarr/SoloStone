@@ -28,8 +28,8 @@ public sealed partial class LocalProfile
     // #37: the ladder reads ranked matches only. A Casual record never carries a ladder receipt and never moves stars,
     // hidden rating, calibration, Legend number or the NPC field's drift epoch.
     internal static List<LocalMatchRecord> RankedMatches(LocalProfileData profile) =>
-        profile.Matches.Where(match => !CasualRules.IsCasual(match.Mode)).ToList();
-    internal int RankedMatchCount => data.Matches.Count(match => !CasualRules.IsCasual(match.Mode));
+        profile.Matches.Where(match => ArenaRules.IsRanked(match.Mode)).ToList();
+    internal int RankedMatchCount => data.Matches.Count(match => ArenaRules.IsRanked(match.Mode));
     public IReadOnlyList<LocalMatchRecord> RankedHistory => RankedMatches(data).Select(Copy).ToArray();
     public IReadOnlyList<LocalMatchRecord> CasualHistory => data.Matches.Where(match => CasualRules.IsCasual(match.Mode)).Select(Copy).ToArray();
     // Hidden Casual matchmaking rating: the stored one, else the seed the first Casual settlement will store.
@@ -65,8 +65,19 @@ public sealed partial class LocalProfile
         double? last = null;
         foreach (var match in profile.Matches.Concat(profile.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { profile.Pending }))
         {
-            if (match.Mode != null && !CasualRules.IsCasual(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
+            if (match.Mode != null && !CasualRules.IsCasual(match.Mode) && !ArenaRules.IsArena(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
             bool settled = match != profile.Pending;
+            // Arena (#6): a run's match has neither a ladder nor a Casual receipt and must name its run; no other mode may.
+            if (ArenaRules.IsArena(match.Mode)) {
+                if (match.Casual != null || match.Ladder != null || (match.TierRewards != null && match.TierRewards.Count != 0)
+                    || match.RivalGold != 0 || match.Gold != 0 || match.BonusGold != 0 || match.PackReward
+                    || !Guid.TryParseExact(match.ArenaRunId ?? "", "D", out _) || match.ArenaWins < 0 || match.ArenaLosses < 0
+                    || (match.Packs != null && match.Packs.Count != 0) || (settled && match.DustReward != 0)
+                    || (match.AchievementGrants != null && match.AchievementGrants.Count != 0))
+                    throw new InvalidOperationException("Invalid Arena match record.");
+                continue;
+            }
+            if (match.ArenaRunId != null) throw new InvalidOperationException("Arena run id on a non-Arena match.");
             if (!CasualRules.IsCasual(match.Mode) || !settled) {
                 if (match.Casual != null) throw new InvalidOperationException("Casual receipt on a ranked or pending match.");
                 continue;
@@ -96,7 +107,7 @@ public sealed partial class LocalProfile
     }
 
     private LadderPosition EffectiveLadder(LocalProfileData profile) => profileOptions.StartLegendOne
-        && profile.LadderRuleVersion == 0 && !profile.Matches.Any(match => !CasualRules.IsCasual(match.Mode)) ? CheatLegendOne(profileOptions.LegendRating) : LadderOf(profile);
+        && profile.LadderRuleVersion == 0 && !profile.Matches.Any(match => ArenaRules.IsRanked(match.Mode)) ? CheatLegendOne(profileOptions.LegendRating) : LadderOf(profile);
 
     // The reservation's position, derived from history alone so the first ladder receipt can be checked against it:
     // star index = the legacy fold; best = the fold at V10 migration (matches without receipts), then its running
@@ -114,11 +125,26 @@ public sealed partial class LocalProfile
         return LadderRules.Seed(stars, best, history);
     }
 
+    internal double? PlacementRating => PreviousPlacementRating(data, Ladder);
+
+    private static double? PreviousPlacementRating(LocalProfileData profile, LadderPosition before) =>
+        before.PlacementGames < LadderRules.PlacementLength
+            ? profile.Matches.LastOrDefault(match => ArenaRules.IsRanked(match.Mode))?.Ladder?.PlacementRatingAfter
+            : null;
+
+    private static LocalPlacementOpponent Copy(LocalPlacementOpponent placement) => placement == null ? null :
+        new LocalPlacementOpponent { NpcId = placement.NpcId, DeckId = placement.DeckId, Rating = placement.Rating };
+
     // Applies one settled match to the snapshot's ladder state; call before the match joins the snapshot's history.
     private LocalLadderReceipt SettleLadder(LocalProfileData next, LocalMatchRecord match, string result, double? opponentRating)
     {
         var before = EffectiveLadder(next);
-        var step = LadderRules.Apply(before, LadderRules.Outcome(result), opponentRating ?? before.Rating, GrindTiers.Find(match.GrindTier).Ladder);
+        double? placementRating = PreviousPlacementRating(next, before);
+        // A legacy opponent has no rating. Each Elo calculation treats it as equally rated to the player.
+        if (opponentRating == null && placementRating.HasValue && match.PlacementOpponent == null)
+            match.PlacementOpponent = new LocalPlacementOpponent { Rating = placementRating.Value };
+        var step = LadderRules.Apply(before, LadderRules.Outcome(result), opponentRating ?? before.Rating, GrindTiers.Find(match.GrindTier).Ladder,
+            placementRating, match.PlacementOpponent?.Rating);
         var after = step.After;
         var state = next.LadderState ?? new LocalLadderState();
         state.StarIndex = after.StarIndex; state.BestStarIndex = after.BestStarIndex; state.Multiplier = after.Multiplier;
@@ -133,6 +159,7 @@ public sealed partial class LocalProfile
             StreakBefore = before.StreakWins, StreakAfter = after.StreakWins,
             PlacementBefore = before.PlacementGames, PlacementAfter = after.PlacementGames,
             RatingBefore = before.Rating, RatingAfter = after.Rating, OpponentRating = step.OpponentRating,
+            PlacementRatingAfter = step.PlacementRatingAfter,
             StreakBonus = step.StreakBonus, StoppedAtDiamondFive = step.StoppedAtDiamondFive, LegendReached = step.LegendReachedNow,
             FloorsReached = FloorIds(step.FloorsReached)
         };
@@ -169,6 +196,8 @@ public sealed partial class LocalProfile
     private static void ValidateLadderCore(LocalProfileData profile, double legendRating)
     {
         if (profile.Pending?.Ladder != null) throw new InvalidOperationException("Pending match with a ladder receipt.");
+        if (profile.Pending?.PlacementOpponent != null && LadderOf(profile).PlacementGames >= LadderRules.PlacementLength)
+            throw new InvalidOperationException("Pending placement opponent outside placement.");
         ValidateCasual(profile);
         var matches = RankedMatches(profile);
         var marker = profile.LadderCalibration;
@@ -191,11 +220,13 @@ public sealed partial class LocalProfile
             throw new InvalidOperationException("Missing ladder state.");
         var position = LadderOf(profile);
         if (matches.Count == 0 && marker == null && Same(position, LadderRules.Fresh())) return;
+        double? placementRating = null;
         for (int i = legacy; i <= matches.Count; i++)
         {
             if (marker != null && marker.MatchCount == i) {
                 expected.Rating = LadderRules.StartRating;
                 expected.PlacementGames = 0;
+                placementRating = null;
             }
             if (i == matches.Count) break;
             var match = matches[i];
@@ -206,7 +237,17 @@ public sealed partial class LocalProfile
                 || double.IsNaN(r.OpponentRating.Value) || double.IsInfinity(r.OpponentRating.Value)
                 || !Same(expected, ReceiptPosition(r, before: true), i == legacy && marker?.MatchCount != i ? RatingTolerance : 0))
                 throw new InvalidOperationException("Invalid ladder receipt.");
-            var replay = LadderRules.Apply(ReceiptPosition(r, before: true), LadderRules.Outcome(match.Result), r.OpponentRating.Value, GrindTiers.Find(match.GrindTier).Ladder);
+            var placement = match.PlacementOpponent;
+            if (placement != null && expected.PlacementGames >= LadderRules.PlacementLength)
+                throw new InvalidOperationException("Placement opponent outside placement.");
+            if (placement != null && placement.NpcId == null && (placement.Rating != placementRating || r.OpponentRating != r.RatingBefore))
+                throw new InvalidOperationException("Invalid unrated placement opponent.");
+            var replay = LadderRules.Apply(ReceiptPosition(r, before: true), LadderRules.Outcome(match.Result), r.OpponentRating.Value,
+                GrindTiers.Find(match.GrindTier).Ladder, placementRating, placement?.Rating);
+            if (replay.PlacementRatingAfter.HasValue != r.PlacementRatingAfter.HasValue
+                || r.PlacementRatingAfter.HasValue && !(Math.Abs(replay.PlacementRatingAfter.Value - r.PlacementRatingAfter.Value) <= RatingTolerance))
+                throw new InvalidOperationException("Invalid placement rating.");
+            placementRating = r.PlacementRatingAfter;
             if (!Same(replay.After, ReceiptPosition(r, before: false), RatingTolerance) || replay.StarsGained != r.StarsGained || replay.StreakBonus != r.StreakBonus
                 || replay.StoppedAtDiamondFive != r.StoppedAtDiamondFive || replay.LegendReachedNow != r.LegendReached
                 || !FloorIds(replay.FloorsReached).SequenceEqual(r.FloorsReached))
@@ -230,7 +271,7 @@ public sealed partial class LocalProfile
         StreakBefore = r.StreakBefore, StreakAfter = r.StreakAfter, RatingBefore = r.RatingBefore, RatingAfter = r.RatingAfter,
         StarsGained = r.StarsGained, FloorsReached = r.FloorsReached?.ToList(), LegendReached = r.LegendReached, LadderRuleVersion = r.LadderRuleVersion,
         Outcome = r.Outcome, BestBefore = r.BestBefore, BestAfter = r.BestAfter, PlacementBefore = r.PlacementBefore, PlacementAfter = r.PlacementAfter,
-        OpponentRating = r.OpponentRating, StreakBonus = r.StreakBonus, StoppedAtDiamondFive = r.StoppedAtDiamondFive
+        OpponentRating = r.OpponentRating, PlacementRatingAfter = r.PlacementRatingAfter, StreakBonus = r.StreakBonus, StoppedAtDiamondFive = r.StoppedAtDiamondFive
     };
 
     private static List<string> FloorIds(IEnumerable<int> floors) => floors.Select(floor => floor.ToString(CultureInfo.InvariantCulture)).ToList();

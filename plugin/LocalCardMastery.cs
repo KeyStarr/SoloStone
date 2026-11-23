@@ -57,7 +57,8 @@ internal static class LocalCardMastery
     }
 
     internal static bool EligibleWin(LocalMatchRecord match) => match != null && match.Result == "Won" && !match.Conceded
-        && match.Turns >= 4 && (match.Mode == null || match.Mode == "Ranked" || CasualRules.IsCasual(match.Mode))
+        && match.Turns >= 4 && (match.Mode == null || match.Mode == "Ranked" || CasualRules.IsCasual(match.Mode)
+        || ArenaRules.IsArena(match.Mode))   // Arena (#6): wins on the drafted deck earn mastery like any personal-deck win
         && match.AchievementContext != null && match.AchievementContext.EligibleWorldMatch && match.AchievementContext.PersonalDeck;
 
     internal static Dictionary<string, int> WinCounts(IEnumerable<LocalMatchRecord> history) => history.Where(EligibleWin)

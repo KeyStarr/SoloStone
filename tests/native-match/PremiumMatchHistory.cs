@@ -243,6 +243,7 @@ internal static partial class Program
 
         DerivedPremiumHistory();
         GoldenHeroHistory();
+        PlainCardsHistory();
         Console.WriteLine("PASS premium deck copies and golden hero publish PREMIUM without changing play");
     }
 
@@ -548,7 +549,7 @@ internal static partial class Program
                 using var buyer = new LocalProfile(path);
                 buyer.Purchase(LocalShop.Default.Products.Single(product => product.HeroSkin == "HERO_08a").Id, 1, 1000, "premium-skin");
             }
-            int HeroPremium(bool owned, string favorite, Action<LocalProfile> pick = null)
+            int HeroPremium(bool owned, string favorite, Action<LocalProfile> pick = null, bool plain = false)
             {
                 var serializer = new XmlSerializer(typeof(LocalProfileData));
                 LocalProfileData data;
@@ -562,13 +563,13 @@ internal static partial class Program
                 pick?.Invoke(profile);
                 NativeMatch.CosmeticsProfile = () => profile;
                 var capture = new Capture();
-                var match = new NativeMatch(capture.Send, "mage", "warrior", 1337);
+                var match = new NativeMatch(capture.Send, "mage", "warrior", 1337) { PlainCards = plain };
                 match.Start();
                 var hero = NativeHistory(capture).Select(entry => entry.FullEntity)
                     .First(entity => entity != null && entity.Entity == match.Game.Player1.Hero.Id);
                 Check(hero.Name == profile.FavoriteHero("HERO_08") && match.Game.Player1.Hero.Card.Id == "HERO_08",
                     "golden hero changed the portrait identity");
-                Check(TagValue(hero.Tags, GameTag.PREMIUM)
+                Check(plain || TagValue(hero.Tags, GameTag.PREMIUM)
                     == NativeUIProjection.FavoritePremium(profile, "HERO_08", NativeUIProjection.FavoriteHero(profile, "HERO_08")),
                     "match hero premium differs from the native favorite premium");
                 var opponent = NativeHistory(capture).Select(entry => entry.FullEntity)
@@ -579,6 +580,7 @@ internal static partial class Program
             }
             Check(HeroPremium(false, null) == 0, "unowned golden hero was published");
             Check(HeroPremium(true, null) == 1, "owned golden hero is not the class default");
+            Check(HeroPremium(true, null, plain: true) == 0, "Show Plain Cards published the golden hero");
             // A stored favorite equal to the vanilla hero means "no skin" (the picker stores it on every touch).
             Check(HeroPremium(true, "HERO_08") == 1, "vanilla favorite dropped the golden hero");
             Check(HeroPremium(false, "HERO_08") == 0, "unowned golden hero was published for the vanilla favorite");
