@@ -65,3 +65,5 @@ that is closed or crashes is simply over.
 - Hot-seat: `NativeMatch` plays the seat in `localSeat` and hands the client the other seat with a game-state-swap
   `GAME_RESET` (the new seat gets account Lo 1 and `TEAM_ID` 1). The debug scenario key `hotSeat=1` stages any match
   this way; test control's `handover-continue` answers the handover window.
+- Developer builds also read the debug scenario file at the brawl's start (`human…` keys = the player who starts, `npc…`
+  keys = the other player), e.g. `humanBoard`/`npcBoard` with `…BoardStats=999,999` to reach the win in three turns.

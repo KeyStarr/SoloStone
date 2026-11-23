@@ -139,7 +139,13 @@ internal static class NativeCoopMode
             string id = "coop:" + definition.Id + ":" + Guid.NewGuid().ToString("N");
             log?.LogInfo("COOP start " + definition.Id + " id=" + id + " seed=" + seed + " player1=" + first.Name + " player2=" + second.Name);
             ended = false;
-            ClientBridge.StartRunMatch(match, id);
+            // Developer builds may stage the opening with the debug scenario file, as a run fight does (human = Player 1,
+            // npc = Player 2); the brawl's encounter stays.
+            DebugScenario scenario = null;
+#if !SOLOSTONE_RELEASE
+            scenario = DebugScenario.Read(null, message => log?.LogWarning(message), ClientBridge.ClientKnowsCard, DebugScenario.RunId, NativeTestControl.DiagnosticsEnabled);
+#endif
+            ClientBridge.StartRunMatch(match, id, scenario);
         }
         catch (Exception error) { log?.LogError("COOP start failed: " + error); }
     }
