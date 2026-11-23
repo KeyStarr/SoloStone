@@ -26,7 +26,8 @@ that is closed or crashes is simply over.
 - At 160 and at 60 Health a hit stops at the threshold and he is Immune for the rest of the turn. At 160 he gains 5 Attack
   and casts Elemental Eruption; at 60 he gains 5 more, casts Twisted Light (heals himself 30, 30 damage to every other
   minion) and from then on uses the stronger forms of his spells. If you take too long, he gains his Attack anyway.
-- He hovers in purple smoke and plays his swap effect when he changes sides, both from your game client.
+- He hovers in purple smoke, plays his swap effect when he changes sides, and each of his spells plays an effect (missiles,
+  a swipe, a fireball, a lightning storm and others), all from your game client.
 - He speaks with the voice lines in your game client: on the first turn, with every Bamboozle, Elemental Eruption, Glorious
   Finale and Twisted Light, and each time he gains Attack.
 
@@ -45,6 +46,9 @@ that is closed or crashes is simply over.
 - The brawl's game script plays a line for each of a few event numbers but names no moment for them. Which line goes with
   which spell here follows what the lines are about (minds manipulated for Bamboozle, the Shaman's elements for Elemental
   Eruption, the Priest's light for Twisted Light, the finale for Glorious Finale).
+- His card holds one effect for each of his spells but does not say which is which; the pairing here follows what each
+  effect looks like (missiles for Flame Missiles, a swipe for Cleave, a fireball for Immolate, a lightning storm for Elemental
+  Eruption, a holy nova for Twisted Light, an arcane burst for the Rune and an arcane explosion for Bamboozle).
 - Nefarian's retail spell order was never published. His choice here is a seeded random pick from the spells the wiki lists
   for each phase, never the same twice in a row; the turn count after which he gains Attack on his own is ours.
 - The second player cannot mulligan: the game's mulligan screen opens only once, at the start, for the player at the

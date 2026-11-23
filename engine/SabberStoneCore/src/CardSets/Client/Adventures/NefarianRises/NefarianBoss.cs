@@ -45,7 +45,9 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
         internal const GameTag HealthPhase = (GameTag)34712;   // 0: above 160, 1: 160 reached, 2: 60 reached
         internal const GameTag AttackPhase = (GameTag)34713;   // 0, 1, 2: +0, +5, +10 Attack
         internal const GameTag TurnsInPhase = (GameTag)34714;  // end-of-turn casts since the attack phase began
-        internal const GameTag LastChoice = (GameTag)34715;    // dbf of his last scheduled spell (-1: he rested)
+        internal const GameTag LastChoice = (GameTag)34715;    // dbf of his last scheduled spell (Rested: he rested; 0: none yet)
+        // A tag reads back no negative value, so a rest is a positive id no spell of his has.
+        private const int Rested = 1;
         internal const GameTag Pending = (GameTag)34716;       // 1: a health threshold was just reached, the phase change follows
 
         public const string Glorious = "TB_CoOpv3_001", TwistedLight = "TB_CoOpv3_002", Bamboozle = "TB_CoOpv3_003",
@@ -122,7 +124,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             });
 
             // His spells. Each finds Nefarian itself; the side he stands on is the casting player.
-            Spell(register, 40358, Bamboozle, SwapHands);
+            Spell(register, 40358, Bamboozle, (game, ctx) => { Aim(game, Heroes(game)); SwapHands(game, ctx); });
             Spell(register, 40341, Cleave4, (game, ctx) => Cleave(game, ctx, 4));
             Spell(register, 40352, Cleave7, (game, ctx) => Cleave(game, ctx, 7));
             Spell(register, 40315, Eruption, (game, ctx) =>
@@ -130,15 +132,22 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                     new TaskStack { Playables = OtherMinions(game).Cast<IPlayable>().ToList() }));
             Spell(register, 40316, Missiles5, (game, ctx) => Missiles(game, ctx, 5));
             Spell(register, 40317, Missiles10, (game, ctx) => Missiles(game, ctx, 10));
-            Spell(register, 40500, Rune, (game, ctx) => ctx.Effect.Summon(RuneMinion));
+            Spell(register, 40500, Rune, (game, ctx) => {
+                var before = RunesInPlay(game);
+                ctx.Effect.Summon(RuneMinion);
+                Aim(game, RunesInPlay(game).Except(before));
+            });
             Spell(register, 40498, Runes, (game, ctx) => {
+                var before = RunesInPlay(game);
                 ctx.Effect.Summon(RuneMinion);
                 new EffectContext(game, ctx.Caster.Opponent.Id, ctx.Spell.Id).Summon(RuneMinion);
+                Aim(game, RunesInPlay(game).Except(before));
             });
             Spell(register, 40545, Immolate4, (game, ctx) => ctx.Effect.DamageBatch(Heroes(game), 4));
             Spell(register, 40546, Immolate7, (game, ctx) => ctx.Effect.DamageBatch(Heroes(game), 7));
             Spell(register, 40386, TwistedLight, (game, ctx) => {
                 var nefarian = Find(game);
+                Aim(game, OtherMinions(game).Select(m => m.Id).Concat(nefarian == null ? new int[0] : new[] { nefarian.Id }));
                 if (nefarian != null) ctx.Effect.Heal(nefarian.Id, 30);
                 ctx.Effect.DamageBatch(OtherMinions(game).Select(m => m.Id), 30);
             });
@@ -149,8 +158,14 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
         private static void Spell(Action<int, string, Action<Card>> register, int dbf, string id, Action<Game, SpellContext> effect) =>
             register(dbf, id, card => {
                 card.Power = new Power {
-                    PowerTask = new CustomTask((game, controller, source, target, stack) =>
-                        effect(game, new SpellContext(new EffectContext(game, controller.Id, source.Id, stack: stack), controller, (IPlayable)source)))
+                    PowerTask = new CustomTask((game, controller, source, target, stack) => {
+                        // His spell cards author no effect: the client plays the one his own card holds for each.
+                        var nefarian = Find(game);
+                        int fx = SpellEffect(id);
+                        using var visual = game.History && nefarian != null && fx != 0
+                            ? game.PowerHistory.LentEffect(nefarian.Id, fx, source.Id) : null;
+                        effect(game, new SpellContext(new EffectContext(game, controller.Id, source.Id, stack: stack), controller, (IPlayable)source));
+                    })
                 };
                 NefarianRisesCards.Plain(card);
             });
@@ -249,8 +264,25 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
         }
 
-        // His card's trigger effects on the client, by a trigger block's effect index: 9 is his side swap.
+        // His card's trigger effects on the client, by a trigger block's effect index (0 and 1 are empty): 2 missiles, 3 a quick
+        // arcane burst, 4 a swipe, 5 an arcane explosion, 6 a fireball, 7 a holy nova, 8 a lightning storm, 9 his side swap. Which
+        // spell had which is not recorded; each pairing follows what the effect looks like. Don't Push Me! and Glorious Finale
+        // do nothing on the board and have none.
         internal const int SwapEffect = 9;
+
+        // The targets of his effect, for a spell whose resolution names none of its own (a hand swap, a summon) or names only part
+        // of them (Twisted Light's heal of himself before the damage): the client's effect plays only on the targets it is given.
+        private static void Aim(Game game, IEnumerable<int> targets)
+        {
+            if (game.History) game.PowerHistory.TargetRange(targets, resolved: true);
+        }
+
+        private static List<int> RunesInPlay(Game game) =>
+            game.Player1.BoardZone.Concat(game.Player2.BoardZone).Where(m => m.Card.Id == RuneMinion).Select(m => m.Id).ToList();
+
+        internal static int SpellEffect(string spell) =>
+            spell == Missiles5 || spell == Missiles10 ? 2 : spell == Rune || spell == Runes ? 3 : spell == Cleave4 || spell == Cleave7 ? 4
+            : spell == Bamboozle ? 5 : spell == Immolate4 || spell == Immolate7 ? 6 : spell == TwistedLight ? 7 : spell == Eruption ? 8 : 0;
 
         // The scheduled spell, or null for a turn of rest. Never the same choice twice in a row.
         private static string Choose(Game game, Minion nefarian)
@@ -258,9 +290,9 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
             var options = Pool(nefarian[HealthPhase], nefarian[AttackPhase]).Cast<string>().ToList();
             options.Add(null); // rest
             int last = nefarian[LastChoice];
-            options.RemoveAll(id => (id == null ? -1 : Cards.FromId(id).AssetId) == last && last != 0);
+            options.RemoveAll(id => (id == null ? Rested : Cards.FromId(id).AssetId) == last && last != 0);
             string pick = options[DungeonRunCards.Pick(game, options.Count)];
-            nefarian[LastChoice] = pick == null ? -1 : Cards.FromId(pick).AssetId;
+            nefarian[LastChoice] = pick == null ? Rested : Cards.FromId(pick).AssetId;
             return pick;
         }
 

@@ -42,6 +42,24 @@ internal static class NefarianRisesProof
 
     private static Game Reload(Game game) => Game.LoadSnapshot(game.SaveSnapshot());
 
+    // The META_DATA TARGET ids directly inside Nefarian's trigger block that plays the given spell's effect (after mark).
+    private static HashSet<int> Aimed(Game game, int mark, string spell)
+    {
+        var entries = game.PowerHistory.Full.Skip(mark).ToList();
+        var ids = new HashSet<int>();
+        int open = entries.FindIndex(e => e is SabberStoneCore.Kettle.PowerHistoryBlockStart b && b.BlockType == BlockType.TRIGGER
+            && b.EffectIndex == NefarianBoss.SpellEffect(spell) && game.IdEntityDic.TryGetValue(b.Source, out var owner) && NefarianBoss.IsBoss(owner));
+        if (open < 0) return ids;
+        int depth = 0;
+        foreach (var e in entries.Skip(open + 1))
+        {
+            if (e is SabberStoneCore.Kettle.PowerHistoryBlockStart) depth++;
+            else if (e is SabberStoneCore.Kettle.PowerHistoryBlockEnd && depth-- == 0) break;
+            else if (depth == 0 && e is SabberStoneCore.Kettle.PowerHistoryMetaData m && m.Type == MetaDataType.TARGET) ids.UnionWith(m.Info);
+        }
+        return ids;
+    }
+
     // The spell played from hand by the player (his spells cost nothing and need no target).
     private static void Cast(Game game, Controller player, string id) => Play(game, player, id);
 
@@ -221,12 +239,64 @@ internal static class NefarianRisesProof
         Check(a.All(id => pool.Contains(id)), "casts come from the first pool: " + string.Join(",", a));
         Check(a.Count >= 3, "he casts most turns (" + a.Count + " of 10)");
         Check(!a.Zip(a.Skip(1), (x, y) => x == y).Any(same => same), "no spell twice in a row");
+        // Nor two turns of rest in a row (live 2026-11-23: a rest was kept as -1, which a tag reads back as 0, "no choice yet").
+        for (int seed = 1; seed <= 12; seed++)
+        {
+            Game game = Brawl(seed, health: 1000);
+            bool rested = false;
+            for (int i = 0; i < 11; i++)
+            {
+                int spells = Graveyards(game).Count;
+                End(game);
+                bool rest = Graveyards(game).Count == spells;
+                Check(!(rest && rested), "seed " + seed + ": two turns of rest in a row (turn " + (i + 1) + ")");
+                rested = rest;
+            }
+        }
         Check(NefarianBoss.Pool(2, 2).All(id => id == NefarianBoss.Cleave7 || id == NefarianBoss.Runes || id == NefarianBoss.Missiles10
             || id == NefarianBoss.Immolate7) && !NefarianBoss.Pool(0, 2).Contains(NefarianBoss.Bamboozle), "late pools");
     }
 
     private static void Spells()
     {
+        // His spells play the effects his own card holds: each hit of Flame Missiles lands directly in his trigger block that
+        // names the missile effect, so the client's effect finds its targets there (no attribution block per hit).
+        Game visual = Brawl(health: 300);
+        Summon(visual.Player1, "CS2_182");
+        var nefarian = Boss(visual);
+        int mark = visual.PowerHistory.Full.Count;
+        Cast(visual, visual.Player1, NefarianBoss.Missiles5);
+        var entries = visual.PowerHistory.Full.Skip(mark).ToList();
+        int open = entries.FindIndex(e => e is SabberStoneCore.Kettle.PowerHistoryBlockStart b && b.BlockType == BlockType.TRIGGER
+            && b.Source == nefarian.Id && b.EffectIndex == NefarianBoss.SpellEffect(NefarianBoss.Missiles5));
+        int shut = open < 0 ? -1 : entries.FindIndex(open + 1, e => e is SabberStoneCore.Kettle.PowerHistoryBlockStart
+            || e is SabberStoneCore.Kettle.PowerHistoryBlockEnd);
+        int hits = open < 0 || shut < 0 ? 0 : entries.Skip(open + 1).Take(shut - open - 1).Count(e => e is SabberStoneCore.Kettle.PowerHistoryTagChange t
+            && t.Tag == GameTag.DAMAGE);
+        Check(open >= 0 && shut > open && entries[shut] is SabberStoneCore.Kettle.PowerHistoryBlockEnd && hits == 5,
+            "Flame Missiles play his missile effect with all 5 hits inside (block " + open + ", end " + shut + ", hits " + hits + ")");
+        Check(NefarianBoss.SpellEffect(NefarianBoss.DontPush) == 0 && NefarianBoss.SpellEffect(NefarianBoss.Glorious) == 0,
+            "Don't Push Me! and Glorious Finale have no effect");
+        // Spells whose resolution names no target of its own still give his effect its targets (live 2026-11-23: the Rune's
+        // effect, given none, never played).
+        Game runeAim = Brawl(health: 300);
+        int runeMark = runeAim.PowerHistory.Full.Count;
+        Cast(runeAim, runeAim.Player1, NefarianBoss.Rune);
+        var runeIds = runeAim.Player1.BoardZone.Where(m => m.Card.Id == NefarianBoss.RuneMinion).Select(m => m.Id).ToList();
+        Check(runeIds.Count == 1 && Aimed(runeAim, runeMark, NefarianBoss.Rune).SetEquals(runeIds), "Explosive Rune aims his effect at the Rune");
+        Game hands = Brawl(health: 300);
+        int handsMark = hands.PowerHistory.Full.Count;
+        Cast(hands, hands.Player1, NefarianBoss.Bamboozle);
+        Check(Aimed(hands, handsMark, NefarianBoss.Bamboozle).SetEquals(new[] { hands.Player1.Hero.Id, hands.Player2.Hero.Id }),
+            "Bamboozle aims his effect at both heroes");
+        Game light = Brawl(health: 300);
+        var lit = Summon(light.Player1, "CS2_182");
+        Boss(light).Damage = 50;
+        int lightMark = light.PowerHistory.Full.Count;
+        Cast(light, light.Player1, NefarianBoss.TwistedLight);
+        Check(Aimed(light, lightMark, NefarianBoss.TwistedLight).IsSupersetOf(new[] { lit.Id, Boss(light).Id }),
+            "Twisted Light aims his effect at himself and every other minion");
+
         // Bamboozle: the hands swap.
         Game swap = Brawl(boss: false);
         var first = swap.Player1.HandZone.Select(p => p.Id).ToList();
