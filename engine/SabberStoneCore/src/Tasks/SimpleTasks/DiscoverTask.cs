@@ -93,6 +93,20 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 		private readonly ChoiceAction _choiceAction;
 		private readonly int _repeat;
 
+		// The basic-totem choice cards (Totemic Slam, Kobold Hermit) only display an offer: they have no Totem race, keywords
+		// or effects. Picking one summons the basic totem it shows, the cards Kobold Hermit's Entourage lists.
+		internal static Card BasicTotemFor(Card choice)
+		{
+			switch (choice.Id)
+			{
+				case "AT_132_SHAMANa": return Cards.FromId("NEW1_009");
+				case "AT_132_SHAMANb": return Cards.FromId("CS2_050");
+				case "AT_132_SHAMANc": return Cards.FromId("CS2_051");
+				case "AT_132_SHAMANd": return Cards.FromId("CS2_052");
+				default: return null;
+			}
+		}
+
 		// These recipes reuse the picker for fixed choices without semantic Discover.
 		private bool IsDiscover => _discoverType != DiscoverType.BRANCHING_PATHS
 			&& _discoverType != DiscoverType.BASIC_TOTEM

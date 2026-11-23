@@ -111,7 +111,18 @@ namespace SabberStoneCore.Actions
 						break;
 
 					case ChoiceAction.SUMMON:
-						if (!c.BoardZone.IsFull && RemoveFromZone(c, playable))
+						if (!c.BoardZone.IsFull && DiscoverTask.BasicTotemFor(playable.Card) is Card basicTotem)
+						{
+							// The choice card only shows the offer and stays set aside; the basic totem it shows is summoned.
+							IEntity summoner = g.IdEntityDic[DarkGifts.RecipeSource(g, c.Choice.SourceId)];
+							var totem = (Minion)Entity.FromCard(c, basicTotem, new EntityData
+							{
+								{GameTag.ZONE, (int)Zone.PLAY},
+								{GameTag.DISPLAYED_CREATOR, summoner.Id}
+							});
+							SummonBlock.Invoke(g, totem, -1, summoner);
+						}
+						else if (!c.BoardZone.IsFull && RemoveFromZone(c, playable))
 						{
 							SummonBlock.Invoke(g, (Minion)playable, -1, g.IdEntityDic[DarkGifts.RecipeSource(g, c.Choice.SourceId)]);
 						}
