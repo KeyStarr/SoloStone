@@ -227,7 +227,7 @@ internal static class NativeCoopMode
         var info = new AlertPopup.PopupInfo {
             m_id = "solostone-coop-start", m_headerText = definition.Name, m_showAlertIcon = false, m_keyboardEscIsCancel = true,
             m_text = "Two players, one screen: " + definition.Seats[0].Name + " and " + definition.Seats[1].Name
-                + " fight Nefarian together. If either hero falls, you both lose.\n\n"
+                + " fight " + BossName(definition) + " together. If either hero falls, you both lose.\n\n"
                 + (definition.HandoverScreen ? "The game hands the screen over at every turn." : "The board turns around for the next player at every turn."),
             m_responseDisplay = AlertPopup.ResponseDisplay.CONFIRM_CANCEL,
             m_confirmText = "PLAY", m_cancelText = NativeStrings.Get("GLOBAL_CANCEL", "Cancel").ToUpperInvariant(),
@@ -236,7 +236,11 @@ internal static class NativeCoopMode
         DialogManager.Get()?.ShowUniquePopup(info);
     }
 
-    // Starts a match: the two seats are dealt at random to the engine's Player 1 (who starts) and Player 2 (Nefarian's side).
+    // The boss as the start popup names it: its engine card's name.
+    private static string BossName(CoopDefinition definition) =>
+        SabberStoneCore.Model.Cards.FromId(definition.Boss)?.Name is string name && name.Length > 0 ? name : "the boss";
+
+    // Starts a match: the two seats are dealt at random to the engine's Player 1 (who starts) and Player 2 (the boss's side).
     internal static void Start(CoopDefinition definition)
     {
         try
