@@ -22,7 +22,7 @@ namespace SabberStoneCore.CardSets.Client.Core2026
                 {
                     var pick = remaining.Choose(g.Random);
                     picks.Add(pick.Id);
-                    remaining.RemoveAll(p => p.Card.Id == pick.Card.Id);
+                    remaining.RemoveAll(p => p.Card.IsSameCardAs(pick.Card)); // three different cards: a reprint is the same card (#225)
                 }
                 if (picks.Count > 0)
                 {

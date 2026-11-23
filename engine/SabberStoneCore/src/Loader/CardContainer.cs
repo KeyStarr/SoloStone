@@ -11,6 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
+using SabberStoneCore.Identity;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -74,6 +75,7 @@ namespace SabberStoneCore.Loader
 			CardSets.Client.Reprints.Apply(Cards);
             CardSets.Client.RebalancedCore2026.Apply(Cards);
             LegacyPoweredUpRules.Apply(Cards);
+            CardIdentity.Build(Cards.Values, Cards);
 		}
 
 		/// <summary>Returns an enumerator that iterates through the collection.</summary>

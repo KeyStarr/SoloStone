@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System.Linq;
 using SabberStoneCore.EffectSystem;
 using SabberStoneCore.Enchants;
@@ -17,8 +18,8 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { PowerTask = new CustomTask((g, c, s, t, stack) => {
                 if (c.BoardZone.IsFull) return;
                 // DiamondSpellstone uses distinct printed identities from destroyed graveyard entities.
-                var pool = c.GraveyardZone.OfType<Minion>().Where(m => m.ToBeDestroyed && m.Card.Cost >= 8 && m.Card.Id != s.Card.Id)
-                    .Select(m => m.Card.Id).Distinct().ToArray();
+                var pool = c.GraveyardZone.OfType<Minion>().Where(m => m.ToBeDestroyed && m.Card.Cost >= 8 && !m.Card.IsSameCardAs(s.Card))
+                    .Select(m => m.Card).Distinct(CardIdentity.Comparer).Select(c => c.Id).ToArray();
                 if (pool.Length == 0) return;
                 var order = pool.OrderBy(id => g.Random.Next()).ToArray();
                 if (pool.Length > 1) g.OnRandomHappened(true);

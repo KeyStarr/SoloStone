@@ -15,6 +15,7 @@
     <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
     <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
     <None Include="../../facts/violet-hold-2026-09.json" Link="facts.json" CopyToOutputDirectory="PreserveNewest" />
     <!-- Private tree only: the client export, for the strict hero skin check. -->

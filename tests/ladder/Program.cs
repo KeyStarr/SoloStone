@@ -52,19 +52,25 @@ static void WriteProfile(string path, LocalProfileData profile)
     using var stream = File.Create(path);
     new XmlSerializer(typeof(LocalProfileData)).Serialize(stream, profile);
 }
+// Give legacy editor fixtures the old Classic collection so they can exercise loading an owned Classic loaner.
+static void SeedClassicStarter(string path)
+{
+    using (var seed = new LocalProfile(path)) seed.CreateDraft("Seed", "HERO_08");
+    var data = ReadProfile(File.ReadAllBytes(path));
+    data.CustomDecks.Clear();
+    foreach (var pair in LocalEconomy.StarterCollection)
+        data.Collection.Add(new LocalCardCount { Id = pair.Key, Count = pair.Value, Acquired = pair.Value });
+    WriteProfile(path, data);
+}
 static string MatchSignature(LocalMatchRecord match) => string.Join("|", new object[] {
     match.Id, match.Deck, match.Opponent, match.Seed, match.StartedUtc, match.Result, match.Turns,
     match.Conceded, match.Gold, match.RewardVersion, match.BonusGold, match.PackReward,
     match.RewardFacts?.DistinctCardsPlayed, match.RewardFacts?.EnemyMinionsDefeated,
     match.RewardFacts?.MinimumHealth
 });
-// The current (V6, rolled) reward of a match: facts no longer matter, a loss or draw pays a third, the grind tier scales it.
-static LocalReward Rolled(LocalMatchRecord match, string result, int turns = 12)
-{
-    var reward = LocalEconomy.RewardV6(result, turns, false, LocalEconomy.RewardRollSeed(match.Id, match.Seed));
-    var tier = GrindTiers.Find(match.GrindTier);
-    return new LocalReward { Gold = tier.Gold(reward.Gold), BonusGold = reward.BonusGold, PackReward = reward.PackReward, Dust = tier.Dust(reward.Dust) };
-}
+static LocalReward Rolled(LocalMatchRecord match, string result, int turns = 12) =>
+    LocalEconomy.RewardV7(result, turns, false, match.RewardFacts, LocalEconomy.RewardRollSeed(match.Id, match.Seed),
+        GrindTiers.Find(match.GrindTier));
 // A fresh current profile at path holding the given gold (saves on disk are plain XML).
 static void GoldProfile(string path, int gold)
 {
@@ -147,12 +153,12 @@ try
     {
         Check(store.Gold == 0 && store.UnopenedPacks == 0 && store.Stars == 0 && store.Rank == "Bronze 10"
             && store.LastPack == null && !store.PackRevealPending, "fresh zero-pack profile has no receipt to resume");
-        CheckCollection(store, 93, 186, "fresh seeded collection plus exact Core grants");
+        CheckCollection(store, 0, 0, "fresh collection: no Classic starter (Wild since #87), exact Core grants");
         var exposed = (Dictionary<string, int>)store.Collection;
         exposed.Clear();
-        CheckCollection(store, 93, 186, "collection escaped by reference");
+        CheckCollection(store, 0, 0, "collection escaped by reference");
         var pending = store.Begin("mage", "priest", 123);
-        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>15</Version>"), "new profile is not the current version with rolled rewards");
+        Check(pending.RewardVersion == LocalEconomy.RollRewardVersion && File.ReadAllText(freshPath).Contains("<Version>" + LocalProfile.SaveVersion + "</Version>"), "new profile is not the current version with rolled rewards");
         Reject(() => store.Begin("mage", "warrior", 124), "second pending match");
         var result = store.Settle(pending.Id, "Won", 12, false);
         var rolled = Rolled(pending, "Won"); freshGold = rolled.Gold;
@@ -170,8 +176,8 @@ try
     {
         Check(store.Gold == freshGold && store.Stars == LadderRules.Fresh().Multiplier && store.History.Count == 1, "restart persistence");
         var pending = store.Begin("warrior", "mage", 124);
-        var loss = store.Settle(pending.Id, "Lost", 10, false);
-        var lossReward = Rolled(pending, "Lost", 10);
+        var loss = store.Settle(pending.Id, "Lost", 10, false, new LocalRewardFacts { ActiveTurns = 5, PlayMilliseconds = 540000 });
+        var lossReward = Rolled(loss, "Lost", 10);
         Check(loss.Gold == lossReward.Gold && loss.DustReward == lossReward.Dust && loss.Gold > 0 && !loss.PackReward
             && store.Gold == freshGold + loss.Gold && loss.ClassXpAfter > loss.ClassXpBefore, "a loss pays the rolled third and XP");
         freshGold = store.Gold;
@@ -273,7 +279,7 @@ try
     {
         var pending = store.Begin("mage", "priest", 813);
         rewardReceiptGold = store.Settle(pending.Id, "Lost", 4, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 0, MinimumHealth = 30 }).Gold;
+            new LocalRewardFacts { DistinctCardsPlayed = 6, ActiveTurns = 4, PlayMilliseconds = 360000 }).Gold;
         rewardReceiptId = pending.Id;
     }
     byte[] pendingRewardBytes = File.ReadAllBytes(pendingRewardRestartPath);
@@ -326,21 +332,21 @@ try
     using (var store = new LocalProfile(rewardsPath))
     {
         var match = store.Begin("mage", "priest", 1);
-        var facts = new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, MinimumHealth = 30 };
+        var facts = new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, ActiveTurns = 4, PlayMilliseconds = 360000 };
         Reject(() => store.Settle(match.Id, "Lost", int.MaxValue, false, facts), "unbounded turn count");
         var reward = store.Settle(match.Id, "Lost", 4, false, facts);
         facts.DistinctCardsPlayed = 0;
-        var lossExpected = Rolled(match, "Lost", 4);
+        var lossExpected = Rolled(reward, "Lost", 4);
         Check(reward.Gold == lossExpected.Gold && reward.DustReward == lossExpected.Dust && reward.Gold > 0 && reward.BonusGold == 0 && !reward.PackReward,
-            "a loss pays only the rolled third");
+            "a loss pays a share of the full loss reward");
         Check(store.Settle(match.Id, "Lost", 4, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, MinimumHealth = 30 }).Gold == reward.Gold,
+            new LocalRewardFacts { DistinctCardsPlayed = 6, EnemyMinionsDefeated = 4, ActiveTurns = 4, PlayMilliseconds = 360000 }).Gold == reward.Gold,
             "identical factual retry");
         Reject(() => store.Settle(match.Id, "Lost", 4, false,
-            new LocalRewardFacts { DistinctCardsPlayed = 5, EnemyMinionsDefeated = 4, MinimumHealth = 30 }), "conflicting reward facts");
+            new LocalRewardFacts { DistinctCardsPlayed = 5, EnemyMinionsDefeated = 4, ActiveTurns = 4, PlayMilliseconds = 360000 }), "conflicting reward facts");
         store.AcknowledgeRewardPresentation(match.Id);
 
-        // Rolled (V6) rewards ignore the facts: neither the enemy-minion nor the great-win facts add bonus gold or a pack.
+        // Rolled wins ignore the legacy reward facts: neither the enemy-minion nor the great-win facts add bonus gold or a pack.
         match = store.Begin("mage", "priest", 2);
         var minionFacts = new LocalRewardFacts { DistinctCardsPlayed = 0, EnemyMinionsDefeated = 5, MinimumHealth = 30 };
         reward = store.Settle(match.Id, "Won", 4, false, minionFacts);
@@ -631,7 +637,9 @@ try
     string deckPath = Path.Combine(root, "deck.xml");
     using (var store = new LocalProfile(deckPath))
     {
-        var input = mageCards.ToList();
+        // Classic cards are Wild (#87), so the playable saved deck is built from the Standard cards a new profile owns.
+        var stdMage = StandardDeckFixture.Deck(store, "HERO_08");
+        var input = stdMage.ToList();
         store.SaveDeck("🔥 Mage", "HERO_08", input);
         input[0] = "bad";
         var saved = store.CustomDeck;
@@ -640,23 +648,23 @@ try
         store.SaveDeck("Frost", "HERO_08", LocalDecks.Get("mage-frost").CardIds);
         Check(!store.IsDeckComplete(store.CustomDeck.Id), "unowned deck saved incomplete");
         Reject(() => store.Begin("custom", "priest", 1), "incomplete deck match");
-        store.SaveDeck("🔥 Mage", "HERO_08", mageCards);
-        Reject(() => store.SaveDeck(new string('x', 33), "HERO_08", mageCards), "long name");
+        store.SaveDeck("🔥 Mage", "HERO_08", stdMage);
+        Reject(() => store.SaveDeck(new string('x', 33), "HERO_08", stdMage), "long name");
 
-        var replacement = mageCards.AsEnumerable().Reverse().ToList();
+        var replacement = stdMage.AsEnumerable().Reverse().ToList();
         var beforeCollection = store.Collection.ToDictionary(pair => pair.Key, pair => pair.Value);
         ReplaceFileWithDirectory(deckPath, out var originalDeckBytes);
         bool failed = false;
         try { store.SaveDeck("Arcane Retry", "HERO_08", replacement); } catch (IOException) { failed = true; }
         catch (UnauthorizedAccessException) { failed = true; }
         Check(failed && store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Hero == "HERO_08" &&
-            store.CustomDeck.Cards.SequenceEqual(mageCards) && replacement.SequenceEqual(mageCards.AsEnumerable().Reverse()) &&
+            store.CustomDeck.Cards.SequenceEqual(stdMage) && replacement.SequenceEqual(stdMage.AsEnumerable().Reverse()) &&
             store.Collection.OrderBy(pair => pair.Key).SequenceEqual(beforeCollection.OrderBy(pair => pair.Key)),
             "failed replacement save mutated profile or caller draft");
         var exposedAfterFailure = store.CustomDeck;
         exposedAfterFailure.Name = "bad";
         exposedAfterFailure.Cards.Clear();
-        Check(store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Cards.SequenceEqual(mageCards),
+        Check(store.CustomDeck.Name == "🔥 Mage" && store.CustomDeck.Cards.SequenceEqual(stdMage),
             "failed replacement deck escaped by reference");
         RestoreFile(deckPath, originalDeckBytes);
         Check(File.ReadAllBytes(deckPath).SequenceEqual(originalDeckBytes), "failed replacement changed disk profile");
@@ -666,7 +674,8 @@ try
     }
     using (var store = new LocalProfile(deckPath))
     {
-        var replacement = mageCards.AsEnumerable().Reverse().ToList();
+        var stdMage = StandardDeckFixture.Deck(store, "HERO_08");
+        var replacement = stdMage.AsEnumerable().Reverse().ToList();
         Check(store.CustomDeck.Name == "Arcane Retry" && store.CustomDeck.Hero == "HERO_08" &&
             store.ResolveCustomDeck().CardIds.SequenceEqual(replacement), "replacement retry restart");
         var ui = new LocalCollectionUI(store);
@@ -695,6 +704,7 @@ try
     }
 
     string ambiguousUiPath = Path.Combine(root, "ui-ambiguous.xml");
+    SeedClassicStarter(ambiguousUiPath);
     using (var store = new LocalProfile(ambiguousUiPath))
     {
         store.CreateDraft("One", "HERO_08");
@@ -725,6 +735,7 @@ try
     }
 
     string uiFreshPath = Path.Combine(root, "ui-fresh.xml");
+    SeedClassicStarter(uiFreshPath);
     using (var store = new LocalProfile(uiFreshPath))
     {
         var ui = new LocalCollectionUI(store);
@@ -758,7 +769,7 @@ try
     Check(LocalProfile.NextStars(150, "Lost") == 150, "Legend floor");
 
     string missingVersionPath = Path.Combine(root, "missing-version.xml");
-    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>15</Version>", "");
+    string missingVersion = File.ReadAllText(freshPath).Replace("<Version>" + LocalProfile.SaveVersion + "</Version>", "");
     Check(!missingVersion.Contains("<Version>"), "missing-version fixture still has a version");
     File.WriteAllText(missingVersionPath, missingVersion);
     Reject(() => { using var ignored = new LocalProfile(missingVersionPath); }, "missing profile version");

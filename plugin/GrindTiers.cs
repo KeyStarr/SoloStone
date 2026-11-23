@@ -49,11 +49,11 @@ public static class GrindTiers
     public static readonly GrindTier Standard2x = new GrindTier(Standard2xId, "Normie",
         "Retail-shaped ladder, 2x match rewards and class XP.", 2, 2, Standard.Ladder, 7.8, 87, 4);
     public static readonly GrindTier Grinder = new GrindTier(GrinderId, "Grinder",
-        "A long road: no bonus stars, 0.75x match rewards and class XP.", 0.75, 0.75, new LadderPace(0, 1, 0.75), 20.8, 230, 3);
+        "A long road: no bonus stars, 0.75x match rewards and class XP.", 0.75, 0.75, new LadderPace(0, 1, 0.75), 20.5, 230, 3);
 
     public static readonly GrindTier Retail = new GrindTier(RetailId, "Retail",
         "0.4x match rewards and class XP: close to the live game's free-to-play income at about 2 h of play a day.",
-        0.4, 0.4, LadderPace.Standard, 39.2, 441, 2);
+        0.4, 0.4, LadderPace.Standard, 38.7, 441, 2);
 
     public static readonly GrindTier Relaxed6x = new GrindTier(Relaxed6xId, "Dad-gamer",
         "Faster ladder, 6x match rewards and 3x class XP.", 6, 3, Relaxed.Ladder, 2.6, 31, 6);

@@ -14,14 +14,16 @@ internal static class NpcWorldBoot
             return reader.ReadToEnd();
     }
 
-    internal static NpcWorldCatalogs LoadCatalogs() => LoadCatalogs(null);
+    internal static NpcWorldCatalogs LoadCatalogs() => LoadCatalogs(null, null);
 
     // casual: its decks join the ranked library (admission "casual": never generated, matched or inferred on the ladder).
-    internal static NpcWorldCatalogs LoadCatalogs(CasualDeckCatalog casual)
+    // arena (#6): its drafted decks join the library too (admission "arena": likewise never served by the ladder or Casual).
+    internal static NpcWorldCatalogs LoadCatalogs(CasualDeckCatalog casual, ArenaDeckCatalog arena)
     {
         NpcWorldJson.Parser = EmbeddedJson.Parse;
         var ranked = NpcDeckLibrary.Parse(Read(NpcDeckLibrary.ResourceName));
-        return new NpcWorldCatalogs(casual == null ? ranked : casual.MergeInto(ranked),
+        var withCasual = casual == null ? ranked : casual.MergeInto(ranked);
+        return new NpcWorldCatalogs(arena == null ? withCasual : arena.MergeInto(withCasual),
             SkillCatalog.Parse(Read(SkillCatalog.ResourceName)), PersonalityCatalog.Parse(Read(PersonalityCatalog.ResourceName)),
             NpcNotables.Parse(Read(NpcNotables.ResourceName)), NpcNameTables.Parse(Read(NpcNameTables.ResourceName)),
             NpcCosmeticPool.Parse(Read(NpcCosmeticPool.ResourceName)));
@@ -43,7 +45,10 @@ internal static class NpcWorldBoot
         CasualDeckCatalog casual = null;
         try { NpcWorldJson.Parser = EmbeddedJson.Parse; casual = CasualDeckCatalog.Parse(Read(CasualDeckCatalog.ResourceName)); }
         catch (Exception failure) { limited?.Invoke("npc-world casual catalog unavailable: " + failure.Message); }
-        return NpcWorldRuntime.TryInstallClient(() => NpcWorld.Generate(LoadCatalogs(casual)), PendingNpcForDeck, log, casual);
+        ArenaDeckCatalog arena = null;
+        try { NpcWorldJson.Parser = EmbeddedJson.Parse; arena = ArenaDeckCatalog.Parse(Read(ArenaDeckCatalog.ResourceName)); }
+        catch (Exception failure) { limited?.Invoke("npc-world arena catalog unavailable: " + failure.Message); }
+        return NpcWorldRuntime.TryInstallClient(() => NpcWorld.Generate(LoadCatalogs(casual, arena)), PendingNpcForDeck, log, casual, arena);
     }
 
     // The saved, unsettled match's NPC when it plays this deck (pins and names the deck while NpcWorldRuntime.Active is

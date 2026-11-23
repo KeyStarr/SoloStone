@@ -10,9 +10,10 @@ using SabberStoneCore.Enums;
 // the narrower LocalDecks.Custom list ("Unknown local card.") after Begin had committed Pending: a trapped save.
 internal static partial class Program
 {
-    private static readonly string[] LiveCustomMage = ("CATA_485,CORE_BAR_541,CORE_BAR_541,CORE_CS2_023,CORE_CS2_023,CORE_DRG_107,"
-        + "CORE_DRG_107,CORE_EDR_001,CORE_EDR_001,CORE_EX1_287,CORE_EX1_287,CORE_LOOT_101,CORE_LOOT_101,CORE_SW_108,CORE_SW_108,"
-        + "CS2_024,CS2_024,CS2_025,CS2_025,CS2_026,CS2_027,CS2_027,CS2_031,CS2_031,EX1_277,EX1_277,EX1_608,EX1_608,NEW1_012,NEW1_012").Split(',');
+    // Keep the live regression's pack card and two Golden First Flames in a Standard-legal deck.
+    private static readonly string[] StandardCustomMage = LocalDecks.Get("player-core-mage").CardIds
+        .Where(id => id != "CATA_485" && id != "CORE_SW_108")
+        .Concat(new[] { "CATA_485", "CORE_SW_108", "CORE_SW_108" }).ToArray();
 
     private static void StartUniverseAndTrap()
     {
@@ -22,9 +23,9 @@ internal static partial class Program
 
         // Root cause, pinned: the narrow list refuses this deck while the deck-saving universe accepts it.
         Check(!LocalDecks.IsCustomCard("CATA_485") && LocalProfile.KnownLedgerCard("CATA_485"), "CATA_485 no longer splits the universes");
-        try { LocalDecks.Custom("Custom Mage", "HERO_08", LiveCustomMage); throw new Exception("narrow list accepted the live deck"); }
+        try { LocalDecks.Custom("Custom Mage", "HERO_08", StandardCustomMage); throw new Exception("narrow list accepted the live deck"); }
         catch (InvalidOperationException error) { Check(error.Message == "Unknown local card.", "narrow list failed differently: " + error.Message); }
-        Check(LocalProfile.PlayableDeck("Custom Mage", "HERO_08", LiveCustomMage, null).CardIds.Count == 30, "playable universe refused the live deck");
+        Check(LocalProfile.PlayableDeck("Custom Mage", "HERO_08", StandardCustomMage, null).CardIds.Count == 30, "playable universe refused the live deck");
 
         string root = Path.Combine(Path.GetTempPath(), "hs-start-universe-" + Guid.NewGuid());
         string path = Path.Combine(root, "profile.xml");
@@ -33,9 +34,9 @@ internal static partial class Program
             using (var fresh = new LocalProfile(path)) fresh.SelectCardBack(0);
             // Current-schema fixture: seed the two Golden First Flames explicitly; startup tests do not exercise migration.
             var setup = Read(path);
-            Check(setup.Version == 15, "fresh fixture schema drifted");
+            Check(setup.Version == LocalProfile.SaveVersion, "fresh fixture schema drifted");
             setup.PremiumCollection.Add(new LocalCardCount { Id = "CORE_SW_108", Premium = 1, Count = 2, Acquired = 2 });
-            foreach (var group in LiveCustomMage.Where(id => id != "CORE_SW_108").GroupBy(id => id))
+            foreach (var group in StandardCustomMage.Where(id => id != "CORE_SW_108").GroupBy(id => id))
             {
                 var row = setup.Collection.SingleOrDefault(card => card.Id == group.Key);
                 if (row == null) setup.Collection.Add(row = new LocalCardCount { Id = group.Key });
@@ -50,7 +51,7 @@ internal static partial class Program
             {
                 Check(profile.OwnedCount("CORE_SW_108", 1) == 2, "fixture lacks the explicit Golden First Flame ownership");
                 deckId = profile.CreateDraft("Custom Mage", "HERO_08").Id;
-                var entries = LiveCustomMage.Select(id => new LocalDeckCard { Id = id, Premium = id == "CORE_SW_108" ? 1 : 0 }).ToList();
+                var entries = StandardCustomMage.Select(id => new LocalDeckCard { Id = id, Premium = id == "CORE_SW_108" ? 1 : 0 }).ToList();
                 profile.SavePremiumDraft(deckId, "Custom Mage", "HERO_08", entries, deckId);
                 Check(profile.IsDeckComplete(deckId), "live deck shape is not complete");
                 var saved = profile.GetDraft(deckId);
@@ -66,7 +67,7 @@ internal static partial class Program
                 catch (InvalidOperationException) { }
                 Check(profile.Pending == null && before.SequenceEqual(File.ReadAllBytes(path)), "refused start touched the profile");
 
-                // The exact live shape passes every start check and the match itself starts with its Golden copies.
+                // The Standard deck passes every start check and the match itself starts with its Golden copies.
                 var saved2 = NativeUIProjection.ValidateStart(profile, "custom:" + deckId, resolved, true);
                 var premium = NativeMatch.PremiumEntries(resolved.CardIds, saved2);
                 Check(premium != null && premium.Count(card => card.Premium == 1) == 2, "Golden entries lost before the match");

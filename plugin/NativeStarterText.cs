@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 // #57 hidden starter decks (owner 2026-10-28): copy and test-control ids. Pure text, so test-control checks it on the Mac.
 internal static class NativeStarterText
 {
@@ -15,4 +17,26 @@ internal static class NativeStarterText
 
     internal static string DialogButtonId(string popupId, string button) =>
         popupId != RestorePopupId ? null : button == "confirm" ? ConfirmId : button == "cancel" ? CancelId : null;
+}
+
+// #87: a saved Standard deck that still holds Wild (Classic/Basic) cards. Shown when Play is pressed on such a deck.
+internal static class NativeStandardText
+{
+    internal const string WildDeckHeader = "Wild Cards";
+    internal const string FormatDeckHeader = "Not a Standard Deck";
+    internal static string FormatDeckBody(string format) =>
+        "This is a " + format + " deck. This version of SoloStone plays Standard decks only.";
+    internal const int NamedCards = 6;
+    internal static string WildDeckBody(IReadOnlyList<string> ids)
+    {
+        var names = ids.Take(NamedCards).Select(CardName).ToList();
+        if (ids.Count > NamedCards) names.Add("and " + (ids.Count - NamedCards) + " more");
+        return "This deck has cards that are not in Standard: " + string.Join(", ", names)
+            + ". Edit the deck and replace them to play.";
+    }
+    private static string CardName(string id)
+    {
+        try { return SabberStoneCore.Model.Cards.FromId(id)?.Name ?? id; }
+        catch (KeyNotFoundException) { return id; }
+    }
 }

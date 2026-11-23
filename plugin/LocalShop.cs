@@ -44,7 +44,17 @@ public sealed class LocalTierReward {
 public sealed class LocalMilestoneCatchUp {
     public string Id; public List<LocalTierReward> TierRewards = new List<LocalTierReward>(); public bool Acknowledged;
 }
+// The opponent an unshifted queue would draw during placement. An unrated fallback has no identity.
+public sealed class LocalPlacementOpponent
+{
+    public string NpcId;
+    public string DeckId;
+    public double Rating;
+}
+
 public sealed class LocalLadderReceipt {
+    public double? PlacementRatingAfter;
+    public bool ShouldSerializePlacementRatingAfter() => PlacementRatingAfter.HasValue;
     public int StarsBefore; public int StarsAfter; public int MultiplierBefore; public int MultiplierAfter;
     public int StreakBefore; public int StreakAfter; public double? RatingBefore; public double? RatingAfter;
     public int StarsGained; public List<string> FloorsReached = new List<string>(); public bool LegendReached; public int LadderRuleVersion;
@@ -566,12 +576,14 @@ public sealed class LocalShop
         new HashSet<string>(LocalCardCatalog.ActiveMetaExtraCards, StringComparer.Ordinal));
     internal static bool IsActiveExtraCard(string id) => activeExtraIds.Value.Contains(id);
 #endif
+    // #87: the one Standard rule (active-meta sets, Core 1637, listed extras). A CORE_ prefix alone is not Standard: hidden
+    // Core copies (CORE_HIDDEN, e.g. CORE_CS2_231) and Legacy reprints (CORE_EDR_004) are not in the meta.
     internal static bool IsStandardCard(EngineCard card) => card != null && card.Collectible && card.Implemented
-        && (LocalCardCatalog.IsCore(card.Id) || standardSets.Value.Contains(card.Set)
 #if ENGINE_SOURCE
-            || activeExtraIds.Value.Contains(card.Id)
+        && LocalCardCatalog.IsStandard(card);
+#else
+        && (LocalCardCatalog.IsCore(card.Id) || standardSets.Value.Contains(card.Set));
 #endif
-        );
     internal static IEnumerable<EngineCard> StandardCollectionCards =>
         FairPackRules.Eligible(FairPackRules.Standard, FairPackRules.RuleVersion)
 #if ENGINE_SOURCE
@@ -1046,7 +1058,10 @@ public sealed partial class LocalProfile
     private static readonly Lazy<Dictionary<string, EngineCard>> ledgerCardIndex = new Lazy<Dictionary<string, EngineCard>>(() =>
         ledgerCards.Value.ToDictionary(card => card.Id, StringComparer.Ordinal));
     private static Dictionary<string, EngineCard> LedgerCardIndex => ledgerCardIndex.Value;
-    internal static bool KnownLedgerCard(string id) => id != null && (LedgerCardIndex.ContainsKey(id) || LocalCoreProgression.IsAvailable(id));
+    // A collectible CORE_ id stays known even when it is not Standard (#87): an older save may hold one (the old creation
+    // cheat put hidden and Legacy Core copies in CoreGrants, and a Legend deck snapshot can name it), and must keep loading.
+    internal static bool KnownLedgerCard(string id) => id != null && (LedgerCardIndex.ContainsKey(id) || LocalCoreProgression.IsAvailable(id)
+        || id.StartsWith("CORE_", StringComparison.OrdinalIgnoreCase) && IsCollectibleCard(id));
     // Premium receipts must keep loading after a meta change: any collectible definition is a valid sold card.
     private static bool IsCollectibleCard(string id) {
         try { return Cards.FromId(id)?.Collectible == true; } catch (KeyNotFoundException) { return false; }
@@ -1241,8 +1256,8 @@ public sealed partial class LocalProfile
         }
         int stars = 0;
         foreach (var m in p.Matches.Concat(p.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { p.Pending })) {
-            // #37 Casual: no ladder receipt and outside the star fold; its progression receipt is checked like a ranked one.
-            if (CasualRules.IsCasual(m.Mode) && m.Casual != null) {
+            // #37 Casual and Arena (#6): no ladder receipt and outside the star fold; the progression receipt is checked like a ranked one.
+            if (ArenaRules.IsArena(m.Mode) && m.Result != null || CasualRules.IsCasual(m.Mode) && m.Casual != null) {
                 if (m.Result == null || m.Ladder != null || (m.TierRewards != null && m.TierRewards.Count != 0)
                     || !m.ClassXpBefore.HasValue || !m.ClassXpAfter.HasValue || m.ClassXpBefore < 0 || m.ClassXpAfter < m.ClassXpBefore
                     || m.ProgressionRuleVersion < 1 || !ValidIds(m.UnlockedCardIds) || m.UnlockedCardIds.Any(id => !LocalCoreProgression.ById.ContainsKey(id)))
@@ -1252,7 +1267,7 @@ public sealed partial class LocalProfile
                     throw new InvalidOperationException("Invalid class XP receipt.");
                 continue;
             }
-            int after = CasualRules.IsCasual(m.Mode) ? stars : NextStars(stars, m.Result);
+            int after = !ArenaRules.IsRanked(m.Mode) ? stars : NextStars(stars, m.Result);
             if (m.Ladder == null) {
                 if (m.ClassXpBefore.HasValue || m.ClassXpAfter.HasValue || m.UnlockedCardIds != null || m.ProgressionRuleVersion != 0 || m.TierRewards != null || m.DustReward != 0)
                     throw new InvalidOperationException("Partial historical match receipt.");

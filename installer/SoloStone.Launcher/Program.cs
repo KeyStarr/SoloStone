@@ -92,7 +92,7 @@ namespace SoloStone
                     var report=StatusReport.Build(o.Root,engine,TestedClient.Compiled(),UpdateConfig.Compiled(),new NoBindingManifest(),NoSafetyFailures);
                     progress(o.Json?report.ToJson():(report.Installed?"Installed: "+report.ReleaseVersion+". Client: "+report.ClientVersion+". "+report.Verdict?.Message:"Not installed. "+report.InstallProblem)); return 0;
                 }
-                if(o.Command=="settings") { Settings.Save(o.Root,new Settings { CheckForUpdates=o.UpdatesSwitch=="on" }); progress("Update checks are "+o.UpdatesSwitch+"."); return 0; }
+                if(o.Command=="settings") { Settings.SaveChecks(o.Root,o.UpdatesSwitch=="on"); progress("Update checks are "+o.UpdatesSwitch+"."); return 0; }
                 if(o.Command=="setup") {
                     WindowsHost.RequireIdle(o.Root);
                     string source=o.Source;

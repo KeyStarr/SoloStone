@@ -103,6 +103,65 @@ row M SoundManager LoadAndPlayClip # sound observer: GetMethods().Single(name ==
 site NativeAchievementToast.Initialize | Enumerate | SoundManager.(members chosen at run time) # rows above: foreach array of audio hooks and the SoundManager Single(...) lookup; the later sound ones are try-wrapped diagnostics
 site NativeAchievementToast.Initialize | Patch | (target not known from the IL) # rows above: foreach array of audio hooks and the SoundManager Single(...) lookup; the later sound ones are try-wrapped diagnostics
 
+# NativeArena.InstallLoadPatches
+site NativeArena.InstallLoadPatches | Patch | (target not known from the IL) # the generated E/M rows cover the four iterator and five startup methods selected from runtime tuples
+
+# NativeArena.InstallRetailGuards
+site NativeArena.InstallRetailGuards | Patch | (target not known from the IL) # the generated E/M rows cover four methods and two iterator MoveNext targets selected from the runtime array
+
+# NativeArena.Patch
+row M Box OnArenaButtonPressed # Arena prefix target selected through the shared Patch helper
+row M Hub HandleAreanaButtonPressed # Arena prefix target selected through the shared Patch helper
+row M Network SendArenaSessionRequest # Arena prefix target selected through the shared Patch helper
+row M Network RequestDraftChoicesAndContents # Arena prefix target selected through the shared Patch helper
+row M Network DraftBegin # Arena prefix target selected through the shared Patch helper
+row M Network MakeDraftChoice # Arena prefix target selected through the shared Patch helper
+row M Network DraftRetire # Arena prefix target selected through the shared Patch helper
+row M Network AckDraftRewards # Arena prefix target selected through the shared Patch helper
+row M Network DraftRequestDisablePremiums # Arena prefix target selected through the shared Patch helper
+row M Network RequestArenaRatingInfo # Arena prefix target selected through the shared Patch helper
+row M Network SaveArenaDeck # Arena prefix target selected through the shared Patch helper
+row M Network RedraftBegin # Arena prefix target selected through the shared Patch helper
+row M Network GetArenaSessionResponse # Arena prefix target selected through the shared Patch helper
+row M Network GetDraftChoicesAndContents # Arena prefix target selected through the shared Patch helper
+row M Network GetBeginDraft # Arena prefix target selected through the shared Patch helper
+row M Network GetDraftChosen # Arena prefix target selected through the shared Patch helper
+row M Network GetRetiredDraft # Arena prefix target selected through the shared Patch helper
+row M Network GetRewardsAckDraftID # Arena prefix target selected through the shared Patch helper
+row M Network GetDraftRemovePremiumsResponse # Arena prefix target selected through the shared Patch helper
+row M Network GetArenaRatingInfoResponse # Arena prefix target selected through the shared Patch helper
+row M Network GetSaveArenaDeckResponse # Arena prefix target selected through the shared Patch helper
+row M Network GetDraftError # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager Awake # Arena prefix target selected through the shared Patch helper
+row M DraftDisplay Awake # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager SpendTicket # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager ToggleUndergroundState # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager ShowArenaDisclaimer # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager CheckForFTUXPopup # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager UpdateArenaRatingValues # Arena prefix target selected through the shared Patch helper
+row M ArenaLandingPageManager StartMatchmaking # Arena prefix target selected through the shared Patch helper
+row M DraftManager FindGame # Arena prefix target selected through the shared Patch helper
+row M DraftDisplay PlayButtonPress # Arena prefix target selected through the shared Patch helper
+row M DraftManager SetUndergroundState # Arena prefix target selected through the shared Patch helper
+row M DraftManager GetDraftPremium # Arena prefix target selected through the shared Patch helper
+row M DraftManager HasAlreadySeenPhaseMessage # Arena prefix target selected through the shared Patch helper
+row M CollectionManager GetHeroPremium (TAG_CLASS) # Arena prefix target selected through the shared Patch helper
+row M DraftManager GetNumTicketsOwned # Arena prefix target selected through the shared Patch helper
+row M DraftManager GetMaxWins (System.Boolean) # Arena prefix targets the underground overload
+row M DraftManager GetMaxWins () # Arena prefix targets the normal overload
+row M DraftManager GetMaxLosses (System.Boolean) # Arena prefix targets the underground overload
+row M DraftManager GetMaxLosses () # Arena prefix targets the normal overload
+row M ArenaModeToggleButton DetermineStartingState # Arena prefix target selected through the shared Patch helper
+row M BnetPresenceMgr SetGameFieldBlob # Arena prefix target selected through the shared Patch helper
+row M PresenceMgr SetStatus # Arena prefix target selected through the shared Patch helper
+row M PresenceMgr SetPrevStatus # Arena prefix target selected through the shared Patch helper
+row M AchieveManager IsReady # Arena prefix target selected through the shared Patch helper
+row M TavernTicketDisplay OpenTavernTicketProductPage # Arena prefix target selected through the shared Patch helper
+site NativeArena.Patch | Method | (unknown type) # rows above cover every owner and name passed to the shared runtime lookup
+
+# NativeArena.RoutineStep
+site NativeArena.RoutineStep | Field | (unknown type) # reads <>1__state on the four iterator instances covered by the E rows under InstallLoadPatches; E validates their generated MoveNext types
+
 # NativeBigCardWatchdog.Initialize
 row M HistoryManager PlayBigCardCounteredEffects # big-card counter watchdog patch target
 site NativeBigCardWatchdog.Initialize | Enumerate | HistoryManager.(members chosen at run time) # finds the lambda of PlayBigCardCounteredEffects by shape, because a patch can renumber it; a miss turns this watchdog off and blocks nothing
@@ -164,7 +223,6 @@ row F BnetBar m_currencyFrames # NativeHiddenEntries string table (hides retail 
 row F BnetBar m_friendButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
 row F BnetBar m_tutorialSkipButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
 row F BnetBar m_tutorialSkipPopup # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
-row F Box m_ArenaButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
 row F Box m_BattleGroundsButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
 row F Box m_GameModesButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
 row F Box m_QuestLogButton # NativeHiddenEntries string table (hides retail UI); a miss only warns and leaves the retail control showing
@@ -452,14 +510,14 @@ row M SoundManager Play # GetDeclaredMethods().Single(name == Play && 4 paramete
 site NativeTurnTimerOption.Initialize | Enumerate | SoundManager.(members chosen at run time) # row above: the Single(...) lookup
 site NativeTurnTimerOption.Initialize | Patch | (target not known from the IL) # row above: the Single(...) lookup
 
-# NativeUIProbe+<>c__DisplayClass201_0.<CurrentRecipeGuide>b__0
+# NativeUIProbe+<>c__DisplayClass209_0.<CurrentRecipeGuide>b__0
 row F DeckTemplatePicker m_currentSelectedDeck # recipe guide: which template is selected
-site NativeUIProbe+<>c__DisplayClass201_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
+site NativeUIProbe+<>c__DisplayClass209_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
 
-# NativeUIProbe+<MassBoosterOpened>d__412.MoveNext
+# NativeUIProbe+<MassBoosterOpened>d__422.MoveNext
 row F PackOpeningDirector m_massPackOpeningHighlights # mass pack opening: the widgets must have loaded before the receipt is fed
 row F PackOpeningDirector m_massPackOpeningSummary # mass pack opening: the widgets must have loaded before the receipt is fed
-site NativeUIProbe+<MassBoosterOpened>d__412.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
+site NativeUIProbe+<MassBoosterOpened>d__422.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
 
 # NativeUIProbe.Batch
 row F NetCache+NetCacheBatchRequest m_requests # cache batch requests are made non-reloading while the probe is active
@@ -550,9 +608,9 @@ site ProfileFormKit.Request | Method | (unknown type) # NativeRewardUI.LoadRaw l
 # Added after the review: closures and table rows the scanner now follows
 site NativeAchievementStep+<>c__DisplayClass94_0.<SerializedAudioFields>b__1 | Property | (unknown type) # diagnostic: only logs, a missing member degrades to null
 site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager+BigCardEntry.RunFinishedCallbackAndDestroyBigCard (not on this type) # the row table's Method rows read as Field names on the other type; the real rows are listed above
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Field | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Method | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
-site NativeShop+<>c__DisplayClass256_1.<.cctor>b__7 | Property | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Field | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Method | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
+site NativeShop+<>c__DisplayClass263_1.<.cctor>b__7 | Property | (unknown type) # the lazy resolver of NativeShop.ReflectionBindings, whose rows the scanner reads directly
 site NativeUIProbe.BeforeMassRevealAll | Field | (unknown type) # reads the same PackOpeningDirector fields as MassPageCards, rowed under the pack reveal proof
 site NativeUIProbe.MassPageCards | Field | (unknown type) # m_massPackOpeningHiddenCards and HiddenCards.m_cards, rowed under the pack reveal proof
 site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager+BigCardEntry.CutoffBigCardTransformEffects (not on this type) # the row table splits on row[0], and the scan reads both arms; the real field and method rows are listed under NativeBigCardWatchdog above

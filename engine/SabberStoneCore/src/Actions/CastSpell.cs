@@ -167,7 +167,7 @@ namespace SabberStoneCore.Actions
                 // Hand-play completion owns PLAY; automatic deck casts consume the original before any draw.
                 if (automatic && spell.Zone != null && spell.Zone != c.BoardZone && spell.Zone != c.SecretZone)
                     RemoveFromZone(c, spell);
-                bool failedSecret = spell.IsSecret && (c.SecretZone.IsFull || c.SecretZone.Any(p => p.Card.Id == spell.Card.Id));
+                bool failedSecret = spell.IsSecret && (c.SecretZone.IsFull || c.SecretZone.HasSameCard(spell.Card));
                 bool failedQuest = spell.IsQuest && !QuestRules.CanInstall(c, spell.Card);
                 var targeting = SpellTargetingProfile(spell, chooseOne);
                 if ((automatic || repeat) && (failedSecret || failedQuest

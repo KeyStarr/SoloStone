@@ -10,7 +10,7 @@ using HarmonyLib;
 using UnityEngine;
 
 #if SOLOSTONE_RELEASE
-[BepInPlugin("solostone.plugin", "SoloStone", "0.3.0")]
+[BepInPlugin("solostone.plugin", "SoloStone", "0.4.0")]
 #else
 [BepInPlugin("local.hs.native.ui.probe", "Hearthstone Native UI Probe", "0.0.1")]
 #endif
@@ -264,6 +264,8 @@ public sealed class OfflineProbe : BaseUnityPlugin
         NativeTurnTimerOption.Initialize(harmony, Logger, Config);
         NativeFpsCounter.Initialize(Logger, Config);
         NativeDeckInferenceOption.Initialize(Logger, Config);
+        NativePlainCardsOption.Initialize(Logger, Config);
+        NativeOpponentPetsOption.Initialize(Logger, Config);
         NativeLanguageOption.Initialize(Logger, Config);
         // SoloStone Options: the Options plank and the panels holding the controls above.
         NativeOptionsPanels.Initialize(harmony, Logger);

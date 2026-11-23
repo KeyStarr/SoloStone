@@ -11,6 +11,7 @@ namespace SoloStone
     {
         public static Color VerdictColor(VerdictKind? kind) => Texts.VerdictColor(kind) == VerdictTone.Block ? Color.Firebrick : Texts.VerdictColor(kind) == VerdictTone.Warning ? Color.FromArgb(160, 80, 0) : SystemColors.ControlText;
         public int MaxHeight = 220;
+        public int? GapAfter;
         public WrapText(string name) {
             Name = name; Multiline = true; ReadOnly = true; BorderStyle = BorderStyle.None; TabStop = false; WordWrap = true;
             BackColor = SystemColors.Control; ScrollBars = ScrollBars.None; Height = 20;
@@ -60,14 +61,16 @@ namespace SoloStone
             try {
                 int width = Math.Max(120, ClientSize.Width - Padding.Horizontal);
                 int y = Padding.Top + AutoScrollPosition.Y, x = Padding.Left + AutoScrollPosition.X;
+                int nextGap = 0;
                 foreach (Control c in Controls) {
                     if (!c.Visible) continue;
                     if (c is WrapText || c is Row || c is ProgressBar || c is FlowLayoutPanel) c.Width = width;
                     else if (c.AutoSize) c.MaximumSize = new Size(width, 0);
                     else c.Width = Math.Min(c.Width, width);
-                    c.Left = x; c.Top = y; y += c.Height + Gap;
+                    c.Left = x; c.Top = y + nextGap; y = c.Bottom;
+                    nextGap = (c as WrapText)?.GapAfter ?? Gap;
                 }
-                AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y + Padding.Bottom - Gap);
+                AutoScrollMinSize = new Size(0, y - AutoScrollPosition.Y + Padding.Bottom);
             } finally { laying = false; }
         }
     }

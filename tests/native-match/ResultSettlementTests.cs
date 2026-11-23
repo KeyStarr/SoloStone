@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using SabberStoneCore.Actions;
 using SabberStoneCore.Model;
 using SabberStoneCore.Enums;
 using SabberStoneCore.Tasks.PlayerTasks;
@@ -16,6 +17,7 @@ internal static partial class Program
     // atomic save failure/retry and achievement evidence invalidated by a failed Rewind validation.
     private static void ResultSettlementTests()
     {
+        LossRewardParticipationNative();
         var (match, capture) = SogStart(new[] { "JAIL_509" }, new[] { "JAIL_509" });
         SogComplete(match, capture);
         var game = match.Game;
@@ -142,4 +144,68 @@ internal static partial class Program
             Directory.Delete(root, true);
         }
     }
+    private static void LossRewardParticipationNative()
+    {
+        foreach (bool concede in new[] { false, true })
+        {
+            long clock = 1000;
+            var (match, capture) = SogStart(Array.Empty<string>(), Array.Empty<string>());
+            match.RewardClock = () => clock;
+            // A long mulligan must not accrue time, and several moves on one turn count once.
+            clock += 600000;
+            SogComplete(match, capture);
+            var game = match.Game;
+            for (int turn = 1; turn <= 6; turn++)
+            {
+                var human = game.Player1;
+                Check(game.CurrentPlayer == human, "test is on the human turn");
+                if (turn == 3)
+                    InvokeProcess(match, human.Options().OfType<HeroPowerTask>().First());
+                else if (turn == 4)
+                    InvokeProcess(match, human.Options().OfType<MinionAttackTask>()
+                        .First(task => task.ActionTarget?.Id == game.Player2.Hero.Id));
+                else if (turn == 5)
+                {
+                    var card = Generic.DrawCard(human, Cards.FromId("TIME_038"));
+                    card.Cost = 0;
+                    FlushHistory(match);
+                    InvokeProcess(match, human.Options().OfType<PlayCardTask>().First(task => task.Source?.Id == card.Id));
+                    Check(game.Rewind != null, "the only player move this turn offers a Rewind");
+                    InvokeProcess(match, ChooseTask.Pick(human, game.Rewind.RewindEntityId));
+                    if (game.Rewind != null)
+                        InvokeProcess(match, ChooseTask.Pick(human, game.Rewind.KeepEntityId));
+                    Check(!game.HistoryFacts.Query.PlayerActions().Any(action => action.Turn == game.Turn && action.ControllerId == human.Id),
+                        "the Rewind discards the action fact so the committed attempt must count separately");
+                }
+                else if (turn != 2)
+                    InvokeProcess(match, human.Options().OfType<PlayCardTask>().First());
+                if (turn == 1)
+                    InvokeProcess(match, human.Options().OfType<PlayCardTask>().First());
+                InvokeProcess(match, EndTurnTask.Any(human));
+                if (turn == 6) break;
+                if (turn == 1)
+                    InvokeProcess(match, game.Player2.Options().OfType<PlayCardTask>().First());
+                InvokeProcess(match, EndTurnTask.Any(game.Player2));
+            }
+            // The last qualifying turn already ended, so either ending gives the same participation evidence.
+            clock += 539999;
+            if (concede) match.Concede();
+            else
+            {
+                game.Player1.Hero.Armor = 0;
+                game.Player1.Hero.Damage = game.Player1.Hero.BaseHealth - 1;
+                var lethal = game.Player2.Options().OfType<MinionAttackTask>()
+                    .First(task => task.ActionTarget?.Id == game.Player1.Hero.Id);
+                InvokeProcess(match, lethal);
+            }
+            Check(game.State == State.COMPLETE && game.Player1.PlayState == PlayState.LOST
+                && match.HumanConceded == concede, "natural defeat and concede use the real native terminal path");
+            clock += 10000;
+            var facts = match.RewardFacts;
+            Check(facts.ActiveTurns == 5 && facts.PlayMilliseconds == 539999,
+                "only distinct human move turns and post-mulligan time up to the terminal action count");
+        }
+        Console.WriteLine("PASS native loss rewards count accepted human moves on distinct turns and freeze the clock for both endings");
+    }
+
 }

@@ -11,6 +11,7 @@ internal static class B17LifecycleEdgesProof
     internal static void Run()
     {
         Unpinned_HuskSimultaneousAndConcession();
+        HuskHeroDeathrattleSkull();
         Unpinned_RebornAuraAndExpiry();
         Unpinned_RecruitCopyAndBounce();
         Unpinned_RecruitControlTransfer();
@@ -225,6 +226,27 @@ internal static class B17LifecycleEdgesProof
         var transform=(Minion)Play(g,p,"EX1_564",recruit);
         savior.HasDivineShield=true;savior.HasDivineShield=false;g.ProcessTasks();
         Core2026Proof.Check(transform.Health==2,"exact transform copy retains Silence application count");
+    }
+    // The client draws the hero Deathrattle skull from hero tag PLAYER_DEATHRATTLE (4398), whose value is the entity id of
+    // the set-aside "Eternal Life" card (#191). The tag follows the grant: set by Husk, kept through hero swaps, cleared on revive.
+    private static void HuskHeroDeathrattleSkull()
+    {
+        const GameTag skull=(GameTag)4398;
+        var g=DeathKnightC1Proof.NewGame(1);var p=g.Player1;PoolPilotProof.EmptyHand(p);
+        Core2026Proof.Check(p.Hero[skull]==0,"no skull before Husk");
+        Play(g,p,"TIME_618");
+        var life=g.IdEntityDic[p.Hero[skull]];
+        Core2026Proof.Check(life.Card.Id=="TIME_618t" && life.Zone==p.SetasideZone && life.Controller==p,"Husk points the hero skull at its set-aside Eternal Life");
+        Play(g,p,"TIME_618");
+        Core2026Proof.Check(p.Hero[skull]==life.Id && p.AppliedEnchantments.Count(e=>e.Card.Id=="TIME_618e")==1,"a second Husk keeps one grant and one skull");
+        var oldHero=p.Hero;
+        Play(g,p,"ICC_833");
+        Core2026Proof.Check(p.Hero!=oldHero && p.Hero[skull]==life.Id && oldHero[skull]==0,"a new hero card carries the skull");
+        var replaced=p.Hero;
+        new SabberStoneCore.Tasks.SimpleTasks.ReplaceHeroTask("BRM_027h","BRM_027p").Process(g,p,Add(p,"BRM_027"),null);
+        Core2026Proof.Check(p.Hero!=replaced && p.Hero[skull]==life.Id && replaced[skull]==0,"ReplaceHeroTask carries the skull to the new hero");
+        CorpseRules.Gain(p,5);p.Hero.Destroy();g.DeathProcessingAndAuraUpdate();
+        Core2026Proof.Check(p.Hero.Health==5 && !p.Hero.ToBeDestroyed && p.Hero[skull]==0,"the revive clears the skull");
     }
     private static void HistoryOff()
     {

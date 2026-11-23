@@ -19,7 +19,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { PowerTask = new DecisionSpellTask("b14-h2/deja-vu/v1",
                 new DiscoverThenContinueTask((g,c,s,stack) => {
                     PayloadRules.Clear(s);
-                    var groups = c.Opponent.HandZone.GroupBy(p => p.Card.Id,StringComparer.Ordinal).Select(group => group.ToArray()).ToList();
+                    var groups = c.Opponent.HandZone.GroupBy(p => p.Card.Identity).Select(group => group.ToArray()).ToList();
                     var offers = new List<Card>();
                     while (offers.Count < 3 && groups.Count > 0)
                     {

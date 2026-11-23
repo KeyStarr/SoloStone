@@ -409,6 +409,16 @@ namespace SabberStoneCore.Model.Zones
 			return entity;
 		}
 
+		/// <summary>Adds an entity without publishing a ZONE tag change; the caller sets the ZONE tag itself.</summary>
+		internal void AddWithoutZoneTag(IPlayable entity)
+		{
+			if (entity.Controller != Controller)
+				throw new ZoneException("Can't add an opponent's entity to own Zones");
+			if (_entities.Length == _count) Resize();
+			_entities[_count++] = entity;
+			entity.Zone = this;
+		}
+
 		public override void MoveTo(IPlayable entity, int zonePosition = -1)
 		{
 			if (_entities.Length == _count) Resize();

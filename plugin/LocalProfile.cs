@@ -97,6 +97,11 @@ public sealed class LocalMatchRecord
     public string NpcDeckId;
     public double? NpcRating;   // the encounter's rating; Settle falls back to it when the caller passes none
     public bool? NpcConceded;   // the NPC conceded (player Won); null = not recorded
+    // NPC difficulty the match was played on (NpcDifficultyIds): written only for Easy/Medium world encounters, so Hard
+    // matches and older saves stay byte-identical (no version bump).
+    public string NpcDifficulty;
+    public bool ShouldSerializeNpcDifficulty() => NpcDifficulty != null;
+    public LocalPlacementOpponent PlacementOpponent;
     // XmlSerializer writes xsi:nil for a null Nullable<T>; *Specified omits the element so older saves stay byte-identical.
     [XmlIgnore] public bool NpcRatingSpecified { get => NpcRating.HasValue; set { } }
     [XmlIgnore] public bool NpcConcededSpecified { get => NpcConceded.HasValue; set { } }
@@ -113,6 +118,13 @@ public sealed class LocalMatchRecord
     // tier rewards; Casual holds its hidden-MMR step (CasualRules).
     public string Mode;
     public LocalCasualReceipt Casual;
+    // Arena (#6): the run this match belongs to (Mode "Arena" only), and the run's record right after this match settled.
+    // Additive and optional like Mode: absent elements keep older saves byte-identical.
+    public string ArenaRunId;
+    public int ArenaWins, ArenaLosses;
+    public bool ShouldSerializeArenaRunId() => ArenaRunId != null;
+    public bool ShouldSerializeArenaWins() => ArenaRunId != null && Result != null;
+    public bool ShouldSerializeArenaLosses() => ArenaRunId != null && Result != null;
 }
 
 public sealed class LocalCasualReceipt
@@ -148,7 +160,7 @@ public sealed class LocalNpcRecord
         int wins = 0, losses = 0, ties = 0; string last = null;
         foreach (var match in settled)
         {
-            if (match == null || match.NpcId != npcId) continue;
+            if (match == null || match.NpcId != npcId || ArenaRules.IsArena(match.Mode)) continue;   // Arena: no rivals, no memory
             switch (match.Result)
             {
                 case "Won": wins++; last = "Won"; break;
@@ -186,6 +198,9 @@ public sealed class LocalCustomDeck : LocalDeckCardContainer
     public string PetFamily;
     public string PetForm;
     public bool RandomPetUseFavorite = true;
+    // V16 (#87): the deck's format, "Standard" for every deck today (Commit writes it; the V16 migration stamps old decks).
+    // Wild mode adds its value later; a reader that finds null treats the deck as Standard.
+    public string Format;
     [XmlIgnore] public bool RandomPetUseFavoriteSpecified { get => !RandomPetUseFavorite; set { } }
     [XmlIgnore] public bool CoinSpecified { get => Coin.HasValue; set { } }
     [XmlIgnore] public bool RandomCoinUseFavoriteSpecified { get => !RandomCoinUseFavorite; set { } }
@@ -222,8 +237,19 @@ public sealed class LocalClassXp
 
 public sealed class LocalProfileData
 {
+    public ArenaRun ArenaRun;
+    public bool ShouldSerializeArenaRun() => ArenaRun != null;
+    public List<ArenaReceipt> ArenaReceipts = new List<ArenaReceipt>();
+    public bool ShouldSerializeArenaReceipts() => ArenaReceipts != null && ArenaReceipts.Count != 0;
+    // Keep entry keys after the bounded audit receipts roll off, so an old request can never charge twice.
+    public List<string> ArenaEntryRequestIds = new List<string>();
+    public bool ShouldSerializeArenaEntryRequestIds() => ArenaEntryRequestIds != null && ArenaEntryRequestIds.Count != 0;
     public string GrindTier;
     public bool ShouldSerializeGrindTier() => GrindTier != null;
+    // NPC difficulty of this save (NpcDifficultyIds; owner 2026-11-15). Absent = Hard: every save made before the setting
+    // keeps today's NPCs. Optional element, written only once set (no version bump). Applies from the next match.
+    public string NpcDifficulty;
+    public bool ShouldSerializeNpcDifficulty() => NpcDifficulty != null;
     public int Version;
     public List<LocalMasteryGrant> MasteryGrants = new List<LocalMasteryGrant>();
     public bool ShouldSerializeMasteryGrants() => MasteryGrants.Count > 0;
@@ -504,7 +530,12 @@ public sealed class LocalCardSeen
 
 public sealed partial class LocalProfile : IDisposable
 {
-    private const int CurrentVersion = 15;
+    // V16 (#87): Classic/Basic cards are Wild. The upgrade grants owned Classic cards' Core reprints, moves saved decks onto
+    // them and stamps each deck's Format; decks still holding Wild cards stay as they are and cannot be queued until edited.
+    private const int ClassicMigrationVersion = 16;
+    private const int CurrentVersion = 17;
+    internal const int SaveVersion = CurrentVersion;
+    internal const string StandardFormat = "Standard";
     // Personal decks only; loaners (NativeUIProjection.PlayerLoanerCapacity) sit above this cap. Raising it never
     // invalidates a save: load accepts any library size up to MaximumRecords and only shows the first drafts.
     public const int MaximumCustomDecks = 100;
@@ -528,6 +559,19 @@ public sealed partial class LocalProfile : IDisposable
     public GrindTier GrindTier => GrindTiers.Find(data.GrindTier);
     // The file this instance holds the lock on: what "the open save" means to the catalog (ProfileCatalog.IsOpenSave).
     internal string FilePath => path;
+
+    // The save's NPC difficulty id; absent in the save = Hard (NpcDifficultyIds.Default).
+    public string NpcDifficulty => NpcDifficultyIds.Resolve(data.NpcDifficulty);
+
+    // Options > NPC Difficulty and the save page: any selectable level, any time; the next match uses it (a pending or running
+    // match keeps the level it began with). Extreme is locked.
+    public bool SetNpcDifficulty(string id)
+    {
+        if (!NpcDifficultyIds.IsSelectable(id)) throw new ArgumentException("NPC difficulty not selectable: " + id);
+        if (NpcDifficulty == id) return false;   // picking Hard on an old save (no field) leaves its bytes alone
+        var next = Snapshot(); next.NpcDifficulty = id; Commit(next);
+        return true;
+    }
 
     public bool SetGrindTier(string id)
     {
@@ -592,6 +636,9 @@ public sealed partial class LocalProfile : IDisposable
     public LocalMatchRecord Pending => Copy(data.Pending);
     public IReadOnlyList<LocalMatchRecord> History => data.Matches.Select(Copy).ToArray();
     internal LocalMatchRecord LastSettledMatch => Copy(data.Matches.LastOrDefault());
+    // Cheap mode reads (no record copy) for per-frame callers such as Arena match ownership.
+    internal string PendingMode => data.Pending?.Mode;
+    internal string LastSettledMode => data.Matches.Count == 0 ? null : data.Matches[data.Matches.Count - 1].Mode;
     // Head-to-head with one NPC from SETTLED matches only; the pending match never counts.
     public LocalNpcRecord NpcRecord(string npcId) => LocalNpcRecord.Of(data.Matches, npcId);
     public int Gold => profileOptions.InfiniteGold ? ProfileCatalog.UnlimitedGold : data.GoldBalance;
@@ -657,7 +704,8 @@ public sealed partial class LocalProfile : IDisposable
 #endif
 
     // Versions the constructor loads (older ones are upgraded in place). The startup preflight shares this so the two cannot drift.
-    internal static bool IsSupportedVersion(int version) => version == 13 || version == 14 || version == CurrentVersion;
+    internal static bool IsSupportedVersion(int version) =>
+        version == 13 || version == 14 || version == 15 || version == ClassicMigrationVersion || version == CurrentVersion;
 
     public LocalProfile(string path) : this(path, false) { }
 
@@ -682,7 +730,7 @@ public sealed partial class LocalProfile : IDisposable
         {
             if (!File.Exists(this.path))
             {
-                if (snapshot) throw new InvalidOperationException("Snapshot requires an existing V15 profile.");
+                if (snapshot) throw new InvalidOperationException("Snapshot requires an existing V" + CurrentVersion + " profile.");
                 data = NewProfile();
                 bornMissing = true;
             }
@@ -690,9 +738,9 @@ public sealed partial class LocalProfile : IDisposable
             {
                 LocalProfileData loaded = ReadFile(this.path);
                 if (loaded == null || !IsSupportedVersion(loaded.Version))
-                    throw new InvalidOperationException("Unsupported local profile version; create a fresh V15 profile.");
+                    throw new InvalidOperationException("Unsupported local profile version; create a fresh V" + CurrentVersion + " profile.");
                 if (snapshot && loaded.Version != CurrentVersion)
-                    throw new InvalidOperationException("Snapshot requires an existing V15 profile.");
+                    throw new InvalidOperationException("Snapshot requires an existing V" + CurrentVersion + " profile.");
                 if (loaded.FavoriteCardBacks != null && loaded.FavoriteCardBacks.Count == 0)
                     loaded.FavoriteCardBacks.Add(loaded.SelectedCardBack ?? 0);
                 loaded.SelectedCardBack = null;
@@ -700,7 +748,7 @@ public sealed partial class LocalProfile : IDisposable
                 bool upgrade = fromVersion < CurrentVersion;
                 if (upgrade && (loaded.Matches == null || loaded.Matches.Any(match => match == null)))
                     throw new InvalidOperationException("V" + fromVersion + " profile has an invalid match list.");
-                if (upgrade && (loaded.Matches.Concat(loaded.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { loaded.Pending })
+                if (fromVersion < 15 && (loaded.Matches.Concat(loaded.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { loaded.Pending })
                         .Any(match => match.PetSmall.HasValue || match.PetMedium.HasValue || match.PetLarge.HasValue || match.PetPacingPercent.HasValue
                             || match.PetRules != null && (match.PetRules.StartsWith("rule=2;", StringComparison.Ordinal) || match.PetRules.StartsWith("rule=3;", StringComparison.Ordinal)))))
                     throw new InvalidOperationException("V" + fromVersion + " cannot contain pet event counters.");
@@ -714,18 +762,21 @@ public sealed partial class LocalProfile : IDisposable
                         throw new InvalidOperationException("V13 cannot contain pet state.");
                 }
                 if (upgrade) loaded.Version = CurrentVersion;
+                var classicMigration = fromVersion < ClassicMigrationVersion ? MigrateClassicToV16(loaded) : Array.Empty<string>();
                 ValidateV14(loaded, profileOptions.AllCosmetics, profileOptions.LegendRating, profileOptions.AllDecks);
                 if (upgrade && !snapshot) {
                     EnsureBackup(File.ReadAllBytes(this.path), fromVersion);
                     Commit(loaded);
+                    LogDeckRepairs(classicMigration);
                 }
                 if (this.backups) LocalProfileBackups.Automatic(this.path, "startup", loaded.Version);
                 var successor = GrindTiers.Successor(loaded.GrindTier);
                 bool paceChanged = successor.Id != loaded.GrindTier;
                 if (paceChanged && !snapshot) loaded.GrindTier = successor.Id;
                 var repaired = RepairDeckPremiums(loaded, profileOptions.AllCosmetics);
-                bool granted = AdoptAchievementHeroSkins(loaded) | GrantCoreUnlocks(loaded) | GrantClassRewards(loaded, null) | LocalCardMastery.Grant(loaded, null);
-                if ((granted || paceChanged || repaired.Count > 0) && !snapshot) { Commit(loaded); LogDeckRepairs(repaired); }
+                var reprintGrants = GrantClassicReprints(loaded);
+                bool granted = AdoptAchievementHeroSkins(loaded) | GrantCoreUnlocks(loaded) | reprintGrants.Count > 0 | GrantClassRewards(loaded, null) | LocalCardMastery.Grant(loaded, null);
+                if ((granted || paceChanged || repaired.Count > 0) && !snapshot) { Commit(loaded); LogDeckRepairs(repaired); LogDeckRepairs(reprintGrants); }
                 else data = loaded;
             }
             if (!snapshot) {
@@ -764,33 +815,49 @@ public sealed partial class LocalProfile : IDisposable
     }
     private bool armedDebugScenario;
     internal void ArmDebugScenario() { armedDebugScenario = true; }
+    // One-shot: the NEXT Begin stamps this NPC difficulty on its world encounter (LocalProfileNpcWorld sets it from the encounter).
+    private string armedNpcDifficulty;
+    internal void ArmNpcDifficulty(string id) { armedNpcDifficulty = id; }
     internal void DisarmDebugScenario() { armedDebugScenario = false; armedFirstPlayer = null; }
 
     private LocalMatchRecord Begin(string deck, string opponent, int seed, string npcId, string npcDeckId, double? npcRating,
-        bool unstarted, LocalAchievementPendingContext achievementContext, string mode)
+        bool unstarted, LocalAchievementPendingContext achievementContext, string mode, LocalPlacementOpponent placementOpponent = null)
     {
         // One-shot: the armed test pacing applies to this Begin only, whether or not it succeeds.
         int? pacing = armedPetPacing; armedPetPacing = null;
         bool debugScenario = armedDebugScenario; armedDebugScenario = false;
         int firstPlayer = armedFirstPlayer ?? StableSeed.MatchFirstPlayer(seed); armedFirstPlayer = null;
+        string npcDifficulty = armedNpcDifficulty; armedNpcDifficulty = null;
+        if (npcDifficulty == NpcDifficultyIds.Hard || npcId == null) npcDifficulty = null;
+        if (npcDifficulty != null && !NpcDifficultyIds.IsSelectable(npcDifficulty)) throw new ArgumentException("Invalid NPC difficulty.");
         if (!ValidNpcFields(npcId, npcDeckId, npcRating)) throw new ArgumentException("Invalid NPC encounter.");
-        if (mode != null && !CasualRules.IsCasual(mode)) throw new ArgumentException("Unknown match mode.");
+        if (mode != null && !CasualRules.IsCasual(mode) && !ArenaRules.IsArena(mode)) throw new ArgumentException("Unknown match mode.");
         if (data.Pending != null) throw new InvalidOperationException("A local match is already pending.");
         if (RunFightUnderway(data)) throw new InvalidOperationException("A run fight is under way.");
         if (data.PendingRewardPresentationId != null)
             throw new InvalidOperationException("The previous local reward must be presented first.");
         if (!ValidName(deck, 64) || !ValidName(opponent, 64) || seed < 0)
             throw new ArgumentException("Invalid match setup.");
+        // Arena (#6): only the Ready run's own drafted deck plays in Arena mode, and an Arena deck key plays nowhere else.
+        string arenaRunId = null;
+        if (ArenaRules.IsArena(mode)) {
+            var run = data.ArenaRun;
+            if (run == null || run.Phase != ArenaPhase.Ready || deck != ArenaRules.DeckKey(run.RunId))
+                throw new InvalidOperationException("No Ready Arena run for this deck.");
+            arenaRunId = run.RunId;
+        } else if (ArenaRules.IsDeckKey(deck)) throw new InvalidOperationException("An Arena deck plays only in an Arena match.");
         if (deck == "custom" || deck.StartsWith("custom:", StringComparison.Ordinal)) {
             LocalCustomDeck saved = deck == "custom" ? CustomDeck : data.CustomDecks.SingleOrDefault(d => "custom:" + d.Id == deck);
-            if (saved == null || !IsDeckComplete(saved.Id)) throw new InvalidOperationException("The saved deck is incomplete.");
+            if (saved == null || !IsDeckComplete(saved.Id))
+                throw new InvalidOperationException(saved == null ? "The saved deck is incomplete." : NotPlayableReason(saved.Id));
         }
         var chosenPet = DeckPet(deck, seed);
         var next = Snapshot();
         next.Pending = new LocalMatchRecord {
             Id = Guid.NewGuid().ToString(), Deck = deck, DeckHero = ResolveDeckHero(deck, data), Opponent = opponent, Seed = seed, FirstPlayer = firstPlayer,
             StartedUtc = DateTime.UtcNow.ToString("o"), RewardVersion = LocalEconomy.RollRewardVersion, GrindTier = GrindTier.Id, RewardFacts = DefaultFacts(), Unstarted = unstarted, DebugScenario = debugScenario,
-            NpcId = npcId, NpcDeckId = npcDeckId, NpcRating = npcRating, Mode = mode,
+            NpcId = npcId, NpcDeckId = npcDeckId, NpcRating = npcRating, NpcDifficulty = npcDifficulty, Mode = mode, ArenaRunId = arenaRunId,
+            PlacementOpponent = Copy(placementOpponent),
             Pet = chosenPet, PetXpBefore = chosenPet != null && data.OwnedPets.Contains(LocalShop.Default.PetFamily(chosenPet))
                 ? (int?)PetXp(LocalShop.Default.PetFamily(chosenPet)) : null
         };
@@ -829,10 +896,11 @@ public sealed partial class LocalProfile : IDisposable
         => BeginLaunch(deck, opponent, seed, npcId, npcDeckId, npcRating, achievementContext, null, launch);
 
     internal LocalMatchRecord BeginLaunch(string deck, string opponent, int seed, string npcId, string npcDeckId, double? npcRating,
-        LocalAchievementPendingContext achievementContext, string mode, Action<LocalMatchRecord> launch)
+        LocalAchievementPendingContext achievementContext, string mode, Action<LocalMatchRecord> launch,
+        LocalPlacementOpponent placementOpponent = null)
     {
         if (launch == null) throw new ArgumentNullException(nameof(launch));
-        LocalMatchRecord record = Begin(deck, opponent, seed, npcId, npcDeckId, npcRating, true, achievementContext, mode);
+        LocalMatchRecord record = Begin(deck, opponent, seed, npcId, npcDeckId, npcRating, true, achievementContext, mode, placementOpponent);
         try { launch(record); }
         catch (Exception failure)
         {
@@ -899,7 +967,7 @@ public sealed partial class LocalProfile : IDisposable
                 || (old.Casual != null && (opponentRating ?? old.NpcRating ?? old.Casual.RatingBefore) != old.Casual.OpponentRating)
                 || (npcConceded.HasValue && (old.NpcConceded ?? false) != npcConceded.Value)
                 || (petXp != null && old.PetSmall.HasValue && (old.PetSmall != petXp.Small || old.PetMedium != petXp.Medium || old.PetLarge != petXp.Large))
-                || (old.AchievementContext == null ? achievementEvidence != null
+                || (ArenaRules.IsArena(old.Mode) ? false : old.AchievementContext == null ? achievementEvidence != null
                     : achievementEvidence == null || old.AchievementEvidenceFingerprint != achievementEvidence.Fingerprint))
                 throw new InvalidOperationException("Conflicting result for a settled match.");
             return Copy(old);
@@ -909,7 +977,8 @@ public sealed partial class LocalProfile : IDisposable
 
         var next = Snapshot();
         var match = next.Pending;
-        LocalReward reward = MatchReward(match, result, turns, conceded, suppliedFacts);
+        // Arena (#6) pays no per-match gold, dust or pack: the run pays once, when it ends.
+        LocalReward reward = ArenaRules.IsArena(match.Mode) ? new LocalReward() : MatchReward(match, result, turns, conceded, suppliedFacts);
         match.Unstarted = false;
         match.SettledUtc = DateTime.UtcNow.ToString("o", CultureInfo.InvariantCulture);
         match.Result = result;
@@ -924,7 +993,7 @@ public sealed partial class LocalProfile : IDisposable
         match.PetSmall = petXp?.Small; match.PetMedium = petXp?.Medium; match.PetLarge = petXp?.Large;
         ApplyMatchReceipt(next, match, opponentRating, reward.Dust);
         SettleAchievements(next, match, achievementEvidence);
-        match.RivalGold = RivalGoldFor(next.Matches, match);
+        match.RivalGold = ArenaRules.IsArena(match.Mode) ? 0 : RivalGoldFor(next.Matches, match);
         next.GoldBalance = checked(next.GoldBalance + match.Gold + match.RivalGold);
         if (match.PackReward) {
             // V1/V2 keep the newest set; V3 weights the Standard sets by missing copies (LocalEconomy.RewardPackSet).
@@ -1015,9 +1084,9 @@ public sealed partial class LocalProfile : IDisposable
     // no milestones, no win-portrait count (XpWin).
     private void ApplyMatchReceipt(LocalProfileData next, LocalMatchRecord match, double? opponentRating, int dust)
     {
-        bool casual = CasualRules.IsCasual(match.Mode);
+        bool casual = CasualRules.IsCasual(match.Mode), arena = ArenaRules.IsArena(match.Mode);
         if (casual) match.Casual = SettleCasual(next, match.Result, opponentRating ?? match.NpcRating);
-        else match.Ladder = SettleLadder(next, match, match.Result, opponentRating ?? match.NpcRating);
+        else if (!arena) match.Ladder = SettleLadder(next, match, match.Result, opponentRating ?? match.NpcRating);
         var before = XpMap(next);
         match.ClassXpBefore = match.DeckHero == null ? 0 : before[match.DeckHero];
         match.ClassXpAfter = checked(match.ClassXpBefore.Value + (match.DeckHero == null ? 0 : LocalProfile.MatchClassXp(match)));
@@ -1027,12 +1096,23 @@ public sealed partial class LocalProfile : IDisposable
             .OrderBy(id => id, StringComparer.Ordinal).ToList();
         match.ProgressionRuleVersion = LocalCoreProgression.ScheduleVersion;
         GrantCoreUnlocks(next);
-        match.TierRewards = casual ? null : SettleMilestones(next, match);
+        match.TierRewards = casual || arena ? null : SettleMilestones(next, match);
         GrantClassRewards(next, match);
         LocalCardMastery.Grant(next, match);
         ApplyPetReceipt(next, match);
-        match.DustReward = dust;
+        if (arena) SettleArenaRun(next, match);
+        match.DustReward = arena ? 0 : dust;
         next.DustBalance = checked(next.DustBalance + match.DustReward);
+    }
+
+    // Arena (#6): the match settles into its run in the same snapshot as the class XP, mastery and pet receipts. A run that is no
+    // longer this match's Ready run (a cheat or a hand-edited save) leaves the run alone: the match is still recorded, never stuck.
+    private static void SettleArenaRun(LocalProfileData next, LocalMatchRecord match)
+    {
+        var run = next.ArenaRun;
+        if (run == null || run.RunId != match.ArenaRunId || run.Phase != ArenaPhase.Ready) return;
+        SettleArenaMatch(next, match.Result);
+        match.ArenaWins = next.ArenaRun.Wins; match.ArenaLosses = next.ArenaRun.Losses;
     }
 
     public void BuyPack() => Purchase("pack-standard", 1, LocalEconomy.PackPrice, Guid.NewGuid().ToString());
@@ -1387,10 +1467,33 @@ public sealed partial class LocalProfile : IDisposable
         } catch (InvalidOperationException) { return false; }
     }
 
+    // #87: the Wild cards a saved Standard deck still holds (main deck and sideboards), each id once. Such a deck stays
+    // editable but cannot be played until they are removed.
+    public IReadOnlyList<string> WildCards(long id)
+    {
+        var deck = GetDraft(id);
+        if (deck == null) return Array.Empty<string>();
+        return LocalCardCatalog.NonStandardIds((deck.Cards ?? new LocalDeckCards()).Concat((deck.Sideboards ?? new List<LocalSideboard>())
+            .SelectMany(board => (IEnumerable<string>)board?.Cards ?? Array.Empty<string>())));
+    }
+
+    // Why a saved deck cannot be played, for messages: its format, its Wild cards, or missing cards.
+    public string NotPlayableReason(long id)
+    {
+        var deck = GetDraft(id);
+        if (deck == null) return "The saved deck no longer exists.";
+        string format = deck.Format ?? StandardFormat;
+        if (format != StandardFormat) return "The saved deck is a " + format + " deck; only Standard decks can be played.";
+        var wild = WildCards(id);
+        if (wild.Count != 0) return "The saved deck holds Wild cards (" + string.Join(", ", wild) + "); replace them to play Standard.";
+        return "The saved deck is incomplete. Acquire missing cards before playing.";
+    }
+
     public bool IsDeckComplete(long id)
     {
         var deck = GetDraft(id);
         if (deck == null) return false;
+        if ((deck.Format ?? StandardFormat) != StandardFormat || WildCards(id).Count != 0) return false;
         try {
             PlayableDeck(deck.Name, deck.Hero, deck.Cards, deck.Sideboards);
             // Retail CollectionDeck.CanCardBeAddedAsOwned (254477): a sideboard copy is owned only beyond the main deck's
@@ -1543,7 +1646,7 @@ public sealed partial class LocalProfile : IDisposable
 
     // Win portraits count Ranked wins only (owner 2026-10-28): Casual wins never reach the golden/honored thresholds.
     internal static bool XpWin(LocalMatchRecord match) => match.Result == "Won" && !match.Conceded && match.DeckHero != null
-        && !CasualRules.IsCasual(match.Mode)
+        && ArenaRules.IsRanked(match.Mode)
         && (match.ClassXpBefore.HasValue && match.ClassXpAfter.HasValue
             ? match.ClassXpAfter.Value > match.ClassXpBefore.Value : LocalProfile.MatchClassXp(match) > 0);
 
@@ -1634,7 +1737,7 @@ public sealed partial class LocalProfile : IDisposable
         foreach (var match in profile.Matches.Concat(profile.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { profile.Pending })) {
             bool absent = match.ClassRewardGrants == null && match.PortraitGrants == null;
             if (absent) continue; // Historical V10 receipts predate these fields.
-            if (profile.Version < 11 || (match.Ladder == null && match.Casual == null) || match.Result == null || match.ClassRewardGrants == null || match.PortraitGrants == null)
+            if (profile.Version < 11 || (match.Ladder == null && match.Casual == null && !ArenaRules.IsArena(match.Mode)) || match.Result == null || match.ClassRewardGrants == null || match.PortraitGrants == null)
                 throw new InvalidOperationException("Partial premium reward receipt.");
             foreach (var row in match.ClassRewardGrants) {
                 if (row == null || !grants.TryGetValue(ClassGrantKey(row), out var grant) || !seenRewards.Add(ClassGrantKey(row))
@@ -1676,7 +1779,8 @@ public sealed partial class LocalProfile : IDisposable
             GrindTier = GrindTiers.Default.Id,
             ClassXp = EmptyXp(),
             PackSeed = Guid.NewGuid().GetHashCode() & int.MaxValue,
-            Collection = CollectionList(LocalEconomy.StarterCollection),
+            // #87: no Classic/Basic starter cards (they are Wild); a new save starts with every Core common (GrantCoreUnlocks).
+            Collection = new List<LocalCardCount>(),
             NextCustomDeckId = FirstAllocatedCustomDeckId,
             PackCounters = new[] { FairPackRules.Legacy }.Concat(FairPackRules.PackTypes)
                 .Select(type => new LocalPackProgress { PackType = type }).ToList(),
@@ -1832,6 +1936,7 @@ public sealed partial class LocalProfile : IDisposable
 
     private static string ResolveDeckHero(string key, LocalProfileData profile)
     {
+        if (ArenaRules.IsDeckKey(key)) return profile.ArenaRun != null && key == ArenaRules.DeckKey(profile.ArenaRun.RunId) ? profile.ArenaRun.Hero : null;
         LocalDeck loaner = LocalDecks.Resolve(
             LocalDecks.All.Concat(LocalDecks.TestLoaners).Concat(LocalDecks.PlayerStarterDecks), key);
         if (loaner != null) return loaner.Hero;
@@ -1902,7 +2007,10 @@ public sealed partial class LocalProfile : IDisposable
         } };
 
     private LocalProfileData Snapshot() => new LocalProfileData {
-        Version = CurrentVersion, GrindTier = data.GrindTier,
+        Version = CurrentVersion, GrindTier = data.GrindTier, NpcDifficulty = data.NpcDifficulty,
+        ArenaRun = data.ArenaRun?.Copy(),
+        ArenaReceipts = data.ArenaReceipts.Select(row => row.Copy()).ToList(),
+        ArenaEntryRequestIds = data.ArenaEntryRequestIds.ToList(),
         MasteryGrants = data.MasteryGrants.Select(LocalCardMastery.Clone).ToList(),
         ClassRewardGrants = data.ClassRewardGrants.Select(Copy).ToList(),
         PortraitGrants = data.PortraitGrants.Select(Copy).ToList(),
@@ -1964,9 +2072,11 @@ public sealed partial class LocalProfile : IDisposable
 
     private void Commit(LocalProfileData next)
     {
-        if (next.Version != CurrentVersion) throw new InvalidOperationException("Only V15 profiles can be committed.");
+        if (next.Version != CurrentVersion) throw new InvalidOperationException("Only V" + CurrentVersion + " profiles can be committed.");
+        foreach (var deck in next.CustomDecks ?? new List<LocalCustomDeck>()) if (deck != null && deck.Format == null) deck.Format = StandardFormat;
         ValidateV14(next, profileOptions.AllCosmetics, profileOptions.LegendRating, profileOptions.AllDecks);
         GrantCoreUnlocks(next);
+        LogDeckRepairs(GrantClassicReprints(next));
         GrantClassRewards(next, null);
         // O(history) catch-up keeps changed thresholds/metas current; real local histories are small.
         LocalCardMastery.Grant(next, null);
@@ -2016,14 +2126,18 @@ public sealed partial class LocalProfile : IDisposable
     private void EnsureBackup(byte[] original, int version)
     {
         string backup = path + ".v" + version + ".bak";
-        if (File.Exists(backup))
+        if (File.Exists(backup) && !SameBytes(backup, original))
         {
-            long backupLength = new FileInfo(backup).Length;
-            if (backupLength > MaximumProfileBytes || backupLength != original.LongLength
-                || !File.ReadAllBytes(backup).SequenceEqual(original))
+            // An older backup of other bytes (the player restored it by hand, played on the old build, then upgraded
+            // again). Never overwrite it: back these bytes up beside it, named by their hash, and go on.
+            string hash;
+            using (var sha = System.Security.Cryptography.SHA256.Create())
+                hash = BitConverter.ToString(sha.ComputeHash(original)).Replace("-", "").Substring(0, 16).ToLowerInvariant();
+            backup = path + ".v" + version + "." + hash + ".bak";
+            if (File.Exists(backup) && !SameBytes(backup, original))
                 throw new InvalidOperationException("Existing V" + version + " backup does not match the profile.");
-            return;
         }
+        if (File.Exists(backup)) return;
         string temporary = backup + ".tmp";
         try
         {
@@ -2035,6 +2149,12 @@ public sealed partial class LocalProfile : IDisposable
             File.Move(temporary, backup);
         }
         finally { if (File.Exists(temporary)) File.Delete(temporary); }
+    }
+
+    private static bool SameBytes(string file, byte[] original)
+    {
+        long length = new FileInfo(file).Length;
+        return length <= MaximumProfileBytes && length == original.LongLength && File.ReadAllBytes(file).SequenceEqual(original);
     }
 
     private static void ValidateV1(LocalProfileData profile)
@@ -2084,12 +2204,18 @@ public sealed partial class LocalProfile : IDisposable
     private static void ValidateV14(LocalProfileData profile, bool allCosmetics = false, double legendRating = 0, bool allDecks = false)
     {
         GrindTiers.Find(profile?.GrindTier);
+        if (profile?.NpcDifficulty != null && !NpcDifficultyIds.IsSelectable(profile.NpcDifficulty))
+            throw new InvalidOperationException("Invalid NPC difficulty.");
         ValidateV8(profile, allCosmetics, legendRating, allDecks);
         ValidateAchievements(profile);
+        ValidateArena(profile);
         if (profile.HiddenLoaners == null || profile.HiddenLoaners.Any(key => !IsStarterLoanerShape(key))
             || profile.HiddenLoaners.Distinct(StringComparer.Ordinal).Count() != profile.HiddenLoaners.Count)
             throw new InvalidOperationException("Invalid hidden starter decks.");
         ValidateRuns(profile);
+        // A format this build does not know (a later Wild mode) keeps the deck saved and unplayable here (IsDeckComplete).
+        if (profile.Version >= 16 && profile.CustomDecks.Any(deck => deck != null && deck.Format != null && !ValidName(deck.Format, 32)))
+            throw new InvalidOperationException("Invalid deck format.");
     }
 
     private static bool RunFightUnderway(LocalProfileData profile) => profile.Runs != null && profile.Runs.Any(slot => slot?.FightId != null);
@@ -2131,6 +2257,84 @@ public sealed partial class LocalProfile : IDisposable
             Require(run.Offer == null || (ValidName(run.Offer.Kind, 32) && run.Offer.Options != null && run.Offer.Options.Count > 0
                 && run.Offer.Options.All(o => o != null && Ids(o.Cards, false) && (o.Title == null || ValidName(o.Title, 64)))), slot.Definition + " run offer");
         }
+    }
+
+    // #87 Classic -> Core. A Classic or Basic card whose Core reprint shares its copy group (LocalCoreProgression.Unlocks).
+    internal static IReadOnlyDictionary<string, string> ClassicReprints => classicReprints.Value;
+    private static readonly Lazy<IReadOnlyDictionary<string, string>> classicReprints = new Lazy<IReadOnlyDictionary<string, string>>(() =>
+        new System.Collections.ObjectModel.ReadOnlyDictionary<string, string>(LocalCoreProgression.Unlocks
+            .Where(unlock => unlock.CopyGroup != unlock.Id && LocalCardCatalog.IsStandardId(unlock.Id) && !LocalCardCatalog.IsStandardId(unlock.CopyGroup)
+                && !LocalCardCatalog.IsCore(unlock.CopyGroup) && LocalCoreProgression.IsAvailable(unlock.Id) && SameClass(unlock.Id, unlock.CopyGroup))
+            .GroupBy(unlock => unlock.CopyGroup, StringComparer.Ordinal)
+            .ToDictionary(group => group.Key, group => group.OrderBy(unlock => unlock.Id, StringComparer.Ordinal).First().Id, StringComparer.Ordinal)));
+
+    private static bool SameClass(string core, string classic)
+    {
+        try {
+            var a = SabberStoneCore.Model.Cards.FromId(core); var b = SabberStoneCore.Model.Cards.FromId(classic);
+            return a != null && b != null && b.Collectible && a.Class == b.Class;
+        } catch (KeyNotFoundException) { return false; }
+    }
+
+    // #87: every owned Classic card with a Core reprint also owns that reprint (up to its copies). Monotonic like
+    // GrantCoreUnlocks; run by the V16 migration and by every V16 load and commit, so a Classic card that arrives later
+    // (an unopened Legacy pack from an old save) brings its reprint too.
+    internal static List<string> GrantClassicReprints(LocalProfileData profile)
+    {
+        var lines = new List<string>();
+        var reprints = ClassicReprints;
+        var owned = new Dictionary<string, int>(StringComparer.Ordinal);
+        foreach (var row in (profile.Collection ?? new List<LocalCardCount>()).Concat(profile.PremiumCollection ?? new List<LocalCardCount>()))
+            if (row != null && row.Id != null && row.Count > 0 && reprints.ContainsKey(row.Id))
+                owned[row.Id] = (owned.TryGetValue(row.Id, out int count) ? count : 0) + row.Count;
+        profile.CoreGrants = profile.CoreGrants ?? new List<LocalCardCount>();
+        foreach (var classic in owned.OrderBy(entry => entry.Key, StringComparer.Ordinal))
+        {
+            string core = reprints[classic.Key];
+            int copies = Math.Min(classic.Value, LocalCoreProgression.ById[core].Copies);
+            var grant = profile.CoreGrants.SingleOrDefault(entry => entry != null && entry.Id == core);
+            if (grant == null) profile.CoreGrants.Add(new LocalCardCount { Id = core, Count = copies });
+            else if (grant.Count < copies) grant.Count = copies;
+            else continue;
+            lines.Add("CLASSIC_REPRINT_GRANT classic=" + classic.Key + " core=" + core + " copies=" + copies);
+        }
+        return lines;
+    }
+
+    // V13-V15 -> V16 (#87), on the loaded data before validation and the backed-up commit:
+    // 1. every owned Classic card with a Core reprint grants that Core card (CoreGrants is monotonic), up to its copies;
+    // 2. every saved deck (main and sideboards) moves those cards to the reprint, keeping each slot's premium (the
+    //    premium repair that follows every load drops a version the player does not own). If Beatrix's pick now duplicates
+    //    a main-deck card, clear her slot so the deck can load and the player can pick a replacement;
+    // 3. every deck is stamped Standard. A deck that still holds Wild cards loads as it is and is refused at queue time.
+    // Collection rows stay, so pending pack reveals, craft receipts and mastery keep validating against them.
+    internal static IReadOnlyList<string> MigrateClassicToV16(LocalProfileData profile)
+    {
+        var lines = GrantClassicReprints(profile);
+        var reprints = ClassicReprints;
+        foreach (var deck in profile.CustomDecks ?? new List<LocalCustomDeck>())
+        {
+            if (deck == null) continue;
+            var beatrix = deck.Sideboards?.FirstOrDefault(board => board?.Source == "JAIL_397");
+            var beatrixPick = beatrix?.CardEntries?.Count == 1 ? beatrix.CardEntries[0] : null;
+            bool hadDistinctBeatrixPick = beatrixPick?.Id != null && deck.Cards?.Contains(beatrixPick.Id) == false;
+            int moved = 0;
+            foreach (var entry in (deck.CardEntries ?? new List<LocalDeckCard>())
+                .Concat((deck.Sideboards ?? new List<LocalSideboard>()).SelectMany(board => board?.CardEntries ?? new List<LocalDeckCard>())))
+                if (entry != null && entry.Id != null && reprints.TryGetValue(entry.Id, out string core)) { entry.Id = core; moved++; }
+            if (hadDistinctBeatrixPick && deck.Cards.Contains(beatrixPick.Id))
+            {
+                deck.Sideboards.Remove(beatrix);
+                lines.Add("CLASSIC_DECK_MIGRATION_BEATRIX_SLOT_CLEARED id=" + deck.Id + " card=" + beatrixPick.Id);
+            }
+            deck.Format = StandardFormat;
+            var wild = LocalCardCatalog.NonStandardIds((deck.CardEntries ?? new List<LocalDeckCard>()).Select(entry => entry?.Id)
+                .Concat((deck.Sideboards ?? new List<LocalSideboard>()).SelectMany(board => (board?.CardEntries ?? new List<LocalDeckCard>()).Select(entry => entry?.Id)))
+                .Where(id => id != null));
+            if (moved > 0 || wild.Count > 0)
+                lines.Add("CLASSIC_DECK_MIGRATION id=" + deck.Id + " moved=" + moved + " wild=" + string.Join(",", wild));
+        }
+        return lines;
     }
 
     private static void ValidateProgression(LocalProfileData profile, int version, string[] heroes)
@@ -2286,8 +2490,19 @@ public sealed partial class LocalProfile : IDisposable
                 || !Regex.IsMatch(match.CosmeticCoinCardId, "^[A-Za-z0-9_]{1,64}$")))
             throw new InvalidOperationException("Invalid match coin snapshot.");
         if (!ValidNpcFields(match.NpcId, match.NpcDeckId, match.NpcRating)
-            || (match.NpcConceded == true && (pending || match.Result != "Won" || match.Conceded)) || (pending && match.NpcConceded != null))
+            || (match.NpcConceded == true && (pending || match.Result != "Won" || match.Conceded)) || (pending && match.NpcConceded != null)
+            || (match.NpcDifficulty != null && (match.NpcId == null || match.NpcDifficulty == NpcDifficultyIds.Hard
+                || !NpcDifficultyIds.IsSelectable(match.NpcDifficulty))))
             throw new InvalidOperationException("Invalid NPC encounter record.");
+        var placement = match.PlacementOpponent;
+        if (placement != null)
+        {
+            bool unrated = placement.NpcId == null && placement.DeckId == null && !pending && match.NpcRating == null;
+            bool world = placement.NpcId != null && placement.DeckId != null && match.NpcId != null;
+            if ((!unrated && !world) || !ValidNpcFields(placement.NpcId, placement.DeckId, placement.Rating)
+                || match.DebugScenario || !ArenaRules.IsRanked(match.Mode))
+                throw new InvalidOperationException("Invalid placement opponent.");
+        }
         if (match.RivalGold != 0 && (match.RivalGold != LocalNpcRecord.RivalSettleGold || pending || match.Result != "Won"
             || string.IsNullOrEmpty(match.NpcId)))
             throw new InvalidOperationException("Invalid rivalry reward.");
@@ -2311,7 +2526,7 @@ public sealed partial class LocalProfile : IDisposable
         // Rolled rewards exist only in profiles supporting them; V1/V2 keep their exact historical checks.
         bool rolled = LocalEconomy.IsRolled(match.RewardVersion) && profileVersion >= RollRewardProfileVersion;
         if (profileVersion == CurrentVersion && !rolled)
-            throw new InvalidOperationException("Current profiles require V4, V5 or V6 match rewards.");
+            throw new InvalidOperationException("Current profiles require a rolled match reward.");
         if (match.RewardVersion != 1 && match.RewardVersion != 2 && !rolled)
             throw new InvalidOperationException("Invalid reward version.");
         LocalEconomy.ValidateFacts(match.RewardFacts);
@@ -2324,11 +2539,18 @@ public sealed partial class LocalProfile : IDisposable
             return;
         }
         ValidateTerminal(match);
+        if (match.RewardFacts.ActiveTurns > match.Turns)
+            throw new InvalidOperationException("Invalid number of active reward turns.");
         if (match.RewardVersion == 1)
         {
             if (match.Gold != AwardV1(match.Result, match.Turns, match.Conceded) || match.BonusGold != 0 || match.PackReward
                 || !Same(match.RewardFacts, DefaultFacts()))
                 throw new InvalidOperationException("Invalid historical reward.");
+        }
+        else if (ArenaRules.IsArena(match.Mode))
+        {
+            if (match.Gold != 0 || match.BonusGold != 0 || match.PackReward || match.DustReward != 0)
+                throw new InvalidOperationException("Invalid local reward.");
         }
         else
         {
@@ -2358,10 +2580,12 @@ public sealed partial class LocalProfile : IDisposable
     {
         if (!LocalEconomy.IsRolled(match.RewardVersion)) return LocalEconomy.Reward(result, turns, conceded, facts);
         int rollSeed = LocalEconomy.RewardRollSeed(match.Id, match.Seed);
+        var tier = GrindTiers.Find(match.GrindTier);
+        if (match.RewardVersion == LocalEconomy.ParticipationRewardVersion)
+            return LocalEconomy.RewardV7(result, turns, conceded, facts, rollSeed, tier);
         var reward = match.RewardVersion == 4 ? LocalEconomy.RewardV4(result, turns, conceded, rollSeed)
             : match.RewardVersion == 5 ? LocalEconomy.RewardV5(result, turns, conceded, rollSeed)
             : LocalEconomy.RewardV6(result, turns, conceded, rollSeed);
-        var tier = GrindTiers.Find(match.GrindTier);
         return new LocalReward { Gold = tier.Gold(reward.Gold), BonusGold = reward.BonusGold, PackReward = reward.PackReward, Dust = tier.Dust(reward.Dust) };
     }
 
@@ -2518,12 +2742,15 @@ public sealed partial class LocalProfile : IDisposable
     private static bool Same(LocalRewardFacts left, LocalRewardFacts right) => left != null && right != null
         && left.DistinctCardsPlayed == right.DistinctCardsPlayed
         && left.EnemyMinionsDefeated == right.EnemyMinionsDefeated
-        && left.MinimumHealth == right.MinimumHealth;
+        && left.MinimumHealth == right.MinimumHealth
+        && left.ActiveTurns == right.ActiveTurns && left.PlayMilliseconds == right.PlayMilliseconds;
 
     private static LocalRewardFacts Copy(LocalRewardFacts facts) => facts == null ? null : new LocalRewardFacts {
         DistinctCardsPlayed = facts.DistinctCardsPlayed,
         EnemyMinionsDefeated = facts.EnemyMinionsDefeated,
-        MinimumHealth = facts.MinimumHealth
+        MinimumHealth = facts.MinimumHealth,
+        ActiveTurns = facts.ActiveTurns,
+        PlayMilliseconds = facts.PlayMilliseconds
     };
 
     private static LocalCraftReceipt Copy(LocalCraftReceipt receipt) => receipt == null ? null : new LocalCraftReceipt {
@@ -2613,9 +2840,10 @@ public sealed partial class LocalProfile : IDisposable
         Pet = match.Pet, PetXpBefore = match.PetXpBefore, PetXpAfter = match.PetXpAfter, PetRules = match.PetRules,
         PetSmall = match.PetSmall, PetMedium = match.PetMedium, PetLarge = match.PetLarge, PetPacingPercent = match.PetPacingPercent,
         NpcId = match.NpcId, NpcDeckId = match.NpcDeckId, NpcRating = match.NpcRating, NpcConceded = match.NpcConceded,
-        RivalGold = match.RivalGold,
+        NpcDifficulty = match.NpcDifficulty, PlacementOpponent = Copy(match.PlacementOpponent), RivalGold = match.RivalGold,
         AchievementContext = Copy(match.AchievementContext), AchievementEvidenceFingerprint = match.AchievementEvidenceFingerprint,
         AchievementGrants = match.AchievementGrants?.Select(Copy).ToList(), Mode = match.Mode,
+        ArenaRunId = match.ArenaRunId, ArenaWins = match.ArenaWins, ArenaLosses = match.ArenaLosses,
         Casual = match.Casual == null ? null : new LocalCasualReceipt { RatingBefore = match.Casual.RatingBefore,
             RatingAfter = match.Casual.RatingAfter, OpponentRating = match.Casual.OpponentRating }
     };
@@ -2634,7 +2862,7 @@ public sealed partial class LocalProfile : IDisposable
         Id = deck.Id, SortOrder = deck.SortOrder, Name = deck.Name, Hero = deck.Hero, SourceRecipeId = deck.SourceRecipeId,
         Coin = deck.Coin, RandomCoinUseFavorite = deck.RandomCoinUseFavorite,
         CardBack = deck.CardBack, RandomCardBack = deck.RandomCardBack, HeroSkin = deck.HeroSkin, RandomHeroUseFavorite = deck.RandomHeroUseFavorite,
-        PetFamily = deck.PetFamily, PetForm = deck.PetForm, RandomPetUseFavorite = deck.RandomPetUseFavorite,
+        PetFamily = deck.PetFamily, PetForm = deck.PetForm, RandomPetUseFavorite = deck.RandomPetUseFavorite, Format = deck.Format,
         CardEntries = deck.CardEntries?.Select(Copy).ToList(),
         Sideboards = deck.Sideboards?.Select(row => new LocalSideboard { Source = row.Source, CardEntries = row.CardEntries?.Select(Copy).ToList() }).ToList()
     };

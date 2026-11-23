@@ -132,6 +132,14 @@ internal static class CurrentProfileContractChecks
 
     private static void DeckLibrary(string root)
     {
+        using (var fresh = new LocalProfile(Path.Combine(root, "fresh-deck-editor.xml")))
+        {
+            var ui = new LocalCollectionUI(fresh);
+            Check(ui.DraftHero == "HERO_08" && ui.DraftCount == 0 && ui.ActionError == "",
+                "a fresh profile opens the editor without owning the old Classic loaner");
+            ui.ResetDraft();
+            Check(ui.DraftCount == 0 && ui.ActionError == "", "reset keeps a blank draft when no loaner is owned");
+        }
         string path = Path.Combine(root, "current-decks.xml");
         long first, second;
         using (var profile = new LocalProfile(path))

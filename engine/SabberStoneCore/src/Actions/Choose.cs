@@ -200,7 +200,7 @@ namespace SabberStoneCore.Actions
 						KazakusPower.Action(in g, in c, c.Choice.EntityStack);
 						break;
 					case ChoiceAction.GLIMMERROOT:
-						if (c.Opponent.DeckCards.Select(p => p.Id).Contains(playable.Card.Id))
+						if (c.Opponent.DeckCards.Any(p => p.IsSameCardAs(playable.Card)))
 						{
 							if (RemoveFromZone(c, playable))
 								AddHandPhase.Invoke(c, playable);

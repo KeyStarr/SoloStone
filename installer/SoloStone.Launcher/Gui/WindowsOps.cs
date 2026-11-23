@@ -61,7 +61,7 @@ namespace SoloStone
         }
         public InstallRecord Load() => InstallRecord.Load(root);
         public void ApplyFirewall(InstallRecord record) => WindowsHost.Firewall(record, true);
-        public void SaveSettings(bool checkForUpdates) => Settings.Save(root, new Settings { CheckForUpdates = checkForUpdates });
+        public void SaveSettings(bool checkForUpdates) => Settings.SaveChecks(root, checkForUpdates);
         public void RemovePartial() => Installer.RemovePartial(root, WindowsHost.RegisteredFolders());
         public string LogPath => Texts.LogFile(root);
         public void Log(string line) => InstallerLog.Write(root, line);
@@ -81,7 +81,7 @@ namespace SoloStone
         public StatusReport Status()
             => StatusReport.Build(root, Engine(), TestedClient.Compiled(), UpdateConfig.Compiled(), new NoBindingManifest(), WindowsHost.IdleFailures(root));
         public UpdateStatus Check(CancellationToken cancel) => NewService().Check(cancel);
-        public UpdateResult Apply(bool acceptWarning, CancellationToken cancel) => NewService().Apply(acceptWarning, cancel);
+        public UpdateResult Apply(bool acceptWarning, CancellationToken cancel, string offeredVersion, Action committing) => NewService().Apply(acceptWarning, cancel, offeredVersion, committing);
         // The old process must load nothing more once the new release is in place, so it starts the new one and leaves at once.
         public void Restart() {
             GuiHost.ReleaseInstance();
@@ -99,7 +99,9 @@ namespace SoloStone
         }
         public RollbackResult Rollback() => Engine().Rollback();
         public RestoreResult RestoreBackup(string id) => Engine().RestoreBackup(id);
-        public void SaveUpdatesSetting(bool on) => Settings.Save(root, new Settings { CheckForUpdates = on });
+        public void SaveUpdatesSetting(bool on) => Settings.SaveChecks(root, on);
+        public string SkippedVersion() => Settings.Load(root).SkippedVersion;
+        public void SkipVersion(string version) => Settings.SaveSkipped(root, version);
         public void RepairFirewall() {
             var record = InstallRecord.Load(root);
             Safety.Destinations(record, WindowsHost.RegisteredFolders());

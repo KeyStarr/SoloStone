@@ -5,6 +5,7 @@ using SabberStoneCore.Actions;
 using SabberStoneCore.Auras;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Identity;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.SimpleTasks;
@@ -132,11 +133,13 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
         private static void MysteriousTome(IPlayable source)
         {
             var c = source.Controller; var game = c.Game;
+            // One entry per card: a Secret and its reprint are one card (the first printing by id stands for both).
             var pool = Cards.All.Where(card => card.IsSecret && card.Collectible && card.Implemented && !card.ExcludeFromLegacyRandomPools)
-                .Select(card => card.Id).Distinct().OrderBy(id => id, StringComparer.Ordinal).ToList();
+                .GroupBy(card => card, CardIdentity.Comparer).Select(group => group.Select(card => card.Id).OrderBy(id => id, StringComparer.Ordinal).First())
+                .OrderBy(id => id, StringComparer.Ordinal).ToList();
             for (int i = 0; i < 3 && pool.Count > 0 && !c.SecretZone.IsFull; i++)
             {
-                var candidates = pool.Where(id => c.SecretZone.All(s => s.Card.Id != id)).ToList();
+                var candidates = pool.Where(id => c.SecretZone.All(s => !s.Card.IsSameCardAs(Cards.FromId(id)))).ToList();
                 if (candidates.Count == 0) break;
                 string pick = candidates[DungeonRunCards.Pick(game, candidates.Count)];
                 var secret = (Spell)Entity.FromCard(c, Cards.FromId(pick));

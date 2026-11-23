@@ -22,7 +22,7 @@ internal static class HeroDraftChecks
                 var full = profile.CreateDraft("Full " + label, hero);
                 var neutrals = profile.Collection.Where(pair => pair.Value >= 2
                     && SabberStoneCore.Model.Cards.FromId(pair.Key).Class == SabberStoneCore.Enums.CardClass.NEUTRAL
-                    && !LocalCardCatalog.IsCore(pair.Key)).Take(15).SelectMany(pair => new[] { pair.Key, pair.Key }).ToArray();
+                    && LocalCardCatalog.IsStandardId(pair.Key)).Take(15).SelectMany(pair => new[] { pair.Key, pair.Key }).ToArray();
                 Check(neutrals.Length == 30, "fixture needs 30 owned neutral cards");
                 if (label == "DK")
                     neutrals[0] = LocalCoreProgression.Unlocks.First(card => card.Hero == hero && card.Threshold == 1).Id;

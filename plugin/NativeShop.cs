@@ -21,6 +21,14 @@ using UnityEngine;
 using ShopAttribute = Shared.Scripts.Game.Shop.Product.Attribute;
 #endif
 
+// Test-control ids of the native pack quantity stepper (AdjustBuyingAmount + / -) on the open local pack page.
+internal static class NativeShopAmountText
+{
+    internal const string MoreId = "shop.amount.more", LessId = "shop.amount.less", TypeId = "shop.amount.type";
+    // The count's click area: opens the client's type-a-number box (StoreQuantityPrompt), bounded by the same max.
+    internal const string TypeSuffix = "Arrow Adjust Option/QuantityPromptClicker";
+}
+
 // #57 kit question copy and test-control ids (pure: test-control checks them against the denylist).
 internal static class NativeShopKitText
 {
@@ -184,6 +192,16 @@ internal sealed class NativeShopPurchase
             default: return false; // Packs remain repeatable even with unopened inventory.
         }
     }
+    // Several packs in one order (Discord request "buy more than one pack at a time"): a pack page shows the client's own
+    // quantity stepper (AdjustBuyingAmount), from 1 up to what the balance covers and never above the catalogue maximum
+    // (50, retail's own GetMaxBulkPurchaseCount). Every other kind stays one per order. No bulk discount (no-FOMO rule):
+    // N packs cost exactly N times the unit quote, granted and paid in one ledger commit.
+    internal static bool SupportsQuantity(LocalShopProduct product) => product != null && product.Kind == "Pack" && product.MaxQuantity > 1;
+    internal static bool QuantityAllowed(LocalShopProduct product, int quantity) => product != null
+        && quantity >= product.MinQuantity && quantity <= (SupportsQuantity(product) ? product.MaxQuantity : 1);
+    internal static int AffordableQuantity(LocalShopProduct product, long gold, int unitPrice) =>
+        !SupportsQuantity(product) ? 1 : unitPrice <= 0 ? product.MaxQuantity
+        : (int)Math.Max(1, Math.Min(product.MaxQuantity, gold / unitPrice));
     // Themes and boards are equipped by clicking their tile; the equipped one is named so on its tile.
     internal static bool IsSelectable(LocalShopProduct product) => product.Kind == "HubTheme" || product.Kind == "Board" || product.Kind == "Pet";
     internal static bool Equipped(LocalProfile profile, LocalShopProduct product) =>
@@ -197,9 +215,10 @@ internal sealed class NativeShopPurchase
     // price is the pre-kit quote; kitId (a ready-made deck only) makes the ledger redeem that kit in the same commit.
     internal LocalPurchaseReceipt Commit(LocalProfile profile, long transaction, long product, string currency, int quantity, long price, string kitId = null)
     {
-        if (transaction <= 0 || currency != "XSH" || quantity != 1 || price < 0 || price > int.MaxValue)
+        if (transaction <= 0 || currency != "XSH" || price < 0 || price > int.MaxValue)
             throw new InvalidOperationException("Invalid local gold purchase.");
         var local = Product(product);
+        if (!QuantityAllowed(local, quantity)) throw new InvalidOperationException("Invalid local gold purchase.");
         // The ledger checks expected price and funds atomically, and replays receipts before checking the new balance.
         return profile.Purchase(local.Id, quantity, (int)price, transaction.ToString(System.Globalization.CultureInfo.InvariantCulture), kitId);
     }
@@ -555,6 +574,7 @@ internal static class NativeShop
     private static AlertPopup.PopupInfo localConfirmation;
     private static NativeShopConfirmation confirmation;
     private static long purchasePrice;
+    private static int purchaseQuantity = 1;
     // #57: kit question popup (USE KIT / PAY FULL), whether its PAY FULL button was pressed, and the kit Buy took.
     private static readonly NativeShopKitChoice kits = new NativeShopKitChoice();
     private static AlertPopup.PopupInfo kitQuestion;
@@ -742,6 +762,8 @@ internal static class NativeShop
         new[] { "Method", "PurchaseManager", "PurchaseProduct", "Hearthstone.DataModels.ProductDataModel;Hearthstone.DataModels.PriceDataModel;PurchaseManager+PurchaseManagerOptions;System.Int32", "LocalPurchase", "" },
         new[] { "Method", "PurchaseManager", "Internal_PurchaseProduct", "*", "ClearFinishedPurchase", "postfix" },
         new[] { "Method", "ShopSlot", "OnRelease", "*", "BuyPackTile", "" },
+        new[] { "Method", "ProductExtensions", "ProductSupportsQuantitySelect", "*", "PackQuantitySelect", "postfix" },
+        new[] { "Method", "ProductExtensions", "GetMaxBulkPurchaseCount", "*", "PackBuyCap", "postfix" },
         new[] { "Method", "Hearthstone.UI.Clickable", "OnRelease", "*", "NoteDragRelease", "" },
         new[] { "Field", "Hearthstone.UI.Clickable", "m_dragged", "*", "", "" },
         new[] { "Field", "Hearthstone.UI.Clickable", "m_pegUiElement", "*", "", "" },
@@ -891,6 +913,17 @@ internal static class NativeShop
         new[] { "Field", "ShopTab", "m_clickable", "*", "", "ui" },
         new[] { "Field", "ShopSubTab", "m_button", "*", "", "ui" },
         new[] { "Field", "ProductPageController", "m_quantityPrompt", "*", "", "ui" },
+        new[] { "Method", "AdjustBuyingAmount", "RefreshQuantity", "", "", "ui" },
+        new[] { "Field", "AdjustBuyingAmount", "m_incrementClickable", "*", "", "ui" },
+        new[] { "Field", "AdjustBuyingAmount", "m_decrementClickable", "*", "", "ui" },
+#if !SOLOSTONE_RELEASE
+        new[] { "Field", "StoreQuantityPrompt", "m_currentMaxQuantity", "*", "", "ui" },
+        new[] { "Field", "StoreQuantityPrompt", "m_currentInputText", "*", "", "ui" },
+        new[] { "Method", "StoreQuantityPrompt", "OnInputComplete", "System.String", "", "ui" },
+        new[] { "Field", "AdjustBuyingAmount", "m_buyingAmountText", "*", "", "ui" },
+        new[] { "Field", "AdjustBuyingAmount", "m_buyingAmount", "*", "", "ui" },
+        new[] { "Field", "AdjustBuyingAmount", "m_maximumBuyingAmount", "*", "", "ui" },
+#endif
         new[] { "Field", "StorePurchaseAuth", "m_transaction", "*", "", "ui" },
 #if !SOLOSTONE_RELEASE
         new[] { "Field", "PurchaseAuthWindow", "m_purchaseAuth", "*", "", "ui" },
@@ -1189,7 +1222,7 @@ internal static class NativeShop
             var product = __0 == null ? null : Read(__0, "Product") as ProductDataModel;
             var price = __0 == null ? null : Read(__0, "Price") as PriceDataModel;
             if (!pending && Enabled && ready && ValidProduct(product) && price?.Currency == CurrencyType.GOLD
-                && (int)Read(__0, "Quantity") == 1
+                && NativeShopPurchase.TryProduct(product.PmtId, out var local) && NativeShopPurchase.QuantityAllowed(local, (int)Read(__0, "Quantity"))
                 && kits.Dispatch(product.PmtId, FullPrice(product), (int)product.Prices[0].Amount, price.Amount, Time.realtimeSinceStartup)) return true;
             if (__0 != null) Write(__0, "HasFinished", true);
             Call(__instance, "CancelCurrentPurchase", product, pending ? "A local purchase is already pending" : "Only local gold products are available");
@@ -1215,6 +1248,11 @@ internal static class NativeShop
             if (__0 == null || !NativeShopPurchase.TryProduct(__0.PmtId, out var local)) return true; // GuardPurchase refuses foreign orders.
             if (transaction != null || confirmation != null) { Trace("click ignored: purchase pending"); return false; }
             if (kitQuestion != null) { Trace("click ignored: deck kit question open"); return false; }
+            if (!NativeShopPurchase.QuantityAllowed(local, __3)) { Refuse("purchase click quantity " + __3 + " for " + local.Id); return false; }
+            // Packs are the one repeatable kind and are bought from their page, which stays open under the purchase window:
+            // the press that dismisses the window must not order the same batch again (the tile cooldown, on the page).
+            if (local.Kind == "Pack" && NativeShopClicks.PackCoolingDown(Time.realtimeSinceStartup, purchaseWindowAt))
+            { Trace("pack buy ignored: purchase window cooldown"); return false; }
             // Every route, kind and quantity: the native gold-deficit stop is silent, so a short balance is said here.
             string blocker = local.Kind == "Deck" ? Profile.DeckPurchaseBlocker(local.RecipeId) : null;
             if (blocker != null) { ShowPurchaseFailure("solostone-purchase-refused", blocker); return false; }
@@ -1390,8 +1428,9 @@ internal static class NativeShop
         }
         catch (Exception error) { Fail("purchase coroutine cleanup", error); }
     }
-    // Owner 2026-10-25: a pack tile's gold price buys one pack at once; the booster details page adds nothing.
-    // Other kinds keep the native details page (deck list, preview, cosmetic preview) and buy from there.
+    // A pack tile opens the native booster page, whose quantity stepper (PackQuantitySelect) buys 1 to 50 packs in one
+    // order (Discord request; this replaces the one-click tile buy of 2026-10-25). Themes, boards and pets keep the tile
+    // click: it equips what is owned and buys (then equips) what is not. Other kinds keep their native details page.
     private static bool BuyPackTile(ShopSlot __instance)
     {
         if (!Isolated) return true;
@@ -1399,29 +1438,60 @@ internal static class NativeShop
         {
             var shown = __instance.BrowserButtonDataModel?.DisplayProduct;
             if (shown == null || !NativeShopPurchase.TryProduct(shown.PmtId, out var local)
-                || (local.Kind != "Pack" && !NativeShopPurchase.IsSelectable(local))) return true;
-            if (NativeShopClicks.PackCoolingDown(Time.realtimeSinceStartup, purchaseWindowAt)) { Trace("pack click ignored: purchase window cooldown"); return false; }
+                || !NativeShopPurchase.IsSelectable(local)) return true;
+            if (NativeShopClicks.PackCoolingDown(Time.realtimeSinceStartup, purchaseWindowAt)) { Trace("tile click ignored: purchase window cooldown"); return false; }
             // Pinned PegUI still dispatches RELEASE after a drag-scroll that starts and ends on one tile: never a purchase.
             string ignored = PackTileRelease(__instance);
-            if (ignored != null) { Trace("pack tile " + ignored + " ignored"); return false; }
+            if (ignored != null) { Trace("tile " + ignored + " ignored"); return false; }
             // A tile under the open purchase window (the press that dismisses it can reach the tile) must not queue an
             // order: the native purchase coroutine would run it after the acknowledgement, a second unasked purchase.
             if (transaction != null || confirmation != null || auth != null) { Trace("tile click ignored: purchase window open"); return false; }
-            if (!Enabled || !ready || products == null) { Refuse("pack click while shop unavailable"); return false; }
+            if (!Enabled || !ready || products == null) { Refuse("tile click while shop unavailable"); return false; }
             var product = products.GetProductDataModel(shown.PmtId);
-            if (!ValidProduct(product)) { Refuse("pack click on stale catalogue"); return false; }
+            if (!ValidProduct(product)) { Refuse("tile click on stale catalogue"); return false; }
             // Owner 2026-10-25: a theme or board tile equips what is owned and buys (then equips) what is not.
             if (NativeShopPurchase.IsSelectable(local) && NativeShopPurchase.Owned(Profile, local, 0)) { Equip(local); return false; }
             // The tile must show the quote that will be charged: the catalogue model itself or the same single gold price.
             if (!ReferenceEquals(shown, product) && (shown.Prices == null || shown.Prices.Count != 1
                 || shown.Prices[0].Currency != CurrencyType.GOLD || shown.Prices[0].Amount != product.Prices[0].Amount))
-            { Refuse("pack tile price differs from catalogue"); return false; }
+            { Refuse("tile price differs from catalogue"); return false; }
             if (!ServiceManager.TryGet<PurchaseManager>(out var manager) || manager == null)
                 throw new InvalidOperationException("purchase manager unavailable");
             manager.PurchaseProduct(product, product.Prices[0], 1);
         }
-        catch (Exception error) { ClickFailed("pack click", error); }
+        catch (Exception error) { ClickFailed("tile click", error); }
         return false;
+    }
+    // Retail gives its page stepper (AdjustBuyingAmount) only to "base_booster" products, which need retail sale events
+    // (client map), so both ProductExtensions answers are set here for local single-gold-price packs. The cap is what the
+    // balance covers (at least 1: a short balance gets the native not-enough-gold alert on Buy), at most MaxQuantity;
+    // the stepper hides + at the cap and - at 1. The ledger re-prices and re-checks every order (Buy, Commit).
+    private static void PackQuantitySelect(ProductDataModel __0, ref bool __result)
+    {
+        if (!Isolated) return;
+        // A local product decides alone: packs get the stepper, every other local kind never does (one per order).
+        try { if (__0 != null && NativeShopPurchase.TryProduct(__0.PmtId, out _)) __result = LocalPack(__0, out _); }
+        catch (Exception error) { Refuse("pack quantity select: " + (error.InnerException ?? error).Message); }
+    }
+    private static void PackBuyCap(ProductDataModel __0, ref int __result)
+    {
+        if (!Isolated) return;
+        try { if (LocalPack(__0, out var local)) __result = NativeShopPurchase.AffordableQuantity(local, Profile.Gold, Profile.PurchasePrice(local.Id)); }
+        catch (Exception error) { Refuse("pack buy cap: " + (error.InnerException ?? error).Message); __result = 1; }
+    }
+    // After a purchase the open pack page's stepper still holds the limit of the old balance: the client's own
+    // RefreshQuantity asks GetMaxBulkPurchaseCount again (PackBuyCap) and clamps the count to it.
+    private static void RefreshPackStepperAfterPurchase()
+    {
+        var page = Shop.Get()?.ProductPageController?.CurrentProductPage;
+        if (page == null || !page.IsOpen || !LocalPack(page.GetSelectedVariant(), out _) && !LocalPackSelection(page.GetSelectedVariant())) return;
+        foreach (var stepper in page.GetComponentsInChildren<AdjustBuyingAmount>(false)) Call(stepper, "RefreshQuantity");
+    }
+    private static bool LocalPack(ProductDataModel product, out LocalShopProduct local)
+    {
+        local = null;
+        return product != null && Profile != null && NativeShopPurchase.TryProduct(product.PmtId, out local) && NativeShopPurchase.SupportsQuantity(local)
+            && product.Prices != null && product.Prices.Count == 1 && product.Prices[0] != null && product.Prices[0].Currency == CurrencyType.GOLD;
     }
     private static void Equip(LocalShopProduct local)
     {
@@ -1950,6 +2020,18 @@ internal static class NativeShop
         && products.Catalog.Products.Count() == NativeShopPurchase.Products.Count
         && NativeShopPurchase.Products.All(p => LocalModel(products.GetProductDataModel(NativeShopPurchase.PmtId(p))));
     // Purchase paths: native identity plus the current ledger quote.
+    // A pack page's selected variant is the client's mutable copy at the stepper's N (SetVariantQuantityAndUpdateDataModel):
+    // N packs at N times the quote, same PMT and booster. Control identity only; orders carry the catalogue model.
+    private static bool LocalPackSelection(ProductDataModel variant)
+    {
+        if (variant == null || !NativeShopPurchase.TryProduct(variant.PmtId, out var local) || !NativeShopPurchase.SupportsQuantity(local)
+            || variant.Items == null || variant.Items.Count != 1 || variant.Items[0] == null || variant.Prices == null || variant.Prices.Count != 1
+            || variant.Prices[0] == null || variant.Prices[0].Currency != CurrencyType.GOLD) return false;
+        var item = variant.Items[0];
+        return item.Quantity >= 1 && item.Quantity <= local.MaxQuantity && item.ItemId == NativeShopPurchase.NativeItemId(local)
+            && item.Booster != null && (int)item.Booster.Type == FairPackRules.NativeBoosterId(local.PackType)
+            && variant.Prices[0].Amount == (long)Quote(local) * item.Quantity;
+    }
     private static bool ValidProduct(ProductDataModel product)
     {
         return LocalModel(product) && Profile != null
@@ -2271,6 +2353,62 @@ internal static class NativeShop
 #endif
 
 #if !SOLOSTONE_RELEASE
+    // Test control (shop-pack-buy): the open local page's selection, its native quantity stepper and the price the Buy
+    // button draws. Read only; null while no product page is open.
+    internal static MiniJSON.JsonNode AmountDiagnostics()
+    {
+        try
+        {
+            var shop = Shop.Get();
+            if (!Isolated || shop == null || !shop.IsOpen()) return null;
+            var page = shop.ProductPageController?.CurrentProductPage;
+            if (page == null || !page.IsOpen) return null;
+            var variant = page.GetSelectedVariant();
+            var price = variant?.Prices != null && variant.Prices.Count > 0 ? variant.Prices[0] : null;
+            var node = new MiniJSON.JsonNode {
+                { "pmt", variant?.PmtId }, { "product", variant != null && NativeShopPurchase.TryProduct(variant.PmtId, out var local) ? local.Id : null },
+                { "quantity", page.Selection?.Quantity }, { "maxQuantity", page.Selection?.MaxQuantity },
+                { "price", price == null ? null : (object)(long)price.Amount }, { "priceText", price?.DisplayText }, { "gold", Profile?.Gold } };
+            var stepper = page.GetComponentsInChildren<AdjustBuyingAmount>(true).FirstOrDefault();
+            bool Active(string field) => (Read(stepper, field) as Component)?.gameObject.activeInHierarchy == true;
+            // UberText lives in an assembly the plugin does not reference: its text through the get_Text binding.
+            var textGetter = (MethodInfo)UiBinding("UberText", "get_Text");
+            string Text(object text) => text == null || textGetter == null ? null : textGetter.Invoke(text, null) as string;
+            node["stepper"] = stepper == null ? null : new MiniJSON.JsonNode {
+                { "active", stepper.gameObject.activeInHierarchy }, { "amount", (int)Read(stepper, "m_buyingAmount") },
+                { "max", (int)Read(stepper, "m_maximumBuyingAmount") }, { "text", Text(Read(stepper, "m_buyingAmountText")) },
+                { "moreActive", Active("m_incrementClickable") }, { "lessActive", Active("m_decrementClickable") } };
+            var labels = new List<object>();
+            foreach (var button in page.GetComponentsInChildren<UIBButton>(false))
+                if (button.BubbleUpEvent == ProductPage.SHOP_BUY_WITH_FIRST_CURRENCY || IsSingleBuyPath(path => MatchesHierarchy(button, path)))
+                    if (textGetter != null)
+                        foreach (Component text in button.GetComponentsInChildren(textGetter.DeclaringType, false))
+                            if (!string.IsNullOrWhiteSpace(Text(text))) labels.Add(Text(text));
+            node["buyLabels"] = labels;
+            var events = new List<object>();
+            foreach (var button in page.GetComponentsInChildren<UIBButton>(false))
+                events.Add(new MiniJSON.JsonNode { { "name", button.transform.parent == null ? button.name : button.transform.parent.name + "/" + button.name },
+                    { "event", button.BubbleUpEvent }, { "buyPath", IsSingleBuyPath(path => MatchesHierarchy(button, path)) } });
+            node["buttons"] = events;
+            var prompt = Read(shop.ProductPageController, "m_quantityPrompt") as StoreQuantityPrompt;
+            node["prompt"] = prompt == null ? null : new MiniJSON.JsonNode { { "shown", prompt.IsShown() },
+                { "max", (int)Read(prompt, "m_currentMaxQuantity") }, { "text", Read(prompt, "m_currentInputText") as string } };
+            return node;
+        }
+        catch (Exception error) { return new MiniJSON.JsonNode { { "error", (error.InnerException ?? error).Message } }; }
+    }
+    // Test control (shop-quantity-type): what typing TEXT and Enter does in the open type-a-number box: the box's own
+    // input-complete callback, which validates against its max, hides the box and sets the page quantity (or refuses).
+    internal static int TypeQuantityForTest(string text)
+    {
+        var shop = Shop.Get();
+        if (!Active || shop == null || !shop.IsOpen() || !ControlContext(shop, out var page, out bool local) || !local)
+            throw new InvalidOperationException("Open a local pack page first.");
+        var prompt = Read(shop.ProductPageController, "m_quantityPrompt") as StoreQuantityPrompt;
+        if (prompt == null || !prompt.IsShown()) throw new InvalidOperationException("Open the quantity box first (press shop.amount.type).");
+        Call(prompt, "OnInputComplete", text);
+        return page.Selection?.Quantity ?? 0;
+    }
     // Test-control only: the browser scroller's height inputs (registered items, dividers, viewport) along its scroll axis.
     internal static MiniJSON.JsonNode ScrollDiagnostics()
     {
@@ -2676,19 +2814,22 @@ internal static class NativeShop
             if (collectionLookupFailed) throw new InvalidOperationException("Collection caller unavailable.");
             if (!Enabled || !ready || __0 == null)
             { Refuse("buy unavailable"); RecoverUI(); return false; }
-            if (__0.PaymentCurrency != CurrencyType.GOLD || __0.Quantity != 1
+            if (__0.PaymentCurrency != CurrencyType.GOLD
                 || !ValidProduct(products.GetProductDataModel(__0.PmtProductId))
+                || !NativeShopPurchase.QuantityAllowed(NativeShopPurchase.Product(__0.PmtProductId), __0.Quantity)
                 || (collection == null && Profile.Pending != null))
                 throw new InvalidOperationException("invalid local gold purchase or profile busy");
             if (!shopOpen && CollectionPurchaseContext(__0.PmtProductId, collection) == null) throw new InvalidOperationException("local shop is not open");
             var local = NativeShopPurchase.Product(__0.PmtProductId);
+            int quantity = __0.Quantity, unitPrice = Profile.PurchasePrice(local.Id);
             // #57: this order consumes the answered kit question (if any), refused or not; gold is checked after the kit.
-            int fullPrice = Profile.PurchasePrice(local.Id);
+            // A pack order of N is N times the unit quote (decks, the only kitted kind, are always one).
+            int fullPrice = Profile.PurchasePrice(local.Id, quantity);
             int due = kits.Due(__0.PmtProductId, fullPrice, Time.realtimeSinceStartup);
             string kitId = kits.Take(__0.PmtProductId, fullPrice, Time.realtimeSinceStartup, out bool answered);
             // A kit-quoted deck is bought only through its question: never at a price the page did not offer.
-            if (Quote(local) != fullPrice && !answered) throw new InvalidOperationException("Deck kit question was not answered.");
-            if (NativeShopPurchase.Owned(Profile, local, Profile.PurchasePrice(local.Id)))
+            if (Quote(local) != unitPrice && !answered) throw new InvalidOperationException("Deck kit question was not answered.");
+            if (NativeShopPurchase.Owned(Profile, local, unitPrice))
                 throw new InvalidOperationException("Shop item already owned.");
             string blocker = NativeShopPurchase.Blocker(Profile, local);
             if (blocker != null || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting")
@@ -2704,6 +2845,7 @@ internal static class NativeShop
             if (EvaluatePrerequisite() != null) throw new InvalidOperationException("Local shop prerequisites unavailable."); // Uncached: the per-frame memo may be stale.
             // The ledger expects the pre-kit price; the native quote may be the after-kit amount (ValidProduct above).
             purchasePrice = fullPrice;
+            purchaseQuantity = quantity;
             purchaseKit = kitId;
             auth = ShopWindowController.Get().GetWindow<PurchaseAuthWindow>()
                 ?? throw new InvalidOperationException("Purchase auth unavailable.");
@@ -2712,7 +2854,7 @@ internal static class NativeShop
             transaction = new Transaction(sequence, __0.PmtProductId, PegasusShared.BattlePayProvider.BP_PROVIDER_BLIZZARD);
             collectionPurchase = collection;
             committed = successSent = resultShown = false; purchaseBegan = Time.realtimeSinceStartup;
-            Write(__instance, "m_pendingProductPurchaseArgs", new BuyProductEventArgs(__0.PmtProductId, CurrencyType.GOLD, 1, true));
+            Write(__instance, "m_pendingProductPurchaseArgs", new BuyProductEventArgs(__0.PmtProductId, CurrencyType.GOLD, quantity, true));
             Write(__instance, "m_activeTransaction", transaction); EnumValue(__instance, "Status", "WAIT_BLIZZARD_CHECKOUT");
             Call(__instance, "SetCanTapOutConfirmationUI", true); __instance.BlockStoreInterface();
             Trace("buy start transaction " + transaction.ID);
@@ -2777,7 +2919,7 @@ internal static class NativeShop
                     || NativeShopPurchase.Blocker(Profile, NativeShopPurchase.Product(transaction.PMTProductID.GetValueOrDefault())) != null
                     || LocalLadder.Screen == "Playing" || LocalLadder.Screen == "Starting")
                     throw new InvalidOperationException("local purchase context changed while loading");
-                purchaseReceipt = purchases.Commit(Profile, transaction.ID, transaction.PMTProductID.GetValueOrDefault(), "XSH", 1, purchasePrice, purchaseKit);
+                purchaseReceipt = purchases.Commit(Profile, transaction.ID, transaction.PMTProductID.GetValueOrDefault(), "XSH", purchaseQuantity, purchasePrice, purchaseKit);
                 committed = true;
                 // A bought theme is equipped by the ledger; its notice follows the purchase window (Tick).
                 if (purchaseReceipt.Granted.HubTheme != null) themeNoticeAfterPurchase = purchaseReceipt.Granted.HubTheme;
@@ -2798,7 +2940,7 @@ internal static class NativeShop
             var success = Method(typeof(StoreManager), "HandlePurchaseSuccess");
             var constructor = (ConstructorInfo)bindings["Blizzard.Commerce.TransactionData..ctor"].Value;
             object productId = Method("Blizzard.Commerce.ProductId", "CreateFrom").Invoke(null, new object[] { transaction.PMTProductID.GetValueOrDefault() });
-            object data = constructor.Invoke(new[] { productId, "XSH", (object)1u, true });
+            object data = constructor.Invoke(new[] { productId, "XSH", (object)(uint)purchaseQuantity, true });
             successSent = true; // Native completion may fire callbacks synchronously; never schedule it twice.
             success.Invoke(store, new[] { null, (object)transaction, "", data });
             RefreshWallet();
@@ -2862,6 +3004,8 @@ internal static class NativeShop
                 try { Call(__instance, "SetCanTapOutConfirmationUI", true); }
                 finally { __instance.UnblockStoreInterface(); }
             }
+            // The pack page stays open under the window: its stepper re-reads the limit from the new balance (review 2026-11-16).
+            if (__0) RecoverStep("pack stepper refresh", RefreshPackStepperAfterPurchase);
             Trace("ack transaction " + __1.ID + " success " + __0);
         }
         catch (Exception error) { Fail("ack", error); RecoverUI(); }
@@ -3086,14 +3230,17 @@ internal static class NativeShop
     private const string BuyButtonSuffix = "1 Option/ProductBuyButton/ProductBuyButton/Container";
     // #57 live 2026-10-28: a price on sale (kit decks) uses the same single-price widget under "Discount Option".
     private const string DiscountBuyButtonSuffix = "Discount Option/ProductBuyButton/ProductBuyButton/Container";
-    internal static bool IsSingleBuyPath(Func<string, bool> matches) => matches(BuyButtonSuffix) || matches(DiscountBuyButtonSuffix);
+    // Live 2026-11-15: a pack page with the quantity stepper draws its gold price in the "Arrow Adjust Option" widget.
+    private const string StepperBuyButtonSuffix = "Arrow Adjust Option/ProductBuyButton/ProductBuyButton/Container";
+    internal static bool IsSingleBuyPath(Func<string, bool> matches) =>
+        matches(BuyButtonSuffix) || matches(DiscountBuyButtonSuffix) || matches(StepperBuyButtonSuffix);
     private static readonly NativeShopControlCache controlCache = new NativeShopControlCache();
     private static bool ControlContext(Shop shop, out ProductPage currentPage, out bool localPage)
     {
         currentPage = shop.ProductPageController?.CurrentProductPage;
         var variant = currentPage?.GetSelectedVariant();
         bool catalogue = controlCache.Resolve(Time.frameCount, shop, currentPage, variant, NativeShopPurchase.CatalogueVersion,
-            LocalCatalogue, () => LocalModel(variant),
+            LocalCatalogue, () => LocalModel(variant) || LocalPackSelection(variant),
             error => Refuse("control identity: " + (error.InnerException ?? error).Message), out bool localVariant);
         localPage = catalogue && currentPage != null && currentPage.IsOpen && localVariant;
         return catalogue;
@@ -3132,6 +3279,16 @@ internal static class NativeShop
         if (quantity != null && localPage && ReferenceEquals(Read(shop.ProductPageController, "m_quantityPrompt"), quantity)
             && control == quantity.m_clickCatcherClickable?.GetComponent<PegUIElement>())
         { id = "shop.quantity.cancel"; return true; }
+        var amount = control.GetComponentInParent<AdjustBuyingAmount>();
+        if (amount != null && localPage && amount.GetComponentInParent<ProductPage>() == currentPage)
+        {
+            // Live 2026-11-15: the - arrow's PegUIElement is a child of its Clickable (Shop_Detail_Slider_Arrow_Decrease/PageArrowImage).
+            bool Under(string field) => Read(amount, field) is Component clickable && clickable != null && control.transform.IsChildOf(clickable.transform);
+            if (Under("m_incrementClickable")) { id = NativeShopAmountText.MoreId; return true; }
+            if (Under("m_decrementClickable")) { id = NativeShopAmountText.LessId; return true; }
+        }
+        if (localPage && control.GetComponentInParent<ProductPage>() == currentPage && MatchesHierarchy(control, NativeShopAmountText.TypeSuffix))
+        { id = NativeShopAmountText.TypeId; return true; }
         var page = control.GetComponentInParent<ProductPage>();
         bool inShop = control.GetComponentInParent<Shop>() == shop;
         if (!inShop && !(localPage && page == currentPage)) return false;

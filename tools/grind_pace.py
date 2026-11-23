@@ -96,7 +96,7 @@ FRACTIONS = (0.25, 0.50, 0.75, 0.90, 1.0)
 DEFAULT_TIERS = ("relaxed-6x:6:101", "standard-2x:2:217", "grinder:0.75:440", "retail:0.4:217")
 RETAIL_REFERENCES = {1: (78.1, 0.705, 25.0), 2: (45.7, 0.352, 12.5)}
 
-# LocalEconomy.StarterCollection = these two LocalCardCatalog manifests.
+# LocalEconomy.StarterCollection = these two LocalCardCatalog manifests: Classic/Basic (Wild since #87), owned only by old saves.
 STARTER_IDS = set("""
 CS1_112 CS1_130 CS2_004 CS2_022 CS2_023 CS2_024 CS2_026 CS2_027 CS2_029
 CS2_032 CS2_033 CS2_087 CS2_088 CS2_089 CS2_091 CS2_092 CS2_093 CS2_094
@@ -283,8 +283,9 @@ def shop_deck_costs(root, definitions, core, active_sets, extra_ids):
     products = json.loads((root / "data/shop/catalog-v1.json").read_text())["Products"]
     recipe_prices = {p["RecipeId"]: p["Price"] for p in products if p["Kind"] == "Recipe"}
     schedule = json.loads((root / "data/progression/core-2026-unlocks.json").read_text())
-    # EmptyXp starts every class at level 1 and neutral combined level at 4.
-    owned = dict.fromkeys(STARTER_IDS, 2)
+    # EmptyXp starts every class at level 1 and neutral combined level at 4. Since #87 a new save owns no Classic
+    # starter cards (STARTER_IDS are Wild and only old saves hold them); the schedule's start cards are all it owns.
+    owned = {}
     for card in schedule["cards"]:
         level = schedule["neutralBaseCombinedLevel"] if card["class"] == "NEUTRAL" else 1
         if card["threshold"] <= level:

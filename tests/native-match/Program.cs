@@ -114,6 +114,8 @@ internal static partial class Program
         if (args.Contains("--rewind-settlement-only")) { NativeMatch.ClockFreeBot = true; RewindSettlementNoOp(args.ElementAtOrDefault(1)); return; }
         if (args.Contains("--play-effect-once-only")) { NativeMatch.ClockFreeBot = true; PlayEffectOnceHistory(); return; }
         if (args.Contains("--effect-summon-slot-only")) { NativeMatch.ClockFreeBot = true; EffectSummonSlotHistory(); return; }
+        if (args.Contains("--leave-board-only")) { NativeMatch.ClockFreeBot = true; LeaveBoardHistory(); return; }
+        if (args.Contains("--escape-artist-only")) { NativeMatch.ClockFreeBot = true; EscapeArtistLeavesHistory(); return; }
         if (args.Contains("--king-llane-only")) { NativeMatch.ClockFreeBot = true; KingLlanePlayHistory(); return; }
         if (args.Contains("--vanguard-only")) { NativeMatch.ClockFreeBot = true; VanguardDrawHistory(); return; }
         if (args.Contains("--broxigar-only")) { NativeMatch.ClockFreeBot = true; BroxigarReturnHistory(); return; }
@@ -162,6 +164,7 @@ internal static partial class Program
         if (args.Contains("--npc-pets-only")) { NpcPets_(); return; }
         if (args.Contains("--pet-likes-only")) { PetLikesAndTreats(); return; }
         PlayerTurnTimerTests();
+        LossRewardParticipationNative();
         RewindPresentationTags();
         CoinFlipTests();
         DebugScenarioTests();
@@ -299,6 +302,8 @@ internal static partial class Program
             return;
         }
         ForcedAttackReadinessIsPublished();
+        LeaveBoardHistory();
+        EscapeArtistLeavesHistory();
         TransformCopyReadinessIsPublished();
         BefuddledCopyStateIsPublished();
         if (args.Contains("--reveal-animation-only"))
@@ -1914,9 +1919,8 @@ internal static partial class Program
             Check(match.Game.State == State.COMPLETE, "pairing did not finish " + human.Id + "/" + bot.Id);
             Check(errors.Count == 0, "Search exceptions in " + human.Id + "/" + bot.Id + ": " + string.Join(";",errors));
             string outcome = match.Game.Player1.PlayState == PlayState.WON ? "Won" : match.Game.Player1.PlayState == PlayState.LOST ? "Lost" : "Tied";
-            // V6: a completed loss/draw pays a rounded third of the same win roll.
-            expectedGold += profile.GrindTier.Gold(LocalEconomy.RewardV6(outcome, match.Game.Turn, false,
-                LocalEconomy.RewardRollSeed(pending.Id, pending.Seed)).Gold);
+            expectedGold += LocalEconomy.RewardV7(outcome, match.Game.Turn, false, new LocalRewardFacts(),
+                LocalEconomy.RewardRollSeed(pending.Id, pending.Seed), profile.GrindTier).Gold;
             if (outcome == "Won") wins++;
             var priorLadder = expectedLadder ?? profile.Ladder;
             expectedLadder = LadderRules.Apply(priorLadder, LadderRules.Outcome(outcome), priorLadder.Rating).After;

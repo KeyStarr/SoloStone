@@ -23,7 +23,7 @@ public static class NpcPremiums
     // The rank an NPC's finishes follow: its medal's rank in Ranked. Casual shows no medal and its rating is hidden,
     // so there they follow the player's visible ladder rank (owner 2026-10-28) and never reveal the Casual rating.
     public static int SeatStarIndex(string mode, double npcRating, int playerStarIndex) =>
-        CasualRules.IsCasual(mode) ? playerStarIndex : LadderRules.IndexForRating(npcRating);
+        !ArenaRules.IsRanked(mode) ? playerStarIndex : LadderRules.IndexForRating(npcRating);   // Arena (#6) shows no medal either
 
     public static double FlairFor(string personalityId) =>
         personalityId != null && Flair.TryGetValue(personalityId, out double flair) ? flair : 1;

@@ -11,6 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
+using SabberStoneCore.Identity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -164,6 +165,9 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				choiceAction = _choiceAction;
 			}
 
+			// Two printings of one card are one card in a pinned match pool (#225); a legacy pool keeps its frozen draws.
+			IEqualityComparer<Card> sameCard = pool.Legacy ? (IEqualityComparer<Card>)EqualityComparer<Card>.Default : CardIdentity.Comparer;
+
 			// Random Discover cannot offer its source; copies from existing zones and fixed choices are exempt.
 			if (!pool.Legacy && IsDiscover && _discoverType != DiscoverType.BASIC_HEROPOWERS
 				&& _discoverType != DiscoverType.ARTIFACT && _discoverType != DiscoverType.DECK_MINION
@@ -175,15 +179,15 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 				cardsToDiscover = cardsToDiscover.Select(set => (Card[])pool.WithoutSource(set, discoverSource)).ToArray();
 				// Source exclusion may leave a tri-class set empty or fewer than three distinct choices.
 				if (cardsToDiscover.Length == 3 && (cardsToDiscover.Any(set => set.Length == 0)
-					|| cardsToDiscover.SelectMany(set => set).Distinct().Count() < 3))
-					cardsToDiscover = new[] { cardsToDiscover.SelectMany(set => set).Distinct().ToArray() };
+					|| cardsToDiscover.SelectMany(set => set).Distinct(sameCard).Count() < 3))
+					cardsToDiscover = new[] { cardsToDiscover.SelectMany(set => set).Distinct(sameCard).ToArray() };
 			}
 
 			if (cardsToDiscover.Length == 1)
-				cardsToDiscover[0] = cardsToDiscover[0].Distinct().ToArray();
+				cardsToDiscover[0] = cardsToDiscover[0].Distinct(sameCard).ToArray();
 
 			// Gets cards to choose from the sets. 
-			Card[] result = GetChoices(cardsToDiscover, _numberOfChoices, game.Random);
+			Card[] result = GetChoices(cardsToDiscover, _numberOfChoices, game.Random, !pool.Legacy);
 
 			// TODO work on it ...
 			//if (game.Splitting)
@@ -715,14 +719,17 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 		// 2 Sets means Class cards / Neutral cards.
 		// 3 Sets means Tri-Class discovers. (Gangs)
-		public static Card[] GetChoices(Card[][] cardsToDiscover, int numberOfChoices, Util.DeepCloneableRandom rnd)
+		public static Card[] GetChoices(Card[][] cardsToDiscover, int numberOfChoices, Util.DeepCloneableRandom rnd, bool byIdentity = true)
 		{
+			// A reprint is the same card (#225); byIdentity false keeps the frozen legacy-pool draws.
+			IEqualityComparer<Card> sameCard = byIdentity ? (IEqualityComparer<Card>)CardIdentity.Comparer : EqualityComparer<Card>.Default;
 			Card[] result;
 
+			// Two printings of one card are one choice (#225). The sets keep their repeats on purpose (a deck's weighting).
 			switch (cardsToDiscover.Length)
 			{
 				case 1:
-					Card[] distinct = cardsToDiscover[0].Distinct().ToArray();
+					Card[] distinct = byIdentity ? CardIdentity.Distinct(cardsToDiscover[0]) : cardsToDiscover[0].Distinct().ToArray();
 					if (numberOfChoices >= distinct.Length)
 						result = distinct;
 					else
@@ -734,7 +741,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 							do
 							{
 								pick = cardsToDiscover[0][rnd.Next(cardsToDiscover[0].Length)];
-							} while (result.Contains(pick));
+							} while (result.Contains(pick, sameCard));
 
 							result[i] = pick;
 						}
@@ -744,6 +751,8 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 					int classCount = cardsToDiscover[1].Length;
 					int neutralCount = cardsToDiscover[0].Length;
 					numberOfChoices = Math.Min(numberOfChoices, neutralCount + classCount);
+					// Never ask for more choices than there are different cards (a reprint is the same card).
+					numberOfChoices = Math.Min(numberOfChoices, cardsToDiscover[0].Concat(cardsToDiscover[1]).Distinct(sameCard).Count());
 					result = new Card[numberOfChoices];
 					for (int i = 0; i < result.Length; i++)
 					{
@@ -756,7 +765,7 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 						bool contains = false;
 						for (int j = 0; j < i; j++)
-							if (result[j] == pick)
+							if (sameCard.Equals(result[j], pick))
 								contains = true;
 
 						if (contains)
@@ -777,18 +786,20 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 					result = new Card[3];
 					for (int i = 0; i < result.Length; i++)
 					{
+						Card[] bucket = cardsToDiscover[i];
+						if (bucket.All(card => result.Contains(card, sameCard)))
+						{
+							// Reprints can exhaust a bucket even when the combined pool still has enough cards.
+							var remaining = cardsToDiscover.SelectMany(set => set).Except(result, sameCard).ToArray();
+							var fallback = GetChoices(new[] { remaining }, result.Length - i, rnd, byIdentity);
+							return result.Take(i).Concat(fallback).ToArray();
+						}
+
 						Card pick;
-						bool contains;
 						do
 						{
-							// Reset per attempt: a card listed in two of the three class sets (a gang card) used to
-							// make this loop spin forever once it had been drawn twice.
-							contains = false;
-							pick = cardsToDiscover[i][rnd.Next(cardsToDiscover[i].Length)];
-							for (int j = 0; j < i; j++)
-								if (result[j] == pick)
-									contains = true;
-						} while (contains);
+							pick = bucket[rnd.Next(bucket.Length)];
+						} while (result.Contains(pick, sameCard));
 
 						result[i] = pick;
 					}

@@ -313,6 +313,11 @@ namespace SabberStoneCore.Kettle
 			};
 		}
 
+		public static IPowerHistoryEntry HideEntity(int entityId, Zone zone)
+		{
+			return new PowerHistoryHideEntity { EntityID = entityId, Zone = zone };
+		}
+
 		public static IPowerHistoryEntry HideEntity(IPlayable playable)
 		{
 			return new PowerHistoryHideEntity

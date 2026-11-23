@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System.Linq;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Enchants;
@@ -14,7 +15,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { PowerTask = new DecisionBattlecryTask("client/JAIL_831/v1",
                 new DiscoverThenContinueTask((g,c,s,k) => DeckbuildingRules.Remaining(c, DeckbuildingRules.Underbelly)
-                    .Select(p => p.Card).Distinct().ToArray()),
+                    .Select(p => p.Card).Distinct(CardIdentity.Comparer).ToArray()),
                 new CustomTask((g,c,s,t,k) => DeckbuildingRules.Receive(c, k.Playables.FirstOrDefault()))) };
         }
     }

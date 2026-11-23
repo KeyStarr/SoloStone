@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -37,9 +38,11 @@ namespace SabberStoneCore.Model
             int classes = allowDiscoverFallback && filter.DiscoverFallback && filter.ClassMode == PoolClassMode.ControllerAndNeutral
                 ? (sourceClassMask ?? PrintedClassMask(Cards.FromAssetId(sourceDbfId))) & PlayableClassMask : 0;
             return Cache.GetOrAdd((manifest.Hash, heroClass, filter, sourceDbfId, destination, allowDiscoverFallback, classes), _ => {
+                int sourceIdentity = Cards.FromAssetId(sourceDbfId)?.Identity ?? sourceDbfId;
                 var eligible = (filter.Scope == PoolScope.Wild ? manifest.Standard.Concat(manifest.Past).OrderBy(m => m.DbfId)
                     : filter.Scope == PoolScope.Standard ? (IEnumerable<OfflinePoolPolicy.Member>)manifest.Standard : manifest.Past)
-                .Where(m => m.DbfId != sourceDbfId &&
+                // The source's reprints are the source too (#225).
+                .Where(m => !IsSource(m.DbfId, sourceDbfId, sourceIdentity) &&
                     // Colossal bodies may be generated off-board, never selected for a direct summon/transform.
                     // Tag 2247 marks a Colossal body. Tag 4538 marks a Herald Colossal, which is rejected from every pool.
                     (!m.Tags.TryGetValue(2247, out int colossal) || colossal <= 0 ||
@@ -62,6 +65,9 @@ namespace SabberStoneCore.Model
             if (game.LegacyPoolReplay) throw new InvalidOperationException("Offline pools are unavailable in schema-2 legacy replay mode.");
             return game.OfflinePools ?? throw new InvalidOperationException("Offline pools require StartGame.");
         }
+
+        private static bool IsSource(int dbfId, int sourceDbfId, int sourceIdentity) =>
+            dbfId == sourceDbfId || sourceDbfId != 0 && Cards.FromAssetId(dbfId)?.Identity == sourceIdentity;
 
         public static IReadOnlyList<Card> Candidates(Game game, CardClass heroClass,
             OfflinePoolFilter filter, int sourceDbfId, PoolDestination destination = PoolDestination.Hand, int? sourceClassMask = null) =>
@@ -127,15 +133,29 @@ namespace SabberStoneCore.Model
         {
             if (random == null) throw new ArgumentNullException(nameof(random));
             var candidates = Candidates(manifest, heroClass, filter, sourceDbfId, destination, sourceClassMask);
-            if (candidates.Count <= 3) return candidates.ToArray();
+            // Two printings of one card are one choice (#225): a pick that repeats a chosen card is dropped and redrawn, so a pool
+            // without reprints consumes exactly the draws it always did.
+            if (candidates.Count <= 3) return CardIdentity.Distinct(candidates.ToArray());
             var indices = Enumerable.Range(0, candidates.Count).ToArray();
             var result = new Card[3];
+            int live = indices.Length;
             for (int i = 0; i < result.Length; i++)
             {
+                if (live - i <= 0) return result.Take(i).ToArray();
                 // Existing Game.Random API: Next(bound) consumes exactly one primitive draw.
-                int j = i + random.Next(indices.Length - i);
+                int j = i + random.Next(live - i);
                 int swap = indices[i]; indices[i] = indices[j]; indices[j] = swap;
-                result[i] = candidates[indices[i]];
+                Card pick = candidates[indices[i]];
+                bool repeated = false;
+                for (int k = 0; k < i; k++) if (result[k].IsSameCardAs(pick)) { repeated = true; break; }
+                if (repeated)
+                {
+                    live--;
+                    int tail = indices[live]; indices[live] = indices[i]; indices[i] = tail;
+                    i--;
+                    continue;
+                }
+                result[i] = pick;
             }
             return result;
         }

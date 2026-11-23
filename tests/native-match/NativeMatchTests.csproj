@@ -25,8 +25,10 @@
     <Compile Include="../../plugin/NativePetReactions.cs" Link="NativePetReactions.cs" />
     <Compile Include="../../plugin/NativePetLikes.cs" Link="NativePetLikes.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <!-- NPC World integration (NpcWorldIntegrationTests): the pure world core, as the plugin compiles it. -->
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/arena/ArenaMatchmaker.cs" LinkBase="arena" />
     <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
     <Compile Include="../../plugin/NpcPetSeats.cs" Link="NpcPetSeats.cs" />
     <None Include="../../data/npc/*.json" LinkBase="data/npc" CopyToOutputDirectory="PreserveNewest" />
@@ -96,5 +98,12 @@
     <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
   </ItemGroup>
-<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/arena/ArenaContract.cs" />
+    <Compile Include="../../plugin/arena/DraftRules.cs" />
+    <Compile Include="../../plugin/arena/ArenaRun.cs" />
+    <Compile Include="../../plugin/arena/ArenaService.cs" />
+    <EmbeddedResource Include="../../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" />
+  </ItemGroup>
 </Project>

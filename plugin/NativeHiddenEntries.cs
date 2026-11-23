@@ -19,7 +19,6 @@ internal static class NativeHiddenEntries
     }
 
     internal static readonly Entry[] Entries = {
-        new Entry("home.arena", "Box.m_ArenaButton", "No local Arena", "#6", "Box.OnArenaButtonPressed|Hub.HandleAreanaButtonPressed", buttons: "ARENA", disabledMode: true),
         new Entry("home.battlegrounds", "Box.m_BattleGroundsButton", "Online mode; face relabelled Fan-made modes (community mods, modder toolkit), later", "Fan-made modes (community mods, modder toolkit), later; Battlegrounds #50 unscheduled", "Box.OnBattleGroundsButtonPressed|Box.PlayBattlegroundsMode|Box.ShowBattlegroundsPreviewVideo|Box.StartBattlegroundsTutorial|Hub.HandleBaconButtonPressed", buttons: "BACON|BACON_PREVIEW", disabledMode: true),
         new Entry("home.modes", "Box.m_GameModesButton", "Twist, Duels, Adventures, Mercenaries and Books unsupported", "#50; #8 separate roguelike", "Box.OnModesButtonPressed|Hub.HandleGameModesButtonPressed", buttons: "GAME_MODES|PVP_DUNGEON_RUN|MERCENARIES", disabledMode: true),
         new Entry("home.brawl", "Box.m_prtbButtonWidget|Box.m_ribbonButtons.m_prtbRibbon|Box.m_ribbonButtons.m_prtbButtonWidget|PRTBButton.$self", "No local Tavern Brawl", "#21", "Box.OnPRTBButtonPressed|Box.OnTavernBrawlButtonPressed|PRTBButton.GoToTavernBrawl", buttons: "TAVERN_BRAWL"),

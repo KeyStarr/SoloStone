@@ -826,7 +826,7 @@ internal static class CraftingLedgerTests
             string id = p.Begin("mage", "priest", 1).Id;
             var result = p.Settle(id, "Won", 10, false);
             int rolledDust = GrindTiers.Find(result.GrindTier).Dust(LocalEconomy.RewardV6("Won", 10, false, LocalEconomy.RewardRollSeed(id, 1)).Dust);
-            Check(result.RewardVersion == 6 && result.DustReward == rolledDust && ledger.DustBalance == before + result.DustReward, "ledger sees stamped-tier V6 settlement credit live");
+            Check(result.RewardVersion == LocalEconomy.RollRewardVersion && result.DustReward == rolledDust && ledger.DustBalance == before + result.DustReward, "ledger sees stamped-tier V6 settlement credit live");
             Check(ledger.CommitBatch(Common, CraftDirection.Craft, 1, 0).Ok && ledger.DustBalance == result.DustReward, "craft spends post-settlement balance");
         }
         // #74: ranked milestone craft tokens pay for a Normal craft of their rarity, one copy each, automatically.

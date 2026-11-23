@@ -11,7 +11,7 @@ internal sealed class LocalProfile : IDisposable
     internal static LocalProfileData ReadFile(string path) => throw new NotSupportedException("Save summaries are outside the guard boundary test.");
     public static string RankName(int stars) => throw new NotSupportedException();
     // The startup preflight asks this after ReadFile; ReadFile throws here, so a guard-boundary launch always lands on the picker.
-    internal static bool IsSupportedVersion(int version) => version >= 13 && version <= 15;
+    internal static bool IsSupportedVersion(int version) => version >= 13 && version <= 16;
     public void Dispose() { }
 }
 internal sealed class LocalLadderState { public int StarIndex; }

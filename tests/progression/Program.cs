@@ -8,6 +8,12 @@ if (args.Length == 2 && args[0] == "--deck-premium-owner-save")
     return;
 }
 
+if (args.Length == 2 && args[0] == "--gen-arena-decks")
+{
+    ArenaDeckGenerator.Write(args[1]);
+    return;
+}
+
 if (args.SequenceEqual(new[] { "--deck-premiums-only" }))
 {
     var deckPremiumRoot = Path.Combine(Path.GetTempPath(), "hs-deck-premiums-" + Guid.NewGuid());
@@ -34,6 +40,15 @@ if (args.SequenceEqual(new[] { "--premium-tracks-only" }))
     return;
 }
 
+if (args.SequenceEqual(new[] { "--npc-difficulty-only" }))
+{
+    string difficultyRoot = Path.Combine(Path.GetTempPath(), "hs-npc-difficulty-" + Guid.NewGuid());
+    Directory.CreateDirectory(difficultyRoot);
+    try { NpcDifficultyChecks.Run(difficultyRoot); }
+    finally { Directory.Delete(difficultyRoot, true); }
+    return;
+}
+
 if (args.SequenceEqual(new[] { "--grind-tiers-only" }))
 {
     string grindRoot = Path.Combine(Path.GetTempPath(), "hs-grind-tiers-" + Guid.NewGuid());
@@ -45,6 +60,9 @@ if (args.SequenceEqual(new[] { "--grind-tiers-only" }))
 
 if (args.Length == 0)
 {
+    var arenaRoot = Path.Combine(Path.GetTempPath(), "hs-arena-" + Guid.NewGuid());
+    Directory.CreateDirectory(arenaRoot);
+    try { ArenaChecks.Run(arenaRoot); NativeArenaBoundary.NativeArena.RunRealServiceTests(arenaRoot); } finally { Directory.Delete(arenaRoot, true); }
     var premiumRoot = Path.Combine(Path.GetTempPath(), "hs-deck-premiums-" + Guid.NewGuid());
     Directory.CreateDirectory(premiumRoot);
     try { DeckPremiumChecks.Run(premiumRoot); } finally { Directory.Delete(premiumRoot, true); }
@@ -52,12 +70,14 @@ if (args.Length == 0)
     TurnTimerOptionChecks.Run();
     FpsCounterOptionChecks.Run();
     DeckInferenceOptionChecks.Run();
+    PlainCardsOptionChecks.Run();
+    OpponentPetsOptionChecks.Run();
     MasteryChecks.Run();
     CurrentV14ProgressionChecks.Run();
     // The gate runs only this no-argument path; keep the save-catalog/cheat checks in it.
     var gateCatalogRoot = Path.Combine(Path.GetTempPath(), "hs-profile-catalog-" + Guid.NewGuid());
     Directory.CreateDirectory(gateCatalogRoot);
-    try { RewardV5Checks.Run(gateCatalogRoot); MatchTimingChecks.Run(gateCatalogRoot); GrindTierChecks.Run(gateCatalogRoot); ProfileCatalogChecks.Run(gateCatalogRoot); StartupSaveChecks.Run(gateCatalogRoot); SaveHoldChecks.Run(gateCatalogRoot); HiddenLoanerChecks.Run(gateCatalogRoot); TestLoanerGateChecks.Run(gateCatalogRoot); MassPackChecks.Run(gateCatalogRoot); DeathKnightTipChecks.Run(gateCatalogRoot); PremiumPackChecks.Run(gateCatalogRoot); DeckRecordChecks.Run(gateCatalogRoot); RunProfileChecks.Run(gateCatalogRoot); }
+    try { RewardV5Checks.Run(gateCatalogRoot); MatchTimingChecks.Run(gateCatalogRoot); GrindTierChecks.Run(gateCatalogRoot); NpcDifficultyChecks.Run(gateCatalogRoot); ProfileCatalogChecks.Run(gateCatalogRoot); StartupSaveChecks.Run(gateCatalogRoot); SaveHoldChecks.Run(gateCatalogRoot); HiddenLoanerChecks.Run(gateCatalogRoot); TestLoanerGateChecks.Run(gateCatalogRoot); MassPackChecks.Run(gateCatalogRoot); DeathKnightTipChecks.Run(gateCatalogRoot); PremiumPackChecks.Run(gateCatalogRoot); DeckRecordChecks.Run(gateCatalogRoot); RunProfileChecks.Run(gateCatalogRoot); }
     finally { Directory.Delete(gateCatalogRoot, true); }
     return;
 }
@@ -127,7 +147,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
     try
     {
         using (var v11 = new LocalProfile(Path.Combine(root, "v11-new.xml"))) v11.CreateDraft("V11", "HERO_08");
-        Check(Read(Path.Combine(root, "v11-new.xml")).Version == 15, "new profiles use the current save version");
+        Check(Read(Path.Combine(root, "v11-new.xml")).Version == LocalProfile.SaveVersion, "new profiles use the current save version");
         PremiumChecks.Run(root);
         RewardV3Checks.Run();
         DeathKnightChecks.Run(root);
@@ -147,7 +167,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
         using (var profile = new LocalProfile(curvePath))
             Check(profile.ClassXp["HERO_08"] == 1000 && profile.ClassLevel("HERO_08") == 10, "curve reload preserves XP");
         var curveAfter = Read(curvePath);
-        Check(curveAfter.Version == 15 && curveAfter.CoreScheduleVersion == LocalCoreProgression.ScheduleVersion
+        Check(curveAfter.Version == LocalProfile.SaveVersion && curveAfter.CoreScheduleVersion == LocalCoreProgression.ScheduleVersion
             && curveSave.CoreGrants.All(old => curveAfter.CoreGrants.Any(card => card.Id == old.Id && card.Count >= old.Count))
             && LocalCoreProgression.Owned(curveAfter.ClassXp.ToDictionary(entry => entry.Hero, entry => entry.Xp), false)
                 .All(pair => curveAfter.CoreGrants.Any(card => card.Id == pair.Key && card.Count == pair.Value))
@@ -216,7 +236,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
                 Check(profile.ClassXp["HERO_08"] == sample.Item3, "loss/concede/tie XP");
             }
             var draft = profile.CreateDraft("Personal priest", "HERO_09");
-            profile.SaveDraft(draft.Id, draft.Name, draft.Hero, LocalDecks.Get("priest").CardIds, 0);
+            profile.SaveDraft(draft.Id, draft.Name, draft.Hero, StandardDeckFixture.Deck(profile, "HERO_09"), 0);
             var custom = profile.Begin("custom:" + draft.Id, "mage", 1);
             profile.SaveDraft(draft.Id, "Now warrior", "HERO_01", Array.Empty<string>(), 0);
             profile.Settle(custom.Id, "Won", 12, false);
@@ -303,7 +323,7 @@ if (args.SequenceEqual(new[] { "--extended" }))
                 Reject(() => profile.SaveDraft(draft.Id, draft.Name, draft.Hero, new[] { legendary, legendary }, 0), "legendary copy cap");
                 string other = LocalCoreProgression.Unlocks.First(card => card.Hero == "HERO_04").Id;
                 Reject(() => profile.SaveDraft(draft.Id, draft.Name, draft.Hero, new[] { other }, 0), "off-class Core");
-                var deck = LocalDecks.Get("mage").CardIds
+                var deck = StandardDeckFixture.Deck(profile, "HERO_08")
                     .Where(id => LocalCardCatalog.CopyGroup(id) != locked.CopyGroup).Take(28).ToList();
                 deck.AddRange(new[] { locked.Id, locked.Id });
                 profile.SaveDeck("Complete Core", "HERO_08", deck);

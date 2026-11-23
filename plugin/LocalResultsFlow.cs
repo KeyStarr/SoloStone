@@ -9,6 +9,9 @@ internal sealed class LocalResultsReceipt
     public bool Conceded, PackReward;
     // #37 Standard Casual: no rank scoop or tier step (Ladder stays null); the rank line reads "Casual".
     public bool Casual;
+    // Arena (#6): no rank, no season line and no per-match gold, dust or pack; the rank line reads the run's record after this match.
+    public bool Arena;
+    public int ArenaWins, ArenaLosses;
     public int Turns, Gold, Dust;
     public int SeasonGamesBefore, SeasonGamesAfter, SeasonWinsBefore, SeasonWinsAfter;
     public int? ClassXpBefore, ClassXpAfter;
@@ -52,6 +55,7 @@ internal sealed class LocalResultsReceipt
         get
         {
             if (Casual) return "Casual · no rank change";
+            if (Arena) return "Arena run: " + ArenaWins + " wins, " + ArenaLosses + " losses";
             if (!HasRank) return "";
             string before = DisplayRank(StarsBefore, ArrivedByWinBefore), after = DisplayRank(StarsAfter, ArrivedByWinAfter);
             string text = "Rank: " + before + (before != after ? " → " + after : "");
@@ -134,22 +138,22 @@ internal sealed class LocalResultsReceipt
             if (history[i].Id == match.Id) { if (index != -1) throw new ArgumentException("Duplicate match id."); index = i; }
         if (index < 0) throw new ArgumentException("Match is not in saved history.");
         match = history[index];
-        bool casual = CasualRules.IsCasual(match.Mode);
-        // Season counts are ranked games only: Casual neither counts nor shows a season line.
-        var ranked = history.Take(index).Where(m => !CasualRules.IsCasual(m.Mode)).ToList();
+        bool casual = CasualRules.IsCasual(match.Mode), arena = ArenaRules.IsArena(match.Mode);
+        // Season counts are ranked games only: Casual and Arena neither count nor show a season line.
+        var ranked = history.Take(index).Where(m => ArenaRules.IsRanked(m.Mode)).ToList();
         int wins = ranked.Count(m => m.Result == "Won");
         bool arrivedByWin = history.Take(index).Select(m => m.Ladder)
             .LastOrDefault(r => r != null && r.LadderRuleVersion >= LadderRules.RuleVersion && r.StarsGained != 0)?.StarsGained > 0;
         LocalClassRewardGrant CopyGrant(LocalClassRewardGrant row) => new LocalClassRewardGrant { Hero = row.Hero, Level = row.Level,
             CardId = row.CardId, Premium = row.Premium, Copies = row.Copies, ScheduleVersion = row.ScheduleVersion,
             ScheduledCardId = row.ScheduledCardId, Dust = row.Dust, GrantedUtc = row.GrantedUtc };
-        return new LocalResultsReceipt { MatchId = match.Id, Result = match.Result, Conceded = match.Conceded, Casual = casual,
+        return new LocalResultsReceipt { MatchId = match.Id, Result = match.Result, Conceded = match.Conceded, Casual = casual, Arena = arena, ArenaWins = match.ArenaWins, ArenaLosses = match.ArenaLosses,
             Pace = GrindTiers.Find(match.GrindTier),
             Turns = match.Turns, Gold = checked(match.Gold + match.RivalGold), PackReward = match.PackReward, Dust = match.DustReward,
             // Rule version 1 = shop-era one-star folds: shown like legacy (no rank scoop).
             Ladder = match.Ladder == null || match.Ladder.LadderRuleVersion < 2 ? null : LocalProfile.Clone(match.Ladder),
-            SeasonGamesBefore = ranked.Count, SeasonGamesAfter = ranked.Count + (casual ? 0 : 1), ArrivedByWinBefore = arrivedByWin,
-            SeasonWinsBefore = wins, SeasonWinsAfter = wins + (!casual && match.Result == "Won" ? 1 : 0),
+            SeasonGamesBefore = ranked.Count, SeasonGamesAfter = ranked.Count + (casual || arena ? 0 : 1), ArrivedByWinBefore = arrivedByWin,
+            SeasonWinsBefore = wins, SeasonWinsAfter = wins + (!casual && !arena && match.Result == "Won" ? 1 : 0),
             HeroClass = match.DeckHero, ClassXpBefore = match.ClassXpBefore, ClassXpAfter = match.ClassXpAfter,
             Pet = match.Pet, PetXpBefore = match.PetXpBefore, PetXpAfter = match.PetXpAfter,
             UnlockedCardIds = match.UnlockedCardIds?.ToArray() ?? Array.Empty<string>(),

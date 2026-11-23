@@ -16,7 +16,7 @@ namespace SabberStoneCore.Model
         public const string PolicyVersion = "dark-gift/1";
         // Attachment-local cursor survives STACK continuation cloning/snapshot-v2 without a live reference.
         private const GameTag PendingSweetDreams = (GameTag)33000;
-        /// <summary>Sample own-deck minions weighted by copies, rejecting repeated card IDs with game RNG.
+        /// <summary>Sample own-deck minions weighted by copies, rejecting repeated cards (a reprint is the same card, #225) with game RNG.
         /// Like DiscoverTask.GetChoices for a deck pool, pools with at most count distinct IDs return
         /// their first entities in deck order without RNG; otherwise rejection draws consume RNG.</summary>
         public static IReadOnlyList<IPlayable> SampleDeckOffers(Controller controller, Func<IPlayable, bool> predicate, int count = 3)
@@ -25,13 +25,13 @@ namespace SabberStoneCore.Model
             if (predicate == null) throw new ArgumentNullException(nameof(predicate));
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
             var pool = controller.DeckZone.Where(p => p is Minion && predicate(p)).ToArray();
-            var distinct = pool.GroupBy(p => p.Card.Id, StringComparer.Ordinal).Select(g => g.First()).ToArray();
+            var distinct = pool.GroupBy(p => p.Card.Identity).Select(g => g.First()).ToArray();
             if (count >= distinct.Length) return distinct;
             var result = new List<IPlayable>(count);
             while (result.Count < count)
             {
                 var pick = pool[controller.Game.Random.Next(pool.Length)];
-                if (result.All(p => p.Card.Id != pick.Card.Id)) result.Add(pick);
+                if (result.All(p => !p.Card.IsSameCardAs(pick.Card))) result.Add(pick);
             }
             return result;
         }
@@ -145,7 +145,8 @@ namespace SabberStoneCore.Model
                 entity.Game.PowerHistory.Add(PowerHistoryBuilder.TagChange(entity.Id, tag, value));
         }
 
-        internal static int RecipeSource(Game game, int sourceId) =>
+        // The executor owns the choice, but the played card owns the recipe and its play spell.
+        public static int RecipeSource(Game game, int sourceId) =>
             game.IdEntityDic.TryGetValue(sourceId, out var source) && source.Card.Id == "EDR_102t"
                 ? source[GameTag.CREATOR] : sourceId;
 

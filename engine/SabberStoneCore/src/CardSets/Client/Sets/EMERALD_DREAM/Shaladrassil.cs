@@ -92,7 +92,12 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented=true;
             card.SetPlayRequirements(new Dictionary<PlayReq,int>{{PlayReq.REQ_TARGET_TO_PLAY,0},{PlayReq.REQ_MINION_TARGET,0}});
             card.Power=new Power {PowerTask=new CustomTask((g,c,s,t,stack)=>{
-                if(t is Minion m) {var owner=m.Controller; m.Zone.Remove(m); m.Reset(); Generic.ShuffleIntoDeck(owner,s,m);}
+                if (t is not Minion minion) return;
+                var owner = minion.Controller;
+                minion.Zone.Remove(minion);
+                minion.Reset();
+                if (!Generic.ShuffleFromBoardIntoDeck(owner, s, minion))
+                    owner.GraveyardZone.Add(minion);
             })};
         }
         [StandardCard("EDR_846t1",115096)]

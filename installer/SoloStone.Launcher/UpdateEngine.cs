@@ -372,7 +372,7 @@ namespace SoloStone
         [DataMember(Name="before")] public InstallRecord Before;
         [DataMember(Name="after")] public InstallRecord After;
     }
-    public enum UpdateOutcome { Nothing, Swapped, Held, NeedsConfirmation, Refused, Failed }
+    public enum UpdateOutcome { Nothing, Swapped, Held, NeedsConfirmation, Refused, Failed, NewerOffered }
     public sealed class UpdateResult
     {
         public UpdateOutcome Outcome; public string Version, Message; public Verdict Verdict;
@@ -576,7 +576,8 @@ namespace SoloStone
         // A release waiting for its first start is no obstacle: FinishSwap restores the last good version first, so that stays the rollback target.
         bool NoSwapInProgress => !JournalActive || Journal?.Phase==SwapJournal.Swapped;
         // Runs in the current launcher. It decides, then hands the swap to the new launcher, because a running exe cannot be replaced.
-        public UpdateResult Apply(LatestRelease latest,bool acceptWarning) {
+        public UpdateResult Apply(LatestRelease latest,bool acceptWarning,CancellationToken cancel=default(CancellationToken),Action committing=null) {
+            cancel.ThrowIfCancellationRequested();
             if(!NoSwapInProgress) return new UpdateResult { Outcome=UpdateOutcome.Refused, Version=latest.Version, Message="Another update is still finishing. Start SoloStone again." };
             string staged=StagedApp(latest.Version);
             if(!Directory.Exists(staged)) throw new InvalidOperationException("The update is not staged.");
@@ -585,6 +586,7 @@ namespace SoloStone
             Verdict verdict;
             try { verdict=host.CheckStaged(staged,root); }
             catch(Exception e) when(e is IOException || e is UnauthorizedAccessException || e is InvalidOperationException || e is System.ComponentModel.Win32Exception) { verdict=null; }
+            cancel.ThrowIfCancellationRequested();
             if(verdict==null) return new UpdateResult { Outcome=UpdateOutcome.Failed, Version=latest.Version, Message="The new version's client check could not run, so the update waits. SoloStone will try again next time." };
             if(verdict.Kind==VerdictKind.Block) {
                 string reason=verdict.Message;
@@ -595,6 +597,8 @@ namespace SoloStone
                 return new UpdateResult { Outcome=UpdateOutcome.NeedsConfirmation, Version=latest.Version, Verdict=verdict, Message=verdict.Message };
             string idle=IdleProblem();
             if(idle!=null) return new UpdateResult { Outcome=UpdateOutcome.Refused, Version=latest.Version, Verdict=verdict, Message=idle };
+            committing?.Invoke();
+            cancel.ThrowIfCancellationRequested();
             Say("Installing SoloStone "+latest.Version+"…");
             ClearNote(); // From here on only this attempt's result may speak.
             host.HandOffSwap(staged,latest.Version);

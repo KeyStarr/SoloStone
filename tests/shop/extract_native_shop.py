@@ -6,6 +6,7 @@ builders = source.split("// BEGIN catalogue builders", 1)[1].split("\n", 1)[1].s
 for name in ("CollectionCardBackProduct", "CollectionHeroSkinProduct", "ActiveCollectionController", "CollectionPurchaseContext", "RefuseCollectionPurchase",
              "LocalTabs", "LocalPrice", "ValidProduct", "LocalModel", "UpdateAvailability", "RefreshPrices", "RefreshNeeded", "ModelPricesMatch", "DeckDetails", "NativeEntryValid", "Buy", "TickPurchase", "Acknowledge",
              "GuardPurchase", "ClickFailed", "LocalPurchase", "ShowNotEnoughGold", "ShowPurchaseFailure", "ClearFinishedPurchase", "BuyPackTile",
+             "PackQuantitySelect", "PackBuyCap", "LocalPack", "LocalPackSelection",
              "NoteDragRelease", "NoteTilePress", "ClearTilePress", "ExpireTilePress", "PackTileRelease", "SuccessShown",
              "DeckSectionDividers", "ShouldFetchDivider", "HideEmptySlot", "SyncSubTabs", "SubTabList", "SyncSubTabsFrame", "Equip", "Quote", "FullPrice", "DeckVariants", "DeckFirstVariant", "RecipeTileText", "Priced"):
     # RecipeTileText is internal (NativeShopTilePrices calls it); Priced is an expression body.

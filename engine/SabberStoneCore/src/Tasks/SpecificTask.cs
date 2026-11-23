@@ -11,6 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
+using SabberStoneCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -225,13 +226,13 @@ namespace SabberStoneCore.Tasks
 					// Keep explicit modern-class, deck-specific pools out of the legacy static memory.
 					var actual = op.DeckCards.Where(card => (card.Class == op.BaseClass || op.BaseClass == CardClass.DEATHKNIGHT &&
 						card[GameTag.MULTIPLE_CLASSES] != 0 && CardClassRules.IsAllowedInDeck(card, op.BaseClass)) &&
-						card.Collectible && card.Implemented && card.Type != CardType.HERO).Distinct().ToArray();
+						card.Collectible && card.Implemented && card.Type != CardType.HERO).Distinct(CardIdentity.Comparer).ToArray();
 					if (actual.Length == 0) return;
 					var glimmerPool = Cards.RandomPool(g, PoolDestination.Other, s);
 					var decoys = (glimmerPool.Legacy ? Cards.FormatTypeClassCards(g.FormatType)[op.BaseClass]
 							.Where(card => card.Class == op.BaseClass || op.BaseClass == CardClass.DEATHKNIGHT && card[GameTag.MULTIPLE_CLASSES] != 0)
 						: glimmerPool.ClassOnly(op.BaseClass))
-						.Where(card => !op.DeckCards.Contains(card)).ToList();
+						.Where(card => !op.DeckCards.Contains(card, CardIdentity.Comparer)).ToList();
 					var choices = new List<Card> { actual.Choose(g.Random) };
 					while (choices.Count < 3 && decoys.Count > 0)
 					{
@@ -256,7 +257,7 @@ namespace SabberStoneCore.Tasks
 				{
 					if (card.Class != op.BaseClass)
 						continue;
-					if (!deckClassIds.Add(card.AssetId))
+					if (!deckClassIds.Add(card.Identity))
 						continue;
 					deckClassCards.Add(card);
 				}
@@ -281,7 +282,7 @@ namespace SabberStoneCore.Tasks
 				do
 				{
 					Card pick = classCards.Choose(rnd);
-					if (deckClassIds.Contains(pick.AssetId) || result.Contains(pick)) continue;
+					if (deckClassIds.Contains(pick.Identity) || result.Contains(pick, CardIdentity.Comparer)) continue;
 					result[count] = pick;
 					count++;
 				} while (count < 3);
@@ -363,8 +364,11 @@ namespace SabberStoneCore.Tasks
 					string format = LegacyGenerationV1.Format(controller.Game.FormatType);
 					Util.DeepCloneableRandom rnd = controller.Game.Random;
 
-					Card[] first = LegacyGenerationV1.Get(format + "/Beasts/First").ChooseNElements(3, rnd);
-					Card[] second = LegacyGenerationV1.Get(format + "/Beasts/Second").ChooseNElements(3, rnd);
+					// Two printings of one beast are one choice in a pinned match pool (#225); a legacy pool keeps its frozen draws.
+					bool differentCards = !Cards.RandomPool(controller.Game).Legacy;
+					IReadOnlyList<Card> Beasts(string name) => differentCards ? CardIdentity.Distinct(LegacyGenerationV1.Get(format + name).ToArray()) : LegacyGenerationV1.Get(format + name);
+					Card[] first = Beasts("/Beasts/First").ChooseNElements(3, rnd);
+					Card[] second = Beasts("/Beasts/Second").ChooseNElements(3, rnd);
 
 
 					Generic.CreateChoiceCards.Invoke(controller, p[0], null, ChoiceType.GENERAL,
@@ -479,11 +483,11 @@ namespace SabberStoneCore.Tasks
 					Util.DeepCloneableRandom rnd = list[0].Game.Random;
 					return list
 						.Where(p => p is Minion && p.ToBeDestroyed)
-						.Select(p => p.Card.Id)
-						.Distinct()
+						.Select(p => p.Card)
+						.Distinct(CardIdentity.Comparer) // one resurrected per different card, a reprint is the same card (#225)
 						.OrderBy(p => rnd.Next())
 						.Take(i)
-						.Select(p => Entity.FromCard(list[0].Controller, Cards.FromId(p)))
+						.Select(p => Entity.FromCard(list[0].Controller, Cards.FromId(p.Id)))
 						.ToList();
 				}),
 				new SummonStackTask());
@@ -729,7 +733,7 @@ namespace SabberStoneCore.Tasks
 				if (source.Controller.SecretZone.IsFull) return 0;
 
 				CardClass[] secretClasses = {CardClass.HUNTER, CardClass.PALADIN, CardClass.ROGUE};
-				int[] existing = source.Controller.SecretZone.Select(p => p.Card.AssetId).ToArray();
+				SecretZone existing = source.Controller.SecretZone;
 
 				CardClass cls = source.Controller.HeroClass;
 
@@ -737,9 +741,9 @@ namespace SabberStoneCore.Tasks
 					cls = CardClass.MAGE;
 
 				Card[] candidates = ClassSecrets(source.Game, cls, source)
-					.Where(c => !existing.Contains(c.AssetId)).ToArray();
+					.Where(c => !existing.HasSameCard(c)).ToArray();
 
-				Card[] choices = candidates.ChooseNElements(3, source.Game.Random);
+				Card[] choices = CardIdentity.Distinct(candidates).ChooseNElements(3, source.Game.Random); // three different Secrets (#225)
 
 				if (candidates.Length == 0) return 0;
 
@@ -754,9 +758,8 @@ namespace SabberStoneCore.Tasks
 			{
 				// Preserve legacy-only casting; modern quests share the secret capacity.
 				if (c.SecretZone.ModernQuests.Count != 0 && c.SecretZone.IsFull) return;
-				int[] activeSecrets = c.SecretZone.Select(secret => secret.Card.AssetId).ToArray();
 				Card[] cardsList = ClassSecrets(g, cardClass, s)
-					.Where(card => !activeSecrets.Contains(card.AssetId)).ToArray();
+					.Where(card => !c.SecretZone.HasSameCard(card)).ToArray();
 				// A match pool can hold no secret for a class (frozen lists always did); nothing to cast then.
 				if (cardsList.Length == 0) return;
 				Spell spell = (Spell)Entity.FromCard(c, cardsList.Choose(g.Random));

@@ -124,8 +124,11 @@ static partial class Program
         string model=Source("Gui/LauncherModel.cs");
         string play=Body(model,"public int Play(","public void RollBack(");
         Check(!play.Contains("ops.Check(") && !play.Contains("ops.Apply(") && play.Contains("LauncherPhase.Ready"),"Play refuses until the start step finished, and makes no update call");
-        string start=Body(model,"public bool Start(","bool CheckAndApply(");
-        Check(start.IndexOf("ops.Resume()",StringComparison.Ordinal)<start.IndexOf("CheckAndApply(",StringComparison.Ordinal) && start.IndexOf("using (ops.Lease())",StringComparison.Ordinal)<start.IndexOf("ops.Resume()",StringComparison.Ordinal),"start order: lease, resume, then check and apply");
+        string start=Body(model,"public bool Start(","bool WasSkipped(");
+        int lease=start.IndexOf("using (ops.Lease())",StringComparison.Ordinal), resume=start.IndexOf("ops.Resume()",StringComparison.Ordinal);
+        Check(lease>=0 && lease<resume && resume<start.IndexOf("CheckForUpdate(",StringComparison.Ordinal),"start order: lease, resume, then check");
+        string check=Body(model,"void CheckForUpdate(","public bool ConfirmUpdate(");
+        Check(check.Contains("ops.Check(") && !check.Contains("ops.Apply(") && !start.Contains("ApplyChosen("),"starting the launcher checks for updates without applying one");
         Check(start.IndexOf("ops.Lease()",StringComparison.Ordinal)>=0 && start.LastIndexOf("Restart()",StringComparison.Ordinal)>start.IndexOf("post(model.Ready)",StringComparison.Ordinal),"the restart comes after the lease is released");
         string restart=Body(ops,"public void Restart(","public int Launch(");
         Check(restart.IndexOf("Process.Start",StringComparison.Ordinal)>=0 && restart.Contains("\"app\"") && restart.Contains("Environment.Exit"),"a swap restarts from Root\\app and the old process exits");

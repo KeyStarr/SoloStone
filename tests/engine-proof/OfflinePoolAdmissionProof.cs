@@ -38,8 +38,11 @@ internal static class OfflinePoolAdmissionProof
         // The independent derivation from the client export (OfflinePoolExpectations) is the oracle of this proof: client tier only.
         bool oracle = ClientExport.Oracle;
         if (oracle)
+        {
             Check(manifest.Standard.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Standard))
                 && manifest.Past.Select(m => m.CardId).SequenceEqual(OfflinePoolExpectations.Ids(PoolScope.Past)), "membership equals eligibility/export scopes");
+            CheckSourceReprints(manifest);
+        }
         else ClientExport.Skip("Offline pool admission against the independent derivation from the client export");
         foreach (var card in report.Cards)
             foreach (var row in card.PoolRequirements)
@@ -171,6 +174,20 @@ internal static class OfflinePoolAdmissionProof
     private static HashSet<string> ExpandClasses(IEnumerable<string> classes) => classes.SelectMany(c => c == "NEUTRAL"
         ? new[] { "DEATHKNIGHT", "DEMONHUNTER", "DRUID", "HUNTER", "MAGE", "PALADIN", "PRIEST", "ROGUE", "SHAMAN", "WARLOCK", "WARRIOR" }
         : new[] { c }).ToHashSet(StringComparer.Ordinal);
+
+    private static void CheckSourceReprints(OfflinePoolManifest manifest)
+    {
+        const string original = "CORE_EDR_004", reprint = "CORE_EDR_004_2026", grizzly = "CORE_GIL_623";
+        var filter = new OfflinePoolFilter(PoolScope.Wild, PoolClassMode.ControllerAndNeutral,
+            type: CardType.MINION, race: Race.BEAST, cardIds: new[] { original, reprint, grizzly });
+        foreach (var (source, expected) in new[] {
+            (0, new[] { original, grizzly, reprint }), (119798, new[] { grizzly }), (131356, new[] { grizzly }) })
+        {
+            Check(OfflinePoolExpectations.Ids(filter, "DEATHKNIGHT", source).SequenceEqual(expected), "export source reprints for " + source);
+            Check(OfflineCardPools.Candidates(manifest, CardClass.DEATHKNIGHT, filter, source).Select(c => c.Id).SequenceEqual(expected),
+                "runtime source reprints for " + source);
+        }
+    }
 
     private static void CheckControllerClasses()
     {

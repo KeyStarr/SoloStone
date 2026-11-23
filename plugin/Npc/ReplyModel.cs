@@ -106,7 +106,7 @@ public sealed class ReplyJob : INodeJob
         if (Samples.Count == 0) {
             var f = ended.Facts;
             var brain = profile.Budget.Brain;
-            Samples = brain != null && brain.ReplyPrior == ReplyPrior.Inferred
+            Samples = brain != null && brain.ReplyPrior != ReplyPrior.Class
                 ? CardFrequencies.Sample(DeckInference.Table(ended.ReplyClass, played, brain), f.Opponent.Hand.Count(c => c.Unknown),
                     samples, f.Opponent.Mana, seed, played)
                 : CardFrequencies.Sample(ended.ReplyClass, f.Opponent.Hand.Count(c => c.Unknown),

@@ -76,8 +76,9 @@ public sealed class NpcWorld
     // Notables first, then GeneratedCount generated NPCs (see spec "Rating spread"): names from NpcNameTables (filtered),
     // taste/classes/personality weighted by rating, DeckIds from Decks.ForBand(band of HomeRating) with archetype cap,
     // cosmetics from NpcCosmeticPool. Pure function of (catalogs, worldSeed).
+    // The Core starter decks join the library here (admission "core", NpcCoreDecks), so every world can serve the Core step.
     public static NpcWorld Generate(NpcWorldCatalogs catalogs, long worldSeed = DefaultWorldSeed) =>
-        NpcPopulationGenerator.Generate(catalogs, worldSeed);
+        NpcPopulationGenerator.Generate(NpcCoreDecks.Include(catalogs), worldSeed);
 
     public static LadderBand BandForRating(double rating) => BandForStarIndex(LadderRules.IndexForRating(rating));
     public static LadderBand BandForStarIndex(int starIndex) =>

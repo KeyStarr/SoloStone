@@ -134,8 +134,9 @@ public sealed class NpcTurnRunner
     public int LateExtendedDecisions { get; private set; }
     internal bool SpendFallbackNode() { if (fallbackNodes <= 0 || SearchLimitReached(sliceStart, true, false)) return false; fallbackNodes--; return true; }
     private readonly Func<BotAction, double> actedCardDwell;
-    // A native-display wait before acting (opposing choice backs being dealt). It bounds itself and is not pacing, so it
-    // never spends the 4 s artificial-delay budget.
+    // A native-display wait before acting (opposing choice backs being dealt, the choice source's play spell, and the beat
+    // after the deal). It bounds itself and, by the owner's call, is outside the 4 s artificial-delay budget: it never
+    // spends it, and ArtificialDelayMilliseconds does not count it.
     private readonly Func<BotAction, double> actHold;
     private readonly Func<string> busyReason;
     private double turnStarted;

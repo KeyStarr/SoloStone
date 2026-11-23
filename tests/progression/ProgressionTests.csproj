@@ -9,8 +9,10 @@
     <Compile Include="../../plugin/TurnTimerSettings.cs" />
     <Compile Include="../../plugin/FpsCounterSettings.cs" />
     <Compile Include="../../plugin/DeckInferenceSettings.cs" />
+    <Compile Include="../../plugin/PlainCardsSettings.cs" />
+    <Compile Include="../../plugin/OpponentPetsSettings.cs" />
     <Compile Include="../shared/BepInExStandIns.cs" Link="BepInExStandIns.cs" />
-    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" />
+    <Compile Include="../shared/CosmeticsFixture.cs" Link="CosmeticsFixture.cs" /><Compile Include="../shared/StandardDeckFixture.cs" Link="StandardDeckFixture.cs" />
     <Compile Include="../shared/StandardBatchData.cs" Link="StandardBatchData.cs" />
     <Compile Include="../../plugin/LocalProfile.cs" />
     <Compile Include="../../plugin/LocalDeckRecord.cs" />
@@ -63,5 +65,18 @@
     <Compile Include="../../plugin/LocalResultsFlow.cs" Link="LocalResultsFlow.cs" />
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
   </ItemGroup>
-<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" /></ItemGroup>
+  <ItemGroup><None Include="../fixtures/profile-saves/v15-arena-*.xml" LinkBase="profile-fixtures" CopyToOutputDirectory="PreserveNewest" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/arena/ArenaContract.cs" />
+    <Compile Include="../../plugin/arena/DraftRules.cs" />
+    <Compile Include="../../plugin/arena/ArenaRun.cs" />
+    <Compile Include="../../plugin/arena/ArenaService.cs" />
+    <EmbeddedResource Include="../../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" />
+    <Compile Include="../shared/NativeArenaBoundaryMocks.cs" Link="NativeArenaBoundaryMocks.cs" />
+  </ItemGroup>
+  <Target Name="ExtractArenaTransport" BeforeTargets="CoreCompile">
+    <Exec Command="python3 &quot;$(MSBuildProjectDirectory)/../native-bindings-logic/extract_arena.py&quot; &quot;$(IntermediateOutputPath)Arena.g.cs&quot;" />
+    <ItemGroup><Compile Include="$(IntermediateOutputPath)Arena.g.cs" /></ItemGroup>
+  </Target>
 </Project>

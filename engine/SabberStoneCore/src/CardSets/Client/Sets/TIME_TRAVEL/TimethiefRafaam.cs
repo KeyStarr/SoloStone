@@ -1,3 +1,4 @@
+using SabberStoneCore.Identity;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -56,10 +57,10 @@ namespace SabberStoneCore.CardSets.Client.Sets
         {
             card.Implemented=true; card.ExcludeFromLegacyRandomPools=true;
             card.Power=new Power { PowerTask=new DecisionBattlecryTask("client/TIME_005t3/v1",
-                new DiscoverThenContinueTask((g,c,s,k)=>c.DeckZone.Where(p=>Family(p.Card)).Select(p=>p.Card).Distinct().ToArray().ChooseNElements(3,g.Random)),
+                new DiscoverThenContinueTask((g,c,s,k)=>c.DeckZone.Where(p=>Family(p.Card)).Select(p=>p.Card).Distinct(CardIdentity.Comparer).ToArray().ChooseNElements(3,g.Random)),
                 new CustomTask((g,c,s,t,k)=> {
                     var chosen=k.Playables.FirstOrDefault(); if(chosen==null) return;
-                    new EffectContext(g,c.Id,s.Id).DrawWhere(p=>p.Card.Id==chosen.Card.Id);
+                    new EffectContext(g,c.Id,s.Id).DrawWhere(p=>p.Card.IsSameCardAs(chosen.Card));
                 })) };
         }
         [StandardCard("TIME_005t4",119443)]

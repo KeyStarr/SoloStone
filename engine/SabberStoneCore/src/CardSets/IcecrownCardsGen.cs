@@ -1297,15 +1297,15 @@ namespace SabberStoneCore.CardSets
 						Game g = p.Game;
 						if (c.SecretZone.IsFull) return 0;
 						IPlayable[] entities = c.DeckZone.GetAll(x => x.Card.IsSecret);
-						List<int> ids = c.SecretZone.Select(x => x.Card.AssetId).ToList();
+						List<int> ids = c.SecretZone.Select(x => x.Card.Identity).ToList(); // a reprint of an active Secret counts as active (#225)
 						for (int i = 0; i < entities.Length; i++)
 						{
 							IPlayable e = entities[i];
-							if (ids.Contains(e.Card.AssetId)) continue;
+							if (ids.Contains(e.Card.Identity)) continue;
 
 							c.DeckZone.Remove(e);
 							Generic.CastSpell(c, g, (Spell)e, null, 0);
-							ids.Add(e.Card.AssetId);
+							ids.Add(e.Card.Identity);
 
 							if (c.SecretZone.IsFull) return 0;
 						}

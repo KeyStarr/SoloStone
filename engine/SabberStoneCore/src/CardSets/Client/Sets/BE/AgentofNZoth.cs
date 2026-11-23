@@ -15,7 +15,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Implemented = true;
             card.ExcludeFromLegacyRandomPools = true;
             card.Power = new Power { DeathrattleTask = new CustomTask((g, c, s, t, stack) => {
-                var candidates = c.HandZone.GetAll().Where(p => p is Minion && p.HasDeathrattle && p.Card.Id != s.Card.Id).ToList();
+                var candidates = c.HandZone.GetAll().Where(p => p is Minion && p.HasDeathrattle && !p.Card.IsSameCardAs(s.Card)).ToList();
                 if (candidates.Count == 0 || c.HandZone.IsFull) return;
                 var selection = new TaskStack { Playables = candidates };
                 new RandomTask(1, EntityType.STACK).Process(g, c, s, null, selection);

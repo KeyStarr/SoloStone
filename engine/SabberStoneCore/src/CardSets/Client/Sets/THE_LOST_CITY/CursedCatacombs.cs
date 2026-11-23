@@ -21,7 +21,7 @@ namespace SabberStoneCore.CardSets.Client.Sets
             card.Power = new Power { PowerTask = new DecisionSpellTask("client/TLC_451/v1",
                 new DiscoverThenContinueTask((g,c,s,stack) => {
                     using var scope = g.Facts.ChoiceOffers();
-                    var groups = c.DeckZone.Where(p=>p.Card.Id != "TLC_451").GroupBy(p=>p.Card.Id).Select(a=>a.ToList()).ToList();
+                    var groups = c.DeckZone.Where(p=>p.Card.Id != "TLC_451").GroupBy(p=>p.Card.Identity).Select(a=>a.ToList()).ToList();
                     var selected = DiscoverRealRules.Take(groups,3,g).Select(a=>a.Count==1?a[0]:a[g.Random.Next(a.Count)]).ToArray();
                     var offers = selected.Select(real=>CreateOffer(c,s,real)).ToArray();
                     if (offers.Length > 0)

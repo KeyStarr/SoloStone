@@ -13,9 +13,29 @@ public sealed class CasualRequest
     public int RankedIndex { get; }                  // count of ranked matches (NpcLegendField drift epoch)
     public double CasualRating { get; }              // hidden Casual MMR (CasualRules), never shown
     public IReadOnlyList<PastEncounter> History { get; }   // Casual encounters, oldest first
-    public CasualRequest(long profileSeed, int casualIndex, int rankedIndex, double casualRating, IEnumerable<PastEncounter> history)
+    // The save's NPC difficulty (NpcDifficulties); null or Hard = today's queue, unchanged.
+    public NpcDifficultyLevel Difficulty { get; }
+    // The player's ranked star index: Easy/Medium anchor the boost on it (the player's rank, not the Casual rating). null = the Casual rating.
+    public int? StarIndex { get; }
+    public CasualRequest(long profileSeed, int casualIndex, int rankedIndex, double casualRating, IEnumerable<PastEncounter> history,
+        NpcDifficultyLevel difficulty = null, int? starIndex = null)
     { ProfileSeed = profileSeed; CasualIndex = casualIndex; RankedIndex = rankedIndex; CasualRating = casualRating;
-      History = GoldenData.Copy(history); }
+      History = GoldenData.Copy(history); Difficulty = difficulty; StarIndex = starIndex; }
+    internal bool Shifted => Difficulty != null && !Difficulty.IsHard;
+    // Easy/Medium: the shifted ladder position in stars (negative at the Core step): the ranked star index when given, else the
+    // hidden Casual rating.
+    internal int Position
+    {
+        get
+        {
+            if (!Shifted) return 0;
+            if (!StarIndex.HasValue) return Difficulty.RatingPosition(CasualRating);
+            // Casual-only players can climb out of the Core step through Casual wins.
+            double progress = Math.Max(0, (CasualRating - LadderRules.StartRating) / LadderRules.RatingPerStar);
+            int star = (int)Math.Min(LadderRules.LegendIndex, Math.Max(StarIndex.Value, progress));
+            return Difficulty.LadderPosition(star);
+        }
+    }
 }
 
 // Casual deck catalog: data/npc/casual-decks-v1.json. Same deck schema as decks-v1.json, every deck admission "casual"
@@ -188,6 +208,10 @@ public sealed class CasualMatchmaker
         int seed = StableSeed.Derive(request.ProfileSeed, CasualTag, request.CasualIndex);
         bool fun = new MatchRng(seed, StreamKind).NextDouble() < Rules.FunShare;
         double target = request.CasualRating + new MatchRng(seed, StreamTarget).Gauss() * Rules.JitterSigma;
+        if (request.Shifted) target -= request.Difficulty.ShiftRating;   // Easy/Medium: the opponents of a lower Casual rating
+        var core = request.Shifted
+            ? NpcDifficultyShaper.Decide(request.Difficulty, request.Position, seed, request.CasualRating, request.Difficulty.CasualCoreShare)
+            : default(NpcDifficultyShaper.CoreDecision);
         var ranked = Legend.Ranked(request.RankedIndex);
         int count = Math.Min(request.History.Count, Rules.HistoryDepth);
         var recent = request.History.Skip(request.History.Count - count).Reverse().ToArray();   // most recent first
@@ -201,14 +225,14 @@ public sealed class CasualMatchmaker
             if (regularRoll)
             {
                 double centre = Math.Max(target, Rules.RegularMinTarget);
-                var regulars = Build(Regulars(ranked, centre, decksOf), centre, recent, 0, decksOf, Rules.RegularSigma);
+                var regulars = Build(Regulars(ranked, centre, decksOf), centre, recent, 0, decksOf, core, Rules.RegularSigma);
                 if (regulars.Count != 0) { options = regulars; regularDraw = true; fun = funKind; level = 0; break; }
             }
             var candidates = Nearest(ranked, target, decksOf);
             // Levels: 0 both rules; 1 drop the deck rule; 2 NPC window 2; 3 ignore both (tiny worlds only).
             for (level = 0; level <= 3 && options == null; level++)
             {
-                var built = Build(candidates, target, recent, level, decksOf);
+                var built = Build(candidates, target, recent, level, decksOf, core);
                 if (built.Count != 0) options = built;
             }
             if (options != null) { fun = funKind; level--; break; }
@@ -224,8 +248,8 @@ public sealed class CasualMatchmaker
             throw new InvalidOperationException("NPC " + chosen.Npc.Id + " references an unknown skill or personality.");
         var profile = buildProfile(chosen.Npc, deck, personality, skill);
         int matchSeed = StableSeed.Derive(seed, StreamMatch) & int.MaxValue;
-        var encounter = new NpcEncounter(chosen.Npc, deck, skill, personality, profile, chosen.Rating, matchSeed,
-            fun ? "casual-fun" : "casual-own");
+        var encounter = NpcDifficultyShaper.Shape(new NpcEncounter(chosen.Npc, deck, skill, personality, profile, chosen.Rating, matchSeed,
+            fun ? "casual-fun" : "casual-own"), request.Difficulty, request.Position, World, buildProfile);
         return new MatchPick(encounter, target, level, false, false, regularDraw);
     }
 
@@ -258,7 +282,7 @@ public sealed class CasualMatchmaker
     }
 
     private List<Option> Build(List<RankedNpc> candidates, double target, PastEncounter[] recent, int level,
-        Func<NpcIdentity, NpcDeckEntry[]> decksOf, double sigma = 0)
+        Func<NpcIdentity, NpcDeckEntry[]> decksOf, NpcDifficultyShaper.CoreDecision core, double sigma = 0)
     {
         int npcWindow = level >= 3 ? 0 : level == 2 ? 2 : Rules.NoSameNpcWithin;
         int deckWindow = level >= 1 ? 0 : Rules.NoSameDeckWithin;
@@ -269,11 +293,18 @@ public sealed class CasualMatchmaker
             var npc = candidate.Npc;
             if (recent.Take(npcWindow).Any(p => p.NpcId == npc.Id)) continue;
             var all = decksOf(npc);
+            Catalog.HostDeck.TryGetValue(npc.Id, out string hosted);
+            if (core.Core)
+            {
+                var signatureDeck = all.FirstOrDefault(deck => deck.Id == hosted);
+                hosted = NpcDifficultyShaper.Served(signatureDeck, core, World.Catalogs.Decks)?.Id;
+                all = all.Select(deck => NpcDifficultyShaper.Served(deck, core, World.Catalogs.Decks))
+                    .GroupBy(deck => deck.Id, StringComparer.Ordinal).Select(group => group.First()).ToArray();
+            }
             var decks = all.Where(d => !recent.Take(deckWindow).Any(p => Catalog.FamilyOf(p.DeckId) == Catalog.FamilyOf(d.Id)))
                 .Select(d => new DeckOption { Deck = d }).ToList();
             if (decks.Count == 0) continue;
-            string hosted;
-            bool signature = decks.Count > 1 && Catalog.HostDeck.TryGetValue(npc.Id, out hosted) && decks[0].Deck.Id == hosted;
+            bool signature = decks.Count > 1 && decks[0].Deck.Id == hosted;
             for (int i = 0; i < decks.Count; i++)
                 decks[i].Weight = decks.Count == 1 ? 1 : signature
                     ? (i == 0 ? Rules.SignatureDeckShare : (1 - Rules.SignatureDeckShare) / (decks.Count - 1)) : 1.0 / decks.Count;

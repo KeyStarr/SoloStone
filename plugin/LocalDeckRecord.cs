@@ -40,7 +40,7 @@ public sealed class LocalDeckRecord
         int rankedWins = 0, rankedLosses = 0, casualWins = 0, casualLosses = 0, ties = 0;
         foreach (var match in settled)
         {
-            if (match == null || !SameDeck(match.Deck, deckKey)) continue;
+            if (match == null || !SameDeck(match.Deck, deckKey) || ArenaRules.IsArena(match.Mode)) continue;   // Arena decks are gone after the run
             bool casual = CasualRules.IsCasual(match.Mode);
             switch (match.Result)
             {

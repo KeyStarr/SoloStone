@@ -42,7 +42,7 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
             // one is already up or the Secret zone is full.
             register(46357, "LOOTA_BOSS_35h", DungeonRunCards.Plain);
             register(46358, "LOOTA_BOSS_35p", card => {
-                card.PlayAvailabilityPredicate = (c, _) => !c.SecretZone.IsFull && !c.SecretZone.Any(s => s.Card.Id == Counterspell);
+                card.PlayAvailabilityPredicate = (c, _) => !c.SecretZone.IsFull && !c.SecretZone.Any(s => s.Card.IsSameCardAs(Cards.FromId(Counterspell)));
                 card.Power = new Power { PowerTask = PutSecret(Counterspell) };
                 DungeonRunCards.Plain(card);
             });
@@ -111,8 +111,9 @@ namespace SabberStoneCore.CardSets.Client.Adventures.DungeonRun
 
         // A Secret created in play, as if cast: live on the opponent's turn (CastSpell's rule for a Secret).
         private static ISimpleTask PutSecret(string id) => new CustomTask((game, controller, source, target, stack) => {
-            if (controller.SecretZone.IsFull || controller.SecretZone.Any(s => s.Card.Id == id)) return;
-            var secret = (Spell)Entity.FromCard(controller, Cards.FromId(id));
+            Card card = Cards.FromId(id);
+            if (controller.SecretZone.IsFull || controller.SecretZone.Any(s => s.Card.IsSameCardAs(card))) return;
+            var secret = (Spell)Entity.FromCard(controller, card);
             secret.Power.Trigger?.Activate(secret);
             controller.SecretZone.Add(secret);
             if (controller == game.CurrentPlayer) secret.IsExhausted = true;

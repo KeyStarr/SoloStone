@@ -9,7 +9,8 @@ using System.Linq;
 public enum ReplyPrior
 {
     Class,     // shipping: fair class population frequencies (CardFrequencies)
-    Inferred   // fair Bayesian deck inference: population decks of the class reweighted by the opponent's public plays
+    Inferred,  // fair Bayesian deck inference: population decks of the class reweighted by the opponent's public plays
+    Arena      // Arena (#6): the opponent's deck was drafted, so the prior is the frequency table of the drafted decks (ArenaReplyTable)
 }
 
 public sealed class BrainOptions

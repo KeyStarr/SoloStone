@@ -12,6 +12,92 @@ using EngineZone = SabberStoneCore.Enums.Zone;
 // a hidden transport entity, mana, and the central "a scenario match never settles" gate.
 internal static partial class Program
 {
+    // humanHeroPower=CARDID: parse, canonical, rejection and the applied hero power (ReplaceHeroPower, the heroPowerUpgrade path).
+    private static void DebugScenarioHumanHeroPower()
+    {
+        var staged = DebugScenario.Parse("humanHeroPower=EDR_851p\nhumanMana=5");
+        Check(staged.HumanHeroPower == "EDR_851p", "humanHeroPower parses");
+        string text = staged.Canonical();
+        Check(text == "humanHeroPower=EDR_851p\nhumanMana=5" && DebugScenario.Parse(text).Canonical() == text, "humanHeroPower round-trips: " + text);
+        Check(!DebugScenario.Parse("humanMana=5").Canonical().Contains("humanHeroPower"), "an absent key stays absent");
+        RejectsScenario("humanHeroPower=CS2_182", "a minion is not a hero power", null, "is a MINION");
+        RejectsScenario("humanHeroPower=HERO_08", "a base hero is not a hero power", null, "is a HERO");
+        RejectsScenario("humanHeroPower=NO_SUCH_CARD", "unknown card id", null, "unknown card id");
+        RejectsScenario("humanHeroPower=TB_BaconShop_HP_010", "a Battlegrounds hero power", null, "set 1453");
+        RejectsScenario("humanHeroPower=TBA01_5", "a Tavern Brawl hero power", null, "set 18");
+        RejectsScenario("humanHeroPower=EDR_851p,CS2_034", "a list is not an id");
+        RejectsScenario("humanHeroPower=EDR_851p\nhumanHeroPower=EDR_851p", "duplicate key");
+        RejectsScenario("humanHeroPower=EDR_851p", "no native client definition", id => id != "EDR_851p", "no native client definition");
+        try { DebugScenario.Parse("humanHeroPower=CS2_182"); throw new Exception("minion accepted"); }
+        catch (ArgumentException error) { Check(error.Message.Contains("humanHeroPower") && error.Message.Contains("hero power"), "error names the key: " + error.Message); }
+        var game = new SabberStoneCore.Model.Game(new SabberStoneCore.Config.GameConfig { RandomSeed = 17, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
+            History = true, Logging = false,
+            Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList(),
+            Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList() });
+        game.StartGame();
+        int before = game.Player1.Hero.HeroPower.Id, enemy = game.Player2.Hero.HeroPower.Id;
+        string applied = staged.Apply(game);
+        Check(game.Player1.Hero.HeroPower.Card.Id == "EDR_851p" && game.Player1.Hero.HeroPower.Id != before,
+            "the human hero power is the staged card: " + game.Player1.Hero.HeroPower.Card.Id);
+        Check(game.Player2.Hero.HeroPower.Id == enemy, "the NPC hero power is untouched");
+        Check(game.Player1.SetasideZone.Any(e => e.Id == before), "the old hero power left for SETASIDE");
+        Check(applied.Contains("humanHeroPower=EDR_851p"), "outcome detail names it: " + applied);
+    }
+
+    // humanHeroDamage / humanBoardDamage: wound the human side after the board is placed (live-check staging for heal cards).
+    private static void DebugScenarioWounds()
+    {
+        const string board = "humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,10\n";
+        var wounds = DebugScenario.Parse(board + "humanHeroDamage=7\nhumanBoardDamage=3");
+        Check(wounds.HumanHeroDamage == 7 && wounds.HumanBoardDamage == 3, "wound keys parse");
+        string text = wounds.Canonical();
+        Check(text == "humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,10\nhumanBoardDamage=3\nhumanHeroDamage=7" && DebugScenario.Parse(text).Canonical() == text,
+            "wound keys round-trip: " + text);
+        Check(DebugScenario.Parse("humanHeroDamage=1").HumanHeroDamage == 1 && DebugScenario.Parse("humanHeroDamage=29").HumanHeroDamage == 29
+            && DebugScenario.Parse("humanBoard=CS2_182\nhumanBoardDamage=999").HumanBoardDamage == 999, "wound limits accepted");
+        foreach (string bad in new[] { "0", "30", "-1", "+5", "1.5", "a", "5,5", "1e1", "07", "00" })
+            RejectsScenario("humanHeroDamage=" + bad, "hero damage '" + bad + "'");
+        foreach (string bad in new[] { "0", "1000", "-1", "+5", "2.5", "a", "5,5", "0999" })
+            RejectsScenario("humanBoard=CS2_182\nhumanBoardDamage=" + bad, "board damage '" + bad + "'");
+        RejectsScenario("humanBoardDamage=3", "board damage without humanBoard");
+        RejectsScenario("npcBoard=CS2_182\nhumanBoardDamage=3", "board damage needs the human board key");
+        RejectsScenario("humanHeroDamage=3\nhumanHeroDamage=3", "duplicate hero damage");
+        RejectsScenario("humanBoard=CS2_182\nhumanBoardDamage=3\nhumanBoardDamage=3", "duplicate board damage");
+        RejectsScenario("humanHeroDamage=3\nheroAttack=npc\nattackLethal=1", "hero damage with the NPC's lethal attack on the human hero");
+        Check(DebugScenario.Parse("humanHeroDamage=3\nheroAttack=human\nattackLethal=1").HumanHeroDamage == 3, "lethal on the NPC hero may combine");
+        Check(DebugScenario.Parse("humanHeroDamage=3\nheroAttack=npc").HumanHeroDamage == 3, "NPC attack without lethal may combine");
+        try { DebugScenario.Parse("humanBoard=CS2_182\nhumanBoardDamage=1000"); throw new Exception("1000 accepted"); }
+        catch (ArgumentException error) { Check(error.Message.Contains("humanBoardDamage"), "error names the key: " + error.Message); }
+        var game = PlainEngineGame();
+        string applied = wounds.Apply(game);
+        var human = game.Player1.BoardZone.OfType<Minion>().ToList();
+        Check(human.Count == 2 && human.All(m => m.BaseHealth == 10 && m.Damage == 3 && m.Health == 7), "board wounds: max 10, Health 7");
+        Check(game.Player1.Hero.Damage == 7 && game.Player1.Hero.BaseHealth == 30 && game.Player1.Hero.Health == 23, "hero wounded, max unchanged");
+        Check(game.Player2.Hero.Damage == 0, "the NPC hero is untouched");
+        Check(applied.Contains("humanBoardDamage=3") && applied.Contains("humanHeroDamage=7"), "outcome detail names both: " + applied);
+        // Clamp: more damage than Health leaves 1 Health, nothing dies.
+        var game2 = PlainEngineGame();
+        DebugScenario.Parse("humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,5\nhumanBoardDamage=999").Apply(game2);
+        var survivors = game2.Player1.BoardZone.OfType<Minion>().ToArray();
+        Check(survivors.Length == 2 && survivors.All(m => m.Health == 1 && m.Damage == 4 && m.Zone.Type == EngineZone.PLAY),
+            "both minions survive the clamp at 1 Health");
+        var game3 = PlainEngineGame();
+        string one = DebugScenario.Parse("humanBoard=CS2_182,EDR_031\nhumanBoardStats=4,1\nhumanBoardDamage=5").Apply(game3);
+        var alreadyAtOne = game3.Player1.BoardZone.OfType<Minion>().ToArray();
+        Check(one.Contains("(0 minions wounded") && alreadyAtOne.Length == 2 && alreadyAtOne.All(m => m.Damage == 0 && m.Health == 1),
+            "1-Health bodies are not wounded and not counted: " + one);
+    }
+
+    private static SabberStoneCore.Model.Game PlainEngineGame()
+    {
+        var game = new SabberStoneCore.Model.Game(new SabberStoneCore.Config.GameConfig { RandomSeed = 17, StartPlayer = 1, Shuffle = false, SkipMulligan = true,
+            History = true, Logging = false,
+            Player1Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList(),
+            Player2Deck = Enumerable.Repeat(Cards.FromId("CS2_182"), 30).ToList() });
+        game.StartGame();
+        return game;
+    }
+
     private static void DebugScenarioLanePaths()
     {
         var paths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -28,10 +114,15 @@ internal static partial class Program
         }
     }
 
-    private static void RejectsScenario(string text, string reason, Func<string, bool> known = null)
+    // `message`, when given, must appear in the rejection so the test proves WHICH check fired.
+    private static void RejectsScenario(string text, string reason, Func<string, bool> known = null, string message = null)
     {
         try { DebugScenario.Parse(text, known); }
-        catch (ArgumentException) { return; }
+        catch (ArgumentException error)
+        {
+            if (message != null && !error.Message.Contains(message)) throw new Exception("scenario rejected for the wrong reason (" + reason + "): " + error.Message);
+            return;
+        }
         throw new Exception("scenario accepted but must be rejected: " + reason);
     }
 

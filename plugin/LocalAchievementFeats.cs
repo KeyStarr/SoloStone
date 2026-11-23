@@ -282,7 +282,9 @@ internal sealed class LocalAchievementFeats
             var levels = new List<LocalFeat>();
             foreach (var group in LocalCoreProgression.Unlocks.Where(row => row.Hero == hero).GroupBy(row => hero == "" ? Math.Max(LocalCoreProgression.NeutralBaseCombinedLevel, row.Threshold) : row.Threshold)) {
                 int level = group.Key;
-                bool earned = group.All(card => profile.CoreGrants.Any(grant => grant.Id == card.Id && grant.Count >= card.Copies));
+                // Earned by the level reached, not by owning the group's cards: a shop purchase or a #87 Classic reprint grant
+                // can own a level's Core cards long before the level.
+                bool earned = (hero == "" ? combined : LocalCoreProgression.Level(xp[hero])) >= level;
                 levels.Add(Track(LevelIdBase + index * 100 + level, "level:" + index + ":" + level, "Level " + level,
                     hero == "" ? "Reach combined class level " + level + "." : "Reach " + english + " level " + level + ".",
                     hero == "" ? combined : xp[hero], hero == "" ? level : LocalCoreProgression.LevelThresholds[level - 1], earned,

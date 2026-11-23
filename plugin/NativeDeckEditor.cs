@@ -14,6 +14,7 @@ internal static partial class NativeUIProbe
     {
         // No contraband ownership prefix: retail CanCardBeAddedAsOwned owns sideboard cards only through the collection.
         InitializeSideboardSubset(harmony);
+        InitializeWildFormat(harmony);
         Hook(harmony, typeof(DeckRule_CountCopiesOfEachCard), "GetCopiesInDeck", nameof(LocalDeckCopyCount),
             new[] { typeof(string), typeof(CollectionDeck), typeof(bool) });
     }

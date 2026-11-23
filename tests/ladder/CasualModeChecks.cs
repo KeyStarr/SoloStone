@@ -18,7 +18,8 @@ internal static class CasualModeChecks
     {
         var match = p.Begin("mage", "priest", seed, npcRating == null ? null : "npc.g.0001", npcRating == null ? null : "priest",
             npcRating, casual ? CasualRules.Mode : null);
-        var settled = p.Settle(match.Id, result, turns, conceded);
+        var facts = result == "Lost" ? new LocalRewardFacts { ActiveTurns = 3, PlayMilliseconds = 180000 } : null;
+        var settled = p.Settle(match.Id, result, turns, conceded, facts);
         p.AcknowledgeRewardPresentation(match.Id);
         return settled;
     }
@@ -68,8 +69,9 @@ internal static class CasualModeChecks
             {
                 double before = p.CasualRating;
                 var row = Play(p, result, 3, casual: true, conceded: conceded);
-                var reward = LocalEconomy.RewardV6(result, 10, conceded, LocalEconomy.RewardRollSeed(row.Id, row.Seed));
-                Check(row.Ladder == null && SameLadder(p.Ladder, ladder) && row.Gold == p.GrindTier.Gold(reward.Gold) && row.DustReward == p.GrindTier.Dust(reward.Dust)
+                var reward = LocalEconomy.RewardV7(result, 10, conceded, row.RewardFacts,
+                    LocalEconomy.RewardRollSeed(row.Id, row.Seed), p.GrindTier);
+                Check(row.Ladder == null && SameLadder(p.Ladder, ladder) && row.Gold == reward.Gold && row.DustReward == reward.Dust
                     && p.CasualRating == CasualRules.Apply(before, result, 1450), "Casual " + result + (conceded ? " (concede)" : "") + " moves no rank");
             }
 

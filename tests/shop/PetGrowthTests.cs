@@ -238,7 +238,7 @@ internal static class PetGrowthTests
             throw new InvalidOperationException(error.InnerException.Message);
         } }, "V14 read-only snapshot requires the current version and never migrates");
         check(Read(stale).Version == 14 && !File.Exists(stale + ".v14.bak"), "refused V14 snapshot left the file and made no backup");
-        using (var p = new LocalProfile(legacy)) check(p.Gold == 9876 && p.OwnedPets.Count == 0 && Read(legacy).Version == 15, "explicit V13 upgrade to current V15 preserves existing state");
+        using (var p = new LocalProfile(legacy)) check(p.Gold == 9876 && p.OwnedPets.Count == 0 && Read(legacy).Version == LocalProfile.SaveVersion, "explicit V13 upgrade to current preserves existing state");
         check(original.SequenceEqual(File.ReadAllBytes(legacy + ".v13.bak")), "V13 upgrade keeps byte-exact original backup");
         string populated = fresh("pet-v13-populated", 5000);
         using (var p = new LocalProfile(populated)) {

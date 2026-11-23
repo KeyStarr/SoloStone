@@ -11,6 +11,7 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
+using SabberStoneCore.Identity;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -593,6 +594,15 @@ namespace SabberStoneCore.Model
 		/// Unique asset id of that card nummeric representation.
 		/// </summary>
 		public int AssetId { get; }
+
+		/// <summary>
+		/// A key shared by a card and its reprints (the dbf of the original they all link to; the card's own dbf when it has none).
+		/// Compare this, not <see cref="Id"/> or <see cref="AssetId"/>, in every rule that asks "the same card?" (#225, see <see cref="CardIdentity"/>).
+		/// </summary>
+		public int Identity => CardIdentity.Of(AssetId);
+
+		/// <summary>True when this card and <paramref name="other"/> are one card: the same printing or a reprint of each other.</summary>
+		public bool IsSameCardAs(Card other) => CardIdentity.Same(this, other);
 
 		/// <summary>
 		/// Unique card ID, as defined in

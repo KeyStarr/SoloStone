@@ -1,5 +1,5 @@
 // Stand-in for the part of BepInEx.Configuration that the plugin's option classes (TurnTimerSettings, FpsCounterSettings,
-// DeckInferenceSettings) use: a config file with bound entries, an explicit Save() and the SaveOnConfigSet switch.
+// DeckInferenceSettings, OpponentPetsSettings) use: a config file with bound entries, an explicit Save() and the SaveOnConfigSet switch.
 // Like BepInEx, setting an entry's Value saves the file at once while SaveOnConfigSet is true, so the option classes
 // that switch it off first (and roll back a failed Save) are really exercised. It does not model BepInEx's file format.
 namespace BepInEx.Configuration

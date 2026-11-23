@@ -37,7 +37,7 @@ internal sealed class LocalCollectionUI
         }
         else
         {
-            SeedFromLoaner(0);
+            SeedDefaultDraft(LocalDecks.All[0]);
             // Several saved decks are normal (native Collection, ready-made deck purchases): inform, never an error state.
             if (savedDecks.Count > 1) notice = AmbiguousLibraryMessage();
         }
@@ -60,7 +60,7 @@ internal sealed class LocalCollectionUI
     }
 
     internal void SelectLoaner(string id) { selectedDeck = LocalDecks.Get(id).Id; }
-    internal void LoadLoaner(int index) { SeedFromLoaner(index); }
+    internal void LoadLoaner(int index) { SeedFromLoaner(LocalDecks.All[index]); }
 
     internal LocalDeck ResolveSelectedDeck()
     {
@@ -374,8 +374,7 @@ internal sealed class LocalCollectionUI
         {
             int selectedIndex = LocalDecks.All.ToList().FindIndex(deck => deck.Id == selectedDeck);
             LocalDeck preferred = selectedIndex >= 0 ? LocalDecks.All[selectedIndex] : LocalDecks.All.First(deck => deck.Hero == draftHero);
-            LocalDeck owned = Owns(preferred) ? preferred : LocalDecks.All.First(deck => deck.Hero == preferred.Hero && Owns(deck));
-            SeedFromLoaner(LocalDecks.All.ToList().IndexOf(owned));
+            SeedDefaultDraft(preferred);
         }
         catalogPage = draftPage = 0;
         notice = null;
@@ -416,9 +415,19 @@ internal sealed class LocalCollectionUI
     private static string AmbiguousLibraryMessage() =>
         "Multiple personal decks are managed in native Collection; this compatibility editor cannot choose one.";
 
-    private void SeedFromLoaner(int index)
+    private void SeedDefaultDraft(LocalDeck preferred)
     {
-        LocalDeck deck = LocalDecks.All[index];
+        LocalDeck owned = Owns(preferred) ? preferred : LocalDecks.All.FirstOrDefault(deck => deck.Hero == preferred.Hero && Owns(deck));
+        if (owned != null) SeedFromLoaner(owned);
+        else
+        {
+            draftHero = preferred.Hero;
+            NewDraft();
+        }
+    }
+
+    private void SeedFromLoaner(LocalDeck deck)
+    {
         if (!Owns(deck)) throw new InvalidOperationException("The local collection does not own this loaner list.");
         draftHero = deck.Hero;
         draftName = "My " + HeroName(deck.Hero) + " Deck";

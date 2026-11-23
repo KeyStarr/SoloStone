@@ -14,6 +14,7 @@
     <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
     <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <Compile Include="../shared/StandardDeckFixture.cs" Link="StandardDeckFixture.cs" />
     <Compile Include="../shared/NativeMatchTransportId.cs" Link="NativeMatchTransportId.cs" />
     <Compile Include="../shared/ControllerAdmissionInvariant.cs" Link="ControllerAdmissionInvariant.cs" />
     <Compile Include="../shared/AdmissionFault.cs" Link="AdmissionFault.cs" />
@@ -23,7 +24,9 @@
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <Compile Include="../../plugin/TestControlRules.cs" Link="TestControlRules.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/arena/ArenaMatchmaker.cs" LinkBase="arena" />
     <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
     <Compile Include="../../plugin/NpcPetSeats.cs" Link="NpcPetSeats.cs" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
@@ -56,10 +59,17 @@
     <Compile Include="../../plugin/LocalProfileMilestones.cs" Link="LocalProfileMilestones.cs" />
     <Compile Include="../../plugin/FairPackRules.cs" Link="FairPackRules.cs" />
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
-    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" />
+    <Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" />
     <EmbeddedResource Include="../../data/shop/catalog-v1.json" LogicalName="SoloStone.Shop.catalog-v1.json" />
     <EmbeddedResource Include="../../data/pools/offline-standard-v1.json" LogicalName="SoloStone.Shop.active-pool.json" />
     <EmbeddedResource Include="../../data/shop/recipes-v1.json" LogicalName="SoloStone.Shop.recipes-v1.json" />
     <EmbeddedResource Include="../../data/progression/card-mastery.json" LogicalName="SoloStone.Progression.card-mastery.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/arena/ArenaContract.cs" />
+    <Compile Include="../../plugin/arena/DraftRules.cs" />
+    <Compile Include="../../plugin/arena/ArenaRun.cs" />
+    <Compile Include="../../plugin/arena/ArenaService.cs" />
+    <EmbeddedResource Include="../../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" />
   </ItemGroup>
 </Project>

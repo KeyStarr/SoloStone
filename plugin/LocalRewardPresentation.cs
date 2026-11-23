@@ -220,6 +220,8 @@ internal static class LocalRewardPresentation
             throw new ArgumentException("A settled reward record is required.", nameof(match));
         string header = match.Result == "Won" ? "VICTORY" : match.Result == "Tied" ? "DRAW" : "DEFEAT";
         string progression = profile?.ProgressionSummary(match) ?? "";
+        if (ArenaRules.IsArena(match.Mode))
+            return new LocalRewardSummary(header, "Arena rewards are paid when the run ends." + progression, Array.Empty<LocalRewardItem>());
         if (LocalEconomy.IsRolled(match.RewardVersion)) return CurrentSummary(match, header, progression);
         var items = new List<LocalRewardItem>();
         if (match.Gold > 0) items.Add(new LocalRewardItem(LocalRewardKind.Gold, match.Gold));
@@ -271,16 +273,20 @@ internal static class LocalRewardPresentation
             string type = match.Packs?.FirstOrDefault()?.PackType;
             baseRewards.Add("1 " + (string.IsNullOrEmpty(type) ? "" : type + " ") + "pack");
         }
+        bool participationLoss = match.RewardVersion == LocalEconomy.ParticipationRewardVersion && match.Result == "Lost";
         string reason = baseRewards.Count > 0 ? "Match reward: " + string.Join(", ", baseRewards)
-                + (match.RewardVersion >= 5 && (match.Result == "Lost" || match.Result == "Tied")
+                + (match.RewardVersion >= 5 && !participationLoss && (match.Result == "Lost" || match.Result == "Tied")
                     ? "\n" + (match.Result == "Tied" ? "Draw" : "Loss") + " reward: 1/3 of a victory roll (then pace scaled)." : "")
             : achievements.Count > 0 ? "Achievement reward" + (achievements.Count == 1 ? "" : "s")
                 + " saved. Open Details. No ordinary victory reward."
+            : participationLoss ? LocalEconomy.LossRewardDetails(match.RewardFacts)
             : match.Conceded ? "No rewards: the encounter was conceded."
             : match.Result == "Abandoned" ? "No rewards: the encounter was interrupted."
             : match.Turns < 4 ? "No match rewards: the encounter ended before four turns."
             : match.RewardVersion == 4 && match.Result != "Won" ? "No match rewards: only victories roll a reward."
             : "No match rewards earned.";
+        if (participationLoss && (baseRewards.Count > 0 || achievements.Count > 0))
+            reason += "\n" + LocalEconomy.LossRewardDetails(match.RewardFacts);
         if (match.RivalGold > 0) reason += "\n" + RivalryText(match);
         string achievementText = achievements.Count == 0 ? "" : "\n\nAchievements:\n"
             + (achievements.Count <= InlineAchievementDetailLimit ? achievements.Details

@@ -15,7 +15,9 @@
     <Compile Include="../../plugin/NativeUIProjection.cs" Link="NativeUIProjection.cs" />
     <Compile Include="../../plugin/NativeStallClock.cs" Link="NativeStallClock.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <Compile Include="../../plugin/Npc/World/*.cs" LinkBase="Npc/World" />
+    <Compile Include="../../plugin/arena/ArenaMatchmaker.cs" LinkBase="arena" />
     <Compile Include="../../plugin/LocalNativeText.cs" Link="LocalNativeText.cs" />
     <Compile Include="../../plugin/LocalizedCardText.cs" Link="LocalizedCardText.cs" />
     <Compile Include="../../plugin/GameLanguage.cs" Link="GameLanguage.cs" />
@@ -81,5 +83,12 @@
     <Compile Include="../../plugin/LocalCardMastery.cs" Link="LocalCardMastery.cs" />
     <Compile Include="../../plugin/LocalCrafting.cs" Link="LocalCrafting.cs" />
   </ItemGroup>
-<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /></ItemGroup>
+<ItemGroup><Compile Include="../../plugin/GrindTiers.cs" Link="GrindTiers.cs" /><Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" /></ItemGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/arena/ArenaContract.cs" />
+    <Compile Include="../../plugin/arena/DraftRules.cs" />
+    <Compile Include="../../plugin/arena/ArenaRun.cs" />
+    <Compile Include="../../plugin/arena/ArenaService.cs" />
+    <EmbeddedResource Include="../../data/arena/arena-rules-v1.json" LogicalName="SoloStone.Arena.arena-rules-v1.json" />
+  </ItemGroup>
 </Project>

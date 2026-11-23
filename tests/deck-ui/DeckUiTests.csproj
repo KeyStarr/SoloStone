@@ -5,6 +5,7 @@
     <Compile Include="../../plugin/ButtonChromeRules.cs" Link="ButtonChromeRules.cs" />
     <Compile Include="../../plugin/DeckRecordLayout.cs" Link="DeckRecordLayout.cs" />
     <Compile Include="../../plugin/HandheldPolicy.cs" Link="HandheldPolicy.cs" />
+    <Compile Include="../../plugin/NpcDifficultyIds.cs" Link="NpcDifficultyIds.cs" />
     <Compile Include="../../plugin/ProfileMenuGeometry.cs" Link="ProfileMenuGeometry.cs" />
     <Compile Include="../../plugin/NativeSaveDeleteText.cs" Link="NativeSaveDeleteText.cs" />
     <Compile Include="$(IntermediateOutputPath)DeckRuntime.Generated.cs" />

@@ -4,6 +4,7 @@
     <Compile Include="../../plugin/FairBotState.cs" Link="FairBotState.cs" />
     <Compile Include="../../plugin/AiFingerprint.cs" Link="AiFingerprint.cs" />
     <Compile Include="../../plugin/Npc/*.cs" LinkBase="Npc" />
+    <Compile Include="../../plugin/arena/ArenaReplyTable.cs" LinkBase="arena" />
     <Compile Include="../../plugin/BotSearch.cs" Link="BotSearch.cs" />
     <Compile Include="../../plugin/BotDriver.cs" Link="BotDriver.cs" />
     <Compile Include="../../plugin/LocalBot.cs" Link="LocalBot.cs" />
