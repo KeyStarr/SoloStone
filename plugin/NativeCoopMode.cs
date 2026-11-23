@@ -70,11 +70,69 @@ internal static class NativeCoopMode
         foreach (string handler in new[] { "ContinueButtonPress_PrevMode", "ContinueButtonPress_Common" })
             harmony.Patch(AccessTools.Method(typeof(EndGameScreen), handler), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenContinue)));
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenShown)));
+        harmony.Patch(AccessTools.Method(typeof(PowerProcessor), "CreateSwapGameStateSpellController"),
+            postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(SwapCoverFromRewind)));
+        harmony.Patch(AccessTools.Method(typeof(ResetGameSpellController), "IsResetSourceRewind"),
+            postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(SwapLooksLikeRewind)));
         var resetEffects = typeof(ResetGameSpellController).GetNestedTypes(AccessTools.all)
             .FirstOrDefault(type => type.Name.StartsWith("<DoEffectsWithTiming>", StringComparison.Ordinal));
         if (resetEffects == null) log?.LogWarning("COOP: the reset effects coroutine was not found; swaps keep the client's audio pause");
         else harmony.Patch(AccessTools.Method(resetEffects, "MoveNext"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(ResetStep)),
             postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(ResetStepDone)));
+    }
+
+    // A swap's reset controller (SwapGameStateSpellController) is built from no prefab, so its Rewind cover spells are empty
+    // and it shows the board vanishing and coming back. In hot-seat it takes the screen wipe and loop of the client's own
+    // RewindGameSpellController prefab (loaded once, kept inactive) and plays them as a Rewind does. Only the cover changes:
+    // the swap stays a game-state swap and its rebuild runs as before. A load that fails leaves the old look.
+    private const string RewindControllerPrefab = "RewindGameSpellController.prefab:9dd5e7376da08de4fb6b0baa314ff0ba";
+    private static readonly string[] RewindCoverFields = { "m_RewindSpellScreenWipe", "m_RewindHideScreenLoop",
+        "m_RewindSpellScreenWipeOpponent", "m_RewindHideScreenLoopOpponent", "m_screenWipeToLoopTransitionTimer" };
+    private static RewindGameSpellController rewindTemplate;
+    private static bool rewindTemplateFailed;
+
+    private static void SwapCoverFromRewind(ResetGameSpellController __result)
+    {
+        if (__result == null || ClientBridge.ActiveMatch?.HotSeat != true) return;
+        try
+        {
+            var template = RewindTemplate();
+            if (template == null) return;
+            foreach (string name in RewindCoverFields)
+                AccessTools.Field(typeof(ResetGameSpellController), name).SetValue(__result, AccessTools.Field(typeof(RewindGameSpellController), name).GetValue(template));
+        }
+        catch (Exception error) { log?.LogWarning("COOP swap: Rewind cover not applied: " + error.GetBaseException().Message); }
+    }
+
+    private static RewindGameSpellController RewindTemplate()
+    {
+        if (rewindTemplate != null || rewindTemplateFailed) return rewindTemplate;
+        try
+        {
+            object loader = typeof(AssetLoader).GetMethod("Get", System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static)?.Invoke(null, null)
+                ?? throw new InvalidOperationException("AssetLoader unavailable");
+            // InstantiatePrefab(AssetReference, AssetLoadingOptions), as PowerProcessor.CreateSpellController calls it (options 0).
+            var instantiate = loader.GetType().GetMethods().First(m => m.Name == "InstantiatePrefab" && m.ReturnType == typeof(UnityEngine.GameObject)
+                && m.GetParameters().Length == 2 && m.GetParameters()[1].ParameterType.IsEnum);
+            var parameters = instantiate.GetParameters();
+            var reference = parameters[0].ParameterType.GetMethod("op_Implicit", new[] { typeof(string) })
+                ?? throw new MissingMethodException(parameters[0].ParameterType.FullName, "op_Implicit");
+            var root = instantiate.Invoke(loader, new[] { reference.Invoke(null, new object[] { RewindControllerPrefab }), Enum.ToObject(parameters[1].ParameterType, 0) })
+                as UnityEngine.GameObject ?? throw new InvalidOperationException("prefab did not load");
+            root.SetActive(false);
+            UnityEngine.Object.DontDestroyOnLoad(root);
+            rewindTemplate = root.GetComponent<RewindGameSpellController>() ?? throw new InvalidOperationException("no RewindGameSpellController on the prefab");
+            log?.LogInfo("COOP swap: Rewind cover loaded");
+        }
+        catch (Exception error) { rewindTemplateFailed = true; log?.LogWarning("COOP swap: Rewind cover unavailable: " + error.GetBaseException().Message); }
+        return rewindTemplate;
+    }
+
+    private static readonly System.Reflection.FieldInfo RewindLoop = AccessTools.Field(typeof(ResetGameSpellController), "m_RewindHideScreenLoop");
+    private static void SwapLooksLikeRewind(ResetGameSpellController __instance, ref bool __result)
+    {
+        if (!__result && __instance is SwapGameStateSpellController && ClientBridge.ActiveMatch?.HotSeat == true
+            && RewindLoop?.GetValue(__instance) is UnityEngine.Object loop && loop != null) __result = true;
     }
 
     // A hot-seat swap is a GAME_RESET. While the client rebuilds the board for it, ResetGameSpellController pauses the whole
@@ -108,6 +166,8 @@ internal static class NativeCoopMode
 
     private static void ResetStepDone(bool __result)
     {
+        // The reset rebuilt the name banners with the old seat's names; the swap's own refresh can come before that.
+        if (!__result && ClientBridge.ActiveMatch?.HotSeat == true && seats != null) Processor.ScheduleCallback(0.1f, false, _ => RefreshBanners());
         if (keptPlaying == null) return;
         try
         {

@@ -183,6 +183,10 @@ site NativeBigCardWatchdog.ResolveAdmissionBindings | Field | HistoryManager.Run
 site NativeCoopMode.Install | Enumerate | ResetGameSpellController.(members chosen at run time) # finds the reset effects coroutine by name prefix (the compiler numbers it); a miss logs a warning and hot-seat swaps keep the client's audio pause, blocks nothing
 site NativeCoopMode.Install | Method | (unknown type) # MoveNext of that coroutine, same fallback
 
+# NativeCoopMode.RewindTemplate
+site NativeCoopMode.RewindTemplate | Enumerate | (unknown type) # AssetLoader.InstantiatePrefab(reference, options) chosen by shape, as PowerProcessor.CreateSpellController calls it; a miss logs a warning and hot-seat swaps keep their plain cover, blocks nothing
+site NativeCoopMode.RewindTemplate | Method | (unknown type) # AssetLoader.Get, InstantiatePrefab and the reference conversion, same fallback
+
 # NativeCosmeticCheck+<>c__DisplayClass28_0`1.<Asset>b__1
 
 # NativeCosmeticCheck+<Asset>d__28`1.MoveNext

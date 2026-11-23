@@ -622,6 +622,11 @@ F	Assembly-CSharp	RankedRewardDisplay	m_isAnimating	*
 F	Assembly-CSharp	RankedRewardDisplay	m_isHidePending	*
 F	Assembly-CSharp	RankedRewardDisplay	m_numAnimationsRemaining	*
 F	Assembly-CSharp	RankedRewardDisplay	m_screenEffectsHandle	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindHideScreenLoop	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindHideScreenLoopOpponent	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindSpellScreenWipe	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindSpellScreenWipeOpponent	*
+F	Assembly-CSharp	ResetGameSpellController	m_screenWipeToLoopTransitionTimer	*
 F	Assembly-CSharp	RewardBoxesDisplay	m_ClickCatcher	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay	m_DoneButton	NormalButton
 F	Assembly-CSharp	RewardBoxesDisplay	m_RewardObjects	*
@@ -635,6 +640,11 @@ F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardData	System.Collections.G
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardDust	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardGold	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardPackage	UnityEngine.GameObject
+F	Assembly-CSharp	RewindGameSpellController	m_RewindHideScreenLoop	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindHideScreenLoopOpponent	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindSpellScreenWipe	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindSpellScreenWipeOpponent	*
+F	Assembly-CSharp	RewindGameSpellController	m_screenWipeToLoopTransitionTimer	*
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbButtonWidget	*
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbRibbon	*
 F	Assembly-CSharp	SceneMgr	m_scene	*
@@ -2328,6 +2338,7 @@ M	Assembly-CSharp	Player	UpdateName	*
 M	Assembly-CSharp	PopupDisplayManager	CanShowRankedIntroForNewPlayer	*
 M	Assembly-CSharp	PopupDisplayManager	Get	PopupDisplayManager()
 M	Assembly-CSharp	PopupDisplayManager	get_IsShowing	System.Boolean()
+M	Assembly-CSharp	PowerProcessor	CreateSwapGameStateSpellController	*
 M	Assembly-CSharp	PowerProcessor	DoCurrentTaskList	()
 M	Assembly-CSharp	PowerProcessor	DoTaskListWithSpellController	(GameState,PowerTaskList,Entity)
 M	Assembly-CSharp	PowerProcessor	EndCurrentTaskList	()
@@ -2402,6 +2413,7 @@ M	Assembly-CSharp	RemoteActionHandler	HandleAction	System.Void(Network+UserUI)
 M	Assembly-CSharp	RenderUtils	EnableColliders	System.Void(UnityEngine.GameObject,System.Boolean)
 M	Assembly-CSharp	ReplayableTutorialPopup	Awake	*
 M	Assembly-CSharp	ReplayableTutorialPopup	HandleEvent	*
+M	Assembly-CSharp	ResetGameSpellController	IsResetSourceRewind	*
 M	Assembly-CSharp	RewardBoxesDisplay	AnimateRewards	System.Void()
 M	Assembly-CSharp	RewardBoxesDisplay	CreateRewardInstance	(RewardData,System.Int32,UnityEngine.Vector3,System.Boolean)
 M	Assembly-CSharp	RewardBoxesDisplay	CreateRewardInstance	*
@@ -3650,6 +3662,7 @@ T	Assembly-CSharp	RewardItemType
 T	Assembly-CSharp	RewardPackage		
 T	Assembly-CSharp	RewardPopups		
 T	Assembly-CSharp	RewardUtils		
+T	Assembly-CSharp	RewindGameSpellController		
 T	Assembly-CSharp	RuleInvalidReason		
 T	Assembly-CSharp	SceneMgr		
 T	Assembly-CSharp	SceneMgr+Mode		
@@ -3701,6 +3714,7 @@ T	Assembly-CSharp	StorePurchaseAuth
 T	Assembly-CSharp	StorePurchaseAuth+ButtonStyle		
 T	Assembly-CSharp	StoreQuantityPrompt		
 T	Assembly-CSharp	SubSpellController		
+T	Assembly-CSharp	SwapGameStateSpellController		
 T	Assembly-CSharp	TAG_CARDTYPE		
 T	Assembly-CSharp	TAG_CARD_SET		
 T	Assembly-CSharp	TAG_CLASS		

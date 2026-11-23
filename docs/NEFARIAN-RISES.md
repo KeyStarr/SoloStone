@@ -9,7 +9,8 @@ concedes, you both lose. Kill Nefarian and you both win.
 1. On the home screen, press **Tavern Brawl** (the fourth slot of the box), then **Play**.
 2. The two classes are dealt at random; the player whose hero is at the bottom of the screen starts.
 3. When a player ends the turn, a **"<name>'s turn"** window asks to hand the screen over. The next player presses
-   **Continue**, and only then is that player's hand shown.
+   **Continue**, and only then is that player's hand shown. The game's Rewind effect covers the board while it turns
+   around for the next player.
 4. The player who starts mulligans; the second player keeps the opening hand (see *Differences from retail*).
 
 There is no turn timer. The match does not count for the ladder, gives no gold or experience, and is not saved: a match
