@@ -8,9 +8,8 @@ concedes, you both lose. Kill Nefarian and you both win.
 
 1. On the home screen, press **Tavern Brawl** (the fourth slot of the box), then **Play**.
 2. The two classes are dealt at random; the player whose hero is at the bottom of the screen starts.
-3. When a player ends the turn, a **"<name>'s turn"** window asks to hand the screen over. The next player presses
-   **Continue**, and only then is that player's hand shown. The game's Rewind effect covers the board while it turns
-   around for the next player.
+3. When a player ends the turn, the game's Rewind effect covers the board while it turns around for the next player. The
+   two of you are a team, so no screen hides the next player's hand.
 4. The player who starts mulligans; the second player keeps the opening hand (see *Differences from retail*).
 
 There is no turn timer. The match does not count for the ladder, gives no gold or experience, and is not saved: a match
@@ -65,6 +64,8 @@ that is closed or crashes is simply over.
   (Nefarian, his spells, the player cards). Proof: `dotnet run --project tests/engine-proof/EngineProof.csproj -- --nefarian-rises-only`.
 - Hot-seat: `NativeMatch` plays the seat in `localSeat` and hands the client the other seat with a game-state-swap
   `GAME_RESET` (the new seat gets account Lo 1 and `TEAM_ID` 1). The debug scenario key `hotSeat=1` stages any match
-  this way; test control's `handover-continue` answers the handover window.
+  this way. A definition's `handoverScreen` (default `true`; `false` for this brawl) puts a pass-the-device window with
+  **Continue** before each swap that hides the next player's hand until they press it; test control's `handover-continue`
+  answers it.
 - Developer builds also read the debug scenario file at the brawl's start (`human…` keys = the player who starts, `npc…`
   keys = the other player), e.g. `humanBoard`/`npcBoard` with `…BoardStats=999,999` to reach the win in three turns.

@@ -6,6 +6,7 @@
   "source": "https://hearthstone.wiki.gg/wiki/Nefarian_Rises!",
   "client": { "scenario": 1865, "board": 7 },
   "boss": "TB_CoOpv3_Boss",
+  "handoverScreen": false,
   "seats": [
     {
       "name": "Anduin",

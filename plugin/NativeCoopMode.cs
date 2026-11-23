@@ -70,6 +70,13 @@ internal static class NativeCoopMode
         foreach (string handler in new[] { "ContinueButtonPress_PrevMode", "ContinueButtonPress_Common" })
             harmony.Patch(AccessTools.Method(typeof(EndGameScreen), handler), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenContinue)));
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenShown)));
+        // The victory or defeat banner waits on services that do not exist offline; a co-op match has no rewards to wait for.
+        harmony.Patch(AccessTools.DeclaredMethod(typeof(EndGameScreen), "Awake"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenAwake)));
+        foreach (var method in new[] { AccessTools.DeclaredMethod(typeof(EndGameScreen), "ShouldMakeUtilRequests"),
+            AccessTools.DeclaredMethod(typeof(EndGameScreen), "ShowBmecRewards"), AccessTools.DeclaredMethod(typeof(VictoryScreen), "JustEarnedHeroReward") })
+            harmony.Patch(method, prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(NoServiceResult)));
+        harmony.Patch(AccessTools.DeclaredMethod(typeof(EndGameScreen), "ShowJournalGameOnlyXpGains"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(NoServiceStep)));
+        harmony.Patch(AccessTools.DeclaredMethod(typeof(EndGameTwoScoop), "Show"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(BannerWithoutXp)));
         harmony.Patch(AccessTools.Method(typeof(PowerProcessor), "CreateSwapGameStateSpellController"),
             postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(SwapCoverFromRewind)));
         harmony.Patch(AccessTools.Method(typeof(ResetGameSpellController), "IsResetSourceRewind"),
@@ -219,7 +226,8 @@ internal static class NativeCoopMode
         var info = new AlertPopup.PopupInfo {
             m_id = "solostone-coop-start", m_headerText = definition.Name, m_showAlertIcon = false, m_keyboardEscIsCancel = true,
             m_text = "Two players, one screen: " + definition.Seats[0].Name + " and " + definition.Seats[1].Name
-                + " fight Nefarian together. If either hero falls, you both lose.\n\nThe game hands the screen over at every turn.",
+                + " fight Nefarian together. If either hero falls, you both lose.\n\n"
+                + (definition.HandoverScreen ? "The game hands the screen over at every turn." : "The board turns around for the next player at every turn."),
             m_responseDisplay = AlertPopup.ResponseDisplay.CONFIRM_CANCEL,
             m_confirmText = "PLAY", m_cancelText = NativeStrings.Get("GLOBAL_CANCEL", "Cancel").ToUpperInvariant(),
             m_responseCallback = (response, data) => { if (response == AlertPopup.Response.CONFIRM) Start(definition); },
@@ -244,8 +252,9 @@ internal static class NativeCoopMode
             };
             int seed = random.Next();
             var match = ClientBridge.PrepareRunMatch(encounter, seed);
-            match.HandoverPrompt = Handover;
-            match.SeatSwapped = () => Processor.ScheduleCallback(0.6f, false, _ => RefreshBanners());
+            // Without the handover screen the seats swap as soon as the turn ends.
+            match.HandoverPrompt = definition.HandoverScreen ? Handover : (Action<int, Action>)null;
+            match.SeatSwapped = () => Processor.ScheduleCallback(0.6f, false, _ => RefreshBanners(early: true));
             string id = "coop:" + definition.Id + ":" + Guid.NewGuid().ToString("N");
             log?.LogInfo("COOP start " + definition.Id + " id=" + id + " seed=" + seed + " player1=" + first.Name + " player2=" + second.Name);
             ended = false;
@@ -312,7 +321,8 @@ internal static class NativeCoopMode
 
     // The client's name banners stay bound to the player id each side had at the start: after a swap each banner is rebound to
     // the player now on its side and shows that player's hero again.
-    private static void RefreshBanners()
+    // The early refresh can land while the swap's reset is still rebuilding the board; the refresh after the reset repeats it.
+    private static void RefreshBanners(bool early = false)
     {
         try
         {
@@ -330,19 +340,59 @@ internal static class NativeCoopMode
                 if (subtext != null && subtext.GetParameters().Length == 0) subtext.Invoke(banner, null);
             }
         }
-        catch (Exception error) { log?.LogWarning("COOP name banners not refreshed: " + error.GetBaseException().Message); }
+        catch (Exception error) { if (!early) log?.LogWarning("COOP name banners not refreshed: " + error.GetBaseException().Message); }
     }
 
     private static bool InCoopMatch => ClientBridge.ActiveMatch?.HotSeat == true && ClientBridge.ActiveMatch.ActiveEncounter?.Coop == true;
 
-    // The client's end screen never registers its continue offline: a click goes back to the home screen.
+    private static bool OwnsEndScreen => InCoopMatch && !ClientBridge.OwnsLocalPostMatch;
+
+    // The end screen shows its victory or defeat banner once net cache, achievements and rewards report ready; offline they
+    // never do (it gives up after 5 s). A co-op match has none of them: they count as ready, and there is no rank, card back
+    // or reward-track progress to show.
+    private static void EndScreenAwake(EndGameScreen __instance)
+    {
+        if (!OwnsEndScreen || __instance == null) return;
+        try
+        {
+            foreach (string ready in new[] { "m_netCacheReady", "m_achievesReady", "m_rewardsLoaded" })
+                AccessTools.Field(typeof(EndGameScreen), ready).SetValue(__instance, true);
+            foreach (string shown in new[] { "m_shouldShowRankChange", "m_shouldShowRankedCardBackProgress", "m_shouldShowRewardXpGains" })
+                AccessTools.Field(typeof(EndGameScreen), shown).SetValue(__instance, false);
+        }
+        catch (Exception error) { log?.LogWarning("COOP end screen keeps its service waits: " + error.GetBaseException().Message); }
+    }
+
+    private static bool NoServiceResult(ref bool __result)
+    {
+        if (!OwnsEndScreen) return true;
+        __result = false;
+        return false;
+    }
+
+    private static bool NoServiceStep() => !OwnsEndScreen;
+
+    private static void BannerWithoutXp(ref bool showXPBar)
+    {
+        if (OwnsEndScreen) showXPBar = false;
+    }
+
+    // The client's end screen never registers its continue offline: a click goes back to the home screen. It takes clicks
+    // once the banner is up, as the client's own continue does (or after a while, should the banner never come).
     private static void EndScreenShown(EndGameScreen __instance)
     {
         if (!InCoopMatch || __instance?.m_hitbox == null) return;
         ended = true; leaving = false;
-        __instance.m_hitbox.AddEventListener(UIEventType.RELEASE, _ => EndScreenContinue());
+        float shownAt = UnityEngine.Time.realtimeSinceStartup;
+        var bannerShown = AccessTools.Field(typeof(EndGameScreen), "m_haveShownTwoScoop");
+        __instance.m_hitbox.AddEventListener(UIEventType.RELEASE, _ => {
+            bool banner = bannerShown == null || (bool)bannerShown.GetValue(__instance);
+            if (banner || UnityEngine.Time.realtimeSinceStartup - shownAt > EndScreenBannerWait) EndScreenContinue();
+        });
         log?.LogInfo("COOP end screen shown");
     }
+
+    private const float EndScreenBannerWait = 8f;
 
     private static bool EndScreenContinue()
     {

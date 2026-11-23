@@ -19,6 +19,9 @@ public sealed class CoopDefinition
     public const string Schema = "solostone.coop/1";
     public string Id, Name, Source, Boss;
     public int Version, Scenario, Board;
+    // Whether each turn ends on a pass-the-device screen that hides the next player's hand until they press Continue. A team
+    // shares what it sees and skips it; players with something to hide from each other (a versus mode) keep it. Default on.
+    public bool HandoverScreen = true;
     public IReadOnlyList<CoopSeat> Seats;
     public string ResourceName => "SoloStone.Coop." + Id + "-v" + Version + ".json";
 
@@ -36,6 +39,7 @@ public sealed class CoopDefinition
             Boss = CardId(NpcWorldJson.Text(root, "boss"), "boss"),
             Scenario = NpcWorldJson.Integer(client, "scenario"),
             Board = NpcWorldJson.Integer(client, "board"),
+            HandoverScreen = NpcWorldJson.Boolean(root, "handoverScreen", true),
         };
         if (definition.Version <= 0 || definition.Scenario <= 0 || definition.Board <= 0)
             throw new InvalidDataException("version, client.scenario and client.board must be positive");

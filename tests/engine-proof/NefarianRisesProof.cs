@@ -415,6 +415,8 @@ internal static class NefarianRisesProof
         Check(root.GetProperty("schema").GetString() == "solostone.coop/1", "content: schema");
         Check(root.GetProperty("boss").GetString() == NefarianBoss.BossId, "content: the boss is Nefarian");
         Check(root.GetProperty("client").GetProperty("scenario").GetInt32() == 1865, "content: scenario 1865 (TB_COOPV3)");
+        Check(root.TryGetProperty("handoverScreen", out var handover) && handover.ValueKind == System.Text.Json.JsonValueKind.False,
+            "content: a team shares the screen, no handover screen");
         var seats = root.GetProperty("seats").EnumerateArray().ToList();
         Check(seats.Count == 2, "content: two seats");
         foreach (var seat in seats)
