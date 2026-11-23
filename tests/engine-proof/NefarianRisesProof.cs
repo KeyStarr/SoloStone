@@ -134,6 +134,8 @@ internal static class NefarianRisesProof
         // His hover (the client's custom keyword effect) rides on every full entity, so a hot-seat swap keeps it.
         Check(SabberStoneCore.Kettle.PowerHistoryBuilder.FullEntity(boss).Entity.Tags.TryGetValue(GameTag.CUSTOM_KEYWORD_EFFECT, out int hover)
             && hover == 1, "his full entity carries the hover tag");
+        // The client's mission script finds him through the game entity's first script entity: his voice lines need it.
+        Check(game[GameTag.TAG_SCRIPT_DATA_ENT_1] == boss.Id, "the game entity names him for the mission script");
         int mark = game.PowerHistory.Full.Count;
         End(game);
         Check(boss.Controller == game.Player1, "after Player 1's turn he stands on Player 1's side");

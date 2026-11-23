@@ -43,7 +43,14 @@ namespace SabberStoneCore.Actions
             if (!coop) return;
             game[Coop] = 1;
             foreach (var minion in game.Player1.BoardZone.GetAll().Concat(game.Player2.BoardZone.GetAll()))
-                if (BossCards.Contains(minion.Card.AssetId)) { game[BossEntity] = minion.Id; break; }
+                if (BossCards.Contains(minion.Card.AssetId))
+                {
+                    game[BossEntity] = minion.Id;
+                    // The client's mission script finds its boss here (TB11_CoOpv3.SetUpBossCard): without it every voice
+                    // line, and the speech bubble that comes with it at his card, is skipped.
+                    game[GameTag.TAG_SCRIPT_DATA_ENT_1] = minion.Id;
+                    break;
+                }
         }
 
         // After each death phase (Game.CheckDeadHeroes and the death processing's own hero check): the boss has died.

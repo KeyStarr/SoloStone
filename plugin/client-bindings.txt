@@ -541,6 +541,7 @@ F	Assembly-CSharp	MultiSliceElement+Slice	m_slice	UnityEngine.GameObject
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useMeshRenderers	System.Boolean
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useTextSize	System.Boolean
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useWidgetTransform	System.Boolean
+F	Assembly-CSharp	NameBanner	m_playerId	*
 F	Assembly-CSharp	NetCache	FavoritePetChanged	*
 F	Assembly-CSharp	NetCache	FavoritePetVariantChanged	*
 F	Assembly-CSharp	NetCache	PetsXpLevelChanged	*
@@ -785,6 +786,9 @@ M	Assembly-CSharp	Actor	GetPremium	TAG_PREMIUM()
 M	Assembly-CSharp	Actor	GetSpell	*
 M	Assembly-CSharp	Actor	IsColliderEnabled	System.Boolean()
 M	Assembly-CSharp	Actor	IsShown	System.Boolean()
+M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
+M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
+M	Assembly-CSharp	AdjustBuyingAmount	RefreshQuantity	()
 M	Assembly-CSharp	AdventureConfig	ChangeSubSceneToSelectedAdventure	System.Void()
 M	Assembly-CSharp	AdventureConfig	Get	AdventureConfig()
 M	Assembly-CSharp	AdventureConfig	GetSelectedAdventure	AdventureDbId()
@@ -794,9 +798,6 @@ M	Assembly-CSharp	AdventureConfig	SetSelectedAdventureMode	System.Void(Adventure
 M	Assembly-CSharp	AdventureConfig	get_CurrentSubScene	Assets.AdventureData+Adventuresubscene()
 M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnBackButtonPress	*
 M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnRewardOptionSelected	*
-M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
-M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
-M	Assembly-CSharp	AdjustBuyingAmount	RefreshQuantity	()
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -931,6 +932,7 @@ M	Assembly-CSharp	BoxProductBanner	Start	*
 M	Assembly-CSharp	BoxProductBanner	UnfurlBanner	*
 M	Assembly-CSharp	BoxProductBanner	UnfurlPayload	*
 M	Assembly-CSharp	BoxRailroadManager	ShouldDisableButtonType	*
+M	Assembly-CSharp	BoxScrollButton	IsFeatureActive	*
 M	Assembly-CSharp	BoxScrollButton	TriggerOut	*
 M	Assembly-CSharp	BoxScrollButton	TriggerOver	*
 M	Assembly-CSharp	ButtonListMenu	Awake	System.Void()
@@ -1270,6 +1272,7 @@ M	Assembly-CSharp	DialogBase	HandleKeyboardInput	()
 M	Assembly-CSharp	DialogBase	Hide	System.Void()
 M	Assembly-CSharp	DialogManager	AddToQueue	(DialogManager+DialogRequest)
 M	Assembly-CSharp	DialogManager	AddToQueue	*
+M	Assembly-CSharp	DialogManager	DismissAlertOrRemoveFromQueue	*
 M	Assembly-CSharp	DialogManager	DismissAlertOrRemoveFromQueue	System.Void(System.String)
 M	Assembly-CSharp	DialogManager	Get	DialogManager()
 M	Assembly-CSharp	DialogManager	ShowCardListPopup	System.Void(UserAttentionBlocker,CardListPopup+Info)
@@ -1343,6 +1346,8 @@ M	Assembly-CSharp	EnemyEmoteHandler	Get	EnemyEmoteHandler()
 M	Assembly-CSharp	EnemyEmoteHandler	IsSquelched	System.Boolean(System.Int32)
 M	Assembly-CSharp	Entity	GetCard	Card()
 M	Assembly-CSharp	Entity	GetController	Player()
+M	Assembly-CSharp	Entity	GetHero	Entity()
+M	Assembly-CSharp	Entity	GetName	System.String()
 M	Assembly-CSharp	Entity	GetPetCard	Card()
 M	Assembly-CSharp	Entity	GetWeaponCard	Card()
 M	Assembly-CSharp	Entity	HasHandTarget	System.Boolean()
@@ -1516,6 +1521,8 @@ M	Assembly-CSharp	GameUtils	IsWildCard	System.Boolean(EntityDef)
 M	Assembly-CSharp	GameUtils	ReplayTraditionalTutorial	*
 M	Assembly-CSharp	GameUtils	TranslateCardIdToDbId	System.Int32(System.String,System.Boolean)
 M	Assembly-CSharp	GameUtils	TranslateDbIdToCardId	System.String(System.Int32,System.Boolean)
+M	Assembly-CSharp	Gameplay	Get	Gameplay()
+M	Assembly-CSharp	Gameplay	GetNameBannerForSide	NameBanner(Player+Side)
 M	Assembly-CSharp	Gameplay	OnBoardLoaded	*
 M	Assembly-CSharp	GoldRewardData	get_Amount	System.Int64()
 M	Assembly-CSharp	GraphicsManager	InitializeScreen	()
@@ -1876,6 +1883,8 @@ M	Assembly-CSharp	MulliganManager	SkipMulligan	*
 M	Assembly-CSharp	MultiSliceElement	AddSlice	System.Void(UnityEngine.GameObject,UnityEngine.Vector3,UnityEngine.Vector3,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
 M	Assembly-CSharp	MultiSliceElement	ClearSlices	System.Void()
 M	Assembly-CSharp	MultiSliceElement	UpdateSlices	System.Void()
+M	Assembly-CSharp	NameBanner	UpdateHeroNameBanner	*
+M	Assembly-CSharp	NameBanner	UpdateSubtext	*
 M	Assembly-CSharp	NarrativeManager	Get	NarrativeManager()
 M	Assembly-CSharp	NarrativeManager	OnArenaRewardsShown	*
 M	Assembly-CSharp	Navigation	GoBack	System.Boolean()
@@ -3018,6 +3027,7 @@ M	blizzard.bgsclient	PegasusGame.PowerHistoryMetaData	set_Info	System.Void(Syste
 M	blizzard.bgsclient	PegasusGame.PowerHistoryMetaData	set_Type	System.Void(PegasusGame.HistoryMeta+Type)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	get_CreateGame	PegasusGame.PowerHistoryCreateGame()
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_CreateGame	System.Void(PegasusGame.PowerHistoryCreateGame)
+M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_SourceIsGamestateSwap	System.Void(System.Boolean)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_SourceIsRewind	System.Void(System.Boolean)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryShuffleDeck	set_PlayerId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryStart	get_EffectCardId	System.String()
@@ -3162,7 +3172,10 @@ P	*	UberText	Text	*
 P	*	UberText	TextColor	*
 P	*	UberText	Width	*
 P	*	UberText	WordWrap	*
+P	*	UnityEngine.AudioListener	pause	*
 P	*	UnityEngine.AudioListener	volume	*
+P	*	UnityEngine.AudioSource	ignoreListenerPause	*
+P	*	UnityEngine.AudioSource	isPlaying	*
 P	Assembly-CSharp	CardSetDbfRecord	IsCoreCardSet	*
 P	Assembly-CSharp	CardSetDbfRecord	IsFeaturedCardSet	*
 P	Assembly-CSharp	CraftingManager	IsInCraftingMode	*
@@ -3501,6 +3514,7 @@ T	Assembly-CSharp	MulliganButton
 T	Assembly-CSharp	MulliganManager		
 T	Assembly-CSharp	MultiSliceElement		
 T	Assembly-CSharp	MultiSliceElement+Slice		
+T	Assembly-CSharp	NameBanner		
 T	Assembly-CSharp	NarrativeManager		
 T	Assembly-CSharp	Navigation		
 T	Assembly-CSharp	Navigation+NavigateBackHandler		
@@ -3624,6 +3638,7 @@ T	Assembly-CSharp	RankedRewardDisplay
 T	Assembly-CSharp	RankedStarArray		
 T	Assembly-CSharp	RemoteActionHandler		
 T	Assembly-CSharp	RenderUtils		
+T	Assembly-CSharp	ResetGameSpellController		
 T	Assembly-CSharp	Reward		
 T	Assembly-CSharp	Reward+Type		
 T	Assembly-CSharp	RewardBoxesDisplay		

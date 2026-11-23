@@ -70,6 +70,56 @@ internal static class NativeCoopMode
         foreach (string handler in new[] { "ContinueButtonPress_PrevMode", "ContinueButtonPress_Common" })
             harmony.Patch(AccessTools.Method(typeof(EndGameScreen), handler), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenContinue)));
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenShown)));
+        var resetEffects = typeof(ResetGameSpellController).GetNestedTypes(AccessTools.all)
+            .FirstOrDefault(type => type.Name.StartsWith("<DoEffectsWithTiming>", StringComparison.Ordinal));
+        if (resetEffects == null) log?.LogWarning("COOP: the reset effects coroutine was not found; swaps keep the client's audio pause");
+        else harmony.Patch(AccessTools.Method(resetEffects, "MoveNext"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(ResetStep)),
+            postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(ResetStepDone)));
+    }
+
+    // A hot-seat swap is a GAME_RESET. While the client rebuilds the board for it, ResetGameSpellController pauses the whole
+    // AudioListener (the rebuilt cards stay silent) and resumes it once the rebuild is done: a few seconds without music or
+    // ambience after every handover. In hot-seat the sounds already playing when the reset starts (music, ambience) ignore
+    // that pause and get their setting back after it; the rebuild itself stays silent. AudioModule is not a plugin reference.
+    private static readonly Type AudioSourceType = Type.GetType("UnityEngine.AudioSource, UnityEngine.AudioModule");
+    private static readonly Type AudioListenerType = Type.GetType("UnityEngine.AudioListener, UnityEngine.AudioModule");
+    private static System.Collections.Generic.List<UnityEngine.Object> keptPlaying;
+    private static bool resetPaused;
+
+    private static void ResetStep()
+    {
+        try
+        {
+            if (keptPlaying != null || ClientBridge.ActiveMatch?.HotSeat != true || AudioSourceType == null || AudioListenerType == null) return;
+            keptPlaying = new System.Collections.Generic.List<UnityEngine.Object>();
+            resetPaused = false;
+            var isPlaying = AudioSourceType.GetProperty("isPlaying");
+            var ignorePause = AudioSourceType.GetProperty("ignoreListenerPause");
+            foreach (var source in UnityEngine.Object.FindObjectsOfType(AudioSourceType))
+                if ((bool)isPlaying.GetValue(source, null) && !(bool)ignorePause.GetValue(source, null))
+                {
+                    ignorePause.SetValue(source, true, null);
+                    keptPlaying.Add(source);
+                }
+            log?.LogInfo("COOP swap: " + keptPlaying.Count + " playing sound(s) kept through the reset's audio pause");
+        }
+        catch (Exception error) { log?.LogWarning("COOP swap sound keep failed: " + error.GetBaseException().Message); }
+    }
+
+    private static void ResetStepDone(bool __result)
+    {
+        if (keptPlaying == null) return;
+        try
+        {
+            if ((bool)AudioListenerType.GetProperty("pause").GetValue(null, null)) { resetPaused = true; return; }
+            if (!resetPaused && __result) return;
+            var ignorePause = AudioSourceType.GetProperty("ignoreListenerPause");
+            foreach (var source in keptPlaying)
+                if (source != null) ignorePause.SetValue(source, false, null);
+        }
+        catch (Exception error) { log?.LogWarning("COOP swap sound restore failed: " + error.GetBaseException().Message); }
+        keptPlaying = null;
+        resetPaused = false;
     }
 
     private static void SlotFeatureActive(BoxScrollButton __instance, ref bool __result)
