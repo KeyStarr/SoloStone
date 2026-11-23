@@ -1893,6 +1893,7 @@ M	Assembly-CSharp	MulliganManager	SkipMulligan	*
 M	Assembly-CSharp	MultiSliceElement	AddSlice	System.Void(UnityEngine.GameObject,UnityEngine.Vector3,UnityEngine.Vector3,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
 M	Assembly-CSharp	MultiSliceElement	ClearSlices	System.Void()
 M	Assembly-CSharp	MultiSliceElement	UpdateSlices	System.Void()
+M	Assembly-CSharp	NameBanner	ShouldShowGameIconBanner	*
 M	Assembly-CSharp	NameBanner	UpdateHeroNameBanner	*
 M	Assembly-CSharp	NameBanner	UpdateSubtext	*
 M	Assembly-CSharp	NarrativeManager	Get	NarrativeManager()

@@ -77,6 +77,7 @@ internal static class NativeCoopMode
             harmony.Patch(method, prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(NoServiceResult)));
         harmony.Patch(AccessTools.DeclaredMethod(typeof(EndGameScreen), "ShowJournalGameOnlyXpGains"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(NoServiceStep)));
         harmony.Patch(AccessTools.DeclaredMethod(typeof(EndGameTwoScoop), "Show"), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(BannerWithoutXp)));
+        harmony.Patch(AccessTools.DeclaredMethod(typeof(NameBanner), "ShouldShowGameIconBanner"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(NoModeIconBanner)));
         harmony.Patch(AccessTools.Method(typeof(PowerProcessor), "CreateSwapGameStateSpellController"),
             postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(SwapCoverFromRewind)));
         harmony.Patch(AccessTools.Method(typeof(ResetGameSpellController), "IsResetSourceRewind"),
@@ -344,6 +345,14 @@ internal static class NativeCoopMode
     }
 
     private static bool InCoopMatch => ClientBridge.ActiveMatch?.HotSeat == true && ClientBridge.ActiveMatch.ActiveEncounter?.Coop == true;
+
+    // In any mission the bottom name banner keeps room for a game-mode icon on its left, and this match shows none (the
+    // client's Tavern Brawl icon needs its own brawl game type): the name sat further right on a longer banner than the top
+    // one. Both seats take turns at the bottom, so both banners use the plain layout.
+    private static void NoModeIconBanner(ref bool __result)
+    {
+        if (__result && InCoopMatch) __result = false;
+    }
 
     private static bool OwnsEndScreen => InCoopMatch && !ClientBridge.OwnsLocalPostMatch;
 
