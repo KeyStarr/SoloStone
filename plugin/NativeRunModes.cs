@@ -201,7 +201,7 @@ internal static class NativeRunModes
         if (run == null || run.Status != RunStatus.Active)
         {
             // A new run with the class of the hero picked in the client (its base hero plays; skins stay cosmetic). The class
-            // picker shows each class's favourite hero, so a skin's card can arrive, and the engine knows only the class heroes.
+            // picker shows each class's favourite hero, so a skin's card can arrive, and the engine's card data lacks most skins.
             var hero = SabberStoneCore.Model.Cards.FromAssetId(heroCardDbId) ?? SkinClassHero(heroCardDbId)
                 ?? throw new ArgumentException("Unknown hero " + heroCardDbId);
             string cls = hero.Class.ToString();
