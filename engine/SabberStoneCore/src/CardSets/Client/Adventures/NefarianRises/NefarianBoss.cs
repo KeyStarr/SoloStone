@@ -7,6 +7,7 @@ using SabberStoneCore.Auras;
 using SabberStoneCore.EffectSystem;
 using SabberStoneCore.Enchants;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks;
@@ -93,6 +94,9 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                 // His death wins the game for the team (CoopRules.CheckBoss after each death phase). No Deathrattle: the client
                 // would show its skull under him.
                 CoopRules.MarkBoss(card);
+                // The client's look for him (his card's custom keyword effect): he hovers in purple smoke while this tag is set.
+                // Every full entity carries it, so the hover comes back after each hot-seat swap.
+                card.Tags[GameTag.CUSTOM_KEYWORD_EFFECT] = 1;
                 NefarianRisesCards.Plain(card);
             };
             register(40259, BossId, boss);
@@ -238,8 +242,15 @@ namespace SabberStoneCore.CardSets.Client.Adventures.NefarianRises
                 game.DeathProcessingAndAuraUpdate();
                 if (Over(game) || nefarian.IsDead || to.BoardZone.IsFull) return;
             }
+            // In a trigger block of his that names his swap effect, so the client plays it as he crosses the board.
+            if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, nefarian.Id, "", -1, 0,
+                effectIndex: SwapEffect));
             new ControlTask(EntityType.SOURCE, opposite: true).Process(game, nefarian.Controller, nefarian, null);
+            if (game.History) game.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
         }
+
+        // His card's trigger effects on the client, by a trigger block's effect index: 9 is his side swap.
+        internal const int SwapEffect = 9;
 
         // The scheduled spell, or null for a turn of rest. Never the same choice twice in a row.
         private static string Choose(Game game, Minion nefarian)

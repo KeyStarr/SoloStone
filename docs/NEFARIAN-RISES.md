@@ -26,6 +26,7 @@ that is closed or crashes is simply over.
 - At 160 and at 60 Health a hit stops at the threshold and he is Immune for the rest of the turn. At 160 he gains 5 Attack
   and casts Elemental Eruption; at 60 he gains 5 more, casts Twisted Light (heals himself 30, 30 damage to every other
   minion) and from then on uses the stronger forms of his spells. If you take too long, he gains his Attack anyway.
+- He hovers in purple smoke and plays his swap effect when he changes sides, both from your game client.
 - He speaks with the voice lines in your game client: on the first turn, with every Bamboozle, Elemental Eruption, Glorious
   Finale and Twisted Light, and each time he gains Attack.
 

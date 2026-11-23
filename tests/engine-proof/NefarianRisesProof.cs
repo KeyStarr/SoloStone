@@ -113,8 +113,21 @@ internal static class NefarianRisesProof
         Check(boss.Controller == game.Player2 && boss.AttackDamage == 0 && boss.Health == 200 && boss.HasTaunt, "0/200 Taunt on Player 2's side");
         Check(boss.CantBeTargetedBySpells, "can't be targeted by spells");
         Check(!boss.Card.Deathrattle && boss[GameTag.DEATHRATTLE] == 0, "no Deathrattle (the client would show its skull)");
+        // His hover (the client's custom keyword effect) rides on every full entity, so a hot-seat swap keeps it.
+        Check(SabberStoneCore.Kettle.PowerHistoryBuilder.FullEntity(boss).Entity.Tags.TryGetValue(GameTag.CUSTOM_KEYWORD_EFFECT, out int hover)
+            && hover == 1, "his full entity carries the hover tag");
+        int mark = game.PowerHistory.Full.Count;
         End(game);
         Check(boss.Controller == game.Player1, "after Player 1's turn he stands on Player 1's side");
+        // The side switch sits in a trigger block of his that names his swap effect.
+        var after = game.PowerHistory.Full.Skip(mark).ToList();
+        int swap = after.FindIndex(e => e is SabberStoneCore.Kettle.PowerHistoryBlockStart b && b.BlockType == BlockType.TRIGGER
+            && b.Source == boss.Id && b.EffectIndex == NefarianBoss.SwapEffect);
+        int control = after.FindIndex(e => e is SabberStoneCore.Kettle.PowerHistoryTagChange t && t.EntityId == boss.Id
+            && t.Tag == GameTag.CONTROLLER && t.Value == game.Player1.PlayerId);
+        int close = swap < 0 ? -1 : after.FindIndex(swap + 1, e => e is SabberStoneCore.Kettle.PowerHistoryBlockEnd);
+        Check(swap >= 0 && control > swap && close > control, "his side switch plays his swap effect (block " + swap + ", control "
+            + control + ", end " + close + ")");
         End(game);
         Check(boss.Controller == game.Player2, "after Player 2's turn back on Player 2's side");
 
