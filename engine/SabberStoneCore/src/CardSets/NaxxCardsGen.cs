@@ -166,7 +166,7 @@ namespace SabberStoneCore.CardSets
 			{
 				DeathrattleTask = ComplexTask.Create(
 					new RandomTask(1, EntityType.MINIONS),
-					new AddEnchantmentTask("FP1_023e", EntityType.TARGET))
+					new AddEnchantmentTask("FP1_023e", EntityType.STACK))
 			}));
 
 		}
