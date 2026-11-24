@@ -115,12 +115,23 @@ namespace SabberStoneCore.Actions
 						{
 							// The choice card only shows the offer and stays set aside; the basic totem it shows is summoned.
 							IEntity summoner = g.IdEntityDic[DarkGifts.RecipeSource(g, c.Choice.SourceId)];
-							var totem = (Minion)Entity.FromCard(c, basicTotem, new EntityData
+							// A separate choice answer needs its source's POWER block so the client inherits its premium.
+							bool continuationBlock = g.History && g.PowerHistory.CurrentBlock == null;
+							if (continuationBlock)
+								g.PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.POWER, summoner.Id, "", 0, 0));
+							try
 							{
-								{GameTag.ZONE, (int)Zone.PLAY},
-								{GameTag.DISPLAYED_CREATOR, summoner.Id}
-							});
-							SummonBlock.Invoke(g, totem, -1, summoner);
+								var totem = (Minion)Entity.FromCard(c, basicTotem, new EntityData
+								{
+									{GameTag.ZONE, (int)Zone.PLAY},
+									{GameTag.DISPLAYED_CREATOR, summoner.Id}
+								});
+								SummonBlock.Invoke(g, totem, -1, summoner);
+							}
+							finally
+							{
+								if (continuationBlock) g.PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
+							}
 						}
 						else if (!c.BoardZone.IsFull && RemoveFromZone(c, playable))
 						{

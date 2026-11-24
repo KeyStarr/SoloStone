@@ -283,6 +283,29 @@ internal static partial class Program
     }
 
     // Retail: a created card takes the highest quality among the cards involved in creating it.
+    [GroupProof("basic-totem-premium", ProofKind.Native)]
+    private static void BasicTotemChoicePremium()
+    {
+        foreach (int premium in new[] { 0, 1 })
+        {
+            var (match, capture) = AnimationMatch();
+            var player = match.Game.Player1;
+            var hermit = PremiumCard(match, "LOOT_062", premium);
+            PlayPremiumCard(match, capture, hermit);
+            typeof(NativeMatch).GetMethod("SendHumanChoice", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance).Invoke(match, null);
+            var choice = capture.Last<EntityChoices>(17);
+            int pick = choice.Entities.Single(id => match.Game.IdEntityDic[id].Card.Id == "AT_132_SHAMANc");
+            AssertPremiumReplay(capture, pick, premium, "Stoneclaw offer");
+
+            int cursor = capture.Packets.Count;
+            match.SendChoices(choice.Id, new List<int> { pick });
+            var stoneclaw = player.BoardZone.Single(card => card.Card.Id == "CS2_051");
+            AssertDerived(capture, NativeHistory(capture, cursor), stoneclaw.Id, premium, "Stoneclaw from Kobold Hermit");
+            capture.SerializeAll();
+        }
+        Console.WriteLine("PASS basic totem choices preserve premium");
+    }
+
     private static void DerivedPremiumHistory()
     {
         // Resolver: Diamond -> Diamond/Signature/Golden by the result card's own quality flags.
