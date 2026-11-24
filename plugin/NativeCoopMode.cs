@@ -4,9 +4,9 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Hearthstone.Core;
 
-// Co-op boss modes (Nefarian Rises! first, data/coop/): two people at one client against a boss, started from the home
-// screen's fourth mode slot, which reads Tavern Brawl while a co-op mode ships (this client's home screen has no Tavern Brawl
-// widget of its own: retail moved brawls into Modes). The match is an encounter like a run fight (both decks, both heroes and the boss come from
+// Co-op boss modes (Nefarian Rises! first, data/coop/): two people at one client against a boss, started from the Couch
+// Co-op entry of the Modes screen (NativeModesMenu; it borrows the retail Tavern Brawl row's look, as retail hosted Nefarian
+// Rises! as a Tavern Brawl). The match is an encounter like a run fight (both decks, both heroes and the boss come from
 // the definition; no ladder record, never settled), with the engine's co-op rules and hot-seat seats: at every handover a
 // pass-the-device popup asks the next player to take the screen before their hand is shown.
 internal static class NativeCoopMode
@@ -14,7 +14,7 @@ internal static class NativeCoopMode
     private static ManualLogSource log;
     private static readonly Random random = new Random();
 
-    // The co-op mode the Tavern Brawl button starts (the first shipped one until there is a chooser).
+    // The co-op mode the Couch Co-op entry starts (the first shipped one until there is a chooser).
     internal static CoopDefinition Current => CoopCatalog.All.FirstOrDefault();
 
     // Developer and test-hook builds show it; the public build once every card of the mode plays in this engine and the
@@ -59,14 +59,8 @@ internal static class NativeCoopMode
     internal static void Install(Harmony harmony, ManualLogSource logger)
     {
         log = logger;
-        NativeHomeUI.CoopModesAvailable = () => Enabled;
-        NativeHomeUI.ModeSlotEnabled = WireSlot;
-        // The slot's scroll button presses only while its server feature (Battlegrounds) is active: offline it never is.
-        harmony.Patch(AccessTools.Method(typeof(BoxScrollButton), "IsFeatureActive"),
-            postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(SlotFeatureActive)));
-        // Box.OnButtonPressed checks the server's feature flags before it reaches the slot's own handler: catch the press first.
-        harmony.Patch(AccessTools.Method(typeof(Box), "OnButtonPressed", new[] { typeof(UIEvent) }),
-            prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(BoxButtonPressed)));
+        NativeModesMenu.Add(new NativeModesMenu.Entry("TAVERNBRAWL", "Couch Co-op",
+            "Two players at one screen fight a boss together. Now playing: " + (Current?.Name ?? ""), () => Enabled, Start));
         foreach (string handler in new[] { "ContinueButtonPress_PrevMode", "ContinueButtonPress_Common" })
             harmony.Patch(AccessTools.Method(typeof(EndGameScreen), handler), prefix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenContinue)));
         harmony.Patch(AccessTools.Method(typeof(EndGameScreen), "Show"), postfix: new HarmonyMethod(typeof(NativeCoopMode), nameof(EndScreenShown)));
@@ -190,36 +184,11 @@ internal static class NativeCoopMode
         resetPaused = false;
     }
 
-    private static void SlotFeatureActive(BoxScrollButton __instance, ref bool __result)
+    private static void Start()
     {
-        if (!__result && Enabled && __instance != null && __instance == Box.Get()?.m_BattleGroundsButton) __result = true;
-    }
-
-    // The slot's own listener starts the brawl (NativeHomeUI.EnableMode); the box's generic route must not act on the press.
-    private static bool BoxButtonPressed(Box __instance, UIEvent __0) =>
-        !Enabled || __instance == null || __0?.GetElement() == null || __0.GetElement() != __instance.m_BattleGroundsButton;
-
-    // Box.OnButtonPressed checks the server's feature flags before the slot's own handler: the slot gets its own listener (once
-    // per button instance; a reloaded HUB builds a new box). Box buttons act on PRESS.
-    private static readonly System.Runtime.CompilerServices.ConditionalWeakTable<BoxMenuButton, object> wiredSlots =
-        new System.Runtime.CompilerServices.ConditionalWeakTable<BoxMenuButton, object>();
-    private static void WireSlot(BoxMenuButton button)
-    {
-        if (button == null || wiredSlots.TryGetValue(button, out _)) return;
-        wiredSlots.Add(button, new object());
-        button.AddEventListener(UIEventType.PRESS, _ => {
-            log?.LogInfo("COOP slot pressed");
-            if (SceneMgr.IsInitialized() && SceneMgr.Get().GetMode() == SceneMgr.Mode.HUB) BrawlPressed();
-        });
-        log?.LogInfo("COOP fourth mode slot wired: " + button.name);
-    }
-
-    private static bool BrawlPressed()
-    {
-        if (!Enabled) return true;
+        if (!Enabled) return;
         try { ShowStart(Current); }
         catch (Exception error) { log?.LogWarning("COOP start popup unavailable: " + error.Message); }
-        return false;
     }
 
     private static void ShowStart(CoopDefinition definition)
@@ -413,10 +382,11 @@ internal static class NativeCoopMode
         if (!leaving)
         {
             leaving = true; ended = false; seats = null;
-            log?.LogInfo("COOP end screen continued: home");
-            // No ladder result to present: the match is done (as a run fight's end, NativeRunModes).
+            log?.LogInfo("COOP end screen continued: modes");
+            // No ladder result to present: the match is done (as a run fight's end, NativeRunModes). Back to the Modes
+            // screen the match was started from.
             LocalLadder.RewardPresentationComplete();
-            NativeUIProbe.Navigate(SceneMgr.Mode.HUB);
+            NativeModesMenu.Open();
         }
         return false;
     }

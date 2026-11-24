@@ -6,7 +6,7 @@ concedes, you both lose. Kill Nefarian and you both win.
 
 ## How to play
 
-1. On the home screen, press **Tavern Brawl** (the fourth slot of the box), then **Play**.
+1. On the home screen, press **Modes**, choose **Couch Co-op**, then **Play**.
 2. The two classes are dealt at random; the player whose hero is at the bottom of the screen starts.
 3. When a player ends the turn, the game's Rewind effect covers the board while it turns around for the next player. The
    two of you are a team, so no screen hides the next player's hand.
@@ -59,7 +59,8 @@ that is closed or crashes is simply over.
 ## For developers
 
 - Content: `data/coop/nefarian-rises-v1.json` (scenario 1865, board 7, the two decks, the boss); parsed by
-  `plugin/CoopDefinition.cs`, started by `plugin/NativeCoopMode.cs`.
+  `plugin/CoopDefinition.cs`, started by `plugin/NativeCoopMode.cs` from its Couch Co-op entry of the Modes screen
+  (`plugin/NativeModesMenu.cs`).
 - Engine: `GameConfig.Coop` and `Actions/CoopRules.cs` (the shared result), `CardSets/Client/Adventures/NefarianRises*`
   (Nefarian, his spells, the player cards). Proof: `dotnet run --project tests/engine-proof/EngineProof.csproj -- --nefarian-rises-only`.
 - Hot-seat: `NativeMatch` plays the seat in `localSeat` and hands the client the other seat with a game-state-swap

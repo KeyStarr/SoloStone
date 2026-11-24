@@ -179,10 +179,7 @@ internal static class NativeHiddenEntries
             if (Applies(binding.Entry) && Hides(binding.Entry))
             {
                 object value = binding.Read(__instance);
-                // The fourth-mode slot starts the co-op brawl while one ships (NativeCoopMode); its Battlegrounds routes stay blocked.
-                if (binding.Entry.DisabledMode && binding.Entry.Id == NativeHomeUI.FanModesEntry && NativeHomeUI.CoopModesAvailable())
-                    NativeHomeUI.EnableMode(__instance as Box, value as BoxMenuButton);
-                else if (binding.Entry.DisabledMode) NativeHomeUI.DisableMode(__instance as Box, value as BoxMenuButton);
+                if (binding.Entry.DisabledMode) NativeHomeUI.DisableMode(__instance as Box, value as BoxMenuButton);
                 else Hide(value, binding.Entry.HideSiblingLabel);
             }
     }

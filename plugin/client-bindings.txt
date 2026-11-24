@@ -947,7 +947,6 @@ M	Assembly-CSharp	BoxProductBanner	Start	*
 M	Assembly-CSharp	BoxProductBanner	UnfurlBanner	*
 M	Assembly-CSharp	BoxProductBanner	UnfurlPayload	*
 M	Assembly-CSharp	BoxRailroadManager	ShouldDisableButtonType	*
-M	Assembly-CSharp	BoxScrollButton	IsFeatureActive	*
 M	Assembly-CSharp	BoxScrollButton	TriggerOut	*
 M	Assembly-CSharp	BoxScrollButton	TriggerOver	*
 M	Assembly-CSharp	ButtonListMenu	Awake	System.Void()
