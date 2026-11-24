@@ -39,6 +39,7 @@ C	Assembly-CSharp	Hearthstone.DataModels.AchievementSectionListDataModel	.ctor	S
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementStatsDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryListDataModel	.ctor	System.Void()
+C	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.PriceDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.RewardItemDataModel	.ctor	System.Void()
@@ -459,6 +460,7 @@ F	Assembly-CSharp	GameDbf	CosmeticCoin	Dbf`1<CosmeticCoinDbfRecord>
 F	Assembly-CSharp	GameDbf	Deck	Dbf`1<DeckDbfRecord>
 F	Assembly-CSharp	GameDbf	DeckCard	Dbf`1<DeckCardDbfRecord>
 F	Assembly-CSharp	GameDbf	DeckTemplate	Dbf`1<DeckTemplateDbfRecord>
+F	Assembly-CSharp	GameDbf	GameMode	Dbf`1<GameModeDbfRecord>
 F	Assembly-CSharp	GameDbf	League	Dbf`1<LeagueDbfRecord>
 F	Assembly-CSharp	GameDbf	Pet	Dbf`1<PetDbfRecord>
 F	Assembly-CSharp	GameDbf	PetLevel	Dbf`1<PetLevelDbfRecord>
@@ -481,6 +483,9 @@ F	Assembly-CSharp	GameMgr	m_gameType	*
 F	Assembly-CSharp	GameMgr	m_nextFormatType	*
 F	Assembly-CSharp	GameMgr	m_nextGameType	*
 F	Assembly-CSharp	GameMgr	m_nextMissionId	*
+F	Assembly-CSharp	GameModeDisplay	m_activeGameModeRecords	*
+F	Assembly-CSharp	GameModeDisplay	m_selectedGameModeButtonDataModel	*
+F	Assembly-CSharp	GameModeDisplay	m_slidingTray	SlidingTray
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Key	GameSaveKeyId
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Long_Values	System.Int64[]
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Subkey	GameSaveKeySubkeyId
@@ -1443,6 +1448,13 @@ M	Assembly-CSharp	GameMgr	IsBattlegroundsMatchOrTutorial	System.Boolean()
 M	Assembly-CSharp	GameMgr	IsTraditionalTutorial	System.Boolean()
 M	Assembly-CSharp	GameMgr	LoadTransitionPopup	(System.String)
 M	Assembly-CSharp	GameMgr	ShowTransitionPopup	(System.String,System.Int32)
+M	Assembly-CSharp	GameModeDbfRecord	get_GameModeButtonState	System.String()
+M	Assembly-CSharp	GameModeDisplay	CanEnterMode	*
+M	Assembly-CSharp	GameModeDisplay	GetGameModeSceneDataModel	Hearthstone.DataModels.GameModeSceneDataModel()
+M	Assembly-CSharp	GameModeDisplay	GoToHub	*
+M	Assembly-CSharp	GameModeDisplay	InitializeGameModeSceneData	*
+M	Assembly-CSharp	GameModeDisplay	InitializeSlidingTray	*
+M	Assembly-CSharp	GameModeDisplay	NavigateToSelectedMode	*
 M	Assembly-CSharp	GameSaveDataManager	ApplyGameSaveDataUpdate	System.Void(PegasusShared.GameSaveDataUpdate)
 M	Assembly-CSharp	GameSaveDataManager	Get	*
 M	Assembly-CSharp	GameSaveDataManager	Get	GameSaveDataManager()
@@ -1606,6 +1618,22 @@ M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel	set_ratin
 M	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel	get_CardBackId	System.Int32()
 M	Assembly-CSharp	Hearthstone.DataModels.CardDataModel	get_CardId	System.String()
 M	Assembly-CSharp	Hearthstone.DataModels.EventDataModel	get_Payload	System.Object()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_ButtonState	System.String()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_GameModeRecordId	System.Int32()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_Name	System.String()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_ButtonState	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_Description	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_GameModeRecordId	System.Void(System.Int32)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsBeta	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsDownloadRequired	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsDownloading	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsEarlyAccess	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsNew	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_ModuleTag	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_Name	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	get_LastSelectedGameModeRecordId	System.Int32()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	set_GameModeButtons	System.Void(Hearthstone.UI.DataModelList`1<Hearthstone.DataModels.GameModeButtonDataModel>)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	set_LastSelectedGameModeRecordId	System.Void(System.Int32)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_DoneChangingTabs	System.Void(System.Boolean)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_HasPassedTavernGuideButtonIntro	System.Void(System.Boolean)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_HasSeenWelcomeApprentice	System.Void(System.Boolean)
@@ -2499,6 +2527,7 @@ M	Assembly-CSharp	ShopWindowController	GetWindow	!!0()
 M	Assembly-CSharp	SideboardDeck	InitCardCount	System.Void()
 M	Assembly-CSharp	SideboardDeck	get_MainDeck	CollectionDeck()
 M	Assembly-CSharp	SideboardDeck	get_OwnerCardDbId	System.Int32()
+M	Assembly-CSharp	SlidingTray	ToggleTraySlider	System.Void(System.Boolean,UnityEngine.Transform,System.Boolean)
 M	Assembly-CSharp	SoundManager	Get	SoundManager()
 M	Assembly-CSharp	SoundManager	IsInitialized	System.Boolean()
 M	Assembly-CSharp	SoundManager	LoadAndPlayClip	*
@@ -3407,6 +3436,9 @@ T	Assembly-CSharp	GameEntityOption
 T	Assembly-CSharp	GameEntityOptions		
 T	Assembly-CSharp	GameMenu		
 T	Assembly-CSharp	GameMgr		
+T	Assembly-CSharp	GameModeDbfRecord		
+T	Assembly-CSharp	GameModeDisplay		
+T	Assembly-CSharp	GameModeDisplay+ModeLockedStatus		
 T	Assembly-CSharp	GameSaveDataManager		
 T	Assembly-CSharp	GameSaveDataManager+OnRequestDataResponseDelegate		
 T	Assembly-CSharp	GameSaveDataManager+OnSaveDataResponseDelegate		
@@ -3434,6 +3466,8 @@ T	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel
 T	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.CardDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.EventDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.PackDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.PriceDataModel		
@@ -3696,6 +3730,7 @@ T	Assembly-CSharp	ShopType
 T	Assembly-CSharp	ShopWindowController		
 T	Assembly-CSharp	SideboardCardDbfRecord		
 T	Assembly-CSharp	SideboardDeck		
+T	Assembly-CSharp	SlidingTray		
 T	Assembly-CSharp	SoundDef		
 T	Assembly-CSharp	SoundManager		
 T	Assembly-CSharp	SoundManager+SoundOptions		

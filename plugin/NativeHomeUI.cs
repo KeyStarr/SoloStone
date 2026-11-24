@@ -343,12 +343,12 @@ internal static class NativeHomeUI
     // The co-op mode wires its own press listener to the enabled slot (NativeCoopMode).
     internal static Action<BoxMenuButton> ModeSlotEnabled;
 
-    // True while the Modes button opens SoloStone's run modes (set by NativeRunModes; tests leave it false).
-    internal static Func<bool> RunModesAvailable = () => false;
+    // True while the Modes button opens SoloStone's Modes screen (set by NativeModesMenu; tests leave it false).
+    internal static Func<bool> ModesAvailable = () => false;
 
     private static bool IsUnavailableMode(Box box, PegUIElement button) => box != null && button != null
         && (button == box.m_BattleGroundsButton && !CoopModesAvailable()
-            || button == box.m_GameModesButton && !RunModesAvailable());
+            || button == box.m_GameModesButton && !ModesAvailable());
 
     internal static bool ShowModeTooltip(Box box, PegUIElement button)
     {

@@ -248,6 +248,7 @@ internal static partial class NativeUIProbe
             transpiler: new HarmonyMethod(typeof(NativeUIProbe), nameof(CollectionExitOnlineCheck)));
         Hook(harmony, typeof(GameSaveDataManager), "Request", nameof(Preferences), new[] { typeof(List<GameSaveKeyId>), typeof(GameSaveDataManager.OnRequestDataResponseDelegate) });
         Hook(harmony, typeof(GameSaveDataManager), "SaveSubkeys", nameof(SavePreferences));
+        NativeModesMenu.Install(harmony, log);
         NativeRunModes.Install(harmony, log);
         NativeCoopMode.Install(harmony, log);
         Hook(harmony, typeof(CollectionManager), "SendCreateDeck", nameof(CreateLocalDraft));
@@ -1547,7 +1548,7 @@ internal static partial class NativeUIProbe
             : button == Box.ButtonType.OPEN_PACKS ? NativeHomeControl.OpenPacks
             : button == Box.ButtonType.ARENA ? NativeHomeControl.Arena
             : button == Box.ButtonType.STORE ? NativeHomeControl.Store
-            : button == Box.ButtonType.GAME_MODES && NativeRunModes.Enabled ? NativeHomeControl.RunModes
+            : button == Box.ButtonType.GAME_MODES && NativeModesMenu.Enabled ? NativeHomeControl.Modes
             : NativeHomeControl.Unsupported;
         NativeMenuTarget route = NativeMenuFlow.HomeRoute(control);
         if (route == NativeMenuTarget.Picker) Navigate(SceneMgr.Mode.TOURNAMENT);
@@ -1559,7 +1560,7 @@ internal static partial class NativeUIProbe
         else if (route == NativeMenuTarget.Arena) Navigate(SceneMgr.Mode.DRAFT);
         else if (route == NativeMenuTarget.Pack) Navigate(SceneMgr.Mode.PACKOPENING);
         else if (route == NativeMenuTarget.LocalShop) { } // NativeShop raised this press after opening the local shop.
-        else if (route == NativeMenuTarget.RunModes) NativeRunModes.Open();
+        else if (route == NativeMenuTarget.Modes) NativeModesMenu.Open();
         else log.LogWarning("NATIVE_MENU unsupported home control blocked: " + button);
     }
     private static IEnumerable<CodeInstruction> CollectionExitOnlineCheck(IEnumerable<CodeInstruction> instructions)
@@ -1596,7 +1597,7 @@ internal static partial class NativeUIProbe
         __instance.SetBoxButtonInteractions(NativeArena.HomeEntryAvailable, __instance.m_ArenaButton, true);
         __instance.SetButtonEnabled(true, __instance.m_OpenPacksButton);
         __instance.SetButtonEnabled(true, __instance.m_CollectionButton);
-        NativeRunModes.ShowModesButton(__instance);
+        NativeModesMenu.ShowModesButton(__instance);
         NativeHiddenEntries.Apply(__instance);
         NativeHomeUI.RefreshDrawer(__instance, Profile.UnopenedPacks, message => log.LogInfo(message));
         NativeShop.RefreshHomeStore();
@@ -1611,7 +1612,7 @@ internal static partial class NativeUIProbe
             mode = NativeArena.NavigationTarget(mode);
             if (!NativeResultsUI.CanNavigate(mode == SceneMgr.Mode.HUB)) return;
             if (mode != SceneMgr.Mode.HUB && mode != SceneMgr.Mode.PACKOPENING && mode != SceneMgr.Mode.COLLECTIONMANAGER && mode != SceneMgr.Mode.TOURNAMENT && mode != SceneMgr.Mode.DRAFT
-                && !(mode == SceneMgr.Mode.ADVENTURE && NativeRunModes.Enabled))
+                && !(mode == SceneMgr.Mode.ADVENTURE && NativeRunModes.Enabled) && !(mode == SceneMgr.Mode.GAME_MODE && NativeModesMenu.Enabled))
                 throw new ArgumentException("Unsupported native UI target");
             // Arena refused (its notice is up): from HUB stay put; from anywhere else (the post-game route) go home, never strand.
             if (mode == SceneMgr.Mode.DRAFT && !NativeArena.PrepareScene())

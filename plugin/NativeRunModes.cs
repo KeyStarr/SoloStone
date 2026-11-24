@@ -6,8 +6,8 @@ using HarmonyLib;
 using MiniJSON;
 
 // Run modes in the client's own adventure screen (Dungeon Run first: adventure 414, mode DUNGEON_CRAWL; plugin/Runs holds the
-// rules, RunCatalog the shipped definitions). The Modes button opens it while run modes are enabled. The client's Dungeon
-// Crawl display reads the run from the save data served here.
+// rules, RunCatalog the shipped definitions). It is an entry of the Modes screen (NativeModesMenu) while run modes are
+// enabled. The client's Dungeon Crawl display reads the run from the save data served here.
 internal static class NativeRunModes
 {
     private static ManualLogSource log;
@@ -38,14 +38,15 @@ internal static class NativeRunModes
     private static bool? ready;
 #endif
 
-    // The run mode the Modes button opens (the first shipped one until there is a chooser).
+    // The run mode the Modes screen's entry opens (the first shipped one until there is a chooser).
     internal static RunDefinition Current => RunCatalog.All.FirstOrDefault();
 
     internal static void Install(Harmony harmony, ManualLogSource logger)
     {
         log = logger;
-        NativeHomeUI.RunModesAvailable = () => Enabled;
-        harmony.Patch(AccessTools.Method(typeof(Box), "OnModesButtonPressed"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(ModesPressed)));
+        // The entry borrows the retail Solo Adventures row's look: Dungeon Run was a solo adventure.
+        NativeModesMenu.Add(new NativeModesMenu.Entry("ADVENTURE", "Dungeon Run",
+            "Pick a class and defeat eight bosses in a row. Grow your deck with loot and treasures after every win.", () => Enabled, Open));
         harmony.Patch(AccessTools.Method(typeof(GameMgr), "FindGameWithHero"), prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(FindGameWithHero)));
         harmony.Patch(AccessTools.Method(typeof(AbsDeckPickerTrayDisplay), "OnPlayGameButtonReleased"),
             prefix: new HarmonyMethod(typeof(NativeRunModes), nameof(PickerPlayReleased)));
@@ -58,13 +59,13 @@ internal static class NativeRunModes
         harmony.Patch(AccessTools.Method(typeof(AdventureDungeonCrawlDisplay), "OnRewardOptionSelected"), postfix: new HarmonyMethod(typeof(NativeRunModes), nameof(RewardChosen)));
     }
 
-    // The display's Back goes to the client's adventure chooser, which offers only Practice (not playable offline). With one
-    // run mode there is nothing to choose: Back goes home. A chooser of run modes can take this over when there are several.
+    // The display's Back goes to the client's adventure chooser, which offers only Practice (not playable offline). Back
+    // returns to the Modes screen the run mode was opened from.
     private static bool DisplayBack()
     {
         if (!InRunMode) return true;
-        Trace("display back: home");
-        NativeUIProbe.Navigate(SceneMgr.Mode.HUB);
+        Trace("display back: modes");
+        NativeModesMenu.Open();
         return false;
     }
 
@@ -266,28 +267,6 @@ internal static class NativeRunModes
             Trace("fight " + fightId + " left its game scene for " + SceneMgr.Get().GetMode());
             phase = FightPhase.None; fightId = null; fightMatch = null; leaving = false;
         }
-    }
-
-    // The box's fourth slot shows the Modes face, pressable, instead of the empty plate (home screen setup, while enabled).
-    internal static void ShowModesButton(Box box)
-    {
-        if (!Enabled || box == null || box.m_GameModesButton == null) return;
-        AccessTools.Method(typeof(Box), "ShowGameModesButton").Invoke(box, null);
-        BoxMenuButton button = box.m_GameModesButton;
-        box.SetBoxButtonInteractions(true, button, true);
-        button.SetEnabled(UIEventType.PRESS, true);
-        button.SetEnabled(UIEventType.RELEASE, true);
-        button.SetEnabled(UIEventType.ROLLOVER, true);
-        button.SetEnabled(UIEventType.ROLLOUT, true);
-    }
-
-    // The client's Modes handler asks for a Battle.net login first and then opens its online modes screen. While run modes
-    // are enabled the press goes straight to the hub's button route (NativeUIProbe.OnLocalHubButton), which opens Open().
-    private static bool ModesPressed(Box __instance)
-    {
-        if (!Enabled) return true;
-        __instance.FireButtonPressEvent(Box.ButtonType.GAME_MODES, false);
-        return false;
     }
 
     internal static void Open()
