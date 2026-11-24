@@ -193,6 +193,8 @@ internal static class NativeUiTree
         }
         // #57 welcome reward scroll: its dismiss is a Widget Clickable (DontSave PegUIElement); walk it like Feats.
         foreach (var control in NativeWelcomeUI.ScrollControls) { shopControls.Add(control); Name(control, NativeWelcomeText.ScrollDoneId); }
+        // The Modes screen's entries are Widget Clickables too (NativeModesMenu.Controls).
+        foreach (var control in NativeModesMenu.Controls()) { shopControls.Add(control.Key); Name(control.Key, control.Value); }
         shopProxies.AddRange(NativeWelcomeUI.ScrollProxies);
         if (NativeResultsUI.PremiumRewards != null)
         {

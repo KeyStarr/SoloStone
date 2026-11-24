@@ -324,11 +324,11 @@ internal static class NativeHomeUI
         button.SetEnabled(UIEventType.ROLLOUT, true);
     }
 
-    // True while the Modes button opens SoloStone's run modes (set by NativeRunModes; tests leave it false).
-    internal static Func<bool> RunModesAvailable = () => false;
+    // True while the Modes button opens SoloStone's Modes screen (set by NativeModesMenu; tests leave it false).
+    internal static Func<bool> ModesAvailable = () => false;
 
     private static bool IsUnavailableMode(Box box, PegUIElement button) => box != null && button != null
-        && (button == box.m_BattleGroundsButton || button == box.m_GameModesButton && !RunModesAvailable());
+        && (button == box.m_BattleGroundsButton || button == box.m_GameModesButton && !ModesAvailable());
 
     internal static bool ShowModeTooltip(Box box, PegUIElement button)
     {
