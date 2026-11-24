@@ -201,7 +201,7 @@ internal class LocalTierRewardCatchUp
     public static bool LastIdle;
     public void Update(LocalProfile p, bool idle, Action<LocalResultsReceipt, Action> present, Action<Exception> error) { LastIdle = idle; }
 }
-internal static class NativeUIProbe { public static LocalProfile RewardProfile; public static bool RewardContextReady, GameplayRewardContextReady; }
+internal static class NativeUIProbe { public const PegasusShared.FormatType LocalDeckFormat = PegasusShared.FormatType.FT_STANDARD; public static LocalProfile RewardProfile; public static bool RewardContextReady, GameplayRewardContextReady; }
 internal static class NativeResultsUI { public static ILocalTierRewardStep TierRewardStep; public static bool CanStart, BlocksEscape; public static void PresentTierRewardsOnly(LocalResultsReceipt r, Action done) { } }
 internal static class NativeRewardUI { public static bool Active; }
 internal static class NativeAchievementToast { public static bool Active; }

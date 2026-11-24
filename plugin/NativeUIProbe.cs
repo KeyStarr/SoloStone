@@ -282,7 +282,6 @@ internal static partial class NativeUIProbe
         harmony.Patch(Required(typeof(DeckTrayDeckListContent), "OnDeckBoxVisualOver", new[] { typeof(CollectionDeckBoxVisual) }),
             postfix: new HarmonyMethod(typeof(NativeUIProbe), nameof(ShowStarterDeleteButton)));
         Hook(harmony, typeof(DialogManager), "ShowPopup", nameof(StarterDeleteConfirmText), new[] { typeof(AlertPopup.PopupInfo) });
-        Hook(harmony, typeof(DeckOptionsMenu), "ShowConvertButton", nameof(HidePersonalDeckConvert), Type.EmptyTypes);
         Hook(harmony, typeof(CollectionManager), "ShouldShowWildToStandardTutorial", nameof(HidePersonalDeckTutorial), new[] { typeof(bool) });
         Hook(harmony, typeof(DeckHelper), "HasChoicesToOffer", nameof(HidePersonalDeckHelperChoices), new[] { typeof(CollectionDeck) });
         Hook(harmony, typeof(DeckTrayCardListContent), "ShowDeckHelper", nameof(BlockPersonalDeckHelper), new[] { typeof(CollectionDeckSlot), typeof(bool) });
@@ -525,8 +524,7 @@ internal static partial class NativeUIProbe
             // Retail inferred 2 (medium confidence, docs/design/pet-xp.md). NativeMatch answers packets 68/67 and enforces the cap.
             MaxPetTreatsAllowedPerGame = NativeMatch.MaxPetTreatsPerGame
         };
-        // Standard ranked and Standard Casual are playable (GameUtils.IsFormatPlayable); Wild stays visible but disabled.
-        features.Games.Forge = true; features.Games.Tournament = true; features.Games.Casual = true; features.Games.RankedStandard = true; features.Games.RankedWild = false;
+        features.Games.Forge = true; features.Games.Tournament = true; features.Games.Casual = true; features.Games.RankedStandard = true; features.Games.RankedWild = true;
         features.Collection.Manager = true; features.Collection.Crafting = CraftingLedgerRegistry.Current != null;
         // Upgrades consume Normal copies through the same atomic crafting ledger.
         features.EnableUpgradeToGolden = CraftingLedgerRegistry.Current != null;
@@ -570,7 +568,7 @@ internal static partial class NativeUIProbe
         SaveLocal(new GameSaveDataManager.SubkeySaveRequest(GameSaveKeyId.PLAYER_FLAGS, GameSaveKeySubkeyId.PLAYER_FLAGS_UNLOCKED_WILD, 1L));
         SaveLocal(new GameSaveDataManager.SubkeySaveRequest(GameSaveKeyId.PLAYER_FLAGS, GameSaveKeySubkeyId.PLAYER_FLAGS_HAS_SEEN_MASS_PACK_OPENING_TOOLTIP, Profile.SeenMassPackTooltip ? 1L : 0L));
         SaveLocal(new GameSaveDataManager.SubkeySaveRequest(GameSaveKeyId.PLAYER_FLAGS, GameSaveKeySubkeyId.PLAYER_FLAGS_HAS_COMPLETED_APPRENTICE, 1L));
-        Options.SetFormatType(LocalDeckFormat);
+        Options.SetFormatType(Profile.PrefersWild ? FormatType.FT_WILD : FormatType.FT_STANDARD);
         NativeUIProjection.CasualPlayMode = Profile.PrefersCasual;
         Options.SetInRankedPlayMode(!NativeUIProjection.CasualPlayMode);
         if (CollectionManager.Get() != null) throw new InvalidOperationException("CollectionManager was initialized before probe");
@@ -1454,7 +1452,8 @@ internal static partial class NativeUIProbe
             LocalCustomDeck custom = Profile.GetDraft(native.ID);
             var wild = custom == null ? Array.Empty<string>() : Profile.WildCards(custom.Id);
             string format = custom?.Format ?? LocalProfile.StandardFormat;
-            if (format != LocalProfile.StandardFormat) {
+            bool wildQueue = !NativeUIProjection.CasualPlayMode && Options.GetFormatType() == FormatType.FT_WILD;
+            if (!LocalProfile.CanQueueDeck(format, wildQueue)) {
                 log.LogInfo("NATIVE_PICKER_FORMAT_REFUSED deck=" + custom.Id + " format=" + format);
                 DialogManager.Get()?.ShowPopup(new AlertPopup.PopupInfo {
                     m_headerText = NativeStandardText.FormatDeckHeader, m_text = NativeStandardText.FormatDeckBody(format),
@@ -1462,7 +1461,7 @@ internal static partial class NativeUIProbe
                 });
                 return;
             }
-            if (wild.Count != 0) {
+            if (format == LocalProfile.StandardFormat && wild.Count != 0) {
                 log.LogInfo("NATIVE_PICKER_WILD_REFUSED deck=" + custom.Id + " cards=" + string.Join(",", wild));
                 DialogManager.Get()?.ShowPopup(new AlertPopup.PopupInfo {
                     m_headerText = NativeStandardText.WildDeckHeader, m_text = NativeStandardText.WildDeckBody(wild),
@@ -1484,7 +1483,7 @@ internal static partial class NativeUIProbe
             bool casual = NativeUIProjection.CasualPlayMode;
             log.LogInfo((rematch ? "NATIVE_PICKER_REMATCH " : "NATIVE_PICKER_START ") + selected + (casual ? " mode=Casual" : ""));
             LocalLadder.StartSelected(LocalDeckRecord.KeyFor(custom != null, native.ID, local.Id), local, custom != null,
-                nativeMatchmaking: true, rematch: rematch, casual: casual);
+                nativeMatchmaking: true, rematch: rematch, casual: casual, wild: wildQueue);
         }
         catch (Exception error) { Fail(error); }
     }

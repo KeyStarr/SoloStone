@@ -1164,8 +1164,6 @@ M	Assembly-CSharp	DeckHelper	Show	System.Void(CollectionDeckSlot,System.Boolean,
 M	Assembly-CSharp	DeckOptionsMenu	OnCopyButtonReleased	*
 M	Assembly-CSharp	DeckOptionsMenu	OnDeleteButtonConfirmationResponse	(AlertPopup+Response,System.Object)
 M	Assembly-CSharp	DeckOptionsMenu	OnDeleteButtonConfirmationResponse	*
-M	Assembly-CSharp	DeckOptionsMenu	ShowConvertButton	()
-M	Assembly-CSharp	DeckOptionsMenu	ShowConvertButton	*
 M	Assembly-CSharp	DeckPickerTrayDisplay	GetSelectedCollectionDeck	CollectionDeck()
 M	Assembly-CSharp	DeckPickerTrayDisplay	OverridePlayButtonCallback	System.Void(UIEvent+Handler)
 M	Assembly-CSharp	DeckPickerTrayDisplay	SetReplayableTutorialActive	*
@@ -2412,6 +2410,7 @@ M	Assembly-CSharp	ShareableDeck	ParseDataFromDeckString	*
 M	Assembly-CSharp	ShareableDeck	Serialize	System.String(System.Boolean)
 M	Assembly-CSharp	ShareableDeck	get_DeckContents	PegasusUtil.DeckContents()
 M	Assembly-CSharp	ShareableDeck	get_DeckName	System.String()
+M	Assembly-CSharp	ShareableDeck	get_FormatType	PegasusShared.FormatType()
 M	Assembly-CSharp	ShareableDeck	get_HeroCardDbId	System.Int32()
 M	Assembly-CSharp	Shared.Scripts.Game.Shop.Product.Attribute	CreateFrom	Shared.Scripts.Util.Maybe`1<Shared.Scripts.Game.Shop.Product.Attribute>(System.String,System.String)
 M	Assembly-CSharp	Shared.Scripts.Game.Shop.Product.AttributeSet	AddAttributeIfValid	System.Void(Shared.Scripts.Util.Maybe`1<Shared.Scripts.Game.Shop.Product.Attribute>)

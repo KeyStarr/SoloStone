@@ -6,10 +6,8 @@ using PegasusShared;
 
 internal static partial class NativeUIProbe
 {
-    // SoloStone presents Standard everywhere: every local deck header, the picker, ladder medal and results screens.
-    // Offline the client has no set-rotation timings, so it classes every set Standard; the engine (always FT_WILD
-    // internally) and LocalDecks/LocalCardCatalog keep enforcing the real meta pool. Not persisted: profiles store no format.
-    internal const FormatType LocalDeckFormat = FormatType.FT_STANDARD;
+    internal static FormatType LocalDeckFormat => Profile?.PrefersWild == true ? FormatType.FT_WILD : FormatType.FT_STANDARD;
+    internal static bool IsConstructedFormat(FormatType format) => format == FormatType.FT_STANDARD || format == FormatType.FT_WILD;
 
     // Live 2026-10-30: offline the client has no server-delivered King of the Underbelly subset (ALLOWED_SIDEBOARD_SUBSET
     // 19499 is empty), so DeckRule_SideboardSubset refused every contraband pick ("invalid cards in your sideboard",
@@ -91,9 +89,9 @@ internal static partial class NativeUIProbe
         if (prior != null && profile.SavedVersionsOwned(working.ID) && SameDeckEntries(entries, DeckEntries(prior)) && SameSideboardEntries(boards, ReadSideboards(prior))
             && SameDeckIds(entries.Select(card => card.Id), persisted.Cards)
             && SideboardSignature(boards) == SideboardSignature(persisted.Sideboards))
-            profile.SaveDraftCosmetics(working.ID, working.Name, NativeDeckCosmetics(profile, working));
+            profile.SaveDraftCosmetics(working.ID, working.Name, NativeDeckCosmetics(profile, working), working.FormatType == FormatType.FT_WILD);
         else NativeUIProjection.SaveNativeDraft(profile, working.ID, working.Name, hero, entries,
-            boards, persisted.SortOrder, NativeDeckCosmetics(profile, working));
+            boards, persisted.SortOrder, NativeDeckCosmetics(profile, working), working.FormatType == FormatType.FT_WILD);
         return profile.GetDraft(working.ID);
     }
 
@@ -126,7 +124,7 @@ internal static partial class NativeUIProbe
         NetCache.DeckHeader header, long rank)
     {
         var expected = ExpectedHeader(saved.Id, LocalProfile.LedgerDeck(saved.Name, saved.Hero, saved.Cards, saved.Sideboards, false),
-            saved.Name, rank, saved.Cosmetics);
+            saved.Name, rank, saved.Cosmetics, saved.Format);
         working.SetRuneOrder(NativeDeckRunes.Order(saved.Hero, saved.Cards));
         working.SortOrder = rank;
         // A removed skin leaves the skin id behind with HeroOverridden false; project the saved cosmetics exactly.
@@ -138,7 +136,7 @@ internal static partial class NativeUIProbe
         CopyHeader(expected, header);
     }
 
-    internal static NetCache.DeckHeader ExpectedHeader(long id, LocalDeck deck, string name, long rank, LocalDeckCosmetics cosmetics = null)
+    internal static NetCache.DeckHeader ExpectedHeader(long id, LocalDeck deck, string name, long rank, LocalDeckCosmetics cosmetics = null, string format = null)
     {
         RuneType[] runes = NativeDeckRunes.Order(deck.Hero, deck.CardIds);
         int? random = cosmetics != null && cosmetics.RandomCardBack ? RandomCardBackId() : null;
@@ -146,7 +144,7 @@ internal static partial class NativeUIProbe
             ID = id, Name = name, Hero = cosmetics?.HeroSkin ?? deck.Hero, HeroPower = deck.Hero + "bp",
             HeroOverridden = cosmetics?.HeroSkin != null, RandomHeroUseFavorite = cosmetics?.RandomHeroUseFavorite ?? false,
             CosmeticCoin = cosmetics?.Coin is int coin && !string.IsNullOrEmpty(NativeMatch.NativeCoinCard(coin)) ? cosmetics.Coin : null, RandomCoinUseFavorite = cosmetics?.RandomCoinUseFavorite ?? true,
-            Type = DeckType.NORMAL_DECK, CardBack = random ?? cosmetics?.CardBack, FormatType = LocalDeckFormat, SortOrder = rank,
+            Type = DeckType.NORMAL_DECK, CardBack = random ?? cosmetics?.CardBack, FormatType = format == LocalProfile.WildFormat ? FormatType.FT_WILD : FormatType.FT_STANDARD, SortOrder = rank,
             SourceType = DeckSourceType.DECK_SOURCE_TYPE_NORMAL, Rune1 = runes[0], Rune2 = runes[1], Rune3 = runes[2],
             Pet = cosmetics?.PetFamily == null ? (int?)null : LocalShop.Default.PetNativeId(cosmetics.PetFamily),
             PetVariant = cosmetics?.PetForm == null ? (int?)null : NativeMatch.NativePetVariant(cosmetics.PetForm),
@@ -364,7 +362,7 @@ internal static partial class NativeUIProbe
     }
 
     private static bool SupportedNativeEnvelope(CollectionDeck deck) => deck != null
-        && deck.Type == DeckType.NORMAL_DECK && deck.FormatType == LocalDeckFormat
+        && deck.Type == DeckType.NORMAL_DECK && IsConstructedFormat(deck.FormatType)
         && deck.SourceType == DeckSourceType.DECK_SOURCE_TYPE_NORMAL
         && (!deck.HeroOverridden || LocalDecks.PlayerHeroes.Contains(NativeBaseHero(deck)))
         && deck.CreatedFromShareableDeck == null && SupportedSideboards(deck)
@@ -377,7 +375,7 @@ internal static partial class NativeUIProbe
         first != null && second != null && first.ID == second.ID && first.Type == second.Type
         && NativeBaseHero(first) == NativeBaseHero(second)
         && first.NeedsName == second.NeedsName && first.SeasonId == second.SeasonId
-        && first.BrawlLibraryItemId == second.BrawlLibraryItemId && first.FormatType == second.FormatType
+        && first.BrawlLibraryItemId == second.BrawlLibraryItemId && IsConstructedFormat(second.FormatType)
         && first.SourceType == second.SourceType && first.UIHeroOverrideCardID == second.UIHeroOverrideCardID
         && first.UIHeroOverridePremium == second.UIHeroOverridePremium && first.Locked == second.Locked
         && (first.GetRuneOrder().SequenceEqual(second.GetRuneOrder())

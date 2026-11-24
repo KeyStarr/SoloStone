@@ -103,13 +103,13 @@ internal static class V16ClassicMigrationTests
         Write(path, later);
         using (var reopened = new LocalProfile(path)) check(reopened.Collection.TryGetValue("CORE_EX1_559", out int legend) && legend == 1,
             "a later-owned Classic card grants its reprint on load");
-        // A deck format this build does not know (a later Wild mode) loads, and its deck cannot be played here.
+        // A deck format this build does not know (Twist) loads, and its deck cannot be played here.
         var unknown = Read(path);
-        unknown.CustomDecks.Single(deck => deck.Id == Reprinted).Format = "Wild";
+        unknown.CustomDecks.Single(deck => deck.Id == Reprinted).Format = "Twist";
         Write(path, unknown);
         using (var reopened = new LocalProfile(path))
             check(!reopened.IsDeckComplete(Reprinted) && reopened.WildCards(Reprinted).Count == 0
-                && reopened.NotPlayableReason(Reprinted).Contains("Wild deck") && reopened.NotPlayableReason(Mixed).Contains("CS2_182"),
+                && reopened.NotPlayableReason(Reprinted).Contains("Twist deck") && reopened.NotPlayableReason(Mixed).Contains("CS2_182"),
                 "an unknown deck format loads, is not playable and says why; a Wild-card deck names its cards");
         // V14 saves take the same upgrade, with a byte-exact .v14.bak.
         string v14 = V15Fixture(root, "v14-classic", out byte[] v14original, 14);

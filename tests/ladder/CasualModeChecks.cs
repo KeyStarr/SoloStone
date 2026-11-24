@@ -114,6 +114,13 @@ internal static class CasualModeChecks
             Check(p.PrefersCasual && p.History.Count(m => m.Mode == CasualRules.Mode) == 5, "mode and preference survive reload");
             p.SetPreferredPlayMode(false);
             Check(!p.PrefersCasual, "preference switches back");
+            p.SetPreferredPlayMode(false, wild: true);
+        }
+        using (var p = new LocalProfile(path))
+        {
+            Check(p.PrefersWild && !p.PrefersCasual, "Wild is remembered as a ranked queue");
+            p.SetPreferredPlayMode(false);
+            Check(!p.PrefersWild, "switching to Standard clears the Wild preference");
         }
 
         // Tamper rejection: a ladder receipt on a Casual row, a broken Casual chain, an unknown mode.
@@ -125,7 +132,7 @@ internal static class CasualModeChecks
             ("ladder receipt on Casual", d => d.Matches.First(m => m.Mode != null).Ladder = d.Matches.First(m => m.Mode == null).Ladder),
             ("broken Casual chain", d => d.Matches.Last(m => m.Mode != null).Casual.RatingBefore += 5),
             ("Casual rating mismatch", d => d.CasualRating += 5),
-            ("unknown mode", d => d.Matches.First(m => m.Mode != null).Mode = "Wild"),
+            ("unknown mode", d => d.Matches.First(m => m.Mode != null).Mode = "Twist"),
             ("Casual receipt on ranked", d => d.Matches.First(m => m.Mode == null).Casual = new LocalCasualReceipt { RatingBefore = 1400, RatingAfter = 1400, OpponentRating = 1400 }),
             ("Casual mode dropped", d => d.Matches.First(m => m.Mode != null).Mode = null),
         })

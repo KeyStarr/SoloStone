@@ -63,9 +63,8 @@ internal static partial class NativeUIProbe
         bool allowed = NativeUIProjection.CanCreateDraft(deckType == DeckType.NORMAL_DECK,
             NativeUIProjection.OwnsCreateSource(deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_NORMAL,
                 deckSourceType == DeckSourceType.DECK_SOURCE_TYPE_PASTED_DECK, pastedDeckHashString != null, import != null),
-            hero != null && Heroes.Contains(hero), Options.GetFormatType() == LocalDeckFormat,
+            hero != null && Heroes.Contains(hero), IsConstructedFormat(Options.GetFormatType()),
             Profile.CustomDecks.Count, SessionLoanerKeys().Count());
-        // The import never switches the format: the client's own format change on paste is coerced back by NativeFormatLock.
         if (import != null && hero != null && hero != import.Hero) allowed = false;
         if (import != null && NativeUIProjection.OwnsCreateRequest(active, CurrentCollectionScene(), true, isHeroOverridden) && !allowed)
         {
@@ -77,8 +76,8 @@ internal static partial class NativeUIProbe
             throw new InvalidOperationException("Unsupported local deck creation request.");
 
         // The import's draft, cards and sideboards land in the one commit; a refusal or failure leaves no deck behind.
-        if (!NativeUIProjection.TryCreateDraft(() => import == null ? Profile.CreateDraft(name, hero)
-                : Profile.CreateDraftFromCode(ImportDeckName(name, hero, import), hero, import.Cards, import.Sideboards),
+        if (!NativeUIProjection.TryCreateDraft(() => import == null ? Profile.CreateDraft(name, hero, Options.GetFormatType() == FormatType.FT_WILD)
+                : Profile.CreateDraftFromCode(ImportDeckName(name, hero, import), hero, import.Cards, import.Sideboards, import.Wild),
             error => { if (import != null) { LastImportStage = "commit-failed"; LastImportError = Unwrap(error).Message; } ReportDeckError(import == null ? "create" : "import", candidateId, error); },
             out LocalCustomDeck saved)) return false;
         if (import != null) importCreated = true;
@@ -457,13 +456,6 @@ internal static partial class NativeUIProbe
                 __instance.GetDeckID(), __0);
     }
 
-    private static bool HidePersonalDeckConvert(DeckOptionsMenu __instance, ref bool __result)
-    {
-        if (!OwnsPersonalDeckEditor(Field(__instance, "m_deck") as CollectionDeck, __instance)) return true;
-        __result = false;
-        return false;
-    }
-
     private static bool HidePersonalDeckTutorial(CollectionManager __instance, ref bool __result)
     {
         if (!OwnsPersonalDeckEditor(__instance?.GetEditedDeck(), __instance)) return true;
@@ -566,7 +558,7 @@ internal static partial class NativeUIProbe
         LocalCustomDeck saved = Profile.GetDraft(id);
         LocalDeck deck = saved == null ? decks[id] : LocalProfile.LedgerDeck(saved.Name, saved.Hero, saved.Cards, saved.Sideboards, false);
         return ExpectedHeader(id, deck, saved == null ? "Loaner: " + deck.Name : saved.Name, ExpectedRanks()[id],
-            saved == null ? null : Profile.DeckCosmetics(id));
+            saved == null ? null : Profile.DeckCosmetics(id), saved?.Format);
     }
 
     private static bool ExactProjectedHeader(long id)

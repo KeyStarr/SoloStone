@@ -35,13 +35,15 @@ public sealed partial class LocalProfile
     // Hidden Casual matchmaking rating: the stored one, else the seed the first Casual settlement will store.
     public double CasualRating => data.CasualRating ?? CasualRules.Seed(EffectiveLadder(data).Rating);
 
+    public bool PrefersWild => data.PlayMode == WildFormat;
     public bool PrefersCasual => CasualRules.IsCasual(data.PlayMode);
     // Remembers the native picker's mode for the next launch; a no-op when unchanged (no commit per picker open).
-    public void SetPreferredPlayMode(bool casual)
+    public void SetPreferredPlayMode(bool casual, bool wild = false)
     {
-        if (casual == PrefersCasual) return;
+        string mode = casual ? CasualRules.Mode : wild ? WildFormat : null;
+        if (data.PlayMode == mode) return;
         var next = Snapshot();
-        next.PlayMode = casual ? CasualRules.Mode : null;
+        next.PlayMode = mode;
         Commit(next);
     }
 
@@ -61,11 +63,11 @@ public sealed partial class LocalProfile
     {
         if (profile.CasualRating.HasValue && !CasualRules.ValidRating(profile.CasualRating.Value))
             throw new InvalidOperationException("Invalid Casual rating.");
-        if (profile.PlayMode != null && !CasualRules.IsCasual(profile.PlayMode)) throw new InvalidOperationException("Unknown play mode.");
+        if (profile.PlayMode != null && profile.PlayMode != WildFormat && !CasualRules.IsCasual(profile.PlayMode)) throw new InvalidOperationException("Unknown play mode.");
         double? last = null;
         foreach (var match in profile.Matches.Concat(profile.Pending == null ? Enumerable.Empty<LocalMatchRecord>() : new[] { profile.Pending }))
         {
-            if (match.Mode != null && !CasualRules.IsCasual(match.Mode) && !ArenaRules.IsArena(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
+            if (match.Mode != null && match.Mode != WildFormat && !CasualRules.IsCasual(match.Mode) && !ArenaRules.IsArena(match.Mode)) throw new InvalidOperationException("Unknown match mode.");
             bool settled = match != profile.Pending;
             // Arena (#6): a run's match has neither a ladder nor a Casual receipt and must name its run; no other mode may.
             if (ArenaRules.IsArena(match.Mode)) {

@@ -174,7 +174,7 @@ internal static class LocalLadder
     // arena: an Arena (#6) match: the run's drafted deck (LocalDecks.ArenaDeck, key "arena:<run id>") against a drafted-deck NPC picked
     // by the run's record. No saved-deck ownership or copy rule applies, no rematch and no playtest knob.
     internal static void StartSelected(string selected, LocalDeck resolved, bool personal, bool nativeMatchmaking = false,
-        bool rematch = false, bool casual = false, bool arena = false)
+        bool rematch = false, bool casual = false, bool arena = false, bool wild = false)
     {
         if (screen == "Starting" || screen == "Playing" || profile.Pending != null) return;
         try
@@ -258,7 +258,7 @@ internal static class LocalLadder
                 if (scenario.FirstPlayer.HasValue) profile.ArmFirstPlayer(scenario.FirstPlayer.Value);
             }
             try {
-            profile.BeginLaunch(selected, opponent.Id, seed, encounter, achievementContext, casual ? CasualRules.Mode : arena ? ArenaRules.Mode : null, record => {
+            profile.BeginLaunch(selected, opponent.Id, seed, encounter, achievementContext, casual ? CasualRules.Mode : arena ? ArenaRules.Mode : wild ? LocalProfile.WildFormat : null, record => {
                 // Stage first: a refusal throws before any displayed state (a previous result, the active id) changes.
                 ClientBridge.StartLocalMatch(record, prepared, queued, nativeMatchmaking, scenario);
                 active = record;

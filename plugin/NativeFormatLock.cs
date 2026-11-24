@@ -8,17 +8,8 @@ using Hearthstone.UI;
 using PegasusShared;
 using UnityEngine;
 
-// SoloStone plays Standard ranked and Standard Casual (#37; NativeUIProbe.LocalDeckFormat). The deck picker's format toggle
-// opens the native picker, where Standard and Casual are selectable: Wild (and Classic/Twist if a layout shows them)
-// stay visible, greyed and click-dead, with a "Coming later" note on hover. Greyed the native way: Clickable.Active = false
-// plays the button's own authored "inactive" state and stops its click states (as the client disables a widget button);
-// the hover listener stays live, and the art is desaturated and dimmed through property blocks that survive state swaps.
-// Every other way into another mode is coerced:
-// Options.SetFormatType (hero picker, set filter, tutorials) and DeckPickerTrayDisplay.SwitchFormatTypeAndRankedPlayMode
-// (picker events, adventure/set-rotation flows) land on Standard or Casual; the choice is kept in
-// NativeUIProjection.CasualPlayMode (IN_RANKED_PLAY_MODE reads its inverse) and remembered per save.
-// Update runs every frame inside the probe's Update: it never throws; a failure logs once and disables the visual lock
-// (the coercions above still keep the client Standard).
+// Classic and Twist remain visible with their inactive art and hover note.
+// Only a completed Play-screen switch updates the save's preferred queue.
 internal static class NativeFormatLock
 {
     internal const string ComingLater = "Coming later";
@@ -72,7 +63,7 @@ internal static class NativeFormatLock
 
     private static void StandardFormat(ref FormatType __0)
     {
-        if (!NativeUIProbe.IsolatedLaunch || __0 == FormatType.FT_UNKNOWN || __0 == NativeUIProbe.LocalDeckFormat) return;
+        if (!NativeUIProbe.IsolatedLaunch || __0 == FormatType.FT_UNKNOWN || NativeUIProbe.IsConstructedFormat(__0)) return;
         log?.LogInfo("NATIVE_FORMAT options " + __0 + " kept " + NativeUIProbe.LocalDeckFormat);
         __0 = NativeUIProbe.LocalDeckFormat;
     }
@@ -80,7 +71,7 @@ internal static class NativeFormatLock
     private static void StandardMode(ref VisualsFormatType __0)
     {
         if (!NativeUIProbe.IsolatedLaunch) return;
-        if (__0 != VisualsFormatType.VFT_STANDARD && __0 != VisualsFormatType.VFT_CASUAL)
+        if (__0 != VisualsFormatType.VFT_STANDARD && __0 != VisualsFormatType.VFT_CASUAL && __0 != VisualsFormatType.VFT_WILD)
         {
             log?.LogInfo("NATIVE_FORMAT mode " + __0 + " kept VFT_STANDARD");
             __0 = VisualsFormatType.VFT_STANDARD;
@@ -96,20 +87,22 @@ internal static class NativeFormatLock
     private static Exception StandardModeDone(Exception __exception, VisualsFormatType __0)
     {
         NativeUIProjection.PickerSwitchActive = false;
-        if (__exception == null && NativeUIProbe.IsolatedLaunch && PlayScreen) Keep(__0 == VisualsFormatType.VFT_CASUAL);
+        if (__exception == null && NativeUIProbe.IsolatedLaunch && PlayScreen) Keep(__0);
         return __exception;
     }
 
-    private static void Keep(bool casual)
+    private static void Keep(VisualsFormatType mode)
     {
+        bool casual = mode == VisualsFormatType.VFT_CASUAL;
+        bool wild = mode == VisualsFormatType.VFT_WILD;
         if (NativeUIProjection.CasualPlayMode != casual) NativeUIProjection.CasualPlayMode = casual;
         try
         {
             var profile = LocalLadder.Profile;
-            if (profile != null && profile.PrefersCasual != casual)
+            if (profile != null && (profile.PrefersCasual != casual || profile.PrefersWild != wild))
             {
-                profile.SetPreferredPlayMode(casual);
-                log?.LogInfo("NATIVE_FORMAT mode " + (casual ? "Casual" : "Standard") + " remembered");
+                profile.SetPreferredPlayMode(casual, wild);
+                log?.LogInfo("NATIVE_FORMAT mode " + mode + " remembered");
             }
         }
         catch (Exception error) { log?.LogWarning("NATIVE_FORMAT mode not remembered: " + error.Message); }
@@ -150,7 +143,7 @@ internal static class NativeFormatLock
     {
         disabled = true;
         try { HideNote(); } catch { }
-        log?.LogError("NATIVE_FORMAT picker lock disabled after failure (mode switches still stay Standard): " + error);
+        log?.LogError("NATIVE_FORMAT picker lock disabled after failure: " + error);
     }
 
     private static void Tick()

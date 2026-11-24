@@ -80,7 +80,7 @@ internal sealed class NativeTierRewardStep : ILocalTierRewardStep
                     ?? NpcWorldRuntime.World?.Find(id)?.DisplayName);   // challengers are world NPC ids
             // #51 EnsureReceipt publishes the settled medal through NativeUIProbe.PublishResultsMedal.
             // Same current medal as EndGameScreen.cs:1614-1616; MedalInfoTranslator.cs:187.
-            medal = RankMgr.Get().GetLocalPlayerMedalInfo().GetCurrentMedal(FormatType.FT_STANDARD);   // NativeUIProbe.LocalDeckFormat
+            medal = RankMgr.Get().GetLocalPlayerMedalInfo().GetCurrentMedal(NativeUIProbe.LocalDeckFormat);
             if (medal == null || !medal.IsValid()) throw new InvalidOperationException("After-match medal unavailable.");
             PresentNext();
         }

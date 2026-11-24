@@ -18,6 +18,7 @@ internal sealed class DeckCodeRefusal : Exception
 internal sealed class DeckCodePlan
 {
     internal string Hero, Name;
+    internal bool Wild;
     internal List<string> Cards = new List<string>();
     internal List<LocalSideboard> Sideboards = new List<LocalSideboard>();
     // Copies the code held (main deck plus sideboards) and what became of the ones that were not kept.
@@ -27,7 +28,6 @@ internal sealed class DeckCodePlan
 
 internal static class NativeDeckCodeImport
 {
-    // Wild-only cards are not imported today: the usable set follows the profile ledger, which PR #136 decides (owner ruling 3).
 
     // 32 UTF-16 code units, the limit LocalShop.ValidateDeck puts on a saved deck name (not 32 visible characters).
     internal const int NameLength = 32;
@@ -36,8 +36,9 @@ internal static class NativeDeckCodeImport
     // The editor's universe: the legacy custom pool, or a Standard card the profile ledger knows. Only collectible cards: tokens and
     // other uncollectible cards never enter through a hand-made code (Fabled companions ride with their primary). CATA_190h
     // (Deathwing, Worldbreaker) is a collectible hero card in the engine data, the ledger and the editor, so it is usable too.
-    internal static bool Usable(string id) => id != null && Known(id) && Cards.FromId(id).Collectible
-        && (LocalDecks.IsCustomCard(id) || LocalProfile.KnownLedgerCard(id) && LocalShop.IsStandardCard(Cards.FromId(id)));
+    internal static bool Usable(string id) => Usable(id, false);
+    private static bool Usable(string id, bool wild) => id != null && Known(id) && Cards.FromId(id).Collectible
+        && (LocalDecks.IsCustomCard(id) || LocalProfile.KnownLedgerCard(id) && (wild ? LocalCardCatalog.InActiveMeta(Cards.FromId(id)) : LocalShop.IsStandardCard(Cards.FromId(id))));
 
     private static bool Known(string id)
     {
@@ -63,7 +64,7 @@ internal static class NativeDeckCodeImport
     }
 
     internal static DeckCodePlan Plan(string hero, string codeName, string fallbackName,
-        IEnumerable<(string id, int qty)> main, IEnumerable<(string owner, string id, int qty)> side)
+        IEnumerable<(string id, int qty)> main, IEnumerable<(string owner, string id, int qty)> side, bool wild = false)
     {
         if (hero == null || !LocalDecks.PlayerHeroes.Contains(hero))
             throw new DeckCodeRefusal(DeckCodeRefusalReason.UnsupportedClass, "This deck code is for a class SoloStone does not have.");
@@ -74,7 +75,7 @@ internal static class NativeDeckCodeImport
             throw new DeckCodeRefusal(DeckCodeRefusalReason.Malformed, "This deck code is damaged.");
         if (mainRows.Sum(row => row.qty) == 0)
             throw new DeckCodeRefusal(DeckCodeRefusalReason.Empty, "This deck code holds no cards.");
-        var plan = new DeckCodePlan { Hero = hero, CodeCards = (int)total, Name = Name(hero, codeName, fallbackName) };
+        var plan = new DeckCodePlan { Wild = wild, Hero = hero, CodeCards = (int)total, Name = Name(hero, codeName, fallbackName) };
         var heroClass = LocalDecks.HeroClass(hero);
 
         // 1. Usable, class-legal cards in code order. Fabled companions are never listed: each primary brings its own.
@@ -88,7 +89,7 @@ internal static class NativeDeckCodeImport
                     if (!mainRows.Any(other => other.id != null && other.qty > 0 && LocalDecks.FabledBundle(other.id).Contains(row.id))) plan.Unusable++;
                     continue;
                 }
-                if (!Usable(row.id) || LocalDecks.IsUnsupportedSideboardOwner(row.id)) { plan.Unusable++; continue; }
+                if (!Usable(row.id, wild) || LocalDecks.IsUnsupportedSideboardOwner(row.id)) { plan.Unusable++; continue; }
                 if (!LocalDecks.IsAllowedInDeck(Cards.FromId(row.id), heroClass)) { plan.WrongClass++; continue; }
                 legal.Add(row.id);
             }

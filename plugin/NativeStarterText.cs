@@ -23,16 +23,16 @@ internal static class NativeStarterText
 internal static class NativeStandardText
 {
     internal const string WildDeckHeader = "Wild Cards";
-    internal const string FormatDeckHeader = "Not a Standard Deck";
+    internal const string FormatDeckHeader = "Deck Format";
     internal static string FormatDeckBody(string format) =>
-        "This is a " + format + " deck. This version of SoloStone plays Standard decks only.";
+        format == LocalProfile.WildFormat ? "Select Wild to play this deck." : "This deck format is unavailable: " + format + ".";
     internal const int NamedCards = 6;
     internal static string WildDeckBody(IReadOnlyList<string> ids)
     {
         var names = ids.Take(NamedCards).Select(CardName).ToList();
         if (ids.Count > NamedCards) names.Add("and " + (ids.Count - NamedCards) + " more");
         return "This deck has cards that are not in Standard: " + string.Join(", ", names)
-            + ". Edit the deck and replace them to play.";
+            + ". Edit the deck and replace them for Standard, or convert the deck to Wild.";
     }
     private static string CardName(string id)
     {

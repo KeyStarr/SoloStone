@@ -198,8 +198,7 @@ public sealed class LocalCustomDeck : LocalDeckCardContainer
     public string PetFamily;
     public string PetForm;
     public bool RandomPetUseFavorite = true;
-    // V16 (#87): the deck's format, "Standard" for every deck today (Commit writes it; the V16 migration stamps old decks).
-    // Wild mode adds its value later; a reader that finds null treats the deck as Standard.
+    // Personal deck format. Older decks without a format are Standard.
     public string Format;
     [XmlIgnore] public bool RandomPetUseFavoriteSpecified { get => !RandomPetUseFavorite; set { } }
     [XmlIgnore] public bool CoinSpecified { get => Coin.HasValue; set { } }
@@ -298,7 +297,7 @@ public sealed class LocalProfileData
     // #37 hidden Casual matchmaking rating; absent until the first Casual match settles (CasualRules).
     public double? CasualRating;
     [XmlIgnore] public bool CasualRatingSpecified { get => CasualRating.HasValue; set { } }
-    // Last play mode picked in the native format picker: "Casual", or absent for Standard ranked.
+    // Native picker preference: Wild, Casual, or absent for Standard ranked.
     public string PlayMode;
     public LocalAchievementState Achievements = new LocalAchievementState();
     public string PendingNonMatchAchievementNoticeId;
@@ -463,7 +462,9 @@ public sealed partial class LocalProfile : IDisposable
     private const int ClassicMigrationVersion = 16;
     private const int CurrentVersion = 17;
     internal const int SaveVersion = CurrentVersion;
-    internal const string StandardFormat = "Standard";
+    internal const string StandardFormat = "Standard", WildFormat = "Wild";
+    internal static bool SupportsDeckFormat(string format) => format == null || format == StandardFormat || format == WildFormat;
+    internal static bool CanQueueDeck(string format, bool wild) => SupportsDeckFormat(format) && (wild || format != WildFormat);
     // Personal decks only; loaners (NativeUIProjection.PlayerLoanerCapacity) sit above this cap. Raising it never
     // invalidates a save: load accepts any library size up to MaximumRecords and only shows the first drafts.
     public const int MaximumCustomDecks = 100;
@@ -759,7 +760,7 @@ public sealed partial class LocalProfile : IDisposable
         if (npcDifficulty == NpcDifficultyIds.Hard || npcId == null) npcDifficulty = null;
         if (npcDifficulty != null && !NpcDifficultyIds.IsSelectable(npcDifficulty)) throw new ArgumentException("Invalid NPC difficulty.");
         if (!ValidNpcFields(npcId, npcDeckId, npcRating)) throw new ArgumentException("Invalid NPC encounter.");
-        if (mode != null && !CasualRules.IsCasual(mode) && !ArenaRules.IsArena(mode)) throw new ArgumentException("Unknown match mode.");
+        if (mode != null && mode != WildFormat && !CasualRules.IsCasual(mode) && !ArenaRules.IsArena(mode)) throw new ArgumentException("Unknown match mode.");
         if (data.Pending != null) throw new InvalidOperationException("A local match is already pending.");
         if (data.PendingRewardPresentationId != null)
             throw new InvalidOperationException("The previous local reward must be presented first.");
@@ -775,6 +776,8 @@ public sealed partial class LocalProfile : IDisposable
         } else if (ArenaRules.IsDeckKey(deck)) throw new InvalidOperationException("An Arena deck plays only in an Arena match.");
         if (deck == "custom" || deck.StartsWith("custom:", StringComparison.Ordinal)) {
             LocalCustomDeck saved = deck == "custom" ? CustomDeck : data.CustomDecks.SingleOrDefault(d => "custom:" + d.Id == deck);
+            if (saved != null && !CanQueueDeck(saved.Format, mode == WildFormat))
+                throw new InvalidOperationException("This deck cannot be played in the selected format.");
             if (saved == null || !IsDeckComplete(saved.Id))
                 throw new InvalidOperationException(saved == null ? "The saved deck is incomplete." : NotPlayableReason(saved.Id));
         }
@@ -1184,7 +1187,7 @@ public sealed partial class LocalProfile : IDisposable
 
     public LocalCustomDeck GetDraft(long id) => Copy(data.CustomDecks.SingleOrDefault(deck => deck.Id == id));
 
-    public LocalCustomDeck CreateDraft(string name, string hero)
+    public LocalCustomDeck CreateDraft(string name, string hero, bool wild = false)
     {
         LocalDeck draft = LocalDecks.Draft(name, hero, Array.Empty<string>());
         if (CustomDecks.Count >= MaximumCustomDecks)
@@ -1194,7 +1197,7 @@ public sealed partial class LocalProfile : IDisposable
         long id = next.NextCustomDeckId;
         next.NextCustomDeckId = checked(id + 1);
         next.CustomDecks.Add(new LocalCustomDeck {
-            Id = id, SortOrder = id, Name = draft.Name, Hero = draft.Hero, Cards = draft.CardIds
+            Format = wild ? WildFormat : StandardFormat, Id = id, SortOrder = id, Name = draft.Name, Hero = draft.Hero, Cards = draft.CardIds
         });
         Commit(next);
         return GetDraft(id);
@@ -1228,7 +1231,7 @@ public sealed partial class LocalProfile : IDisposable
     }
 
     public void SaveDraft(long id, string name, string hero, IEnumerable<string> ids, long sortOrder, IEnumerable<LocalSideboard> sideboards = null,
-        LocalDeckCosmetics cosmetics = null)
+        LocalDeckCosmetics cosmetics = null, bool? wild = null)
     {
         if (sortOrder < 0) throw new ArgumentOutOfRangeException(nameof(sortOrder));
         var boards = (sideboards ?? GetDraft(id)?.Sideboards ?? Enumerable.Empty<LocalSideboard>()).Select(Copy).ToList();
@@ -1241,12 +1244,13 @@ public sealed partial class LocalProfile : IDisposable
         if (cosmetics != null) ApplyCosmetics(saved, ValidDeckCosmetics(next, draft.Hero, cosmetics, profileOptions.AllCosmetics));
         saved.Name = draft.Name; saved.Hero = draft.Hero; saved.Cards = draft.CardIds; saved.SortOrder = sortOrder;
         saved.Sideboards = boards;
+        if (wild.HasValue) saved.Format = wild.Value ? WildFormat : StandardFormat;
         Commit(next);
     }
 
     // Name and per-deck cosmetics only (the editor changed no card): the saved cards, versions and sideboards stay
     // byte-for-byte as they are, so the projection's choice of versions can never rewrite or block them.
-    public void SaveDraftCosmetics(long id, string name, LocalDeckCosmetics cosmetics)
+    public void SaveDraftCosmetics(long id, string name, LocalDeckCosmetics cosmetics, bool? wild = null)
     {
         var next = Snapshot();
         LocalCustomDeck saved = next.CustomDecks.SingleOrDefault(deck => deck.Id == id)
@@ -1254,6 +1258,7 @@ public sealed partial class LocalProfile : IDisposable
         LocalDeck draft = LedgerDeck(name, saved.Hero, saved.Cards, saved.Sideboards, false);
         if (cosmetics != null) ApplyCosmetics(saved, ValidDeckCosmetics(next, draft.Hero, cosmetics, profileOptions.AllCosmetics));
         saved.Name = draft.Name;
+        if (wild.HasValue) saved.Format = wild.Value ? WildFormat : StandardFormat;
         Commit(next);
     }
 
@@ -1403,9 +1408,9 @@ public sealed partial class LocalProfile : IDisposable
         var deck = GetDraft(id);
         if (deck == null) return "The saved deck no longer exists.";
         string format = deck.Format ?? StandardFormat;
-        if (format != StandardFormat) return "The saved deck is a " + format + " deck; only Standard decks can be played.";
+        if (!SupportsDeckFormat(format)) return "The saved deck is a " + format + " deck. Choose a Standard or Wild deck.";
         var wild = WildCards(id);
-        if (wild.Count != 0) return "The saved deck holds Wild cards (" + string.Join(", ", wild) + "); replace them to play Standard.";
+        if (format == StandardFormat && wild.Count != 0) return "The saved deck holds Wild cards (" + string.Join(", ", wild) + "); replace them to play Standard.";
         return "The saved deck is incomplete. Acquire missing cards before playing.";
     }
 
@@ -1413,7 +1418,7 @@ public sealed partial class LocalProfile : IDisposable
     {
         var deck = GetDraft(id);
         if (deck == null) return false;
-        if ((deck.Format ?? StandardFormat) != StandardFormat || WildCards(id).Count != 0) return false;
+        if (!SupportsDeckFormat(deck.Format) || deck.Format != WildFormat && WildCards(id).Count != 0) return false;
         try {
             PlayableDeck(deck.Name, deck.Hero, deck.Cards, deck.Sideboards);
             // Retail CollectionDeck.CanCardBeAddedAsOwned (254477): a sideboard copy is owned only beyond the main deck's
@@ -1480,7 +1485,7 @@ public sealed partial class LocalProfile : IDisposable
 
     /// <summary>Saves owned per-copy premium choices; Normal slots reconcile at the commit boundary.</summary>
     public void SavePremiumDraft(long id, string name, string hero, IEnumerable<LocalDeckCard> cards, long sortOrder,
-        IEnumerable<LocalSideboard> sideboards = null, LocalDeckCosmetics cosmetics = null)
+        IEnumerable<LocalSideboard> sideboards = null, LocalDeckCosmetics cosmetics = null, bool? wild = null)
     {
         if (cards == null) throw new ArgumentNullException(nameof(cards));
         if (sortOrder < 0) throw new ArgumentOutOfRangeException(nameof(sortOrder));
@@ -1499,6 +1504,7 @@ public sealed partial class LocalProfile : IDisposable
         if (cosmetics != null) ApplyCosmetics(saved, ValidDeckCosmetics(next, draft.Hero, cosmetics, profileOptions.AllCosmetics));
         saved.Name = draft.Name; saved.Hero = draft.Hero; saved.SortOrder = sortOrder;
         saved.CardEntries = entries; saved.Sideboards = boards;
+        if (wild.HasValue) saved.Format = wild.Value ? WildFormat : StandardFormat;
         Commit(next);
     }
 
@@ -2131,7 +2137,7 @@ public sealed partial class LocalProfile : IDisposable
         if (profile.HiddenLoaners == null || profile.HiddenLoaners.Any(key => !IsStarterLoanerShape(key))
             || profile.HiddenLoaners.Distinct(StringComparer.Ordinal).Count() != profile.HiddenLoaners.Count)
             throw new InvalidOperationException("Invalid hidden starter decks.");
-        // A format this build does not know (a later Wild mode) keeps the deck saved and unplayable here (IsDeckComplete).
+        // A format this build does not know (for example Twist) keeps the deck saved and unplayable here (IsDeckComplete).
         if (profile.Version >= 16 && profile.CustomDecks.Any(deck => deck != null && deck.Format != null && !ValidName(deck.Format, 32)))
             throw new InvalidOperationException("Invalid deck format.");
     }

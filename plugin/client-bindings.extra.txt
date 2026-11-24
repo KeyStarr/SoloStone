@@ -510,14 +510,14 @@ row M SoundManager Play # GetDeclaredMethods().Single(name == Play && 4 paramete
 site NativeTurnTimerOption.Initialize | Enumerate | SoundManager.(members chosen at run time) # row above: the Single(...) lookup
 site NativeTurnTimerOption.Initialize | Patch | (target not known from the IL) # row above: the Single(...) lookup
 
-# NativeUIProbe+<>c__DisplayClass209_0.<CurrentRecipeGuide>b__0
+# NativeUIProbe+<>c__DisplayClass210_0.<CurrentRecipeGuide>b__0
 row F DeckTemplatePicker m_currentSelectedDeck # recipe guide: which template is selected
-site NativeUIProbe+<>c__DisplayClass209_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
+site NativeUIProbe+<>c__DisplayClass210_0.<CurrentRecipeGuide>b__0 | Field | (unknown type) # FindCurrentRecipeGuide reads the picker's selected template; recipe guide only
 
-# NativeUIProbe+<MassBoosterOpened>d__422.MoveNext
+# NativeUIProbe+<MassBoosterOpened>d__423.MoveNext
 row F PackOpeningDirector m_massPackOpeningHighlights # mass pack opening: the widgets must have loaded before the receipt is fed
 row F PackOpeningDirector m_massPackOpeningSummary # mass pack opening: the widgets must have loaded before the receipt is fed
-site NativeUIProbe+<MassBoosterOpened>d__422.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
+site NativeUIProbe+<MassBoosterOpened>d__423.MoveNext | Field | (unknown type) # director is a local typed PackOpeningDirector; rows above. A miss fails the pack opening closed
 
 # NativeUIProbe.Batch
 row F NetCache+NetCacheBatchRequest m_requests # cache batch requests are made non-reloading while the probe is active

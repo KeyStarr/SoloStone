@@ -43,11 +43,11 @@ internal static class NativeUIProjection
     // One native deck-contents row per (card, version), in first-seen order.
     // Exact per-copy versions go to SavePremiumDraft; Normal-only decks keep the id path, which accepts missing (ghost) copies.
     internal static void SaveNativeDraft(LocalProfile profile, long id, string name, string hero,
-        IReadOnlyList<LocalDeckCard> entries, IReadOnlyList<LocalSideboard> boards, long sortOrder, LocalDeckCosmetics cosmetics = null)
+        IReadOnlyList<LocalDeckCard> entries, IReadOnlyList<LocalSideboard> boards, long sortOrder, LocalDeckCosmetics cosmetics = null, bool? wild = null)
     {
         if (entries.Any(card => card.Premium != 0) || boards.Any(board => board.CardEntries.Any(card => card.Premium != 0)))
-            profile.SavePremiumDraft(id, name, hero, entries, sortOrder, boards, cosmetics);
-        else profile.SaveDraft(id, name, hero, entries.Select(card => card.Id).ToArray(), sortOrder, boards, cosmetics);
+            profile.SavePremiumDraft(id, name, hero, entries, sortOrder, boards, cosmetics, wild);
+        else profile.SaveDraft(id, name, hero, entries.Select(card => card.Id).ToArray(), sortOrder, boards, cosmetics, wild);
     }
 
     internal static List<DeckRow> DeckRows(IEnumerable<LocalDeckCard> entries)
@@ -757,9 +757,9 @@ internal static class NativeUIProjection
     // whose code the import already planned (the plan is what fills the draft; an unplanned paste stays unsupported).
     internal static bool OwnsCreateSource(bool normalSource, bool pastedSource, bool hasPastedCode, bool importPlanned) =>
         normalSource && !hasPastedCode || pastedSource && hasPastedCode && importPlanned;
-    internal static bool CanCreateDraft(bool normalDeck, bool normalSource, bool supportedHero, bool standardFormat, int personalCount,
+    internal static bool CanCreateDraft(bool normalDeck, bool normalSource, bool supportedHero, bool supportedFormat, int personalCount,
         int sessionLoanerCount) =>
-        normalDeck && normalSource && supportedHero && standardFormat && CanAddPersonalDeck(personalCount, sessionLoanerCount);
+        normalDeck && normalSource && supportedHero && supportedFormat && CanAddPersonalDeck(personalCount, sessionLoanerCount);
     internal static bool SupportsLocalDeckSave(bool probeActive, bool collectionContext, bool supportedSource,
         bool packRewardReconcile) => probeActive && supportedSource && (collectionContext || packRewardReconcile);
     // craftingReconcile: native reconciles deck ownership inside a crafting synchronize. The craft is already committed
@@ -1138,8 +1138,8 @@ internal static class NativeUIProjection
         }
         return null;
     }
-    // SoloStone plays Standard ranked and Standard Casual (#37): every other picker mode stays visible but disabled.
-    internal static bool IsDisabledFormatMode(string mode) => mode != null && mode != "STANDARD" && mode != "CASUAL";
+    // Standard, Wild and Casual can be selected in the offline picker.
+    internal static bool IsDisabledFormatMode(string mode) => mode != null && mode != "STANDARD" && mode != "WILD" && mode != "CASUAL";
     // The native picker's Standard/Casual choice (NativeFormatLock.StandardMode keeps it; boot restores the save's
     // LocalProfile.PrefersCasual). IN_RANKED_PLAY_MODE reads its inverse, so the client renders Casual natively.
     internal static bool CasualPlayMode;

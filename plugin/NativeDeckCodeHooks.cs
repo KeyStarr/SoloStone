@@ -45,7 +45,7 @@ internal static partial class NativeUIProbe
             var main = (contents.Cards ?? new List<DeckCardData>()).Select(card => (CardIdOrNull(card.Def.Asset), card.Qty)).ToList();
             var side = (contents.SideboardCards ?? new List<SideBoardCardData>())
                 .Select(card => (CardIdOrNull(card.LinkedCardDbId), CardIdOrNull(card.Def.Asset), card.Qty)).ToList();
-            var plan = NativeDeckCodeImport.Plan(hero, __0.DeckName, null, main, side);
+            var plan = NativeDeckCodeImport.Plan(hero, __0.DeckName, null, main, side, __0.FormatType == FormatType.FT_WILD);
             pendingImport = new PendingImport { Plan = plan };
             importInFlight = true;
             LastImportStage = "planned";

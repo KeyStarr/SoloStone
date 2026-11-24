@@ -243,7 +243,6 @@ var hooks = new[] {
     ("DeckTrayDeckListContent", "ShouldDeckBoxesBeLocked", "NativeUIProbe", "UnlockLocalDeckBoxSlots"),
     ("CollectionDeckBoxVisual", "SetDeckID", "NativeUIProbe", "LockLoanerBox"),
     ("CollectionDeckBoxVisual", "ShowDeleteButton", "NativeUIProbe", "HideLoanerDeleteButton"),
-    ("DeckOptionsMenu", "ShowConvertButton", "NativeUIProbe", "HidePersonalDeckConvert"),
     ("CollectionManager", "ShouldShowWildToStandardTutorial", "NativeUIProbe", "HidePersonalDeckTutorial"),
     ("DeckHelper", "HasChoicesToOffer", "NativeUIProbe", "HidePersonalDeckHelperChoices"),
     ("DeckTrayCardListContent", "ShowDeckHelper", "NativeUIProbe", "BlockPersonalDeckHelper"),
@@ -1085,7 +1084,7 @@ foreach (var contract in new[] {
     catch { failures.Add(contract.Item1 + "::" + contract.Item2 + " Standard format field missing"); }
 if (TryEnumValue(gameMetadata, "FormatType", "FT_STANDARD") != 2 || TryEnumValue(gameMetadata, "FormatType", "FT_WILD") != 1
     || TryEnumValue(gameMetadata, "Option", "IN_RANKED_PLAY_MODE") == null || TryEnumValue(gameMetadata, "VisualsFormatType", "VFT_STANDARD") == null
-    || TryEnumValue(gameMetadata, "VisualsFormatType", "VFT_CASUAL") == null)
+    || TryEnumValue(gameMetadata, "VisualsFormatType", "VFT_CASUAL") == null || TryEnumValue(gameMetadata, "VisualsFormatType", "VFT_WILD") == null)
     failures.Add("Standard format enum contract changed (FT_STANDARD/FT_WILD/IN_RANKED_PLAY_MODE/VFT_STANDARD)");
 // Live 2026-10-25: the material-only grey was invisible; locked picker buttons use the native inactive Clickable state.
 if (!Calls(plugin, pluginMetadata, Method(pluginMetadata, "NativeFormatLock", "Lock")).Contains(("NativeFormatLock", "Grey")))

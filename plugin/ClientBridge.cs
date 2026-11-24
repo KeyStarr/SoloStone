@@ -476,6 +476,7 @@ internal static class ClientBridge
         npcFailed = false;
         try
         {
+            match.WildMatch = record.Mode == LocalProfile.WildFormat;
             match.MatchId = record.Id;
             match.PlayerTurnTimerEnabled = NativeTurnTimerOption.Enabled;
             match.StartingPlayer = record.FirstPlayer;
@@ -605,7 +606,7 @@ internal static class ClientBridge
             var manager = GameMgr.Get();
             Set(manager, "m_gameType", GameType.GT_VS_AI);
             Set(manager, "m_nextGameType", GameType.GT_VS_AI);
-            Set(manager, "m_nextFormatType", NativeUIProbe.LocalDeckFormat);
+            Set(manager, "m_nextFormatType", match.WildMatch ? PegasusShared.FormatType.FT_WILD : PegasusShared.FormatType.FT_STANDARD);
             Set(manager, "m_nextMissionId", 0);
             if (nativeMatchmaking) NativeMatchmaking.Begin();
             var transition = new JobDefinition("Offline.StageGame", StageGame(), Array.Empty<IJobDependency>());

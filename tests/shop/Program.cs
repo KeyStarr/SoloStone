@@ -63,6 +63,37 @@ try {
     }
     using (var p = new LocalProfile(mixedPath))
         Check(p.CustomDeck.Cards.Contains("CS2_029") && p.CustomDeck.Cards.Contains("CATA_452"), "mixed draft survives reload");
+    string wildPath = Fresh("wild-ranked");
+    var wildData = Read(wildPath);
+    var wildCards = LocalDecks.Get("mage").CardIds;
+    foreach (var group in wildCards.GroupBy(id => id))
+    {
+        var owned = wildData.Collection.SingleOrDefault(row => row.Id == group.Key);
+        if (owned == null) wildData.Collection.Add(new LocalCardCount { Id = group.Key, Count = group.Count(), Acquired = group.Count() });
+        else { owned.Count = Math.Max(owned.Count, group.Count()); owned.Acquired = Math.Max(owned.Acquired, owned.Count); }
+    }
+    Write(wildPath, wildData);
+    long wildId;
+    using (var p = new LocalProfile(wildPath))
+    {
+        var draft = p.CreateDraft("Wild Mage", "HERO_08", wild: true);
+        wildId = draft.Id;
+        p.SaveDraft(wildId, draft.Name, draft.Hero, wildCards, draft.SortOrder);
+        Check(p.IsDeckComplete(wildId) && p.WildCards(wildId).Count > 0, "owned Wild cards complete a Wild deck");
+        p.SaveDraftCosmetics(wildId, draft.Name, null, wild: false);
+        Check(!p.IsDeckComplete(wildId), "converting to Standard checks the cards");
+        p.SaveDraftCosmetics(wildId, draft.Name, null, wild: true);
+    }
+    using (var p = new LocalProfile(wildPath))
+    {
+        string key = "custom:" + wildId;
+        Reject(() => p.Begin(key, "mage", 1), "a Wild deck cannot enter Standard");
+        Reject(() => p.Begin(key, "mage", 1, null, null, null, CasualRules.Mode), "a Wild deck cannot enter Standard Casual");
+        var match = p.Begin(key, "mage", 1, null, null, null, LocalProfile.WildFormat);
+        Check(match.Mode == LocalProfile.WildFormat && p.Pending.Mode == match.Mode, "Wild match starts with its selected format");
+        var outcome = p.Settle(match.Id, "Won", 10, false);
+        Check(outcome.Ladder != null && p.RankedHistory.Last().Mode == LocalProfile.WildFormat, "Wild win settles on the local ranked ladder");
+    }
     Check(typeof(LocalMatchRecord).GetField("Ladder") != null, "settlement must reserve durable ladder receipt");
     var library = RecipeLibrary.LoadText(File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "recipes-v1.json")));
     var shop = LocalShop.Default;

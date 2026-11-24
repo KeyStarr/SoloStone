@@ -98,7 +98,7 @@ internal static class NativeUiTree
                 Name(PickerFormat?.GetValue(pages) as PegUIElement, "picker.format");
             }
         }
-        // Format picker popup buttons: only Standard is pressable; the rest report Enabled=false (NativeFormatLock).
+        // Format picker popup buttons: locked formats report Enabled=false (NativeFormatLock).
         foreach (var button in NativeFormatLock.PickerButtons)
             if (button.Mode != null) Name(button.Element, "picker.format." + button.Mode.ToLowerInvariant());
         foreach (var control in NativeProfileSelector.Controls) Name(control.Key, control.Value);

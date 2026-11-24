@@ -128,6 +128,7 @@ internal static partial class Program
         if (args.Contains("--delegated-fx-only")) { NativeMatch.ClockFreeBot = true; DelegatedPowerFx(); return; }
         if (args.Contains("--wisp-fx-only")) { NativeMatch.ClockFreeBot = true; WispHeroPowerHistory(); return; }
         if (args.Contains("--godfrey-only")) { GodfreyPortalHistory(); return; }
+        if (args.Contains("--wild-format-only")) { WildMatchFormat(); return; }
         if (args.Contains("--coin-flip-only")) { CoinFlipTests(); return; }
         if (args.Contains("--hero-power-contract-only")) { NativeMatch.ClockFreeBot = true; HeroPowerReplacementContract(args.Contains("--dump-hero-replacement")); return; }
         if (args.Contains("--hero-replacement-only")) { NativeMatch.ClockFreeBot = true; HeroReplacementHistory(args.Contains("--dump-hero-replacement")); HeroPowerReplacementContract(args.Contains("--dump-hero-replacement")); return; }
@@ -330,6 +331,7 @@ internal static partial class Program
         SourceTradeAndBotDecisions();
         SourcePrepareAction();
         NativeTextUsesBoundedEngineRawDescriptions();
+        WildMatchFormat();
         EngineStartEvidenceIsExactAndImmutable();
         CustomDecksAndRewardFacts();
         StartingHandIsRevealedBeforeMulligan();
@@ -885,6 +887,21 @@ internal static partial class Program
         Check(!LocalNativeText.TryGetOverride(true, "CS2_089", value => throw new InvalidOperationException(), out text),
             "native text transform failure did not fall back");
         Console.WriteLine("PASS bounded native engine text");
+    }
+
+    private static void WildMatchFormat()
+    {
+        foreach (bool wild in new[] { true, false })
+        {
+            var capture = new Capture();
+            var match = new NativeMatch(capture.Send, "mage", "priest", 19) { WildMatch = wild };
+            match.Start();
+            Check(match.Game.PoolFormat == (wild ? SabberStoneCore.Config.GenerationFormat.Wild : SabberStoneCore.Config.GenerationFormat.Standard),
+                "generation pool follows the selected queue");
+            match.SendChoices(capture.Last<EntityChoices>(17).Id, new List<int>());
+            Check(match.Game.Turn > 0, "constructed match reaches the first turn");
+        }
+        Console.WriteLine("PASS Wild and Standard native matches use their own generation pool");
     }
 
     private static void EngineStartEvidenceIsExactAndImmutable()
