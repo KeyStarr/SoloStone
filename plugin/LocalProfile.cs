@@ -579,7 +579,7 @@ public sealed partial class LocalProfile : IDisposable
     public IReadOnlyList<LocalPackProgress> PackCounters => data.PackCounters.Select(Copy).ToArray();
     public int PackSequence => data.PackSequence;
     public IReadOnlyDictionary<string, int> ClassXp => XpMap(data);
-    public IReadOnlyDictionary<string, int> Collection => OwnedCollection(data);
+    public IReadOnlyDictionary<string, int> Collection => OwnedCollection(data, allCards: profileOptions.AllCards);
     // Raw stored Normal counts, before OwnedCollection adds Core grants. Pack draws write here; the projection is what
     // native shows. No card is pinned (virtual ownership removed, owner 2026-10-30).
     internal IReadOnlyDictionary<string, int> StoredCollection => CollectionMap(data.Collection);
@@ -602,7 +602,7 @@ public sealed partial class LocalProfile : IDisposable
     public bool OwnsCoin(int coin) => data.OwnedCoins.Contains(coin)
         || profileOptions.AllCosmetics && LocalShop.SupportedCheatCoins.Contains(coin);
     public bool OwnsHeroSkin(string heroSkin) => data.OwnedHeroSkins.Contains(heroSkin)
-        || profileOptions.AllCosmetics && LocalShop.SupportedCheatHeroSkins.Contains(heroSkin);
+        || profileOptions.AllCosmetics && LocalShop.IsSandboxHeroSkin(heroSkin);
     public bool HasPendingMatch => data.Pending != null;
     public bool HasPendingRewardPresentation => data.PendingRewardPresentationId != null
         && data.Matches.Any(match => match.Id == data.PendingRewardPresentationId);
@@ -1433,8 +1433,14 @@ public sealed partial class LocalProfile : IDisposable
     public int OwnedCount(string id, int premium = 0)
     {
         if (premium < 0 || premium > 3) throw new ArgumentOutOfRangeException(nameof(premium));
-        if (premium == 0) return id != null && Collection.TryGetValue(id, out int normal) ? normal : 0;
-        if (!LocalClassRewards.IsAvailable(id)) return 0;
+        if (premium == 0)
+        {
+            if (id == null) return 0;
+            int normal = OwnedCollection(data).TryGetValue(id, out int storedNormal) ? storedNormal : 0;
+            return profileOptions.AllCards && RetailCollection.Current?.NormalCopies.TryGetValue(id, out int copies) == true
+                && !creationPlaysets.Value.Contains(id) ? Math.Max(normal, copies) : normal;
+        }
+        if (!LocalClassRewards.IsAvailable(id)) return SandboxCollection?.Count(id, premium) ?? 0;
         int stored = data.PremiumCollection.SingleOrDefault(card => card.Id == id && card.Premium == premium)?.Count ?? 0;
         return profileOptions.AllCosmetics ? Math.Max(stored, CheatPremiumCount(id, premium)) : stored;
     }
@@ -1504,12 +1510,12 @@ public sealed partial class LocalProfile : IDisposable
 
     // Profile commits are the common boundary for every slot writer and collection mutation.
     internal static Action<string> DeckRepairLog = Console.WriteLine;
-    internal static Func<string, int, int> DeckOwnedCount(LocalProfileData profile, bool allCosmetics = false)
+    internal static Func<string, int, int> DeckOwnedCount(LocalProfileData profile, bool allCosmetics = false, bool allCards = false)
     {
-        var normal = OwnedCollection(profile);
+        var normal = OwnedCollection(profile, allCards: allCards);
         var premium = profile.PremiumCollection.ToDictionary(row => PremiumKey(row.Id, row.Premium), row => row.Count, StringComparer.Ordinal);
         return (id, version) => version == 0 ? (normal.TryGetValue(id, out int count) ? count : 0)
-            : !LocalClassRewards.IsAvailable(id) ? 0
+            : !LocalClassRewards.IsAvailable(id) ? (allCosmetics ? CheatPremiumCount(id, version) : 0)
             : Math.Max(premium.TryGetValue(PremiumKey(id, version), out int stored) ? stored : 0,
                 allCosmetics ? CheatPremiumCount(id, version) : 0);
     }
@@ -1536,13 +1542,13 @@ public sealed partial class LocalProfile : IDisposable
     {
         var deck = data.CustomDecks.SingleOrDefault(row => row.Id == id);
         if (deck == null) throw new InvalidOperationException("Saved draft does not exist.");
-        return LocalCrafting.MissingDeckSlots(deck, DeckOwnedCount(data, profileOptions.AllCosmetics));
+        return LocalCrafting.MissingDeckSlots(deck, DeckOwnedCount(data, profileOptions.AllCosmetics, profileOptions.AllCards));
     }
 
     private void ValidateDeckOwnership(IEnumerable<LocalDeckCard> cards, bool normalToo)
     {
         var list = cards.ToList();
-        var owned = DeckOwnedCount(data, profileOptions.AllCosmetics);
+        var owned = DeckOwnedCount(data, profileOptions.AllCosmetics, profileOptions.AllCards);
         var deck = new LocalCustomDeck { CardEntries = list };
         if (LocalCrafting.MissingDeckSlots(deck, owned, normalToo) > 0)
             throw new InvalidOperationException(normalToo ? "The local collection does not own this deck card."
@@ -1824,12 +1830,16 @@ public sealed partial class LocalProfile : IDisposable
     private static Dictionary<string, int> XpMap(LocalProfileData profile) => profile.ClassXp
         .ToDictionary(entry => entry.Hero, entry => entry.Xp, StringComparer.Ordinal);
 
-    private static Dictionary<string, int> OwnedCollection(LocalProfileData profile, bool availableOnly = true)
+    private static Dictionary<string, int> OwnedCollection(LocalProfileData profile, bool availableOnly = true, bool allCards = false)
     {
         var owned = CollectionMap(profile.Collection);
         foreach (var card in profile.CoreGrants)
             if (!availableOnly || LocalCoreProgression.IsAvailable(card.Id))
                 owned[card.Id] = card.Count;
+        if (allCards && RetailCollection.Current != null)
+            foreach (var pair in RetailCollection.Current.NormalCopies)
+                if (!creationPlaysets.Value.Contains(pair.Key))
+                    owned[pair.Key] = Math.Max(owned.TryGetValue(pair.Key, out int count) ? count : 0, pair.Value);
         return owned;
     }
 
@@ -2771,7 +2781,7 @@ public sealed partial class LocalProfile : IDisposable
     internal string PendingMatchId => data.Pending?.Id;
     internal void OwnedCollectionTotals(out int distinct, out int total)
     {
-        var owned = OwnedCollection(data);
+        var owned = Collection;
         distinct = owned.Count; total = owned.Values.Sum();
     }
     internal sealed class DeckSummary { internal long Id; internal string Name; internal int CardCount; internal int DeckSize; }

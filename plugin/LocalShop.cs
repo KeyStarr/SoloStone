@@ -242,10 +242,13 @@ public sealed class LocalShop
         .Distinct().ToArray();
     internal static IReadOnlyList<int> SupportedCheatCoins => SupportedCheatCosmetics("Coin")
         .Select(product => product.Coin.Value).Distinct().ToArray();
-    internal static IReadOnlyList<string> SupportedCheatHeroSkins => SupportedCheatCosmetics("HeroSkin")
+    internal static IReadOnlyList<string> SupportedCheatHeroSkins => RetailCollection.Current != null
+        ? RetailCollection.Current.HeroClasses.Keys.ToArray() : SupportedCheatCosmetics("HeroSkin")
         .Select(product => product.HeroSkin).Concat(LocalClassRewards.Portraits.Select(portrait => portrait.Honored))
         .Concat(AchievementExclusiveCosmetics.All.Where(row => row.Kind == "HeroSkin").Select(row => row.HeroSkinId))
         .Distinct(StringComparer.Ordinal).ToArray();
+    internal static bool IsSandboxHeroSkin(string id) => id != null && (RetailCollection.Current != null
+        ? RetailCollection.Current.HeroClasses.ContainsKey(id) : SupportedCheatHeroSkins.Contains(id));
     internal static IReadOnlyList<string> SupportedCheatHubThemes => SupportedCheatCosmetics("HubTheme")
         .Select(product => product.HubTheme).Where(LocalHubCosmetics.PaidTheme).Distinct(StringComparer.Ordinal).ToArray();
     internal static IReadOnlyList<int> SupportedCheatBoards => SupportedCheatCosmetics("Board")
@@ -258,10 +261,10 @@ public sealed class LocalShop
     public IReadOnlyList<LocalShopProduct> Products => catalog.Products.Select(LocalProfile.Clone).ToArray();
     internal IEnumerable<string> HeroSkinIds => heroSkinClasses.Keys;
     internal string HeroSkinClass(string cardId) => cardId != null && (heroSkinClasses.TryGetValue(cardId, out string found)
-        || catalog.ClientHeroSkins.TryGetValue(cardId, out found)) ? found : null;
+        || catalog.ClientHeroSkins.TryGetValue(cardId, out found)
+        || RetailCollection.Current?.HeroClasses.TryGetValue(cardId, out found) == true) ? found : null;
     internal bool IsHeroSkinForClass(string heroClass, string cardId) =>
-        cardId != null && (heroSkinClasses.TryGetValue(cardId, out string found)
-            || catalog.ClientHeroSkins.TryGetValue(cardId, out found)) && found == heroClass;
+        heroClass != null && HeroSkinClass(cardId) == heroClass;
     internal int RecipePrice(string id) => recipeProducts[id].Price;
     public IReadOnlyList<DeckRecipe> Recipes => Library.Recipes.Select(LocalProfile.Clone).ToArray();
     private LocalShop(LocalShopCatalog catalog, Func<RecipeLibrary> loadRecipes) {
@@ -1005,7 +1008,7 @@ public sealed partial class LocalProfile
     }
     private static bool ValidFavorite(LocalProfileData profile, string heroClass, string heroCardId, bool allCosmetics = false) =>
         LocalCoreProgression.Heroes.Contains(heroClass) && (heroClass == heroCardId || (profile.OwnedHeroSkins.Contains(heroCardId)
-            || allCosmetics && LocalShop.SupportedCheatHeroSkins.Contains(heroCardId)) && LocalShop.Default.IsHeroSkinForClass(heroClass, heroCardId));
+            || allCosmetics && LocalShop.IsSandboxHeroSkin(heroCardId)) && LocalShop.Default.IsHeroSkinForClass(heroClass, heroCardId));
 
     // XmlSerializer construction reflects over the whole type graph (slow on Unity Mono); instances are thread-safe.
     private static readonly System.Collections.Concurrent.ConcurrentDictionary<System.Type, XmlSerializer> cloneSerializers =

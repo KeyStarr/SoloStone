@@ -5,6 +5,31 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using EngineCard = SabberStoneCore.Model.Card;
 
+// The offline client supplies this index before any save opens. Only sandbox options consult it.
+internal sealed class RetailCollection
+{
+    internal static Lazy<RetailCollection> Source;
+    internal static RetailCollection Current => Source?.Value;
+    internal readonly Dictionary<string, string> HeroClasses = new Dictionary<string, string>(StringComparer.Ordinal);
+    internal readonly Dictionary<string, int> NormalCopies = new Dictionary<string, int>(StringComparer.Ordinal);
+    internal readonly List<LocalCardCount> Versions = new List<LocalCardCount>();
+    private readonly Dictionary<(string, int), int> counts = new Dictionary<(string, int), int>();
+
+    internal void AddCard(string id, int copies)
+    {
+        NormalCopies.Add(id, copies);
+        AddVersion(id, 1, copies);
+    }
+
+    internal void AddVersion(string id, int premium, int copies)
+    {
+        counts.Add((id, premium), copies);
+        Versions.Add(new LocalCardCount { Id = id, Premium = premium, Count = copies, Acquired = copies });
+    }
+
+    internal int Count(string id, int premium) => counts.TryGetValue((id, premium), out int copies) ? copies : 0;
+}
+
 public sealed partial class LocalProfile
 {
     private const int DiamondQualityTag = 1932, SignatureQualityTag = 2589;
@@ -20,6 +45,9 @@ public sealed partial class LocalProfile
             && (card.Type != CardType.HERO || collectionCardIds.Value.Contains(card.Id) && !LocalCoreProgression.Heroes.Contains(card.Id)))
         .GroupBy(card => card.Id, StringComparer.Ordinal).Select(group => group.First())
         .OrderBy(card => card.Id, StringComparer.Ordinal).ToArray());
+    // Normal playsets granted at creation stay in the ledger and can be disenchanted.
+    private static readonly Lazy<HashSet<string>> creationPlaysets = new Lazy<HashSet<string>>(() =>
+        new HashSet<string>(supportedCheatCards.Value.Select(card => card.Id), StringComparer.Ordinal));
     private static readonly Lazy<LocalCardCount[]> supportedCheatPremium = new Lazy<LocalCardCount[]>(() => {
         var rows = new List<LocalCardCount>();
         foreach (var card in supportedCheatCards.Value)
@@ -40,10 +68,14 @@ public sealed partial class LocalProfile
             row => PremiumKey(row.Id, row.Premium), row => row.Count, StringComparer.Ordinal));
 
     internal static IReadOnlyList<EngineCard> SupportedCheatCards => supportedCheatCards.Value;
-    internal static IReadOnlyList<LocalCardCount> SupportedCheatPremium => supportedCheatPremium.Value;
+    internal static IReadOnlyList<LocalCardCount> SupportedCheatPremium => (IReadOnlyList<LocalCardCount>)RetailCollection.Current?.Versions ?? supportedCheatPremium.Value;
     private static string PremiumKey(string id, int premium) => premium + ":" + id;
-    internal static int CheatPremiumCount(string id, int premium) => id != null
-        && supportedCheatPremiumCounts.Value.TryGetValue(PremiumKey(id, premium), out int count) ? count : 0;
+    internal static int CheatPremiumCount(string id, int premium) => RetailCollection.Current != null
+        ? RetailCollection.Current.Count(id, premium)
+        : id != null && supportedCheatPremiumCounts.Value.TryGetValue(PremiumKey(id, premium), out int count) ? count : 0;
+
+    internal RetailCollection SandboxCards => profileOptions.AllCosmetics || profileOptions.AllCards ? RetailCollection.Current : null;
+    internal RetailCollection SandboxCollection => profileOptions.AllCosmetics ? RetailCollection.Current : null;
 
     internal bool InfiniteGold => profileOptions.InfiniteGold;
     internal bool InfiniteDust => profileOptions.InfiniteDust;

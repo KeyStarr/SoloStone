@@ -23,6 +23,7 @@ internal static class ProfileCatalogChecks
         LegacyAndSwitch(Path.Combine(root, "legacy"));
         UnsupportedSlotRecovery(Path.Combine(root, "unsupported"));
         CosmeticsOnly(Path.Combine(root, "cosmetics-only"));
+        RetailCosmetics(Path.Combine(root, "retail-cosmetics"));
         Cheats(Path.Combine(root, "cheats"));
         SeededLegendCatchUp(Path.Combine(root, "legend-catchup"));
         HistoricalCatchUp(Path.Combine(root, "historical-catchup"));
@@ -302,6 +303,43 @@ internal static class ProfileCatalogChecks
             Check(bytes.SequenceEqual(File.ReadAllBytes(path)), "historical catch-up remains idempotent");
         }
         Console.WriteLine("PASS normal and cosmetics-only historical catch-up remains paid once");
+    }
+
+    private static void RetailCosmetics(string root)
+    {
+        Directory.CreateDirectory(root);
+        string legacy = Path.Combine(root, "profile.xml");
+        var options = new ProfileOptions { AllCards = true, AllCosmetics = true };
+        var slot = ProfileCatalog.Create(legacy, "Existing sandbox", options);
+        string path = ProfileCatalog.ProfilePathForId(legacy, slot.Id);
+        const string skin = "fixture-hero-skin", card = "fixture-collectible";
+        var index = new RetailCollection();
+        index.HeroClasses.Add(skin, "HERO_08");
+        index.AddCard(card, 2);
+        index.AddVersion(card, 3, 2);
+        var previous = RetailCollection.Source;
+        RetailCollection.Source = new Lazy<RetailCollection>(() => index);
+        try
+        {
+            using (var profile = new LocalProfile(path))
+            {
+                Check(profile.OwnedCount(card) == 2 && profile.OwnedCount(card, 1) == 2
+                    && profile.OwnedCount(card, 2) == 0 && profile.OwnedCount(card, 3) == 2,
+                    "an existing sandbox owns the versions in the client catalogue");
+                Check(NativeUIProjection.IsNativeCollectible(card, profile) && NativeUIProjection.IsNativeCollectible(skin, profile),
+                    "client-only cards and skins are admitted to the native collection");
+                Check(NativeUIProjection.CollectionStacks(profile).Count(row => row.Id == card && row.Count == 2) == 3,
+                    "one native stack per existing client quality");
+                NativeUIProjection.SelectHeroSkin(profile, "HERO_08", skin, true);
+                Reject(() => profile.SetFavoriteHeroSkin("HERO_01", skin), "cross-class retail skin");
+            }
+            using (var reopened = new LocalProfile(path))
+                Check(reopened.ResolveHero("HERO_08", null) == skin, "client-only favourite survives reopen");
+            using (var plain = new LocalProfile(legacy))
+                Check(!plain.OwnsHeroSkin(skin) && plain.OwnedCount(card, 3) == 0 && plain.OwnedCount(card) == 0,
+                    "ordinary saves retain earned ownership");
+        }
+        finally { RetailCollection.Source = previous; }
     }
 
     private static void CosmeticsOnly(string root)

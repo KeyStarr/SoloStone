@@ -266,7 +266,9 @@ internal static class NativeUIProjection
     // Deck-slot collectibility: native EvaluateSlot checks it before ownership, so narrowing it turns missing cards
     // (blue ghosts) into invalid ones. Keep the historical predicate and only add owned admitted grants.
     internal static bool IsNativeCollectible(string id, LocalProfile profile) =>
-        Supported.Contains(id) || LocalDecks.TestStandardCardIds.Contains(id) || CosmeticHeroPool.Contains(id)
+        (id != null && (profile?.SandboxCards?.NormalCopies.ContainsKey(id) == true
+            || profile?.SandboxCollection?.HeroClasses.ContainsKey(id) == true))
+        || Supported.Contains(id) || LocalDecks.TestStandardCardIds.Contains(id) || CosmeticHeroPool.Contains(id)
         || (AdmittedGrantOnly(id) && profile.TotalOwnedCount(id) > 0);
     internal static readonly HashSet<string> Supported = new HashSet<string>(LocalEconomy.Catalog.Select(c => c.Id)
 #if STANDARD_PROOF

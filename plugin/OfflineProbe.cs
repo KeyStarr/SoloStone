@@ -333,6 +333,7 @@ public sealed class OfflineProbe : BaseUnityPlugin
             ClientChecks.ReleaseCardCheck();
             StartupTiming.Milestone("client-checks-passed");
             ClientChecks.ReportCoverage();
+            RetailCollection.Source = new Lazy<RetailCollection>(() => NativeRetailCollection.Read(DefLoader.Get().GetAllEntityDefs()));
             SaveHold.Release();
             OfflineLaunchContext launch = launchContext;
 #if SOLOSTONE_INSTALLER

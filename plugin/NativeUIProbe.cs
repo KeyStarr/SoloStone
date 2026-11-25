@@ -598,6 +598,16 @@ internal static partial class NativeUIProbe
         foreach (var stack in Profile.OwnedCards.Where(card => card.Premium > 0))
             if (CollectionManager.Get().GetOwnedCount(stack.Id, (TAG_PREMIUM)stack.Premium) != Profile.OwnedCount(stack.Id, stack.Premium))
                 throw new InvalidOperationException("Native premium ownership mismatch: " + stack.Id + "/" + stack.Premium);
+        if (Profile.SandboxCollection is RetailCollection client)
+        {
+            var manager = CollectionManager.Get();
+            foreach (var skin in client.HeroClasses.Keys)
+                if (manager.GetOwnedCount(skin, TAG_PREMIUM.NORMAL) != 1)
+                    throw new InvalidOperationException("Native hero skin ownership mismatch: " + skin);
+            log.LogInfo("Offline sandbox collection: cards=" + client.NormalCopies.Count + " heroSkins=" + client.HeroClasses.Count
+                + " golden=" + client.Versions.Count(row => row.Premium == 1) + " diamond=" + client.Versions.Count(row => row.Premium == 2)
+                + " signature=" + client.Versions.Count(row => row.Premium == 3));
+        }
         Tournament.Init();
         if (Hash() != baselineHash) throw new InvalidOperationException("Profile changed during projection");
         ready = true; State("Ready:reward startup intentionally omitted; local deck editor enabled");
@@ -990,10 +1000,17 @@ internal static partial class NativeUIProbe
     {
         var displayable = manager.GetDisplayableCardSets();
         var supportedIds = NativeUIProjection.Supported.Concat(Profile.OwnedCards.Where(card => card.Count > 0
+            && (Profile.SandboxCards == null || LocalClassRewards.IsAvailable(card.Id))
             && NativeUIProjection.IsNativeCollectible(card.Id, Profile)).Select(card => card.Id)).Distinct().OrderBy(id => id).ToArray();
         var supportedSets = supportedIds.Select(id => DefLoader.Get().GetEntityDef(id).GetCardSet());
         var union = NativeUIProjection.DisplayableSetIds(displayable.Concat(supportedSets).Select(set => (int)set), Profile.OwnedCards)
             .Select(set => (TAG_CARD_SET)set).ToList();
+        if (Profile.SandboxCards is RetailCollection client)
+        {
+            var loader = DefLoader.Get();
+            union = union.Concat(client.NormalCopies.Keys.Concat(Profile.OwnedHeroSkins)
+                .Select(id => loader.GetEntityDef(id).GetCardSet()).Where(set => (int)set > 0)).Distinct().ToList();
+        }
         displayable.Clear();
         displayable.AddRange(union);
         var wild = new HashSet<TAG_CARD_SET>(GameUtils.GetAllWildPlayableSets());
@@ -1191,7 +1208,14 @@ internal static partial class NativeUIProbe
     private static bool OpenLocalPack(UnopenedPack __instance, ref string __0, ref bool __result) =>
         !NativeUIProjection.TryProjectPackOpenability(active, __instance.GetBoosterId(), ref __result, ref __0);
     private static bool Pool(ref List<string> __result)
-    { if (!active) return true; __result = NativeUIProjection.NativeCollectiblePool(LocalCrafting.CraftableCardIds, Profile.OwnedCards); return false; }
+    {
+        if (!active) return true;
+        IEnumerable<string> ids = LocalCrafting.CraftableCardIds;
+        if (Profile.SandboxCards is RetailCollection cards) ids = ids.Concat(cards.NormalCopies.Keys);
+        if (Profile.SandboxCollection is RetailCollection skins) ids = ids.Concat(skins.HeroClasses.Keys);
+        __result = NativeUIProjection.NativeCollectiblePool(ids, Profile.OwnedCards);
+        return false;
+    }
     private static bool Collectible(string __0, ref bool __result)
     { if (!active) return true; __result = NativeUIProjection.IsNativeCollectible(__0, Profile); return false; }
     private static void LoanerOwnership(CollectionDeck __instance, ref bool __1)

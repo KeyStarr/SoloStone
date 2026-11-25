@@ -452,6 +452,7 @@ F	Assembly-CSharp	GameDbf	Booster	Dbf`1<BoosterDbfRecord>
 F	Assembly-CSharp	GameDbf	BoxDressing	Dbf`1<BoxDressingDbfRecord>
 F	Assembly-CSharp	GameDbf	Card	Dbf`1<CardDbfRecord>
 F	Assembly-CSharp	GameDbf	CardBack	Dbf`1<CardBackDbfRecord>
+F	Assembly-CSharp	GameDbf	CardTag	Dbf`1<CardTagDbfRecord>
 F	Assembly-CSharp	GameDbf	CosmeticCoin	Dbf`1<CosmeticCoinDbfRecord>
 F	Assembly-CSharp	GameDbf	Deck	Dbf`1<DeckDbfRecord>
 F	Assembly-CSharp	GameDbf	DeckCard	Dbf`1<DeckCardDbfRecord>
@@ -953,8 +954,12 @@ M	Assembly-CSharp	CardBackManager	SetCollectionCardBackOwned	System.Void(System.
 M	Assembly-CSharp	CardBackManager	get_TheRandomCardBackID	System.Int32()
 M	Assembly-CSharp	CardDbfRecord	get_NoteMiniGuid	System.String()
 M	Assembly-CSharp	CardEffect	GetSpell	(System.Boolean)
+M	Assembly-CSharp	CardHeroDbfRecord	get_HeroType	Assets.CardHero+HeroType()
 M	Assembly-CSharp	CardSetDbfRecord	get_IsCoreCardSet	System.Boolean()
 M	Assembly-CSharp	CardSetDbfRecord	get_IsFeaturedCardSet	System.Boolean()
+M	Assembly-CSharp	CardTagDbfRecord	get_CardId	System.Int32()
+M	Assembly-CSharp	CardTagDbfRecord	get_TagId	System.Int32()
+M	Assembly-CSharp	CardTagDbfRecord	get_TagValue	System.Int32()
 M	Assembly-CSharp	CardTextBuilder	GetDefaultCardName	*
 M	Assembly-CSharp	CardTextBuilder	GetDefaultCardName	System.String(EntityDef)
 M	Assembly-CSharp	CardTextBuilder	GetRawCardName	System.String(EntityDef)
@@ -1347,6 +1352,7 @@ M	Assembly-CSharp	EntityBase	HasReferencedTag	(GAME_TAG)
 M	Assembly-CSharp	EntityBase	HasReferencedTag	*
 M	Assembly-CSharp	EntityBase	HasTag	System.Boolean(GAME_TAG)
 M	Assembly-CSharp	EntityBase	IsHero	System.Boolean()
+M	Assembly-CSharp	EntityBase	IsHeroSkin	System.Boolean()
 M	Assembly-CSharp	EntityBase	IsSecret	System.Boolean()
 M	Assembly-CSharp	EntityDef	GetFlavorText	System.String()
 M	Assembly-CSharp	EntityDef	GetReferencedTag	(System.Int32)
@@ -1370,6 +1376,7 @@ M	Assembly-CSharp	Game.Shop.VariantUtils	ResolveVariants	*
 M	Assembly-CSharp	GameDbf	GetIndex	GameDbfIndex()
 M	Assembly-CSharp	GameDbf	get_IsLoaded	System.Boolean()
 M	Assembly-CSharp	GameDbfIndex	GetCardRecord	CardDbfRecord(System.String)
+M	Assembly-CSharp	GameDbfIndex	GetCollectibleCardIds	System.Collections.Generic.List`1<System.String>()
 M	Assembly-CSharp	GameDbfIndex	GetSubsetById	System.Collections.Generic.HashSet`1<System.String>(System.Int32)
 M	Assembly-CSharp	GameEntity	EnemyEmoteHandlerDoneLoadingCallback	*
 M	Assembly-CSharp	GameEntity	GetAdditionalTimeToWaitForSpells	System.Single()
@@ -3184,6 +3191,7 @@ T	Assembly-CSharp	AssetLoader
 T	Assembly-CSharp	Assets.BoxDressing		
 T	Assembly-CSharp	Assets.BoxDressing+BoxDressingType		
 T	Assembly-CSharp	Assets.CardHero		
+T	Assembly-CSharp	Assets.CardHero+HeroType		
 T	Assembly-CSharp	Assets.CardHero+PortraitCurrency		
 T	Assembly-CSharp	Assets.DeckTemplate		
 T	Assembly-CSharp	Assets.DeckTemplate+SourceType		
@@ -3233,6 +3241,7 @@ T	Assembly-CSharp	CardListPopup
 T	Assembly-CSharp	CardListPopup+Info		
 T	Assembly-CSharp	CardRewardData		
 T	Assembly-CSharp	CardSetDbfRecord		
+T	Assembly-CSharp	CardTagDbfRecord		
 T	Assembly-CSharp	CardTextBuilder		
 T	Assembly-CSharp	CardValueDbfRecord		
 T	Assembly-CSharp	CatalogNetworkPage		
