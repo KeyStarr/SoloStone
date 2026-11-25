@@ -15,11 +15,16 @@ public sealed class ArenaRequest
     public int Losses { get; }
     public IReadOnlyList<string> UsedDeckIds { get; }    // this run's earlier opponent decks
     public IReadOnlyList<string> UsedNpcIds { get; }     // this run's earlier opponents
-    public ArenaRequest(long runSeed, int matchIndex, int wins, int losses, IEnumerable<string> usedDeckIds, IEnumerable<string> usedNpcIds)
+    // The save's NPC difficulty when the match starts (#305); null or Hard = the Arena queue as it was, unchanged.
+    public NpcDifficultyLevel Difficulty { get; }
+    public ArenaRequest(long runSeed, int matchIndex, int wins, int losses, IEnumerable<string> usedDeckIds, IEnumerable<string> usedNpcIds,
+        NpcDifficultyLevel difficulty = null)
     {
         RunSeed = runSeed; MatchIndex = matchIndex; Wins = wins; Losses = losses;
         UsedDeckIds = GoldenData.Copy(usedDeckIds ?? new string[0]); UsedNpcIds = GoldenData.Copy(usedNpcIds ?? new string[0]);
+        Difficulty = difficulty;
     }
+    internal bool Shifted => Difficulty != null && !Difficulty.IsHard;
 }
 
 // Arena deck catalog: data/npc/arena-decks-v1.json. Deck rows have the same shape as decks-v1.json (cards as {id, count}, counts
@@ -101,9 +106,20 @@ public sealed class ArenaQueueRules
     public double MiddleBucket { get; set; } = 2;
     public double BucketPerNetWin { get; set; } = 0.5;
     public double BucketSigma { get; set; } = 0.9;
-    // NPCs: the Casual opponent skill scale (an NPC plays at its own rating's tier); Arena has no rating of its own, so the
-    // field is centred on the middle of the ladder and never moves with the player's record or results.
-    public double NpcTargetRating { get; set; } = 1300;
+    // NPCs: the Casual opponent skill scale (an NPC plays at its own rating's tier). Arena has no rating of its own: the field
+    // is centred on NpcTargetRating at 0 wins and climbs NpcRatingPerWin per win of the run (more wins, harder opponents), so
+    // 0 wins meets mostly Regular pilots, 4 Skilled, 6 Expert, 8 Master and 9+ Elite. Losses do not lower it.
+    public double NpcTargetRating { get; set; } = 1250;
+    public double NpcRatingPerWin { get; set; } = 45;
+    public double NpcTargetFor(int wins) => NpcTargetRating + Math.Max(0, wins) * NpcRatingPerWin;
+    // NPC difficulty (#305). Hard is the queue above, untouched. Easy and Medium meet the field of a lower rating (the level's
+    // ShiftRating, as in Casual), draw from weaker drafts (the bucket centre moves down by these many buckets) and play with the
+    // level's boost at the ladder position of the Hard target, so the boost fades as the run's wins climb. Winning runs still
+    // meet stronger opponents on every level.
+    public double EasyBucketShift { get; set; } = 1.0;
+    public double MediumBucketShift { get; set; } = 0.5;
+    public double BucketShiftFor(NpcDifficultyLevel level) =>
+        level == null || level.IsHard ? 0 : level.Id == NpcDifficulties.EasyId ? EasyBucketShift : MediumBucketShift;
     public double NpcSigma { get; set; } = 150;
     public double NotableWeight { get; set; } = 1.5;
     public static ArenaQueueRules Default => new ArenaQueueRules();
@@ -127,9 +143,11 @@ public sealed class ArenaMatchmaker
     }
 
     // Weight of each quality bucket for a record (before the used-deck filter).
-    public double[] BucketWeights(int wins, int losses)
+    public double[] BucketWeights(int wins, int losses, NpcDifficultyLevel difficulty = null)
     {
-        double centre = Math.Max(0, Math.Min(ArenaDeckCatalog.BucketCount - 1, Rules.MiddleBucket + (wins - losses) * Rules.BucketPerNetWin));
+        // The difficulty shift applies after the top clamp, so Easy and Medium stay below Hard even deep in a winning run.
+        double centre = Math.Max(0, Math.Min(ArenaDeckCatalog.BucketCount - 1, Rules.MiddleBucket + (wins - losses) * Rules.BucketPerNetWin)
+            - Rules.BucketShiftFor(difficulty));
         var weights = new double[ArenaDeckCatalog.BucketCount];
         for (int b = 0; b < weights.Length; b++)
         {
@@ -150,13 +168,13 @@ public sealed class ArenaMatchmaker
         var usedNpcs = new HashSet<string>(request.UsedNpcIds, StringComparer.Ordinal);
 
         var free = Catalog.Buckets.Select(bucket => bucket.Where(candidate => !usedDecks.Contains(candidate.Id)).ToArray()).ToArray();
-        var weights = BucketWeights(request.Wins, request.Losses);
+        var weights = BucketWeights(request.Wins, request.Losses, request.Difficulty);
         for (int b = 0; b < weights.Length; b++) if (free[b].Length == 0) weights[b] = 0;
         if (weights.All(w => w <= 0))
         {
             // Every deck was met (not reachable in one run): repeat rather than refuse.
             free = Catalog.Buckets.Select(bucket => bucket.ToArray()).ToArray();
-            weights = BucketWeights(request.Wins, request.Losses);
+            weights = BucketWeights(request.Wins, request.Losses, request.Difficulty);
         }
         int bucketIndex = new MatchRng(seed, StreamBucket).Pick(weights);
         var deck = free[bucketIndex][new MatchRng(seed, StreamDeck).Pick(Enumerable.Repeat(1.0, free[bucketIndex].Length).ToArray())];
@@ -164,9 +182,11 @@ public sealed class ArenaMatchmaker
         var npcs = World.All.Where(npc => !usedNpcs.Contains(npc.Id)).ToList();
         if (npcs.Count == 0) npcs = World.All.ToList();
         if (npcs.Count == 0) throw new InvalidOperationException("The NPC world has no Arena opponent.");
+        double hardTarget = Rules.NpcTargetFor(request.Wins);
+        double npcTarget = request.Shifted ? hardTarget - request.Difficulty.ShiftRating : hardTarget;
         var npcWeights = npcs.Select(npc =>
         {
-            double z = (npc.HomeRating - Rules.NpcTargetRating) / Rules.NpcSigma;
+            double z = (npc.HomeRating - npcTarget) / Rules.NpcSigma;
             return Math.Exp(-0.5 * z * z) * (npc.Notable ? Rules.NotableWeight : 1);
         }).ToArray();
         var chosen = npcs[new MatchRng(seed, StreamNpc).Pick(npcWeights)];
@@ -178,6 +198,9 @@ public sealed class ArenaMatchmaker
             throw new InvalidOperationException("NPC " + chosen.Id + " references an unknown skill or personality.");
         var profile = buildProfile(chosen, deck, personality, skill);
         int matchSeed = StableSeed.Derive(seed, StreamMatch) & int.MaxValue;
-        return new NpcEncounter(chosen, deck, skill, personality, profile, chosen.HomeRating, matchSeed, "arena");
+        var encounter = new NpcEncounter(chosen, deck, skill, personality, profile, chosen.HomeRating, matchSeed, "arena");
+        // Drafted decks have no Core step: Easy/Medium shape only the NPC's play (NpcDifficultyShaper.Shape returns Hard untouched).
+        int position = request.Shifted ? request.Difficulty.RatingPosition(hardTarget) : 0;
+        return NpcDifficultyShaper.Shape(encounter, request.Difficulty, position, World, buildProfile);
     }
 }
