@@ -245,6 +245,8 @@ namespace SabberStoneCore.CardSets
 					new IncludeTask(EntityType.HAND),
 					new FilterStackTask(SelfCondition.IsRace(Race.DEMON)),
 					new RandomTask(1, EntityType.STACK),
+					// Out of the hand first (as LOOT_420, BOT_267): summoned in place, the Demon stayed listed in the hand too.
+					new RemoveFromHand(EntityType.STACK),
 					new SummonTask())
 			}));
 

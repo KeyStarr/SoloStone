@@ -368,6 +368,8 @@ namespace SabberStoneCore.Kettle
             internal readonly List<int> BurnedCards = new List<int>();
             internal bool HasEffects;
             internal bool Appendages;
+            // LentEffect: the entity whose hits stay in this block, though the block names another card's effect.
+            internal int LentTo;
             // A META_DATA TARGET was published in this block (Targets drops ids as their hits land).
             internal bool Targeted;
             // A targeted DAMAGE landed in this block: the play spell's aim, which a following heal does not repeat.
@@ -522,7 +524,7 @@ namespace SabberStoneCore.Kettle
             if (block != null && (block.BlockType == BlockType.ATTACK || block.BlockType == BlockType.FATIGUE)) return null;
             if (block != null && (block.BlockType == BlockType.POWER || block.BlockType == BlockType.TRIGGER))
             {
-                if (block.Source == source.Id) return null;
+                if (block.Source == source.Id || _blocks.Peek().LentTo == source.Id) return null;
                 if (source is Enchantment enchantment && (enchantment.Target?.Id == block.Source || enchantment.Creator?.Id == block.Source)) return null;
                 if (source is Weapon weapon && weapon.Controller.Hero.Weapon == weapon && weapon.Controller.Hero.Id == block.Source) return null;
                 if (source.Game.IdEntityDic.TryGetValue(block.Source, out var owner) && owner is Enchantment effect
@@ -543,6 +545,17 @@ namespace SabberStoneCore.Kettle
             if (!_enabled || _blocks.Count > 0 && _blocks.Peek().Appendages && _blocks.Peek().Start.Source == body.Id) return null;
             Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, body.Id, "", -1, 0));
             _blocks.Peek().Appendages = true;
+            return new EffectSourceScope(this);
+        }
+
+        // One card's trigger effect played for another's resolution: a TRIGGER block of the owner that names the effect by index,
+        // with the actor's hits and heals directly in it (no per-hit attribution block), so the client's effect finds its targets
+        // there. Nefarian Rises!: his spell cards author no effect; his own card holds one for each of them.
+        internal IDisposable LentEffect(int owner, int effectIndex, int actor)
+        {
+            if (!_enabled) return null;
+            Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, owner, "", -1, 0, effectIndex: effectIndex));
+            _blocks.Peek().LentTo = actor;
             return new EffectSourceScope(this);
         }
 
@@ -996,7 +1009,7 @@ namespace SabberStoneCore.Kettle
             foreach (var frame in source._blocks.Reverse())
             {
                 var start = frame.Start;
-                var copy = new BlockFrame { HasEffects = frame.HasEffects, Appendages = frame.Appendages, Targeted = frame.Targeted, DamageTargeted = frame.DamageTargeted, Start = new PowerHistoryBlockStart {
+                var copy = new BlockFrame { HasEffects = frame.HasEffects, Appendages = frame.Appendages, LentTo = frame.LentTo, Targeted = frame.Targeted, DamageTargeted = frame.DamageTargeted, Start = new PowerHistoryBlockStart {
                     BlockType = start.BlockType, Index = start.Index, EffectIndex = start.EffectIndex,
                     TriggerKeyword = start.TriggerKeyword, Source = start.Source, Target = start.Target, EffectCardId = start.EffectCardId
                 } };

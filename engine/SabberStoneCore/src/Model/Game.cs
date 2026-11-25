@@ -370,9 +370,11 @@ namespace SabberStoneCore.Model
 			{
 				_players[0].AddHeroAndPower(gameConfig.Player1HeroCard ?? Cards.HeroCard(gameConfig.Player1HeroClass));
 				_players[0].BaseClass = _players[0].HeroClass;
+				ApplyStartingHealth(_players[0], gameConfig.Player1StartingHealth);
 
 				_players[1].AddHeroAndPower(gameConfig.Player2HeroCard ?? Cards.HeroCard(gameConfig.Player2HeroClass));
 				_players[1].BaseClass = _players[1].HeroClass;
+				ApplyStartingHealth(_players[1], gameConfig.Player2StartingHealth);
 			}
 
 			TaskQueue = new TaskQueue(this);
@@ -765,7 +767,9 @@ namespace SabberStoneCore.Model
 
         internal void CheckDeadHeroes()
         {
+            CoopRules.CheckBoss(this);
             Actions.CorpseRules.ResurrectHeroes(this);
+            Actions.BossRules.TagInPartners(this);
 			// check dead heroes here again (TODO)
 			if (State != State.COMPLETE)
 			{
@@ -836,6 +840,19 @@ namespace SabberStoneCore.Model
 			// first turn
 			Turn = 1;
 
+			// Run modes: mana crystals before the first turn, and loadout cards set aside to resolve with Start of Game.
+			ApplyStartingMana(Player1, _gameConfig.Player1StartingMana);
+			ApplyStartingMana(Player2, _gameConfig.Player2StartingMana);
+			StartOfGameRules.AddLoadout(Player1, _gameConfig.Player1Loadout);
+			StartOfGameRules.AddLoadout(Player2, _gameConfig.Player2Loadout);
+			AddStartingBoard(Player1, _gameConfig.Player1StartingBoard);
+			AddStartingBoard(Player2, _gameConfig.Player2StartingBoard);
+			RunProgressRules.Apply(Player1, _gameConfig.Player1RunBossesDefeated);
+			CoopRules.Apply(this, _gameConfig.Coop);
+			// A starting Passive Hero Power (a boss's trigger or aura) is live from the start of the game.
+			ActivatePassivePower(Player1);
+			ActivatePassivePower(Player2);
+
 			HistoryFacts.FreezeInitial(this);
             Actions.PayloadRules.CaptureTracking(this);
             // PowerHistory is null when History is off; opening is set only when it is on.
@@ -855,6 +872,39 @@ namespace SabberStoneCore.Model
 
 			// set next step
 			NextStep = Step.BEGIN_FIRST;
+		}
+
+		// A run boss's starting board: minions in play from the start (each with its own auras and triggers live).
+		private static void AddStartingBoard(Controller player, IReadOnlyList<string> cardIds)
+		{
+			if (cardIds == null) return;
+			if (cardIds.Count > player.BoardZone.MaxSize) throw new ArgumentException("A starting board holds at most " + player.BoardZone.MaxSize + " minions.");
+			foreach (string id in cardIds)
+			{
+				Card card = Cards.FromId(id);
+				if (card?.Type != CardType.MINION) throw new ArgumentException("Starting board card " + id + " is not a minion.");
+				var minion = (Minion)Entity.FromCard(player, card, new EntityData { [GameTag.ZONE] = (int)Enums.Zone.PLAY });
+				player.BoardZone.Add(minion);
+			}
+		}
+
+		// A run mode's extra cards in hand after the mulligans (a full hand keeps the rest out, as for any card added to it).
+		private static void AddStartingHand(Controller player, IReadOnlyList<string> cardIds)
+		{
+			if (cardIds == null) return;
+			foreach (string id in cardIds)
+			{
+				Card card = Cards.FromId(id) ?? throw new ArgumentException("Starting hand card " + id + " is unknown.");
+				Generic.AddHandPhase.Invoke(player, Entity.FromCard(player, card));
+			}
+		}
+
+		private static void ActivatePassivePower(Controller player)
+		{
+			var power = player.Hero?.HeroPower;
+			if (power == null || !(power.IsPassiveHeroPower || BossRules.HasStandingTrigger(power.Card))) return;
+			if (power.Power?.Trigger != null && power.ActivatedTrigger == null) power.Power.Trigger.Activate(power);
+			if (power.Power?.Aura != null && power.OngoingEffect == null) power.Power.Aura.Activate(power);
 		}
 
 		/// <summary>
@@ -887,6 +937,21 @@ namespace SabberStoneCore.Model
 			NextStep = Step.BEGIN_DRAW;
 		}
 
+		// A run mode's starting Health replaces the hero card's own (max Health too); 0 keeps the card's. Set through the
+		// Health setter, so history carries it as the hero's HEALTH change and engine and client agree.
+		private static void ApplyStartingHealth(Controller player, int health)
+		{
+			if (health < 0 || health > 1000) throw new ArgumentOutOfRangeException(nameof(health), "Starting Health must be 0..1000.");
+			if (health > 0) player.Hero.BaseHealth = health;
+		}
+
+		// Mana crystals a run mode gives a player before its first turn (the turn then adds one, as usual).
+		private static void ApplyStartingMana(Controller player, int mana)
+		{
+			if (mana < 0 || mana > Controller.MaxResources) throw new ArgumentOutOfRangeException(nameof(mana), "Starting mana must be 0..10.");
+			if (mana > 0) player.BaseMana = mana;
+		}
+
 		/// <summary>
 		/// Part of the state machine.
 		/// Runs when STATE = RUNNING &amp;&amp; NEXTSTEP = BEGIN_DRAW
@@ -899,14 +964,15 @@ namespace SabberStoneCore.Model
 			//FirstPlayer.Opponent.NumCardsToDraw = 4;
 
 			// Self-removing Start of Game sources are never dealt; with nothing else left the slot stays empty.
-			void Deal(Controller p) { if (!StartOfGameRules.OpeningBlocked(p)) Generic.Draw(p, StartOfGameRules.OpeningPick(p)); }
+			// A boss that draws nothing (BossRules) gets no opening hand.
+			void Deal(Controller p) { if (!StartOfGameRules.OpeningBlocked(p) && !BossRules.DrawsNothing(p)) Generic.Draw(p, StartOfGameRules.OpeningPick(p)); }
 
 			_players.ToList().ForEach(p =>
 			{
 				// quest draw if there is
 				// Tag 1192 marks a Sidequest; Sidequests are not part of this guaranteed Quest draw.
 				IPlayable quest = p.DeckZone.FirstOrDefault(q => q is Spell spell && spell.IsQuest && spell.Card[(GameTag)1192] == 0);
-				if (quest != null) Generic.Draw(p, quest); else Deal(p);
+				if (quest != null && !BossRules.DrawsNothing(p)) Generic.Draw(p, quest); else Deal(p);
 				Deal(p);
 				Deal(p);
 
@@ -915,13 +981,17 @@ namespace SabberStoneCore.Model
 					// 4th card for second player
 					Deal(p);
 
-					IPlayable coin = FromCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"), new EntityData
+					// Run modes can withhold the Coin (Dungeon Run's bosses get none); the fourth card stays.
+					if (!_gameConfig.SkipCoin)
 					{
-						[GameTag.ZONE] = (int)Enums.Zone.HAND,
-						[GameTag.CARDTYPE] = (int)CardType.SPELL,
-						[GameTag.CREATOR] = FirstPlayer.Opponent.PlayerId
-					});
-					Generic.AddHandPhase(FirstPlayer.Opponent, coin);
+						IPlayable coin = FromCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"), new EntityData
+						{
+							[GameTag.ZONE] = (int)Enums.Zone.HAND,
+							[GameTag.CARDTYPE] = (int)CardType.SPELL,
+							[GameTag.CREATOR] = FirstPlayer.Opponent.PlayerId
+						});
+						Generic.AddHandPhase(FirstPlayer.Opponent, coin);
+					}
 				}
 
 				p.NumTurnsLeft = 1;
@@ -977,6 +1047,8 @@ namespace SabberStoneCore.Model
 			//Generic.DrawCard(FirstPlayer.Opponent, Cards.FromId("GAME_005"));
 
 			StartOfGameRules.Resolve(this);
+			AddStartingHand(Player1, _gameConfig.Player1StartingHand);
+			AddStartingHand(Player2, _gameConfig.Player2StartingHand);
 			if (Player1[NativeTailRules.NozdormuEnabled] != 0) Player1.TimeOut = 15;
 			if (Player2[NativeTailRules.NozdormuEnabled] != 0) Player2.TimeOut = 15;
 
@@ -1122,7 +1194,7 @@ namespace SabberStoneCore.Model
 				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, CurrentPlayer.Id, "", 0, 0, effectIndex: -1)); // turn start effect
 
 			//CurrentPlayer.NumCardsToDraw = 1;
-			if (!Actions.DrawReplacementRules.TryReplaceNormalDraw(CurrentPlayer))
+			if (!Actions.BossRules.DrawsNothing(CurrentPlayer) && !Actions.DrawReplacementRules.TryReplaceNormalDraw(CurrentPlayer))
                 using(Facts.TurnStartDraw()) Generic.Draw(CurrentPlayer);
 
 			if (History)
@@ -1326,7 +1398,8 @@ namespace SabberStoneCore.Model
 			if (History)
 				PowerHistory.Add(PowerHistoryBuilder.BlockStart(BlockType.TRIGGER, Id, "", -1, 0, effectIndex: -1));
 
-			foreach (Controller player in _players)
+			if (CoopRules.IsCoop(this)) CoopRules.WrapUp(this);
+			else foreach (Controller player in _players)
 			{
 				if (player.PlayState == PlayState.TIED)
 				{
@@ -1441,6 +1514,8 @@ namespace SabberStoneCore.Model
 			}
 
             Actions.CorpseRules.ResurrectHeroes(this);
+            Actions.BossRules.TagInPartners(this);
+            CoopRules.CheckBoss(this);
 
 			if (Player1.Hero.ToBeDestroyed)
 			{
@@ -1850,6 +1925,10 @@ namespace SabberStoneCore.Model
 		{
 			set
 			{
+				// A co-op game that ended mid-step (heroes killed by Nefarian's end-of-turn spell) stops there: the step
+				// that was running must not go on to the cleanup and a new turn, which would draw cards in a finished game.
+				// Ordinary games share the bug; fixing them too changes the recorded goldens, so that is a separate change.
+				if (State == State.COMPLETE && value != Step.FINAL_WRAPUP && value != Step.FINAL_GAMEOVER && CoopRules.IsCoop(this)) return;
 				this[GameTag.NEXT_STEP] = (int)value;
 				GamesEventManager.NextStepEvent(this, value);
 			}

@@ -39,6 +39,7 @@ C	Assembly-CSharp	Hearthstone.DataModels.AchievementSectionListDataModel	.ctor	S
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementStatsDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.AchievementSubcategoryListDataModel	.ctor	System.Void()
+C	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.PriceDataModel	.ctor	System.Void()
 C	Assembly-CSharp	Hearthstone.DataModels.RewardItemDataModel	.ctor	System.Void()
@@ -157,6 +158,7 @@ C	blizzard.bgsclient	PegasusShared.Date	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.DeckCardData	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	.ctor	System.Void()
+C	blizzard.bgsclient	PegasusShared.GameSaveDataValue	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusShared.GameSaveKey	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.ArenaPlayerInfo	.ctor	System.Void()
 C	blizzard.bgsclient	PegasusUtil.ArenaRatingInfoResponse	.ctor	System.Void()
@@ -194,6 +196,8 @@ F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_heroPowerContainer	*
 F	Assembly-CSharp	AbsDeckPickerTrayDisplay	m_playButton	*
 F	Assembly-CSharp	AdjustBuyingAmount	m_decrementClickable	*
 F	Assembly-CSharp	AdjustBuyingAmount	m_incrementClickable	*
+F	Assembly-CSharp	AdventureDungeonCrawlDeckTray	m_deck	*
+F	Assembly-CSharp	AdventureDungeonCrawlDisplay	m_dungeonCrawlDeckTray	AdventureDungeonCrawlDeckTray
 F	Assembly-CSharp	AlertPopup	m_alertText	*
 F	Assembly-CSharp	AlertPopup	m_body	NineSliceElement
 F	Assembly-CSharp	AlertPopup	m_buttonContainer	MultiSliceElement
@@ -456,6 +460,7 @@ F	Assembly-CSharp	GameDbf	CosmeticCoin	Dbf`1<CosmeticCoinDbfRecord>
 F	Assembly-CSharp	GameDbf	Deck	Dbf`1<DeckDbfRecord>
 F	Assembly-CSharp	GameDbf	DeckCard	Dbf`1<DeckCardDbfRecord>
 F	Assembly-CSharp	GameDbf	DeckTemplate	Dbf`1<DeckTemplateDbfRecord>
+F	Assembly-CSharp	GameDbf	GameMode	Dbf`1<GameModeDbfRecord>
 F	Assembly-CSharp	GameDbf	League	Dbf`1<LeagueDbfRecord>
 F	Assembly-CSharp	GameDbf	Pet	Dbf`1<PetDbfRecord>
 F	Assembly-CSharp	GameDbf	PetLevel	Dbf`1<PetLevelDbfRecord>
@@ -478,6 +483,9 @@ F	Assembly-CSharp	GameMgr	m_gameType	*
 F	Assembly-CSharp	GameMgr	m_nextFormatType	*
 F	Assembly-CSharp	GameMgr	m_nextGameType	*
 F	Assembly-CSharp	GameMgr	m_nextMissionId	*
+F	Assembly-CSharp	GameModeDisplay	m_activeGameModeRecords	*
+F	Assembly-CSharp	GameModeDisplay	m_selectedGameModeButtonDataModel	*
+F	Assembly-CSharp	GameModeDisplay	m_slidingTray	SlidingTray
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Key	GameSaveKeyId
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Long_Values	System.Int64[]
 F	Assembly-CSharp	GameSaveDataManager+SubkeySaveRequest	Subkey	GameSaveKeySubkeyId
@@ -538,6 +546,7 @@ F	Assembly-CSharp	MultiSliceElement+Slice	m_slice	UnityEngine.GameObject
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useMeshRenderers	System.Boolean
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useTextSize	System.Boolean
 F	Assembly-CSharp	MultiSliceElement+Slice	m_useWidgetTransform	System.Boolean
+F	Assembly-CSharp	NameBanner	m_playerId	*
 F	Assembly-CSharp	NetCache	FavoritePetChanged	*
 F	Assembly-CSharp	NetCache	FavoritePetVariantChanged	*
 F	Assembly-CSharp	NetCache	PetsXpLevelChanged	*
@@ -618,6 +627,11 @@ F	Assembly-CSharp	RankedRewardDisplay	m_isAnimating	*
 F	Assembly-CSharp	RankedRewardDisplay	m_isHidePending	*
 F	Assembly-CSharp	RankedRewardDisplay	m_numAnimationsRemaining	*
 F	Assembly-CSharp	RankedRewardDisplay	m_screenEffectsHandle	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindHideScreenLoop	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindHideScreenLoopOpponent	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindSpellScreenWipe	*
+F	Assembly-CSharp	ResetGameSpellController	m_RewindSpellScreenWipeOpponent	*
+F	Assembly-CSharp	ResetGameSpellController	m_screenWipeToLoopTransitionTimer	*
 F	Assembly-CSharp	RewardBoxesDisplay	m_ClickCatcher	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay	m_DoneButton	NormalButton
 F	Assembly-CSharp	RewardBoxesDisplay	m_RewardObjects	*
@@ -631,6 +645,11 @@ F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardData	System.Collections.G
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardDust	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardGold	UnityEngine.GameObject
 F	Assembly-CSharp	RewardBoxesDisplay+RewardSet	m_RewardPackage	UnityEngine.GameObject
+F	Assembly-CSharp	RewindGameSpellController	m_RewindHideScreenLoop	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindHideScreenLoopOpponent	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindSpellScreenWipe	*
+F	Assembly-CSharp	RewindGameSpellController	m_RewindSpellScreenWipeOpponent	*
+F	Assembly-CSharp	RewindGameSpellController	m_screenWipeToLoopTransitionTimer	*
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbButtonWidget	*
 F	Assembly-CSharp	RibbonButtonsUI	m_prtbRibbon	*
 F	Assembly-CSharp	SceneMgr	m_scene	*
@@ -762,6 +781,10 @@ M	*	UberText	GetLocalizedFont	()
 M	*	UberText	GetTextBounds	()
 M	*	UberText	UpdateNow	(System.Boolean)
 M	*	iTween	Count	(UnityEngine.GameObject)
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	OnPlayGameButtonReleased	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	PlayGame	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetHeroButtonsEnabled	*
+M	Assembly-CSharp	AbsDeckPickerTrayDisplay	SetPlayButtonEnabled	*
 M	Assembly-CSharp	AchieveManager	Get	AchieveManager()
 M	Assembly-CSharp	AchieveManager	IsReady	*
 M	Assembly-CSharp	AchieveManager	IsReady	System.Boolean()
@@ -781,6 +804,15 @@ M	Assembly-CSharp	Actor	IsShown	System.Boolean()
 M	Assembly-CSharp	Actor	SetPortraitMaterial	System.Void(UnityEngine.Material,System.Int32)
 M	Assembly-CSharp	Actor	SetPortraitTexture	System.Void(UnityEngine.Texture)
 M	Assembly-CSharp	AdjustBuyingAmount	RefreshQuantity	()
+M	Assembly-CSharp	AdventureConfig	ChangeSubSceneToSelectedAdventure	System.Void()
+M	Assembly-CSharp	AdventureConfig	Get	AdventureConfig()
+M	Assembly-CSharp	AdventureConfig	GetSelectedAdventure	AdventureDbId()
+M	Assembly-CSharp	AdventureConfig	GetSelectedMode	AdventureModeDbId()
+M	Assembly-CSharp	AdventureConfig	OnAdventureSceneAwake	*
+M	Assembly-CSharp	AdventureConfig	SetSelectedAdventureMode	System.Void(AdventureDbId,AdventureModeDbId)
+M	Assembly-CSharp	AdventureConfig	get_CurrentSubScene	Assets.AdventureData+Adventuresubscene()
+M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnBackButtonPress	*
+M	Assembly-CSharp	AdventureDungeonCrawlDisplay	OnRewardOptionSelected	*
 M	Assembly-CSharp	AlertPopup	ButtonPress	*
 M	Assembly-CSharp	AlertPopup	GetInfo	AlertPopup+PopupInfo()
 M	Assembly-CSharp	AlertPopup	Hide	*
@@ -819,8 +851,11 @@ M	Assembly-CSharp	AttackSpellController	OnHeroSourceAttackStateFinished	*
 M	Assembly-CSharp	AttackSpellController	OnProcessTaskList	*
 M	Assembly-CSharp	AttackSpellController	OnSourceAttackStateStarted	*
 M	Assembly-CSharp	AttackSpellController	OnStaticHeroSourceAttackStateFinished	*
+M	Assembly-CSharp	BannerManager	Get	BannerManager()
+M	Assembly-CSharp	BannerManager	get_IsShowing	System.Boolean()
 M	Assembly-CSharp	BaseHeroSkinInfoManager	EnterPreview	(CollectionCardVisual)
 M	Assembly-CSharp	BaseHeroSkinInfoManager	OnFailedPurchaseAck	(Hearthstone.Store.ProductInfo,PaymentMethod)
+M	Assembly-CSharp	BasePhoneDeckTray	OnCardCountUpdated	*
 M	Assembly-CSharp	BattlegroundsGuideButton	OnTrayEvent	*
 M	Assembly-CSharp	BattlegroundsGuideButton	StartGuideTutorial	*
 M	Assembly-CSharp	BnetBar	Get	BnetBar()
@@ -996,6 +1031,7 @@ M	Assembly-CSharp	CollectionDeck	GetCardsWithCardID	System.Collections.Generic.L
 M	Assembly-CSharp	CollectionDeck	GetClasses	System.Collections.Generic.List`1<TAG_CLASS>()
 M	Assembly-CSharp	CollectionDeck	GetDisplayHeroCardID	(System.Boolean)
 M	Assembly-CSharp	CollectionDeck	GetDisplayHeroCardID	*
+M	Assembly-CSharp	CollectionDeck	GetMaxCardCount	System.Int32()
 M	Assembly-CSharp	CollectionDeck	GetOrCreateSideboard	SideboardDeck(System.String,TAG_PREMIUM)
 M	Assembly-CSharp	CollectionDeck	GetRuleset	DeckRuleset(System.Nullable`1<PegasusShared.FormatType>)
 M	Assembly-CSharp	CollectionDeck	GetRuneOrder	PegasusShared.RuneType[]()
@@ -1250,6 +1286,7 @@ M	Assembly-CSharp	DialogBase	HandleKeyboardInput	()
 M	Assembly-CSharp	DialogBase	Hide	System.Void()
 M	Assembly-CSharp	DialogManager	AddToQueue	(DialogManager+DialogRequest)
 M	Assembly-CSharp	DialogManager	AddToQueue	*
+M	Assembly-CSharp	DialogManager	DismissAlertOrRemoveFromQueue	*
 M	Assembly-CSharp	DialogManager	DismissAlertOrRemoveFromQueue	System.Void(System.String)
 M	Assembly-CSharp	DialogManager	Get	DialogManager()
 M	Assembly-CSharp	DialogManager	ShowCardListPopup	System.Void(UserAttentionBlocker,CardListPopup+Info)
@@ -1299,6 +1336,8 @@ M	Assembly-CSharp	DraftScene	OnUIScreenLoaded	*
 M	Assembly-CSharp	EmoteHandler	Get	EmoteHandler()
 M	Assembly-CSharp	EmoteHandler	IsValidEmoteTypeForOpponent	System.Boolean(EmoteType)
 M	Assembly-CSharp	EndGameScreen	Awake	*
+M	Assembly-CSharp	EndGameScreen	ContinueButtonPress_Common	*
+M	Assembly-CSharp	EndGameScreen	ContinueButtonPress_PrevMode	*
 M	Assembly-CSharp	EndGameScreen	ContinueEvents	*
 M	Assembly-CSharp	EndGameScreen	Get	EndGameScreen()
 M	Assembly-CSharp	EndGameScreen	HideTwoScoop	()
@@ -1321,6 +1360,8 @@ M	Assembly-CSharp	EnemyEmoteHandler	Get	EnemyEmoteHandler()
 M	Assembly-CSharp	EnemyEmoteHandler	IsSquelched	System.Boolean(System.Int32)
 M	Assembly-CSharp	Entity	GetCard	Card()
 M	Assembly-CSharp	Entity	GetController	Player()
+M	Assembly-CSharp	Entity	GetHero	Entity()
+M	Assembly-CSharp	Entity	GetName	System.String()
 M	Assembly-CSharp	Entity	GetPetCard	Card()
 M	Assembly-CSharp	Entity	GetWeaponCard	Card()
 M	Assembly-CSharp	Entity	HasHandTarget	System.Boolean()
@@ -1394,6 +1435,7 @@ M	Assembly-CSharp	GameMenu	OnSkipTutorialButtonReleased	*
 M	Assembly-CSharp	GameMenu	RestartButtonPressed	*
 M	Assembly-CSharp	GameMenu	Show	*
 M	Assembly-CSharp	GameMenu	ShowLoginTooltipIfNeeded	*
+M	Assembly-CSharp	GameMgr	FindGameWithHero	*
 M	Assembly-CSharp	GameMgr	Get	GameMgr()
 M	Assembly-CSharp	GameMgr	GetGameSetup	Network+GameSetup()
 M	Assembly-CSharp	GameMgr	GetGameType	PegasusShared.GameType()
@@ -1405,6 +1447,13 @@ M	Assembly-CSharp	GameMgr	IsBattlegroundsMatchOrTutorial	System.Boolean()
 M	Assembly-CSharp	GameMgr	IsTraditionalTutorial	System.Boolean()
 M	Assembly-CSharp	GameMgr	LoadTransitionPopup	(System.String)
 M	Assembly-CSharp	GameMgr	ShowTransitionPopup	(System.String,System.Int32)
+M	Assembly-CSharp	GameModeDbfRecord	get_GameModeButtonState	System.String()
+M	Assembly-CSharp	GameModeDisplay	CanEnterMode	*
+M	Assembly-CSharp	GameModeDisplay	GetGameModeSceneDataModel	Hearthstone.DataModels.GameModeSceneDataModel()
+M	Assembly-CSharp	GameModeDisplay	GoToHub	*
+M	Assembly-CSharp	GameModeDisplay	InitializeGameModeSceneData	*
+M	Assembly-CSharp	GameModeDisplay	InitializeSlidingTray	*
+M	Assembly-CSharp	GameModeDisplay	NavigateToSelectedMode	*
 M	Assembly-CSharp	GameSaveDataManager	ApplyGameSaveDataUpdate	System.Void(PegasusShared.GameSaveDataUpdate)
 M	Assembly-CSharp	GameSaveDataManager	Get	*
 M	Assembly-CSharp	GameSaveDataManager	Get	GameSaveDataManager()
@@ -1493,6 +1542,8 @@ M	Assembly-CSharp	GameUtils	IsWildCard	System.Boolean(EntityDef)
 M	Assembly-CSharp	GameUtils	ReplayTraditionalTutorial	*
 M	Assembly-CSharp	GameUtils	TranslateCardIdToDbId	System.Int32(System.String,System.Boolean)
 M	Assembly-CSharp	GameUtils	TranslateDbIdToCardId	System.String(System.Int32,System.Boolean)
+M	Assembly-CSharp	Gameplay	Get	Gameplay()
+M	Assembly-CSharp	Gameplay	GetNameBannerForSide	NameBanner(Player+Side)
 M	Assembly-CSharp	Gameplay	OnBoardLoaded	*
 M	Assembly-CSharp	GoldRewardData	get_Amount	System.Int64()
 M	Assembly-CSharp	GraphicsManager	InitializeScreen	()
@@ -1566,6 +1617,22 @@ M	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel	set_ratin
 M	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel	get_CardBackId	System.Int32()
 M	Assembly-CSharp	Hearthstone.DataModels.CardDataModel	get_CardId	System.String()
 M	Assembly-CSharp	Hearthstone.DataModels.EventDataModel	get_Payload	System.Object()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_ButtonState	System.String()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_GameModeRecordId	System.Int32()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	get_Name	System.String()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_ButtonState	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_Description	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_GameModeRecordId	System.Void(System.Int32)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsBeta	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsDownloadRequired	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsDownloading	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsEarlyAccess	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_IsNew	System.Void(System.Boolean)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_ModuleTag	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel	set_Name	System.Void(System.String)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	get_LastSelectedGameModeRecordId	System.Int32()
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	set_GameModeButtons	System.Void(Hearthstone.UI.DataModelList`1<Hearthstone.DataModels.GameModeButtonDataModel>)
+M	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel	set_LastSelectedGameModeRecordId	System.Void(System.Int32)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_DoneChangingTabs	System.Void(System.Boolean)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_HasPassedTavernGuideButtonIntro	System.Void(System.Boolean)
 M	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel	set_HasSeenWelcomeApprentice	System.Void(System.Boolean)
@@ -1853,6 +1920,9 @@ M	Assembly-CSharp	MulliganManager	SkipMulligan	*
 M	Assembly-CSharp	MultiSliceElement	AddSlice	System.Void(UnityEngine.GameObject,UnityEngine.Vector3,UnityEngine.Vector3,System.Boolean,System.Boolean,System.Boolean,System.Boolean,System.Boolean)
 M	Assembly-CSharp	MultiSliceElement	ClearSlices	System.Void()
 M	Assembly-CSharp	MultiSliceElement	UpdateSlices	System.Void()
+M	Assembly-CSharp	NameBanner	ShouldShowGameIconBanner	*
+M	Assembly-CSharp	NameBanner	UpdateHeroNameBanner	*
+M	Assembly-CSharp	NameBanner	UpdateSubtext	*
 M	Assembly-CSharp	NarrativeManager	Get	NarrativeManager()
 M	Assembly-CSharp	NarrativeManager	OnArenaRewardsShown	*
 M	Assembly-CSharp	Navigation	GoBack	System.Boolean()
@@ -2296,6 +2366,7 @@ M	Assembly-CSharp	Player	UpdateName	*
 M	Assembly-CSharp	PopupDisplayManager	CanShowRankedIntroForNewPlayer	*
 M	Assembly-CSharp	PopupDisplayManager	Get	PopupDisplayManager()
 M	Assembly-CSharp	PopupDisplayManager	get_IsShowing	System.Boolean()
+M	Assembly-CSharp	PowerProcessor	CreateSwapGameStateSpellController	*
 M	Assembly-CSharp	PowerProcessor	DoCurrentTaskList	()
 M	Assembly-CSharp	PowerProcessor	DoTaskListWithSpellController	(GameState,PowerTaskList,Entity)
 M	Assembly-CSharp	PowerProcessor	EndCurrentTaskList	()
@@ -2370,6 +2441,7 @@ M	Assembly-CSharp	RemoteActionHandler	HandleAction	System.Void(Network+UserUI)
 M	Assembly-CSharp	RenderUtils	EnableColliders	System.Void(UnityEngine.GameObject,System.Boolean)
 M	Assembly-CSharp	ReplayableTutorialPopup	Awake	*
 M	Assembly-CSharp	ReplayableTutorialPopup	HandleEvent	*
+M	Assembly-CSharp	ResetGameSpellController	IsResetSourceRewind	*
 M	Assembly-CSharp	RewardBoxesDisplay	AnimateRewards	System.Void()
 M	Assembly-CSharp	RewardBoxesDisplay	CreateRewardInstance	(RewardData,System.Int32,UnityEngine.Vector3,System.Boolean)
 M	Assembly-CSharp	RewardBoxesDisplay	CreateRewardInstance	*
@@ -2387,8 +2459,10 @@ M	Assembly-CSharp	RewardBoxesDisplay	SetLayer	*
 M	Assembly-CSharp	RewardBoxesDisplay	SetRewards	System.Void(System.Collections.Generic.List`1<RewardData>,System.Collections.Generic.List`1<RewardData>)
 M	Assembly-CSharp	RewardBoxesDisplay	UseDarkeningClickCatcher	System.Void(System.Boolean)
 M	Assembly-CSharp	RewardData	get_RewardType	Reward+Type()
+M	Assembly-CSharp	RewardPopups	ShowRewardsForAdventureUnlocks	*
 M	Assembly-CSharp	RewardUtils	GetNextHeroLevelRewardText	*
 M	Assembly-CSharp	RewardUtils	InitializeRewardItemDataModel	System.Boolean(Hearthstone.DataModels.RewardItemDataModel,TAG_RARITY,TAG_PREMIUM,System.String&)
+M	Assembly-CSharp	RewardUtils	LoadAndDisplayRewards	System.Void(System.Collections.Generic.List`1<RewardData>,System.Action)
 M	Assembly-CSharp	RewardUtils	RewardItemTypeToCurrencyType	CurrencyType(RewardItemType)
 M	Assembly-CSharp	SPJEntryButton	Awake	*
 M	Assembly-CSharp	SPJEntryButton	ShowButton	*
@@ -2452,6 +2526,7 @@ M	Assembly-CSharp	ShopWindowController	GetWindow	!!0()
 M	Assembly-CSharp	SideboardDeck	InitCardCount	System.Void()
 M	Assembly-CSharp	SideboardDeck	get_MainDeck	CollectionDeck()
 M	Assembly-CSharp	SideboardDeck	get_OwnerCardDbId	System.Int32()
+M	Assembly-CSharp	SlidingTray	ToggleTraySlider	System.Void(System.Boolean,UnityEngine.Transform,System.Boolean)
 M	Assembly-CSharp	SoundManager	Get	SoundManager()
 M	Assembly-CSharp	SoundManager	IsInitialized	System.Boolean()
 M	Assembly-CSharp	SoundManager	LoadAndPlayClip	*
@@ -2993,6 +3068,7 @@ M	blizzard.bgsclient	PegasusGame.PowerHistoryMetaData	set_Info	System.Void(Syste
 M	blizzard.bgsclient	PegasusGame.PowerHistoryMetaData	set_Type	System.Void(PegasusGame.HistoryMeta+Type)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	get_CreateGame	PegasusGame.PowerHistoryCreateGame()
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_CreateGame	System.Void(PegasusGame.PowerHistoryCreateGame)
+M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_SourceIsGamestateSwap	System.Void(System.Boolean)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryResetGame	set_SourceIsRewind	System.Void(System.Boolean)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryShuffleDeck	set_PlayerId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusGame.PowerHistoryStart	get_EffectCardId	System.String()
@@ -3069,6 +3145,8 @@ M	blizzard.bgsclient	PegasusShared.DeckCardData	set_Qty	System.Void(System.Int32
 M	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	set_EndSecondsFromNow	System.Void(System.UInt64)
 M	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec	set_SeasonId	System.Void(System.Int32)
 M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Tuple	System.Void(System.Collections.Generic.List`1<PegasusShared.GameSaveKey>)
+M	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate	set_Value	System.Void(PegasusShared.GameSaveDataValue)
+M	blizzard.bgsclient	PegasusShared.GameSaveDataValue	set_IntValue	System.Void(System.Collections.Generic.List`1<System.Int64>)
 M	blizzard.bgsclient	PegasusShared.GameSaveKey	set_Id	System.Void(System.Int64)
 M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_Def	PegasusShared.CardDef()
 M	blizzard.bgsclient	PegasusShared.SideBoardCardData	get_LinkedCardDbId	System.Int32()
@@ -3135,7 +3213,10 @@ P	*	UberText	Text	*
 P	*	UberText	TextColor	*
 P	*	UberText	Width	*
 P	*	UberText	WordWrap	*
+P	*	UnityEngine.AudioListener	pause	*
 P	*	UnityEngine.AudioListener	volume	*
+P	*	UnityEngine.AudioSource	ignoreListenerPause	*
+P	*	UnityEngine.AudioSource	isPlaying	*
 P	Assembly-CSharp	CardSetDbfRecord	IsCoreCardSet	*
 P	Assembly-CSharp	CardSetDbfRecord	IsFeaturedCardSet	*
 P	Assembly-CSharp	CraftingManager	IsInCraftingMode	*
@@ -3163,6 +3244,14 @@ T	Assembly-CSharp	AchievementCategoryDbfRecord
 T	Assembly-CSharp	AchievementSubcategoryDbfRecord		
 T	Assembly-CSharp	Actor		
 T	Assembly-CSharp	AdjustBuyingAmount		
+T	Assembly-CSharp	AdventureConfig		
+T	Assembly-CSharp	AdventureDbId		
+T	Assembly-CSharp	AdventureDeckDbfRecord		
+T	Assembly-CSharp	AdventureDungeonCrawlDeckTray		
+T	Assembly-CSharp	AdventureDungeonCrawlDisplay		
+T	Assembly-CSharp	AdventureHeroPowerDbfRecord		
+T	Assembly-CSharp	AdventureLoadoutTreasuresDbfRecord		
+T	Assembly-CSharp	AdventureModeDbId		
 T	Assembly-CSharp	AlertPopup		
 T	Assembly-CSharp	AlertPopup+Header		
 T	Assembly-CSharp	AlertPopup+PopupInfo		
@@ -3181,6 +3270,8 @@ T	Assembly-CSharp	ArenaLandingPage
 T	Assembly-CSharp	ArenaLandingPageManager		
 T	Assembly-CSharp	ArenaModeToggleButton		
 T	Assembly-CSharp	AssetLoader		
+T	Assembly-CSharp	Assets.AdventureData		
+T	Assembly-CSharp	Assets.AdventureData+Adventuresubscene		
 T	Assembly-CSharp	Assets.BoxDressing		
 T	Assembly-CSharp	Assets.BoxDressing+BoxDressingType		
 T	Assembly-CSharp	Assets.CardHero		
@@ -3191,7 +3282,9 @@ T	Assembly-CSharp	Assets.Global
 T	Assembly-CSharp	Assets.Global+PresenceStatus		
 T	Assembly-CSharp	Assets.Global+RewardTrackType		
 T	Assembly-CSharp	AttackSpellController		
+T	Assembly-CSharp	BannerManager		
 T	Assembly-CSharp	BaseHeroSkinInfoManager		
+T	Assembly-CSharp	BasePhoneDeckTray		
 T	Assembly-CSharp	BnetBar		
 T	Assembly-CSharp	BnetBarMenuButton		
 T	Assembly-CSharp	BnetPresenceMgr		
@@ -3342,6 +3435,9 @@ T	Assembly-CSharp	GameEntityOption
 T	Assembly-CSharp	GameEntityOptions		
 T	Assembly-CSharp	GameMenu		
 T	Assembly-CSharp	GameMgr		
+T	Assembly-CSharp	GameModeDbfRecord		
+T	Assembly-CSharp	GameModeDisplay		
+T	Assembly-CSharp	GameModeDisplay+ModeLockedStatus		
 T	Assembly-CSharp	GameSaveDataManager		
 T	Assembly-CSharp	GameSaveDataManager+OnRequestDataResponseDelegate		
 T	Assembly-CSharp	GameSaveDataManager+OnSaveDataResponseDelegate		
@@ -3369,6 +3465,8 @@ T	Assembly-CSharp	Hearthstone.DataModels.ArenaLandingPageModeDataModel
 T	Assembly-CSharp	Hearthstone.DataModels.CardBackDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.CardDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.EventDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.GameModeButtonDataModel		
+T	Assembly-CSharp	Hearthstone.DataModels.GameModeSceneDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.JournalMetaDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.PackDataModel		
 T	Assembly-CSharp	Hearthstone.DataModels.PriceDataModel		
@@ -3462,6 +3560,7 @@ T	Assembly-CSharp	MulliganButton
 T	Assembly-CSharp	MulliganManager		
 T	Assembly-CSharp	MultiSliceElement		
 T	Assembly-CSharp	MultiSliceElement+Slice		
+T	Assembly-CSharp	NameBanner		
 T	Assembly-CSharp	NarrativeManager		
 T	Assembly-CSharp	Navigation		
 T	Assembly-CSharp	Navigation+NavigateBackHandler		
@@ -3585,6 +3684,7 @@ T	Assembly-CSharp	RankedRewardDisplay
 T	Assembly-CSharp	RankedStarArray		
 T	Assembly-CSharp	RemoteActionHandler		
 T	Assembly-CSharp	RenderUtils		
+T	Assembly-CSharp	ResetGameSpellController		
 T	Assembly-CSharp	Reward		
 T	Assembly-CSharp	Reward+Type		
 T	Assembly-CSharp	RewardBoxesDisplay		
@@ -3594,7 +3694,9 @@ T	Assembly-CSharp	RewardBoxesDisplay+RewardSet
 T	Assembly-CSharp	RewardData		
 T	Assembly-CSharp	RewardItemType		
 T	Assembly-CSharp	RewardPackage		
+T	Assembly-CSharp	RewardPopups		
 T	Assembly-CSharp	RewardUtils		
+T	Assembly-CSharp	RewindGameSpellController		
 T	Assembly-CSharp	RuleInvalidReason		
 T	Assembly-CSharp	SceneMgr		
 T	Assembly-CSharp	SceneMgr+Mode		
@@ -3627,6 +3729,7 @@ T	Assembly-CSharp	ShopType
 T	Assembly-CSharp	ShopWindowController		
 T	Assembly-CSharp	SideboardCardDbfRecord		
 T	Assembly-CSharp	SideboardDeck		
+T	Assembly-CSharp	SlidingTray		
 T	Assembly-CSharp	SoundDef		
 T	Assembly-CSharp	SoundManager		
 T	Assembly-CSharp	SoundManager+SoundOptions		
@@ -3646,6 +3749,7 @@ T	Assembly-CSharp	StorePurchaseAuth
 T	Assembly-CSharp	StorePurchaseAuth+ButtonStyle		
 T	Assembly-CSharp	StoreQuantityPrompt		
 T	Assembly-CSharp	SubSpellController		
+T	Assembly-CSharp	SwapGameStateSpellController		
 T	Assembly-CSharp	TAG_CARDTYPE		
 T	Assembly-CSharp	TAG_CARD_SET		
 T	Assembly-CSharp	TAG_CLASS		
@@ -3825,6 +3929,7 @@ T	blizzard.bgsclient	PegasusShared.ErrorCode
 T	blizzard.bgsclient	PegasusShared.FormatType		
 T	blizzard.bgsclient	PegasusShared.GameContentSeasonSpec		
 T	blizzard.bgsclient	PegasusShared.GameSaveDataUpdate		
+T	blizzard.bgsclient	PegasusShared.GameSaveDataValue		
 T	blizzard.bgsclient	PegasusShared.GameSaveKey		
 T	blizzard.bgsclient	PegasusShared.GameType		
 T	blizzard.bgsclient	PegasusShared.RuneType		

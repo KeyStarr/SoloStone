@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Run modes (plugin/Runs): definition parsing, strict content admission, and the run rules. C# 7.3 like the plugin. -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework>
+    <LangVersion>7.3</LangVersion><ImplicitUsings>disable</ImplicitUsings><Nullable>disable</Nullable>
+    <EngineSource>true</EngineSource><DefineConstants>$(DefineConstants);ENGINE_SOURCE</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../plugin/Runs/*.cs" LinkBase="Runs" />
+    <Compile Include="../../plugin/StableSeed.cs" Link="StableSeed.cs" />
+    <Compile Include="../../plugin/Npc/EncounterSpec.cs" Link="EncounterSpec.cs" />
+    <Compile Include="../../plugin/Npc/World/NpcWorldJson.cs" Link="NpcWorldJson.cs" />
+    <Compile Include="../shared/MiniJSON.cs" Link="MiniJSON.cs" />
+    <ProjectReference Include="../../engine/SabberStoneCore/SabberStoneCore.csproj" />
+    <None Include="fixtures/*.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="../../data/runs/*.json" LinkBase="data/runs" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>

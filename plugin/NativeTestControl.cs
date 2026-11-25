@@ -21,6 +21,10 @@ internal sealed partial class NativeTestControl
 #endif
     private string CaptureRoot => Reports + @"\control";
     private const int TradeKeyword = 1720;
+    // Semantic act classes beyond plain plays: act sets the client's selected option, sub-option, target and position and
+    // calls SendOption, the packet the native targeting and Choose One UI send at their end. Flip off to refuse them again.
+    internal const bool TargetedBattlecryQualified = true;
+    internal const bool ChooseOneQualified = true;
     private static NativeTestControl current;
     private readonly OfflineLaunchContext launch;
     private readonly ManualLogSource log;
@@ -195,9 +199,13 @@ internal sealed partial class NativeTestControl
         }
         if (active != null)
         {
-            active.Phase = active.Phase == "fault" || active.Sends != 0 || active.Detail.ContainsKey("nativeInvocationStarted") ? "fault" : "rejected";
-            active.Detail["error"] = reason + "; reconcile action-status before retry";
-            if (active.Phase == "fault") LatchFault(reason);
+            // An action that already settled stays settled: a restart after it (a new token) leaves nothing unknown to fault.
+            if (active.Phase != "settled")
+            {
+                active.Phase = active.Phase == "fault" || active.Sends != 0 || active.Detail.ContainsKey("nativeInvocationStarted") ? "fault" : "rejected";
+                active.Detail["error"] = reason + "; reconcile action-status before retry";
+                if (active.Phase == "fault") LatchFault(reason);
+            }
             active = null; owner = null; inSubmission = false;
         }
     }
@@ -411,7 +419,7 @@ internal sealed partial class NativeTestControl
         catch (Exception error)
         {
             string readError = "Snapshot failed: " + error.GetType().Name + ": " + error.Message;
-            var view = new View { MatchId = LocalLadder.MatchId, Revision = "snapshot-fault" };
+            var view = new View { MatchId = ClientBridge.TestControlMatchId, Revision = "snapshot-fault" };
             view.Blockers.Add(readError); view.ActionBlockers.Add(readError);
             view.State["readError"] = readError;
             view.State["readErrorTrace"] = error.ToString();
@@ -424,7 +432,7 @@ internal sealed partial class NativeTestControl
     {
         var reply = new JsonNode {
             { "v", 1 }, { "runId", launch.RunId }, { "snapshotId", launch.SnapshotId },
-            { "matchId", LocalLadder.MatchId }, { "frame", Time.frameCount }, { "id", request.Id }, { "phase", phase }
+            { "matchId", ClientBridge.TestControlMatchId }, { "frame", Time.frameCount }, { "id", request.Id }, { "phase", phase }
         };
         if (data != null) reply.Add("data", Clone(data));
         if (error != null) reply.Add("error", error);
@@ -553,6 +561,7 @@ internal sealed partial class NativeTestControl
             if (request.Command == "open-packs") { HandleOpenPacks(envelope); return; }
             if (request.Command == "craft-token-grant" || request.Command == "collection-jump" || request.Command == "gold-grant" || request.Command == "shop-quantity-type") { HandleCraftingTest(envelope); return; }
             if (request.Command == "clipboard-set" || request.Command == "collection-paste-check") { HandleDeckImportTest(envelope); return; }
+            if (request.Command == "handover-continue") { HandleHandover(envelope, view); return; }
             if (request.Command == "squelch" || request.Command == "unsquelch" || request.Command == "emote" || request.Command == "npc-emote" || request.Command == "npc-concede"
                 || request.Command == "human-defeat" || request.Command == "premium-unlock-prepare" || request.Command == "achievement-prime" || request.Command == "turn-timer-debug" || request.Command == "spell-stall-arm" || request.Command == "cancel-target")
             { HandlePresence(envelope, view); return; }
@@ -652,6 +661,33 @@ internal sealed partial class NativeTestControl
         }
         OperationReply(envelope.Connection, request, operation);
     }
+    // Hot-seat (co-op brawl): answer the pending pass-the-device popup, as its Continue button does. It is the only way on while
+    // a handover holds the match, so the unresolved action that led to it does not block it.
+    private void HandleHandover(ControlEnvelope envelope, View view)
+    {
+        AssertMainThread();
+        var request = envelope.Request;
+        var operation = ledger.Accept(request, out bool added);
+        if (!added) { OperationReply(envelope.Connection, request, operation); return; }
+        if (FaultBlocks(request, view)) Reject(operation, "Mutations frozen: " + fault);
+        else if (!Enabled(out string enabledToken) || token != enabledToken) { Reject(operation, "Control flag changed"); Stop("Control flag changed"); }
+        else
+        {
+            try
+            {
+                RequireMatch(request, view);
+                if (ClientBridge.ActiveMatch?.HandoverPending != true) throw new InvalidOperationException("No handover pending");
+                operation.Detail["inputKind"] = "semantic-handover"; operation.Detail["matchId"] = view.MatchId;
+                if (!NativeCoopMode.ContinueHandoverForTest()) throw new InvalidOperationException("No handover popup");
+                mutations++;
+                operation.Detail["localSeat"] = ClientBridge.ActiveMatch?.LocalSeat ?? 0;
+                operation.Phase = "settled";
+            }
+            catch (Exception error) { Reject(operation, error.Message); }
+        }
+        OperationReply(envelope.Connection, request, operation);
+    }
+
     // Squelch/unsquelch the NPC opponent through the native EnemyEmoteHandler, or play one human emote through the
     // native emote option. Settles at once: no game packet, no engine mutation; a retry with the same ID replays the record.
     // npc-concede / human-defeat (debug instant win / plain loss) share the gate but do mutate the engine (counted in
@@ -844,16 +880,16 @@ internal sealed partial class NativeTestControl
             if (blocker != null || !view.EndTurnReady) throw new InvalidOperationException("End-turn button blocked: " + (blocker ?? view.State["endTurnBlocker"] ?? "endTurnSettling"));
         }
         PlayerTask task = ClientBridge.ValidateTestControlOption(options.ID, index, target, sub, position);
-        // shortcut: advanced semantic classes need separate Windows qualification before enabling.
-        // Trade (untargeted, keyword 1720) is qualified; choose-one and targeted battlecries are not.
+        // Advanced semantic classes are enabled once qualified live: Trade (untargeted, keyword 1720), Choose One and
+        // targeted Battlecries (the constants above); other power keywords stay refused.
 #if STANDARD_PROOF || ENGINE_SOURCE
         bool trade = (int)option.Main.PowerKeyword == TradeKeyword && target == 0 && sub == -1 && position == 0
             && task.PlayerTaskType == PlayerTaskType.TRADE_CARD;
 #else
         const bool trade = false;
 #endif
-        if (sub != -1 || ((int)option.Main.PowerKeyword != 0 && !trade)
-            || (target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion))
+        if ((sub != -1 && !ChooseOneQualified) || ((int)option.Main.PowerKeyword != 0 && !trade)
+            || (!TargetedBattlecryQualified && target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion))
             throw new InvalidOperationException("Unqualified semantic action class (choose-one/targeted battlecry)");
         expectedSend = "option"; expectedOptions = options.ID; expectedIndex = index;
         expectedTarget = target; expectedSub = sub; expectedPosition = position;
@@ -1277,8 +1313,11 @@ internal sealed partial class NativeTestControl
         var next = ledger.Accept(request, out bool added);
         if (!added) throw new InvalidOperationException("Unexpected ledger duplicate");
         bool escape = request.Command == "press" && UiRules.IsMatchEscape(request.Text("element"));
+        // A hot-seat handover holds the match until its popup is answered: the popup's buttons are the way on.
+        bool handover = request.Command == "press" && ClientBridge.ActiveMatch?.HandoverPending == true
+            && request.Text("element").StartsWith("dialog.", StringComparison.Ordinal);
         if (fault != null && !escape) Reject(next, "Mutations frozen: " + fault);
-        else if (active != null && !active.Finished && !escape) Reject(next, "Match action unresolved: " + active.Request.Id);
+        else if (active != null && !active.Finished && !escape && !handover) Reject(next, "Match action unresolved: " + active.Request.Id);
         else if (press != null) Reject(next, "Another press unresolved: " + press.Operation.Request.Id);
         else if ((DateTime.UtcNow - request.ReceivedUtc).TotalSeconds > 10) Reject(next, "Expired before execution");
         else if (!Enabled(out string enabledToken) || token != enabledToken) { Reject(next, "Control flag changed"); Stop("Control flag changed"); }
@@ -1765,7 +1804,7 @@ internal sealed partial class NativeTestControl
     // Read-only hover aim: the plugin never moves the cursor; Input-Client.ps1 does, so native hover code runs unchanged.
     private static JsonNode Locate(ControlRequest request)
     {
-        TestControlProtocol.RequireIdentity(request.Text("matchId"), LocalLadder.MatchId, 0, 0);
+        TestControlProtocol.RequireIdentity(request.Text("matchId"), ClientBridge.TestControlMatchId, 0, 0);
         var front = GameState.Get(); var scene = SceneMgr.Get();
         if (front == null || scene == null || scene.GetMode() != SceneMgr.Mode.GAMEPLAY) throw new InvalidOperationException("No native gameplay scene");
         int id = request.Integer("entityId", 1);
@@ -1814,7 +1853,7 @@ internal sealed partial class NativeTestControl
     // big card's (hover with `hslive hover`, then read this).
     private static JsonNode CardText(ControlRequest request)
     {
-        TestControlProtocol.RequireIdentity(request.Text("matchId"), LocalLadder.MatchId, 0, 0);
+        TestControlProtocol.RequireIdentity(request.Text("matchId"), ClientBridge.TestControlMatchId, 0, 0);
         var front = GameState.Get(); var scene = SceneMgr.Get();
         if (front == null || scene == null || scene.GetMode() != SceneMgr.Mode.GAMEPLAY) throw new InvalidOperationException("No native gameplay scene");
         int id = request.Integer("entityId", 1);
@@ -2076,9 +2115,9 @@ internal sealed partial class NativeTestControl
                 { "state", game.State.ToString() }, { "step", game.Step.ToString() }, { "turn", game.Turn },
                 { "currentPlayerId", game.CurrentPlayer?.PlayerId ?? 0 }, { "firstPlayer", match.FirstPlayer }, { "seed", match.Seed },
                 { "botNodes", match.BotNodes }, { "botMilliseconds", match.BotMilliseconds }, { "botFallbacks", match.BotFallbacks },
-                { "human", EnginePlayer(match, game.Player1, true) }, { "opponent", EnginePlayer(match, game.Player2, false) }
+                { "human", EnginePlayer(match, match.LocalSeatController, true) }, { "opponent", EnginePlayer(match, match.OtherSeatController, false) }
             };
-            var coin = game.Player1.HandZone.FirstOrDefault(card => card.Id == match.CosmeticCoinEntityId);
+            var coin = match.LocalSeatController.HandZone.FirstOrDefault(card => card.Id == match.CosmeticCoinEntityId);
             var nativeCoin = coin == null ? null : front?.GetEntityMap()?.Values.FirstOrDefault(entity => entity.GetEntityId() == coin.Id);
             view.State["coin"] = coin == null ? null : new JsonNode {
                 { "entityId", coin.Id }, { "engineCardId", coin.Card.Id }, { "nativeCardId", nativeCoin?.GetCardId() } };
@@ -2088,6 +2127,8 @@ internal sealed partial class NativeTestControl
                 var gameEntity = front.GetGameEntity();
                 var human = front.GetFriendlySidePlayer(); var opponent = front.GetOpposingSidePlayer();
                 view.State["client"] = new JsonNode {
+                    { "gameEntityType", gameEntity.GetType().Name }, { "missionId", GameMgr.Get()?.GetMissionId() ?? 0 },
+                    { "localSeat", match.LocalSeat }, { "hotSeat", match.HotSeat }, { "handoverPending", match.HandoverPending }, { "seatSwaps", match.SeatSwaps },
                     { "state", gameEntity.GetTag(GAME_TAG.STATE) }, { "step", gameEntity.GetTag(GAME_TAG.STEP) }, { "turn", gameEntity.GetTag(GAME_TAG.TURN) },
                     { "human", ClientPlayer(front, human) }, { "opponent", ClientPlayer(front, opponent) },
                     { "boardActors", BoardActors(front) },
@@ -2100,13 +2141,13 @@ internal sealed partial class NativeTestControl
                 if (human == null || opponent == null) view.Differences.Add("playersMissing");
                 else
                 {
-                    Compare("humanCurrentPlayer", human.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == game.Player1 ? 1 : 0);
-                    Compare("opponentCurrentPlayer", opponent.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == game.Player2 ? 1 : 0);
-                    ComparePlayer(match, front, human, game.Player1, view.Differences); ComparePlayer(match, front, opponent, game.Player2, view.Differences);
+                    Compare("humanCurrentPlayer", human.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == match.LocalSeatController ? 1 : 0);
+                    Compare("opponentCurrentPlayer", opponent.GetTag(GAME_TAG.CURRENT_PLAYER), game.CurrentPlayer == match.OtherSeatController ? 1 : 0);
+                    ComparePlayer(match, front, human, match.LocalSeatController, view.Differences); ComparePlayer(match, front, opponent, match.OtherSeatController, view.Differences);
                     if (view.Blockers.Count == 0 || view.ChoiceBoundary)
                     {
-                        CompareBoardActors(match, human, game.Player1, view.Differences);
-                        CompareBoardActors(match, opponent, game.Player2, view.Differences);
+                        CompareBoardActors(match, human, match.LocalSeatController, view.Differences);
+                        CompareBoardActors(match, opponent, match.OtherSeatController, view.Differences);
                     }
                 }
                 // Audit only after queues drain; transient packet application is expected divergence.
@@ -2166,6 +2207,8 @@ internal sealed partial class NativeTestControl
             { "heldEntityId", pressRecord.HeldEntity } };
         view.State["concedeStallRecovery"] = NativeConcedeStallRecovery.LastRecovery;
         var scenarioOutcome = DebugScenario.LastOutcome;
+        try { view.State["run"] = NativeRunModes.TestView(); }
+        catch (Exception error) { view.State["run"] = new JsonNode { { "error", error.GetType().Name + ": " + error.Message } }; }
         view.State["debugScenario"] = scenarioOutcome == null ? null : new JsonNode {
             { "status", scenarioOutcome.Status }, { "detail", scenarioOutcome.Detail }, { "runId", scenarioOutcome.RunId } };
         view.State["unresolvedLocalChange"] = zone?.HasUnresolvedLocalChange() ?? false;
@@ -2189,14 +2232,48 @@ internal sealed partial class NativeTestControl
 #else
                 player.BoardZone
 #endif
-                .Select(card => (object)new JsonNode {
-                { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) }, { "position", card.ZonePosition + 1 }
-            })) }
+                .Select(card => (object)BoardCard(match, card, player, human))) }
         };
-        if (human) result.Add("hand", TestControlProtocol.List(player.HandZone.Select(card => (object)new JsonNode {
-            { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) }
-        })));
+        // Compact play view (test tools): names, costs, stats and keywords, so a tester needs no per-entity reads.
+        result.Add("heroName", player.Hero.Card.Name);
+        result.Add("heroPower", new JsonNode { { "id", match.WireReturnId(player.Hero.HeroPower.Id) }, { "name", player.Hero.HeroPower.Card.Name },
+            { "cost", player.Hero.HeroPower.Cost }, { "used", player.Hero.HeroPower.IsExhausted } });
+        if (player.Hero.Weapon != null)
+            result.Add("weapon", new JsonNode { { "id", match.WireReturnId(player.Hero.Weapon.Id) }, { "name", player.Hero.Weapon.Card.Name },
+                { "attack", player.Hero.Weapon.AttackDamage }, { "durability", player.Hero.Weapon.Durability } });
+        result.Add("heroAttack", player.Hero.AttackDamage);
+        result.Add("secretCount", player.SecretZone.Count(card => card.IsSecret));
+        if (human)
+        {
+            result.Add("secrets", TestControlProtocol.List(player.SecretZone.Where(card => card.IsSecret).Select(card => (object)card.Card.Name)));
+            result.Add("hand", TestControlProtocol.List(player.HandZone.Select(card => (object)new JsonNode {
+                { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) },
+                { "name", card.Card.Name }, { "cost", card.Cost }
+            })));
+        }
         return result;
+    }
+    private static JsonNode BoardCard(NativeMatch match, SabberStoneCore.Model.Entities.IPlayable card, SabberStoneCore.Model.Entities.Controller player, bool human)
+    {
+        var node = new JsonNode {
+            { "id", match.WireReturnId(card.Id) }, { "cardId", match.PresentationCardId(card.Id, card.Card.Id, player.PlayerId) },
+            { "position", card.ZonePosition + 1 }, { "name", card.Card.Name } };
+        if (card is SabberStoneCore.Model.Entities.Minion minion)
+        {
+            node.Add("attack", minion.AttackDamage); node.Add("health", minion.Health);
+            var keywords = new List<object>();
+            if (minion.HasTaunt) keywords.Add("taunt");
+            if (minion.HasDivineShield) keywords.Add("shield");
+            if (minion.HasStealth) keywords.Add("stealth");
+            if (minion.IsFrozen) keywords.Add("frozen");
+            if (minion.HasWindfury) keywords.Add("windfury");
+            if (minion.Poisonous) keywords.Add("poisonous");
+            if (minion.HasLifeSteal) keywords.Add("lifesteal");
+            if (minion.IsDormant) keywords.Add("dormant");
+            if (human && minion.CanAttack) keywords.Add("ready");
+            if (keywords.Count != 0) node.Add("keywords", TestControlProtocol.List(keywords));
+        }
+        return node;
     }
     private static JsonNode ClientPlayer(GameState front, Player player)
     {
@@ -2207,7 +2284,8 @@ internal sealed partial class NativeTestControl
             { "id", player.GetPlayerId() }, { "heroId", hero?.GetEntityId() ?? 0 },
             { "health", hero == null ? 0 : hero.GetTag(GAME_TAG.HEALTH) - hero.GetTag(GAME_TAG.DAMAGE) },
             { "armor", hero?.GetTag(GAME_TAG.ARMOR) ?? 0 }, { "mana", player.GetNumAvailableResources() },
-            { "handCount", Count(3) }, { "deckCount", Count(2) }, { "playState", player.GetTag(GAME_TAG.PLAYSTATE) }
+            { "handCount", Count(3) }, { "deckCount", Count(2) }, { "playState", player.GetTag(GAME_TAG.PLAYSTATE) },
+            { "local", player.IsLocalUser() }, { "teamId", player.GetTeamId() }, { "side", player.GetSide().ToString() }
         };
     }
     private static JsonList VisibleEntities(GameState front)
@@ -2240,7 +2318,7 @@ internal sealed partial class NativeTestControl
             engine.BoardZone
 #endif
             .Select(card => match.WireReturnId(card.Id)))) diff.Add("player" + engine.PlayerId + ":boardOrder");
-        if (engine.PlayerId == 1)
+        if (engine == match.LocalSeatController) // the hand audit follows the seat the client controls (hot-seat)
         {
             var cards = native.GetHandZone()?.GetCards()?.Where(card => card != null && card.GetEntity() != null).ToArray() ?? new Card[0];
             int[] hand = cards.Select(card => card.GetEntity().GetEntityId()).OrderBy(id => id).ToArray();
@@ -2337,6 +2415,11 @@ internal sealed partial class NativeTestControl
             { "entities", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Cast<object>()) },
             { "unchoosableEntities", TestControlProtocol.List((choices?.UnchoosableEntities ?? new List<int>()).Cast<object>()) },
             { "selected", TestControlProtocol.List((front?.GetChosenEntities() ?? new List<Entity>()).Select(entity => (object)entity.GetEntityId())) },
+            // Test tools: what each choice is, so a tester picks by name without reading entities one by one.
+            { "cards", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Select(id => {
+                var entity = front?.GetEntity(id);
+                return (object)new JsonNode { { "id", id }, { "cardId", entity?.GetCardId() }, { "name", entity?.GetName() } };
+            })) },
             { "handTargets", TestControlProtocol.List((choices?.Entities ?? new List<int>()).Select(id => {
                 var row = new JsonNode { { "entityId", id }, { "clickable", false } };
                 try { var point = NativeGameplayDrag.ChoicePoint(id); row["clickable"] = true;
@@ -2373,19 +2456,21 @@ internal sealed partial class NativeTestControl
                     {
                         var positions = new JsonList();
                         int keyword = (int)(sub?.PowerKeyword ?? 0);
-                        bool enabled = subIndex == -1 && (keyword == 0 || keyword == TradeKeyword);
+                        bool enabled = (subIndex == -1 || ChooseOneQualified) && (keyword == 0 || keyword == TradeKeyword);
                         for (int position = 0; position <= 7; position++)
                             try
                             {
                                 ValidateClientOption(packet, index, target, subIndex);
                                 PlayerTask task = ClientBridge.ValidateTestControlOption(packet.ID, index, target, subIndex, position);
-                                if (target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion) enabled = false;
+                                if (!TargetedBattlecryQualified && target != 0 && task is PlayCardTask play && play.Source is SabberStoneCore.Model.Entities.Minion) enabled = false;
                                 positions.Add(position);
                             }
                             catch (Exception error) when (error is InvalidOperationException || error is ArgumentException) { }
                         if (positions.Count > 0) legal.Add(new JsonNode { { "target", target }, { "positions", positions }, { "semanticEnabled", enabled } });
                     }
+                    var subEntity = subIndex >= 0 ? GameState.Get()?.GetEntity(sub?.ID ?? 0) : null;
                     return new JsonNode { { "sub", subIndex }, { "source", sub?.ID ?? 0 }, { "keyword", (int)(sub?.PowerKeyword ?? 0) },
+                        { "name", subEntity?.GetName() },
                         { "error", sub?.PlayErrorInfo?.PlayError.ToString() }, { "errorParam", sub?.PlayErrorInfo?.PlayErrorParam },
                         { "targets", targets }, { "permitted", legal }, { "positionProvenance", "NativeMatch.ValidateOption" } };
                 }

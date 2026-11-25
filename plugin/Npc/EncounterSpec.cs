@@ -1,0 +1,46 @@
+using System.Collections.Generic;
+
+// What makes a match other than an ordinary ladder or casual one: a run mode's boss fight (Dungeon Run first), or a debug
+// scenario's npcHero / npcDeck / missionId. Every field left at its default keeps the ordinary match. NativeMatch builds the
+// game from it; the setup fields (Health, mana, Coin, loadout) reach the engine in ENGINE_SOURCE builds only.
+public sealed class EncounterSpec
+{
+    // The player's side. Null hero or deck keeps the player's own deck; a run passes its run deck (any size, no deck rules).
+    public string PlayerHero;
+    // A hero skin the client shows for the encounter's hero (presentation only; the engine plays PlayerHero / NpcHero).
+    public string PlayerHeroSkin, NpcHeroSkin;
+    public IReadOnlyList<string> PlayerDeck;
+    public int PlayerStartingHealth;
+    public IReadOnlyList<string> PlayerLoadout;
+    // Cards the player gets in hand after the mulligans (a run boss's rule).
+    public IReadOnlyList<string> PlayerHand;
+    // Bosses the player's run has defeated before this fight (its run-scaled treasures).
+    public int PlayerBossesDefeated;
+
+    // The NPC's side: a boss hero (its own Hero Power comes with it) and deck replace the ladder opponent's.
+    public string NpcHero;
+    public IReadOnlyList<string> NpcDeck;
+    // The boss has no deck at all (Dungeon Run's Treasure Vault): an empty NpcDeck then replaces the opponent's deck.
+    public bool NpcHasNoDeck;
+    public string NpcName;
+    // Minions the NPC has in play from the start (a run boss's starting board).
+    public IReadOnlyList<string> NpcBoard;
+    public int NpcStartingHealth, NpcStartingMana;
+    public bool NpcCoin = true;
+
+    // 1: the player goes first, 2: the NPC; null keeps the match's own seat rule.
+    public int? FirstPlayer;
+
+    // The client's mission (scenario) id: the client then runs that mission's own game entity (Dungeon Run: 2663, the boss's
+    // portrait, voice lines and music). Board: the board the mission is played on; 0 keeps the player's cosmetic.
+    public int MissionId, BoardId;
+
+    // A co-op boss game (Nefarian Rises!): both players are one team against a boss minion and share one result (engine
+    // GameConfig.Coop). HotSeat: Player 2 is a second person at this client, not the NPC (NativeMatch hands the client the seat
+    // whose turn it is).
+    public bool Coop, HotSeat;
+
+    public bool ReplacesPlayerDeck => PlayerDeck != null && PlayerDeck.Count > 0;
+    public bool ReplacesNpcDeck => NpcDeck != null && (NpcDeck.Count > 0 || NpcHasNoDeck);
+    public bool IsMission => MissionId != 0;
+}

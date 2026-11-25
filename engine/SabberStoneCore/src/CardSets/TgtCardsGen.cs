@@ -1164,6 +1164,7 @@ namespace SabberStoneCore.CardSets
 				Trigger = TriggerBuilder
 					.Type(TriggerType.DRAW)
 					.SetTask(new AddEnchantmentTask("AT_014e", EntityType.TARGET))
+					.SetSource(TriggerSource.FRIENDLY)
 					.GetTrigger()
 			}));
 

@@ -230,6 +230,66 @@ namespace SabberStoneCore.Config
 		/// </summary>
 		public bool DrawWithRandom { get; set; } = false;
 
+		// Run modes (Dungeon Run and later adventures). Setup-only: they shape the game while it is built, and what they set
+		// lives on in entity tags, so snapshots leave them out and a restored game reads their defaults (the ordinary game).
+
+		/// <summary>Player 1 hero's starting Health; 0 keeps the hero card's own.</summary>
+		[field: NonSerialized]
+		public int Player1StartingHealth { get; set; }
+
+		/// <summary>Player 2 hero's starting Health; 0 keeps the hero card's own.</summary>
+		[field: NonSerialized]
+		public int Player2StartingHealth { get; set; }
+
+		/// <summary>Player 1's mana crystals before its first turn (its first turn then adds one); 0 = none.</summary>
+		[field: NonSerialized]
+		public int Player1StartingMana { get; set; }
+
+		/// <summary>Player 2's mana crystals before its first turn (its first turn then adds one); 0 = none.</summary>
+		[field: NonSerialized]
+		public int Player2StartingMana { get; set; }
+
+		/// <summary>The second player gets no Coin (it still draws its fourth card).</summary>
+		[field: NonSerialized]
+		public bool SkipCoin { get; set; }
+
+		/// <summary>Player 1's loadout: cards set aside at game start whose Start of Game effect runs after the mulligans
+		/// (Dungeon Run's passive treasures). Every card must declare a Start of Game effect.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1Loadout { get; set; }
+
+		/// <summary>Player 2's loadout; see <see cref="Player1Loadout"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2Loadout { get; set; }
+
+		/// <summary>Minions Player 1 has in play when the game starts (a run boss's starting board, e.g. Brimstone Warden's
+		/// Stone Golems); they are on the board from the first turn, before the mulligans.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1StartingBoard { get; set; }
+
+		/// <summary>Player 2's starting board; see <see cref="Player1StartingBoard"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2StartingBoard { get; set; }
+
+		/// <summary>Cards Player 1 gets in hand after the mulligans, before the first turn (The Darkness's Luminous Candles in
+		/// Dungeon Run); never part of the mulligan.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player1StartingHand { get; set; }
+
+		/// <summary>Player 2's starting hand; see <see cref="Player1StartingHand"/>.</summary>
+		[field: NonSerialized]
+		public IReadOnlyList<string> Player2StartingHand { get; set; }
+
+		/// <summary>Bosses Player 1 has defeated in its run before this fight: the count its run-scaled cards use (Dungeon
+		/// Run's "for each Boss you've defeated this run").</summary>
+		[field: NonSerialized]
+		public int Player1RunBossesDefeated { get; set; }
+
+		/// <summary>A co-op boss game (Nefarian Rises!): both players are one team against a boss minion and share one result
+		/// (CoopRules). Setup-only like the run knobs: the mark lives on the game entity.</summary>
+		[field: NonSerialized]
+		public bool Coop { get; set; }
+
 		/// <summary>
 		/// Clones this instance.
 		/// </summary>

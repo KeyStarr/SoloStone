@@ -23,8 +23,115 @@ internal static partial class Program
         DebugScenarioSummonStats();
         DebugScenarioHandMods();
         DebugScenarioManaRawAndClear();
+        DebugScenarioBossMatch();
+        RunEncounterMatch();
+        RejectedScenarioDropsItsEncounter();
         DebugScenarioNpcPlayNext();
-        Console.WriteLine("PASS debug scenario: validation, one-shot file, hidden NPC first draw, mana, no settlement");
+        Console.WriteLine("PASS debug scenario: validation, one-shot file, hidden NPC first draw, mana, no settlement, boss match, run encounter");
+    }
+
+    // Dungeon Run's Giant Rat deck (data/runs/loot-v1.json, from https://hearthstone.wiki.gg/wiki/Giant_Rat_(boss)).
+    private const string GiantRatDeck = "EX1_549,DS1_175,CS2_237,EX1_537,CS2_171,CS2_169,EX1_076,CS2_120,CS2_203,CS2_201";
+    // Dungeon Run's Mage start deck (data/runs/loot-v1.json).
+    private const string MageRunDeck = "EX1_277,NEW1_012,NEW1_021,CS2_024,EX1_608,CS2_117,EX1_289,CS2_182,CS2_029,CS2_028";
+
+    private static string SortedIds(IEnumerable<string> ids) => string.Join(",", ids.OrderBy(id => id, StringComparer.Ordinal));
+    private static IEnumerable<string> Dealt(SabberStoneCore.Model.Entities.Controller player) =>
+        player.DeckZone.Select(card => card.Card.Id).Concat(player.HandZone.Select(card => card.Card.Id).Where(id => id != "GAME_005"));
+
+    // A run mode's boss fight, as Dungeon Run stages round 1: the player's run deck at 15 Health going first, the boss with its
+    // own deck, no Coin and two early crystals (round 8's rule, here to see it applied), on the boss's mission.
+    private static void RunEncounterMatch()
+    {
+        var encounter = new EncounterSpec {
+            PlayerHero = "HERO_08", PlayerDeck = MageRunDeck.Split(','), PlayerStartingHealth = 15,
+            NpcHero = "LOOTA_BOSS_18h", NpcDeck = GiantRatDeck.Split(','), NpcName = "Giant Rat", NpcCoin = false, NpcStartingMana = 2,
+            FirstPlayer = 1, MissionId = 2663,
+        };
+        var run = new Capture();
+        var match = new NativeMatch(run.Send, "mage", "warrior", 4242) { Encounter = encounter, BotTrace = _ => { } };
+        Check(ReferenceEquals(match.ActiveEncounter, encounter), "before Start the match reports the encounter it will use");
+        match.Start();
+        var game = match.Game;
+        Check(ReferenceEquals(match.ActiveEncounter, encounter) && game.FirstPlayer == game.Player1, "the encounter puts the player first");
+        Check(game.Player1.Hero.Card.Id == "HERO_08" && game.Player1.Hero.Health == 15 && game.Player1.Hero.BaseHealth == 15,
+            "the player starts at the run's 15 Health");
+        Check(SortedIds(Dealt(game.Player1)) == SortedIds(MageRunDeck.Split(',')), "the player plays the run deck, not the picked deck");
+        Check(game.Player2.Hero.Card.Id == "LOOTA_BOSS_18h" && game.Player2.Hero.Health == 10
+            && SortedIds(Dealt(game.Player2)) == SortedIds(GiantRatDeck.Split(',')), "the boss with its own Health and deck");
+        Check(game.Player2.HandZone.Count == 4 && game.Player2.HandZone.All(card => card.Card.Id != "GAME_005"),
+            "the boss keeps its fourth card and gets no Coin");
+        Check(game.Player2.BaseMana == 2 && match.OpponentName == "Giant Rat", "the boss's early crystals and name");
+        var create = run.HistorySnapshots().SelectMany(h => h.List).Select(h => h.CreateGame).First(c => c != null);
+        var aiPlayer = create.Players.Single(p => p.Id == game.Player2.PlayerId);
+        Check(aiPlayer.GameAccountId.Lo == 0 && aiPlayer.Entity.Tags.Any(tag => tag.Name == (int)GameTag.HERO_ENTITY),
+            "a mission encounter gives the client's mission entity its AI player");
+
+        // The boss is not a ladder opponent: it keeps its opening hand instead of the "no plan" full mulligan.
+        var offered = run.Packets.Where(p => p.Id == 17).Select(p => p.Message).OfType<EntityChoices>()
+            .Where(c => c.PlayerId == game.Player2.PlayerId).Select(c => c.Entities).First();
+        Check(offered.OrderBy(id => id).SequenceEqual(game.Player2.HandZone.Select(card => card.Id).OrderBy(id => id)),
+            "the boss keeps every card of its opening hand");
+
+        // Boss Hero Powers get a neutral place in the AI's order (an untargeted one used to sort below every card).
+        Check(LocalBot.IsBossHeroPower(SabberStoneCore.Model.Cards.FromId("LOOTA_BOSS_18p"))
+            && !LocalBot.IsBossHeroPower(SabberStoneCore.Model.Cards.FromId("HERO_08bp")), "boss Hero Powers are told apart from class ones");
+        match.SendChoices(run.Last<EntityChoices>(17).Id, new List<int>());
+        InvokeProcess(match, SabberStoneCore.Tasks.PlayerTasks.EndTurnTask.Any(game.Player1));
+        var ratRace = game.Player2.Options().FirstOrDefault(task => task.PlayerTaskType == SabberStoneCore.Tasks.PlayerTasks.PlayerTaskType.HERO_POWER);
+        Check(ratRace != null && LocalBot.Score(ratRace) == 10 && LocalBot.Score(ratRace) > LocalBot.Score(SabberStoneCore.Tasks.PlayerTasks.EndTurnTask.Any(game.Player2)),
+            "Rat Race is ordered with the boss's plays, not below them");
+    }
+
+    // Regression: a debug scenario rejected at Start used to keep its npcDeck while its hero was reset. Now the whole
+    // encounter it staged is dropped and the ladder opponent plays its own hero and deck.
+    private static void RejectedScenarioDropsItsEncounter()
+    {
+        // The NPC goes first (three opening cards), so four npcOpeningHand cards do not fit: Validate rejects the scenario.
+        var scenario = DebugScenario.Parse("npcHero=LOOTA_BOSS_18h\nnpcDeck=" + GiantRatDeck + "\nnpcOpeningHand=CS2_182,CS2_182,CS2_182,CS2_182\nhumanSeat=second");
+        var run = new Capture();
+        var match = new NativeMatch(run.Send, "mage", "warrior", 4242) { DebugScenario = scenario, StartingPlayer = 2, BotTrace = _ => { } };
+        match.Start();
+        var npc = match.Game.Player2;
+        var ladder = LocalDecks.Get("warrior");
+        Check(match.DebugScenario == null && match.ActiveEncounter == null, "the rejected scenario and its encounter are dropped");
+        Check(npc.Hero.Card.Id == ladder.Hero && Dealt(npc).All(ladder.CardIds.Contains) && Dealt(npc).Count() == ladder.CardIds.Count,
+            "the ladder opponent keeps its own hero and deck: " + npc.Hero.Card.Id);
+    }
+
+    // npcHero + npcDeck + missionId: the NPC is the boss with the boss's deck, and CreateGame has what the client's mission entity
+    // reads (GenericDungeonMissionEntity.GetOpposingHeroCardID): an AI player with an empty game account and a HERO_ENTITY.
+    private static void DebugScenarioBossMatch()
+    {
+        static string Sorted(IEnumerable<string> ids) => string.Join(",", ids.OrderBy(id => id, StringComparer.Ordinal));
+        foreach (bool mission in new[] { true, false })
+        {
+            var scenario = DebugScenario.Parse("npcHero=LOOTA_BOSS_18h\nnpcDeck=" + GiantRatDeck + (mission ? "\nmissionId=2663" : ""));
+            var run = new Capture();
+            var match = new NativeMatch(run.Send, "mage", "warrior", 4242) { DebugScenario = scenario, BotTrace = _ => { } };
+            match.Start();
+            var npc = match.Game.Player2;
+            Check(npc.Hero.Card.Id == "LOOTA_BOSS_18h" && npc.Hero.Health == 10 && npc.Hero.HeroPower.Card.Id == "LOOTA_BOSS_18p",
+                "the NPC is Giant Rat with Rat Race");
+            var dealt = npc.DeckZone.Select(card => card.Card.Id).Concat(npc.HandZone.Select(card => card.Card.Id).Where(id => id != "GAME_005"));
+            Check(Sorted(dealt) == Sorted(GiantRatDeck.Split(',')), "npcDeck replaces the ladder deck card for card: " + Sorted(dealt));
+            match.SendChoices(run.Last<EntityChoices>(17).Id, new List<int>());
+            Check(match.DebugScenarioApplied != null && match.DebugScenarioApplied.Contains("npcDeck=10 cards"),
+                "npcDeck is reported as applied: " + match.DebugScenarioApplied);
+
+            var histories = run.HistorySnapshots().ToList();
+            var create = histories.SelectMany(h => h.List).Select(h => h.CreateGame).First(c => c != null);
+            var aiPlayer = create.Players.Single(p => p.Id == npc.PlayerId);
+            var heroTag = aiPlayer.Entity.Tags.Where(tag => tag.Name == (int)GameTag.HERO_ENTITY).ToList();
+            if (mission)
+            {
+                Check(aiPlayer.GameAccountId.Hi == 0 && aiPlayer.GameAccountId.Lo == 0, "a mission's AI player has an empty game account");
+                Check(heroTag.Count == 1 && histories.SelectMany(h => h.List).Any(h => h.HasFullEntity
+                    && h.FullEntity.Entity == heroTag[0].Value && h.FullEntity.Name == "LOOTA_BOSS_18h"),
+                    "a mission's CreateGame names the boss as the AI player's HERO_ENTITY");
+            }
+            else Check(aiPlayer.GameAccountId.Lo != 0, "contrast: without a mission the NPC keeps its own game account");
+        }
     }
 
     private static void RejectsScenario(string text, string reason, Func<string, bool> known = null)
