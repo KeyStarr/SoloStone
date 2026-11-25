@@ -103,15 +103,25 @@ public sealed class ArenaDeckCatalog
 public sealed class ArenaQueueRules
 {
     // Target quality bucket of a run record: the middle bucket at 0-0, one half bucket up per net win, down per net loss.
+    // The spread narrows with the wins (BucketSigma at 0 wins, BucketSigmaPerWin less per win, never below BucketSigmaMin), so
+    // a deep run meets the strongest drafts: at 10+ wins about nine decks in ten come from the top bucket.
     public double MiddleBucket { get; set; } = 2;
     public double BucketPerNetWin { get; set; } = 0.5;
     public double BucketSigma { get; set; } = 0.9;
+    public double BucketSigmaPerWin { get; set; } = 0.04;
+    public double BucketSigmaMin { get; set; } = 0.5;
+    public double BucketSigmaFor(int wins) => Math.Max(BucketSigmaMin, BucketSigma - Math.Max(0, wins) * BucketSigmaPerWin);
     // NPCs: the Casual opponent skill scale (an NPC plays at its own rating's tier). Arena has no rating of its own: the field
-    // is centred on NpcTargetRating at 0 wins and climbs NpcRatingPerWin per win of the run (more wins, harder opponents), so
-    // 0 wins meets mostly Regular pilots, 4 Skilled, 6 Expert, 8 Master and 9+ Elite. Losses do not lower it.
+    // is centred on NpcTargetRating at 0 wins, climbs NpcRatingPerWin per win of the run and drops NpcRatingPerLoss per loss.
+    // Each NPC's weight is divided by how many NPCs share its rating (NpcDensityWindow either side), so the field follows the
+    // target, not the shape of the population (which thins out above 1700): 0 wins meets mostly Casual to Skilled pilots,
+    // 5 wins Skilled to Master, and 10+ wins mostly Master and Elite with a few Experts and almost nobody below.
     public double NpcTargetRating { get; set; } = 1250;
     public double NpcRatingPerWin { get; set; } = 45;
-    public double NpcTargetFor(int wins) => NpcTargetRating + Math.Max(0, wins) * NpcRatingPerWin;
+    public double NpcRatingPerLoss { get; set; } = 25;
+    public double NpcTargetFor(int wins, int losses = 0) =>
+        NpcTargetRating + Math.Max(0, wins) * NpcRatingPerWin - Math.Max(0, losses) * NpcRatingPerLoss;
+    public double NpcDensityWindow { get; set; } = 50;
     // NPC difficulty (#305). Hard is the queue above, untouched. Easy and Medium meet the field of a lower rating (the level's
     // ShiftRating, as in Casual), draw from weaker drafts (the bucket centre moves down by these many buckets) and play with the
     // level's boost at the ladder position of the Hard target, so the boost fades as the run's wins climb. Winning runs still
@@ -120,7 +130,12 @@ public sealed class ArenaQueueRules
     public double MediumBucketShift { get; set; } = 0.5;
     public double BucketShiftFor(NpcDifficultyLevel level) =>
         level == null || level.IsHard ? 0 : level.Id == NpcDifficulties.EasyId ? EasyBucketShift : MediumBucketShift;
+    // The field's spread narrows with the wins like the deck spread: NpcSigma at 0 wins, NpcSigmaPerWin less per win, never
+    // below NpcSigmaMin, so a deep run rarely meets a weak pilot.
     public double NpcSigma { get; set; } = 150;
+    public double NpcSigmaPerWin { get; set; } = 5;
+    public double NpcSigmaMin { get; set; } = 100;
+    public double NpcSigmaFor(int wins) => Math.Max(NpcSigmaMin, NpcSigma - Math.Max(0, wins) * NpcSigmaPerWin);
     public double NotableWeight { get; set; } = 1.5;
     public static ArenaQueueRules Default => new ArenaQueueRules();
 }
@@ -151,13 +166,30 @@ public sealed class ArenaMatchmaker
         var weights = new double[ArenaDeckCatalog.BucketCount];
         for (int b = 0; b < weights.Length; b++)
         {
-            double z = (b - centre) / Rules.BucketSigma;
+            double z = (b - centre) / Rules.BucketSigmaFor(wins);
             weights[b] = Math.Exp(-0.5 * z * z);
         }
         return weights;
     }
 
     public NpcEncounter Next(ArenaRequest request) => Choose(request);
+
+    // For each candidate, how many candidates (itself included) are within NpcDensityWindow of its rating. Sorted ratings and
+    // two pointers: linear after the sort, so a large world stays cheap.
+    private double[] Density(IReadOnlyList<NpcIdentity> npcs)
+    {
+        var order = Enumerable.Range(0, npcs.Count).OrderBy(i => npcs[i].HomeRating).ToArray();
+        var density = new double[npcs.Count];
+        int lo = 0, hi = 0;
+        foreach (int i in order)
+        {
+            double r = npcs[i].HomeRating;
+            while (npcs[order[lo]].HomeRating < r - Rules.NpcDensityWindow) lo++;
+            while (hi < order.Length && npcs[order[hi]].HomeRating <= r + Rules.NpcDensityWindow) hi++;
+            density[i] = Math.Max(1, hi - lo);
+        }
+        return density;
+    }
 
     public NpcEncounter Choose(ArenaRequest request)
     {
@@ -182,12 +214,14 @@ public sealed class ArenaMatchmaker
         var npcs = World.All.Where(npc => !usedNpcs.Contains(npc.Id)).ToList();
         if (npcs.Count == 0) npcs = World.All.ToList();
         if (npcs.Count == 0) throw new InvalidOperationException("The NPC world has no Arena opponent.");
-        double hardTarget = Rules.NpcTargetFor(request.Wins);
+        double hardTarget = Rules.NpcTargetFor(request.Wins, request.Losses);
         double npcTarget = request.Shifted ? hardTarget - request.Difficulty.ShiftRating : hardTarget;
-        var npcWeights = npcs.Select(npc =>
+        var density = Density(npcs);
+        double sigma = Rules.NpcSigmaFor(request.Wins);
+        var npcWeights = npcs.Select((npc, i) =>
         {
-            double z = (npc.HomeRating - npcTarget) / Rules.NpcSigma;
-            return Math.Exp(-0.5 * z * z) * (npc.Notable ? Rules.NotableWeight : 1);
+            double z = (npc.HomeRating - npcTarget) / sigma;
+            return Math.Exp(-0.5 * z * z) * (npc.Notable ? Rules.NotableWeight : 1) / density[i];
         }).ToArray();
         var chosen = npcs[new MatchRng(seed, StreamNpc).Pick(npcWeights)];
 

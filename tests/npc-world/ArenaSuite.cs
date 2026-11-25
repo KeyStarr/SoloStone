@@ -169,7 +169,7 @@ internal static class ArenaSuite
         double low = MeanBucket(0, 2), mid = MeanBucket(0, 0), high = MeanBucket(10, 0);
         Program.Require(low < mid && mid < high && high - low > 1, "drawn decks get stronger with the record: " + low.ToString("F2") + " < " + mid.ToString("F2") + " < " + high.ToString("F2"));
 
-        // Opponents get stronger with the wins: the NPC field's centre climbs per win, losses do not lower it.
+        // Opponents get stronger with the wins: the NPC field's centre climbs per win.
         double MeanRating(int wins, int losses, NpcDifficultyLevel level = null)
         {
             double sum = 0; int n = 400;
@@ -180,6 +180,32 @@ internal static class ArenaSuite
         double fresh = MeanRating(0, 0), climbing = MeanRating(5, 0), deep = MeanRating(10, 0);
         Program.Require(fresh < climbing && climbing < deep && deep - fresh > 250,
             "NPC rating climbs with the wins: " + fresh.ToString("F0") + " < " + climbing.ToString("F0") + " < " + deep.ToString("F0"));
+        // Losses lower the NPC field a little (NpcRatingPerLoss per loss).
+        double Mean(int wins, int losses, int n)
+        {
+            double sum = 0;
+            for (int i = 0; i < n; i++) sum += matchmaker.Choose(new ArenaRequest(11000 + i, wins + losses, wins, losses, null, null)).Npc.HomeRating;
+            return sum / n;
+        }
+        double clean = Mean(5, 0, 1500), bruised = Mean(5, 2, 1500);
+        Program.Require(bruised < clean - 20, "losses lower the NPC field: " + bruised.ToString("F0") + " < " + clean.ToString("F0"));
+
+        // A deep run (10+ wins) meets the strongest field: mostly Master and Elite pilots, a few Experts, almost nobody below,
+        // and about nine drafts in ten from the top bucket.
+        foreach (int wins in new[] { 10, 11 })
+        {
+            int n = 2000, strong = 0, expert = 0, weak = 0, top = 0;
+            for (int i = 0; i < n; i++)
+            {
+                var e = matchmaker.Choose(new ArenaRequest(30000 + i, wins + 1, wins, 1, null, null));
+                int tier = e.Skill.Tier;
+                if (tier >= 6) strong++; else if (tier == 5) expert++; else weak++;
+                if (arena.BucketOf(e.Deck.Id) == ArenaDeckCatalog.BucketCount - 1) top++;
+            }
+            Program.Require(strong >= n * 0.75 && expert <= n * 0.22 && weak <= n * 0.05,
+                wins + "-1 meets mostly Master and Elite: " + strong + " master+, " + expert + " expert, " + weak + " below of " + n);
+            Program.Require(top >= n * 0.8, wins + "-1 draws the top drafts: " + top + " of " + n);
+        }
         Difficulty(world, arena, matchmaker, MeanBucket, MeanRating);
 
         // No repeat within a run (the caller passes the run's earlier opponents), whatever the record path.
