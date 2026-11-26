@@ -15,11 +15,22 @@ namespace SabberStoneCore.Actions
             TargetDefinition = (GameTag)32102, ChooseBoth = (GameTag)32108, Payload = (GameTag)32103, Charge = (GameTag)32104;
         public const GameTag OneCost = (GameTag)32105, OtherClass = (GameTag)32106;
         public const GameTag PlayedCost = (GameTag)32107;
-        public static bool IsInternalTag(GameTag tag) => (int)tag >= 32100 && (int)tag <= 32121;
+        public static bool IsInternalTag(GameTag tag) => (int)tag >= 32100 && (int)tag <= 32122;
 
         private const GameTag PowerSource = (GameTag)32112, PowerRemaining = (GameTag)32113,
             PowerTarget = (GameTag)32114, PowerTargetDefinition = (GameTag)32115, PowerChoice = (GameTag)32116,
             PowerChooseBoth = (GameTag)32117, PowerTargetWitness = (GameTag)32118;
+
+        // Counts the Hero Power effects being resolved for a player; present only while one resolves (never left in the state).
+        private const GameTag HeroPowerResolving = (GameTag)32122;
+        internal static void BeginHeroPowerEffect(Controller owner) => owner[HeroPowerResolving] = owner[HeroPowerResolving] + 1;
+        internal static void EndHeroPowerEffect(Controller owner)
+        {
+            if (owner[HeroPowerResolving] > 1) owner[HeroPowerResolving] = owner[HeroPowerResolving] - 1;
+            else owner.NativeTags.Remove(HeroPowerResolving);
+        }
+        /// <summary>True while a Hero Power of <paramref name="owner"/> resolves its effect (not its Inspire): cards drawn now are "drawn from your Hero Power".</summary>
+        public static bool IsResolvingHeroPower(Controller owner) => owner[HeroPowerResolving] > 0;
 
         public static bool DoublesHeroPower(Controller owner) => owner.BoardZone.Any(m => m.Card.Id == "TIME_064"
             && !m.IsSilenced && !m.IsDormant && !m.ToBeDestroyed);
@@ -55,12 +66,17 @@ namespace SabberStoneCore.Actions
                     && (character == character.Controller.Hero || character.Zone == character.Controller.BoardZone)
                     && power.IsValidPlayTarget(character)) target = character;
                 game.TaskQueue.StartEvent();
-                if (power.ChooseOne && owner[PowerChooseBoth] != 0)
-                    foreach (var option in power.ChooseOnePlayables) option.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
-                else if (power.ChooseOne && owner[PowerChoice] > 0)
-                    power.ChooseOnePlayables[owner[PowerChoice]-1].ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
-                else power.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice]);
-                game.ProcessTasks();
+                BeginHeroPowerEffect(owner);
+                try
+                {
+                    if (power.ChooseOne && owner[PowerChooseBoth] != 0)
+                        foreach (var option in power.ChooseOnePlayables) option.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
+                    else if (power.ChooseOne && owner[PowerChoice] > 0)
+                        power.ChooseOnePlayables[owner[PowerChoice]-1].ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
+                    else power.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice]);
+                    game.ProcessTasks();
+                }
+                finally { EndHeroPowerEffect(owner); }
                 game.TaskQueue.EndEvent();
                 game.DeathProcessingAndAuraUpdate();
                 if (Generic.SpellBodyPending(game)) return;

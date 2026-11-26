@@ -178,6 +178,17 @@ comparison and a `SKIPPED n x ...` total at the end. The comparisons that need t
 hero powers) are skipped in `engine-proof` even when the export is there, and run in `engine-proof-client`. Nothing is skipped silently. The client half builds with
 `-p:ClientTransport=true`, which defines `CLIENT_TRANSPORT`, adds the client's libraries and links the plugin's native match.
 
+### Wild card proofs
+
+The full engine proof run includes the Wild card groups. Run them alone with `--wild-sets-only`
+or select one group with its own flag, such as `--wild-y0a-pilot-cards-only`. The manifests under
+`tests/progression/batches/wild/` list the cases that run. Each case exercises the installed engine
+definition in three seeded games and checks clone and snapshot parity.
+
+The fixtures use the match's Wild pool policy. Wild-only generation membership is still pending, so
+a passing gameplay case does not certify that a card has full retail generation or native FX parity.
+Set `WILD_HELD=1` to run the optional diagnostic cases that report their results outside the manifest.
+
 ## Client drop prediction
 
 When you drag a card from your hand and drop it, the client doesn't wait for the game. It moves the card to the board at

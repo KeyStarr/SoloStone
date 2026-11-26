@@ -41,6 +41,7 @@ internal static partial class Program
             ["--match-event-log-only"] = MatchEventLogChecks,
             ["--controller-admission-only"] = ControllerAdmissionControls,
             ["--hero-replacement-only"] = HeroReplaceHistoryProof.Run,
+            ["--wild-fx-history-only"] = WildFxHistoryProof.Run,
         };
         var unknown = args.Where(arg => !slices.ContainsKey(arg)).ToArray();
         if (unknown.Length != 0) throw new ArgumentException("Unknown argument: " + string.Join(" ", unknown));

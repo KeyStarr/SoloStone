@@ -39,8 +39,13 @@ foreach (bool duplicate in new[] { false, true })
 }
 GroupProofs.Run(ProofKind.Facility);
 GroupProofs.Run(ProofKind.PoweredUp);
-Check(Probe.Calls.SequenceEqual(new[] { "a", "z", "glow" }), "group dispatch is ordered, exactly once and kind-specific");
+GroupProofs.Run(ProofKind.WildCards);
+Check(Probe.Calls.SequenceEqual(new[] { "a", "z", "glow", "wild" }), "group dispatch is ordered, exactly once and kind-specific");
 RejectArgument(() => GroupProofs.TryRun(new[] { "--registry-a-only", "--registry-z-only" }));
+Reject(() => GroupProofs.TryRun(new[] { "--registry-wild-only" }), "Wild card proof runner required");
+bool wildContext = false;
+Check(GroupProofs.TryRun(new[] { "--registry-wild-only" }, runWildCards: proof => { wildContext = true; proof(); })
+    && wildContext && Probe.Calls.Last() == "wild", "Wild group flag uses its own card context");
 RejectArgument(() => GroupProofs.TryRun(new[] { "--not-registered-only" }));
 RejectArgument(() => GroupProofs.TryRun(new[] { "--legacy-only", "--not-registered-only" }, allowUnmatched: true));
 if (args.Length == 2 && args[0] == "--merge-check")
@@ -66,6 +71,7 @@ static void RejectArgument(Action action)
 internal static class Probe
 {
     internal static readonly List<string> Calls = new();
+    [GroupProof("registry-wild", ProofKind.WildCards)] internal static void Wild() => Calls.Add("wild");
     [GroupProof("registry-z")] internal static void Z() => Calls.Add("z");
     [GroupProof("registry-a")] internal static void A() => Calls.Add("a");
     [GroupProof("registry-glow", ProofKind.PoweredUp)] internal static void Glow() => Calls.Add("glow");

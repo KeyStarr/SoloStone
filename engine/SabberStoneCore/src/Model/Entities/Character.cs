@@ -350,6 +350,7 @@ namespace SabberStoneCore.Model.Entities
                 || source is Weapon weaponSource && weaponSource.Card.Id == "BE_000";
 			var minion = this as Minion;
             if (!outgoingApplied) damage = Actions.CombatRules.Outgoing(source, damage);
+            damage = Actions.CombatRules.Incoming(hero, damage);
             if (Actions.CombatRules.PreventsFire(source.Card.Type, source.Card[GameTag.SPELL_SCHOOL], this)) return 0;
 
 			if (minion != null && (minion.Zone.Type != Enums.Zone.PLAY || minion.Untouchable))

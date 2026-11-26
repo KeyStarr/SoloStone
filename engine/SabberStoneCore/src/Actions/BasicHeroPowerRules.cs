@@ -186,11 +186,13 @@ namespace SabberStoneCore.Actions
             try
             {
                 game.CurrentEventData = new EventMetaData(power, target);
+                RepeatRules.BeginHeroPowerEffect(controller);
                 if (power.IsPlayableByCardReq) power.ActivateTask(PowerActivation.POWER, target);
                 game.ProcessTasks();
             }
             finally
             {
+                RepeatRules.EndHeroPowerEffect(controller);
                 game.TaskQueue.EndEvent();
                 controller.GraveyardZone.Add(controller.SetasideZone.Remove(power));
                 game.CurrentEventData = previousEvent;

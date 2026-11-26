@@ -705,9 +705,12 @@ namespace SabberStoneCore.Actions
 				using (game.Resolution.Enter(ResolutionKind.Battlecry))
 				{
 					game.TaskQueue.StartEvent();
-					weapon.ActivateTask(PowerActivation.POWER, target, chooseOne);
+					// A Combo weapon (Perdition's Blade) replaces its Battlecry when Combo is active, as spells and minions do.
+					var activation = weapon.Combo && c.IsComboActive ? PowerActivation.COMBO : PowerActivation.POWER;
+					if (activation == PowerActivation.COMBO) game.Facts.ComboActivated(weapon);
+					weapon.ActivateTask(activation, target, chooseOne);
 					if (c.ExtraBattlecry && weapon.Card[GameTag.BATTLECRY] == 1)
-						weapon.ActivateTask(PowerActivation.POWER, target, chooseOne);
+						weapon.ActivateTask(activation, target, chooseOne);
 					game.ProcessTasks();
 					game.TaskQueue.EndEvent();
 				}

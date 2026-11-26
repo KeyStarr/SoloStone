@@ -56,7 +56,7 @@ namespace SabberStoneCore.Model.Snapshots
             .Concat(new[] { typeof(Kettle.PowerHistoryEffectPlayStart) })
             .Concat(new[] { typeof(Kettle.PowerHistoryRetainedOverdraw) })
             // The match pool policy enum rides in GameConfig; appended so published definition type IDs stay put.
-            .Concat(new[] { typeof(Config.GenerationFormat) }).ToArray();
+            .Concat(new[] { typeof(Config.GenerationFormat), typeof(Auras.ExtraHeroPowerUseAura) }).ToArray();
         private static readonly string[] Namespaces = {
             "SabberStoneCore.Model", "SabberStoneCore.Model.Entities", "SabberStoneCore.Model.Zones",
             "SabberStoneCore.Config", "SabberStoneCore.Enums", "SabberStoneCore.Enchants",

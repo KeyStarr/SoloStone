@@ -2451,8 +2451,8 @@ namespace SabberStoneCore.CardSets.Standard
 			// --------------------------------------------------------
 			cards.Add("EX1_124", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0}}, new Power
 			{
-				PowerTask = new DamageTask(2, EntityType.TARGET),
-				ComboTask = new DamageTask(4, EntityType.TARGET)
+				PowerTask = new DamageTask(2, EntityType.TARGET, true),
+				ComboTask = new DamageTask(4, EntityType.TARGET, true)
 			}));
 
 			// ------------------------------------------ SPELL - ROGUE
@@ -2482,9 +2482,9 @@ namespace SabberStoneCore.CardSets.Standard
 			// --------------------------------------------------------
 			cards.Add("EX1_137", new CardDef(new Power
 			{
-				PowerTask = new DamageTask(2, EntityType.OP_HERO),
+				PowerTask = new DamageTask(2, EntityType.OP_HERO, true),
 				ComboTask = ComplexTask.Create(
-					new DamageTask(2, EntityType.OP_HERO),
+					new DamageTask(2, EntityType.OP_HERO, true),
 					new SetGameTagTask(GameTag.HEADCRACK_COMBO, 1, EntityType.SOURCE)),
 				Trigger = new Trigger(TriggerType.TURN_END)
 				{
@@ -2537,11 +2537,25 @@ namespace SabberStoneCore.CardSets.Standard
 			// [EX1_182] Pilfer - COST:1
 			// - Set: expert1, Rarity: common
 			// --------------------------------------------------------
-			// Text: Add a random card to your hand <i>(from your opponent's class)</i>.
-			// --------------------------------------------------------
 			cards.Add("EX1_182", new CardDef(new Power
 			{
-				PowerTask = ComplexTask.AddRandomOpClassCardToHand
+				PowerTask = ComplexTask.Create(
+					new CustomTask((game, controller, source, target, stack) =>
+					{
+						var pool = Cards.RandomPool(game, PoolDestination.Hand, source);
+						stack.Playables = System.Array.Empty<IPlayable>();
+						if (pool.Legacy)
+						{
+							new RandomCardTask(EntityType.OP_HERO).Process(game, controller, source, target, stack);
+							return;
+						}
+						var eligible = pool.WithoutSource(pool.All.Where(card => !pool.InClass(card, controller.HeroClass)
+							&& !pool.InClass(card, CardClass.NEUTRAL) && !card.IsQuest).ToArray(), source);
+						if (eligible.Count == 0) return;
+						stack.Playables = new[] { Entity.FromCard(controller, eligible.Choose(game.Random)) };
+						game.OnRandomHappened(true);
+					}),
+					new AddStackTo(EntityType.HAND))
 			}));
 
 			// ----------------------------------------- WEAPON - ROGUE
