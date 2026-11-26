@@ -957,8 +957,8 @@ namespace SabberStoneCore.CardSets
 						var candidates = new List<IPlayable>();
 						foreach (var secret in stack)
 						{
-							if (c.SecretZone.Any(s => s.Card.AssetId == secret.Card.AssetId)) continue;
-							if (candidates.Any(s => s.Card.AssetId == secret.Card.AssetId)) continue;
+							if (c.SecretZone.Any(s => s.Card.IsSameCardAs(secret.Card))) continue;
+							if (candidates.Any(s => s.Card.IsSameCardAs(secret.Card))) continue;
 							candidates.Add(secret);
 						}
 						while (candidates.Count > 0 && !c.SecretZone.IsFull)

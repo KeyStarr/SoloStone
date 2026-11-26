@@ -270,7 +270,7 @@ namespace SabberStoneCore.Tasks
 				if (c.SecretZone.IsFull) return;
 				var candidates = new List<Spell>();
 				foreach (var secret in c.Opponent.SecretZone)
-					if (secret.IsSecret && !secret.IsQuest && !c.SecretZone.Any(own => own.Card.Id == secret.Card.Id)) candidates.Add(secret);
+					if (secret.IsSecret && !secret.IsQuest && !c.SecretZone.Any(own => own.Card.IsSameCardAs(secret.Card))) candidates.Add(secret);
 				if (candidates.Count == 0) return;
 				var stolen = candidates[g.Random.Next(candidates.Count)];
 				g.OnRandomHappened(true);

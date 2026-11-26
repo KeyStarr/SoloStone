@@ -26,7 +26,7 @@ namespace SabberStoneCore.Auras
         private static bool Active(IPlayable source) =>
             source.Zone?.Type == Zone.PLAY && !source.ToBeDestroyed && !(source is Minion m && (m.IsSilenced || m.IsDormant));
 
-        private bool OtherSource() => _owner.Controller.BoardZone.Any(m => m != _owner && m.Card.Id == _owner.Card.Id && Active(m));
+        private bool OtherSource() => _owner.Controller.BoardZone.Interactable.Any(m => m != _owner && m.Card.IsSameCardAs(_owner.Card) && Active(m));
 
         public void Update()
         {
