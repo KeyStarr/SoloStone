@@ -1,6 +1,7 @@
 using HsSim;
 using SabberStoneCore.Config;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Actions;
@@ -12,9 +13,7 @@ using static Core2026Proof;
 //  - BLOCKED-STANDARD GVG_058, GVG_062 (data/pools/pool-eligibility-v1.json), GVG_059, GVG_061 (plugin/LocalCardCatalog.cs CoreUnlock rows
 //    and data/progression/core-2026-unlocks.json copyGroup), GVG_070 (data/pools/pool-eligibility-v1.json, plugin/Npc/TriggerMeasure.cs): Standard
 //    data uses them today. Their scripts are not changed here; GVG_061's script already matches the 37.0 text.
-// New mechanic: FORGETFUL ("50% chance to attack the wrong enemy": GVG_054 Ogre Warmaul, GVG_065 Ogre Brute, GVG_066 Dunemaul Shaman) is
-// SpecificTask.Forgetful on a TARGET trigger. Rule (hearthstone.wiki.gg/wiki/Forgetful): a fair coin; on a miss the attack goes to a uniformly
-// random OTHER enemy character (hero included, Taunt / Stealth / Immune ignored); with no other enemy the attack stays on its target.
+// Forgetful is held until redirection can dispatch Secrets for each proposed defender.
 internal static class WildY0bM2CProof
 {
     [GroupProof("wild-y0b-m2c-cards", ProofKind.WildCards)]
@@ -23,15 +22,15 @@ internal static class WildY0bM2CProof
         WildSetsProof.Case("GVG_051", Warbot);
         WildSetsProof.Case("GVG_052", Crush);
         WildSetsProof.Case("GVG_053", Shieldmaiden);
-        WildSetsProof.Case("GVG_054", OgreWarmaul);
+        WildSetsProof.Held("GVG_054", "held: Forgetful needs proposed attack Secret redirection", OgreWarmaul);
         WildSetsProof.Case("GVG_055", ScrewjankClunker);
         WildSetsProof.Held("GVG_056", "held: generated-shuffle FX scope", IronJuggernaut);
         WildSetsProof.Case("GVG_057", SealOfLight);
         WildSetsProof.Case("GVG_060", Quartermaster);
         WildSetsProof.Case("GVG_063", BolvarFordragon);
         WildSetsProof.Case("GVG_064", Puddlestomper);
-        WildSetsProof.Case("GVG_065", OgreBrute);
-        WildSetsProof.Case("GVG_066", DunemaulShaman);
+        WildSetsProof.Held("GVG_065", "held: Forgetful needs proposed attack Secret redirection", OgreBrute);
+        WildSetsProof.Held("GVG_066", "held: Forgetful needs proposed attack Secret redirection", DunemaulShaman);
         WildSetsProof.Case("GVG_067", StonesplinterTrogg);
         WildSetsProof.Case("GVG_068", BurlyRockjawTrogg);
         WildSetsProof.Case("GVG_069", AntiqueHealbot);
@@ -504,6 +503,7 @@ internal static class WildY0bM2CProof
 
     private static void OgreBrute(Game g, Controller p, string id)
     {
+        ForgetfulAttackSecrets(id);
         var opp = p.Opponent;
         var brute = (Minion)Play(g, p, id);
         Check(brute.Card.Cost == 3 && brute.AttackDamage == 4 && brute.Health == 4, "a 4/4 for 3");
@@ -548,6 +548,41 @@ internal static class WildY0bM2CProof
         var (oi, oo) = Trials(g, 100, m1, new ICharacter[] { m2, p.Hero }, () => Strike(g, theirs, m1));
         Check(oi >= 30 && oi <= 70 && oo.All(x => x >= 10), "the opponent's Brute misdirects against my side: " + oi + "/" + string.Join("/", oo));
         Resume(g, next => Check(Get(next, theirs).Zone.Type == Zone.PLAY, "clone keeps the Ogre"));
+    }
+
+    private static void ForgetfulAttackSecrets(string id)
+    {
+        var failures = new List<string>();
+        foreach (bool declaresHero in new[] { false, true })
+        {
+            var game = Fresh(1);
+            var owner = game.Player1;
+            var defender = game.Player2;
+            End(game);
+            var explosive = Secret(game, defender, "EX1_610");
+            var snake = declaresHero ? Secret(game, defender, "EX1_554") : null;
+            End(game);
+            var brute = Summon(owner, id);
+            var yeti = Summon(defender, "CS2_182");
+            game.SetRandomSeed(1);
+            int cursor = game.PowerHistory.Full.Count;
+            Strike(game, brute, declaresHero ? defender.Hero : yeti);
+
+            var rows = game.PowerHistory.Full.Skip(cursor).ToArray();
+            int TriggerIndex(Spell secret) => Array.FindIndex(rows,
+                row => row is PowerHistoryBlockStart start && start.BlockType == BlockType.TRIGGER && start.Source == secret.Id);
+            int explosiveFrame = TriggerIndex(explosive);
+            int snakeFrame = snake == null ? -1 : TriggerIndex(snake);
+            int attackFrame = Array.FindIndex(rows,
+                row => row is PowerHistoryTagChange tag && tag.EntityId == brute.Id && tag.Tag == GameTag.ATTACKING && tag.Value == 1);
+            bool hitNewTarget = declaresHero ? yeti.Damage == 4 : defender.Hero.Damage == 4;
+            bool explosiveFired = explosive.Zone != defender.SecretZone && explosiveFrame >= 0 && explosiveFrame < attackFrame;
+            bool snakeFired = snake == null || snake.Zone != defender.SecretZone && snakeFrame >= 0 && snakeFrame < attackFrame;
+            if (!hitNewTarget || !explosiveFired || !snakeFired)
+                failures.Add((declaresHero ? "hero to minion" : "minion to hero")
+                    + $": redirected hit={hitNewTarget}, Explosive Trap frame={explosiveFrame}, Snake Trap frame={snakeFrame}, ATTACKING frame={attackFrame}");
+        }
+        Check(failures.Count == 0, string.Join("; ", failures));
     }
 
     // ---- GVG_066 Dunemaul Shaman ------------------------------------------------------------------------------------

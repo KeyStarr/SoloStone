@@ -225,9 +225,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_119", new CardDef(new Power
 			{
-				// "Your hero can only take 1 damage at a time": applied by CombatRules.Incoming (before armor) while this
-				// minion is on the board and not silenced. The aura only records the rule; AuraEffects has no slot for the tag.
-				Aura = new Aura(AuraType.HERO, new Effect(GameTag.INCOMING_DAMAGE_CAP, EffectOperator.SET, 1))
+				// Hero damage caps need a target finalized by damage redirection.
 			}));
 
 			// ------------------------------------------- SPELL - MAGE
@@ -675,10 +673,8 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("LOE_118", new CardDef(new Power
 			{
-				// "Double all damage dealt to your hero": applied by CombatRules.Incoming (before armor) while this weapon is
-				// equipped and not destroyed or silenced. The aura only records the rule; AuraEffects has no slot for the tag.
-				InfoCardId = "LOE_118e",
-				Aura = new Aura(AuraType.HERO, new Effect(GameTag.INCOMING_DAMAGE_MULTIPLIER, EffectOperator.SET, 2))
+				// Hero damage multipliers need a target finalized by damage redirection.
+				InfoCardId = "LOE_118e"
 			}));
 
 		}
@@ -834,9 +830,9 @@ namespace SabberStoneCore.CardSets
 					{
 						// After you cast a spell on another friendly minion, cast a copy of it on this one.
 						if (!(s is SabberStoneCore.Model.Entities.Minion djinni) || djinni.Zone?.Type != Zone.PLAY) return;
-						if (!(t is SabberStoneCore.Model.Entities.Spell spell) || spell.Controller != c || spell.CardTarget <= 0) return;
-						if (!g.IdEntityDic.TryGetValue(spell.CardTarget, out var aimed)
-							|| !(aimed is SabberStoneCore.Model.Entities.Minion other) || other == djinni || other.Controller != c) return;
+						if (!(t is SabberStoneCore.Model.Entities.Spell spell) || spell.Controller != c) return;
+						int friendlyTarget = spell[SabberStoneCore.Actions.Generic.FriendlyMinionSpellTarget];
+						if (friendlyTarget == 0 || friendlyTarget == djinni.Id) return;
 						int mode = 0;
 						foreach (var entry in c.PlayHistory) if (entry.SourceId == spell.Id) mode = entry.SubOption;
 						var copy = (SabberStoneCore.Model.Entities.Spell)SabberStoneCore.Model.Entities.Entity.FromCard(c, spell.Card,

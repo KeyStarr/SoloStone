@@ -9,13 +9,13 @@ using SabberStoneCore.Tasks.PlayerTasks;
 using static Core2026Proof;
 
 /// <summary>Wave Y0b lane m3e: Grand Tournament AT_088..AT_110 (Neutral minions and the Paladin Tuskarr Jouster).
-/// Registered (literal WildSetsProof.Case, listed in wild-y0b-m3e.txt): every id of the lane except AT_101.
+/// Registered (literal WildSetsProof.Case, listed in wild-y0b-m3e.txt): every id of the lane except AT_088 and AT_101.
 /// BLOCKED-STANDARD, written but never registered: AT_101 Pit Fighter (data/pools/pool-eligibility-v1.json). Its script is
 /// untouched; run it with WILD_Y0B_M3E_BLOCKED=1.
 /// Amount trap: Frigid Snobold's SPELLPOWER tag is stored as 1 by the client and is 1 on the card (Spell Damage +1).
 /// Inspire is proven as a facility in WildY0bM3AProof.InspireMechanic; the Inspire cards here prove their own effect and the
 /// boundaries every Inspire card shares (opponent's Hero Power, once per use, Silence). Joust is proven in WildY0bM3CProof (AT_048);
-/// Tuskarr Jouster and Armored Warhorse prove their own numbers and outcomes. FORGETFUL (Mogor's Champion) uses SpecificTask.Forgetful.
+/// Tuskarr Jouster and Armored Warhorse prove their own numbers and outcomes. Mogor's Champion is held for proposed attack Secret redirection.
 /// </summary>
 internal static class WildY0bM3EProof
 {
@@ -31,7 +31,7 @@ internal static class WildY0bM3EProof
     {
         if (BlockedRun) Blocked();
 
-        WildSetsProof.Case("AT_088", (g, p, id) => {
+        WildSetsProof.Held("AT_088", "held: Forgetful needs proposed attack Secret redirection", (g, p, id) => {
             var opp = p.Opponent;
             var champ = (Minion)Play(g, p, id);
             Check(champ.Card.Cost == 6 && champ.AttackDamage == 8 && champ.Health == 5, "Mogor's Champion is an 8/5 for 6");

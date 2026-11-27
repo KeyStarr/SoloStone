@@ -38,8 +38,8 @@ internal static class WildY0bM4BProof
         WildSetsProof.Held("LOE_111", "held: generated-shuffle FX scope", ExcavatedEvil);
         WildSetsProof.Case("LOE_113", EveryfinIsAwesome);
         WildSetsProof.Held("LOE_116", "held: FX-MISSING live (play)", ReliquarySeeker);
-        WildSetsProof.Case("LOE_118", CursedBlade);
-        WildSetsProof.Case("LOE_119", AnimatedArmor);
+        WildSetsProof.Held("LOE_118", "apply hero damage multipliers after damage redirection", CursedBlade);
+        WildSetsProof.Held("LOE_119", "apply the damage cap after damage redirection", AnimatedArmor);
         // HELD: the client stores SPELLPOWER 1 for this Spell Damage +2 card, so its identity row would break the effect.
         // Proof kept, not registered; it runs against the base card, which still carries +2.
         Held("LOE_051", "export tag 192 = 1 for Spell Damage +2 (generator fix pending)", JungleMoonkin);
@@ -277,6 +277,21 @@ internal static class WildY0bM4BProof
         var enemy = Summon(p.Opponent, "CS2_182");
         Play(g, p, "CS2_092", enemy);
         Ok(enemy.AttackDamage == 8 && djinni.AttackDamage == 12, "cast on an enemy minion: no copy");
+        var enemyWisp = Summon(p.Opponent, "CS2_231");
+        var madness = Play(g, p, "EX1_334", enemyWisp);
+        Ok(enemyWisp.Controller == p && !g.HistoryFacts.Query.Casts().Any(cast =>
+            cast.Definition.DbfId == madness.Card.AssetId && cast.CasterKind == HistoryCastKind.Effect),
+            "Shadow Madness targeted an enemy, so taking control does not trigger a copy");
+        Resume(g, next =>
+        {
+            var caster = next.Player1;
+            ToTurn(next, caster.Opponent);
+            Play(next, caster.Opponent, "tt_010");
+            ToTurn(next, caster);
+            var redirected = Play(next, caster, "CS2_092", (Minion)next.IdEntityDic[ally.Id]);
+            Ok(redirected.CardTarget != ally.Id && ((Minion)next.IdEntityDic[djinni.Id]).AttackDamage == 12,
+                "Spellbender redirects to an enemy minion, so Djinni does not copy");
+        });
         p.Opponent.Hero.Damage = 0; Play(g, p, "CS2_029", p.Opponent.Hero);
         Ok(djinni.Damage == 0 && p.Opponent.Hero.Damage == 6, "cast on a hero: no copy");
         int hand = p.HandZone.Count;
@@ -1190,9 +1205,9 @@ internal static class WildY0bM4BProof
         Steal(g, p, theirs);
         p.Hero.Damage = 0; Hit(g, p, p.Hero);
         Ok(p.Hero.Damage == 1, "a stolen Animated Armor protects the thief");
-        // Together with Cursed Blade the cap wins (the doubled amount is capped at 1).
+        // Animated Armor caps the proposed damage before Cursed Blade doubles the result.
         p.Hero.Damage = 0; Play(g, p, "LOE_118");
         Hit(g, p, p.Hero);
-        Ok(p.Hero.Damage == 1, "with Cursed Blade the final amount is still capped at 1: " + p.Hero.Damage);
+        Ok(p.Hero.Damage == 2, "Cursed Blade doubles the capped amount: " + p.Hero.Damage);
     }
 }

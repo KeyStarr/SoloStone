@@ -744,6 +744,7 @@ namespace SabberStoneCore.Model
             if (spell != null)
             {
                 Actions.Generic.CloseDecisionSpellPower(this);
+                spell.NativeTags.Remove(Actions.Generic.FriendlyMinionSpellTarget);
                 if (History) PowerHistory.Add(PowerHistoryBuilder.BlockEnd());
             }
             if (Resolution.HasSuspendedEffect) Resolution.CancelSuspendedEffect(this);

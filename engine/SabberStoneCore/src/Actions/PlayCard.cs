@@ -542,6 +542,17 @@ namespace SabberStoneCore.Actions
 
         }
 
+        // Private tag so a spell suspended by a choice keeps its original target's allegiance.
+        internal const GameTag FriendlyMinionSpellTarget = (GameTag)32123;
+
+        private static void CaptureFriendlyMinionSpellTarget(Spell spell, ICharacter target)
+        {
+            if (target is Minion && target.Controller == spell.Controller)
+                spell[FriendlyMinionSpellTarget] = target.Id;
+            else
+                spell.NativeTags.Remove(FriendlyMinionSpellTarget);
+        }
+
 		public static Func<Controller, Game, Spell, ICharacter, int, bool> PlaySpell
 			=> delegate (Controller c, Game game, Spell spell, ICharacter target, int chooseOne)
 			{
@@ -581,6 +592,7 @@ namespace SabberStoneCore.Actions
 				// check the spell is countered
 				if (spell.IsCountered)
 				{
+                    CaptureFriendlyMinionSpellTarget(spell, target);
 					OutcastRules.Clear(spell);
                     CardSets.Client.Sets.DragonSoulShattered.Finish(spell);
                     RepeatRules.Clear(spell);
@@ -609,6 +621,7 @@ namespace SabberStoneCore.Actions
 						}
 					}
 
+                    CaptureFriendlyMinionSpellTarget(spell, target);
                     var recipe = (spell.Power?.PowerTask as DecisionSpellTask)?.Recipe;
                     if (recipe != null || handProgress.Length != 0 || !spell.IsSecret && !spell.IsQuest)
                     {
@@ -652,6 +665,7 @@ namespace SabberStoneCore.Actions
 					game.TaskQueue.EndEvent();
 				}
 
+                spell.NativeTags.Remove(FriendlyMinionSpellTarget);
 				c.NumSpellsPlayedThisGame++;
 				if (spell.IsSecret)
 					c.NumSecretsPlayedThisGame++;

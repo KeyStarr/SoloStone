@@ -29,7 +29,7 @@ internal static class WildY0bM2DProof
         WildSetsProof.Case("GVG_084", FlyingMachine);
         WildSetsProof.Case("GVG_086", SiegeEngine);
         WildSetsProof.Held("GVG_087", SteamwheedleSniper);
-        WildSetsProof.Case("GVG_088", OgreNinja);
+        WildSetsProof.Held("GVG_088", "held: Forgetful needs proposed attack Secret redirection", OgreNinja);
         WildSetsProof.Case("GVG_089", Illuminator);
         WildSetsProof.Case("GVG_090", MadderBomber);
         WildSetsProof.Case("GVG_091", ArcaneNullifier);

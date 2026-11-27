@@ -15,7 +15,7 @@ namespace SabberStoneCore.Actions
             TargetDefinition = (GameTag)32102, ChooseBoth = (GameTag)32108, Payload = (GameTag)32103, Charge = (GameTag)32104;
         public const GameTag OneCost = (GameTag)32105, OtherClass = (GameTag)32106;
         public const GameTag PlayedCost = (GameTag)32107;
-        public static bool IsInternalTag(GameTag tag) => (int)tag >= 32100 && (int)tag <= 32122;
+        public static bool IsInternalTag(GameTag tag) => (int)tag >= 32100 && (int)tag <= 32123;
 
         private const GameTag PowerSource = (GameTag)32112, PowerRemaining = (GameTag)32113,
             PowerTarget = (GameTag)32114, PowerTargetDefinition = (GameTag)32115, PowerChoice = (GameTag)32116,

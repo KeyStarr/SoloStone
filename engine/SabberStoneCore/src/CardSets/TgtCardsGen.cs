@@ -2329,11 +2329,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("AT_088", new CardDef(new Power
 			{
-				Trigger = new Trigger(TriggerType.TARGET)
-				{
-					TriggerSource = TriggerSource.SELF,
-					SingleTask = SpecificTask.Forgetful
-				}
+				// TODO [AT_088] Mogor's Champion && Test: Mogor's Champion_AT_088
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

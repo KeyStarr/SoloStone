@@ -1034,11 +1034,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_088", new CardDef(new Power
 			{
-				Trigger = new Trigger(TriggerType.TARGET)
-				{
-					TriggerSource = TriggerSource.SELF,
-					SingleTask = SpecificTask.Forgetful
-				}
+				// TODO [GVG_088] Ogre Ninja && Test: Ogre Ninja_GVG_088
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 			// ------------------------------------------ SPELL - ROGUE
@@ -1211,11 +1209,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_066", new CardDef(new Power
 			{
-				Trigger = new Trigger(TriggerType.TARGET)
-				{
-					TriggerSource = TriggerSource.SELF,
-					SingleTask = SpecificTask.Forgetful
-				}
+				// TODO [GVG_066] Dunemaul Shaman && Test: Dunemaul Shaman_GVG_066
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 			// ----------------------------------------- SPELL - SHAMAN
@@ -1620,11 +1616,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_054", new CardDef(new Power
 			{
-				Trigger = new Trigger(TriggerType.TARGET)
-				{
-					TriggerSource = TriggerSource.HERO,
-					SingleTask = SpecificTask.Forgetful
-				}
+				// TODO [GVG_054] Ogre Warmaul && Test: Ogre Warmaul_GVG_054
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 		}
@@ -1767,11 +1761,9 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_065", new CardDef(new Power
 			{
-				Trigger = new Trigger(TriggerType.TARGET)
-				{
-					TriggerSource = TriggerSource.SELF,
-					SingleTask = SpecificTask.Forgetful
-				}
+				// TODO [GVG_065] Ogre Brute && Test: Ogre Brute_GVG_065
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

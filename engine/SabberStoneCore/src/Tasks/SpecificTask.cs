@@ -225,29 +225,6 @@ namespace SabberStoneCore.Tasks
 				return;
 			});
 
-		/// <summary>FORGETFUL (Ogre Brute, Ogre Warmaul, Dunemaul Shaman): when the owner attacks, a fair coin may send the attack at a random
-		/// other enemy character (hero included; Taunt, Stealth and Immune ignored). No other enemy: the attack stays on its target.</summary>
-		public static ISimpleTask Forgetful =>
-			new CustomTask((g, c, s, t, stack) =>
-			{
-				var attacker = g.CurrentEventData?.EventSource as ICharacter;
-				var intended = g.CurrentEventData?.EventTarget as ICharacter;
-				if (attacker == null || intended == null || !attacker.IsAttacking) return;
-				var enemy = attacker.Controller.Opponent;
-				var others = new List<ICharacter>();
-				foreach (var m in enemy.BoardZone.Interactable) if (m != intended) others.Add(m);
-				if (enemy.Hero != intended) others.Add(enemy.Hero);
-				if (others.Count == 0) return;
-				bool wrong = g.Random.Next(2) == 0;
-				g.OnRandomHappened(true);
-				if (!wrong) return;
-				var next = others[g.Random.Next(others.Count)];
-				g.OnRandomHappened(true);
-				intended.NativeTags[GameTag.DEFENDING] = 0;
-				g.ProposedDefender = next.Id;
-				g.CurrentEventData.EventTarget = next;
-			});
-
 		/// <summary>Jeeves: at the end of each player's turn, that player (the one whose turn ends, not the owner) draws until they hold 3 cards.
 		/// The number of draws is fixed when the effect starts, so an empty deck costs Fatigue per missing card and cannot loop.</summary>
 		public static ISimpleTask Jeeves =>
