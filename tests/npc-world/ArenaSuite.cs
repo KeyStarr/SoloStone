@@ -169,6 +169,45 @@ internal static class ArenaSuite
         double low = MeanBucket(0, 2), mid = MeanBucket(0, 0), high = MeanBucket(10, 0);
         Program.Require(low < mid && mid < high && high - low > 1, "drawn decks get stronger with the record: " + low.ToString("F2") + " < " + mid.ToString("F2") + " < " + high.ToString("F2"));
 
+        // Opponents get stronger with the wins: the NPC field's centre climbs per win.
+        double MeanRating(int wins, int losses, NpcDifficultyLevel level = null)
+        {
+            double sum = 0; int n = 400;
+            for (int i = 0; i < n; i++)
+                sum += matchmaker.Choose(new ArenaRequest(7000 + i, wins + losses, wins, losses, null, null, level)).Npc.HomeRating;
+            return sum / n;
+        }
+        double fresh = MeanRating(0, 0), climbing = MeanRating(5, 0), deep = MeanRating(10, 0);
+        Program.Require(fresh < climbing && climbing < deep && deep - fresh > 250,
+            "NPC rating climbs with the wins: " + fresh.ToString("F0") + " < " + climbing.ToString("F0") + " < " + deep.ToString("F0"));
+        // Losses lower the NPC field a little (NpcRatingPerLoss per loss).
+        double Mean(int wins, int losses, int n)
+        {
+            double sum = 0;
+            for (int i = 0; i < n; i++) sum += matchmaker.Choose(new ArenaRequest(11000 + i, wins + losses, wins, losses, null, null)).Npc.HomeRating;
+            return sum / n;
+        }
+        double clean = Mean(5, 0, 1500), bruised = Mean(5, 2, 1500);
+        Program.Require(bruised < clean - 20, "losses lower the NPC field: " + bruised.ToString("F0") + " < " + clean.ToString("F0"));
+
+        // A deep run (10+ wins) meets the strongest field: mostly Master and Elite pilots, a few Experts, almost nobody below,
+        // and about nine drafts in ten from the top bucket.
+        foreach (int wins in new[] { 10, 11 })
+        {
+            int n = 2000, strong = 0, expert = 0, weak = 0, top = 0;
+            for (int i = 0; i < n; i++)
+            {
+                var e = matchmaker.Choose(new ArenaRequest(30000 + i, wins + 1, wins, 1, null, null));
+                int tier = e.Skill.Tier;
+                if (tier >= 6) strong++; else if (tier == 5) expert++; else weak++;
+                if (arena.BucketOf(e.Deck.Id) == ArenaDeckCatalog.BucketCount - 1) top++;
+            }
+            Program.Require(strong >= n * 0.75 && expert <= n * 0.22 && weak <= n * 0.05,
+                wins + "-1 meets mostly Master and Elite: " + strong + " master+, " + expert + " expert, " + weak + " below of " + n);
+            Program.Require(top >= n * 0.8, wins + "-1 draws the top drafts: " + top + " of " + n);
+        }
+        Difficulty(world, arena, matchmaker, MeanBucket, MeanRating);
+
         // No repeat within a run (the caller passes the run's earlier opponents), whatever the record path.
         for (int run = 0; run < 40; run++)
         {
@@ -184,10 +223,54 @@ internal static class ArenaSuite
         // No rigging: the choice reads only the run's seed, index, record and earlier opponents. (The request has no deck, hand or
         // collection field to read; the result of the match being chosen never exists yet.)
         var props = typeof(ArenaRequest).GetProperties().Select(p => p.Name).OrderBy(n => n).ToArray();
-        Program.Require(string.Join(",", props) == "Losses,MatchIndex,RunSeed,UsedDeckIds,UsedNpcIds,Wins", "Arena request carries no player deck state");
+        Program.Require(string.Join(",", props) == "Difficulty,Losses,MatchIndex,RunSeed,UsedDeckIds,UsedNpcIds,Wins", "Arena request carries no player deck state");
         // NPC skill is today's default scale: the NPC's own tier, no Arena difficulty levels.
         var picked = matchmaker.Choose(request);
         var expectedSkill = picked.Npc.SkillId != null ? world.Catalogs.Skills.Find(picked.Npc.SkillId) : NpcPopulationRules.SkillFor(world.Catalogs.Skills, picked.Npc.HomeRating);
         Program.Require(picked.Skill.Id == expectedSkill.Id, "the Arena NPC plays at its own skill tier");
+    }
+
+    // NPC difficulty (#305): Hard is the queue unchanged; Easy and Medium meet a lower field, weaker drafts and a boosted
+    // (more mistake-prone) NPC that fades as the run's wins climb; every level still climbs with the wins.
+    private static void Difficulty(NpcWorld world, ArenaDeckCatalog arena, ArenaMatchmaker matchmaker,
+        Func<int, int, double> meanBucket, Func<int, int, NpcDifficultyLevel, double> meanRating)
+    {
+        var easy = NpcDifficulties.Easy; var medium = NpcDifficulties.Medium; var hard = NpcDifficulties.Hard;
+        for (int i = 0; i < 60; i++)
+        {
+            var plain = new ArenaRequest(4000 + i, i % 13, i % 12, i % 3, new[] { "npc-arena-0003" }, null);
+            var stated = new ArenaRequest(4000 + i, i % 13, i % 12, i % 3, new[] { "npc-arena-0003" }, null, hard);
+            var a = matchmaker.Choose(plain); var b = matchmaker.Choose(stated);
+            Program.Require(a.Npc.Id == b.Npc.Id && a.Deck.Id == b.Deck.Id && a.Skill.Id == b.Skill.Id && a.MatchSeed == b.MatchSeed
+                && a.Difficulty == null && b.Difficulty == null, "Hard is the Arena queue unchanged");
+        }
+
+        double Bucket(int wins, int losses, NpcDifficultyLevel level)
+        {
+            double sum = 0; int n = 600;
+            for (int i = 0; i < n; i++)
+                sum += arena.BucketOf(matchmaker.Choose(new ArenaRequest(5000 + i, wins + losses, wins, losses, null, null, level)).Deck.Id);
+            return sum / n;
+        }
+        foreach (int wins in new[] { 0, 6 })
+        {
+            double e = Bucket(wins, 0, easy), m = Bucket(wins, 0, medium), h = meanBucket(wins, 0);
+            Program.Require(e < m && m < h, "Easy and Medium draw weaker drafts at " + wins + " wins: " + e.ToString("F2") + " < " + m.ToString("F2") + " < " + h.ToString("F2"));
+            double re = meanRating(wins, 0, easy), rm = meanRating(wins, 0, medium), rh = meanRating(wins, 0, null);
+            Program.Require(re < rm && rm < rh, "Easy and Medium meet a lower NPC field at " + wins + " wins: " + re.ToString("F0") + " < " + rm.ToString("F0") + " < " + rh.ToString("F0"));
+        }
+        foreach (var level in new[] { easy, medium })
+        {
+            Program.Require(Bucket(0, 0, level) < Bucket(10, 0, level) && meanRating(0, 0, level) + 250 < meanRating(10, 0, level),
+                level.Name + ": winning runs still meet stronger opponents");
+            var shaped = matchmaker.Choose(new ArenaRequest(31, 0, 0, 0, null, null, level));
+            var own = shaped.Npc.SkillId != null ? world.Catalogs.Skills.Find(shaped.Npc.SkillId) : NpcPopulationRules.SkillFor(world.Catalogs.Skills, shaped.Npc.HomeRating);
+            Program.Require(shaped.Difficulty == level.Id && shaped.Skill.Id == own.Id + "+" + level.Id && shaped.Reason == "arena"
+                && shaped.Deck.Admission == "arena", level.Name + " shapes the NPC's play, never its drafted deck");
+        }
+        // The boost fades with the wins: Easy at 0 wins plays with more room for mistakes than Easy deep in a run.
+        int early = easy.RatingPosition(matchmaker.Rules.NpcTargetFor(0)), late = easy.RatingPosition(matchmaker.Rules.NpcTargetFor(11));
+        Program.Require(easy.BoostAt(early).MistakeScale > easy.BoostAt(late).MistakeScale, "Easy's boost fades as the run's wins climb");
+        Program.Require(medium.BoostAt(medium.RatingPosition(matchmaker.Rules.NpcTargetFor(11))).MistakeScale == 1, "Medium deep in a run plays at the NPC's own tier");
     }
 }

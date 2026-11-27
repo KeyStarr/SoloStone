@@ -208,7 +208,7 @@ public static class NpcCoreDecks
         : new NpcWorldCatalogs(Include(catalogs.Decks), catalogs.Skills, catalogs.Personalities, catalogs.Notables, catalogs.Names, catalogs.Cosmetics);
 }
 
-// Shared deck selection and skill adjustment for Ranked and Casual difficulty.
+// Shared deck selection and skill adjustment for Ranked and Casual difficulty; Arena uses the skill adjustment only (#305).
 public static class NpcDifficultyShaper
 {
     public const int StreamCore = 11, StreamSoftKeep = 12, StreamBeginner = 13;

@@ -385,7 +385,8 @@ internal static class LocalLadder
     }
 
     // Arena (#6): the Arena NPC of the run's next match. No fallback to a ladder or legacy opponent (an Arena start that cannot
-    // find its drafted-deck opponent refuses). Inputs: the run's own record and its earlier opponents, never the player's deck.
+    // find its drafted-deck opponent refuses). Inputs: the run's own record, its earlier opponents and the save's NPC difficulty
+    // (#305), never the player's deck.
     private static NpcEncounter ArenaEncounter(out LocalDeck deck)
     {
         deck = null;
@@ -393,7 +394,8 @@ internal static class LocalLadder
         var run = profile.ArenaRun ?? throw new InvalidOperationException("No Arena run.");
         var played = profile.History.Where(match => match.ArenaRunId == run.RunId && match.Result != null).ToList();
         var request = new ArenaRequest(run.Seed, played.Count, run.Wins, run.Losses,
-            played.Where(match => match.NpcDeckId != null).Select(match => match.NpcDeckId), played.Where(match => match.NpcId != null).Select(match => match.NpcId));
+            played.Where(match => match.NpcDeckId != null).Select(match => match.NpcDeckId), played.Where(match => match.NpcId != null).Select(match => match.NpcId),
+            NpcDifficulties.Find(profile.NpcDifficulty));   // read at each match start: an Options change applies from the next match
         NpcEncounter encounter = matchmaker.Next(request);
         string deckId = encounter.Deck.Id;
         if (string.IsNullOrWhiteSpace(deckId) || deckId.Length > 64 || deckId.Any(char.IsControl))
