@@ -408,6 +408,34 @@ internal static class WildY0bM3DProof
             Ok(me.BoardZone.Select(m => m.Card.Id).SequenceEqual(new[] { id, "CS2_182", "CS2_168" }),
                 "minions go to the battlefield in draw order after Varian: " + string.Join(",", me.BoardZone.Select(m => m.Card.Id)));
             Ok(me.HandZone.Count == 1 && me.HandZone[0].Card.Id == "CS2_029" && me.DeckZone.Count == 1, "the spell is drawn into the hand, one card stays in the deck");
+            var randomGame = NewGame(seed, CardClass.WARRIOR, CardClass.MAGE);
+            var randomOwner = randomGame.Player1;
+            SetDeck(randomOwner, "CS2_182", "CS2_029", "AT_130");
+            randomOwner.DeckZone.DrawWithRandom = true;
+            var remaining = randomOwner.DeckZone.ToList();
+            var random = randomGame.Random.Clone();
+            var picks = new List<IPlayable>();
+            while (remaining.Count > 0)
+            {
+                int index = random.Next(remaining.Count);
+                picks.Add(remaining[index]);
+                remaining.RemoveAt(index);
+            }
+            int cursor = randomGame.PowerHistory.Full.Count;
+            int drawnBefore = randomOwner.NumCardsDrawnThisTurn;
+            var randomVarian = (Minion)Play(randomGame, randomOwner, id);
+            var summoned = picks.OfType<Minion>().ToArray();
+            var drawn = picks.Single(card => card is Spell);
+            Ok(randomOwner.BoardZone.Skip(1).SequenceEqual(summoned) && randomOwner.HandZone.Single() == drawn
+                && randomOwner.DeckZone.IsEmpty && randomOwner.NumCardsDrawnThisTurn == drawnBefore + 1
+                && randomVarian.Damage == 0 && randomGame.Random.Clone().Next(int.MaxValue) == random.Next(int.MaxValue),
+                "random draw policy selects once per card, summons minions in order and draws the spell");
+            var rows = randomGame.PowerHistory.Full.Skip(cursor).ToArray();
+            var shows = rows.OfType<PowerHistoryShowEntity>().ToArray();
+            Ok(summoned.All(m => shows.Any(show => show.Entity.Id == m.Id
+                    && show.Entity.Tags.TryGetValue(GameTag.ZONE, out int zone) && zone == (int)Zone.PLAY))
+                && !rows.OfType<PowerHistoryFullEntity>().Any(full => summoned.Any(m => m.Id == full.Entity.Id)),
+                "deck summons reveal existing entities directly in play");
             // Retail: put into the battlefield, not drawn: no draw triggers (Sea Reaver stays undamaging); minions are not played (no battlecry).
             var g2 = NewGame(seed, CardClass.WARRIOR, CardClass.MAGE);
             var me2 = g2.Player1;
@@ -427,6 +455,7 @@ internal static class WildY0bM3DProof
             var me3b = g3b.Player1;
             while (me3b.BoardZone.Count < 6) Summon(me3b, "CS2_182");
             SetDeck(me3b, "AT_130");
+            me3b.DeckZone.DrawWithRandom = true;
             var v3b = (Minion)Play(g3b, me3b, id);
             Ok(me3b.BoardZone.Count == 7 && me3b.BoardZone.All(m => m.Damage == 1) && me3b.DeckZone.Count == 0, "Sea Reaver with the board full is drawn, so its draw trigger hits our minions: " + me3b.BoardZone.Count + "/" + v3b.Damage + "/" + me3b.DeckZone.Count + "/hand " + me3b.HandZone.Count + "/" + string.Join(",", me3b.BoardZone.Select(m => m.Damage)));
             // Short deck: fatigue 1 + 2 after the one minion.
@@ -721,9 +750,19 @@ internal static class WildY0bM3DProof
 
     private static void EnterTheColiseum(Game g0, Controller p0, string id)
     {
-        Summon(p0, "CS2_182"); Summon(p0, "CS2_168");
-        Play(g0, p0, id);
-        Ok(p0.UsedMana == 3 && p0.BoardZone.Count == 1 && p0.BoardZone[0].Card.Id == "CS2_182", "Enter the Coliseum costs 3 and spares the highest Attack minion");
+        var highest = Summon(p0, "CS2_182");
+        var lower = Summon(p0, "CS2_168");
+        var sleeper = Summon(p0, "CS2_222");
+        Ok(DormantRules.Make(sleeper, 2, "TIME_046e", sleeper), "high Attack minion goes Dormant");
+        var portal = Summon(p0.Opponent, "UNG_829t2");
+        var enemy = Summon(p0.Opponent, "CS2_168");
+        int cursor = g0.PowerHistory.Full.Count;
+        var coliseum = Play(g0, p0, id);
+        Ok(p0.UsedMana == 3 && Alive(highest) && Dead(lower) && Alive(sleeper) && Alive(portal) && Alive(enemy),
+            "Enter the Coliseum spares the highest Attack active minion per side and leaves Untouchables alone");
+        var targets = g0.PowerHistory.Full.Skip(cursor).OfType<PowerHistoryMetaData>()
+            .Where(row => row.Type == MetaDataType.TARGET && row.Data == coliseum.Id).SelectMany(row => row.Info);
+        Ok(targets.SequenceEqual(new[] { highest.Id, lower.Id, enemy.Id }), "TARGET history lists exactly the interactable cohort");
         var survivors = new HashSet<string>();
         Seeds(CardClass.PALADIN, CardClass.MAGE, (g, seed) =>
         {
@@ -752,7 +791,10 @@ internal static class WildY0bM3DProof
             var a = Summon(me, "CS2_182"); var b = Summon(me, "CS2_182"); var c = Summon(me, "CS2_182");
             var x = Summon(foe, "CS2_182"); var y = Summon(foe, "CS2_182"); var z = Summon(foe, "CS2_182");
             lone.Silence();
+            int ties = 0;
+            g.RandomHappenedEvent += (_, happened) => { if (happened) ties++; };
             Play(g, me, id);
+            Ok(ties == 2, "each tied side notifies listeners once");
             int mineLeft = new[] { a, b, c }.Count(Alive), theirsLeft = new[] { x, y, z }.Count(Alive);
             Ok(mineLeft == 1 && theirsLeft == 1 && !Alive(lone), "a tie leaves exactly one of the tied minions per side");
             survivors.Add(string.Join("", new[] { a, b, c }.Select(m => Alive(m) ? "1" : "0")) + "/" + string.Join("", new[] { x, y, z }.Select(m => Alive(m) ? "1" : "0")));
@@ -807,7 +849,10 @@ internal static class WildY0bM3DProof
             // More distinct Secrets than room: five at most.
             var g4 = NewGame(seed, CardClass.PALADIN, CardClass.MAGE);
             SetDeck(g4.Player1, SecretPool);
+            bool sampled = false;
+            g4.RandomHappenedEvent += (_, random) => sampled |= random;
             Play(g4, g4.Player1, id);
+            Ok(sampled, "picking which Secrets fill the zone reports random selection");
             Ok(g4.Player1.SecretZone.Count == 5 && g4.Player1.DeckZone.Count == 3, "the Secret limit of five holds");
             sets.Add(string.Join(",", g4.Player1.SecretZone.Select(s => s.Card.Id).OrderBy(s => s, StringComparer.Ordinal)));
             // Full secret zone: none are put.
@@ -895,18 +940,69 @@ internal static class WildY0bM3DProof
             Kill(g6, cmd6);
             Refresh(m6);
             Ok(!CanPower(m6), "Commander died: the extra use is gone");
-            // Clone mid-turn after the first use.
+            // Both copies keep the pending grant until their last live source leaves.
             var g5 = NewGame(seed, CardClass.PALADIN, CardClass.MAGE);
             var m5 = g5.Player1;
-            Play(g5, m5, id);
+            var first = Play(g5, m5, id);
+            var last = Play(g5, m5, id);
             Refresh(m5);
             Ok(g5.Process(HeroPowerTask.Any(m5)), "first use");
             Resume(g5, next =>
             {
                 Refresh(next.Player1);
-                Ok(CanPower(next.Player1), "second use survives clone");
+                ((Minion)next.IdEntityDic[first.Id]).Silence();
+                Ok(CanPower(next.Player1), "second use survives copy and one Commander being silenced");
+                Kill(next, (Minion)next.IdEntityDic[last.Id]);
+                Ok(!CanPower(next.Player1), "last active Commander leaving revokes the pending use in the copy");
             });
         });
+
+        foreach (int uses in new[] { 2, 1 })
+        {
+            var game = NewGame(1, CardClass.PALADIN, CardClass.MAGE);
+            var player = game.Player1;
+            var commander = (Minion)Play(game, player, id);
+            var yeti = Summon(player.Opponent, "CS2_182");
+            for (int i = 0; i < uses; i++) UseHeroPower(game, player);
+            Play(game, player, "GIL_561"); // Blackwald Pixie refreshes even if Commander's use is pending.
+            Resume(game, CheckRefresh);
+            CheckRefresh(game);
+
+            void CheckRefresh(Game next)
+            {
+                var owner = next.Player1;
+                var attacker = (Minion)next.IdEntityDic[commander.Id];
+                Attack(next, attacker, (Minion)next.IdEntityDic[yeti.Id]);
+                Ok(Dead(attacker) && CanPower(owner), "Blackwald Pixie's refresh survives Commander trading into a Yeti");
+                UseHeroPower(next, owner);
+                Ok(owner.Hero.HeroPower.IsExhausted && !CanPower(owner), "independent refresh gives one use");
+            }
+        }
+
+        var replacement = NewGame(1, CardClass.PALADIN, CardClass.MAGE);
+        var replacingPlayer = replacement.Player1;
+        var replacingCommander = (Minion)Play(replacement, replacingPlayer, id);
+        UseHeroPower(replacement, replacingPlayer);
+        var originalPower = replacingPlayer.Hero.HeroPower;
+        Play(replacement, replacingPlayer, "AT_132"); // Justicar Trueheart installs a new Hero Power.
+        Ok(originalPower.Zone == replacingPlayer.SetasideZone && originalPower.IsExhausted, "replacing a power ends its pending use");
+        replacingCommander.Silence();
+        Ok(replacingPlayer.Hero.HeroPower != originalPower && CanPower(replacingPlayer), "new power stays ready when Commander is silenced");
+        UseHeroPower(replacement, replacingPlayer);
+        Ok(!CanPower(replacingPlayer), "new power is exhausted after use");
+
+        var rescue = NewGame(1, CardClass.PALADIN, CardClass.MAGE);
+        var rescuedPlayer = rescue.Player1;
+        var rescuedCommander = (Minion)Play(rescue, rescuedPlayer, id);
+        UseHeroPower(rescue, rescuedPlayer);
+        rescuedCommander.TakeDamage(rescuedPlayer.Opponent.Hero, rescuedCommander.Health);
+        rescue.AuraUpdate();
+        Ok(rescuedCommander.ToBeDestroyed && CanPower(rescuedPlayer), "pending damage alone leaves Commander's aura in play");
+        rescuedCommander.TakeHeal(rescuedPlayer.Hero, 1);
+        rescue.DeathProcessingAndAuraUpdate();
+        Ok(Alive(rescuedCommander) && CanPower(rescuedPlayer), "rescued Commander keeps its aura and extra use");
+        rescuedCommander.Silence();
+        Ok(!CanPower(rescuedPlayer), "silencing rescued Commander revokes its extra use");
     }
 
     private static void EadricThePure(Game g0, Controller p0, string id)

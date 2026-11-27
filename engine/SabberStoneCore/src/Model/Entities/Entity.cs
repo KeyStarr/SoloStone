@@ -138,7 +138,7 @@ namespace SabberStoneCore.Model.Entities
                 {
                     Actions.SwapRules.ZoneChanged(card, value);
                     if ((value != null && value.Type != Enums.Zone.PLAY || value == null && _zone != null) && Actions.DormantRules.HasPending(card)) Actions.DormantRules.ClearPending(card);
-                    if (value != _zone && this is HeroPower passive) Actions.BasicHeroPowerRules.DetachPassive(passive);
+                    if (value != _zone && this is HeroPower power) Actions.BasicHeroPowerRules.DetachPower(power);
                     if (value != _zone && _zone?.Type == Enums.Zone.HAND) Actions.InfinityRules.ChangingDefinition(card);
                     if (value != _zone && _zone?.Type == Enums.Zone.HAND && value?.Type != Enums.Zone.HAND) Actions.PayloadRules.HandExit(card);
                     if (value != _zone && value?.Type != Enums.Zone.HAND && Actions.TemporaryRules.IsTemporary(card)) Actions.TemporaryRules.OnHandExit(card);

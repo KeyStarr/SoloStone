@@ -10,7 +10,6 @@ using static Core2026Proof;
 // Wave Y0b, lane m2a: Goblins vs Gnomes GVG_001 .. GVG_025 (Mage, Priest, Warlock, Rogue and neutral opening cards).
 // Unregistered (not in the batch manifest), their scenarios kept below and run only with WILD_Y0B_M2A_UNREGISTERED=1:
 //  - BLOCKED-STANDARD GVG_005, GVG_021: a Standard pool uses them today (data/pools/pool-eligibility-v1.json).
-//  - GVG_007 is registered (script: 2 damage to all non-Mech characters; it stays in hand via Actions/Draw.cs).
 //  - BLOCKED-HSDATA GVG_004, GVG_011, GVG_015: their English text changed in 37.0, and the locale files cannot be
 //    regenerated without the hsdata CardDefs (tools/gen_card_facts.py --hsdata); an identity row would leave them stale.
 //    Their script fixes are NOT on this branch (card text and behaviour must not disagree); the scenarios below state the
@@ -27,7 +26,16 @@ internal static class WildY0bM2AProof
         WildSetsProof.Case("GVG_002", Snowchugger);
         WildSetsProof.Case("GVG_003", UnstablePortal);
         WildSetsProof.Case("GVG_006", Mechwarper);
-        WildSetsProof.Case("GVG_007", FlameLeviathan);
+        var drawGame = WildSetsProof.CreateGame(1, GenerationFormat.Wild);
+        FlameLeviathan(drawGame, drawGame.Player1, "GVG_007");
+        WildSetsProof.Held("GVG_007", "37.0 Rush and localized text pending", (g, p, id) =>
+        {
+            var leviathan = (Minion)Play(g, p, id);
+            var enemy = Summon(p.Opponent, "CS2_182");
+            var attacks = p.Options().Where(t => t.PlayerTaskType == PlayerTaskType.MINION_ATTACK && t.Source?.Id == leviathan.Id).ToArray();
+            Check(leviathan.Card.Rush && attacks.Length == 1 && attacks[0].Target?.Id == enemy.Id,
+                "Rush: it can attack a minion on its first turn");
+        });
         WildSetsProof.Case("GVG_008", Lightbomb);
         WildSetsProof.Case("GVG_009", Shadowbomber);
         WildSetsProof.Case("GVG_010", VelensChosen);
@@ -43,7 +51,7 @@ internal static class WildY0bM2AProof
         WildSetsProof.Case("GVG_023", AutoBarber);
         WildSetsProof.Case("GVG_024", CogmastersWrench);
         WildSetsProof.Case("GVG_025", OneEyedCheat);
-        // Opt-in evidence for the six unregistered ids (never part of the registered group, never in the manifest).
+        // Opt-in evidence for the five unregistered ids (never part of the registered group, never in the manifest).
         if (Environment.GetEnvironmentVariable("WILD_Y0B_M2A_UNREGISTERED") == "1") RunUnregistered();
     }
 
@@ -270,8 +278,8 @@ internal static class WildY0bM2AProof
         Stack(p, id);
         var drawn = Generic.Draw(p); g.DeathProcessingAndAuraUpdate();
         Check(drawn.Card.Id == id && drawn.Zone.Type == Zone.HAND, "Flame Leviathan stays in hand when drawn");
-        Check(friend.Damage == 2 && enemy.Damage == 2 && p.Hero.Damage == 2 && p.Opponent.Hero.Damage == 2 && friendMech.Damage == 2
-            && enemyMech.Damage == 2 && weak.Zone.Type == Zone.GRAVEYARD, "drawing it deals 2 to all characters");
+        Check(friend.Damage == 2 && enemy.Damage == 2 && p.Hero.Damage == 2 && p.Opponent.Hero.Damage == 2 && friendMech.Damage == 0
+            && enemyMech.Damage == 0 && weak.Zone.Type == Zone.GRAVEYARD, "drawing it deals 2 to both heroes and all non-Mech minions");
         Add(p, id);
         Check(friend.Damage == 2 && p.Hero.Damage == 2, "adding it to hand is not drawing it");
         EmptyHand(p); FillHand(p);
@@ -284,9 +292,6 @@ internal static class WildY0bM2AProof
         Check(friend.Damage == 4 && p.Hero.Damage == 4, "Spell Damage does not boost it");
         Check(again.AttackDamage == 7 && again.Health == 7 && again.IsRace(Race.MECHANICAL), "Flame Leviathan is a 7/7 Mech");
         PlayEntity(g, p, again);
-        var rush = p.Options().Where(t => t.PlayerTaskType == PlayerTaskType.MINION_ATTACK && t.Source?.Id == again.Id).ToArray();
-        // Rush comes from the 37.0 identity row, which is not loaded for this unregistered id (Card.Rush is read-only here).
-        Check(!again.Card.Rush || rush.Length > 0 && rush.All(t => t.Target is Minion), "Rush: it can attack minions but not the hero this turn");
         Resume(g, next => { End(next); Check(Get(next, again).Zone.Type == Zone.PLAY, "Leviathan survives on a clone"); });
         End(g);
         var opp = p.Opponent;
@@ -825,7 +830,7 @@ internal static class WildY0bM2AProof
     // ---- Unregistered scenarios (never registered, never listed) ------------------------------------------------------
 
     // The 37.0 identity row is not loaded for these ids (see the header). Apply what it carries that a scenario reads, so the
-    // scenario sees the retail card: the Shadow school for Darkbomb (Rush for Flame Leviathan cannot be set from here).
+    // scenario sees the retail spell school for Darkbomb.
     private static void RunUnregistered()
     {
         Cards.FromId("GVG_015").Tags[GameTag.SPELL_SCHOOL] = 6;

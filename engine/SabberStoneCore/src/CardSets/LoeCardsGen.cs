@@ -575,9 +575,8 @@ namespace SabberStoneCore.CardSets
 			cards.Add("LOE_116", new CardDef(new Power
 			{
 				PowerTask = ComplexTask.Create(
-					// 6 other minions; a Location fills a slot but is not a minion.
-					new ConditionTask(EntityType.SOURCE, new SelfCondition(me => me.Controller.BoardZone.Count(
-						other => other != me && other is SabberStoneCore.Model.Entities.Minion) >= 6)),
+					new ConditionTask(EntityType.SOURCE, new SelfCondition(me => me.Controller.BoardZone.CountInteractable(
+						other => other != me) >= 6)),
 					new FlagTask(true, ComplexTask.Create(
 						new FuncNumberTask(p => {
 							if (p.Game.History) p.Game.PowerHistory.TargetRange(new[] { p.Id });
@@ -1008,8 +1007,8 @@ namespace SabberStoneCore.CardSets
 			{
 				// 37.0: "unless it's the only minion on the battlefield" (either side).
 				Aura = new AdaptiveEffect(new SelfCondition(me =>
-					me.Controller.BoardZone.Any(other => other != me && other is SabberStoneCore.Model.Entities.Minion)
-					|| me.Controller.Opponent.BoardZone.Any(other => other is SabberStoneCore.Model.Entities.Minion)), GameTag.CANT_ATTACK)
+					me.Controller.BoardZone.AnyInteractable(other => other != me)
+					|| me.Controller.Opponent.BoardZone.AnyInteractable()), GameTag.CANT_ATTACK)
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL

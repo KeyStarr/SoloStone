@@ -479,6 +479,16 @@ internal static class WildY0bM1CProof
             var t = Summon(opp, "CS2_182"); Play(g, opp, id, t);
             Core2026Proof.Check(opp.BoardZone.Count == 1 && opp.BoardZone[0].Id != t.Id, "the opponent's cast works the same way");
             End(g);
+
+            StandardSetsProof.ParkBoard(p); StandardSetsProof.ParkBoard(opp);
+            EmptyHand(opp);
+            var yeti = Summon(opp, "CS2_182"); yeti.Damage = 3;
+            var forcedSpell = Add(opp, id);
+            var saboteur = (Minion)Add(p, "DAL_538"); saboteur.CantBeTargetedBySpells = true;
+            PlayEntity(g, p, saboteur);
+            Core2026Proof.Check(forcedSpell.Zone == opp.GraveyardZone && yeti.Zone == opp.GraveyardZone
+                && opp.BoardZone.SingleOrDefault() is { } reborn && reborn.Card.Id == yeti.Card.Id && reborn.Damage == 0
+                && p.BoardZone.Count == 1, "Saboteur forces the inactive caster to return its Yeti to its own board");
         });
         WildSetsProof.Held("FP1_026", (g, p, id) => {
             var opp = p.Opponent; var card = Cards.FromId(id);
@@ -544,9 +554,9 @@ internal static class WildY0bM1CProof
             End(g);
             Core2026Proof.Check(theirs.Damage == 2 && garg.Damage == 0, "and not at mine; mine heals at mine");
         });
-        WildSetsProof.Held("FP1_028", (g, p, id) => {
+        WildSetsProof.Held("FP1_028", "37.0 Undead type and localized text pending", (g, p, id) => {
             var opp = p.Opponent; var card = Cards.FromId(id);
-            Core2026Proof.Check(card.Cost == 1 && card.ATK == 1 && card.Health == 2 && card.IsRace(Race.UNDEAD), "Undertaker is a 1-mana 1/2 Undead");
+            Core2026Proof.Check(card.Cost == 1 && card.ATK == 1 && card.Health == 2, "Undertaker is a 1-mana 1/2");
             var under = Summon(p, id);
             // A Deathrattle minion is summoned and removed again, so the board never fills up.
             void Dr(Controller c) { Kill(g, Summon(c, "FP1_029")); }
@@ -579,6 +589,7 @@ internal static class WildY0bM1CProof
             Dr(opp);
             Core2026Proof.Check(ut.AttackDamage == 2 && ut.Health == 3, "but gains for its own side");
             End(g);
+            Core2026Proof.Check(card.IsRace(Race.UNDEAD), "Undertaker has the Undead type in 37.0");
         });
         WildSetsProof.Held("FP1_029", (g, p, id) => {
             var opp = p.Opponent; var card = Cards.FromId(id);

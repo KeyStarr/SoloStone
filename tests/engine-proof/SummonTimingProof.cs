@@ -122,10 +122,11 @@ internal static class SummonTimingProof
         var undertaker = Summon(p, "FP1_028");
         var hoarder = Summon(p, "EX1_096");
         hoarder[GameTag.REBORN] = 1;
-        int attack = undertaker.AttackDamage;
+        int attack = undertaker.AttackDamage, health = undertaker.Health;
         Die(g, hoarder);
         Verify(p.BoardZone.Any(m => m.Card.Id == "EX1_096" && m[GameTag.HAS_BEEN_REBORN] == 1), "Loot Hoarder is reborn");
-        Verify(undertaker.AttackDamage == attack + 1, $"Undertaker gains +1 Attack for the Reborn Deathrattle minion in the same cleanup, got {undertaker.AttackDamage - attack}");
+        Verify(undertaker.AttackDamage == attack + 1 && undertaker.Health == health + 1,
+            "Undertaker gains +1/+1 for the Reborn Deathrattle minion in the same cleanup");
         NothingLeft(g);
     }
 

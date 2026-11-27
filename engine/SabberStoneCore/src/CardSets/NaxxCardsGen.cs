@@ -222,7 +222,7 @@ namespace SabberStoneCore.CardSets
 			cards.Add("FP1_025", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_TARGET_TO_PLAY,0},{PlayReq.REQ_MINION_TARGET,0}}, new Power
 			{
 				PowerTask = ComplexTask.Create(
-					new ConditionTask(EntityType.TARGET, SelfCondition.IsMyTurn),
+					new ConditionTask(EntityType.TARGET, RelaCondition.IsFriendly),
 					new DestroyTask(EntityType.TARGET, true),
 					new FlagTask(true, new CopyTask(EntityType.TARGET, Zone.PLAY)),
 					new FlagTask(false, new CopyTask(EntityType.TARGET, Zone.PLAY, toOpponent: true)))
@@ -659,7 +659,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("FP1_028e", new CardDef(new Power
 			{
-				Enchant = new OngoingEnchant(Effects.Attack_N(1))
+				Enchant = new OngoingEnchant(Effects.AttackHealth_N(1))
 			}));
 
 			// ---------------------------------- ENCHANTMENT - NEUTRAL

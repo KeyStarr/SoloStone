@@ -235,7 +235,7 @@ namespace SabberStoneCore.Tasks
 				if (attacker == null || intended == null || !attacker.IsAttacking) return;
 				var enemy = attacker.Controller.Opponent;
 				var others = new List<ICharacter>();
-				foreach (var m in enemy.BoardZone) if (!m.Untouchable && m != intended) others.Add(m);
+				foreach (var m in enemy.BoardZone.Interactable) if (m != intended) others.Add(m);
 				if (enemy.Hero != intended) others.Add(enemy.Hero);
 				if (others.Count == 0) return;
 				bool wrong = g.Random.Next(2) == 0;
@@ -270,7 +270,7 @@ namespace SabberStoneCore.Tasks
 				if (c.SecretZone.IsFull) return;
 				var candidates = new List<Spell>();
 				foreach (var secret in c.Opponent.SecretZone)
-					if (secret.IsSecret && !secret.IsQuest && !c.SecretZone.Any(own => own.Card.IsSameCardAs(secret.Card))) candidates.Add(secret);
+					if (secret.IsSecret && !secret.IsQuest && !c.SecretZone.HasSameCard(secret.Card)) candidates.Add(secret);
 				if (candidates.Count == 0) return;
 				var stolen = candidates[g.Random.Next(candidates.Count)];
 				g.OnRandomHappened(true);

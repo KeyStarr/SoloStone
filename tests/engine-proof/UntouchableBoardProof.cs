@@ -69,6 +69,15 @@ internal static class UntouchableBoardProof
             Verify(!s.IsImmune, "an ordinary minion ends the Immunity");
         });
 
+        Parts(failures, "Reliquary Seeker", () => {
+            var g = QuestLifecycleProof.Fixture(); var p = g.Player1;
+            for (int i = 0; i < 5; i++) Summon(p, "CS2_182");
+            Sleeper(p);
+            var seeker = (Minion)Play(g, p, "LOE_116");
+            Verify(p.BoardZone.IsFull && seeker.AttackDamage == 1 && seeker.Health == 1,
+                "Reliquary Seeker does not count the Dormant sixth minion");
+        });
+
         // "Costs (2) if there are no minions on the battlefield".
         Parts(failures, "Solitary Prisoner", () => {
             var g = QuestLifecycleProof.Fixture(); var p = g.Player1;

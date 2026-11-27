@@ -945,8 +945,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("AT_079", new CardDef(new Power
 			{
-				// Like Mad Scientist's Deathrattle, for every distinct Secret in the deck: a Secret already in play (same card) or a
-				// full Secret zone stops it; the order of the Secrets is random, so the five-Secret cap picks at random.
+				// Pick distinct Secrets in random order, skipping ones already in play, until the Secret zone is full.
 				PowerTask = ComplexTask.Create(
 					new IncludeTask(EntityType.DECK),
 					new FilterStackTask(SelfCondition.IsSecret),
@@ -957,19 +956,17 @@ namespace SabberStoneCore.CardSets
 						var candidates = new List<IPlayable>();
 						foreach (var secret in stack)
 						{
-							if (c.SecretZone.Any(s => s.Card.IsSameCardAs(secret.Card))) continue;
+							if (c.SecretZone.HasSameCard(secret.Card)) continue;
 							if (candidates.Any(s => s.Card.IsSameCardAs(secret.Card))) continue;
 							candidates.Add(secret);
 						}
 						while (candidates.Count > 0 && !c.SecretZone.IsFull)
 						{
 							IPlayable pick = candidates[c.Game.Random.Next(candidates.Count)];
+							if (candidates.Count > 1)
+								c.Game.OnRandomHappened(true);
 							candidates.Remove(pick);
-							c.DeckZone.Remove(pick);
-							pick.Power.Trigger?.Activate(pick);
-							c.SecretZone.Add((Spell) pick);
-							if (c == c.Game.CurrentPlayer)
-								pick.IsExhausted = true;
+							ComplexTask.PlaceSecretFromDeck((Spell)pick);
 						}
 						return null;
 					}))
@@ -1056,10 +1053,10 @@ namespace SabberStoneCore.CardSets
 				// 37.0: each player keeps one minion with the highest Attack; a tie is broken at random, a lone minion is kept.
 				PowerTask = new FuncNumberTask(p =>
 				{
-					if (p.Game.History) p.Game.PowerHistory.TargetRange(p.Controller.BoardZone.Concat(p.Controller.Opponent.BoardZone).Select(m => m.Id));
-					foreach (var owner in new[] { p.Controller, p.Controller.Opponent })
+					var boards = new[] { p.Controller.BoardZone.Interactable, p.Controller.Opponent.BoardZone.Interactable };
+					if (p.Game.History) p.Game.PowerHistory.TargetRange(boards.SelectMany(board => board.Select(m => m.Id)));
+					foreach (var minions in boards)
 					{
-						var minions = owner.BoardZone.ToArray();
 						if (minions.Length == 0) continue;
 						int max = int.MinValue;
 						var top = new List<Minion>();
@@ -1069,7 +1066,12 @@ namespace SabberStoneCore.CardSets
 							if (atk > max) { max = atk; top.Clear(); }
 							if (atk == max) top.Add(minion);
 						}
-						var keep = top.Count == 1 ? top[0] : top[p.Game.Random.Next(top.Count)];
+						var keep = top[0];
+						if (top.Count > 1)
+						{
+							keep = top[p.Game.Random.Next(top.Count)];
+							p.Game.OnRandomHappened(true);
+						}
 						foreach (var minion in minions)
 							if (minion != keep)
 								minion.Destroy();
@@ -1329,7 +1331,7 @@ namespace SabberStoneCore.CardSets
 			// [AT_028] Shado-Pan Rider - COST:5 [ATK:3/HP:7]
 			// - Set: tgt, Rarity: common
 			// --------------------------------------------------------
-			// Text: <b>Combo:</b> Gain +3 Attack.
+			// Text: <b>Combo:</b> Gain +4 Attack.
 			// --------------------------------------------------------
 			// GameTag:
 			// - COMBO = 1
@@ -2025,8 +2027,8 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("AT_072", new CardDef(new Power
 			{
-				// Retail, three times over: a minion on top of the deck goes straight to the battlefield (not drawn, so no draw
-				// triggers) while there is room; any other top card, or a minion with no room, is drawn (empty deck: fatigue).
+				// A selected minion goes straight to the battlefield without draw triggers while there is room.
+				// The usual draw path handles other cards, a full board, and fatigue.
 				PowerTask = new FuncNumberTask(p =>
 				{
 					var c = p.Controller;
@@ -2034,13 +2036,14 @@ namespace SabberStoneCore.CardSets
 					{
 						if (p.Game.State == SabberStoneCore.Enums.State.COMPLETE) break;
 						var deck = c.DeckZone;
-						if (!deck.IsEmpty && !deck.DrawWithRandom && deck[deck.Count - 1] is Minion top && !c.BoardZone.IsFull)
+						var selected = deck.IsEmpty ? null : deck[deck.NextDrawIndex()];
+						if (selected is Minion minion && !c.BoardZone.IsFull)
 						{
-							deck.Remove(top);
-							SabberStoneCore.Actions.Generic.SummonBlock(p.Game, top, -1, p);
+							deck.Remove(minion);
+							SabberStoneCore.Actions.Generic.SummonBlock(p.Game, minion, -1, p);
 						}
 						else
-							SabberStoneCore.Actions.Generic.Draw(c);
+							SabberStoneCore.Actions.Generic.Draw(c, selected);
 					}
 					return 0;
 				})
@@ -3036,7 +3039,7 @@ namespace SabberStoneCore.CardSets
 			// [AT_028e] Chi Lance (*) - COST:0
 			// - Set: tgt,
 			// --------------------------------------------------------
-			// Text: +3 Attack.
+			// Text: +4 Attack.
 			// --------------------------------------------------------
 			cards.Add("AT_028e", new CardDef(new Power
 			{

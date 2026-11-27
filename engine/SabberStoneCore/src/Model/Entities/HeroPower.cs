@@ -22,6 +22,31 @@ namespace SabberStoneCore.Model.Entities
 	/// <seealso cref="Playable" />
 	public class HeroPower : Playable
 	{
+		private bool _readiedByExtraUse;
+
+		/// <inheritdoc />
+		public override bool IsExhausted
+		{
+			get => base.IsExhausted;
+			set
+			{
+				// Using or independently refreshing the power supersedes the aura's readiness.
+				_readiedByExtraUse = false;
+				base.IsExhausted = value;
+			}
+		}
+
+		internal void ReadyForExtraUse()
+		{
+			base.IsExhausted = false;
+			_readiedByExtraUse = true;
+		}
+
+		internal void RevokeExtraUse()
+		{
+			if (_readiedByExtraUse) IsExhausted = true;
+		}
+
 		/// <summary>Initializes a new instance of the <see cref="HeroPower"/> class.</summary>
 		/// <param name="controller">The controller.</param>
 		/// <param name="card">The card.</param>
@@ -37,7 +62,10 @@ namespace SabberStoneCore.Model.Entities
 		/// </summary>
 		/// <param name="controller">The target <see cref="T:SabberStoneCore.Model.Entities.Controller" /> instance.</param>
 		/// <param name="heroPower">The source <see cref="T:SabberStoneCore.Model.Entities.HeroPower" />.</param>
-		private HeroPower(in Controller controller, in Playable heroPower) : base(in controller, in heroPower) { }
+		private HeroPower(in Controller controller, in HeroPower heroPower) : base(in controller, heroPower)
+		{
+			_readiedByExtraUse = heroPower._readiedByExtraUse;
+		}
 
 		/// <summary>Targetings the requirements.</summary>
 		/// <param name="target">The target.</param>

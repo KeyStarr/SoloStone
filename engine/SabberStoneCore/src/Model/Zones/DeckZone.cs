@@ -73,11 +73,10 @@ namespace SabberStoneCore.Model.Zones
 			if (cardToDraw != null)
 				return Remove(cardToDraw);
 
-			if (DrawWithRandom)
-				return Remove(Game.Random.Next(Count));
-
-			return Remove(Count - 1);
+			return Remove(NextDrawIndex());
 		}
+
+		internal int NextDrawIndex() => DrawWithRandom ? Game.Random.Next(Count) : Count - 1;
 
 		public override bool IsFull => _count >= DeckMaximumCapcity;
 

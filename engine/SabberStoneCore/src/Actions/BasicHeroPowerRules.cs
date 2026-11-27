@@ -63,11 +63,13 @@ namespace SabberStoneCore.Actions
             }
         }
 
-        internal static void DetachPassive(HeroPower power)
+        internal static void DetachPower(HeroPower power)
         {
-            if (power?.Card.Id == "JAIL_EVENT_101hp" && power.Controller.Hero.HeroPower == power) { power.ActivatedTrigger?.Remove(); return; }
             // An inactive clone's zone assignment must not detach or refresh the live power.
-            if (power?.Card.Id != "BE_004p" || power.Controller.Hero.HeroPower != power) return;
+            if (power == null || power.Controller.Hero?.HeroPower != power) return;
+            power.RevokeExtraUse();
+            if (power.Card.Id == "JAIL_EVENT_101hp") { power.ActivatedTrigger?.Remove(); return; }
+            if (power.Card.Id != "BE_004p") return;
             power.ActivatedTrigger?.Remove();
             power.OngoingEffect?.Remove();
             foreach (var actor in power.Controller.Hero.AppliedEnchantments?.Where(e => e.Creator?.Id == power.Id

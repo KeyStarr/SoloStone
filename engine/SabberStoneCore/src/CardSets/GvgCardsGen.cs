@@ -283,10 +283,10 @@ namespace SabberStoneCore.CardSets
 		private static void Hunter(IDictionary<string, CardDef> cards)
 		{
 			// ---------------------------------------- MINION - HUNTER
-			// [GVG_046] King of Beasts - COST:5 [ATK:2/HP:6]
+			// [GVG_046] King of Beasts - COST:3 [ATK:1/HP:5]
 			// - Race: beast, Set: gvg, Rarity: rare
 			// --------------------------------------------------------
-			// Text: <b>Taunt</b> Has +1 Attack for each other Beast you control. (37.0: a 1/5 for 3)
+			// Text: <b>Taunt</b> Has +1 Attack for each other Beast you control.
 			// --------------------------------------------------------
 			// GameTag:
 			// - TAUNT = 1
@@ -296,7 +296,7 @@ namespace SabberStoneCore.CardSets
 			{
 				InfoCardId = "GVG_046e",
 				Aura = new AdaptiveEffect(GameTag.ATK, EffectOperator.ADD,
-					p => p.Controller.BoardZone.CountOf(m => m != p && !m.IsDormant && m.IsRace(Race.BEAST)))
+					p => p.Controller.BoardZone.CountInteractable(m => m != p && m.IsRace(Race.BEAST)))
 			}));
 
 			// ---------------------------------------- MINION - HUNTER
@@ -498,7 +498,7 @@ namespace SabberStoneCore.CardSets
 			// [GVG_007] Flame Leviathan - COST:7 [ATK:7/HP:7]
 			// - Race: mechanical, Set: gvg, Rarity: legendary
 			// --------------------------------------------------------
-			// Text: When you draw this, deal 2 damage to all characters.
+			// Text: <b>Rush</b>. When you draw this, deal 2 damage to all characters except Mechs.
 			// --------------------------------------------------------
 			// GameTag:
 			// - ELITE = 1
@@ -506,7 +506,10 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_007", new CardDef(new Power
 			{
-				TopdeckTask = new DamageTask(2, EntityType.ALL)
+				TopdeckTask = ComplexTask.Create(
+					new IncludeTask(EntityType.ALL),
+					new FilterStackTask(SelfCondition.IsNotRace(Race.MECHANICAL)),
+					new DamageTask(2, EntityType.STACK))
 			}));
 
 			// ------------------------------------------ MINION - MAGE
@@ -1579,8 +1582,8 @@ namespace SabberStoneCore.CardSets
 					for (int hits = 0; hits < 4096; hits++)
 					{
 						var pool = new List<Minion>();
-						pool.AddRange(g.Player1.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.Untouchable && !m.IsImmune));
-						pool.AddRange(g.Player2.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.Untouchable && !m.IsImmune));
+						pool.AddRange(g.Player1.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.IsImmune));
+						pool.AddRange(g.Player2.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.IsImmune));
 						if (pool.Count == 0) return;
 						var hit = pool[g.Random.Next(pool.Count)];
 						g.OnRandomHappened(true);
