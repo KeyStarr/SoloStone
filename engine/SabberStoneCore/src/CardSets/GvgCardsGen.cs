@@ -1433,7 +1433,7 @@ namespace SabberStoneCore.CardSets
 				// One Imp per damage actually dealt: a Divine Shield or Immunity absorbs it (no Imps), overkill and Spell Damage count.
 				PowerTask = ComplexTask.Create(
 					new MathRandTask(2, 4),
-					new DamageNumberTask(EntityType.TARGET, true, storeDealt: true),
+					new ImpLosionDamageTask(),
 					new EnqueueNumberTask(new SummonTask("GVG_045t")))
 			}));
 

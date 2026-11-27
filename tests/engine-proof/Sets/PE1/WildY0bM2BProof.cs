@@ -1,8 +1,11 @@
+using System.Security.Cryptography;
 using HsSim;
 using SabberStoneCore.Config;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
+using SabberStoneCore.Model.Snapshots;
 using SabberStoneCore.Actions;
 using SabberStoneCore.Tasks.PlayerTasks;
 using static Core2026Proof;
@@ -841,6 +844,7 @@ internal static class WildY0bM2BProof
 
     private static void Implosion(Game g, Controller p, string id)
     {
+        DetachedImplosion(id);
         var opp = p.Opponent;
         var spell = Add(p, id);
         Check(spell.Cost == 4 && !Playable(p, spell), "Imp-losion costs 4 and needs a minion target");
@@ -887,6 +891,40 @@ internal static class WildY0bM2BProof
         PlayEntity(g, opp, Add(opp, id), theirs);
         Check(opp.BoardZone.Count == theirs.Damage && opp.BoardZone.All(m => m.Card.Id == "GVG_045t"), "the opponent's Imps join its own board");
         Resume(g, next => Check(Get(next, opp).BoardZone.Count == opp.BoardZone.Count, "clone keeps the Imps"));
+    }
+
+    private static void DetachedImplosion(string id)
+    {
+        // Hash of detached Crackle bytes encoded by 8f586547, before DamageNumberTask was changed.
+        const string baselineHash = "362D543FB107ECF5A4B9F5756FC484C5419BE6F51B91BC15B327869225EF8705";
+        string legacy = SnapshotCodec.EncodeDefinition(Cards.FromId("GVG_038"), detached: true);
+        Check(Convert.ToHexString(SHA256.HashData(Convert.FromBase64String(legacy))) == baselineHash
+            && SnapshotCodec.EncodeDefinition(SnapshotCodec.DecodeDefinition(legacy)) == legacy,
+            "Crackle keeps the historical DamageNumberTask bytes");
+
+        string encoded = SnapshotCodec.EncodeDefinition(Cards.FromId(id), detached: true);
+        var restored = SnapshotCodec.DecodeDefinition(encoded);
+        Check(restored.Id == id && SnapshotCodec.EncodeDefinition(restored) == encoded,
+            "new Imp-losion definition round-trips its distinct task");
+
+        var game = QuestLifecycleProof.Fixture();
+        var owner = game.Player1;
+        Summon(owner, "EX1_012");
+        owner.Hero.Damage = 10;
+        var target = Summon(owner.Opponent, "CS2_182");
+        target.Health = 100;
+        var spell = Entity.FromCard(owner, restored, zone: owner.HandZone);
+        spell.HasLifeSteal = true;
+        int expected = game.Random.Clone().Next(2, 5) + 1;
+        int cursor = game.PowerHistory.Full.Count;
+        PlayEntity(game, owner, spell, target);
+        var rows = game.PowerHistory.Full.Skip(cursor).ToArray();
+        Check(target.Damage == expected && owner.BoardZone.Count(m => m.Card.Id == "GVG_045t") == expected
+            && owner.Hero.Damage == 10 - expected, "decoded Imp-losion counts actual Spell Damage and heals once");
+        Check(rows.OfType<PowerHistoryMetaData>().Any(m => m.Type == MetaDataType.DAMAGE && m.Info.SequenceEqual(new[] { target.Id }))
+            && rows.OfType<PowerHistoryBlockStart>().Count(b => b.Source == spell.Id
+                && b.TriggerKeyword == (int)GameTag.LIFESTEAL) == 1,
+            "decoded Imp-losion emits damage and one Lifesteal trigger");
     }
 
     // ---- GVG_046 King of Beasts -------------------------------------------------------------------------------------
