@@ -69,12 +69,14 @@ namespace SabberStoneCore.Actions
                 BeginHeroPowerEffect(owner);
                 try
                 {
+                    var blade = BasicHeroPowerRules.EquippedPoisonedBlade(owner);
                     if (power.ChooseOne && owner[PowerChooseBoth] != 0)
                         foreach (var option in power.ChooseOnePlayables) option.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
                     else if (power.ChooseOne && owner[PowerChoice] > 0)
                         power.ChooseOnePlayables[owner[PowerChoice]-1].ActivateTask(PowerActivation.POWER, target, owner[PowerChoice], power);
                     else power.ActivateTask(PowerActivation.POWER, target, owner[PowerChoice]);
                     game.ProcessTasks();
+                    BasicHeroPowerRules.ApplyPoisonedBlade(game, owner, power, blade);
                 }
                 finally { EndHeroPowerEffect(owner); }
                 game.TaskQueue.EndEvent();

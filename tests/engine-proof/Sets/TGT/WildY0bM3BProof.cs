@@ -478,6 +478,20 @@ internal static class WildY0bM3BProof
             var theirs = (Weapon)Play(g, p.Opponent, id);
             Use(g, p.Opponent);
             Check(theirs.AttackDamage == 2 && again.AttackDamage == 3, "each side's Hero Power affects its own Blade only");
+            // A non-weapon Hero Power charges the Blade too: Fireblast deals its damage and still gives +1.
+            SetPower(p, "CS2_034");
+            End(g);
+            p.Opponent.Hero.Damage = 0;
+            Use(g, p, p.Opponent.Hero);
+            Check(p.Opponent.Hero.Damage == 1, "the swapped Fireblast deals its 1 damage");
+            Check(p.Hero.Weapon.Id == again.Id && again.AttackDamage == 4, "and the Blade gains +1 Attack from a non-weapon Hero Power");
+            Resume(g, next => {
+                var owner = next.Player1; var charged = (Weapon)next.IdEntityDic[again.Id];
+                End(next); End(next);
+                Use(next, owner, owner.Opponent.Hero);
+                Check(owner.Opponent.Hero.Damage == 2 && charged.AttackDamage == 5 && owner.Hero.Weapon.Id == charged.Id,
+                    "clone and snapshot keep a non-weapon Hero Power charging the Blade");
+            });
         });
 
         WildSetsProof.Held("AT_035", (g, p, id) => {

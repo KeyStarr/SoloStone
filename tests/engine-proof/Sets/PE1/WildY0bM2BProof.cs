@@ -1158,6 +1158,27 @@ internal static class WildY0bM2BProof
         var onlyImmune = Summon(opp, "CS2_182"); onlyImmune[GameTag.IMMUNE] = 1;
         Play(g, p, id);
         Check(onlyImmune.Damage == 0 && onlyImmune.Zone.Type == Zone.PLAY, "only Immune minions: the loop ends without a death");
+        // Commanding Shout floors friendly Health at 1: such a minion can no longer die, so the Blade must skip it.
+        Park(p); Park(opp);
+        var shouted = Summon(p, "CS2_182");
+        var shielded = Summon(p, "EX1_008");
+        Play(g, p, "NEW1_036");
+        int bladeHits = 0;
+        EventHandler<bool> countBladeHits = (_, random) => { if (random) bladeHits++; };
+        g.RandomHappenedEvent += countBladeHits;
+        try { Play(g, p, id); }
+        finally { g.RandomHappenedEvent -= countBladeHits; }
+        Check(bladeHits == 5, "under Commanding Shout it stops after popping the shield and flooring the Yeti: no spin");
+        Check(shouted.Zone.Type == Zone.PLAY && shouted.Health == 1 && shielded.Zone.Type == Zone.PLAY
+            && !shielded.HasDivineShield && shielded.Health == 1,
+            "Commanding Shout: the shield is popped, both friendly minions end at 1 Health and neither dies");
+        Park(p);
+        var frail = Summon(p, "CS2_182"); frail.Health = 1;
+        var doomed = Summon(opp, "CS2_182");
+        Play(g, p, "NEW1_036");
+        Play(g, p, id);
+        Check(frail.Zone.Type == Zone.PLAY && frail.Damage == 0 && doomed.Zone.Type == Zone.GRAVEYARD,
+            "a 1-Health minion under Commanding Shout is skipped; an enemy minion still dies");
         Park(p); Park(opp);
         Fill(p); Fill(opp);
         Play(g, p, id);

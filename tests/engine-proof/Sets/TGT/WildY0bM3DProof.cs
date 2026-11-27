@@ -763,6 +763,9 @@ internal static class WildY0bM3DProof
         var targets = g0.PowerHistory.Full.Skip(cursor).OfType<PowerHistoryMetaData>()
             .Where(row => row.Type == MetaDataType.TARGET && row.Data == coliseum.Id).SelectMany(row => row.Info);
         Ok(targets.SequenceEqual(new[] { highest.Id, lower.Id, enemy.Id }), "TARGET history lists exactly the interactable cohort");
+        var destroys = g0.HistoryFacts.Query.Deaths().Where(death => death.SourceId == coliseum.Id).ToArray();
+        Ok(destroys.Length == 1 && destroys[0].EntityId == lower.Id && destroys[0].Cause == HistoryDeathCause.Destroy,
+            "Deaths() records the one destroy (the lower friendly) with the Coliseum as source and cause Destroy");
         var survivors = new HashSet<string>();
         Seeds(CardClass.PALADIN, CardClass.MAGE, (g, seed) =>
         {

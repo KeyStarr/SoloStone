@@ -11,7 +11,6 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU Affero General Public License for more details.
 #endregion
-using SabberStoneCore.Actions;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 
@@ -40,11 +39,10 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 
 			// Poisoned Blade (AT_034): the owner's Hero Power gives the equipped Blade +1 Attack instead of equipping a weapon.
 			// Only a Hero Power as the source; every other WeaponTask (Battlecry, Deathrattle, spell) is untouched.
+			// The +1 Attack is applied by the Hero Power activation itself (BasicHeroPowerRules.ApplyPoisonedBlade),
+			// so every Hero Power charges the Blade, not only one whose task list reaches this task.
 			if (_card != null && source is HeroPower power && power.Controller == c && c.Hero.Weapon?.Card.Id == "AT_034")
-			{
-				Generic.AddEnchantmentBlock(game, Cards.FromId("AT_034e"), (IPlayable) source, c.Hero.Weapon, 0, 0, 0);
 				return TaskState.COMPLETE;
-			}
 
 			Weapon weapon = _card != null
 				? Entity.FromCard(c, _card) as Weapon

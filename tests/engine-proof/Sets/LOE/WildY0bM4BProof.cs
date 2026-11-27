@@ -294,6 +294,16 @@ internal static class WildY0bM4BProof
         });
         p.Opponent.Hero.Damage = 0; Play(g, p, "CS2_029", p.Opponent.Hero);
         Ok(djinni.Damage == 0 && p.Opponent.Hero.Damage == 6, "cast on a hero: no copy");
+        // A countered spell never landed on the ally, so the Djinni does not copy it either.
+        ToTurn(g, p.Opponent);
+        Play(g, p.Opponent, "EX1_287");
+        ToTurn(g, p);
+        var refused = Summon(p, "CS2_182");
+        var kings = Play(g, p, "CS2_092", refused);
+        Ok(g.HistoryFacts.Query.Casts().Any(cast => cast.Definition.DbfId == kings.Card.AssetId
+            && cast.Outcome == HistoryCastOutcome.Countered), "Counterspell counters the Blessing of Kings");
+        Ok(refused.AttackDamage == 4 && refused.Health == 5 && djinni.AttackDamage == 12 && djinni.Health == 14,
+            "a countered spell buffs neither the ally nor the Djinni");
         int hand = p.HandZone.Count;
         Play(g, p, "CS2_004", ally);
         Ok(ally.Health == 11 && djinni.Health == 16, "Power Word: Shield: the copy gives the Djinni +2 Health");

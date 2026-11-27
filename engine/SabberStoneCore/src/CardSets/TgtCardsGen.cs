@@ -1074,7 +1074,10 @@ namespace SabberStoneCore.CardSets
 						}
 						foreach (var minion in minions)
 							if (minion != keep)
+							{
+								Actions.DeathContextRules.RecordDestroy(minion, p);
 								minion.Destroy();
+							}
 					}
 					return 0;
 				})
@@ -1115,11 +1118,11 @@ namespace SabberStoneCore.CardSets
 			// [AT_075e] Might of the Hostler (*) - COST:0
 			// - Set: tgt,
 			// --------------------------------------------------------
-			// Text: Warhorse Trainer is granting +2 Attack and <b>Taunt</b>. (37.0)
+			// Text: Warhorse Trainer is granting this minion +1 Attack.
 			// --------------------------------------------------------
 			cards.Add("AT_075e", new CardDef(new Power
 			{
-				Enchant = new Enchant(Effects.Attack_N(2), Effects.TauntEff)
+				Enchant = Enchants.Enchants.GetAutoEnchantFromText("AT_075e")
 			}));
 
 			// ---------------------------------- ENCHANTMENT - PALADIN
@@ -1331,7 +1334,7 @@ namespace SabberStoneCore.CardSets
 			// [AT_028] Shado-Pan Rider - COST:5 [ATK:3/HP:7]
 			// - Set: tgt, Rarity: common
 			// --------------------------------------------------------
-			// Text: <b>Combo:</b> Gain +4 Attack.
+			// Text: <b>Combo:</b> Gain +3 Attack.
 			// --------------------------------------------------------
 			// GameTag:
 			// - COMBO = 1
@@ -2699,9 +2702,14 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("AT_115", new CardDef(new Power
 			{
-				// 37.0: a Battlecry with no target; the discount is an enchantment on the Hero Power, spent by its next use.
+				// 37.0: a Battlecry with no target; the discount is a controller-scoped next-Hero-Power rule with a
+				// presentation enchantment on the controller, so replacing the Hero Power (Finley, Justicar) keeps it;
+				// the rule's next use consumes both (CostRules.ConsumeRules retires the enchantment).
 				InfoCardId = "AT_115e",
-				PowerTask = new AddEnchantmentTask("AT_115e", EntityType.HERO_POWER)
+				PowerTask = new CustomTask((g, c, s, t, stack) => {
+					var actor = Enchantment.GetInstance(c, (IPlayable)s, c, Cards.FromId("AT_115e"));
+					SabberStoneCore.Actions.CostRules.AddNextHeroPowerRule(c, reduction: 2, enchantmentId: actor.Id);
+				})
 			}));
 
 			// --------------------------------------- MINION - NEUTRAL
@@ -3037,11 +3045,11 @@ namespace SabberStoneCore.CardSets
 			// [AT_028e] Chi Lance (*) - COST:0
 			// - Set: tgt,
 			// --------------------------------------------------------
-			// Text: +4 Attack.
+			// Text: +3 Attack.
 			// --------------------------------------------------------
 			cards.Add("AT_028e", new CardDef(new Power
 			{
-				Enchant = new Enchant(Effects.Attack_N(4))
+				Enchant = Enchants.Enchants.GetAutoEnchantFromText("AT_028e")
 			}));
 
 			// ---------------------------------- ENCHANTMENT - NEUTRAL
@@ -3228,9 +3236,8 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("AT_115e", new CardDef(new Power
 			{
-				Enchant = new Enchant(Effects.ReduceCost(2)),
-				Trigger = TriggerBuilder.Type(TriggerType.INSPIRE)
-					.SetTask(RemoveEnchantmentTask.Task)
+				// Presentation only: the numeric -2 lives in the CostRules rule that created this enchantment,
+				// so it neither double-discounts nor leaks; consuming the rule removes the actor.
 			}));
 
 			// ---------------------------------- ENCHANTMENT - NEUTRAL

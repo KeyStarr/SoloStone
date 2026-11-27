@@ -96,9 +96,15 @@ namespace SabberStoneCore.Tasks
 					int attack = attacker.AttackDamage;
 					if (attack <= 0) return;
 					if (game.History) game.PowerHistory.TargetRange(stack.Playables, EntityType.STACK);
-					using var wave = game.History ? game.PowerHistory.DamageWave(stack.Playables.Count) : null;
-					foreach (var neighbor in stack.Playables.OfType<Minion>())
-						Generic.DamageCharFunc(attacker, neighbor, attack, false);
+					// The whole two-neighbour wave is one Lifesteal hit batch of the targeted minion.
+					bool collectLifesteal = HealingRules.BeginDamage(attacker);
+					try
+					{
+						using var wave = game.History ? game.PowerHistory.DamageWave(stack.Playables.Count) : null;
+						foreach (var neighbor in stack.Playables.OfType<Minion>())
+							Generic.DamageCharFunc(attacker, neighbor, attack, false);
+					}
+					finally { if (collectLifesteal) HealingRules.EndDamage(attacker); }
 				}));
 
 		public static ISimpleTask JusticarTrueheart

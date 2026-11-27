@@ -574,7 +574,7 @@ namespace SabberStoneCore.CardSets
 			// [FP1_028] Undertaker - COST:1 [ATK:1/HP:2]
 			// - Set: naxx, Rarity: common
 			// --------------------------------------------------------
-			// Text: Whenever you summon a minion with <b>Deathrattle</b>, gain +1/+1.
+			// Text: Whenever you summon a minion with <b>Deathrattle</b>, gain +1 Attack.
 			// --------------------------------------------------------
 			// RefTag:
 			// - DEATHRATTLE = 1
@@ -659,7 +659,7 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("FP1_028e", new CardDef(new Power
 			{
-				Enchant = new OngoingEnchant(Effects.AttackHealth_N(1))
+				Enchant = new OngoingEnchant(Effects.Attack_N(1))
 			}));
 
 			// ---------------------------------- ENCHANTMENT - NEUTRAL

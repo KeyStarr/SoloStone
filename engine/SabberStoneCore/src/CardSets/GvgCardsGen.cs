@@ -283,10 +283,10 @@ namespace SabberStoneCore.CardSets
 		private static void Hunter(IDictionary<string, CardDef> cards)
 		{
 			// ---------------------------------------- MINION - HUNTER
-			// [GVG_046] King of Beasts - COST:3 [ATK:1/HP:5]
+			// [GVG_046] King of Beasts - COST:5 [ATK:2/HP:6]
 			// - Race: beast, Set: gvg, Rarity: rare
 			// --------------------------------------------------------
-			// Text: <b>Taunt</b> Has +1 Attack for each other Beast you control.
+			// Text: <b>Taunt</b>. <b>Battlecry:</b> Gain +1 Attack for each other Beast you have.
 			// --------------------------------------------------------
 			// GameTag:
 			// - TAUNT = 1
@@ -294,9 +294,10 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_046", new CardDef(new Power
 			{
+				// TODO [GVG_046] King of Beasts && Test: King of Beasts_GVG_046
 				InfoCardId = "GVG_046e",
-				Aura = new AdaptiveEffect(GameTag.ATK, EffectOperator.ADD,
-					p => p.Controller.BoardZone.CountInteractable(m => m != p && m.IsRace(Race.BEAST)))
+				//PowerTask = null,
+				//Trigger = null,
 			}));
 
 			// ---------------------------------------- MINION - HUNTER
@@ -1540,8 +1541,8 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_056", new CardDef(new Power
 			{
-				PowerTask = new AddCardTo("GVG_056t", EntityType.OP_DECK),
-				DeathrattleTask = new AddCardTo("GVG_056t", EntityType.OP_DECK)
+				// TODO Test: Iron Juggernaut_GVG_056
+				PowerTask = new AddCardTo("GVG_056t", EntityType.OP_DECK)
 			}));
 
 			// --------------------------------------- MINION - WARRIOR
@@ -1570,16 +1571,20 @@ namespace SabberStoneCore.CardSets
 			// --------------------------------------------------------
 			cards.Add("GVG_050", new CardDef(new Dictionary<PlayReq, int>() {{PlayReq.REQ_MINIMUM_TOTAL_MINIONS,1}}, new Power
 			{
-				// Each hit picks a random minion that can take damage (an Immune or untouchable one could never end the loop),
-				// and the loop stops as soon as any minion has died. Bounded: every hit removes a Divine Shield or Health.
+				// Each hit picks a random minion that can still lose a Divine Shield or Health (an Immune, untouchable or
+				// Commanding-Shout-floored one could never end the loop), and the loop stops as soon as any minion has died.
+				// Retail caps the spell at 80 hits.
 				PowerTask = new CustomTask((g, c, s, t, stack) =>
 				{
 					var spell = s as IPlayable;
-					for (int hits = 0; hits < 4096; hits++)
+					for (int hits = 0; hits < 80; hits++)
 					{
 						var pool = new List<Minion>();
-						pool.AddRange(g.Player1.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.IsImmune));
-						pool.AddRange(g.Player2.BoardZone.GetAll(m => m.Zone.Type == Zone.PLAY && !m.ToBeDestroyed && m.Health > 0 && !m.IsImmune));
+						foreach (var board in new[] { g.Player1.BoardZone.Interactable, g.Player2.BoardZone.Interactable })
+							foreach (var m in board)
+								if (!m.ToBeDestroyed && m.Health > 0 && !m.IsImmune
+									&& (m.HasDivineShield || m.Health > m[GameTag.HEALTH_MINIMUM]))
+									pool.Add(m);
 						if (pool.Count == 0) return;
 						var hit = pool[g.Random.Next(pool.Count)];
 						g.OnRandomHappened(true);

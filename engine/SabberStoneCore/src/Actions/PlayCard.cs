@@ -592,7 +592,8 @@ namespace SabberStoneCore.Actions
 				// check the spell is countered
 				if (spell.IsCountered)
 				{
-                    CaptureFriendlyMinionSpellTarget(spell, target);
+						// The spell never landed on its target, so a Djinni of Zephyrs must not see a friendly-minion target.
+						spell.NativeTags.Remove(FriendlyMinionSpellTarget);
 					OutcastRules.Clear(spell);
                     CardSets.Client.Sets.DragonSoulShattered.Finish(spell);
                     RepeatRules.Clear(spell);
@@ -723,8 +724,9 @@ namespace SabberStoneCore.Actions
 					var activation = weapon.Combo && c.IsComboActive ? PowerActivation.COMBO : PowerActivation.POWER;
 					if (activation == PowerActivation.COMBO) game.Facts.ComboActivated(weapon);
 					weapon.ActivateTask(activation, target, chooseOne);
-					if (c.ExtraBattlecry && weapon.Card[GameTag.BATTLECRY] == 1)
-						weapon.ActivateTask(activation, target, chooseOne);
+					// An extra Battlecry repeats the base power only; the Combo replacement is never doubled.
+					if (activation == PowerActivation.POWER && c.ExtraBattlecry && weapon.Card[GameTag.BATTLECRY] == 1)
+						weapon.ActivateTask(PowerActivation.POWER, target, chooseOne);
 					game.ProcessTasks();
 					game.TaskQueue.EndEvent();
 				}

@@ -1,5 +1,6 @@
 using HsSim;
 using SabberStoneCore.Enums;
+using SabberStoneCore.Kettle;
 using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 using SabberStoneCore.Tasks.PlayerTasks;
@@ -110,6 +111,20 @@ internal static class WildY0aL3BProof
             Play(g, p, id, target);
             Core2026Proof.Check(left.Zone.Type == Zone.GRAVEYARD && right.Zone.Type == Zone.GRAVEYARD,
                 "Betrayal deals damage from the targeted minion, including its Poisonous");
+            // Lifesteal on the target: both neighbours are one collected heal, not two separate ones.
+            StandardSetsProof.ParkBoard(p.Opponent);
+            left = Summon(p.Opponent, Yeti);
+            target = Summon(p.Opponent, Shieldmasta);
+            right = Summon(p.Opponent, Yeti);
+            target.HasLifeSteal = true;
+            p.Opponent.Hero.Damage = 10;
+            int healFrom = g.PowerHistory.Full.Count;
+            Play(g, p, id, target);
+            Core2026Proof.Check(left.Damage == 3 && right.Damage == 3 && p.Opponent.Hero.Damage == 4,
+                "Betrayal from a Lifesteal target heals its hero for the whole wave (2 x 3 Attack)");
+            Core2026Proof.Check(g.PowerHistory.Full.Skip(healFrom).OfType<PowerHistoryBlockStart>()
+                .Count(b => b.TriggerKeyword == (int)GameTag.LIFESTEAL) == 1,
+                "a single Lifesteal TRIGGER block batches both neighbour hits");
             Core2026Proof.Check(!WildY0aL3ALegacyProof.Targets(p, Add(p, id)).Contains(mine), "Betrayal never targets a friendly minion");
         });
         WildSetsProof.Case("EX1_128", (g, p, id) => {
@@ -161,6 +176,12 @@ internal static class WildY0aL3BProof
             Core2026Proof.Check(mine.Damage == 1, "Without Combo it deals 1 and is not boosted by Spell Damage");
             Play(g, p, id, p.Hero);
             Core2026Proof.Check(p.Hero.Damage == 2, "Perdition's Blade may hit the own hero (Combo is active again after the first play this turn)");
+            // Brann repeats the Battlecry, never the Combo replacement.
+            Summon(p, "LOE_077");
+            var fresh = Summon(p.Opponent, Yeti);
+            Play(g, p, Coin);
+            Play(g, p, id, fresh);
+            Core2026Proof.Check(fresh.Damage == 2, "an extra Battlecry does not repeat the Combo: the Yeti takes exactly 2 dmg=" + fresh.Damage);
             StandardSetsProof.ParkBoard(p); StandardSetsProof.ParkBoard(p.Opponent);
             Play(g, p, id, p.Opponent.Hero);
             Core2026Proof.Check(p.Opponent.Hero.Damage == 4, "Perdition's Blade is playable with no minions, targeting heroes");

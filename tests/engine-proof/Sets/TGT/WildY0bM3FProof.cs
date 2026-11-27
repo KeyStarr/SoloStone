@@ -425,6 +425,24 @@ internal static class WildY0bM3FProof
             Ok(g.Process(HeroPowerTask.Any(me)) && me.UsedMana == 0, "the discounted use costs no mana");
             g.AuraUpdate();
             Ok(me.Hero.HeroPower.Cost == 2, "the discount is spent by one use");
+            // The discount is controller-scoped: it survives the Hero Power being replaced and discounts the new one.
+            var g1 = NewGame(seed, CardClass.PALADIN, CardClass.MAGE);
+            var r1 = g1.Player1;
+            Play(g1, r1, id);
+            g1.AuraUpdate();
+            Ok(r1.Hero.HeroPower.Cost == 0, "replacement setup: the discount is in place");
+            Ok(r1.AppliedEnchantments?.Any(e => e.Card.Id == "AT_115e") == true
+                && r1.Hero.HeroPower.AppliedEnchantments?.Any(e => e.Card.Id == "AT_115e") != true,
+                "the presentation enchantment rides the controller, not the Hero Power");
+            Play(g1, r1, "AT_132");
+            Ok(r1.Hero.HeroPower.Card.Id == "AT_132_PALADIN", "Justicar Trueheart replaces the Hero Power");
+            Ok(r1.Hero.HeroPower.Cost == 0, "the -2 survives the replacement and discounts the new power");
+            Resume(g1, next => Ok(next.Player1.Hero.HeroPower.Cost == 0, "and survives a clone/snapshot on the replaced power"));
+            Refresh(r1);
+            Ok(g1.Process(HeroPowerTask.Any(r1)) && r1.UsedMana == 0, "the replaced power is used at 0");
+            g1.AuraUpdate();
+            Ok(r1.Hero.HeroPower.Cost == 2, "that use spends the discount");
+            Ok(r1.AppliedEnchantments?.Any(e => e.Card.Id == "AT_115e") != true, "and retires the presentation enchantment");
             // Discount waits across turns while unused, and survives the Coach dying or being Silenced.
             var g2 = NewGame(seed, CardClass.PALADIN, CardClass.MAGE);
             var c2 = (Minion)Play(g2, g2.Player1, id);
