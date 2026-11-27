@@ -16,9 +16,11 @@ internal static partial class Program
         var player = fixture.Player;
         string cardId = RepentantPrinceRules.CardId;
         var loaner = LocalDecks.Get(LocalDecks.PrincePlaytestDeck);
+        var nativeCards = loaner.CardIds.Select(LocalDecks.PrinceNativeId).ToArray();
         Check(loaner.Build().Count(card => card.Id == cardId) == 1
             && NativeUIProjection.IsExactLoaner(NativeUIProjection.DeckId(loaner.Id), loaner.Hero,
-                loaner.CardIds.Select(LocalDecks.PrinceNativeId))
+                nativeCards)
+            && NativeDeckRunes.Order(loaner.Hero, nativeCards).SequenceEqual(NativeDeckRunes.Order(loaner.Hero, loaner.CardIds))
             && !NativeUIProjection.PlayerLoanerKeys.Contains(loaner.Id), "sandbox loaner uses one custom card through its native alias");
 
         var opening = new NativeMatch((_, _) => { }, loaner.Id, "mage", 322);

@@ -54,7 +54,10 @@ internal static class CardFactsProof
         AddSpellSchools(baseCards);
         int fromExport = ClientRowsFromExport(baseCards, facts);
         var expected = ClientOverlay.AddTo(baseCards, xmlOverlay);
-        var actual = ClientOverlay.AddTo(facts.Cards.Select(e => CardLoader.Build(e, false)).ToArray(), facts.Overlay);
+        // The authored playtest card has no counterpart in the legacy definitions.
+        string prince = SabberStoneCore.Actions.RepentantPrinceRules.CardId;
+        var actual = ClientOverlay.AddTo(facts.Cards.Where(e => e.Id != prince)
+            .Select(e => CardLoader.Build(e, false)).ToArray(), facts.Overlay);
         Check(expected.Length == 8333 + 2381 && actual.Length == expected.Length, "card count " + actual.Length);
         var differences = new List<string>();
         for (int i = 0; i < expected.Length; i++) Compare(expected[i], actual[i], differences);
@@ -199,7 +202,7 @@ internal static class CardFactsProof
             Check(hash.GetString() == actual, "text hash: " + row.GetProperty("id").GetString());
             hashed++;
         }
-        Check(hashed == 6914 + 2389, "text hash count " + hashed);
+        Check(hashed == 6914 + 2389 + 1, "text hash count " + hashed);
     }
 
     // Guard against a comparison that cannot fail: each mutation must be seen.

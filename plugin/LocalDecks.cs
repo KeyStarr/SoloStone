@@ -67,6 +67,14 @@ public static class LocalDecks
         return id;
     }
 
+    internal static string PrinceEngineId(string id)
+    {
+#if ENGINE_SOURCE
+        if (id == PrincePresentationCard) return SabberStoneCore.Actions.RepentantPrinceRules.CardId;
+#endif
+        return id;
+    }
+
     static LocalDecks()
     {
 #if ENGINE_SOURCE

@@ -9,7 +9,7 @@ internal static class NativeDeckRunes
     internal static RuneType[] Order(string hero, IEnumerable<string> ids)
     {
         if (hero != "HERO_11") return new[] { RuneType.RT_NONE, RuneType.RT_NONE, RuneType.RT_NONE };
-        var cards = ids.Select(Cards.FromId).ToArray();
+        var cards = ids.Select(LocalDecks.PrinceEngineId).Select(Cards.FromId).ToArray();
         LocalDecks.ValidateRunes(cards, SabberStoneCore.Enums.CardClass.DEATHKNIGHT);
         int[] counts = LocalDecks.RuneCounts(cards);
         return Enumerable.Repeat(RuneType.RT_BLOOD, counts[0]).Concat(Enumerable.Repeat(RuneType.RT_FROST, counts[1]))

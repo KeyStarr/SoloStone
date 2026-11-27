@@ -32,7 +32,7 @@ internal static class TransportCardIdMirror
             case "AT_132_WARLOCK": return "HERO_07bp2";
             case "AT_132_MAGE": return "HERO_08bp2";
             case "AT_132_PRIEST": return "HERO_09bp2";
-            default: return cardId ?? "";
+            default: return LocalDecks.PrinceNativeId(cardId) ?? "";
         }
     }
 }

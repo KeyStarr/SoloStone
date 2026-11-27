@@ -1276,7 +1276,7 @@ internal static partial class NativeUIProbe
         if (saved != null) return saved;
         var loaner = decks[id];
         return new LocalCustomDeck { Id = id, Name = "Loaner: " + loaner.Name, Hero = loaner.Hero,
-            Cards = loaner.CardIds.ToList(), Sideboards = loaner.Sideboards.Select(row =>
+            Cards = loaner.CardIds.Select(LocalDecks.PrinceNativeId).ToList(), Sideboards = loaner.Sideboards.Select(row =>
                 new LocalSideboard { Source = row.Key, Cards = row.Value.ToList() }).ToList() };
     }
 
@@ -1399,11 +1399,8 @@ internal static partial class NativeUIProbe
             throw new InvalidOperationException("Unmapped/unloaded native deck");
         var ids = native.GetCardsWithCardID().ToArray();
         LocalCustomDeck custom = Profile.GetDraft(native.ID);
-#if ENGINE_SOURCE
         if (custom == null && local.Id == LocalDecks.PrincePlaytestDeck)
-            ids = ids.Select(id => id == LocalDecks.PrincePresentationCard
-                ? SabberStoneCore.Actions.RepentantPrinceRules.CardId : id).ToArray();
-#endif
+            ids = ids.Select(LocalDecks.PrinceEngineId).ToArray();
         if (custom == null)
             NativeUIProjection.ValidateSelection(local.Id, NativeBaseHero(native), ids, new Dictionary<string, int>());
         else
