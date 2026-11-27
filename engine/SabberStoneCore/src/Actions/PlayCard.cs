@@ -93,7 +93,11 @@ namespace SabberStoneCore.Actions
                     return false;
                 }
 
-                if (playedFromHand) RepeatRules.Capture(source, playedCost, repeatOrigin);
+                if (playedFromHand)
+                {
+                    RepentantPrinceRules.HandCardPlayed(c);
+                    RepeatRules.Capture(source, playedCost, repeatOrigin);
+                }
                 DarkGifts.PreparePlayTriggers(source, playedFromHand);
 
                 // The spell/minion phases open nested queues; settle committed hand facts before them.

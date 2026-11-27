@@ -30,6 +30,7 @@ internal static partial class Program
     {
         StandardBatchLoanerTransport(admissionOnly: true, admissionCard: onlyCard);
         AutomaticAdmissionFixtures(onlyCard);
+        if (onlyCard == null || onlyCard == SabberStoneCore.Actions.RepentantPrinceRules.CardId) RepentantPrincePlaytest();
         if (onlyCard == null || onlyCard == "EX1_323") LegacyHeroAdmission();
         FinishAdmissionSweep();
         if (onlyCard == null) ChaosStrikeHistory();

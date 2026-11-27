@@ -323,6 +323,8 @@ namespace SabberStoneCore.Actions
                 }
             if (!(source is HeroPower) && source.Zone == payer.HandZone)
                 foreach (var grant in OpponentHealthGrants(payer)) Replace(OpponentHealth, grant.CostPaymentAppliedAt);
+            if (kind == CostPaymentKind.Mana && source.Zone == payer.HandZone && RepentantPrinceRules.ChangesPayment(payer))
+                kind = CostPaymentKind.Corpses;
             var rules = applied.OrderBy(r => r.Handle).ToArray();
             return new CostQuote(source.Id, payer.Id, Math.Max(0, amount), kind, rules.Select(r => r.Handle).ToArray());
         }

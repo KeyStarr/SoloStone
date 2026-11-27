@@ -72,6 +72,8 @@ namespace SabberStoneCore.Loader
                     cardDef.Configure?.Invoke(c);
 				}
 			}
+            if (Cards.TryGetValue(Actions.RepentantPrinceRules.CardId, out var prince))
+                prince.Implemented = true;
 			CardSets.Client.Reprints.Apply(Cards);
             CardSets.Client.RebalancedCore2026.Apply(Cards);
             LegacyPoweredUpRules.Apply(Cards);

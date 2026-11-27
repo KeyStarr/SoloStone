@@ -143,6 +143,9 @@ internal static class NativeUIProjection
     internal static bool? NativeCardIsWild(bool active, string cardId)
     {
         if (!active || cardId == null) return null;
+#if ENGINE_SOURCE
+        if (cardId == LocalDecks.PrincePresentationCard) return false;
+#endif
         lock (nativeWild)
         {
             if (nativeWild.TryGetValue(cardId, out bool? known)) return known;
@@ -178,7 +181,11 @@ internal static class NativeUIProjection
     private static readonly Lazy<HashSet<string>> testStandardIds = new Lazy<HashSet<string>>(() =>
         new HashSet<string>(LocalDecks.TestStandardCardIds, StringComparer.Ordinal));
     internal static bool ForcesTestPlayability(bool active, string cardId) =>
-        active && cardId != null && (testStandardIds.Value.Contains(cardId) || LocalDecks.IsLegalDeckbuildingCard(cardId));
+        active && cardId != null && (testStandardIds.Value.Contains(cardId) || LocalDecks.IsLegalDeckbuildingCard(cardId)
+#if ENGINE_SOURCE
+            || cardId == LocalDecks.PrincePresentationCard
+#endif
+        );
 
     // A deck's hero card goes through the same event check when its deck box is opened or picked. The client ties
     // Illidan (HERO_10) to the "bt_gameplay" event, which is never active offline, so Demon Hunter decks showed
@@ -246,6 +253,7 @@ internal static class NativeUIProjection
         "test-standard-b11-shaman",
         "showcase-rogue-imbue", "showcase-death-knight-dark-gift", "showcase-demon-hunter-outcast", "showcase-druid-quest-tokens", "showcase-hunter-kindred-beasts", "showcase-mage-leylines", "showcase-paladin-pure-holy", "showcase-priest-imbue", "showcase-shaman-herald", "showcase-warlock-dragon-shred", "showcase-warrior-armor-herald", "showcase-rogue-prepare-combo",
         "player-rogue-imbue", "player-warlock-dragon-shred", "player-warrior-armor-herald",
+        LocalDecks.PrincePlaytestDeck,
         "player-core-mage", "player-core-paladin", "player-core-priest", "player-core-warrior", "player-core-druid", "player-core-hunter", "player-core-rogue", "player-core-shaman", "player-core-warlock", "player-core-demonhunter", "player-core-deathknight",
         "test-standard-azalina-priest"
 #endif
@@ -266,6 +274,9 @@ internal static class NativeUIProjection
     // Deck-slot collectibility: native EvaluateSlot checks it before ownership, so narrowing it turns missing cards
     // (blue ghosts) into invalid ones. Keep the historical predicate and only add owned admitted grants.
     internal static bool IsNativeCollectible(string id, LocalProfile profile) =>
+#if ENGINE_SOURCE
+        (id == LocalDecks.PrincePresentationCard && profile?.IsSandbox == true) ||
+#endif
         Supported.Contains(id) || LocalDecks.TestStandardCardIds.Contains(id) || CosmeticHeroPool.Contains(id)
         || (AdmittedGrantOnly(id) && profile.TotalOwnedCount(id) > 0);
     internal static readonly HashSet<string> Supported = new HashSet<string>(LocalEconomy.Catalog.Select(c => c.Id)
@@ -286,7 +297,11 @@ internal static class NativeUIProjection
         .Concat(LocalCardCatalog.CardStateGeneratedIds.Select(SabberStoneCore.Model.Cards.FromId))
         .Concat(LocalCardCatalog.SupplementalGeneratedIds.Select(SabberStoneCore.Model.Cards.FromId).Where(card => card != null))
         .Concat(LocalCardCatalog.LegacyGeneratedPublicIds.Select(SabberStoneCore.Model.Cards.FromId).Where(card => card != null))
-        .GroupBy(card => card.Id, StringComparer.Ordinal).ToDictionary(group => group.Key, group => group.First(), StringComparer.Ordinal);
+#if ENGINE_SOURCE
+        .Append(SabberStoneCore.Model.Cards.FromId(SabberStoneCore.Actions.RepentantPrinceRules.CardId))
+#endif
+        .GroupBy(card => card.Id, StringComparer.Ordinal)
+        .ToDictionary(group => LocalDecks.PrinceNativeId(group.Key), group => group.First(), StringComparer.Ordinal);
     private static readonly HashSet<SabberStoneCore.Enums.GameTag> DefinitionTags = new HashSet<SabberStoneCore.Enums.GameTag> {
         SabberStoneCore.Enums.GameTag.COLLECTIBLE, SabberStoneCore.Enums.GameTag.CLASS,
         SabberStoneCore.Enums.GameTag.CARDTYPE, SabberStoneCore.Enums.GameTag.RARITY,
@@ -337,6 +352,8 @@ internal static class NativeUIProjection
         if (!DefinitionTags.Contains(engineTag) && !IsModernQuestDefinitionTag(card, engineTag)) return false;
         if (engineTag == SabberStoneCore.Enums.GameTag.HEALTH && card.Type == SabberStoneCore.Enums.CardType.WEAPON)
             engineTag = SabberStoneCore.Enums.GameTag.DURABILITY;
+        // The native loaner slot uses the donor's collectible status.
+        if (id == LocalDecks.PrincePresentationCard && engineTag == SabberStoneCore.Enums.GameTag.COLLECTIBLE) return false;
         value = card[engineTag];
         return true;
     }
@@ -352,6 +369,8 @@ internal static class NativeUIProjection
             && !IsModernQuestDefinitionTag(card, engineTag)) return false;
         if (engineTag == SabberStoneCore.Enums.GameTag.HEALTH && card.Type == SabberStoneCore.Enums.CardType.WEAPON)
             engineTag = SabberStoneCore.Enums.GameTag.DURABILITY;
+        // The native loaner slot uses the donor's collectible status.
+        if (id == LocalDecks.PrincePresentationCard && engineTag == SabberStoneCore.Enums.GameTag.COLLECTIBLE) return false;
         value = card[engineTag];
         if (FlattenedDbfTags.Contains(engineTag) && card.RefTags.TryGetValue(engineTag, out int referenced))
             value = Math.Max(value, referenced);
@@ -469,6 +488,7 @@ internal static class NativeUIProjection
         if (key == "player-core-warlock") return 900000223L;
         if (key == "player-core-demonhunter") return 900000224L;
         if (key == "player-core-deathknight") return 900000225L;
+        if (key == LocalDecks.PrincePlaytestDeck) return 900000226L;
         if (key == LocalDecks.TestShowcaseId) return 900000048L;
         if (key == "test-standard-more-warrior") return 900000050L;
         if (key == "test-standard-more-priest") return 900000051L;
@@ -732,7 +752,7 @@ internal static class NativeUIProjection
         // Harness loaners keep the retail 27-deck budget so a raised tray never floods with test decks.
         int testSlots = Math.Max(0, RetailDeckLimit - pinned.Length - visiblePersonalCount
             - (visiblePersonalCount < MaximumPersonalDecks ? 1 : 0));
-        var tests = DeckKeys.Skip(1).Where(IsTestLoanerKey).ToArray();
+        var tests = DeckKeys.Skip(1).Where(key => key != LocalDecks.PrincePlaytestDeck && IsTestLoanerKey(key)).ToArray();
         var members = ShowcaseLoanerKeys.Concat(TestLoanerGroups[
             int.Parse(CanonicalTestLoanerGroup(testLoanerGroup) ?? "11", CultureInfo.InvariantCulture) - 1]).ToArray();
         return pinned.Concat(members.Concat(tests.Where(key => !members.Contains(key))).Take(testSlots)).ToArray();
@@ -919,8 +939,8 @@ internal static class NativeUIProjection
         string key = DeckKeys.Skip(1).SingleOrDefault(candidate => DeckId(candidate) == deckId);
         if (key == null || ids == null) return false;
         var loaner = LocalDecks.Get(key);
-        return hero == loaner.Hero && ids.OrderBy(id => id, StringComparer.Ordinal)
-            .SequenceEqual(loaner.CardIds.OrderBy(id => id, StringComparer.Ordinal));
+        return hero == loaner.Hero && ids.Select(LocalDecks.PrinceNativeId).OrderBy(id => id, StringComparer.Ordinal)
+            .SequenceEqual(loaner.CardIds.Select(LocalDecks.PrinceNativeId).OrderBy(id => id, StringComparer.Ordinal));
     }
     private static bool ValidPackCardKey(string key)
     {

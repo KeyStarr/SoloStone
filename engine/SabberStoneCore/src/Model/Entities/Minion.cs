@@ -254,6 +254,7 @@ namespace SabberStoneCore.Model.Entities
 
         public override void Reset()
         {
+            Actions.RepentantPrinceRules.Reset(this);
             this[GameTag.NUM_TURNS_IN_PLAY] = 0;
             bool exhausted = IsExhausted;
             NativeTags.Remove(Actions.LifecycleRules.RecruitAppliedPlayer1);

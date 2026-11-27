@@ -822,6 +822,7 @@ internal static partial class Program
         }
         expectedIds.UnionWith(LocalDecks.TestStandardCardIds.Select(NativeMatch.TransportCardId));
         expectedIds.UnionWith(LocalDecks.TestLoaners.SelectMany(deck => deck.CardIds).Select(NativeMatch.TransportCardId));
+        expectedIds.Add(LocalDecks.PrincePresentationCard);
         expectedIds.UnionWith(new[] { "TIME_609t1", "TIME_609t2" });
         expectedIds.UnionWith(LocalCardCatalog.CardStateGeneratedIds.Select(NativeMatch.TransportCardId));
         string missing = expectedIds.FirstOrDefault(id => !LocalNativeText.SupportedIds.Contains(id));

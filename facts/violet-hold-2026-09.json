@@ -2563,6 +2563,7 @@
 {"id":"DS1_188","dbf":311,"name":"Gladiator's Longbow","text":"Your hero is <b>Immune</b> while attacking.","textHash":"affbf6878ac49306","tags":[[47,5],[48,7],[183,3],[187,2],[199,3],[201,3],[202,7],[203,4],[251,8],[321,1]],"refs":[[240,1]]},
 {"id":"DS1_188e","dbf":40197,"name":"Gladiator's Longbow enchantment","tags":[[183,3],[199,3],[202,6]]},
 {"id":"DS1_233","dbf":545,"name":"Mind Blast","text":"Deal $5 damage to the enemy hero.","textHash":"1f2f875fff6a95db","tags":[[48,2],[183,4],[199,6],[201,3],[202,5],[203,1],[251,9],[321,1],[1635,6]]},
+{"id":"SOLO_KAELTHAS","dbf":900001001,"name":"Kael'thas, Repentant Prince","text":"Every third card you play costs <b>Corpses</b> instead of Mana.","textHash":"a9bfe639d48b2904","tags":[[45,7],[47,4],[48,7],[114,1],[183,7],[199,1],[200,11],[202,4],[203,5],[362,1]]},
 {"id":"ds1_whelptoken","dbf":54,"name":"Whelp","tags":[[45,1],[47,1],[48,1],[183,3],[199,12],[200,24],[201,3],[202,4],[251,3],[2355,1]]},
 {"id":"DS1h_292","dbf":229,"name":"Steady Shot","text":"<b>Hero Power</b>\nDeal $2 damage to the enemy hero.@<b>Hero Power</b>\nDeal $2 damage.","textHash":"a236037f21d1ccfc","tags":[[48,2],[183,2],[199,3],[201,3],[202,10],[203,2],[251,1],[1086,2738]]},
 {"id":"DS1h_292_H1","dbf":2833,"name":"Steady Shot","text":"<b>Hero Power</b>\nDeal $2 damage to the enemy hero.@<b>Hero Power</b>\nDeal $2 damage.","textHash":"a236037f21d1ccfc","tags":[[48,2],[183,17],[199,3],[202,10],[203,2],[1086,30366]]},

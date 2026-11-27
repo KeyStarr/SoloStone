@@ -508,7 +508,12 @@ internal static partial class NativeUIProbe
             && NativeUIProjection.LoadTestLoanerGroup(NativeUIProjection.TestLoanerGroupPath, message => { }) != "11")
             log.LogWarning("TEST_LOANER_GROUP ignored: test decks need a Sandbox save.");
 #endif
-        foreach (string key in NativeUIProjection.VisibleLoanerKeys(NativeUIProjection.ProjectedLoanerKeys(decks.Count, testLoanerGroup), Profile.HiddenLoaners))
+        var loanerKeys = NativeUIProjection.ProjectedLoanerKeys(decks.Count, testLoanerGroup);
+#if ENGINE_SOURCE
+        if (Profile.IsSandbox && !loanerKeys.Contains(LocalDecks.PrincePlaytestDeck))
+            loanerKeys = loanerKeys.Select(key => key == "player-core-deathknight" ? LocalDecks.PrincePlaytestDeck : key).ToArray();
+#endif
+        foreach (string key in NativeUIProjection.VisibleLoanerKeys(loanerKeys, Profile.HiddenLoaners))
             decks.Add(NativeUIProjection.DeckId(key), LocalDecks.Get(key));
 #if !SOLOSTONE_RELEASE
         AuditCards();
@@ -560,7 +565,7 @@ internal static partial class NativeUIProbe
             // Saved drafts keep their version per copy; loaners and recipes are Normal.
             var entries = custom != null ? custom.CardEntries : deck.CardIds.Select(id => new LocalDeckCard { Id = id }).ToList();
             foreach (var row in NativeUIProjection.DeckRows(entries)) content.Cards.Add(new DeckCardData {
-                Def = new PegasusShared.CardDef { Asset = GameUtils.TranslateCardIdToDbId(row.Id), Premium = row.Premium }, Qty = row.Qty });
+                Def = new PegasusShared.CardDef { Asset = GameUtils.TranslateCardIdToDbId(LocalDecks.PrinceNativeId(row.Id)), Premium = row.Premium }, Qty = row.Qty });
             contents.Add(content);
         }
         Publish(headers);
@@ -1394,6 +1399,11 @@ internal static partial class NativeUIProbe
             throw new InvalidOperationException("Unmapped/unloaded native deck");
         var ids = native.GetCardsWithCardID().ToArray();
         LocalCustomDeck custom = Profile.GetDraft(native.ID);
+#if ENGINE_SOURCE
+        if (custom == null && local.Id == LocalDecks.PrincePlaytestDeck)
+            ids = ids.Select(id => id == LocalDecks.PrincePresentationCard
+                ? SabberStoneCore.Actions.RepentantPrinceRules.CardId : id).ToArray();
+#endif
         if (custom == null)
             NativeUIProjection.ValidateSelection(local.Id, NativeBaseHero(native), ids, new Dictionary<string, int>());
         else

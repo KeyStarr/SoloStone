@@ -837,7 +837,8 @@ internal static class ClientBridge
 
     private static bool LocalCardName(EntityDef __0, ref string __result)
     {
-        if (LocalNativeText.TryGetNameOverride(NativeUIProbe.PreviewDefinitionContext,
+        if (LocalNativeText.TryGetNameOverride(NativeUIProbe.PreviewDefinitionContext
+            || (OwnsLiveMatch && __0?.GetCardId() == LocalDecks.PrincePresentationCard),
             __0?.GetCardId(), raw => TextUtils.TransformCardText(raw), out string name))
         {
             __result = name;

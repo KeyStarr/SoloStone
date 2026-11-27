@@ -906,8 +906,10 @@ namespace SabberStoneCore.Model
 				// quest draw if there is
 				// Tag 1192 marks a Sidequest; Sidequests are not part of this guaranteed Quest draw.
 				IPlayable quest = p.DeckZone.FirstOrDefault(q => q is Spell spell && spell.IsQuest && spell.Card[(GameTag)1192] == 0);
-				if (quest != null) Generic.Draw(p, quest); else Deal(p);
-				Deal(p);
+                // The playtest card is offered in the opening hand of its loaner deck.
+                IPlayable prince = p.DeckZone.FirstOrDefault(card => card.Card.Id == RepentantPrinceRules.CardId);
+                if (quest != null) Generic.Draw(p, quest); else if (prince == null) Deal(p);
+                if (prince != null) Generic.Draw(p, prince); else Deal(p);
 				Deal(p);
 
 				if (p != FirstPlayer)

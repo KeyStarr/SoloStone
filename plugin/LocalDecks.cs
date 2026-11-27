@@ -56,6 +56,17 @@ public sealed class LocalDeck
 
 public static class LocalDecks
 {
+    internal const string PrincePlaytestDeck = "test-kaelthas";
+    internal const string PrincePresentationCard = "REV_021";
+
+    internal static string PrinceNativeId(string id)
+    {
+#if ENGINE_SOURCE
+        if (id == SabberStoneCore.Actions.RepentantPrinceRules.CardId) return PrincePresentationCard;
+#endif
+        return id;
+    }
+
     static LocalDecks()
     {
 #if ENGINE_SOURCE
@@ -1000,6 +1011,13 @@ public static class LocalDecks
     public static readonly IReadOnlyList<LocalDeck> TestLoaners = new LocalDeck[0];
     public static readonly IReadOnlyList<LocalDeck> TestOpponents = new LocalDeck[0];
 #endif
+#if ENGINE_SOURCE
+    private static readonly LocalDeck PrincePlaytestLoaner = new LocalDeck(PrincePlaytestDeck, "Kael'thas Playtest", "HERO_11", "Showcase opponents",
+            "Keep Kael’thas in your opening hand. Trade Undead to build up Corpses before turn seven.", DeckStyle.Value,
+            new[] { "RLK_503", "CORE_RLK_116", "EDR_814", "JAIL_441", "CORE_RLK_121", "RLK_048", "RLK_708",
+                "TLC_443", "CORE_RLK_062", "RLK_024", "JAIL_454", "RLK_060", "RLK_720" },
+            new[] { SabberStoneCore.Actions.RepentantPrinceRules.CardId, "CORE_EDR_003", "CORE_RLK_087", "CORE_RLK_086" });
+#endif
     // Source-engine player defaults are separate from historical showcase/test and AI population catalogs.
     // Core starter loans (2026-10-28 #57): one deck per class, the normal player tray. Loans never grant cards. #87 (owner
     // 2026-11-15) rebuilt them from a Core backbone (18+ of 30) plus current-set commons and rares (no expansion epic
@@ -1184,7 +1202,11 @@ public static class LocalDecks
     internal static LocalDeck ArenaDeck;
     internal static LocalDeck ArenaDeckFor(string deckKey, string hero, IEnumerable<string> cardIds) => new LocalDeck(deckKey,
         "Arena Deck", hero, "Arena opponent", "Arena drafted deck", DeckStyle.Value, new string[0], cardIds.ToArray());
-    public static LocalDeck Get(string id) => ArenaDeck != null && ArenaDeck.Id == id ? ArenaDeck : All.Concat(TestLoaners).Concat(TestOpponents).Concat(PlayerStarterDecks).Concat(NpcDecks).SingleOrDefault(d => d.Id == id)
+    public static LocalDeck Get(string id) =>
+#if ENGINE_SOURCE
+        id == PrincePlaytestDeck ? PrincePlaytestLoaner :
+#endif
+        ArenaDeck != null && ArenaDeck.Id == id ? ArenaDeck : All.Concat(TestLoaners).Concat(TestOpponents).Concat(PlayerStarterDecks).Concat(NpcDecks).SingleOrDefault(d => d.Id == id)
         ?? External(id) ?? throw new InvalidOperationException("Unknown local deck: " + id);
     // Stable identity wins; catalogue order retains ownership of ambiguous legacy display-name aliases.
     internal static LocalDeck Resolve(IEnumerable<LocalDeck> decks, string key)

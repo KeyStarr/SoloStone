@@ -12,6 +12,9 @@ internal static class LocalNativeText
     private const string ObsoleteSpellDamageSuffix = " @spelldmg";
     private static readonly string[] AdditionalEngineIds = {
         "GAME_005",
+#if ENGINE_SOURCE
+        SabberStoneCore.Actions.RepentantPrinceRules.CardId,
+#endif
         "NEW1_012o", "EX1_019e", "EX1_603e", "CS2_222o", "CS2_004e", "EX1_561e",
         "EX1_411e", "EX1_414e", "CS1_129e", "CS2_236e", "CS2_087e", "CS2_092e",
         "EX1_360e", "EX1_382e", "EX1_619e", "EX1_366e", "EX1_355e"
@@ -31,7 +34,15 @@ internal static class LocalNativeText
         out string name)
     {
         name = null;
-        if (!localContext || cardId != "EX1_084e" || transform == null) return false;
+        if (!localContext || transform == null) return false;
+#if ENGINE_SOURCE
+        if (cardId == LocalDecks.PrincePresentationCard)
+        {
+            name = transform(Cards.FromId(SabberStoneCore.Actions.RepentantPrinceRules.CardId).Name);
+            return true;
+        }
+#endif
+        if (cardId != "EX1_084e") return false;
         name = transform(Cards.FromId(cardId).Name);
         return true;
     }

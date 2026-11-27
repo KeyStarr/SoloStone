@@ -7167,7 +7167,11 @@ public sealed class NativeMatch
             Name = name,
             // Missing Jade sizes share native art, but their printed base must not become a buff.
             DefTags = raceDefinition != null && name.Length > 0
-                && raceDefinition.Id.StartsWith("CFM_712_t", StringComparison.Ordinal)
+                && (raceDefinition.Id.StartsWith("CFM_712_t", StringComparison.Ordinal)
+#if ENGINE_SOURCE
+                    || raceDefinition.Id == SabberStoneCore.Actions.RepentantPrinceRules.CardId
+#endif
+                )
                 ? new[] { GameTag.ATK, GameTag.HEALTH, GameTag.COST }.Select(tag =>
                     new NativeTag { Name = (int)tag, Value = raceDefinition[tag] }).ToList()
                 : changedOffer && !hidden && name.Length > 0
@@ -7572,7 +7576,7 @@ public sealed class NativeMatch
             case "AT_132_WARLOCK": return "HERO_07bp2";
             case "AT_132_MAGE": return "HERO_08bp2";
             case "AT_132_PRIEST": return "HERO_09bp2";
-            default: return cardId ?? "";
+            default: return LocalDecks.PrinceNativeId(cardId) ?? "";
         }
     }
 
