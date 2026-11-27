@@ -116,10 +116,42 @@ internal static partial class Program
             Check(!data.Any(e => e.HasSubSpellStart || e.HasSubSpellEnd), "legacy/control has no substitute recipe");
             capture.SerializeAll();
         }
+        DarkWispersSubOptionHistory();
         SecretIngredientSubOptionHistory();
         ChooseOneDecisionSubOptionHistory();
         ChooseOneGroupBoundaries();
         Console.WriteLine("PASS Choose One sub-option wire, Timereaver group/all recipients, Secret Ingredient hero Attack, Choose Both, legacy and non-Choose-One controls; both seats");
+    }
+    private static void DarkWispersSubOptionHistory()
+    {
+        foreach (bool bot in new[] { false, true })
+        foreach (int branch in new[] { 1, 2, 0 })
+        {
+            var (match, capture) = AnimationMatch(botTurn: bot);
+            var owner = match.Game.CurrentPlayer;
+            if (branch == 0) EngineEntity.FromCard(owner, Cards.FromId("OG_044"), zone: owner.BoardZone);
+            var yeti = (Minion)EngineEntity.FromCard(owner, Cards.FromId("CS2_182"), zone: owner.BoardZone);
+            var source = EngineEntity.FromCard(owner, Cards.FromId("GVG_041"), zone: owner.HandZone);
+            FlushFieldHistory(match);
+            int cursor = capture.Packets.Count;
+
+            InvokeProcess(match, owner.Options().First(task => task.PlayerTaskType == PlayerTaskType.PLAY_CARD
+                && task.Source?.Id == source.Id && (branch == 0 || task.ChooseOne == branch)
+                && (branch == 2 ? task.Target == null : task.Target?.Id == yeti.Id)));
+            FlushFieldHistory(match);
+
+            var history = History(capture, cursor);
+            var play = history.Single(row => row.HasPowerStart && row.PowerStart.Source == source.Id && (int)row.PowerStart.Type == 7);
+            Check(play.PowerStart.SubOption == Math.Max(0, branch - 1), "Dark Wispers PLAY keeps the chosen card");
+            var powers = history.Where(row => row.HasPowerStart && row.PowerStart.Source == source.Id && (int)row.PowerStart.Type == 3);
+            Check(powers.Select(row => row.PowerStart.SubOption).SequenceEqual(branch == 0 ? new[] { 1, 0 } : new[] { 2 - branch }),
+                $"Dark Wispers POWER selects its native FX for branch {branch}, bot={bot}");
+            Check(yeti.AttackDamage == (branch == 2 ? 4 : 9) && yeti.Health == (branch == 2 ? 5 : 10)
+                && yeti.HasTaunt == (branch != 2), "Dark Wispers buff and Taunt follow gameplay branch");
+            Check(owner.BoardZone.Count(minion => minion.Card.Id == "CS2_231") == (branch == 1 ? 0 : 5),
+                "Dark Wispers summons five Wisps in its summon branch");
+            capture.SerializeAll();
+        }
     }
     private static void SecretIngredientSubOptionHistory()
     {

@@ -36,7 +36,7 @@ internal static class WildY0bM2BProof
         WildSetsProof.Case("GVG_038", Crackle);
         WildSetsProof.Case("GVG_039", VitalityTotem);
         WildSetsProof.Case("GVG_040", Siltfin);
-        WildSetsProof.Held("GVG_041", "held: Choose One FX swapped between options (live)", DarkWispers);
+        WildSetsProof.Case("GVG_041", DarkWispers);
         WildSetsProof.Case("GVG_042", Neptulon);
         WildSetsProof.Case("GVG_043", Glaivezooka);
         WildSetsProof.Case("GVG_045", Implosion);
