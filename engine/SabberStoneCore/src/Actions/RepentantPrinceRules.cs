@@ -1,4 +1,5 @@
 using SabberStoneCore.Enums;
+using SabberStoneCore.Model;
 using SabberStoneCore.Model.Entities;
 
 namespace SabberStoneCore.Actions
@@ -8,9 +9,12 @@ namespace SabberStoneCore.Actions
     {
         public const string CardId = "SOLO_KAELTHAS";
         private const GameTag PlayCount = GameTag.TAG_SCRIPT_DATA_NUM_1;
+        private static readonly int PrinceIdentity = Cards.FromId(CardId).Identity;
+
+        internal static bool IsPrince(IPlayable card) => card.Card.Identity == PrinceIdentity;
 
         private static bool Active(Minion minion) =>
-            minion.Card.Id == CardId && !minion.IsSilenced && !minion.ToBeDestroyed;
+            IsPrince(minion) && !minion.IsSilenced && !minion.ToBeDestroyed;
 
         internal static bool ChangesPayment(Controller owner) => owner.Game.EnableCorpses
             && owner.BoardZone.AnyInteractable(minion => Active(minion) && minion[PlayCount] == 2);
@@ -24,7 +28,7 @@ namespace SabberStoneCore.Actions
 
         internal static void Reset(Minion minion)
         {
-            if (minion.Card.Id == CardId) minion[PlayCount] = 0;
+            if (IsPrince(minion)) minion[PlayCount] = 0;
         }
     }
 }
