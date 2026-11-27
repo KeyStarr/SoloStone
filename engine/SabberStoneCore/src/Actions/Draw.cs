@@ -136,10 +136,11 @@ namespace SabberStoneCore.Actions
         // carries REVEALED, as in retail, so the native client shows the drawn card face up (for the opponent too) and
         // holds it there until the TOPDECK block moves it out of the hand. This is the only "leaves the hand" rule and it
         // is read once, after the draw triggers, where the card really moves: a card held in hand is never revealed.
-        // #165 merge rule: "When you draw this" minions without Summoned When Drawn (tag 3128; #165's staysInHand,
-        // e.g. Flame Leviathan, Sea Reaver) stay in hand, so that rule must live in this function, never beside it.
+        // A minion whose draw effect does not summon it resolves the effect from its hand.
         internal static bool LeavesHandWhenDrawn(Controller controller, IPlayable playable) =>
-            playable.Power?.TopdeckTask != null && (playable.Card.Id != "EDR_260t" || !controller.BoardZone.IsFull);
+            playable.Power?.TopdeckTask != null
+            && (!(playable is Minion) || playable.Card[(GameTag)3128] != 0)
+            && (playable.Card.Id != "EDR_260t" || !controller.BoardZone.IsFull);
 
         private static bool PreDrawPhase(Controller controller, bool emptySource = false)
         {

@@ -266,17 +266,23 @@ namespace SabberStoneCore.Tasks
 								continue;
 							}
 
-							c.DeckZone.Remove(pick);
-							pick.Power.Trigger?.Activate(pick);
-							c.SecretZone.Add((Spell) pick);
-							if (c == c.Game.CurrentPlayer)
-								pick.IsExhausted = true;
+							PlaceSecretFromDeck((Spell)pick);
 							break;
 
 						} while (stack.Count > 0);
 
 						return null;
 					}))));
+
+		internal static void PlaceSecretFromDeck(Spell secret)
+		{
+			Controller owner = secret.Controller;
+			owner.DeckZone.Remove(secret);
+			secret.Power.Trigger?.Activate(secret);
+			owner.SecretZone.Add(secret);
+			if (owner == owner.Game.CurrentPlayer)
+				secret.IsExhausted = true;
+		}
 
 		public static ISimpleTask AddRandomOpClassCardToHand =>
 			Create(

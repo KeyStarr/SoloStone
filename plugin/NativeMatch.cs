@@ -5955,6 +5955,11 @@ public sealed class NativeMatch
                 }
             };
 #if ENGINE_SOURCE
+            // Dark Wispers' native FX slots are in the opposite order from its choices.
+            // PLAY still names the selected choice in the client's history.
+            if (start.BlockType == BlockType.POWER && start.Index is 0 or 1
+                && IdentityAt(identityPosition, start.Source, true, true, definitionOnly: true)?.Name == "GVG_041")
+                native.PowerStart.SubOption = 1 - start.Index;
             if (start.EffectIndex.HasValue) native.PowerStart.EffectIndex = start.EffectIndex.Value;
             if (start.TriggerKeyword.HasValue) native.PowerStart.TriggerKeyword = start.TriggerKeyword.Value;
             // A card cast as it is drawn (TOPDECK, 377): PowerProcessor makes its history tile, and its big card when the

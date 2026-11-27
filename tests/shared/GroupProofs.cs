@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-public enum ProofKind { Facility, Cards, PoweredUp, Native }
+public enum ProofKind { Facility, Cards, PoweredUp, Native, WildCards }
 
 [AttributeUsage(AttributeTargets.Method)]
 public sealed class GroupProofAttribute : Attribute
@@ -76,7 +76,7 @@ internal static class GroupProofs
         }
     }
 
-    internal static bool TryRun(string[] args, Action<Action> runCards = null, bool allowUnmatched = false)
+    internal static bool TryRun(string[] args, Action<Action> runCards = null, bool allowUnmatched = false, Action<Action> runWildCards = null)
     {
         if (args.Count(arg => arg.StartsWith("--", StringComparison.Ordinal) && arg.EndsWith("-only", StringComparison.Ordinal)) > 1)
             throw new ArgumentException("Select one group proof");
@@ -92,6 +92,11 @@ internal static class GroupProofs
         {
             if (runCards == null) throw new InvalidOperationException("Card proof runner required");
             runCards(selected[0].Run);
+        }
+        else if (selected[0].Spec.Kind == ProofKind.WildCards)
+        {
+            if (runWildCards == null) throw new InvalidOperationException("Wild card proof runner required");
+            runWildCards(selected[0].Run);
         }
         else selected[0].Run();
         return true;

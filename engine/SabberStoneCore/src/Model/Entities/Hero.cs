@@ -34,7 +34,7 @@ namespace SabberStoneCore.Model.Entities
         public HeroPower HeroPower
         {
             get => _heroPower;
-            set { if (_heroPower != value) Actions.BasicHeroPowerRules.DetachPassive(_heroPower); _heroPower = value; if (value != null) Actions.CostRules.RefreshHandAuras(Game); }
+            set { if (_heroPower != value) Actions.BasicHeroPowerRules.DetachPower(_heroPower); _heroPower = value; if (value != null) Actions.CostRules.RefreshHandAuras(Game); }
         }
 
 		/// <summary>Gets or sets the weapon entity equipped on the Hero.</summary>

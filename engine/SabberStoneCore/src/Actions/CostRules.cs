@@ -230,8 +230,13 @@ namespace SabberStoneCore.Actions
             => AddRule(controller, false, kind, cardType, race, maxEffectiveCost, setCost, expiryTurn, enchantmentId);
 
         public static long AddNextHeroPowerRule(Controller controller, int? setCost = null,
-            CostPaymentKind? kind = null, int? expiryTurn = null, int enchantmentId = 0)
-            => AddRule(controller, true, kind, null, null, null, setCost, expiryTurn, enchantmentId);
+            CostPaymentKind? kind = null, int? expiryTurn = null, int enchantmentId = 0, int? reduction = null)
+        {
+            // A plain reduction (AT_115 Fencing Coach) lives on the controller-scoped rule, not on the current
+            // Hero Power entity, so it survives the power being replaced (Finley, Justicar) and stacks per rule.
+            if (reduction < 0) throw new ArgumentOutOfRangeException(nameof(reduction));
+            return AddRule(controller, true, kind, null, null, null, setCost, expiryTurn, enchantmentId, false, reduction ?? 0);
+        }
 
         public static long AddNextTemporaryRule(Controller controller, int reduction, int enchantmentId = 0)
         {
@@ -267,7 +272,9 @@ namespace SabberStoneCore.Actions
                 if (Matches(rule, source, amount))
                 {
                     if (rule.SetCost.HasValue) amount = rule.SetCost.Value;
-                    if (rule.OnlyTemporary) amount = Math.Max(0, amount - rule.Reduction);
+                    // SetCost first, then the reduction, each rule clamped at zero (two Fencing Coaches stack).
+                    if (rule.OnlyTemporary || rule.HeroPower && rule.Reduction > 0)
+                        amount = Math.Max(0, amount - rule.Reduction);
                 }
             return amount;
         }
@@ -309,10 +316,12 @@ namespace SabberStoneCore.Actions
             var applied = new System.Collections.Generic.List<CostOneUseRule>();
             int running = numeric;
             foreach (var rule in payer.Game.CostState.Rules)
-                if ((rule.SetCost.HasValue || rule.OnlyTemporary) && Matches(rule, source, running))
+                if ((rule.SetCost.HasValue || rule.OnlyTemporary || rule.HeroPower && rule.Reduction > 0)
+                    && Matches(rule, source, running))
                 {
                     if (rule.SetCost.HasValue) running = rule.SetCost.Value;
-                    if (rule.OnlyTemporary) running = Math.Max(0, running - rule.Reduction);
+                    if (rule.OnlyTemporary || rule.HeroPower && rule.Reduction > 0)
+                        running = Math.Max(0, running - rule.Reduction);
                     applied.Add(rule);
                 }
             foreach (var rule in payer.Game.CostState.Rules)

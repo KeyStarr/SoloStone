@@ -73,8 +73,15 @@ namespace SabberStoneCore.Actions
                 }
 
 				game.TaskQueue.StartEvent();
-				heroPower.ActivateTask(PowerActivation.POWER, target, chooseOne);
-				game.ProcessTasks();
+				RepeatRules.BeginHeroPowerEffect(c);
+				try
+				{
+					var blade = BasicHeroPowerRules.EquippedPoisonedBlade(c);
+					heroPower.ActivateTask(PowerActivation.POWER, target, chooseOne);
+					game.ProcessTasks();
+					BasicHeroPowerRules.ApplyPoisonedBlade(game, c, heroPower, blade);
+				}
+				finally { RepeatRules.EndHeroPowerEffect(c); }
 				game.TaskQueue.EndEvent();
 
 				game.DeathProcessingAndAuraUpdate();

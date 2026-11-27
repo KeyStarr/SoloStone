@@ -25,6 +25,9 @@ namespace SabberStoneCore.Tasks.SimpleTasks
 			SpellDmg = spellDmg;
 		}
 
+		/// <summary>When set, the stack number becomes the damage actually dealt (absorbed shields count 0) for the next task.</summary>
+		protected virtual bool StoreDealt => false;
+
 		public EntityType Type { get; set; }
 
 		public bool SpellDmg { get; set; }
@@ -42,14 +45,22 @@ namespace SabberStoneCore.Tasks.SimpleTasks
             bool collectLifesteal = HealingRules.BeginDamage(source as IPlayable);
             try
             {
-            using var wave = game.History ? game.PowerHistory.DamageWave(entities.Count) : null;
-            foreach (IPlayable p in entities)
-				Generic.DamageCharFunc.Invoke(source as IPlayable, p as ICharacter, stack.Number, SpellDmg);
-
+                using var wave = game.History ? game.PowerHistory.DamageWave(entities.Count) : null;
+                int dealt = 0;
+                foreach (IPlayable p in entities)
+                    dealt += Generic.DamageCharFunc.Invoke(source as IPlayable, p as ICharacter, stack.Number, SpellDmg);
+                if (StoreDealt) stack.Number = dealt;
             }
             finally { if (collectLifesteal) HealingRules.EndDamage(source as IPlayable); }
 
 			return TaskState.COMPLETE;
 		}
 	}
+
+    internal sealed class ImpLosionDamageTask : DamageNumberTask
+    {
+        internal ImpLosionDamageTask() : base(EntityType.TARGET, spellDmg: true) { }
+
+        protected override bool StoreDealt => true;
+    }
 }

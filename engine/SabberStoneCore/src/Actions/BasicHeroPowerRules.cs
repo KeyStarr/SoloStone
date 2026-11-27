@@ -63,11 +63,13 @@ namespace SabberStoneCore.Actions
             }
         }
 
-        internal static void DetachPassive(HeroPower power)
+        internal static void DetachPower(HeroPower power)
         {
-            if (power?.Card.Id == "JAIL_EVENT_101hp" && power.Controller.Hero.HeroPower == power) { power.ActivatedTrigger?.Remove(); return; }
             // An inactive clone's zone assignment must not detach or refresh the live power.
-            if (power?.Card.Id != "BE_004p" || power.Controller.Hero.HeroPower != power) return;
+            if (power == null || power.Controller.Hero?.HeroPower != power) return;
+            power.RevokeExtraUse();
+            if (power.Card.Id == "JAIL_EVENT_101hp") { power.ActivatedTrigger?.Remove(); return; }
+            if (power.Card.Id != "BE_004p") return;
             power.ActivatedTrigger?.Remove();
             power.OngoingEffect?.Remove();
             foreach (var actor in power.Controller.Hero.AppliedEnchantments?.Where(e => e.Creator?.Id == power.Id
@@ -162,6 +164,17 @@ namespace SabberStoneCore.Actions
         public static bool RandomTargetsActive(Controller c) => c.BoardZone.Concat(c.Opponent.BoardZone).Any(m =>
             (m.Card.Id == "CORE_CFM_670" || m.Card.Id == "CFM_670") && !m.IsSilenced && !m.IsDormant && !m.ToBeDestroyed);
 
+        /// <summary>The Poisoned Blade (AT_034) currently equipped by <paramref name="owner"/>, or null.</summary>
+        internal static Weapon EquippedPoisonedBlade(Controller owner) =>
+            owner.Hero?.Weapon is Weapon blade && blade.Card.Id == "AT_034" ? blade : null;
+
+        /// <summary>Every Hero Power activation charges the equipped Poisoned Blade +1 Attack (AT_034) instead of its own equip.</summary>
+        internal static void ApplyPoisonedBlade(Game game, Controller owner, HeroPower power, Weapon blade)
+        {
+            if (blade != null && owner.Hero?.Weapon == blade && !blade.ToBeDestroyed && game.State != State.COMPLETE)
+                Generic.AddEnchantmentBlock(game, Cards.FromId("AT_034e"), power, blade, 0, 0, 0);
+        }
+
         public static string PowerId(CardClass heroClass) =>
             Cards.FromAssetId(Cards.HeroCard(heroClass)[GameTag.HERO_POWER]).Id;
 
@@ -186,11 +199,15 @@ namespace SabberStoneCore.Actions
             try
             {
                 game.CurrentEventData = new EventMetaData(power, target);
+                RepeatRules.BeginHeroPowerEffect(controller);
+                var blade = EquippedPoisonedBlade(controller);
                 if (power.IsPlayableByCardReq) power.ActivateTask(PowerActivation.POWER, target);
                 game.ProcessTasks();
+                ApplyPoisonedBlade(game, controller, power, blade);
             }
             finally
             {
+                RepeatRules.EndHeroPowerEffect(controller);
                 game.TaskQueue.EndEvent();
                 controller.GraveyardZone.Add(controller.SetasideZone.Remove(power));
                 game.CurrentEventData = previousEvent;

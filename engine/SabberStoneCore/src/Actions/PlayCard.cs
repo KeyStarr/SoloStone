@@ -542,6 +542,17 @@ namespace SabberStoneCore.Actions
 
         }
 
+        // Private tag so a spell suspended by a choice keeps its original target's allegiance.
+        internal const GameTag FriendlyMinionSpellTarget = (GameTag)32123;
+
+        private static void CaptureFriendlyMinionSpellTarget(Spell spell, ICharacter target)
+        {
+            if (target is Minion && target.Controller == spell.Controller)
+                spell[FriendlyMinionSpellTarget] = target.Id;
+            else
+                spell.NativeTags.Remove(FriendlyMinionSpellTarget);
+        }
+
 		public static Func<Controller, Game, Spell, ICharacter, int, bool> PlaySpell
 			=> delegate (Controller c, Game game, Spell spell, ICharacter target, int chooseOne)
 			{
@@ -581,6 +592,8 @@ namespace SabberStoneCore.Actions
 				// check the spell is countered
 				if (spell.IsCountered)
 				{
+						// The spell never landed on its target, so a Djinni of Zephyrs must not see a friendly-minion target.
+						spell.NativeTags.Remove(FriendlyMinionSpellTarget);
 					OutcastRules.Clear(spell);
                     CardSets.Client.Sets.DragonSoulShattered.Finish(spell);
                     RepeatRules.Clear(spell);
@@ -609,6 +622,7 @@ namespace SabberStoneCore.Actions
 						}
 					}
 
+                    CaptureFriendlyMinionSpellTarget(spell, target);
                     var recipe = (spell.Power?.PowerTask as DecisionSpellTask)?.Recipe;
                     if (recipe != null || handProgress.Length != 0 || !spell.IsSecret && !spell.IsQuest)
                     {
@@ -652,6 +666,7 @@ namespace SabberStoneCore.Actions
 					game.TaskQueue.EndEvent();
 				}
 
+                spell.NativeTags.Remove(FriendlyMinionSpellTarget);
 				c.NumSpellsPlayedThisGame++;
 				if (spell.IsSecret)
 					c.NumSecretsPlayedThisGame++;
@@ -705,8 +720,12 @@ namespace SabberStoneCore.Actions
 				using (game.Resolution.Enter(ResolutionKind.Battlecry))
 				{
 					game.TaskQueue.StartEvent();
-					weapon.ActivateTask(PowerActivation.POWER, target, chooseOne);
-					if (c.ExtraBattlecry && weapon.Card[GameTag.BATTLECRY] == 1)
+					// A Combo weapon (Perdition's Blade) replaces its Battlecry when Combo is active, as spells and minions do.
+					var activation = weapon.Combo && c.IsComboActive ? PowerActivation.COMBO : PowerActivation.POWER;
+					if (activation == PowerActivation.COMBO) game.Facts.ComboActivated(weapon);
+					weapon.ActivateTask(activation, target, chooseOne);
+					// An extra Battlecry repeats the base power only; the Combo replacement is never doubled.
+					if (activation == PowerActivation.POWER && c.ExtraBattlecry && weapon.Card[GameTag.BATTLECRY] == 1)
 						weapon.ActivateTask(PowerActivation.POWER, target, chooseOne);
 					game.ProcessTasks();
 					game.TaskQueue.EndEvent();

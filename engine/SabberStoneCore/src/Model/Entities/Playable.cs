@@ -663,7 +663,7 @@ namespace SabberStoneCore.Model.Entities
 		//	set { this[GameTag.SUMMONED] = value ? 1 : 0; }
 		//}
 
-		public bool IsExhausted
+		public virtual bool IsExhausted
 		{
 			get => _exhausted;
 			set

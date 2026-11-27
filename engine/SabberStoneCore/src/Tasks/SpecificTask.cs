@@ -89,9 +89,23 @@ namespace SabberStoneCore.Tasks
 
 		public static ISimpleTask Betrayal
 			=> ComplexTask.Create(
-				new GetGameTagTask(GameTag.ATK, EntityType.TARGET),
 				new IncludeAdjacentTask(EntityType.TARGET),
-				new DamageNumberTask(EntityType.STACK));
+				new CustomTask((game, controller, source, target, stack) =>
+				{
+					if (target is not Minion attacker) return;
+					int attack = attacker.AttackDamage;
+					if (attack <= 0) return;
+					if (game.History) game.PowerHistory.TargetRange(stack.Playables, EntityType.STACK);
+					// The whole two-neighbour wave is one Lifesteal hit batch of the targeted minion.
+					bool collectLifesteal = HealingRules.BeginDamage(attacker);
+					try
+					{
+						using var wave = game.History ? game.PowerHistory.DamageWave(stack.Playables.Count) : null;
+						foreach (var neighbor in stack.Playables.OfType<Minion>())
+							Generic.DamageCharFunc(attacker, neighbor, attack, false);
+					}
+					finally { if (collectLifesteal) HealingRules.EndDamage(attacker); }
+				}));
 
 		public static ISimpleTask JusticarTrueheart
 			=> ComplexTask.Create(
@@ -215,6 +229,40 @@ namespace SabberStoneCore.Tasks
 				t.CardTarget = playTargets.RandomElement(g.Random).Id;
 				g.OnRandomHappened(true);
 				return;
+			});
+
+		/// <summary>Jeeves: at the end of each player's turn, that player (the one whose turn ends, not the owner) draws until they hold 3 cards.
+		/// The number of draws is fixed when the effect starts, so an empty deck costs Fatigue per missing card and cannot loop.</summary>
+		public static ISimpleTask Jeeves =>
+			new CustomTask((g, c, s, t, stack) =>
+			{
+				var player = g.CurrentPlayer;
+				int missing = 3 - player.HandZone.Count;
+				for (int i = 0; i < missing; i++)
+				{
+					Generic.Draw(player);
+					if (g.State == State.COMPLETE) break;
+				}
+			});
+
+		/// <summary>Kezan Mystic: take control of a random enemy Secret that the controller does not already hold (no duplicate Secrets)
+		/// while the Secret area has room. The Secret's trigger is re-armed for the new controller.</summary>
+		public static ISimpleTask KezanMystic =>
+			new CustomTask((g, c, s, t, stack) =>
+			{
+				if (c.SecretZone.IsFull) return;
+				var candidates = new List<Spell>();
+				foreach (var secret in c.Opponent.SecretZone)
+					if (secret.IsSecret && !secret.IsQuest && !c.SecretZone.HasSameCard(secret.Card)) candidates.Add(secret);
+				if (candidates.Count == 0) return;
+				var stolen = candidates[g.Random.Next(candidates.Count)];
+				g.OnRandomHappened(true);
+				c.Opponent.SecretZone.Remove(stolen);
+				stolen.Controller = c;
+				stolen[GameTag.CONTROLLER] = c.PlayerId;
+				c.SecretZone.Add(stolen);
+				stolen.IsExhausted = g.CurrentPlayer == c; // a Secret cannot trigger on its controller's own turn
+				stolen.Power?.Trigger?.Activate(stolen);
 			});
 
 		public static ISimpleTask CuriousGlimmerroot
