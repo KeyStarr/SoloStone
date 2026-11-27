@@ -236,8 +236,9 @@ public static class AutoCastProof
         var text = new[] { "cast", "spells costing" };
         var candidates = pool.Where(id => text.Any(t => (Cards.FromId(id).Text ?? "").Contains(t, StringComparison.OrdinalIgnoreCase))
             || Cards.FromId(id)[GameTag.CAST_RANDOM_SPELLS] != 0).ToArray();
-        Directory.CreateDirectory(Runner.Output);
-        File.WriteAllLines(Path.Combine(Runner.Output, "auto-cast-coverage.tsv"),
+        string path = Program.EvidencePath($"{Runner.Output}/auto-cast-coverage.tsv");
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
+        File.WriteAllLines(path,
             casters.Select(p => $"covered\t{p.Key}\t{p.Value}\t{Cards.FromId(p.Key).Name}")
                 .Concat(candidates.Where(id => !casters.ContainsKey(id)).Select(id => $"text-only\t{id}\t0\t{Cards.FromId(id).Name}\t{(Cards.FromId(id).Text ?? "").Replace('\n', ' ')}"))
                 .Concat(unplayable.Select(id => $"unplayed\t{id}\t0\t{Cards.FromId(id.Split('(')[0]).Name}\t{(Cards.FromId(id.Split('(')[0]).Text ?? "").Replace('\n', ' ')}")));

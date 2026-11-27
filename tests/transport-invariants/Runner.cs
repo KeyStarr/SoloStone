@@ -298,7 +298,8 @@ internal sealed class Runner
         if (!replaying && (newBucket || replay.Focused))
         {
             Program.Save(path, replay);
-            File.WriteAllLines(Path.ChangeExtension(path, ".packets.jsonl"), session.Packets.Select(p => JsonSerializer.Serialize(p, Program.Json)));
+            File.WriteAllLines(Program.EvidencePath(Path.ChangeExtension(path, ".packets.jsonl")),
+                session.Packets.Select(p => JsonSerializer.Serialize(p, Program.Json)));
         }
         return session.History;
     }

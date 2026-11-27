@@ -55,9 +55,10 @@ internal static class OfflinePoolReplayProof
         string externalDirectory = Path.Combine(Path.GetTempPath(), "pool-replay-" + Guid.NewGuid());
         Directory.CreateDirectory(externalDirectory);
         string external = Path.Combine(externalDirectory, pinned.Hash + ".xml");
-        Directory.CreateDirectory(Path.GetDirectoryName(path));
         try
         {
+            // Keep the deliberate mutations away from snapshots read by parallel transport checks.
+            Environment.CurrentDirectory = externalDirectory;
             xml.Save(external);
             File.WriteAllText(external + ".sha256", Convert.ToHexStringLower(SHA256.HashData(File.ReadAllBytes(external))) + "\n");
             Check(PoolSnapshots.Save(external).Hash == pinned.Hash && File.Exists(path), "recording stores supplied historical snapshot");
@@ -98,8 +99,8 @@ internal static class OfflinePoolReplayProof
         }
         finally
         {
-            File.Delete(path); File.Delete(path + ".sha256");
-            File.Delete(external); File.Delete(external + ".sha256"); Directory.Delete(externalDirectory);
+            Environment.CurrentDirectory = originalDirectory;
+            Directory.Delete(externalDirectory, recursive: true);
         }
 
         void Bad(Action<GameRecord> mutate, string invariant = "replay.pool")

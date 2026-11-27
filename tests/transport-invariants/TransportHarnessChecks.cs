@@ -12,7 +12,7 @@ internal static class TransportHarnessChecks
         runner.Run(replay);
         SelfChecks.Check(runner.LightspawnPlayed && !runner.LightspawnDetected && runner.ViolationCount == 0,
             "focused Lightspawn publishes effective attack without transport violations");
-        string path = $"{Runner.Output}/{replay.Game.Id}.json";
+        string path = Program.EvidencePath($"{Runner.Output}/{replay.Game.Id}.json");
         SelfChecks.Check(File.Exists(path) && File.ReadLines(Path.ChangeExtension(path, ".packets.jsonl")).Count() > 0,
             "focused replay retains packet evidence");
         runner.Run(replay, verify: true);
@@ -49,7 +49,7 @@ internal static class TransportHarnessChecks
         }
         foreach (var bucket in runner.Buckets.Values)
         {
-            string path = bucket.Example.Replay;
+            string path = Program.EvidencePath(bucket.Example.Replay);
             var replay = JsonSerializer.Deserialize<TransportReplay>(File.ReadAllText(path), Program.Json).Game;
             SelfChecks.Check(File.ReadLines(Path.ChangeExtension(path, ".packets.jsonl")).Count() >= bucket.Example.Packets,
                 "representative replay retains every checkpoint packet");

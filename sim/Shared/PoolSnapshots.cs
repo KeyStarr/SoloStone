@@ -1,5 +1,6 @@
 using SabberStoneCore.Model;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Xml.Linq;
 
 namespace HsSim;
@@ -50,15 +51,31 @@ public static class PoolSnapshots
         string path = PathFor(manifest.Hash);
         if (!File.Exists(path))
         {
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            using var input = snapshot == null
-                ? typeof(OfflinePoolPolicy).Assembly.GetManifestResourceStream("SabberStoneCore.Resources.OfflinePoolCatalog.xml")
-                : File.OpenRead(snapshot);
-            using var buffer = new MemoryStream();
-            input.CopyTo(buffer);
-            byte[] bytes = buffer.ToArray();
-            using (var output = new FileStream(path, FileMode.CreateNew)) output.Write(bytes);
-            File.WriteAllText(path + ".sha256", ContentHash(bytes) + "\n");
+            using var writer = new Mutex(false, "SoloStone.PoolSnapshot." + manifest.Hash);
+            try { writer.WaitOne(); }
+            catch (AbandonedMutexException) { }  // An interrupted writer never publishes a partial XML file.
+            try
+            {
+                if (!File.Exists(path))
+                {
+                    Directory.CreateDirectory(Path.GetDirectoryName(path));
+                    using var input = snapshot == null
+                        ? typeof(OfflinePoolPolicy).Assembly.GetManifestResourceStream("SabberStoneCore.Resources.OfflinePoolCatalog.xml")
+                        : File.OpenRead(snapshot);
+                    using var buffer = new MemoryStream();
+                    input.CopyTo(buffer);
+                    byte[] bytes = buffer.ToArray();
+                    string pending = path + "." + Guid.NewGuid().ToString("N") + ".tmp";
+                    try
+                    {
+                        File.WriteAllBytes(pending, bytes);
+                        File.WriteAllText(path + ".sha256", ContentHash(bytes) + "\n");
+                        File.Move(pending, path);  // Publish the XML only after its complete checksum is in place.
+                    }
+                    finally { File.Delete(pending); }
+                }
+            }
+            finally { writer.ReleaseMutex(); }
         }
         return Read(path, manifest.Hash);
     }

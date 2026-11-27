@@ -269,8 +269,9 @@ def tail(path, count=TAIL_LINES):
 
 
 class Runner:
-    def __init__(self, dotnet, artifacts, build, verbose):
+    def __init__(self, dotnet, artifacts, build, verbose, *, strict_transport=None):
         self.dotnet, self.artifacts, self.build, self.verbose = dotnet, Path(artifacts), build, verbose
+        self.strict_transport = strict_transport
         self.logs = self.artifacts / 'logs'
         self.logs.mkdir(parents=True, exist_ok=True)
         self.engine_built = None  # None not tried, else True or False
@@ -286,20 +287,20 @@ class Runner:
     def hssim_dll(self):
         return self.shared() / 'bin' / 'HsSim' / 'release' / 'HsSim.dll'
 
-    def step(self, log, command, label, env=None):
+    def step(self, log, command, label, env=None, *, pass_fds=()):
         """Run one command from the repository root, appending its output to `log`. Returns True on exit 0."""
         with open(log, 'ab') as handle:
             handle.write(f'$ {" ".join(str(part) for part in command)}\n'.encode())
             handle.flush()
             if self.verbose:
                 result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=subprocess.PIPE,
-                                        stderr=subprocess.STDOUT)
+                                        stderr=subprocess.STDOUT, pass_fds=pass_fds)
                 handle.write(result.stdout)
                 sys.stdout.buffer.write(result.stdout)
                 sys.stdout.flush()
             else:
                 result = subprocess.run([str(part) for part in command], cwd=ROOT, env=env or self.env, stdout=handle,
-                                        stderr=subprocess.STDOUT)
+                                        stderr=subprocess.STDOUT, pass_fds=pass_fds)
             handle.write(f'[{label} exit {result.returncode}]\n'.encode())
         return result.returncode == 0
 
@@ -326,6 +327,10 @@ class Runner:
         return ok, time.monotonic() - started, log
 
     def run_dotnet(self, suite, log):
+        if suite.name == 'transport-invariants' and self.strict_transport is not None:
+            command = self.strict_transport(self.dotnet)
+            if command is not None:
+                return self.step(log, [*command, *suite.args], 'run', env=os.environ)
         artifacts = self.artifacts / suite.artifacts if suite.artifacts else self.shared()
         props = list(suite.props)
         if suite.needs_engine:
@@ -347,7 +352,17 @@ class Runner:
         if not program.is_file():
             Path(log).write_bytes(Path(log).read_bytes() + f'missing build output {program}\n'.encode())
             return False
-        return self.step(log, [self.dotnet, program, *suite.args], 'run')
+        command = [self.dotnet, program, *suite.args]
+        if suite.name == 'transport-invariants' and os.name != 'nt':
+            import fcntl
+
+            # The transport child keeps the evidence lock if this wrapper exits first.
+            lock = ROOT / 'sim/.build/transport/run.lock'
+            lock.parent.mkdir(parents=True, exist_ok=True)
+            with lock.open('a') as handle:
+                fcntl.flock(handle, fcntl.LOCK_EX)
+                return self.step(log, command, 'run', pass_fds=(handle.fileno(),))
+        return self.step(log, command, 'run')
 
     def prebuild_with_client(self, log, suite):
         """With a client set up, build what the suite's client-only check reads. False (a failure) when that cannot be done:
@@ -415,7 +430,7 @@ def parse(argv):
     return parser.parse_args(argv)
 
 
-def main(argv=None):
+def main(argv=None, *, strict_transport=None):
     args = parse(argv)
     if args.list:
         width = max(len(suite.name) for suite in SUITES)
@@ -458,7 +473,7 @@ def main(argv=None):
         artifacts = Path(temporary)
     results = []
     try:
-        runner = Runner(dotnet, artifacts, not args.no_build, args.verbose)
+        runner = Runner(dotnet, artifacts, not args.no_build, args.verbose, strict_transport=strict_transport)
         say(f'run.py: {len(chosen)} suites, artifacts in {artifacts}')
         for suite in chosen:
             say(f'--- {suite.name}')
