@@ -99,6 +99,11 @@ internal static class ReprintIdentitySourceCheck
         ("Tasks/SimpleTasks/DiscoverTask.cs", "cardsToDiscover[0].Distinct().ToArray()", "the frozen legacy-pool branch keeps its exact draws"),
         ("Tasks/SpecificTask.cs", "id == m.Card.Id", "legacy entourage token ids"),
         ("Tasks/SpecificTask.cs", "nextId == currentPower.Card.Id", "hero power id, Dr. Boom"),
+        ("Actions/BossRules.cs", "NoDraws.Contains(controller.Hero.Card.AssetId)", "catalog of boss hero dbfs, a lookup by id"),
+        ("Actions/PermanentStealthRules.cs", "PlayerEnchantments.Contains(e.Card.AssetId)", "catalog of player enchantment dbfs"),
+        ("CardSets/Client/Adventures/DungeonRun/DungeonRunActiveTreasures.cs", "p.Card.Id == Hilt", "literal id of a run token with no reprint"),
+        ("CardSets/Client/Adventures/DungeonRun/DungeonRunFinals.cs", "p.Card.Id == Darkspawn", "literal id of a boss token with no reprint"),
+        ("CardSets/Client/Adventures/DungeonRun/DungeonRunFinals.cs", "m.Card.Id == MasterChest", "literal id of a boss token with no reprint"),
     };
 
     internal static void Run()

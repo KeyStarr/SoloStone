@@ -293,7 +293,7 @@ namespace SabberStoneCore.Actions
                     neighbor.TakeDamage(source, sourceAttack);
                 }
 
-				if (minion != null && minion.HasStealth)
+				if (minion != null && minion.HasStealth && !PermanentStealthRules.Keeps(minion))
 				{
 					minion.HasStealth = false;
 				}

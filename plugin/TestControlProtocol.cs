@@ -909,8 +909,15 @@ internal static class UiRules
         return Denials[key] = DenyUncached(type, path, id, label, localGoldControl);
     }
 
+    // Controls a word above would deny but that only navigate inside the game: the run mode screen's Back (its id says
+    // "Exit"), the one way out of a finished run without a restart.
+    private static readonly HashSet<string> NavigationPaths = new HashSet<string>(StringComparer.Ordinal) {
+        "AdventureScene/AdventureDungeonCrawlSubScene(Clone)/AdventureDungeonCrawl(Clone)/ExitButton"
+    };
+
     private static string DenyUncached(string type, string path, string id, string label, bool localGoldControl)
     {
+        if (path != null && NavigationPaths.Contains(path) && (id == null || id == PathId(path)) && label == "GLOBAL_BACK") return null;
         foreach (string source in new[] { id, type, path, label })
         {
             List<string> words = Words(source);

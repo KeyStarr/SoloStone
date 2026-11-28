@@ -813,6 +813,13 @@ namespace SabberStoneCore.Model.Entities
 		}
 
         // Poisonous owns the lethal flag for its hit so the destroy tag stays inside the keyword block.
+		// Damage an entity is created with (its DAMAGE tag already in its FULL_ENTITY): no history, no health fact.
+		internal void InitDamage(int value)
+		{
+			_damage = value;
+			if (value != 0) _data[GameTag.DAMAGE] = value;
+		}
+
 		private void SetDamage(int value, bool destroyOnLethal = true)
 		{
                 int historyHealthBefore = this is Hero && ReferenceEquals(Controller.Hero,this) ? Health : 0;

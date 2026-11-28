@@ -38,7 +38,9 @@ namespace SabberStoneCore.Actions
             }
         }
 
-        public static int AttackLimit(ICharacter source) => source[GameTag.MEGA_WINDFURY] > 0 ? 4 : source.HasWindfury ? 2 : 1;
+        // A hero's weapon with Mega-Windfury (Dungeon Run's Vorpal Dagger) counts like its Windfury does.
+        public static int AttackLimit(ICharacter source) => source[GameTag.MEGA_WINDFURY] > 0
+            || source is Hero { Weapon: not null } hero && hero.Weapon[GameTag.MEGA_WINDFURY] > 0 ? 4 : source.HasWindfury ? 2 : 1;
 
         // Fyrakk the Blazing: "Immune to Fire spells." It is his text, not a tag, so silence switches it off.
         public static bool PreventsFire(CardType sourceType, int school, ICharacter target) =>

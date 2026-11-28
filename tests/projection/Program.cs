@@ -738,6 +738,9 @@ Check((bool)Call("AllowedCache","NetCacheCollection"),"collection cache accepted
 Check(!(bool)Call("AllowedCache","NetCacheQuests"),"unknown cache rejected");
 Check((bool)Call("AllowedPreference","COLLECTION_MANAGER"),"collection preference accepted");
 Check(!(bool)Call("AllowedPreference","QUESTS"),"unknown preference rejected");
+Check((bool)Call("AllowedPreference","GAME_MODE_SCENE"),"Modes screen preference accepted");
+Check(NativeUIProjection.AllowedPreferenceSave("GAME_MODE_SCENE", "GAME_MODE_SCENE_LAST_SELECTED_GAME_MODE", new long[] { 6 }), "Modes screen remembers its selected entry");
+Check(!NativeUIProjection.AllowedPreferenceSave("GAME_MODE_SCENE", "GAME_MODE_SCENE_UNKNOWN", new long[] { 1 }), "other Modes screen subkeys stay denied");
 Check(NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_LAST_SEEN_ARENA_SEASON", new long[] { 1 }), "local Arena season preference accepted");
 Check(NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_SHOULD_START_UNDERGROUND_ARENA", new long[] { 0 }), "normal Arena mode preference accepted");
 Check(!NativeUIProjection.AllowedPreferenceSave("PLAYER_FLAGS", "PLAYER_FLAGS_SHOULD_START_UNDERGROUND_ARENA", new long[] { 1 }), "Underground preference cannot enable another mode");
@@ -1166,6 +1169,7 @@ Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Traditional) == NativeMenuTarge
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Collection) == NativeMenuTarget.Collection, "home Collection routes to collection");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.OpenPacks) == NativeMenuTarget.Pack, "home Open Packs routes to pack opening");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Unsupported) == NativeMenuTarget.None, "unsupported home control has no route");
+Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Modes) == NativeMenuTarget.Modes, "home Modes routes to SoloStone's Modes screen");
 Check(NativeMenuFlow.HomeRoute(NativeHomeControl.Store) == NativeMenuTarget.LocalShop, "home Store press is the local shop's own event, not a blocked control");
 Check(NativeMenuFlow.CollectionExitAllowed(true, false, false), "online collection exit keeps native route");
 Check(NativeMenuFlow.CollectionExitAllowed(false, true, true), "local picker-origin collection exit keeps picker route");

@@ -5,7 +5,8 @@ internal enum NativeHomeControl
     Arena,
     Collection,
     OpenPacks,
-    Store
+    Store,
+    Modes
 }
 
 internal enum NativeMenuTarget
@@ -16,7 +17,9 @@ internal enum NativeMenuTarget
     Collection,
     Pack,
     // The local shop already opened the store (NativeShop fires the STORE press itself): nothing to route or block.
-    LocalShop
+    LocalShop,
+    // SoloStone's modes (Dungeon Run, ...) in the client's Modes screen (NativeModesMenu).
+    Modes
 }
 
 internal static class NativeMenuFlow
@@ -28,6 +31,7 @@ internal static class NativeMenuFlow
         if (control == NativeHomeControl.Collection) return NativeMenuTarget.Collection;
         if (control == NativeHomeControl.OpenPacks) return NativeMenuTarget.Pack;
         if (control == NativeHomeControl.Store) return NativeMenuTarget.LocalShop;
+        if (control == NativeHomeControl.Modes) return NativeMenuTarget.Modes;
         return NativeMenuTarget.None;
     }
 

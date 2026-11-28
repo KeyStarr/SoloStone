@@ -186,6 +186,14 @@ internal static class NativeNpcPresence
             // Rivals-lite: the plate carries the head-to-head record (OpponentPlateName); the engine name stays the NPC name.
             string name = match?.Game != null ? match.OpponentPlateName ?? match.OpponentName : null;
             if (string.IsNullOrEmpty(name) || PlayerName == null || __instance.GetSide() != Player.Side.OPPOSING) return;
+            // A run boss goes by its hero, as an AI mission's opponent does natively: Player.SetHero renames the plate, so a
+            // boss whose hero changes mid-fight (George and Karl's Tag Team) shows the hero now in play.
+            var encounter = match.ActiveEncounter;
+            if (encounter?.NpcHero != null && encounter.NpcName == null)
+            {
+                string hero = __instance.GetHero()?.GetName();
+                if (!string.IsNullOrEmpty(hero)) name = hero;
+            }
             PlayerName.SetValue(__instance, name);
         }
         catch (Exception) { }

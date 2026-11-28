@@ -62,6 +62,9 @@ namespace SabberStoneCore.Model.Entities
 			: base(in controller, in card, in tags, in id)
 		{
 			Auras = new List<Aura>();
+			// A hero created hurt (George and Karl's partner coming back): his FULL_ENTITY, built from the cached Damage,
+			// carries it, and no later DAMAGE change shows as a hit.
+			if (tags != null && tags.TryGetValue(GameTag.DAMAGE, out int damage) && damage != 0) InitDamage(damage);
 			Game.Log(LogLevel.VERBOSE, BlockType.PLAY, "Hero", !Game.Logging? "":$"{card.Name} ({card.Class}) was created.");
 		}
 
