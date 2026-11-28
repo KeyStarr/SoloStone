@@ -11,6 +11,8 @@ namespace SabberStoneCore.Model
         private bool _playerAttack,_fatigue;
         private AttackScope _attack;
         private IEntity _executingSource;
+        // The entity whose queued task is running (a Hero Power while its effect resolves: Wilfred Fizzlebang).
+        internal IEntity ExecutingSource => _executingSource;
         internal IDisposable Executing(IEntity source)
         { var previous=_executingSource;_executingSource=source;return new Cleanup(()=>_executingSource=previous); }
         internal IDisposable SuppressHealth()

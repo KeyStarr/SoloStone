@@ -1108,8 +1108,10 @@ internal static class NativeUIProjection
         "NetCacheFeatures", "NetCacheHeroLevels", "NetCacheBoosters", "NetCacheProfileProgress", "NetCachePlayerRecords",
         "NetCacheMedalInfo", "NetCacheCardBacks", "NetCacheCoins", "NetCacheFavoriteHeroes", "NetCachePets"
     }.Contains(name);
-    internal static bool AllowedPreference(string name) => name == "COLLECTION_MANAGER" || name == "PLAYER_FLAGS";
+    internal static bool AllowedPreference(string name) => name == "COLLECTION_MANAGER" || name == "PLAYER_FLAGS" || name == "GAME_MODE_SCENE";
+    // The Modes screen remembers the entry last selected and the modes already seen (its "new" banners).
     internal static bool AllowedPreferenceSave(string key, string subkey, long[] values) => key == "COLLECTION_MANAGER"
+        || key == "GAME_MODE_SCENE" && (subkey == "GAME_MODE_SCENE_LAST_SELECTED_GAME_MODE" || subkey == "GAME_MODE_SCENE_SEEN_GAME_MODES")
         || key == "PLAYER_FLAGS" && subkey == "PLAYER_FLAGS_HAS_SEEN_MASS_PACK_OPENING_TOOLTIP"
             && values != null && values.Length == 1 && values[0] == 1
         || key == "PLAYER_FLAGS" && AllowedArenaPreference(subkey, values);

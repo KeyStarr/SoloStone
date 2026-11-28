@@ -84,7 +84,7 @@ namespace SabberStoneCore.Model.Entities
 		public override bool IsPlayableByPlayer =>
 			System.Linq.Enumerable.Contains(Controller.HeroPowers, this) && !IsExhausted && !Controller.HeroPowerDisabled && base.IsPlayableByPlayer && !IsPassiveHeroPower;
 
-		public bool IsPassiveHeroPower => Card.HideStat || Card.Id == "BE_004p" || Card.Id == "JAIL_800hp1" || Card.Id == "JAIL_800hp2";
+		public bool IsPassiveHeroPower => Card.HideStat || Actions.PassiveHeroPowerRules.IsMarked(Card) || Card.Id == "BE_004p" || Card.Id == "JAIL_800hp1" || Card.Id == "JAIL_800hp2";
 
 		public override IPlayable Clone(in Controller controller)
 		{

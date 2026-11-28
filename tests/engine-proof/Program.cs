@@ -5,6 +5,7 @@ using SabberStoneCore.Enums;
 using SabberStoneCore.Model;
 using SabberStoneCore.Tasks.PlayerTasks;
 
+if (args.Length >= 1 && args[0] == "--boss-ai") { DungeonRunBossAiProof.Sweep(args.Length > 1 ? int.Parse(args[1]) : 3, args.Length > 2 ? args[2].Split(',') : null, Console.WriteLine); return; }
 if (args.Contains("--ai-frontier-only")) { AiFrontierProof.Run(); return; }
 if (args.Contains("--renew-replay")) { Environment.Exit(PinnedReplayEngineProof.Renew(args)); return; }
 if (args.Contains("--rerecord-replay")) { Environment.Exit(PinnedReplayEngineProof.Rerecord(args)); return; }
